@@ -12,7 +12,7 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 import { SavedVisState } from 'src/plugins/visualizations/common';
-import { TableVisParams, VIS_TYPE_TABLE } from '../../common';
+import { VIS_TYPE_TABLE } from '../../common';
 
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
@@ -42,9 +42,6 @@ export interface VisTypeTableUsage {
   };
 }
 
-/** @internal **/
-type SavedTableVisState = SavedVisState<TableVisParams>;
-
 /*
  * Parse the response data into telemetry payload
  */
@@ -56,37 +53,8 @@ export async function getStats(
     perPage: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
   });
 
-  let tableVisualizations: SavedTableVisState[] = [];
-
-  for await (const response of finder.find()) {
-    tableVisualizations = [
-      ...tableVisualizations,
-      ...(response.saved_objects || []).reduce(
-        (acc: SavedTableVisState[], { attributes }: SavedObjectsFindResult<any>) => {
-          if (attributes?.visState) {
-            try {
-              const visState: SavedVisState = JSON.parse(attributes.visState);
-
-              if (visState.type === VIS_TYPE_TABLE) {
-                acc.push(visState as SavedTableVisState);
-              }
-            } catch {
-              // nothing to be here, "so" not valid
-            }
-          }
-          return acc;
-        },
-        []
-      ),
-    ];
-
-    if (!response.saved_objects.length) {
-      await finder.close();
-    }
-  }
-
-  const defaultStats = {
-    total: tableVisualizations.length,
+  const stats: VisTypeTableUsage = {
+    total: 0,
     total_split: 0,
     split_columns: {
       total: 0,
@@ -98,20 +66,42 @@ export async function getStats(
     },
   };
 
-  return tableVisualizations.reduce((acc, { aggs, params }) => {
+  const doTelemetry = ({ aggs, params }: SavedVisState) => {
+    stats.total += 1;
+
     const hasSplitAgg = aggs.find((agg) => agg.schema === 'split');
 
     if (hasSplitAgg) {
-      acc.total_split += 1;
+      stats.total_split += 1;
 
       const isSplitRow = params.row;
       const isSplitEnabled = hasSplitAgg.enabled;
 
-      const container = isSplitRow ? acc.split_rows : acc.split_columns;
+      const container = isSplitRow ? stats.split_rows : stats.split_columns;
       container.total += 1;
       container.enabled = isSplitEnabled ? container.enabled + 1 : container.enabled;
     }
+  };
 
-    return acc;
-  }, defaultStats);
+  for await (const response of finder.find()) {
+    (response.saved_objects || []).forEach(({ attributes }: SavedObjectsFindResult<any>) => {
+      if (attributes?.visState) {
+        try {
+          const visState: SavedVisState = JSON.parse(attributes.visState);
+
+          if (visState.type === VIS_TYPE_TABLE) {
+            doTelemetry(visState);
+          }
+        } catch {
+          // nothing to be here, "so" not valid
+        }
+      }
+    });
+
+    if (!response.saved_objects.length) {
+      await finder.close();
+    }
+  }
+
+  return stats;
 }
