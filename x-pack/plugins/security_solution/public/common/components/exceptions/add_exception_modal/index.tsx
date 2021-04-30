@@ -404,6 +404,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
       <ModalHeader>
         <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
+        <EuiSpacer size="xs" />
         <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
           {ruleName}
         </ModalHeaderSubtitle>
@@ -465,7 +466,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                       data-test-subj="os-selection-dropdown"
                     />
                   </EuiFormRow>
-                  <EuiSpacer size="m" />
+                  <EuiSpacer size="l" />
                 </>
               )}
               <ExceptionBuilder.ExceptionBuilderComponent
@@ -525,7 +526,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               </EuiFormRow>
               {exceptionListType === 'endpoint' && (
                 <>
-                  <EuiSpacer />
+                  <EuiSpacer size="s" />
                   <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>

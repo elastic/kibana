@@ -305,6 +305,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
             : i18n.EDIT_EXCEPTION_TITLE}
         </EuiModalHeaderTitle>
+        <EuiSpacer size="xs" />
         <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
           {ruleName}
         </ModalHeaderSubtitle>
@@ -387,7 +388,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               </EuiFormRow>
               {exceptionListType === 'endpoint' && (
                 <>
-                  <EuiSpacer />
+                  <EuiSpacer size="s" />
                   <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>
