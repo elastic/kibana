@@ -22,7 +22,7 @@ import {
 import { EuiButtonEmptyTo } from '../../react_router_helpers';
 import { TruncatedContent } from '../../truncate';
 
-import { FieldCoercionErrors } from '../types';
+import { Schema, FieldCoercionErrors } from '../types';
 
 import {
   ERROR_TABLE_ID_HEADER,
@@ -33,23 +33,23 @@ import {
 
 import './schema_errors_accordion.scss';
 
-interface ISchemaErrorsAccordionProps {
+interface Props {
   fieldCoercionErrors: FieldCoercionErrors;
-  schema: { [key: string]: string };
+  schema: Schema;
   itemId?: string;
   getRoute?(itemId: string, externalId: string): string;
 }
 
-export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
+export const SchemaErrorsAccordion: React.FC<Props> = ({
   fieldCoercionErrors,
   schema,
   itemId,
   getRoute,
 }) => (
   <>
-    {Object.keys(fieldCoercionErrors).map((fieldName, fieldNameIndex) => {
+    {Object.keys(fieldCoercionErrors).map((fieldName) => {
       const fieldType = schema[fieldName];
-      const errorInfos = fieldCoercionErrors[fieldName];
+      const errors = fieldCoercionErrors[fieldName];
 
       const accordionHeader = (
         <EuiFlexGroup
@@ -77,8 +77,8 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
 
       return (
         <EuiAccordion
-          key={fieldNameIndex}
-          id={`accordion${fieldNameIndex}`}
+          key={fieldName}
+          id={`schemaErrorAccordion-${fieldName}`}
           className="schemaErrorsAccordion euiAccordionForm"
           buttonClassName="euiAccordionForm__button"
           buttonContent={accordionHeader}
@@ -90,7 +90,9 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
               <EuiTableHeaderCell />
             </EuiTableHeader>
             <EuiTableBody>
-              {errorInfos.map((error, errorIndex) => {
+              {errors.map((error) => {
+                const { external_id: id, error: errorMessage } = error;
+
                 const showViewButton = getRoute && itemId;
                 const documentPath = getRoute && itemId ? getRoute(itemId, error.external_id) : '';
 
@@ -101,15 +103,11 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
                 );
 
                 return (
-                  <EuiTableRow key={`schema-change-document-error-${fieldName}-${errorIndex}`}>
+                  <EuiTableRow key={`schemaErrorDocument-${fieldName}-${id}`}>
                     <EuiTableRowCell truncateText>
-                      <TruncatedContent
-                        tooltipType="title"
-                        content={error.external_id}
-                        length={22}
-                      />
+                      <TruncatedContent tooltipType="title" content={id} length={22} />
                     </EuiTableRowCell>
-                    <EuiTableRowCell>{error.error}</EuiTableRowCell>
+                    <EuiTableRowCell>{errorMessage}</EuiTableRowCell>
                     {showViewButton ? viewButton : <EuiTableRowCell />}
                   </EuiTableRow>
                 );

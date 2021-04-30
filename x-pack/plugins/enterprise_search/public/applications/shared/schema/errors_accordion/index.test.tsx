@@ -13,7 +13,9 @@ import { EuiAccordion, EuiTableRow } from '@elastic/eui';
 
 import { EuiButtonEmptyTo } from '../../react_router_helpers';
 
-import { SchemaErrorsAccordion } from './schema_errors_accordion';
+import { SchemaType } from '../types';
+
+import { SchemaErrorsAccordion } from './';
 
 describe('SchemaErrorsAccordion', () => {
   const props = {
@@ -30,8 +32,7 @@ describe('SchemaErrorsAccordion', () => {
       ],
     },
     schema: {
-      id: 'string',
-      name: 'boolean',
+      id: SchemaType.Text,
     },
   };
 
