@@ -10,7 +10,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
-import expressionInterpreter from 'vega-interpreter';
+import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
