@@ -35,10 +35,7 @@ async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
       'Could not get the Puppeteer version! Check node_modules/puppteer/package.json'
     );
   }
-  let puppeteerRelease = forkCompatibilityMap[version];
-  if (puppeteerRelease == null) {
-    puppeteerRelease = version;
-  }
+  const puppeteerRelease = forkCompatibilityMap[version] ?? version;
 
   log.info(`Kibana is using Puppeteer ${version} (${puppeteerRelease})`);
   return puppeteerRelease;
