@@ -65,6 +65,7 @@ export const getDropTargetCoordinate = (): Position | null => {
   const emptyGroup = document.querySelector(`.${EMPTY_PROVIDERS_GROUP_CLASS_NAME}`);
 
   if (emptyGroup != null) {
+    emptyGroup.scrollIntoView();
     return getPosition(emptyGroup);
   }
 

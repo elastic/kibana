@@ -352,6 +352,13 @@ describe('SearchSource', () => {
         const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['*']);
       });
+
+      test('_source is not set when using the fields API', async () => {
+        searchSource.setField('fields', ['*']);
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['*']);
+        expect(request._source).toEqual(false);
+      });
     });
 
     describe('source filters handling', () => {
