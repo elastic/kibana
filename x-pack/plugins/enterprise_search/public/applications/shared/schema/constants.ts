@@ -69,10 +69,3 @@ export const ERROR_TABLE_VIEW_LINK = i18n.translate(
     defaultMessage: 'View',
   }
 );
-
-export const RECENTY_ADDED = i18n.translate(
-  'xpack.enterpriseSearch.schema.existingField.status.recentlyAdded',
-  {
-    defaultMessage: 'Recently Added',
-  }
-);
