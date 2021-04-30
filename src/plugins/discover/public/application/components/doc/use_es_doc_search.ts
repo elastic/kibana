@@ -30,20 +30,24 @@ export function buildSearchBody(
   useNewFieldsApi: boolean
 ): Record<string, any> {
   const computedFields = indexPattern.getComputedFields();
-  const runtimeFields = indexPattern.getComputedFields().runtimeFields;
-  return {
+  const runtimeFields = computedFields.runtimeFields;
+  const request: Record<string, any> = {
     query: {
       ids: {
         values: [id],
       },
     },
     stored_fields: computedFields.storedFields,
-    _source: !useNewFieldsApi,
-    fields: useNewFieldsApi ? [{ field: '*', include_unmapped: 'true' }] : undefined,
     script_fields: computedFields.scriptFields,
-    docvalue_fields: computedFields.docvalueFields,
-    runtime_mappings: useNewFieldsApi && runtimeFields ? runtimeFields : {}, // needed for index pattern runtime fields in a single doc view
   };
+  if (useNewFieldsApi) {
+    request.fields = [{ field: '*', include_unmapped: 'true' }];
+    request.runtime_mappings = runtimeFields ? runtimeFields : {};
+  } else {
+    request._source = true;
+  }
+  request.fields = [...(request.fields || []), ...(computedFields.docvalueFields || [])];
+  return request;
 }
 
 /**
