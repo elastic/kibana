@@ -7629,7 +7629,6 @@
     "xpack.enterpriseSearch.schema.errorsTable.heading.error": "エラー",
     "xpack.enterpriseSearch.schema.errorsTable.heading.id": "ID",
     "xpack.enterpriseSearch.schema.errorsTable.link.view": "表示",
-    "xpack.enterpriseSearch.schema.existingField.status.recentlyAdded": "最近追加された項目",
     "xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1": "Elastic Cloud コンソールにアクセスして、{editDeploymentLink}。",
     "xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1LinkText": "デプロイの編集",
     "xpack.enterpriseSearch.setupGuide.cloud.step1.title": "デプロイの構成を編集",
