@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
-import { CaseResponseRt, CaseResponse, ESCaseAttributes } from '../../../common/api';
+import { CaseResponseRt, CaseResponse, ESCaseAttributes } from '../../../common';
 import { CaseServiceSetup } from '../../services';
 import { countAlertsForID } from '../../common';
 import { createCaseError } from '../../common/error';

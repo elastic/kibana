@@ -87,7 +87,7 @@ exports[`Columns it renders the expected columns 1`] = `
           Object {
             "columnHeaderType": "not-filtered",
             "id": "message",
-            "width": 180,
+            "initialWidth": 180,
           }
         }
         linkValues={Array []}
@@ -179,7 +179,7 @@ exports[`Columns it renders the expected columns 1`] = `
           Object {
             "columnHeaderType": "not-filtered",
             "id": "event.category",
-            "width": 180,
+            "initialWidth": 180,
           }
         }
         linkValues={Array []}
@@ -271,7 +271,7 @@ exports[`Columns it renders the expected columns 1`] = `
           Object {
             "columnHeaderType": "not-filtered",
             "id": "event.action",
-            "width": 180,
+            "initialWidth": 180,
           }
         }
         linkValues={Array []}
@@ -363,7 +363,7 @@ exports[`Columns it renders the expected columns 1`] = `
           Object {
             "columnHeaderType": "not-filtered",
             "id": "host.name",
-            "width": 180,
+            "initialWidth": 180,
           }
         }
         linkValues={Array []}
@@ -455,7 +455,7 @@ exports[`Columns it renders the expected columns 1`] = `
           Object {
             "columnHeaderType": "not-filtered",
             "id": "source.ip",
-            "width": 180,
+            "initialWidth": 180,
           }
         }
         linkValues={Array []}
@@ -547,7 +547,7 @@ exports[`Columns it renders the expected columns 1`] = `
           Object {
             "columnHeaderType": "not-filtered",
             "id": "destination.ip",
-            "width": 180,
+            "initialWidth": 180,
           }
         }
         linkValues={Array []}
@@ -639,7 +639,7 @@ exports[`Columns it renders the expected columns 1`] = `
           Object {
             "columnHeaderType": "not-filtered",
             "id": "user.name",
-            "width": 180,
+            "initialWidth": 180,
           }
         }
         linkValues={Array []}

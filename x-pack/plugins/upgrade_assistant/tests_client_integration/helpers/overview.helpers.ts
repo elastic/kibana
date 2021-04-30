@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { DeprecationsOverview } from '../../public/application/components/overview';
 import { WithAppDependencies } from './setup_environment';
@@ -17,7 +18,29 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-export type OverviewTestBed = TestBed<OverviewTestSubjects>;
+export type OverviewTestBed = TestBed<OverviewTestSubjects> & {
+  actions: ReturnType<typeof createActions>;
+};
+
+const createActions = (testBed: TestBed) => {
+  /**
+   * User Actions
+   */
+
+  const clickDeprecationToggle = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('upgradeAssistantDeprecationToggle').simulate('click');
+    });
+
+    component.update();
+  };
+
+  return {
+    clickDeprecationToggle,
+  };
+};
 
 export const setup = async (overrides?: Record<string, unknown>): Promise<OverviewTestBed> => {
   const initTestBed = registerTestBed(
@@ -26,7 +49,10 @@ export const setup = async (overrides?: Record<string, unknown>): Promise<Overvi
   );
   const testBed = await initTestBed();
 
-  return testBed;
+  return {
+    ...testBed,
+    actions: createActions(testBed),
+  };
 };
 
 export type OverviewTestSubjects =
@@ -34,6 +60,9 @@ export type OverviewTestSubjects =
   | 'esStatsPanel'
   | 'esStatsPanel.totalDeprecations'
   | 'esStatsPanel.criticalDeprecations'
+  | 'kibanaStatsPanel'
+  | 'kibanaStatsPanel.totalDeprecations'
+  | 'kibanaStatsPanel.criticalDeprecations'
   | 'deprecationLoggingFormRow'
   | 'requestErrorIconTip'
   | 'partiallyUpgradedErrorIconTip'
@@ -42,4 +71,6 @@ export type OverviewTestSubjects =
   | 'upgradedPrompt'
   | 'partiallyUpgradedPrompt'
   | 'upgradeAssistantDeprecationToggle'
+  | 'updateLoggingError'
+  | 'fetchLoggingError'
   | 'upgradeStatusError';
