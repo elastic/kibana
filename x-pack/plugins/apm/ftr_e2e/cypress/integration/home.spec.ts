@@ -6,10 +6,10 @@
  */
 
 describe('Home page', () => {
+  before(() => {
+    cy.loginAsSuperUser();
+  });
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
-    const endDate = new Date(Cypress.env('END_DATE'));
-    cy.clock(endDate);
-
     cy.visit('/app/apm');
 
     cy.url().should(
