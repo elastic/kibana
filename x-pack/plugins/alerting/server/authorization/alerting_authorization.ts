@@ -26,6 +26,11 @@ export enum AlertingAuthorizationEntity {
   Alert = 'alert',
 }
 
+export enum AlertingAuthorizationTypes {
+  Rule = 'rule',
+  Alert = 'alert',
+}
+
 export enum ReadOperations {
   Get = 'get',
   GetRuleState = 'getRuleState',
@@ -58,6 +63,12 @@ export interface EnsureAuthorizedOpts {
   consumer: string;
   operation: ReadOperations | WriteOperations;
   entity: AlertingAuthorizationEntity;
+}
+
+export interface EnsureAuthorizedOpts {
+  ruleTypeId: string;
+  consumer: string;
+  operation: ReadOperations | WriteOperations;
 }
 
 interface HasPrivileges {
