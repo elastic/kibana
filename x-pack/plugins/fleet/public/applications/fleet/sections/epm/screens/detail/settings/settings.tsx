@@ -181,9 +181,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                           <FormattedMessage
                             id="xpack.fleet.integrations.settings.packageUninstallTitle"
                             defaultMessage="Uninstall"
-                            values={{
-                              title,
-                            }}
                           />
                         </h4>
                       </EuiTitle>
@@ -200,9 +197,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                         <p>
                           <InstallationButton
                             {...packageInfo}
-                            disabled={
-                              !packagePoliciesData || removable === false ? true : packageHasUsages
-                            }
+                            disabled={!packagePoliciesData || packageHasUsages}
                           />
                         </p>
                       </EuiFlexItem>

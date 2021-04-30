@@ -8615,7 +8615,6 @@
     "xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail": "{strongNote}{title} 无法卸载，因为存在使用此集成的活动代理。要卸载，请从您的代理策略中移除所有 {title} 集成。",
     "xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel": "注意：",
     "xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail": "{strongNote} {title} 集成默认安装，无法移除。",
-    "xpack.fleet.integrations.settings.packageUninstallTitle": "卸载 {title}",
     "xpack.fleet.integrations.settings.packageVersionTitle": "{title} 版本",
     "xpack.fleet.integrations.settings.versionInfo.installedVersion": "已安装版本",
     "xpack.fleet.integrations.settings.versionInfo.latestVersion": "最新版本",
