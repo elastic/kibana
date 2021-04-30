@@ -7,7 +7,7 @@
 
 import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks__';
 
-import { registerReferenceApplicationRoutes } from './reference_application';
+import { registerSearchUIRoutes } from './search_ui';
 
 describe('reference application routes', () => {
   beforeEach(() => {
@@ -17,11 +17,11 @@ describe('reference application routes', () => {
   describe('GET /api/app_search/engines/{engineName}/search_settings/details', () => {
     const mockRouter = new MockRouter({
       method: 'get',
-      path: '/api/app_search/engines/{engineName}/reference_application/field_config',
+      path: '/api/app_search/engines/{engineName}/search_ui/field_config',
     });
 
     beforeEach(() => {
-      registerReferenceApplicationRoutes({
+      registerSearchUIRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -33,7 +33,7 @@ describe('reference application routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/:engineName/reference_application/field_config',
+        path: '/as/engines/:engineName/search_ui/field_config',
       });
     });
   });

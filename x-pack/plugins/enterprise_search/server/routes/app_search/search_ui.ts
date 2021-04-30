@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
 
-export function registerReferenceApplicationRoutes({
+export function registerSearchUIRoutes({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/reference_application/field_config',
+      path: '/api/app_search/engines/{engineName}/search_ui/field_config',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -23,7 +23,7 @@ export function registerReferenceApplicationRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/reference_application/field_config',
+      path: '/as/engines/:engineName/search_ui/field_config',
     })
   );
 }

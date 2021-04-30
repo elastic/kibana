@@ -70,7 +70,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/reference_application/field_config`;
+      const url = `/api/app_search/engines/${engineName}/search_ui/field_config`;
 
       try {
         const initialFieldValues = await http.get(url);

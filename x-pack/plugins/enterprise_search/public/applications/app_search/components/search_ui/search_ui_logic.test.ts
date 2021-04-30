@@ -138,7 +138,7 @@ describe('SearchUILogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/engine1/reference_application/field_config'
+          '/api/app_search/engines/engine1/search_ui/field_config'
         );
         expect(SearchUILogic.actions.dataInitialized).toHaveBeenCalledWith(MOCK_RESPONSE);
       });
