@@ -7,7 +7,7 @@
 
 import { IconColor } from '@elastic/eui';
 import { invert } from 'lodash';
-import { DeprecationInfo } from '../../../../common/types';
+import { DeprecationInfo } from '../../../common/types';
 
 export const LEVEL_MAP: { [level: string]: number } = {
   warning: 0,
@@ -24,3 +24,5 @@ export const COLOR_MAP: { [level: string]: IconColor } = {
   warning: 'default',
   critical: 'danger',
 };
+
+export const DEPRECATIONS_PER_PAGE = 25;
