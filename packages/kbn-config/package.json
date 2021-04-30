@@ -8,13 +8,5 @@
   "scripts": {
     "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build"
-  },
-  "dependencies": {
-    "@elastic/safer-lodash-set": "link:../elastic-safer-lodash-set",
-    "@kbn/logging": "link:../kbn-logging"
-  },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/utility-types": "link:../kbn-utility-types"
   }
 }

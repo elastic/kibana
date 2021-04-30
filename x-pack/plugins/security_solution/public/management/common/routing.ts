@@ -15,6 +15,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
@@ -23,6 +24,8 @@ import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
+import { EventFiltersPageLocation } from '../pages/event_filters/state';
+import { EventFiltersListPageUrlSearchParams } from '../pages/event_filters/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -116,6 +119,26 @@ const normalizeTrustedAppsPageLocation = (
   }
 };
 
+const normalizeEventFiltersPageLocation = (
+  location?: Partial<EventFiltersPageLocation>
+): Partial<EventFiltersPageLocation> => {
+  if (location) {
+    return {
+      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
+        ? { page_index: location.page_index }
+        : {}),
+      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { page_size: location.page_size }
+        : {}),
+      ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
+      ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
+      ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+    };
+  } else {
+    return {};
+  }
+};
+
 /**
  * Given an object with url params, and a given key, return back only the first param value (case multiples were defined)
  * @param query
@@ -176,5 +199,30 @@ export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLoc
 
   return `${path}${appendSearch(
     querystring.stringify(normalizeTrustedAppsPageLocation(location))
+  )}`;
+};
+
+export const extractEventFiltetrsPageLocation = (
+  query: querystring.ParsedUrlQuery
+): EventFiltersPageLocation => {
+  const showParamValue = extractFirstParamValue(query, 'show') as EventFiltersPageLocation['show'];
+
+  return {
+    ...extractListPaginationParams(query),
+    show:
+      showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
+    id: extractFirstParamValue(query, 'id'),
+  };
+};
+
+export const getEventFiltersListPath = (
+  location?: Partial<EventFiltersListPageUrlSearchParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_EVENT_FILTERS_PATH, {
+    tabName: AdministrationSubTab.eventFilters,
+  });
+
+  return `${path}${appendSearch(
+    querystring.stringify(normalizeEventFiltersPageLocation(location))
   )}`;
 };

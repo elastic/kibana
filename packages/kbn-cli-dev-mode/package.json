@@ -15,10 +15,7 @@
   },
   "dependencies": {
     "@kbn/config": "link:../kbn-config",
-    "@kbn/logging": "link:../kbn-logging",
     "@kbn/server-http-tools": "link:../kbn-server-http-tools",
-    "@kbn/optimizer": "link:../kbn-optimizer",
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/utils": "link:../kbn-utils"
+    "@kbn/optimizer": "link:../kbn-optimizer"
   }
 }

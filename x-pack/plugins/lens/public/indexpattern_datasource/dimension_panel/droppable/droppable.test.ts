@@ -16,6 +16,9 @@ import { documentField } from '../../document_field';
 import { OperationMetadata, DropType } from '../../../types';
 import { IndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
 import { getFieldByNameFactory } from '../../pure_helpers';
+import { generateId } from '../../../id_generator';
+
+jest.mock('../../../id_generator');
 
 const fields = [
   {
@@ -788,7 +791,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         };
 
-        const metricDragging = {
+        const referenceDragging = {
           columnId: 'col3',
           groupId: 'a',
           layerId: 'first',
@@ -798,7 +801,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
         onDrop({
           ...defaultProps,
-          droppedItem: metricDragging,
+          droppedItem: referenceDragging,
           state: testState,
           dropType: 'duplicate_compatible',
           columnId: 'newCol',
@@ -852,6 +855,290 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         });
+      });
+
+      it('when duplicating fullReference column, the referenced columns get duplicated too', () => {
+        (generateId as jest.Mock).mockReturnValue(`ref1Copy`);
+        const testState: IndexPatternPrivateState = {
+          ...state,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'ref1'],
+              columns: {
+                col1: {
+                  label: 'Test reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['ref1'],
+                },
+                ref1: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'Records',
+                  operationType: 'count',
+                },
+              },
+            },
+          },
+        };
+        const referenceDragging = {
+          columnId: 'col1',
+          groupId: 'a',
+          layerId: 'first',
+          id: 'col1',
+          humanData: { label: 'Label' },
+        };
+        onDrop({
+          ...defaultProps,
+          droppedItem: referenceDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          columnId: 'col1Copy',
+        });
+
+        expect(setState).toHaveBeenCalledWith({
+          ...testState,
+          layers: {
+            first: {
+              ...testState.layers.first,
+              columnOrder: ['ref1', 'col1', 'ref1Copy', 'col1Copy'],
+              columns: {
+                ref1: testState.layers.first.columns.ref1,
+                col1: testState.layers.first.columns.col1,
+                ref1Copy: { ...testState.layers.first.columns.ref1 },
+                col1Copy: {
+                  ...testState.layers.first.columns.col1,
+                  references: ['ref1Copy'],
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('when duplicating fullReference column, the multiple referenced columns get duplicated too', () => {
+        (generateId as jest.Mock).mockReturnValueOnce(`ref1Copy`);
+        (generateId as jest.Mock).mockReturnValueOnce(`ref2Copy`);
+        const testState: IndexPatternPrivateState = {
+          ...state,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'ref1'],
+              columns: {
+                col1: {
+                  label: 'Test reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['ref1', 'ref2'],
+                },
+                ref1: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'Records',
+                  operationType: 'count',
+                },
+                ref2: {
+                  label: 'Unique count of bytes',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'bytes',
+                  operationType: 'unique_count',
+                },
+              },
+            },
+          },
+        };
+        const metricDragging = {
+          columnId: 'col1',
+          groupId: 'a',
+          layerId: 'first',
+          id: 'col1',
+          humanData: { label: 'Label' },
+        };
+        onDrop({
+          ...defaultProps,
+          droppedItem: metricDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          columnId: 'col1Copy',
+        });
+
+        expect(setState).toHaveBeenCalledWith({
+          ...testState,
+          layers: {
+            first: {
+              ...testState.layers.first,
+              columnOrder: ['ref1', 'ref2', 'col1', 'ref1Copy', 'ref2Copy', 'col1Copy'],
+              columns: {
+                ref1: testState.layers.first.columns.ref1,
+                ref2: testState.layers.first.columns.ref2,
+                col1: testState.layers.first.columns.col1,
+                ref2Copy: { ...testState.layers.first.columns.ref2 },
+                ref1Copy: { ...testState.layers.first.columns.ref1 },
+                col1Copy: {
+                  ...testState.layers.first.columns.col1,
+                  references: ['ref1Copy', 'ref2Copy'],
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('when duplicating fullReference column, the referenced columns get duplicated recursively', () => {
+        (generateId as jest.Mock).mockReturnValueOnce(`ref1Copy`);
+        (generateId as jest.Mock).mockReturnValueOnce(`innerRef1Copy`);
+        (generateId as jest.Mock).mockReturnValueOnce(`ref2Copy`);
+        const testState: IndexPatternPrivateState = {
+          ...state,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['innerRef1', 'ref2', 'ref1', 'col1'],
+              columns: {
+                col1: {
+                  label: 'Test reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['ref1', 'ref2'],
+                },
+                ref1: {
+                  label: 'Reference that has a reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['innerRef1'],
+                },
+                innerRef1: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'Records',
+                  operationType: 'count',
+                },
+                ref2: {
+                  label: 'Unique count of bytes',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'bytes',
+                  operationType: 'unique_count',
+                },
+              },
+            },
+          },
+        };
+        const refDragging = {
+          columnId: 'col1',
+          groupId: 'a',
+          layerId: 'first',
+          id: 'col1',
+          humanData: { label: 'Label' },
+        };
+        onDrop({
+          ...defaultProps,
+          droppedItem: refDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          columnId: 'col1Copy',
+        });
+
+        expect(setState).toHaveBeenCalledWith({
+          ...testState,
+          layers: {
+            first: {
+              ...testState.layers.first,
+              columnOrder: [
+                'innerRef1',
+                'ref2',
+                'ref1',
+                'col1',
+                'innerRef1Copy',
+                'ref1Copy',
+                'ref2Copy',
+                'col1Copy',
+              ],
+              columns: {
+                innerRef1: testState.layers.first.columns.innerRef1,
+                ref1: testState.layers.first.columns.ref1,
+                ref2: testState.layers.first.columns.ref2,
+                col1: testState.layers.first.columns.col1,
+
+                innerRef1Copy: { ...testState.layers.first.columns.innerRef1 },
+                ref2Copy: { ...testState.layers.first.columns.ref2 },
+                ref1Copy: {
+                  ...testState.layers.first.columns.ref1,
+                  references: ['innerRef1Copy'],
+                },
+                col1Copy: {
+                  ...testState.layers.first.columns.col1,
+                  references: ['ref1Copy', 'ref2Copy'],
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('when duplicating fullReference column onto exisitng column, the state will not get modified', () => {
+        (generateId as jest.Mock).mockReturnValue(`ref1Copy`);
+        const testState: IndexPatternPrivateState = {
+          ...state,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col2', 'ref1', 'col1'],
+              columns: {
+                col1: {
+                  label: 'Test reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  operationType: 'cumulative_sum',
+                  references: ['ref1'],
+                },
+                ref1: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'Records',
+                  operationType: 'count',
+                },
+                col2: {
+                  label: 'Minimum',
+                  dataType: 'number',
+                  isBucketed: false,
+
+                  // Private
+                  operationType: 'min',
+                  sourceField: 'bytes',
+                  customLabel: true,
+                },
+              },
+            },
+          },
+        };
+        const referenceDragging = {
+          columnId: 'col1',
+          groupId: 'a',
+          layerId: 'first',
+          id: 'col1',
+          humanData: { label: 'Label' },
+        };
+        onDrop({
+          ...defaultProps,
+          droppedItem: referenceDragging,
+          state: testState,
+          dropType: 'duplicate_compatible',
+          columnId: 'col2',
+        });
+
+        expect(setState).toHaveBeenCalledWith(testState);
       });
 
       it('sets correct order in group when reordering a column in group', () => {
@@ -1010,6 +1297,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               // Private
               operationType: 'count',
               sourceField: 'Records',
+              customLabel: true,
             },
           },
         };
@@ -1144,6 +1432,85 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: testState.layers.first.columns.col3,
                   col2: testState.layers.first.columns.col2,
                   col4: testState.layers.first.columns.col4,
+                },
+              },
+            },
+          });
+        });
+
+        it('respects groups on moving operations if some columns are not listed in groups', () => {
+          // config:
+          // a: col1,
+          // b: col2, col3
+          // c: col4
+          // col5, col6 not in visualization groups
+          // dragging col3 onto col1 in group a
+          onDrop({
+            ...defaultProps,
+            columnId: 'col1',
+            droppedItem: draggingCol3,
+            state: {
+              ...testState,
+              layers: {
+                first: {
+                  ...testState.layers.first,
+                  columnOrder: ['col1', 'col2', 'col3', 'col4', 'col5', 'col6'],
+                  columns: {
+                    ...testState.layers.first.columns,
+                    col5: {
+                      dataType: 'number',
+                      operationType: 'count',
+                      label: '',
+                      isBucketed: false,
+                      sourceField: 'Records',
+                      customLabel: true,
+                    },
+                    col6: {
+                      dataType: 'number',
+                      operationType: 'count',
+                      label: '',
+                      isBucketed: false,
+                      sourceField: 'Records',
+                      customLabel: true,
+                    },
+                  },
+                },
+              },
+            },
+            groupId: 'a',
+            dimensionGroups: [
+              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+              { ...dimensionGroups[2] },
+            ],
+            dropType: 'move_compatible',
+          });
+
+          expect(setState).toBeCalledTimes(1);
+          expect(setState).toHaveBeenCalledWith({
+            ...testState,
+            layers: {
+              first: {
+                ...testState.layers.first,
+                columnOrder: ['col1', 'col2', 'col4', 'col5', 'col6'],
+                columns: {
+                  col1: testState.layers.first.columns.col3,
+                  col2: testState.layers.first.columns.col2,
+                  col4: testState.layers.first.columns.col4,
+                  col5: expect.objectContaining({
+                    dataType: 'number',
+                    operationType: 'count',
+                    label: '',
+                    isBucketed: false,
+                    sourceField: 'Records',
+                  }),
+                  col6: expect.objectContaining({
+                    dataType: 'number',
+                    operationType: 'count',
+                    label: '',
+                    isBucketed: false,
+                    sourceField: 'Records',
+                  }),
                 },
               },
             },

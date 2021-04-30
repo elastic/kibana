@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { DomainDeprecationDetails } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
+import { deprecationsServiceMock } from 'src/core/public/mocks';
+import { UpgradeAssistantStatus } from '../common/types';
 
 import { OverviewTestBed, setupOverviewPage, setupEnvironment } from './helpers';
 
@@ -14,17 +17,54 @@ describe('Overview page', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
-    const upgradeStatusMockResponse = {
+    const esDeprecationsMockResponse: UpgradeAssistantStatus = {
       readyForUpgrade: false,
-      cluster: [],
-      indices: [],
+      cluster: [
+        {
+          level: 'critical',
+          message: 'Index Lifecycle Management poll interval is set too low',
+          url:
+            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html#ilm-poll-interval-limit',
+          details:
+            'The Index Lifecycle Management poll interval setting [indices.lifecycle.poll_interval] is currently set to [500ms], but must be 1s or greater',
+        },
+      ],
+      indices: [
+        {
+          level: 'warning',
+          message: 'translog retention settings are ignored',
+          url:
+            'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
+          details:
+            'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
+          index: 'settings',
+          reindex: false,
+        },
+      ],
     };
 
-    httpRequestsMockHelpers.setLoadStatusResponse(upgradeStatusMockResponse);
+    const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
+      {
+        correctiveActions: {},
+        domainId: 'xpack.spaces',
+        level: 'critical',
+        message:
+          'Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)',
+      },
+    ];
+
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
     httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
 
     await act(async () => {
-      testBed = await setupOverviewPage();
+      const deprecationService = deprecationsServiceMock.createStartContract();
+      deprecationService.getAllDeprecations = jest
+        .fn()
+        .mockReturnValue(kibanaDeprecationsMockResponse);
+
+      testBed = await setupOverviewPage({
+        deprecations: deprecationService,
+      });
     });
 
     const { component } = testBed;
@@ -39,10 +79,16 @@ describe('Overview page', () => {
     const { exists, find } = testBed;
 
     expect(exists('overviewPageContent')).toBe(true);
+
     // Verify ES stats
     expect(exists('esStatsPanel')).toBe(true);
-    expect(find('esStatsPanel.totalDeprecations').text()).toContain('0');
-    expect(find('esStatsPanel.criticalDeprecations').text()).toContain('0');
+    expect(find('esStatsPanel.totalDeprecations').text()).toContain('2');
+    expect(find('esStatsPanel.criticalDeprecations').text()).toContain('1');
+
+    // Verify Kibana stats
+    expect(exists('kibanaStatsPanel')).toBe(true);
+    expect(find('kibanaStatsPanel.totalDeprecations').text()).toContain('1');
+    expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
   });
 
   describe('Deprecation logging', () => {
@@ -96,90 +142,113 @@ describe('Overview page', () => {
   });
 
   describe('Error handling', () => {
-    test('handles network failure', async () => {
-      const error = {
-        statusCode: 500,
-        error: 'Internal server error',
-        message: 'Internal server error',
-      };
+    describe('Kibana deprecations', () => {
+      test('handles network failure', async () => {
+        await act(async () => {
+          const deprecationService = deprecationsServiceMock.createStartContract();
+          deprecationService.getAllDeprecations = jest
+            .fn()
+            .mockRejectedValue(new Error('Internal Server Error'));
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+          testBed = await setupOverviewPage({
+            deprecations: deprecationService,
+          });
+        });
 
-      await act(async () => {
-        testBed = await setupOverviewPage();
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('requestErrorIconTip')).toBe(true);
       });
-
-      const { component, exists } = testBed;
-
-      component.update();
-
-      expect(exists('requestErrorIconTip')).toBe(true);
     });
 
-    test('handles unauthorized error', async () => {
-      const error = {
-        statusCode: 403,
-        error: 'Forbidden',
-        message: 'Forbidden',
-      };
+    describe('Elasticsearch deprecations', () => {
+      test('handles network failure', async () => {
+        const error = {
+          statusCode: 500,
+          error: 'Internal server error',
+          message: 'Internal server error',
+        };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
-      await act(async () => {
-        testBed = await setupOverviewPage();
+        await act(async () => {
+          testBed = await setupOverviewPage();
+        });
+
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('requestErrorIconTip')).toBe(true);
       });
 
-      const { component, exists } = testBed;
+      test('handles unauthorized error', async () => {
+        const error = {
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Forbidden',
+        };
 
-      component.update();
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
-      expect(exists('unauthorizedErrorIconTip')).toBe(true);
-    });
+        await act(async () => {
+          testBed = await setupOverviewPage();
+        });
 
-    test('handles partially upgraded error', async () => {
-      const error = {
-        statusCode: 426,
-        error: 'Upgrade required',
-        message: 'There are some nodes running a different version of Elasticsearch',
-        attributes: {
-          allNodesUpgraded: false,
-        },
-      };
+        const { component, exists } = testBed;
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+        component.update();
 
-      await act(async () => {
-        testBed = await setupOverviewPage({ isReadOnlyMode: false });
+        expect(exists('unauthorizedErrorIconTip')).toBe(true);
       });
 
-      const { component, exists } = testBed;
+      test('handles partially upgraded error', async () => {
+        const error = {
+          statusCode: 426,
+          error: 'Upgrade required',
+          message: 'There are some nodes running a different version of Elasticsearch',
+          attributes: {
+            allNodesUpgraded: false,
+          },
+        };
 
-      component.update();
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
-      expect(exists('partiallyUpgradedErrorIconTip')).toBe(true);
-    });
+        await act(async () => {
+          testBed = await setupOverviewPage({ isReadOnlyMode: false });
+        });
 
-    test('handles upgrade error', async () => {
-      const error = {
-        statusCode: 426,
-        error: 'Upgrade required',
-        message: 'There are some nodes running a different version of Elasticsearch',
-        attributes: {
-          allNodesUpgraded: true,
-        },
-      };
+        const { component, exists } = testBed;
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+        component.update();
 
-      await act(async () => {
-        testBed = await setupOverviewPage({ isReadOnlyMode: false });
+        expect(exists('partiallyUpgradedErrorIconTip')).toBe(true);
       });
 
-      const { component, exists } = testBed;
+      test('handles upgrade error', async () => {
+        const error = {
+          statusCode: 426,
+          error: 'Upgrade required',
+          message: 'There are some nodes running a different version of Elasticsearch',
+          attributes: {
+            allNodesUpgraded: true,
+          },
+        };
 
-      component.update();
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
-      expect(exists('upgradedErrorIconTip')).toBe(true);
+        await act(async () => {
+          testBed = await setupOverviewPage({ isReadOnlyMode: false });
+        });
+
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('upgradedErrorIconTip')).toBe(true);
+      });
     });
   });
 });

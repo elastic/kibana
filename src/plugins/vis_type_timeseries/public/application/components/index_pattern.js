@@ -113,7 +113,7 @@ export const IndexPattern = ({
   const defaults = {
     [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
-    [dropBucketName]: 1,
+    [dropBucketName]: 0,
     [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };
@@ -126,6 +126,7 @@ export const IndexPattern = ({
   );
   const isTimeSeries = model.type === PANEL_TYPES.TIMESERIES;
   const isDataTimerangeModeInvalid =
+    !disabled &&
     selectedTimeRangeOption &&
     !isTimerangeModeEnabled(selectedTimeRangeOption.value, uiRestrictions);
 

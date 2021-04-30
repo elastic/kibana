@@ -1,27 +1,155 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TrustedAppsGrid renders correctly initially 1`] = `
+.c1 {
+  position: relative;
+}
+
+.c1 .body {
+  min-height: 40px;
+}
+
+.c1 .body-content {
+  position: relative;
+}
+
+.c0 .trusted-app + .trusted-app {
+  margin-top: 24px;
+}
+
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="c0"
   >
     <div
-      class="euiFlexItem"
+      class="c1"
     >
       <div
-        class="euiTextAlign--center"
+        class="body"
       >
         <div
-          class="euiSpacer euiSpacer--m"
+          class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiText euiText--small"
+          class="body-content undefined"
         >
-          No items found
+          <div
+            class="euiEmptyPrompt"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <span>
+                No items found
+              </span>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+            </span>
+          </div>
         </div>
+      </div>
+      <div>
         <div
-          class="euiSpacer euiSpacer--m"
+          class="euiSpacer euiSpacer--l"
         />
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiPopover euiPopover--anchorUpRight"
+            >
+              <div
+                class="euiPopover__anchor"
+              >
+                <button
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                  data-test-subj="tablePaginationPopoverButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      Rows per page
+                      : 
+                      10
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <nav
+              class="euiPagination"
+            >
+              <button
+                aria-label="Previous page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-previous"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="arrowLeft"
+                />
+              </button>
+              <ul
+                class="euiPagination__list"
+              >
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-current="true"
+                    aria-label="Page 1 of 1"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-0"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+              <button
+                aria-label="Next page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-next"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="arrowRight"
+                />
+              </button>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -29,28 +157,161 @@ exports[`TrustedAppsGrid renders correctly initially 1`] = `
 `;
 
 exports[`TrustedAppsGrid renders correctly when failed loading data for the first time 1`] = `
+.c1 {
+  position: relative;
+}
+
+.c1 .body {
+  min-height: 40px;
+}
+
+.c1 .body-content {
+  position: relative;
+}
+
+.c0 .trusted-app + .trusted-app {
+  margin-top: 24px;
+}
+
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="c0"
   >
     <div
-      class="euiFlexItem"
+      class="c1"
     >
       <div
-        class="euiTextAlign--center"
+        class="body"
       >
         <div
-          class="euiSpacer euiSpacer--m"
+          class="euiSpacer euiSpacer--l"
         />
-        <span
-          color="danger"
-          data-euiicon-type="minusInCircle"
-        />
-         
-        Intenal Server Error
         <div
-          class="euiSpacer euiSpacer--m"
+          class="body-content undefined"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <div
+              class="euiTextAlign euiTextAlign--center"
+            >
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <span
+                color="danger"
+                data-euiicon-type="minusInCircle"
+              />
+               
+              Intenal Server Error
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          class="euiSpacer euiSpacer--l"
         />
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiPopover euiPopover--anchorUpRight"
+            >
+              <div
+                class="euiPopover__anchor"
+              >
+                <button
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                  data-test-subj="tablePaginationPopoverButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      Rows per page
+                      : 
+                      10
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <nav
+              class="euiPagination"
+            >
+              <button
+                aria-label="Previous page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-previous"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="arrowLeft"
+                />
+              </button>
+              <ul
+                class="euiPagination__list"
+              >
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-current="true"
+                    aria-label="Page 1 of 1"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-0"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+              <button
+                aria-label="Next page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-next"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="arrowRight"
+                />
+              </button>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -58,28 +319,266 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the firs
 `;
 
 exports[`TrustedAppsGrid renders correctly when failed loading data for the second time 1`] = `
+.c1 {
+  position: relative;
+}
+
+.c1 .body {
+  min-height: 40px;
+}
+
+.c1 .body-content {
+  position: relative;
+}
+
+.c0 .trusted-app + .trusted-app {
+  margin-top: 24px;
+}
+
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="c0"
   >
     <div
-      class="euiFlexItem"
+      class="c1"
     >
       <div
-        class="euiTextAlign--center"
+        class="body"
       >
         <div
-          class="euiSpacer euiSpacer--m"
+          class="euiSpacer euiSpacer--l"
         />
-        <span
-          color="danger"
-          data-euiicon-type="minusInCircle"
-        />
-         
-        Intenal Server Error
         <div
-          class="euiSpacer euiSpacer--m"
+          class="body-content undefined"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <div
+              class="euiTextAlign euiTextAlign--center"
+            >
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <span
+                color="danger"
+                data-euiicon-type="minusInCircle"
+              />
+               
+              Intenal Server Error
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          class="euiSpacer euiSpacer--l"
         />
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiPopover euiPopover--anchorUpRight"
+            >
+              <div
+                class="euiPopover__anchor"
+              >
+                <button
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                  data-test-subj="tablePaginationPopoverButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      Rows per page
+                      : 
+                      10
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <nav
+              class="euiPagination"
+            >
+              <button
+                aria-label="Previous page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-previous"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="arrowLeft"
+                />
+              </button>
+              <ul
+                class="euiPagination__list"
+              >
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-current="true"
+                    aria-label="Page 1 of 20"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-0"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-label="Page 2 of 20"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-1"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        2
+                      </span>
+                    </span>
+                  </button>
+                </li>
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-label="Page 3 of 20"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-2"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        3
+                      </span>
+                    </span>
+                  </button>
+                </li>
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-label="Page 4 of 20"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-3"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        4
+                      </span>
+                    </span>
+                  </button>
+                </li>
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-label="Page 5 of 20"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-4"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        5
+                      </span>
+                    </span>
+                  </button>
+                </li>
+                <li
+                  aria-label="Skipping pages 6 to 19"
+                  class="euiPaginationButton-isPlaceholder euiPagination__item"
+                >
+                  …
+                </li>
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-label="Page 20 of 20"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-19"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        20
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+              <button
+                aria-label="Next page, 2"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-next"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="arrowRight"
+                />
+              </button>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -87,57 +586,74 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
 `;
 
 exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
-.c0 {
+.c2 {
+  background-color: #f5f7fa;
   padding: 16px;
 }
 
-.c3 {
+.c5 {
   padding: 16px;
 }
 
-.c1.c1.c1 {
+.c3.c3.c3 {
   width: 40%;
 }
 
-.c2.c2.c2 {
+.c4.c4.c4 {
   width: 60%;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .body {
+  min-height: 40px;
+}
+
+.c1 .body-content {
+  position: relative;
+}
+
+.c0 .trusted-app + .trusted-app {
+  margin-top: 24px;
 }
 
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="c0"
   >
     <div
-      class="euiFlexItem"
+      class="c1"
     >
       <div
-        class="euiSpacer euiSpacer--l"
-      />
-      <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="body"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -148,12 +664,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -164,22 +680,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -190,12 +706,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -208,7 +724,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -388,29 +904,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -421,12 +933,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -437,22 +949,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -463,12 +975,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -481,7 +993,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -661,29 +1173,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -694,12 +1202,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -710,22 +1218,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -736,12 +1244,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -754,7 +1262,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -934,29 +1442,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -967,12 +1471,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -983,22 +1487,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1009,12 +1513,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1027,7 +1531,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -1207,29 +1711,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1240,12 +1740,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1256,22 +1756,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1282,12 +1782,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1300,7 +1800,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -1480,29 +1980,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1513,12 +2009,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1529,22 +2025,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1555,12 +2051,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1573,7 +2069,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -1753,29 +2249,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1786,12 +2278,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1802,22 +2294,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1828,12 +2320,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1846,7 +2338,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -2026,29 +2518,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2059,12 +2547,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2075,22 +2563,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2101,12 +2589,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2119,7 +2607,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -2299,29 +2787,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2332,12 +2816,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2348,22 +2832,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2374,12 +2858,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2392,7 +2876,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -2572,29 +3056,25 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2605,12 +3085,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2621,22 +3101,22 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2647,12 +3127,12 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2665,7 +3145,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -2847,14 +3327,10 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      <div
-        class="euiSpacer euiSpacer--l"
-      />
       <div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
         >
@@ -3064,34 +3540,158 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
 `;
 
 exports[`TrustedAppsGrid renders correctly when loading data for the first time 1`] = `
+.c1 {
+  position: relative;
+}
+
+.c1 .body {
+  min-height: 40px;
+}
+
+.c1 .body-content {
+  position: relative;
+}
+
+.c0 .trusted-app + .trusted-app {
+  margin-top: 24px;
+}
+
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="c0"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="c1"
     >
       <div
         class="euiProgress euiProgress--indeterminate euiProgress--xs euiProgress--primary"
       />
-    </div>
-    <div
-      class="euiFlexItem"
-    >
       <div
-        class="euiTextAlign--center"
+        class="body"
       >
         <div
-          class="euiSpacer euiSpacer--m"
+          class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiText euiText--small"
+          class="body-content undefined"
         >
-          No items found
+          <div
+            class="euiEmptyPrompt"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <span>
+                No items found
+              </span>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+            </span>
+          </div>
         </div>
+      </div>
+      <div>
         <div
-          class="euiSpacer euiSpacer--m"
+          class="euiSpacer euiSpacer--l"
         />
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiPopover euiPopover--anchorUpRight"
+            >
+              <div
+                class="euiPopover__anchor"
+              >
+                <button
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                  data-test-subj="tablePaginationPopoverButton"
+                  type="button"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      Rows per page
+                      : 
+                      10
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <nav
+              class="euiPagination"
+            >
+              <button
+                aria-label="Previous page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-previous"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="arrowLeft"
+                />
+              </button>
+              <ul
+                class="euiPagination__list"
+              >
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-current="true"
+                    aria-label="Page 1 of 1"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-0"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+              <button
+                aria-label="Next page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-next"
+                disabled=""
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  data-euiicon-type="arrowRight"
+                />
+              </button>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -3099,64 +3699,77 @@ exports[`TrustedAppsGrid renders correctly when loading data for the first time 
 `;
 
 exports[`TrustedAppsGrid renders correctly when loading data for the second time 1`] = `
-.c0 {
+.c2 {
+  background-color: #f5f7fa;
   padding: 16px;
 }
 
-.c3 {
+.c5 {
   padding: 16px;
 }
 
-.c1.c1.c1 {
+.c3.c3.c3 {
   width: 40%;
 }
 
-.c2.c2.c2 {
+.c4.c4.c4 {
   width: 60%;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .body {
+  min-height: 40px;
+}
+
+.c1 .body-content {
+  position: relative;
+}
+
+.c0 .trusted-app + .trusted-app {
+  margin-top: 24px;
 }
 
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="c0"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="c1"
     >
       <div
         class="euiProgress euiProgress--indeterminate euiProgress--xs euiProgress--primary"
       />
-    </div>
-    <div
-      class="euiFlexItem"
-    >
       <div
-        class="euiSpacer euiSpacer--l"
-      />
-      <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="body"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3167,12 +3780,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3183,22 +3796,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3209,12 +3822,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3227,7 +3840,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -3407,29 +4020,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3440,12 +4049,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3456,22 +4065,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3482,12 +4091,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3500,7 +4109,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -3680,29 +4289,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3713,12 +4318,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3729,22 +4334,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3755,12 +4360,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3773,7 +4378,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -3953,29 +4558,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3986,12 +4587,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4002,22 +4603,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4028,12 +4629,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4046,7 +4647,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -4226,29 +4827,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4259,12 +4856,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4275,22 +4872,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4301,12 +4898,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4319,7 +4916,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -4499,29 +5096,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4532,12 +5125,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4548,22 +5141,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4574,12 +5167,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4592,7 +5185,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -4772,29 +5365,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4805,12 +5394,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4821,22 +5410,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4847,12 +5436,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4865,7 +5454,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -5045,29 +5634,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5078,12 +5663,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5094,22 +5679,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5120,12 +5705,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5138,7 +5723,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -5318,29 +5903,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5351,12 +5932,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5367,22 +5948,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5393,12 +5974,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5411,7 +5992,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -5591,29 +6172,25 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5624,12 +6201,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5640,22 +6217,22 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5666,12 +6243,12 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5684,7 +6261,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -5866,14 +6443,10 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      <div
-        class="euiSpacer euiSpacer--l"
-      />
       <div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
         >
@@ -6083,57 +6656,74 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
 `;
 
 exports[`TrustedAppsGrid renders correctly when new page and page size set (not loading yet) 1`] = `
-.c0 {
+.c2 {
+  background-color: #f5f7fa;
   padding: 16px;
 }
 
-.c3 {
+.c5 {
   padding: 16px;
 }
 
-.c1.c1.c1 {
+.c3.c3.c3 {
   width: 40%;
 }
 
-.c2.c2.c2 {
+.c4.c4.c4 {
   width: 60%;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .body {
+  min-height: 40px;
+}
+
+.c1 .body-content {
+  position: relative;
+}
+
+.c0 .trusted-app + .trusted-app {
+  margin-top: 24px;
 }
 
 <div>
   <div
-    class="euiFlexGroup euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    class="c0"
   >
     <div
-      class="euiFlexItem"
+      class="c1"
     >
       <div
-        class="euiSpacer euiSpacer--l"
-      />
-      <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="body"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6144,12 +6734,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6160,22 +6750,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6186,12 +6776,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6204,7 +6794,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -6384,29 +6974,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6417,12 +7003,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6433,22 +7019,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6459,12 +7045,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6477,7 +7063,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -6657,29 +7243,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6690,12 +7272,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6706,22 +7288,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6732,12 +7314,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6750,7 +7332,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -6930,29 +7512,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6963,12 +7541,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6979,22 +7557,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7005,12 +7583,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7023,7 +7601,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -7203,29 +7781,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7236,12 +7810,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7252,22 +7826,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7278,12 +7852,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7296,7 +7870,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -7476,29 +8050,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7509,12 +8079,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7525,22 +8095,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7551,12 +8121,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7569,7 +8139,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -7749,29 +8319,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7782,12 +8348,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7798,22 +8364,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7824,12 +8390,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7842,7 +8408,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -8022,29 +8588,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8055,12 +8617,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8071,22 +8633,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8097,12 +8659,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8115,7 +8677,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -8295,29 +8857,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8328,12 +8886,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8344,22 +8902,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8370,12 +8928,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8388,7 +8946,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -8568,29 +9126,25 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </div>
             </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrow2 c0"
+                class="euiFlexItem euiFlexItem--flexGrow2 c2"
               >
                 <dl
                   class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                 >
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8601,12 +9155,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8617,22 +9171,22 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8643,12 +9197,12 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     </span>
                   </dd>
                   <dt
-                    class="euiDescriptionList__title c1"
+                    class="euiDescriptionList__title c3"
                   >
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2 eui-textBreakWord"
+                    class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8661,7 +9215,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </dl>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                class="euiFlexItem euiFlexItem--flexGrow5 c5"
               >
                 <div
                   class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -8843,14 +9397,10 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      <div
-        class="euiSpacer euiSpacer--l"
-      />
       <div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
         >

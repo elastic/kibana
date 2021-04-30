@@ -12,7 +12,6 @@ import { FtrProviderContext } from './ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -32,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.save();
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/97864
-  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
+  describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -43,19 +41,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    after(async () => {
-      await kibanaServer.uiSettings.replace({ 'discover:searchFieldsFromSource': true });
-    });
-
     it('allows adding custom label to existing fields', async function () {
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      const customLabel = 'megabytes';
       await PageObjects.discover.editField('bytes');
       await fieldEditor.enableCustomLabel();
-      await fieldEditor.setCustomLabel('megabytes');
+      await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getDocHeader()).to.have.string('megabytes');
-      expect((await PageObjects.discover.getAllFieldNames()).includes('megabytes')).to.be(true);
+      expect((await PageObjects.discover.getAllFieldNames()).includes(customLabel)).to.be(true);
+      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
     });
 
     it('allows creation of a new field', async function () {
@@ -104,15 +99,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('doc view includes runtime fields', async function () {
       // navigate to doc view
-      await dataGrid.clickRowToggle();
+      const table = await PageObjects.discover.getDocTable();
+      const useLegacyTable = await PageObjects.discover.useLegacyTable();
+      await table.clickRowToggle();
 
       // click the open action
       await retry.try(async () => {
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await table.getRowActions({ rowIndex: 0 });
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        await rowActions[0].click();
+        const idxToClick = useLegacyTable ? 1 : 0;
+        await rowActions[idxToClick].click();
       });
 
       const hasDocHit = await testSubjects.exists('doc-hit');

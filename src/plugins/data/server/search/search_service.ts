@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, from, Observable, throwError } from 'rxjs';
+import { from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
@@ -36,7 +36,7 @@ import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
-import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
+import { registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -237,14 +237,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
-            legacy: {
-              callMsearch: getCallMsearch({
-                esClient,
-                globalConfig$: this.initializerContext.config.legacy.globalConfig$,
-                uiSettings: uiSettingsClient,
-              }),
-              loadingCount$: new BehaviorSubject(0),
-            },
           };
 
           return this.searchSourceService.start(scopedIndexPatterns, searchSourceDependencies);
@@ -259,7 +251,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private registerSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse<any> = IEsSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>

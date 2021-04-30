@@ -10,8 +10,8 @@ import {
   TrustedApp,
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
-  ConditionEntry,
   ConditionEntryField,
+  OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
 export { OS_TITLES } from '../../../common/translations';
@@ -52,9 +52,12 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string }
   ),
 };
 
-export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
-  included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
+export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
+  is: i18n.translate('xpack.securitySolution.trustedapps.card.operator.is', {
     defaultMessage: 'is',
+  }),
+  matches: i18n.translate('xpack.securitySolution.trustedapps.card.operator.matches', {
+    defaultMessage: 'matches',
   }),
 };
 
@@ -149,10 +152,6 @@ export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
     defaultMessage: 'List view',
   }
 );
-
-export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
-  defaultMessage: 'No items found',
-});
 
 export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
   [`duplicatedEntry.${ConditionEntryField.HASH}`]: i18n.translate(
