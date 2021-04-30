@@ -36,7 +36,7 @@ import { licenseMock } from '../../../../../licensing/common/licensing.mock';
 import { License } from '../../../../../licensing/common/license';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '.';
 import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
-import { HostMetadata } from '../../../../common/endpoint/types';
+import { EndpointAction, HostMetadata } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createV2SearchResponse } from '../metadata/support/test_support';
 import { ElasticsearchAssetType } from '../../../../../fleet/common';
@@ -195,6 +195,15 @@ describe('Host Isolation', () => {
     const actionDoc = (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock
       .calls[0][0].body;
     expect(actionDoc.user_id).toEqual(testU.username);
+  });
+  it('records the comment in the action payload', async () => {
+    const CommentText = "I am isolating this because it's Friday";
+    const ctx = await callRoute(ISOLATE_HOST_ROUTE, {
+      body: { agent_ids: ['XYZ'], comment: CommentText },
+    });
+    const actionDoc: EndpointAction = (ctx.core.elasticsearch.client.asCurrentUser
+      .index as jest.Mock).mock.calls[0][0].body;
+    expect(actionDoc.data.comment).toEqual(CommentText);
   });
   it('creates an action and returns its ID', async () => {
     const ctx = await callRoute(ISOLATE_HOST_ROUTE, {
