@@ -93,51 +93,68 @@ describe('Overview page', () => {
 
   describe('Deprecation logging', () => {
     test('toggles deprecation logging', async () => {
-      const { form, find, component } = testBed;
+      const { find, actions } = testBed;
 
       httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse({ isEnabled: false });
 
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
-      expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
+      );
 
-      await act(async () => {
-        form.toggleEuiSwitch('upgradeAssistantDeprecationToggle');
-      });
+      await actions.clickDeprecationToggle();
 
-      component.update();
-
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(false);
-      expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
+      const latestRequest = server.requests[server.requests.length - 1];
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({ isEnabled: false });
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Enable deprecation logging'
+      );
     });
 
-    test('handles network error', async () => {
+    test('handles network error when updating logging state', async () => {
       const error = {
         statusCode: 500,
         error: 'Internal server error',
         message: 'Internal server error',
       };
 
-      const { form, find, component } = testBed;
+      const { actions, find, exists } = testBed;
 
       httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(undefined, error);
 
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
-      expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
-      expect(find('deprecationLoggingFormRow').find('.euiSwitch__label').text()).toContain(
-        'Enable deprecation logging'
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
       );
 
+      await actions.clickDeprecationToggle();
+
+      // Logging state should not change since there was an error
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
+      );
+      expect(exists('updateLoggingError')).toBe(true);
+    });
+
+    test('handles network error when fetching logging state', async () => {
+      const error = {
+        statusCode: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
+      };
+
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, error);
+
       await act(async () => {
-        form.toggleEuiSwitch('upgradeAssistantDeprecationToggle');
+        testBed = await setupOverviewPage();
       });
+
+      const { component, exists, find } = testBed;
 
       component.update();
 
-      expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
-      expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(true);
-      expect(find('deprecationLoggingFormRow').find('.euiSwitch__label').text()).toContain(
-        'Could not load logging state'
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Deprecation logging unavailable'
       );
+      expect(exists('fetchLoggingError')).toBe(true);
     });
   });
 
