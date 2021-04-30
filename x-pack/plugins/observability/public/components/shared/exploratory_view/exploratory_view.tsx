@@ -21,7 +21,7 @@ import { SeriesBuilder } from './series_builder/series_builder';
 
 export function ExploratoryView() {
   const {
-    services: { lens },
+    services: { lens, notifications },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
   const seriesBuilderRef = useRef<HTMLDivElement>(null);
@@ -37,7 +37,7 @@ export function ExploratoryView() {
 
   const LensComponent = lens?.EmbeddableComponent;
 
-  const { firstSeriesId: seriesId, firstSeries: series } = useUrlStorage();
+  const { firstSeriesId: seriesId, firstSeries: series, setSeries } = useUrlStorage();
 
   const lensAttributesT = useLensAttributes({
     seriesId,
@@ -77,6 +77,24 @@ export function ExploratoryView() {
                 id="exploratoryView"
                 timeRange={series?.time}
                 attributes={lensAttributes}
+                onBrushEnd={({ range }) => {
+                  if (series?.reportType !== 'pld') {
+                    setSeries(seriesId, {
+                      ...series,
+                      time: {
+                        from: new Date(range[0]).toISOString(),
+                        to: new Date(range[1]).toISOString(),
+                      },
+                    });
+                  } else {
+                    notifications?.toasts.add(
+                      i18n.translate('xpack.observability.exploratoryView.noBrusing', {
+                        defaultMessage:
+                          'Zoom by brush selection is only available on time series charts.',
+                      })
+                    );
+                  }
+                }}
               />
             ) : (
               <EmptyView series={series} loading={loading} height={height} />

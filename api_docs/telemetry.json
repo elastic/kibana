@@ -1,490 +1,16 @@
 {
   "id": "telemetry",
   "client": {
-    "classes": [
-      {
-        "id": "def-public.TelemetryNotifications",
-        "type": "Class",
-        "tags": [],
-        "label": "TelemetryNotifications",
-        "description": [],
-        "children": [
-          {
-            "id": "def-public.TelemetryNotifications.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.TelemetryNotifications.Unnamed.$1",
-                "type": "Object",
-                "label": "{ http, overlays, telemetryService }",
-                "isRequired": true,
-                "signature": [
-                  "TelemetryNotificationsConstructor"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/telemetry/public/services/telemetry_notifications/telemetry_notifications.ts",
-                  "lineNumber": 27
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_notifications/telemetry_notifications.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "id": "def-public.TelemetryNotifications.shouldShowOptedInNoticeBanner",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "description": [],
-            "label": "shouldShowOptedInNoticeBanner",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_notifications/telemetry_notifications.ts",
-              "lineNumber": 33
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryNotifications.renderOptedInNoticeBanner",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "label": "renderOptedInNoticeBanner",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_notifications/telemetry_notifications.ts",
-              "lineNumber": 39
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryNotifications.shouldShowOptInBanner",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "description": [],
-            "label": "shouldShowOptInBanner",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_notifications/telemetry_notifications.ts",
-              "lineNumber": 49
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryNotifications.renderOptInBanner",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "label": "renderOptInBanner",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_notifications/telemetry_notifications.ts",
-              "lineNumber": 55
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryNotifications.setOptedInNoticeSeen",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "description": [],
-            "label": "setOptedInNoticeSeen",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_notifications/telemetry_notifications.ts",
-              "lineNumber": 73
-            },
-            "tags": [],
-            "returnComment": []
-          }
-        ],
-        "source": {
-          "path": "src/plugins/telemetry/public/services/telemetry_notifications/telemetry_notifications.ts",
-          "lineNumber": 20
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.TelemetryService",
-        "type": "Class",
-        "tags": [],
-        "label": "TelemetryService",
-        "description": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.TelemetryService.currentKibanaVersion",
-            "type": "string",
-            "label": "currentKibanaVersion",
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 28
-            }
-          },
-          {
-            "id": "def-public.TelemetryService.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.TelemetryService.Unnamed.$1",
-                "type": "Object",
-                "label": "{\n    config,\n    http,\n    notifications,\n    currentKibanaVersion,\n    reportOptInStatusChange = true,\n  }",
-                "isRequired": true,
-                "signature": [
-                  "TelemetryServiceConstructor"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-                  "lineNumber": 30
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 30
-            }
-          },
-          {
-            "id": "def-public.TelemetryService.config",
-            "type": "Object",
-            "label": "config",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 44
-            },
-            "signature": [
-              {
-                "pluginId": "telemetry",
-                "scope": "public",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-public.TelemetryPluginConfig",
-                "text": "TelemetryPluginConfig"
-              }
-            ]
-          },
-          {
-            "id": "def-public.TelemetryService.config",
-            "type": "Object",
-            "label": "config",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 48
-            },
-            "signature": [
-              {
-                "pluginId": "telemetry",
-                "scope": "public",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-public.TelemetryPluginConfig",
-                "text": "TelemetryPluginConfig"
-              }
-            ]
-          },
-          {
-            "id": "def-public.TelemetryService.isOptedIn",
-            "type": "CompoundType",
-            "label": "isOptedIn",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 52
-            },
-            "signature": [
-              "boolean | null"
-            ]
-          },
-          {
-            "id": "def-public.TelemetryService.isOptedIn",
-            "type": "CompoundType",
-            "label": "isOptedIn",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 56
-            },
-            "signature": [
-              "boolean | null"
-            ]
-          },
-          {
-            "id": "def-public.TelemetryService.userHasSeenOptedInNotice",
-            "type": "CompoundType",
-            "label": "userHasSeenOptedInNotice",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 60
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "id": "def-public.TelemetryService.userHasSeenOptedInNotice",
-            "type": "CompoundType",
-            "label": "userHasSeenOptedInNotice",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 64
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "id": "def-public.TelemetryService.getCanChangeOptInStatus",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "description": [],
-            "label": "getCanChangeOptInStatus",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 68
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryService.getOptInStatusUrl",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => string"
-            ],
-            "description": [],
-            "label": "getOptInStatusUrl",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 73
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryService.getTelemetryUrl",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => string"
-            ],
-            "description": [],
-            "label": "getTelemetryUrl",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 78
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryService.getUserShouldSeeOptInNotice",
-            "type": "Function",
-            "label": "getUserShouldSeeOptInNotice",
-            "signature": [
-              "() => boolean"
-            ],
-            "description": [
-              "\nReturns if an user should be shown the notice about Opt-In/Out telemetry.\nThe decision is made based on whether any user has already dismissed the message or\nthe user can't actually change the settings (in which case, there's no point on bothering them)"
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 88
-            }
-          },
-          {
-            "id": "def-public.TelemetryService.userCanChangeSettings",
-            "type": "boolean",
-            "label": "userCanChangeSettings",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 95
-            }
-          },
-          {
-            "id": "def-public.TelemetryService.userCanChangeSettings",
-            "type": "boolean",
-            "label": "userCanChangeSettings",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 99
-            }
-          },
-          {
-            "id": "def-public.TelemetryService.getIsOptedIn",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => boolean | null"
-            ],
-            "description": [],
-            "label": "getIsOptedIn",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 103
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryService.fetchExample",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => Promise<any>"
-            ],
-            "description": [],
-            "label": "fetchExample",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 107
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryService.fetchTelemetry",
-            "type": "Function",
-            "children": [
-              {
-                "id": "def-public.TelemetryService.fetchTelemetry.$1",
-                "type": "Object",
-                "label": "{ unencrypted = false }",
-                "isRequired": true,
-                "signature": [
-                  "{ unencrypted?: boolean | undefined; }"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-                  "lineNumber": 111
-                }
-              }
-            ],
-            "signature": [
-              "({ unencrypted }?: { unencrypted?: boolean | undefined; }) => Promise<any>"
-            ],
-            "description": [],
-            "label": "fetchTelemetry",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 111
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryService.setOptIn",
-            "type": "Function",
-            "children": [
-              {
-                "id": "def-public.TelemetryService.setOptIn.$1",
-                "type": "boolean",
-                "label": "optedIn",
-                "isRequired": true,
-                "signature": [
-                  "boolean"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-                  "lineNumber": 119
-                }
-              }
-            ],
-            "signature": [
-              "(optedIn: boolean) => Promise<boolean>"
-            ],
-            "description": [],
-            "label": "setOptIn",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 119
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.TelemetryService.setUserHasSeenNotice",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "description": [],
-            "label": "setUserHasSeenNotice",
-            "source": {
-              "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-              "lineNumber": 153
-            },
-            "tags": [],
-            "returnComment": []
-          }
-        ],
-        "source": {
-          "path": "src/plugins/telemetry/public/services/telemetry_service.ts",
-          "lineNumber": 21
-        },
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [],
     "interfaces": [
       {
         "id": "def-public.TelemetryPluginConfig",
         "type": "Interface",
         "label": "TelemetryPluginConfig",
-        "description": [],
+        "description": [
+          "\nPublic-exposed configuration"
+        ],
         "tags": [],
         "children": [
           {
@@ -492,10 +18,12 @@
             "id": "def-public.TelemetryPluginConfig.enabled",
             "type": "boolean",
             "label": "enabled",
-            "description": [],
+            "description": [
+              "Is the plugin enabled?"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 46
+              "lineNumber": 84
             }
           },
           {
@@ -503,10 +31,12 @@
             "id": "def-public.TelemetryPluginConfig.url",
             "type": "string",
             "label": "url",
-            "description": [],
+            "description": [
+              "Remote telemetry service's URL"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 47
+              "lineNumber": 86
             }
           },
           {
@@ -514,10 +44,12 @@
             "id": "def-public.TelemetryPluginConfig.banner",
             "type": "boolean",
             "label": "banner",
-            "description": [],
+            "description": [
+              "The banner is expected to be shown when needed"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 48
+              "lineNumber": 88
             }
           },
           {
@@ -525,10 +57,12 @@
             "id": "def-public.TelemetryPluginConfig.allowChangingOptInStatus",
             "type": "boolean",
             "label": "allowChangingOptInStatus",
-            "description": [],
+            "description": [
+              "Does the cluster allow changing the opt-in/out status via the UI?"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 49
+              "lineNumber": 90
             }
           },
           {
@@ -536,10 +70,12 @@
             "id": "def-public.TelemetryPluginConfig.optIn",
             "type": "CompoundType",
             "label": "optIn",
-            "description": [],
+            "description": [
+              "Is the cluster opted-in?"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 50
+              "lineNumber": 92
             },
             "signature": [
               "boolean | null"
@@ -550,10 +86,12 @@
             "id": "def-public.TelemetryPluginConfig.optInStatusUrl",
             "type": "string",
             "label": "optInStatusUrl",
-            "description": [],
+            "description": [
+              "Opt-in/out notification URL"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 51
+              "lineNumber": 94
             }
           },
           {
@@ -561,10 +99,12 @@
             "id": "def-public.TelemetryPluginConfig.sendUsageFrom",
             "type": "CompoundType",
             "label": "sendUsageFrom",
-            "description": [],
+            "description": [
+              "Should the telemetry payloads be sent from the server or the browser?"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 52
+              "lineNumber": 96
             },
             "signature": [
               "\"browser\" | \"server\""
@@ -575,10 +115,12 @@
             "id": "def-public.TelemetryPluginConfig.telemetryNotifyUserAboutOptInDefault",
             "type": "CompoundType",
             "label": "telemetryNotifyUserAboutOptInDefault",
-            "description": [],
+            "description": [
+              "Should notify the user about the opt-in status?"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 53
+              "lineNumber": 98
             },
             "signature": [
               "boolean | undefined"
@@ -589,10 +131,12 @@
             "id": "def-public.TelemetryPluginConfig.userCanChangeSettings",
             "type": "CompoundType",
             "label": "userCanChangeSettings",
-            "description": [],
+            "description": [
+              "Does the user have enough privileges to change the settings?"
+            ],
             "source": {
               "path": "src/plugins/telemetry/public/plugin.ts",
-              "lineNumber": 54
+              "lineNumber": 100
             },
             "signature": [
               "boolean | undefined"
@@ -601,7 +145,100 @@
         ],
         "source": {
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "lineNumber": 45
+          "lineNumber": 82
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.TelemetryServicePublicApis",
+        "type": "Interface",
+        "label": "TelemetryServicePublicApis",
+        "description": [
+          "\nPublicly exposed APIs from the Telemetry Service"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.TelemetryServicePublicApis.getIsOptedIn",
+            "type": "Function",
+            "label": "getIsOptedIn",
+            "description": [
+              "Is the cluster opted-in to telemetry?"
+            ],
+            "source": {
+              "path": "src/plugins/telemetry/public/plugin.ts",
+              "lineNumber": 38
+            },
+            "signature": [
+              "() => boolean | null"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.TelemetryServicePublicApis.userCanChangeSettings",
+            "type": "boolean",
+            "label": "userCanChangeSettings",
+            "description": [
+              "Is the user allowed to change the opt-in/out status?"
+            ],
+            "source": {
+              "path": "src/plugins/telemetry/public/plugin.ts",
+              "lineNumber": 40
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.TelemetryServicePublicApis.getCanChangeOptInStatus",
+            "type": "Function",
+            "label": "getCanChangeOptInStatus",
+            "description": [
+              "Is the cluster allowed to change the opt-in/out status?"
+            ],
+            "source": {
+              "path": "src/plugins/telemetry/public/plugin.ts",
+              "lineNumber": 42
+            },
+            "signature": [
+              "() => boolean"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.TelemetryServicePublicApis.fetchExample",
+            "type": "Function",
+            "label": "fetchExample",
+            "description": [
+              "Fetches an unencrypted telemetry payload so we can show it to the user"
+            ],
+            "source": {
+              "path": "src/plugins/telemetry/public/plugin.ts",
+              "lineNumber": 44
+            },
+            "signature": [
+              "() => Promise<unknown[]>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.TelemetryServicePublicApis.setOptIn",
+            "type": "Function",
+            "label": "setOptIn",
+            "description": [
+              "\nOverwrite the opt-in status.\nIt will send a final request to the remote telemetry cluster to report about the opt-in/out change."
+            ],
+            "source": {
+              "path": "src/plugins/telemetry/public/plugin.ts",
+              "lineNumber": 50
+            },
+            "signature": [
+              "(optedIn: boolean) => Promise<boolean>"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/telemetry/public/plugin.ts",
+          "lineNumber": 36
         },
         "initialIsOpen": false
       }
@@ -613,7 +250,9 @@
       "id": "def-public.TelemetryPluginStart",
       "type": "Interface",
       "label": "TelemetryPluginStart",
-      "description": [],
+      "description": [
+        "\nPublic's start exposed APIs by the telemetry plugin"
+      ],
       "tags": [],
       "children": [
         {
@@ -621,18 +260,20 @@
           "id": "def-public.TelemetryPluginStart.telemetryService",
           "type": "Object",
           "label": "telemetryService",
-          "description": [],
+          "description": [
+            "{@link TelemetryServicePublicApis}"
+          ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 38
+            "lineNumber": 66
           },
           "signature": [
             {
               "pluginId": "telemetry",
               "scope": "public",
               "docId": "kibTelemetryPluginApi",
-              "section": "def-public.TelemetryService",
-              "text": "TelemetryService"
+              "section": "def-public.TelemetryServicePublicApis",
+              "text": "TelemetryServicePublicApis"
             }
           ]
         },
@@ -641,19 +282,15 @@
           "id": "def-public.TelemetryPluginStart.telemetryNotifications",
           "type": "Object",
           "label": "telemetryNotifications",
-          "description": [],
+          "description": [
+            "Notification helpers"
+          ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 39
+            "lineNumber": 68
           },
           "signature": [
-            {
-              "pluginId": "telemetry",
-              "scope": "public",
-              "docId": "kibTelemetryPluginApi",
-              "section": "def-public.TelemetryNotifications",
-              "text": "TelemetryNotifications"
-            }
+            "{ setOptedInNoticeSeen: () => Promise<void>; }"
           ]
         },
         {
@@ -661,10 +298,12 @@
           "id": "def-public.TelemetryPluginStart.telemetryConstants",
           "type": "Object",
           "label": "telemetryConstants",
-          "description": [],
+          "description": [
+            "Set of publicly exposed telemetry constants"
+          ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 40
+            "lineNumber": 73
           },
           "signature": [
             "{ getPrivacyStatementUrl: () => string; }"
@@ -673,7 +312,7 @@
       ],
       "source": {
         "path": "src/plugins/telemetry/public/plugin.ts",
-        "lineNumber": 37
+        "lineNumber": 64
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -682,7 +321,9 @@
       "id": "def-public.TelemetryPluginSetup",
       "type": "Interface",
       "label": "TelemetryPluginSetup",
-      "description": [],
+      "description": [
+        "\nPublic's setup exposed APIs by the telemetry plugin"
+      ],
       "tags": [],
       "children": [
         {
@@ -690,25 +331,27 @@
           "id": "def-public.TelemetryPluginSetup.telemetryService",
           "type": "Object",
           "label": "telemetryService",
-          "description": [],
+          "description": [
+            "{@link TelemetryService}"
+          ],
           "source": {
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "lineNumber": 34
+            "lineNumber": 58
           },
           "signature": [
             {
               "pluginId": "telemetry",
               "scope": "public",
               "docId": "kibTelemetryPluginApi",
-              "section": "def-public.TelemetryService",
-              "text": "TelemetryService"
+              "section": "def-public.TelemetryServicePublicApis",
+              "text": "TelemetryServicePublicApis"
             }
           ]
         }
       ],
       "source": {
         "path": "src/plugins/telemetry/public/plugin.ts",
-        "lineNumber": 33
+        "lineNumber": 56
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -716,384 +359,154 @@
   },
   "server": {
     "classes": [],
-    "functions": [
-      {
-        "id": "def-server.buildDataTelemetryPayload",
-        "type": "Function",
-        "label": "buildDataTelemetryPayload",
-        "signature": [
-          "(indices: ",
-          {
-            "pluginId": "telemetry",
-            "scope": "server",
-            "docId": "kibTelemetryPluginApi",
-            "section": "def-server.DataTelemetryIndex",
-            "text": "DataTelemetryIndex"
-          },
-          "[]) => ",
-          {
-            "pluginId": "telemetry",
-            "scope": "server",
-            "docId": "kibTelemetryPluginApi",
-            "section": "def-server.DataTelemetryPayload",
-            "text": "DataTelemetryPayload"
-          }
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.buildDataTelemetryPayload.$1",
-            "type": "Array",
-            "label": "indices",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "telemetry",
-                "scope": "server",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-server.DataTelemetryIndex",
-                "text": "DataTelemetryIndex"
-              },
-              "[]"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-              "lineNumber": 122
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-          "lineNumber": 122
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.getClusterUuids",
-        "type": "Function",
-        "children": [
-          {
-            "id": "def-server.getClusterUuids.$1",
-            "type": "Object",
-            "label": "{ esClient }",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "telemetryCollectionManager",
-                "scope": "server",
-                "docId": "kibTelemetryCollectionManagerPluginApi",
-                "section": "def-server.StatsCollectionConfig",
-                "text": "StatsCollectionConfig"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_cluster_stats.ts",
-              "lineNumber": 25
-            }
-          }
-        ],
-        "signature": [
-          "({ esClient }: ",
-          {
-            "pluginId": "telemetryCollectionManager",
-            "scope": "server",
-            "docId": "kibTelemetryCollectionManagerPluginApi",
-            "section": "def-server.StatsCollectionConfig",
-            "text": "StatsCollectionConfig"
-          },
-          ") => Promise<{ clusterUuid: string; }[]>"
-        ],
-        "description": [
-          "\nGet the cluster uuids from the connected cluster."
-        ],
-        "label": "getClusterUuids",
-        "source": {
-          "path": "src/plugins/telemetry/server/telemetry_collection/get_cluster_stats.ts",
-          "lineNumber": 25
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.getLocalStats",
-        "type": "Function",
-        "children": [
-          {
-            "id": "def-server.getLocalStats.$1",
-            "type": "Array",
-            "label": "clustersDetails",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "telemetryCollectionManager",
-                "scope": "server",
-                "docId": "kibTelemetryCollectionManagerPluginApi",
-                "section": "def-server.ClusterDetails",
-                "text": "ClusterDetails"
-              },
-              "[]"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-              "lineNumber": 60
-            }
-          },
-          {
-            "id": "def-server.getLocalStats.$2",
-            "type": "Object",
-            "label": "config",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "telemetryCollectionManager",
-                "scope": "server",
-                "docId": "kibTelemetryCollectionManagerPluginApi",
-                "section": "def-server.StatsCollectionConfig",
-                "text": "StatsCollectionConfig"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-              "lineNumber": 61
-            }
-          },
-          {
-            "id": "def-server.getLocalStats.$3",
-            "type": "Object",
-            "label": "context",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "telemetryCollectionManager",
-                "scope": "server",
-                "docId": "kibTelemetryCollectionManagerPluginApi",
-                "section": "def-server.StatsCollectionContext",
-                "text": "StatsCollectionContext"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-              "lineNumber": 62
-            }
-          }
-        ],
-        "signature": [
-          "(clustersDetails: ",
-          {
-            "pluginId": "telemetryCollectionManager",
-            "scope": "server",
-            "docId": "kibTelemetryCollectionManagerPluginApi",
-            "section": "def-server.ClusterDetails",
-            "text": "ClusterDetails"
-          },
-          "[], config: ",
-          {
-            "pluginId": "telemetryCollectionManager",
-            "scope": "server",
-            "docId": "kibTelemetryCollectionManagerPluginApi",
-            "section": "def-server.StatsCollectionConfig",
-            "text": "StatsCollectionConfig"
-          },
-          ", context: ",
-          {
-            "pluginId": "telemetryCollectionManager",
-            "scope": "server",
-            "docId": "kibTelemetryCollectionManagerPluginApi",
-            "section": "def-server.StatsCollectionContext",
-            "text": "StatsCollectionContext"
-          },
-          ") => Promise<{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Pick<{ nodes: { usage: { nodes: ",
-          {
-            "pluginId": "telemetry",
-            "scope": "server",
-            "docId": "kibTelemetryPluginApi",
-            "section": "def-server.NodeUsage",
-            "text": "NodeUsage"
-          },
-          "[] | {}[]; }; count: ",
-          "ClusterNodeCount"
-        ],
-        "description": [
-          "\nGet statistics for all products joined by Elasticsearch cluster."
-        ],
-        "label": "getLocalStats",
-        "source": {
-          "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-          "lineNumber": 59
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.handleOldSettings",
-        "type": "Function",
-        "label": "handleOldSettings",
-        "signature": [
-          "(savedObjectsClient: Pick<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsClient",
-            "text": "SavedObjectsClient"
-          },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, uiSettingsClient: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          ") => Promise<void>"
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.handleOldSettings.$1",
-            "type": "Object",
-            "label": "savedObjectsClient",
-            "isRequired": true,
-            "signature": [
-              "Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/handle_old_settings/handle_old_settings.ts",
-              "lineNumber": 25
-            }
-          },
-          {
-            "id": "def-server.handleOldSettings.$2",
-            "type": "Object",
-            "label": "uiSettingsClient",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/handle_old_settings/handle_old_settings.ts",
-              "lineNumber": 26
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/telemetry/server/handle_old_settings/handle_old_settings.ts",
-          "lineNumber": 24
-        },
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
-        "id": "def-server.DataTelemetryIndex",
+        "id": "def-server.DataTelemetryBasePayload",
         "type": "Interface",
-        "label": "DataTelemetryIndex",
-        "description": [],
+        "label": "DataTelemetryBasePayload",
+        "description": [
+          "\nCommon counters for the {@link DataTelemetryDocument}s"
+        ],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-server.DataTelemetryIndex.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
+            "id": "def-server.DataTelemetryBasePayload.index_count",
+            "type": "number",
+            "label": "index_count",
+            "description": [
+              "How many indices match the declared pattern"
+            ],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-              "lineNumber": 39
+              "lineNumber": 22
             }
           },
           {
             "tags": [],
-            "id": "def-server.DataTelemetryIndex.packageName",
-            "type": "string",
-            "label": "packageName",
-            "description": [],
+            "id": "def-server.DataTelemetryBasePayload.ecs_index_count",
+            "type": "number",
+            "label": "ecs_index_count",
+            "description": [
+              "How many indices match the declared pattern follow ECS conventions"
+            ],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-              "lineNumber": 40
+              "lineNumber": 24
             },
             "signature": [
-              "string | undefined"
+              "number | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-server.DataTelemetryIndex.managedBy",
-            "type": "string",
-            "label": "managedBy",
-            "description": [],
+            "id": "def-server.DataTelemetryBasePayload.doc_count",
+            "type": "number",
+            "label": "doc_count",
+            "description": [
+              "How many documents are among all the identified indices"
+            ],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-              "lineNumber": 41
+              "lineNumber": 26
             },
             "signature": [
-              "string | undefined"
+              "number | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-server.DataTelemetryIndex.dataStreamDataset",
-            "type": "string",
-            "label": "dataStreamDataset",
-            "description": [],
+            "id": "def-server.DataTelemetryBasePayload.size_in_bytes",
+            "type": "number",
+            "label": "size_in_bytes",
+            "description": [
+              "Total size in bytes among all the identified indices"
+            ],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-              "lineNumber": 42
+              "lineNumber": 28
             },
             "signature": [
-              "string | undefined"
+              "number | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
+          "lineNumber": 20
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.DataTelemetryDocument",
+        "type": "Interface",
+        "label": "DataTelemetryDocument",
+        "signature": [
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.DataTelemetryDocument",
+            "text": "DataTelemetryDocument"
+          },
+          " extends ",
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.DataTelemetryBasePayload",
+            "text": "DataTelemetryBasePayload"
+          }
+        ],
+        "description": [
+          "\nDepending on the type of index, we'll populate different keys as we identify them."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.DataTelemetryDocument.data_stream",
+            "type": "Object",
+            "label": "data_stream",
+            "description": [
+              "For data-stream indices. Reporting their details"
+            ],
+            "source": {
+              "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              "{ dataset?: string | undefined; type?: string | undefined; } | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-server.DataTelemetryIndex.dataStreamType",
-            "type": "string",
-            "label": "dataStreamType",
-            "description": [],
+            "id": "def-server.DataTelemetryDocument.package",
+            "type": "Object",
+            "label": "package",
+            "description": [
+              "When available, reporting the package details"
+            ],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
               "lineNumber": 43
             },
             "signature": [
-              "string | undefined"
+              "{ name: string; } | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-server.DataTelemetryIndex.shipper",
+            "id": "def-server.DataTelemetryDocument.shipper",
             "type": "string",
             "label": "shipper",
-            "description": [],
+            "description": [
+              "What's the process indexing the data? (i.e.: \"beats\", \"logstash\")"
+            ],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-              "lineNumber": 44
+              "lineNumber": 48
             },
             "signature": [
               "string | undefined"
@@ -1101,50 +514,24 @@
           },
           {
             "tags": [],
-            "id": "def-server.DataTelemetryIndex.isECS",
+            "id": "def-server.DataTelemetryDocument.pattern_name",
             "type": "CompoundType",
-            "label": "isECS",
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-              "lineNumber": 45
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.DataTelemetryIndex.docCount",
-            "type": "number",
-            "label": "docCount",
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-              "lineNumber": 49
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.DataTelemetryIndex.sizeInBytes",
-            "type": "number",
-            "label": "sizeInBytes",
-            "description": [],
+            "label": "pattern_name",
+            "description": [
+              "When the data comes from a matching index-pattern, the name of the pattern"
+            ],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
               "lineNumber": 50
             },
             "signature": [
-              "number | undefined"
+              "\"search\" | \"logstash\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"metricbeat\" | \"apm\" | \"functionbeat\" | \"heartbeat\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"nginx\" | \"apache\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"zeek\" | \"sigma_doc\" | \"ecs-corelight\" | \"suricata\" | \"wazuh\" | \"meow\" | undefined"
             ]
           }
         ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-          "lineNumber": 38
+          "lineNumber": 34
         },
         "initialIsOpen": false
       },
@@ -1152,7 +539,20 @@
         "id": "def-server.NodeUsage",
         "type": "Interface",
         "label": "NodeUsage",
-        "description": [],
+        "signature": [
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.NodeUsage",
+            "text": "NodeUsage"
+          },
+          " extends ",
+          "NodeUsageInformation"
+        ],
+        "description": [
+          "\nData returned by GET /_nodes/usage, but flattened as an array of {@link estypes.NodeUsageInformation}\nwith the node ID set in the field `node_id`."
+        ],
         "tags": [],
         "children": [
           {
@@ -1160,75 +560,13 @@
             "id": "def-server.NodeUsage.node_id",
             "type": "string",
             "label": "node_id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
-              "lineNumber": 18
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.NodeUsage.timestamp",
-            "type": "CompoundType",
-            "label": "timestamp",
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
-              "lineNumber": 19
-            },
-            "signature": [
-              "React.ReactText"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.NodeUsage.since",
-            "type": "number",
-            "label": "since",
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
-              "lineNumber": 20
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.NodeUsage.rest_actions",
-            "type": "Object",
-            "label": "rest_actions",
-            "description": [],
+            "description": [
+              "\nThe Node ID as reported by ES"
+            ],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
               "lineNumber": 21
-            },
-            "signature": [
-              "{ [key: string]: number; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.NodeUsage.aggregations",
-            "type": "Object",
-            "label": "aggregations",
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
-              "lineNumber": 24
-            },
-            "signature": [
-              "{ [key: string]: ",
-              {
-                "pluginId": "telemetry",
-                "scope": "server",
-                "docId": "kibTelemetryPluginApi",
-                "section": "def-server.NodeUsageAggregation",
-                "text": "NodeUsageAggregation"
-              },
-              "; } | undefined"
-            ]
+            }
           }
         ],
         "source": {
@@ -1236,62 +574,21 @@
           "lineNumber": 17
         },
         "initialIsOpen": false
-      },
-      {
-        "id": "def-server.NodeUsageAggregation",
-        "type": "Interface",
-        "label": "NodeUsageAggregation",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-server.NodeUsageAggregation.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
-              "lineNumber": 13
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
-          "lineNumber": 12
-        },
-        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
-        "tags": [],
-        "id": "def-server.DATA_TELEMETRY_ID",
-        "type": "string",
-        "label": "DATA_TELEMETRY_ID",
-        "description": [],
-        "source": {
-          "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/constants.ts",
-          "lineNumber": 9
-        },
-        "signature": [
-          "\"data\""
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.DataTelemetryPayload",
         "type": "Type",
         "label": "DataTelemetryPayload",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nThe Data Telemetry is reported as an array of {@link DataTelemetryDocument}"
+        ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-          "lineNumber": 36
+          "lineNumber": 56
         },
         "signature": [
           "DataTelemetryDocument[]"
@@ -1303,10 +600,12 @@
         "type": "Type",
         "label": "TelemetryLocalStats",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nThe payload structure as composed by the OSS telemetry collection mechanism."
+        ],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-          "lineNumber": 51
+          "lineNumber": 54
         },
         "signature": [
           "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Pick<estypes.ClusterStatsResponse, \"status\" | \"indices\" | \"nodes\" | \"cluster_uuid\" | \"timestamp\">; collection: string; stack_stats: { data: DataTelemetryPayload | undefined; kibana: { count: number; indices: number; os: {}; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
@@ -1319,7 +618,9 @@
       "id": "def-server.TelemetryPluginSetup",
       "type": "Interface",
       "label": "TelemetryPluginSetup",
-      "description": [],
+      "description": [
+        "\nServer's setup exposed APIs by the telemetry plugin"
+      ],
       "tags": [],
       "children": [
         {
@@ -1332,7 +633,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/server/plugin.ts",
-            "lineNumber": 53
+            "lineNumber": 56
           },
           "signature": [
             "() => Promise<",
@@ -1343,7 +644,7 @@
       ],
       "source": {
         "path": "src/plugins/telemetry/server/plugin.ts",
-        "lineNumber": 48
+        "lineNumber": 51
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1352,7 +653,9 @@
       "id": "def-server.TelemetryPluginStart",
       "type": "Interface",
       "label": "TelemetryPluginStart",
-      "description": [],
+      "description": [
+        "\nServer's start exposed APIs by the telemetry plugin"
+      ],
       "tags": [],
       "children": [
         {
@@ -1365,7 +668,7 @@
           ],
           "source": {
             "path": "src/plugins/telemetry/server/plugin.ts",
-            "lineNumber": 62
+            "lineNumber": 68
           },
           "signature": [
             "() => Promise<boolean>"
@@ -1374,7 +677,7 @@
       ],
       "source": {
         "path": "src/plugins/telemetry/server/plugin.ts",
-        "lineNumber": 56
+        "lineNumber": 62
       },
       "lifecycle": "start",
       "initialIsOpen": true
