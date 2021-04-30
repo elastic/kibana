@@ -105,11 +105,6 @@ export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
   (listDataState) => isLoadingResourceState(listDataState)
 );
 
-export const getListPageActiveState: EventFiltersSelector<boolean> = createSelector(
-  getCurrentListPageState,
-  (pageState) => pageState.active
-);
-
 export const getListPageDataExistsState: EventFiltersSelector<
   StoreState['listPage']['dataExist']
 > = ({ listPage: { dataExist } }) => dataExist;

@@ -21,8 +21,8 @@ import {
   getCurrentListPageDataState,
   getCurrentLocation,
   getListIsLoading,
-  getListPageActiveState,
   getListPageDataExistsState,
+  getListPageIsActive,
   listDataNeedsRefresh,
 } from './selector';
 import { EventFiltersService, EventFiltersServiceGetListOptions } from '../types';
@@ -175,7 +175,7 @@ export const createEventFiltersPageMiddleware = (
     }
 
     // Middleware that only applies to the List Page for Event Filters
-    if (getListPageActiveState(store.getState())) {
+    if (getListPageIsActive(store.getState())) {
       if (action.type === 'userChangedUrl' || action.type === 'eventFiltersCreateSuccess') {
         refreshListDataIfNeeded(store, eventFiltersService);
       }
