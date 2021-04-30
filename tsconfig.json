@@ -17,7 +17,8 @@
     "x-pack/typings/**/*",
     "x-pack/tasks/**/*",
     "x-pack/plugins/lists/**/*",
-    "x-pack/plugins/security_solution/**/*"
+    "x-pack/plugins/security_solution/**/*",
+    "x-pack/plugins/timelines/**/*"
   ],
   "exclude": [
     "x-pack/plugins/security_solution/cypress/**/*"
@@ -124,7 +125,6 @@
     { "path": "./x-pack/plugins/stack_alerts/tsconfig.json" },
     { "path": "./x-pack/plugins/task_manager/tsconfig.json" },
     { "path": "./x-pack/plugins/telemetry_collection_xpack/tsconfig.json" },
-    { "path": "./x-pack/plugins/timelines/tsconfig.json" },
     { "path": "./x-pack/plugins/transform/tsconfig.json" },
     { "path": "./x-pack/plugins/translations/tsconfig.json" },
     { "path": "./x-pack/plugins/triggers_actions_ui/tsconfig.json" },

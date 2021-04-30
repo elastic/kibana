@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { SortColumnTimeline } from '../../../../../../common/types/timeline';
-
-// TODO: Cleanup this type to match SortColumnTimeline
-
-/** Specifies which column the timeline is sorted on */
-export type Sort = SortColumnTimeline;
+export * from './model';
+export * as tGridActions from './actions';

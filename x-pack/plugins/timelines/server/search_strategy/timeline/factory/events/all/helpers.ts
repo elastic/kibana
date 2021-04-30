@@ -7,18 +7,18 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, has, merge, uniq } from 'lodash/fp';
-import { Ecs } from '../../../../../../common/ecs';
+import { Ecs } from '../../../../../../../security_solution/common/ecs';
 import {
   EventHit,
   Fields,
   TimelineEdges,
   TimelineNonEcsData,
-} from '../../../../../../common/search_strategy';
-import { toStringArray } from '../../../../../../common/utils/to_array';
+} from '../../../../../../../security_solution/common/search_strategy';
+import { toStringArray } from '../../../../../../../security_solution/common/utils/to_array';
 import {
   getDataFromFieldsHits,
   getDataSafety,
-} from '../../../../../../common/utils/field_formatters';
+} from '../../../../../../../security_solution/common/utils/field_formatters';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 
 const getTimestamp = (hit: EventHit): string => {

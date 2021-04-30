@@ -10,7 +10,6 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
-import { Sort } from '../../components/timeline/body/sort';
 import {
   EqlOptionsSelected,
   TimelineNonEcsData,
@@ -18,50 +17,29 @@ import {
 import { SerializedFilterQuery } from '../../../common/store/types';
 import type {
   TimelineEventsType,
-  TimelineExpandedDetail,
   TimelineType,
   TimelineStatus,
-  RowRendererId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+
+import { ColumnHeaderOptions, TGridModel } from '../../../../../timelines/public';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
-/** Uniquely identifies a column */
-export type ColumnId = string;
-
 /** The specification of a column header */
-export type ColumnHeaderOptions = Pick<
-  EuiDataGridColumn,
-  'display' | 'displayAsText' | 'id' | 'initialWidth'
-> & {
-  aggregatable?: boolean;
-  category?: string;
-  columnHeaderType: ColumnHeaderType;
-  description?: string;
-  example?: string;
-  format?: string;
-  linkField?: string;
-  placeholder?: string;
-  subType?: IFieldSubType;
-  type?: string;
-};
+export { ColumnHeaderOptions };
 
-export interface TimelineModel {
+export type TimelineModel = TGridModel & {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
   prevActiveTab: TimelineTabs;
-  /** The columns displayed in the timeline */
-  columns: ColumnHeaderOptions[];
   /** Timeline saved object owner */
   createdBy?: string;
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
-  /** Events to not be rendered **/
-  deletedEventIds: string[];
   /** A summary of the events and notes in this timeline */
   description: string;
   eqlOptions: EqlOptionsSelected;
@@ -69,21 +47,11 @@ export interface TimelineModel {
   eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
-  /** A list of Ids of excluded Row Renderers */
-  excludedRowRendererIds: RowRendererId[];
-  /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
-  expandedDetail: TimelineExpandedDetail;
   filters?: Filter[];
-  /** When non-empty, display a graph view for this event */
-  graphEventId?: string;
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
   highlightedDropAndProviderId: string;
-  /** Uniquely identifies the timeline */
-  id: string;
-  /** TO DO sourcerer @X define this */
-  indexNames: string[];
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
   /** Events to be rendered as loading **/
@@ -93,10 +61,6 @@ export interface TimelineModel {
   isFavorite: boolean;
   /** When true, the timeline will update as new data arrives */
   isLive: boolean;
-  /** The number of items to show in a single page of results */
-  itemsPerPage: number;
-  /** Displays a series of choices that when selected, become the value of `itemsPerPage` */
-  itemsPerPageOptions: number[];
   /** determines the behavior of the KQL bar */
   kqlMode: KqlMode;
   /** the KQL query in the KQL bar */
@@ -129,17 +93,14 @@ export interface TimelineModel {
   show: boolean;
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
-  /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
-  sort: Sort[];
   /** status: active | draft */
   status: TimelineStatus;
   /** updated saved object timestamp */
   updated?: number;
   /** timeline is saving */
   isSaving: boolean;
-  isLoading: boolean;
   version: string | null;
-}
+};
 
 export type SubsetTimelineModel = Readonly<
   Pick<

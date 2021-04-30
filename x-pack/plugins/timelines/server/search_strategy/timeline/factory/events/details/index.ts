@@ -15,17 +15,18 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsItem,
   EventSource,
-} from '../../../../../../common/search_strategy';
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionTimelineFactory } from '../../types';
+} from '../../../../../../../security_solution/common/search_strategy';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { inspectStringifyObject } from '../../../../../../../security_solution/server/utils/build_query';
+import { TimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
 import {
   getDataFromFieldsHits,
   getDataFromSourceHits,
   getDataSafety,
-} from '../../../../../../common/utils/field_formatters';
+} from '../../../../../../../security_solution/common/utils/field_formatters';
 
-export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEventsQueries.details> = {
+export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (options: TimelineEventsDetailsRequestOptions) => {
     const { indexName, eventId, docValueFields = [] } = options;
     return buildTimelineDetailsQuery(indexName, eventId, docValueFields);

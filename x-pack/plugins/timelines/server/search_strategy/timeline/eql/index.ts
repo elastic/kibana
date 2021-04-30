@@ -15,11 +15,11 @@ import {
   EqlSearchStrategyResponse,
   EQL_SEARCH_STRATEGY,
 } from '../../../../../../../src/plugins/data/common';
-import { EqlSearchResponse } from '../../../../common/detection_engine/types';
+import { EqlSearchResponse } from '../../../../../security_solution/common/detection_engine/types';
 import {
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
-} from '../../../../common/search_strategy/timeline/events/eql';
+} from '../../../../../security_solution/common/search_strategy/timeline/events/eql';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 
 export const securitySolutionTimelineEqlSearchStrategyProvider = (

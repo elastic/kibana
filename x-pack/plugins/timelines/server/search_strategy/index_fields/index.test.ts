@@ -15,7 +15,7 @@ import {
   requestIndexFieldSearch,
 } from './index';
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
-import { fieldsBeat as beatFields } from '../../utils/beat_schema/fields';
+import { fieldsBeat as beatFields } from '../../../../security_solution/server/utils/beat_schema/fields';
 import {
   IndexPatternsFetcher,
   SearchStrategyDependencies,

@@ -10,20 +10,15 @@ import { isEmpty } from 'lodash/fp';
 import {
   TimerangeFilter,
   TimerangeInput,
-  TimelineEventsAllRequestOptions,
-  TimelineRequestSortField,
-} from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
+  TimelineRequestBasicOptions,
+} from '../../../../../../../security_solution/common/search_strategy';
+import { createQueryFilterClauses } from '../../../../../../../security_solution/server/utils/build_query';
 
-export const buildTimelineEventsAllQuery = ({
+export const buildTimelineKpiQuery = ({
   defaultIndex,
-  docValueFields,
-  fields,
   filterQuery,
-  pagination: { activePage, querySize },
-  sort,
   timerange,
-}: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
+}: TimelineRequestBasicOptions) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
 
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
@@ -48,34 +43,44 @@ export const buildTimelineEventsAllQuery = ({
 
   const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
 
-  const getSortField = (sortFields: TimelineRequestSortField[]) =>
-    sortFields.map((item) => {
-      const field: string = item.field === 'timestamp' ? '@timestamp' : item.field;
-      return {
-        [field]: {
-          order: item.direction,
-          unmapped_type: item.type,
-        },
-      };
-    });
-
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      aggs: {
+        userCount: {
+          cardinality: {
+            field: 'user.id',
+          },
+        },
+        destinationIpCount: {
+          cardinality: {
+            field: 'destination.ip',
+          },
+        },
+        hostCount: {
+          cardinality: {
+            field: 'host.id',
+          },
+        },
+        processCount: {
+          cardinality: {
+            field: 'process.entity_id',
+          },
+        },
+        sourceIpCount: {
+          cardinality: {
+            field: 'source.ip',
+          },
+        },
+      },
       query: {
         bool: {
           filter,
         },
       },
-      from: activePage * querySize,
-      size: querySize,
       track_total_hits: true,
-      sort: getSortField(sort),
-      fields,
-      _source: ['signal.*'],
     },
   };
 

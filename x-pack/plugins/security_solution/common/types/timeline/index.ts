@@ -23,6 +23,8 @@ import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import { Direction, Maybe } from '../../search_strategy';
 
+export * from './store';
+
 /*
  *  ColumnHeader Types
  */
