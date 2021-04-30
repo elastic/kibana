@@ -15,7 +15,6 @@ export enum ConnectorAuditAction {
   DELETE = 'connector_delete',
   FIND = 'connector_find',
   EXECUTE = 'connector_execute',
-  EXPORT = 'connector_export',
 }
 
 type VerbsTuple = [string, string, string];
@@ -27,7 +26,6 @@ const eventVerbs: Record<ConnectorAuditAction, VerbsTuple> = {
   connector_delete: ['delete', 'deleting', 'deleted'],
   connector_find: ['access', 'accessing', 'accessed'],
   connector_execute: ['execute', 'executing', 'executed'],
-  connector_export: ['export', 'exporting', 'exported'],
 };
 
 const eventTypes: Record<ConnectorAuditAction, EcsEventType | undefined> = {
@@ -37,7 +35,6 @@ const eventTypes: Record<ConnectorAuditAction, EcsEventType | undefined> = {
   connector_delete: 'deletion',
   connector_find: 'access',
   connector_execute: undefined,
-  connector_export: 'access',
 };
 
 export interface ConnectorAuditEventParams {

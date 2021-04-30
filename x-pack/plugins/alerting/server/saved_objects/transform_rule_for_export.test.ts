@@ -6,8 +6,6 @@
  */
 
 import { transformRulesForExport } from './transform_rule_for_export';
-import { auditServiceMock } from '../../../security/server/audit/index.mock';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
 
 describe('transform rule for export', () => {
   const date = new Date().toISOString();
@@ -88,30 +86,6 @@ describe('transform rule for export', () => {
           scheduledTaskId: null,
         },
       }))
-    );
-  });
-
-  it('should call audit logger if available', () => {
-    const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
-    transformRulesForExport(mockRules, auditLogger);
-    expect(auditLogger.log).toHaveBeenCalledTimes(mockRules.length);
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: expect.objectContaining({
-          action: 'alert_export',
-          outcome: 'success',
-        }),
-        kibana: { saved_object: { id: '1', type: 'alert' } },
-      })
-    );
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: expect.objectContaining({
-          action: 'alert_export',
-          outcome: 'success',
-        }),
-        kibana: { saved_object: { id: '2', type: 'alert' } },
-      })
     );
   });
 });

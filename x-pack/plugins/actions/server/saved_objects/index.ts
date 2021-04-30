@@ -11,7 +11,6 @@ import {
   SavedObjectsServiceSetup,
 } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import { SecurityPluginSetup } from '../../../security/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { RawAction } from '../types';
@@ -24,8 +23,7 @@ export const ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE = 'action_task_params';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  security?: SecurityPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
@@ -43,8 +41,7 @@ export function setupSavedObjects(
         context: SavedObjectsExportTransformContext,
         objects: Array<SavedObject<RawAction>>
       ) {
-        const auditLogger = security?.audit.asScoped(context.request);
-        return transformConnectorsForExport(objects, auditLogger);
+        return transformConnectorsForExport(objects);
       },
       onImport(connectors) {
         return {

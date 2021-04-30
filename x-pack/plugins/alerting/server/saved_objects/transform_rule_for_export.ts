@@ -6,27 +6,13 @@
  */
 
 import { SavedObject } from 'kibana/server';
-import { AuditLogger } from '../../../security/server';
-import { AlertAuditAction, alertAuditEvent } from '../alerts_client/audit_events';
 import { RawAlert } from '../types';
 
-export function transformRulesForExport(
-  rules: SavedObject[],
-  auditLogger?: AuditLogger
-): Array<SavedObject<RawAlert>> {
-  return rules.map((rule) => transformRuleForExport(rule as SavedObject<RawAlert>, auditLogger));
+export function transformRulesForExport(rules: SavedObject[]): Array<SavedObject<RawAlert>> {
+  return rules.map((rule) => transformRuleForExport(rule as SavedObject<RawAlert>));
 }
 
-function transformRuleForExport(
-  rule: SavedObject<RawAlert>,
-  auditLogger?: AuditLogger
-): SavedObject<RawAlert> {
-  auditLogger?.log(
-    alertAuditEvent({
-      action: AlertAuditAction.EXPORT,
-      savedObject: { type: 'alert', id: rule.id },
-    })
-  );
+function transformRuleForExport(rule: SavedObject<RawAlert>): SavedObject<RawAlert> {
   return {
     ...rule,
     attributes: {

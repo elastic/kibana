@@ -6,8 +6,6 @@
  */
 
 import { transformConnectorsForExport } from './transform_connectors_for_export';
-import { auditServiceMock } from '../../../security/server/audit/index.mock';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
 
 describe('transform connector for export', () => {
   const connectorsWithNoSecrets = [
@@ -224,44 +222,6 @@ describe('transform connector for export', () => {
           isMissingSecrets: true,
         },
       }))
-    );
-  });
-
-  it('should call audit logger if available', () => {
-    const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
-    transformConnectorsForExport(
-      [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actionTypeId: '.email',
-            name: 'email connector without auth',
-            isMissingSecrets: false,
-            config: {
-              hasAuth: false,
-              from: 'me@me.com',
-              host: 'hi',
-              port: 22,
-              service: null,
-              secure: null,
-            },
-            secrets: 'asbqw4tqbef',
-          },
-          references: [],
-        },
-      ],
-      auditLogger
-    );
-    expect(auditLogger.log).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: expect.objectContaining({
-          action: 'connector_export',
-          outcome: 'success',
-        }),
-        kibana: { saved_object: { id: '1', type: 'action' } },
-      })
     );
   });
 });

@@ -10,7 +10,6 @@ import {
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
 } from 'kibana/server';
-import { SecurityPluginSetup } from '../../../security/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -40,8 +39,7 @@ export type AlertAttributesExcludedFromAADType =
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  security?: SecurityPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   savedObjects.registerType({
     name: 'alert',
@@ -58,8 +56,7 @@ export function setupSavedObjects(
         context: SavedObjectsExportTransformContext,
         objects: Array<SavedObject<RawAlert>>
       ) {
-        const auditLogger = security?.audit.asScoped(context.request);
-        return transformRulesForExport(objects, auditLogger);
+        return transformRulesForExport(objects);
       },
     },
   });

@@ -6,19 +6,16 @@
  */
 
 import { SavedObject } from 'kibana/server';
-import { AuditLogger } from '../../../security/server';
 import { RawAction } from '../types';
-import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
 
 const CONNECTORS_WITHOUT_SECRETS = ['.index', '.server-log'];
 const CONNECTORS_CHECK_AUTH = ['.email', '.webhook'];
 
 export function transformConnectorsForExport(
-  connectors: SavedObject[],
-  auditLogger?: AuditLogger
+  connectors: SavedObject[]
 ): Array<SavedObject<RawAction>> {
   return connectors.map((connector) =>
-    transformConnectorForExport(connector as SavedObject<RawAction>, auditLogger)
+    transformConnectorForExport(connector as SavedObject<RawAction>)
   );
 }
 
@@ -26,17 +23,7 @@ function connectorHasNoAuth(connector: SavedObject<RawAction>) {
   return connector?.attributes?.config?.hasAuth === false;
 }
 
-function transformConnectorForExport(
-  connector: SavedObject<RawAction>,
-  auditLogger?: AuditLogger
-): SavedObject<RawAction> {
-  auditLogger?.log(
-    connectorAuditEvent({
-      action: ConnectorAuditAction.EXPORT,
-      savedObject: { type: 'action', id: connector.id },
-    })
-  );
-
+function transformConnectorForExport(connector: SavedObject<RawAction>): SavedObject<RawAction> {
   // Skip connectors with no secrets
   if (CONNECTORS_WITHOUT_SECRETS.includes(connector.attributes.actionTypeId)) {
     return connector;
