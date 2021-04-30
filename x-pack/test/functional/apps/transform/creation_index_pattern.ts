@@ -40,8 +40,8 @@ export default function ({ getService }: FtrProviderContext) {
         source: 'ft_ecommerce',
         groupByEntries: [
           {
-            identifier: 'terms(category.keyword)',
-            label: 'category.keyword',
+            identifier: 'terms(category)',
+            label: 'category',
           } as GroupByEntry,
           {
             identifier: 'date_histogram(order_date)',
@@ -85,16 +85,16 @@ export default function ({ getService }: FtrProviderContext) {
         ],
         transformId: `ec_1_${Date.now()}`,
         transformDescription:
-          'ecommerce batch transform with groups terms(category.keyword) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
+          'ecommerce batch transform with groups terms(category) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
         discoverAdjustSuperDatePicker: true,
         expected: {
-          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
             group_by: {
-              'category.keyword': {
+              category: {
                 terms: {
                   field: 'category.keyword',
                 },
@@ -156,7 +156,15 @@ export default function ({ getService }: FtrProviderContext) {
             rows: 5,
           },
           histogramCharts: [
-            { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'category',
+              legend: '6 categories',
+              colorStats: [
+                { color: '#000000', percentage: 45 },
+                { color: '#54B399', percentage: 55 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'currency',
@@ -166,8 +174,24 @@ export default function ({ getService }: FtrProviderContext) {
                 { color: '#54B399', percentage: 90 },
               ],
             },
-            { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
-            { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'customer_first_name',
+              legend: 'top 20 of 46 categories',
+              colorStats: [
+                { color: '#000000', percentage: 60 },
+                { color: '#54B399', percentage: 35 },
+              ],
+            },
+            {
+              chartAvailable: true,
+              id: 'customer_full_name',
+              legend: 'top 20 of 3321 categories',
+              colorStats: [
+                { color: '#000000', percentage: 25 },
+                { color: '#54B399', percentage: 70 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'customer_gender',
@@ -186,7 +210,15 @@ export default function ({ getService }: FtrProviderContext) {
                 { color: '#000000', percentage: 60 },
               ],
             },
-            { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
+            {
+              chartAvailable: true,
+              id: 'customer_last_name',
+              legend: 'top 20 of 183 categories',
+              colorStats: [
+                { color: '#000000', percentage: 25 },
+                { color: '#54B399', percentage: 70 },
+              ],
+            },
             {
               chartAvailable: true,
               id: 'customer_phone',
