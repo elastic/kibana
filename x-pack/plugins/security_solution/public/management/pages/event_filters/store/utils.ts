@@ -11,7 +11,7 @@ import { Ecs } from '../../../../../common/ecs';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 
 export const getInitialExceptionFromEvent = (data?: Ecs): CreateExceptionListItemSchema => ({
-  comments: undefined,
+  comments: [],
   description: '',
   entries:
     data && data.event && data.process

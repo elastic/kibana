@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFiltersFlyout } from '.';
+import { EventFiltersFlyout, EventFiltersFlyoutProps } from '.';
 import * as reactTestingLibrary from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import {
@@ -18,8 +18,12 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '../../../../../../shared_imports';
+import { EventFiltersHttpService } from '../../../service';
+import { createdEventFilterEntryMock } from '../../../test_utils';
 
 jest.mock('../form');
+jest.mock('../../../service');
+
 jest.mock('../../hooks', () => {
   const originalModule = jest.requireActual('../../hooks');
   const useEventFiltersNotification = jest.fn().mockImplementation(() => {});
@@ -32,16 +36,29 @@ jest.mock('../../hooks', () => {
 
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
-let render: () => ReturnType<AppContextTestRender['render']>;
+let render: (
+  props?: Partial<EventFiltersFlyoutProps>
+) => ReturnType<AppContextTestRender['render']>;
 const act = reactTestingLibrary.act;
 let onCancelMock: jest.Mock;
+const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
 
 describe('Event filter flyout', () => {
+  beforeAll(() => {
+    EventFiltersHttpServiceMock.mockImplementation(() => {
+      return {
+        getOne: () => createdEventFilterEntryMock(),
+        addEventFilters: () => createdEventFilterEntryMock(),
+        updateOne: () => createdEventFilterEntryMock(),
+      };
+    });
+  });
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     onCancelMock = jest.fn();
-    render = () => mockedContext.render(<EventFiltersFlyout onCancel={onCancelMock} />);
+    render = (props) =>
+      mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
   });
 
   afterEach(() => reactTestingLibrary.cleanup());
@@ -165,5 +182,25 @@ describe('Event filter flyout', () => {
     });
 
     expect(onCancelMock).toHaveBeenCalledTimes(0);
+  });
+
+  it('should renders correctly when id and edit type', () => {
+    const component = render({ id: 'fakeId', type: 'edit' });
+
+    expect(component.getAllByText('Update Endpoint Event Filter')).not.toBeNull();
+    expect(component.getByText('cancel')).not.toBeNull();
+    expect(component.getByText('Endpoint Security')).not.toBeNull();
+  });
+
+  it('should dispatch action to init form store on mount with id', async () => {
+    await act(async () => {
+      render({ id: 'fakeId', type: 'edit' });
+      await waitForAction('eventFiltersInitFormFromId');
+    });
+
+    expect(mockedContext.store.getState().management.eventFilters.form.entry).not.toBeUndefined();
+    expect(mockedContext.store.getState().management.eventFilters.form.entry!.item_id).toBe(
+      createdEventFilterEntryMock().item_id
+    );
   });
 });

@@ -6,7 +6,11 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../../shared_imports';
 import { Immutable } from '../../../../../common/endpoint/types';
 import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
 
@@ -15,6 +19,7 @@ export interface EventFiltersService {
     exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema>;
   getOne(id: string): Promise<ExceptionListItemSchema>;
+  updateOne(exception: UpdateExceptionListItemSchema): Promise<ExceptionListItemSchema>;
 }
 export class EventFiltersHttpService implements EventFiltersService {
   private listHasBeenCreated: boolean;
@@ -52,6 +57,12 @@ export class EventFiltersHttpService implements EventFiltersService {
         id,
         namespace_type: 'agnostic',
       },
+    });
+  }
+
+  async updateOne(exception: UpdateExceptionListItemSchema) {
+    return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      body: JSON.stringify(exception),
     });
   }
 }

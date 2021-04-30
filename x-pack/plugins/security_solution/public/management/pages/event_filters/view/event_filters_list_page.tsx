@@ -5,20 +5,57 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AppAction } from '../../../../common/store/actions';
+import { getEventFiltersListPath } from '../../../common/routing';
+import { getCurrentLocation, getActionError, getFormEntry } from '../store/selector';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { EventFiltersListEmptyState } from './components/empty';
 import { useEventFiltersNavigateCallback, useEventFiltersSelector } from './hooks';
-import { getCurrentLocation } from '../store/selector';
 import { EventFiltersFlyout } from './components/flyout';
 
 export const EventFiltersListPage = memo(() => {
-  const location = useEventFiltersSelector(getCurrentLocation);
+  const history = useHistory();
+  const dispatch = useDispatch<Dispatch<AppAction>>();
+  const isActionError = useEventFiltersSelector(getActionError);
+  const formEntry = useEventFiltersSelector(getFormEntry);
   const navigateCallback = useEventFiltersNavigateCallback();
+  const location = useEventFiltersSelector(getCurrentLocation);
   const showFlyout = !!location.show;
-  const exceptionId = location.id;
+
+  // Clean url params if wrong
+  useEffect(() => {
+    if ((location.show === 'edit' && !location.id) || (location.show === 'create' && !!location.id))
+      navigateCallback({
+        show: 'create',
+        id: undefined,
+      });
+  }, [location, navigateCallback]);
+
+  // Catch fetch error -> actionError + empty entry in form
+  useEffect(() => {
+    if (isActionError && !formEntry) {
+      // Replace the current URL route so that user does not keep hitting this page via browser back/fwd buttons
+      history.replace(
+        getEventFiltersListPath({
+          ...location,
+          show: undefined,
+          id: undefined,
+        })
+      );
+      dispatch({
+        type: 'eventFiltersFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
+    }
+  }, [dispatch, formEntry, history, isActionError, location, navigateCallback]);
 
   const handleAddButtonClick = useCallback(
     () =>
@@ -54,7 +91,11 @@ export const EventFiltersListPage = memo(() => {
       {/* TODO: Display this only when list is empty (there are no endpoint events) */}
       <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
       {showFlyout ? (
-        <EventFiltersFlyout onCancel={handleCancelButtonClick} id={exceptionId} />
+        <EventFiltersFlyout
+          onCancel={handleCancelButtonClick}
+          id={location.id}
+          type={location.show}
+        />
       ) : null}
     </AdministrationListPage>
   );

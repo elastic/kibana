@@ -82,6 +82,8 @@ const eventFiltersFormStateChanged: CaseReducer<EventFiltersFormStateChanged> = 
     ...state,
     form: {
       ...state.form,
+      entry: action.payload.type === 'UninitialisedResourceState' ? undefined : state.form.entry,
+      newComment: action.payload.type === 'UninitialisedResourceState' ? '' : state.form.newComment,
       submissionResourceState: action.payload,
     },
   };

@@ -6,7 +6,7 @@
  */
 
 import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+import { ExceptionListItemSchema, UpdateExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
   isLoadingResourceState,
@@ -16,7 +16,7 @@ import {
 
 export const getFormEntry = (
   state: EventFiltersListPageState
-): CreateExceptionListItemSchema | ExceptionListItemSchema | undefined => {
+): UpdateExceptionListItemSchema | ExceptionListItemSchema | undefined => {
   return state.form.entry;
 };
 
@@ -40,7 +40,7 @@ export const isCreationSuccessful = (state: EventFiltersListPageState): boolean 
   return isLoadedResourceState(state.form.submissionResourceState);
 };
 
-export const getCreationError = (state: EventFiltersListPageState): ServerApiError | undefined => {
+export const getActionError = (state: EventFiltersListPageState): ServerApiError | undefined => {
   const submissionResourceState = state.form.submissionResourceState;
 
   return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;

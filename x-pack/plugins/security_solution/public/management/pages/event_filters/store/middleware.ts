@@ -16,7 +16,23 @@ import { EventFiltersHttpService, EventFiltersService } from '../service';
 
 import { EventFiltersListPageState } from '../types';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
-import { CreateExceptionListItemSchema, transformNewItemOutput } from '../../../../shared_imports';
+import {
+  CreateExceptionListItemSchema,
+  transformNewItemOutput,
+  transformOutput,
+  UpdateExceptionListItemSchema,
+} from '../../../../shared_imports';
+
+const addNewComments = (
+  entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema,
+  newComment: string
+): UpdateExceptionListItemSchema | CreateExceptionListItemSchema => {
+  if (newComment) {
+    if (!entry.comments) entry.comments = [];
+    entry.comments.push({ comment: newComment });
+  }
+  return entry;
+};
 
 const eventFiltersCreate = async (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
@@ -35,18 +51,81 @@ const eventFiltersCreate = async (
     });
 
     const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
-    if (store.getState().form.newComment) {
-      if (!sanitizedEntry.comments) sanitizedEntry.comments = [];
-      sanitizedEntry.comments.push({ comment: store.getState().form.newComment });
-    }
+    const updatedCommentsEntry = addNewComments(
+      sanitizedEntry,
+      store.getState().form.newComment
+    ) as CreateExceptionListItemSchema;
 
-    const exception = await eventFiltersService.addEventFilters(sanitizedEntry);
+    const exception = await eventFiltersService.addEventFilters(updatedCommentsEntry);
     store.dispatch({
       type: 'eventFiltersCreateSuccess',
       payload: {
         exception,
       },
     });
+    store.dispatch({
+      type: 'eventFiltersFormStateChanged',
+      payload: {
+        type: 'LoadedResourceState',
+        data: exception,
+      },
+    });
+  } catch (error) {
+    store.dispatch({
+      type: 'eventFiltersFormStateChanged',
+      payload: {
+        type: 'FailedResourceState',
+        error: error.body || error,
+        lastLoadedState: getLastLoadedResourceState(submissionResourceState),
+      },
+    });
+  }
+};
+
+const eventFiltersUpdate = async (
+  store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
+  eventFiltersService: EventFiltersService
+) => {
+  const submissionResourceState = store.getState().form.submissionResourceState;
+  try {
+    const formEntry = store.getState().form.entry;
+    if (!formEntry) return;
+    store.dispatch({
+      type: 'eventFiltersFormStateChanged',
+      payload: {
+        type: 'LoadingResourceState',
+        previousState: { type: 'UninitialisedResourceState' },
+      },
+    });
+
+    const sanitizedEntry: UpdateExceptionListItemSchema = transformOutput(
+      formEntry as UpdateExceptionListItemSchema
+    );
+    const updatedCommentsEntry = addNewComments(
+      sanitizedEntry,
+      store.getState().form.newComment
+    ) as UpdateExceptionListItemSchema;
+
+    // Clean unnecessary fields for update action
+    [
+      'created_at',
+      'created_by',
+      'created_at',
+      'created_by',
+      'list_id',
+      'tie_breaker_id',
+      'updated_at',
+      'updated_by',
+    ].forEach((field) => {
+      delete updatedCommentsEntry[field as keyof UpdateExceptionListItemSchema];
+    });
+
+    updatedCommentsEntry.comments = updatedCommentsEntry.comments?.map((comment) => ({
+      comment: comment.comment,
+      id: comment.id,
+    }));
+
+    const exception = await eventFiltersService.updateOne(updatedCommentsEntry);
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
       payload: {
@@ -101,6 +180,8 @@ export const createEventFiltersPageMiddleware = (
       await eventFiltersCreate(store, eventFiltersService);
     } else if (action.type === 'eventFiltersInitFormFromId') {
       await eventFiltersLoadByid(store, eventFiltersService, action.payload.id);
+    } else if (action.type === 'eventFiltersUpdateStart') {
+      await eventFiltersUpdate(store, eventFiltersService);
     }
   };
 };

@@ -6,12 +6,16 @@
  */
 
 import { Action } from 'redux';
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
 
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
-    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
   };
 };
 
@@ -23,7 +27,7 @@ export type EventFiltersInitFormFromId = Action<'eventFiltersInitFormFromId'> & 
 
 export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
   payload: {
-    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
     hasNameError?: boolean;
     hasItemsError?: boolean;
     hasOSError?: boolean;
@@ -32,6 +36,7 @@ export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
 };
 
 export type EventFiltersCreateStart = Action<'eventFiltersCreateStart'>;
+export type EventFiltersUpdateStart = Action<'eventFiltersUpdateStart'>;
 export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'> & {
   payload: {
     exception: ExceptionListItemSchema;
@@ -49,6 +54,7 @@ export type EventFiltersPageAction =
   | EventFiltersInitFormFromId
   | EventFiltersChangeForm
   | EventFiltersCreateStart
+  | EventFiltersUpdateStart
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
   | EventFiltersFormStateChanged;

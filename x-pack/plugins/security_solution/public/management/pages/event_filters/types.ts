@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../shared_imports';
+import {
+  UpdateExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '../../../shared_imports';
 import { AsyncResourceState } from '../../state/async_resource_state';
 
 export interface EventFiltersPageLocation {
@@ -19,7 +23,7 @@ export interface EventFiltersPageLocation {
 export interface EventFiltersListPageState {
   entries: ExceptionListItemSchema[];
   form: {
-    entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined;
+    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema | undefined;
     newComment: string;
     hasNameError: boolean;
     hasItemsError: boolean;

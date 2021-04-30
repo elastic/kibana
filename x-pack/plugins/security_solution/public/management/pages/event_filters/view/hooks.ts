@@ -12,12 +12,18 @@ import { useHistory } from 'react-router-dom';
 import {
   isCreationSuccessful,
   getFormEntry,
-  getCreationError,
+  getActionError,
   getCurrentLocation,
 } from '../store/selector';
 
 import { useToasts } from '../../../../common/lib/kibana';
-import { getCreationSuccessMessage, getCreationErrorMessage } from './translations';
+import {
+  getCreationSuccessMessage,
+  getUpdateSuccessMessage,
+  getCreationErrorMessage,
+  getUpdateErrorMessage,
+  getGetErrorMessage,
+} from './translations';
 
 import { State } from '../../../../common/store';
 import { EventFiltersListPageState } from '../types';
@@ -36,17 +42,27 @@ export function useEventFiltersSelector<R>(selector: (state: EventFiltersListPag
 
 export const useEventFiltersNotification = () => {
   const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
-  const creationError = useEventFiltersSelector(getCreationError);
+  const actionError = useEventFiltersSelector(getActionError);
   const formEntry = useEventFiltersSelector(getFormEntry);
   const toasts = useToasts();
   const [wasAlreadyHandled] = useState(new WeakSet());
 
   if (creationSuccessful && formEntry && !wasAlreadyHandled.has(formEntry)) {
     wasAlreadyHandled.add(formEntry);
-    toasts.addSuccess(getCreationSuccessMessage(formEntry));
-  } else if (creationError && !wasAlreadyHandled.has(creationError)) {
-    wasAlreadyHandled.add(creationError);
-    toasts.addDanger(getCreationErrorMessage(creationError));
+    if (formEntry.id) {
+      toasts.addSuccess(getUpdateSuccessMessage(formEntry));
+    } else {
+      toasts.addSuccess(getCreationSuccessMessage(formEntry));
+    }
+  } else if (actionError && !wasAlreadyHandled.has(actionError)) {
+    wasAlreadyHandled.add(actionError);
+    if (formEntry && formEntry.id) {
+      toasts.addDanger(getUpdateErrorMessage(actionError));
+    } else if (formEntry) {
+      toasts.addDanger(getCreationErrorMessage(actionError));
+    } else {
+      toasts.addWarning(getGetErrorMessage(actionError));
+    }
   }
 };
 
