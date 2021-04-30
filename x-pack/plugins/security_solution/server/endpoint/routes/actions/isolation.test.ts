@@ -308,25 +308,8 @@ describe('Host Isolation', () => {
       });
       expect(mockResponse.ok).toBeCalled();
     });
-    it('allows kibana_admin to perform isolation', async () => {
-      const superU = { username: 'foo', roles: ['kibana_admin'] };
-      await callRoute(ISOLATE_HOST_ROUTE, {
-        body: { agent_ids: ['XYZ'] },
-        mockUser: superU,
-      });
-      expect(mockResponse.ok).toBeCalled();
-    });
-
     it('allows superuser to perform unisolation', async () => {
       const superU = { username: 'foo', roles: ['superuser'] };
-      await callRoute(UNISOLATE_HOST_ROUTE, {
-        body: { agent_ids: ['XYZ'] },
-        mockUser: superU,
-      });
-      expect(mockResponse.ok).toBeCalled();
-    });
-    it('allows kibana_admin to perform unisolation', async () => {
-      const superU = { username: 'foo', roles: ['kibana_admin'] };
       await callRoute(UNISOLATE_HOST_ROUTE, {
         body: { agent_ids: ['XYZ'] },
         mockUser: superU,

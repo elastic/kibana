@@ -21,12 +21,11 @@ import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 
 export const UserCanIsolate = (roles: readonly string[] | undefined): boolean => {
-  // other "admin" type roles: beats_admin, detections_admin, transform_admin, ml_admin
-  // more future-proof is to fetch the proper Role (type) info, and return isRoleAdmin()
+  // only superusers can write to the fleet index (or look up endpoint data to convert endp ID to agent ID)
   if (!roles || roles.length === 0) {
     return false;
   }
-  return roles.some((r) => ['superuser', 'kibana_admin'].includes(r));
+  return roles.includes('superuser');
 };
 
 /**
@@ -107,22 +106,30 @@ export const isolationRequestHandler = function (
     // create an Action ID and dispatch it to ES & Fleet Server
     const esClient = context.core.elasticsearch.client.asCurrentUser;
     const actionID = uuid.v4();
-    const result = await esClient.index({
-      index: AGENT_ACTIONS_INDEX,
-      body: {
-        action_id: actionID,
-        '@timestamp': moment().toISOString(),
-        expiration: moment().add(2, 'weeks').toISOString(),
-        type: 'INPUT_ACTION',
-        input_type: 'endpoint',
-        agents: agentIDs,
-        user_id: user?.username,
-        data: {
-          command: isolate ? 'isolate' : 'unisolate',
-          comment: req.body.comment,
-        },
-      } as EndpointAction,
-    });
+    let result;
+    try {
+      result = await esClient.index({
+        index: AGENT_ACTIONS_INDEX,
+        body: {
+          action_id: actionID,
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(2, 'weeks').toISOString(),
+          type: 'INPUT_ACTION',
+          input_type: 'endpoint',
+          agents: agentIDs,
+          user_id: user?.username,
+          data: {
+            command: isolate ? 'isolate' : 'unisolate',
+            comment: req.body.comment,
+          },
+        } as EndpointAction,
+      });
+    } catch (e) {
+      return res.customError({
+        statusCode: 500,
+        body: { message: e },
+      });
+    }
 
     if (result.statusCode !== 201) {
       return res.customError({
