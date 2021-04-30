@@ -6,27 +6,22 @@
  */
 
 import { EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../context/url_params_context/use_url_params';
 import * as urlHelpers from './Links/url_helpers';
 
 // The default transaction type (for non-RUM services) is "request". Set the
 // min-width on here to the width when "request" is loaded so it doesn't start
 // out collapsed and change its width when the list of transaction types is loaded.
 const EuiSelectWithWidth = styled(EuiSelect)`
-  min-width: 157px;
+  min-width: 200px;
 `;
 
 export function TransactionTypeSelect() {
-  const { transactionTypes } = useApmServiceContext();
+  const { transactionTypes, transactionType } = useApmServiceContext();
   const history = useHistory();
-  const {
-    urlParams: { transactionType },
-  } = useUrlParams();
 
   const handleChange = useCallback(
     (event: FormEvent<HTMLSelectElement>) => {
@@ -45,9 +40,6 @@ export function TransactionTypeSelect() {
       <EuiSelectWithWidth
         onChange={handleChange}
         options={options}
-        prepend={i18n.translate('xpack.apm.transactionTypeSelectLabel', {
-          defaultMessage: 'Type',
-        })}
         value={transactionType}
       />
     </>

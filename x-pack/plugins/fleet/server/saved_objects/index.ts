@@ -39,7 +39,11 @@ import {
   migrateAgentToV7120,
   migratePackagePolicyToV7120,
 } from './migrations/to_v7_12_0';
-import { migratePackagePolicyToV7130, migrateSettingsToV7130 } from './migrations/to_v7_13_0';
+import {
+  migratePackagePolicyToV7130,
+  migrateSettingsToV7130,
+  migrateOutputToV7130,
+} from './migrations/to_v7_13_0';
 
 /*
  * Saved object types and mappings
@@ -177,7 +181,7 @@ const getSavedObjectTypes = (
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
-        preconfiguration_id: { type: 'keyword' },
+        is_preconfigured: { type: 'keyword' },
       },
     },
     migrations: {
@@ -223,11 +227,12 @@ const getSavedObjectTypes = (
         is_default: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
-        fleet_enroll_username: { type: 'binary' },
-        fleet_enroll_password: { type: 'binary' },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
       },
+    },
+    migrations: {
+      '7.13.0': migrateOutputToV7130,
     },
   },
   [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
@@ -366,7 +371,7 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        preconfiguration_id: { type: 'keyword' },
+        id: { type: 'keyword' },
       },
     },
   },
@@ -398,19 +403,6 @@ export function registerEncryptedSavedObjects(
       'updated_at',
       'expire_at',
       'active',
-    ]),
-  });
-  encryptedSavedObjects.registerType({
-    type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['fleet_enroll_username', 'fleet_enroll_password']),
-    attributesToExcludeFromAAD: new Set([
-      'name',
-      'type',
-      'is_default',
-      'hosts',
-      'ca_sha256',
-      'config',
-      'config_yaml',
     ]),
   });
   encryptedSavedObjects.registerType({

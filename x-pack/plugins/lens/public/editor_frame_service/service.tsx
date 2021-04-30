@@ -9,6 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import {
@@ -35,6 +36,7 @@ export interface EditorFrameSetupPlugins {
   embeddable?: EmbeddableSetup;
   expressions: ExpressionsSetup;
   charts: ChartsPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface EditorFrameStartPlugins {
@@ -101,6 +103,7 @@ export class EditorFrameService {
         documentToExpression: this.documentToExpression,
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
+        usageCollection: plugins.usageCollection,
       };
     };
 

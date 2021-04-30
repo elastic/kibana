@@ -34,7 +34,7 @@ export const FieldLabels: Record<string, string> = {
   'monitor.name': 'Monitor name',
   'monitor.type': 'Monitor Type',
   'url.port': 'Port',
-  'url.full': 'Url',
+  'url.full': 'URL',
   tags: 'Tags',
 
   // custom
