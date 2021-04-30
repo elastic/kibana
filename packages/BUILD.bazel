@@ -14,6 +14,7 @@ filegroup(
       "//packages/kbn-dev-utils:build",
       "//packages/kbn-expect:build",
       "//packages/kbn-logging:build",
+      "//packages/kbn-securitysolution-io-ts-utils:build",
       "//packages/kbn-std:build",
       "//packages/kbn-tinymath:build",
       "//packages/kbn-utility-types:build",
