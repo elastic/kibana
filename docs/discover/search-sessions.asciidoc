@@ -56,7 +56,7 @@ image::images/search-sessions-menu.png[Search Sessions management view with acti
 
 . Use the edit menu in *Search Sessions* to:
 * *Inspect* the queries and filters that makeup the session.
-* *Edit name* of a session.
+* *Edit the name* of a session.
 * *Extend* the expiration of a completed session.
 * *Delete* a session.
 
