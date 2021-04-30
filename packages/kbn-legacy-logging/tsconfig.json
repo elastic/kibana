@@ -6,6 +6,7 @@
     "stripInternal": false,
     "declaration": true,
     "declarationMap": true,
+    "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-legacy-logging/src",
     "types": ["jest", "node"]
