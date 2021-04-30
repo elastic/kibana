@@ -36,26 +36,8 @@ describe('<EditPolicy /> node allocation general behavior', () => {
     });
   };
 
-  beforeEach(async () => {
-    server.respondImmediately = true;
-    httpRequestsMockHelpers.setLoadPolicies([]);
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: { data: ['node1'] },
-      nodesByAttributes: { 'attribute:true': ['node1'] },
-      isUsingDeprecatedDataRoleConfig: true,
-    });
-    httpRequestsMockHelpers.setNodesDetails('attribute:true', [
-      { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
-    ]);
-
-    await setup();
-
-    const { component } = testBed;
-    component.update();
-  });
-
   describe('data allocation', () => {
-    beforeEach(async () => {
+    test('setting node_attr based allocation, but not selecting node attribute', async () => {
       httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_MIGRATE_OFF]);
       httpRequestsMockHelpers.setListNodes({
         nodesByRoles: {},
@@ -66,12 +48,9 @@ describe('<EditPolicy /> node allocation general behavior', () => {
 
       await setup();
 
-      const { component } = testBed;
+      const { component, actions } = testBed;
       component.update();
-    });
 
-    test('setting node_attr based allocation, but not selecting node attribute', async () => {
-      const { actions } = testBed;
       await actions.setDataAllocation('node_attrs');
       await actions.savePolicy();
       const latestRequest = server.requests[server.requests.length - 1];
