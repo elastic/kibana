@@ -102,8 +102,8 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
       condition: {
-        // Note the alternative UTF-8 dot character
-        test: "(datum['ml․outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+        // Note the escaped dot character
+        test: "(datum['ml\\.outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
         value: COLOR_OUTLIER,
       },
       value: euiThemeLight.euiColorMediumShade,
@@ -112,8 +112,8 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
       {
-        // Note the alternative UTF-8 dot character
-        field: 'ml․outlier_score',
+        // Note the escaped dot character
+        field: 'ml\\.outlier_score',
         format: '.3f',
         type: 'quantitative',
       },
