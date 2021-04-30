@@ -17,6 +17,7 @@ const BucketsAggs = rt.array(
 
 export const GetCaseIdsByAlertIdAggsRt = rt.type({
   references: rt.type({
+    doc_count: rt.number,
     caseIds: rt.type({
       buckets: BucketsAggs,
     }),

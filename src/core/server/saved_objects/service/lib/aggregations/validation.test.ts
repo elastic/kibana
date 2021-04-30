@@ -468,4 +468,27 @@ describe('validateAndConvertAggregations', () => {
       `"[someAgg.aggs.nested.max.script]: definition for this key is missing"`
     );
   });
+
+  it('throws an error when trying to access a property via {type}.{type}.{attr}', () => {
+    expect(() => {
+      validateAndConvertAggregations(
+        ['alert'],
+        {
+          aggName: {
+            cardinality: {
+              field: 'alert.alert.attributes.actions.group',
+            },
+            aggs: {
+              aggName: {
+                max: { field: 'alert.alert.attributes.actions.group' },
+              },
+            },
+          },
+        },
+        mockMappings
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"[aggName.cardinality.field] Invalid attribute path: alert.alert.attributes.actions.group"'
+    );
+  });
 });

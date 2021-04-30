@@ -29,13 +29,13 @@ export function initGetCaseIdsByAlertIdApi({ caseService, router, logger }: Rout
           throw Boom.badRequest('The `alertId` is not valid');
         }
         const client = context.core.savedObjects.client;
-        const comments = await caseService.getCaseIdsByAlertId({
+        const caseIds = await caseService.getCaseIdsByAlertId({
           client,
           alertId,
         });
 
         return response.ok({
-          body: comments.aggregations?.references.caseIds.buckets.map((b) => b.key),
+          body: caseIds,
         });
       } catch (error) {
         logger.error(

@@ -227,9 +227,7 @@ export interface CaseServiceSetup {
   getSubCases(args: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
-  getCaseIdsByAlertId(
-    args: GetCaseIdsByAlertIdArgs
-  ): Promise<SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>>;
+  getCaseIdsByAlertId(args: GetCaseIdsByAlertIdArgs): Promise<string[]>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
@@ -909,36 +907,47 @@ export class CaseService implements CaseServiceSetup {
     }
   }
 
-  public async getCaseIdsByAlertId({
-    client,
-    alertId,
-  }: GetCaseIdsByAlertIdArgs): Promise<
-    SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
-  > {
-    let caseIdsAggs: Record<string, AggregationContainer> = {};
-    caseIdsAggs = {
-      references: {
-        nested: {
-          path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
-        },
-        aggregations: {
-          caseIds: {
-            terms: {
-              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
-            },
+  private buildCaseIdsAggs = (size: number = 1000): Record<string, AggregationContainer> => ({
+    references: {
+      nested: {
+        path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+      },
+      aggregations: {
+        caseIds: {
+          terms: {
+            field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+            size,
           },
         },
       },
-    };
-    return client.find({
+    },
+  });
+
+  public async getCaseIdsByAlertId({
+    client,
+    alertId,
+  }: GetCaseIdsByAlertIdArgs): Promise<string[]> {
+    let response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
       type: CASE_COMMENT_SAVED_OBJECT,
       fields: [],
       page: 1,
       perPage: 1,
       sortField: defaultSortField,
-      aggs: caseIdsAggs,
+      aggs: this.buildCaseIdsAggs(),
       filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
     });
+    if (response.aggregations?.references.doc_count ?? 1000 > 1000) {
+      response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        fields: [],
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: this.buildCaseIdsAggs(response.aggregations?.references.doc_count ?? 1000),
+        filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
+      });
+    }
+    return response.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
   }
 
   /**

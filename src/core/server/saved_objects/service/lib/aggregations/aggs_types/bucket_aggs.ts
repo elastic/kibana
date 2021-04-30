@@ -32,7 +32,6 @@ import { schema as s, ObjectType } from '@kbn/config-schema';
  * - ip_range
  * - missing
  * - multi_terms
- * - nested
  * - parent
  * - range
  * - rare_terms
