@@ -47,6 +47,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       });
     }
 
+    async docTableFieldCount(expectedCount: number) {
+      log.debug(`DashboardExpect.docTableFieldCount(${expectedCount})`);
+      await retry.try(async () => {
+        const docTableCells = await testSubjects.findAll('docTableField', findTimeout);
+        expect(docTableCells.length).to.be(expectedCount);
+      });
+    }
+
     async fieldSuggestions(expectedFields: string[]) {
       log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
       const fields = await filterBar.getFilterEditorFields();
@@ -200,14 +208,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       await this.textWithinTestSubjectsExists(values, 'markdownBody');
     }
 
-    async savedSearchRowCount(expectedCount: number) {
-      log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
+    async savedSearchRowCount(expectedMinCount: number) {
+      log.debug(`DashboardExpect.savedSearchRowCount(${expectedMinCount})`);
       await retry.try(async () => {
         const savedSearchRows = await testSubjects.findAll(
           'docTableExpandToggleColumn',
           findTimeout
         );
-        expect(savedSearchRows.length).to.be(expectedCount);
+        expect(savedSearchRows.length).to.be.above(expectedMinCount);
       });
     }
 

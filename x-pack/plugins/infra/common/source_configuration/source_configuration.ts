@@ -160,12 +160,6 @@ export const SavedSourceConfigurationRuntimeType = rt.intersection([
 export interface InfraSavedSourceConfiguration
   extends rt.TypeOf<typeof SavedSourceConfigurationRuntimeType> {}
 
-export const pickSavedSourceConfiguration = (
-  value: InfraSourceConfiguration
-): InfraSavedSourceConfiguration => {
-  return value;
-};
-
 /**
  * Static source configuration, the result of merging values from the config file and
  * hardcoded defaults.

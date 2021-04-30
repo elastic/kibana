@@ -6,7 +6,7 @@
  */
 
 import { createUpdateSuccessToaster } from './helpers';
-import { Case } from '../../containers/types';
+import { Case } from '../../../../../cases/common';
 
 const theCase = {
   id: 'case-id',

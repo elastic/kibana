@@ -539,7 +539,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Security Alerts attached to the case: 3',
+          comment: 'Elastic Alerts attached to the case: 3',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -569,7 +569,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Security Alerts attached to the case: 4',
+          comment: 'Elastic Alerts attached to the case: 4',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);

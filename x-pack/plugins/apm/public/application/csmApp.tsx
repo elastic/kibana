@@ -33,6 +33,7 @@ import {
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
+import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 
 const CsmMainContainer = euiStyled.div`
   padding: ${px(units.plus)};
@@ -103,6 +104,7 @@ export function CsmAppRoot({
             <Router history={history}>
               <UrlParamsProvider>
                 <CsmApp />
+                <UXActionMenu appMountParameters={appMountParameters} />
               </UrlParamsProvider>
             </Router>
           </i18nCore.Context>

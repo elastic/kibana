@@ -13,6 +13,13 @@ import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
 
+export type MigrationLogLevel = 'error' | 'info';
+
+export interface MigrationLog {
+  level: MigrationLogLevel;
+  message: string;
+}
+
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
@@ -70,7 +77,7 @@ export interface BaseState extends ControlState {
    * In this case, you should set a smaller batchSize value and restart the migration process again.
    */
   readonly batchSize: number;
-  readonly logs: Array<{ level: 'error' | 'info'; message: string }>;
+  readonly logs: MigrationLog[];
   /**
    * The current alias e.g. `.kibana` which always points to the latest
    * version index
@@ -132,7 +139,7 @@ export type FatalState = BaseState & {
 export interface WaitForYellowSourceState extends BaseState {
   /** Wait for the source index to be yellow before requesting it. */
   readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
-  readonly sourceIndex: string;
+  readonly sourceIndex: Option.Some<string>;
   readonly sourceIndexMappings: IndexMapping;
 }
 
@@ -158,21 +165,29 @@ export type CreateReindexTempState = PostInitState & {
   readonly sourceIndex: Option.Some<string>;
 };
 
-export type ReindexSourceToTempState = PostInitState & {
-  /** Reindex documents from the source index into the target index */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP';
+export interface ReindexSourceToTempOpenPit extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT';
   readonly sourceIndex: Option.Some<string>;
-};
+}
 
-export type ReindexSourceToTempWaitForTaskState = PostInitState & {
-  /**
-   * Wait until reindexing documents from the source index into the target
-   * index has completed
-   */
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK';
-  readonly sourceIndex: Option.Some<string>;
-  readonly reindexSourceToTargetTaskId: string;
-};
+export interface ReindexSourceToTempRead extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+}
+
+export interface ReindexSourceToTempClosePit extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT';
+  readonly sourceIndexPitId: string;
+}
+
+export interface ReindexSourceToTempIndex extends PostInitState {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX';
+  readonly outdatedDocuments: SavedObjectsRawDoc[];
+  readonly sourceIndexPitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+}
 
 export type SetTempWriteBlock = PostInitState & {
   /**
@@ -302,8 +317,10 @@ export type State =
   | SetSourceWriteBlockState
   | CreateNewTargetState
   | CreateReindexTempState
-  | ReindexSourceToTempState
-  | ReindexSourceToTempWaitForTaskState
+  | ReindexSourceToTempOpenPit
+  | ReindexSourceToTempRead
+  | ReindexSourceToTempClosePit
+  | ReindexSourceToTempIndex
   | SetTempWriteBlock
   | CloneTempToSource
   | UpdateTargetMappingsState
@@ -324,3 +341,5 @@ export type AllControlStates = State['controlState'];
  * 'FATAL' and 'DONE').
  */
 export type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
+
+export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
