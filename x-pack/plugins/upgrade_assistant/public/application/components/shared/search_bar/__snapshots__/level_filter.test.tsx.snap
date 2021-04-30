@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FilterBar renders 1`] = `
+exports[`DeprecationLevelFilter renders 1`] = `
 <EuiFlexItem
   grow={false}
 >
@@ -9,19 +9,10 @@ exports[`FilterBar renders 1`] = `
       data-test-subj="criticalLevelFilter"
       hasActiveFilters={false}
       key="critical"
-      numFilters={2}
+      numFilters={1}
       onClick={[Function]}
-      withNext={true}
     >
       critical
-    </EuiFilterButton>
-    <EuiFilterButton
-      data-test-subj="warningLevelFilter"
-      hasActiveFilters={false}
-      key="warning"
-      onClick={[Function]}
-    >
-      warning
     </EuiFilterButton>
   </EuiFilterGroup>
 </EuiFlexItem>
