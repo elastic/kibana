@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { SchemaType } from './types';
+
+export const fieldTypeSelectOptions = Object.values(SchemaType).map((type) => ({
+  value: type,
+  text: type,
+}));
+
 export const FIELD_NAME_CORRECT_NOTE = i18n.translate(
   'xpack.enterpriseSearch.schema.addFieldModal.fieldNameNote.correct',
   {
