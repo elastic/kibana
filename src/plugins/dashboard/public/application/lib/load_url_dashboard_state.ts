@@ -48,7 +48,7 @@ export const loadUrlDashboardState = ({
       });
     }
     return nextUrl;
-  });
+  }, true);
 
   return {
     ..._.omit(rawAppStateInUrl, 'panels'),

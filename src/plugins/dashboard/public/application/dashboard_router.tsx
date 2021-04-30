@@ -96,6 +96,7 @@ export async function mountApp({
     onAppLeave,
     savedObjects,
     urlForwarding,
+    visualizations,
     usageCollection,
     core: coreStart,
     data: dataStart,
@@ -110,10 +111,6 @@ export async function mountApp({
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
-    dashboardSessionStorage: new DashboardSessionStorage(
-      core.notifications.toasts,
-      activeSpaceId || 'default'
-    ),
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
@@ -128,7 +125,10 @@ export async function mountApp({
       visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
       storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
     },
-    visualizations,
+    dashboardSessionStorage: new DashboardSessionStorage(
+      core.notifications.toasts,
+      activeSpaceId || 'default'
+    ),
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

@@ -11,7 +11,6 @@ import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
 import { DashboardContainer } from '../embeddable';
-import { migrateLegacyQuery } from './migrate_legacy_query';
 import { esFilters, Filter, Query } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';
 import { setFullScreenMode, setPanels, setQuery } from '../state';
@@ -71,7 +70,7 @@ export const syncDashboardContainerInput = (
         tap((trigger) => {
           forceRefresh = forceRefresh || (trigger?.force ?? false);
         }),
-        debounceTime(50)
+        debounceTime(DashboardConstants.CHANGE_APPLY_DEBOUNCE)
       )
       .subscribe(() => {
         applyStateChangesToContainer({ ...syncDashboardContainerProps, force: forceRefresh });
@@ -104,7 +103,7 @@ export const applyContainerChangesToState = ({
   ) {
     // Add filters modifies the object passed to it, hence the clone deep.
     filterManager.addFilters(_.cloneDeep(input.filters));
-    applyFilters(migrateLegacyQuery(latestState.query), input.filters);
+    applyFilters(latestState.query, input.filters);
   }
 
   if (!_.isEqual(input.panels, latestState.panels)) {

@@ -14,6 +14,7 @@ import { DashboardConstants, DashboardSavedObject } from '../..';
 import { DashboardBuildContext, DashboardState } from '../../types';
 import { savedObjectToDashboardState } from './convert_dashboard_state';
 import { ViewMode } from '../../services/embeddable';
+import { cleanFiltersForSerialize } from './filter_utils';
 
 interface LoadSavedDashboardStateReturn {
   savedDashboardState: DashboardState;
@@ -103,6 +104,8 @@ export const loadSavedDashboardState = async ({
 
   const isViewMode = hideWriteControls || Boolean(savedDashboard.id);
   savedDashboardState.viewMode = isViewMode ? ViewMode.VIEW : ViewMode.EDIT;
+
+  savedDashboardState.filters = cleanFiltersForSerialize(savedDashboardState.filters);
 
   return { savedDashboardState, savedDashboard };
 };

@@ -13,10 +13,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 
 import { DashboardConstants } from '../..';
+import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { getNewDashboardTitle } from '../../dashboard_strings';
+import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../services/kibana_utils';
 import {
   DashboardEmbedSettings,
   DashboardBuildContext,
@@ -37,20 +38,21 @@ import {
   diffDashboardState,
   areTimeRangesEqual,
 } from '../lib';
-import { ViewMode } from '../../services/embeddable';
 
-interface UseDashboardStateProps {
+export interface UseDashboardStateProps {
   history: History;
   savedDashboardId?: string;
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export const useDashboardAppState = ({
   history,
-  savedDashboardId,
   redirectTo,
   embedSettings,
+  savedDashboardId,
+  kbnUrlStateStorage,
 }: UseDashboardStateProps) => {
   const services = useKibana<DashboardAppServices>().services;
   const dispatchDashboardStateChange = useDashboardDispatch();
@@ -66,18 +68,15 @@ export const useDashboardAppState = ({
 
   /**
    * This useEffect triggers when the dashboard ID changes, and is in charge of loading the saved dashboard,
-   * fetching the initial state from the Saved Object, Session storage, and URL, building the Dashboard Container
-   * embeddable, and setting up syncing between the Query Service, the Redux State, and the Dashboard Container.
+   * fetching the initial state, building the Dashboard Container embeddable, and setting up all state syncing.
    */
   useEffect(() => {
     /**
      * Unpack services inside UseEffect to keep deps array small. Services do not change during runtime.
      */
     const {
-      core,
       data,
       chrome,
-      uiSettings,
       embeddable,
       initializerContext,
       dashboardCapabilities,
@@ -85,7 +84,6 @@ export const useDashboardAppState = ({
     } = services;
 
     const { docTitle } = chrome;
-    const { notifications } = core;
     const { getStateTransfer } = embeddable;
     const timefilter = data.query.timefilter.timefilter;
     const { version: kibanaVersion } = initializerContext.env.packageInfo;
@@ -98,17 +96,13 @@ export const useDashboardAppState = ({
       services,
       kibanaVersion,
       savedDashboardId,
+      kbnUrlStateStorage,
       dispatchDashboardStateChange,
       $checkForUnsavedChanges: new Subject(),
       isEmbeddedExternally: Boolean(embedSettings),
       $onDashboardStateChange: dashboardAppState.$onDashboardStateChange,
       $triggerDashboardRefresh: dashboardAppState.$triggerDashboardRefresh,
       getLatestDashboardState: () => dashboardAppState.$onDashboardStateChange.value,
-      kbnUrlStateStorage: createKbnUrlStateStorage({
-        history,
-        useHash: uiSettings.get('state:storeInSessionStorage'),
-        ...withNotifyOnErrors(notifications.toasts),
-      }),
     };
 
     let canceled = false;
@@ -263,6 +257,7 @@ export const useDashboardAppState = ({
     dashboardAppState.$onDashboardStateChange,
     dispatchDashboardStateChange,
     $onLastSavedStateChange,
+    kbnUrlStateStorage,
     savedDashboardId,
     embedSettings,
     redirectTo,

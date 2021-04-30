@@ -7,7 +7,7 @@
  */
 
 import { History } from 'history';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
@@ -20,6 +20,7 @@ import {
 import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -33,7 +34,24 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { data, embeddable, onAppLeave, chrome } = useKibana<DashboardAppServices>().services;
+  const {
+    data,
+    core,
+    chrome,
+    embeddable,
+    onAppLeave,
+    uiSettings,
+  } = useKibana<DashboardAppServices>().services;
+
+  const kbnUrlStateStorage = useMemo(
+    () =>
+      createKbnUrlStateStorage({
+        history,
+        useHash: uiSettings.get('state:storeInSessionStorage'),
+        ...withNotifyOnErrors(core.notifications.toasts),
+      }),
+    [core.notifications.toasts, history, uiSettings]
+  );
 
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
@@ -41,6 +59,7 @@ export function DashboardApp({
     redirectTo,
     embedSettings,
     savedDashboardId,
+    kbnUrlStateStorage,
   });
 
   // Clear search session when leaving dashboard route

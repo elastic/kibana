@@ -18,6 +18,7 @@ export const DashboardConstants = {
   DASHBOARD_ID: 'dashboard',
   SEARCH_SESSION_ID: 'searchSessionId',
   CHANGE_CHECK_DEBOUNCE: 100,
+  CHANGE_APPLY_DEBOUNCE: 50,
 };
 
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {

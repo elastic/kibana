@@ -68,7 +68,7 @@ export const syncDashboardFilterState = ({
     {
       get: () => intermediateFilterState,
       set: ({ filters, query }) => {
-        intermediateFilterState.filters = cleanFiltersForSerialize(filters) || [];
+        intermediateFilterState.filters = cleanFiltersForSerialize(filters ?? []) || [];
         intermediateFilterState.query = query || queryString.getDefaultQuery();
         dispatchDashboardStateChange(setFiltersAndQuery(intermediateFilterState));
       },

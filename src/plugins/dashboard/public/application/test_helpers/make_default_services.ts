@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import {
-  IUiSettingsClient,
-  PluginInitializerContext,
-  ScopedHistory,
-} from '../../../../../core/public';
-
 import { DashboardSessionStorage } from '../lib';
 import { dataPluginMock } from '../../../../data/public/mocks';
+import { getSavedDashboardMock } from './get_saved_dashboard_mock';
 import { UrlForwardingStart } from '../../../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../services/navigation';
 import { DashboardAppServices, DashboardCapabilities } from '../../types';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import { IndexPatternsContract, SavedQueryService } from '../../services/data';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
+import { PluginInitializerContext, ScopedHistory } from '../../../../../core/public';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
+import {
+  chromeServiceMock,
+  coreMock,
+  uiSettingsServiceMock,
+} from '../../../../../core/public/mocks';
 
 export function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
@@ -44,10 +44,16 @@ export function makeDefaultServices(): DashboardAppServices {
       hits,
     });
   };
+  savedDashboards.get = jest
+    .fn()
+    .mockImplementation((id?: string) => Promise.resolve(getSavedDashboardMock({ id })));
+
   const dashboardSessionStorage = ({
     getDashboardIdsWithUnsavedChanges: jest
       .fn()
       .mockResolvedValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
+    getState: jest.fn().mockReturnValue(undefined),
+    setState: jest.fn(),
   } as unknown) as DashboardSessionStorage;
   dashboardSessionStorage.clearState = jest.fn();
 
@@ -61,12 +67,15 @@ export function makeDefaultServices(): DashboardAppServices {
     mapsCapabilities: { save: true },
     visualizeCapabilities: { save: true },
   };
+  const initializerContext = {
+    env: { packageInfo: { version: '8.0.0' } },
+  } as PluginInitializerContext;
 
   return {
     visualizations: visualizationsPluginMock.createStartContract(),
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
-    initializerContext: {} as PluginInitializerContext,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     navigation: {} as NavigationPublicPluginStart,
     savedObjectsClient: core.savedObjects.client,
@@ -77,11 +86,11 @@ export function makeDefaultServices(): DashboardAppServices {
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
     urlForwarding: {} as UrlForwardingStart,
-    uiSettings: {} as IUiSettingsClient,
     allowByValueEmbeddables: true,
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
     dashboardSessionStorage,
+    initializerContext,
     savedDashboards,
     core,
   };
