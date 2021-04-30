@@ -10,8 +10,8 @@
 
 # Executive Summary
 
-Summarize this RFC so those unfamiliar with the project and code, and without a
-lot of time, can quickly understand what the problem is, why it is important,
+Summarize this RFC so those unfamiliar with the project and code can quickly understand
+what the problem is, why it is important,
 and the proposed solution. Below are some suggested sections for the Executive
 Summary. Tweak as you desire and try to keep it succinct.
 
