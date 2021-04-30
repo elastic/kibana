@@ -76,6 +76,11 @@ see <<action-settings,Action settings>>.
 
 The following query can help you identify rules that are taking a long time to execute and might impact the overall health of your deployment.
 
+[IMPORTANT]
+==============================================
+By default, only user with a `superuser` role can query the {kib} event log because it is a system index. To enable additional users to execute this query, assign `read` privileges to the `.kibana-event-log*` index.
+==============================================
+
 Query for a list of rule ids, bucketed by their execution times:
 
 [source,console]
