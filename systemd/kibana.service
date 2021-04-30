@@ -5,10 +5,8 @@
 [Unit]
 Description=Kibana 7
 BindsTo=probemanager.service
-Wants=elasticsearch.service
-After=elasticsearch.service
-Wants=cassandra.service
-After=cassandra.service
+Wants=licenseserver.service
+After=licenseserver.service
 Wants=probemanager.service
 Before=probemanager.service
 Wants=probetransmogrifier.service
@@ -49,5 +47,5 @@ Restart=on-failure
 RestartSec=10
 
 [Install]
-WantedBy=elasticsearch.service
+WantedBy=netmon.service
 
