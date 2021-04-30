@@ -35,7 +35,7 @@ import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
-import { HelpPopover, HelpPopoverButton } from '../help_popover';
+import { HelpPopover, HelpPopoverButton } from '../components/help_popover/help_popover';
 
 const SwimLaneHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiIcon,
   EuiLink,
@@ -17,19 +17,11 @@ import {
 } from '@elastic/eui';
 import './help_popover.scss';
 
-export const HelpPopoverButton = ({
-  children,
-  onClick,
-}: {
-  children: string;
-  onClick: EuiLinkButtonProps['onClick'];
-}) => {
+export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['onClick'] }) => {
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
         <EuiIcon className="mlHelpPopover__buttonIcon" size="s" type="help" />
-
-        {children}
       </EuiLink>
     </EuiText>
   );
