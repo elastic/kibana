@@ -475,7 +475,9 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
-|Metrics entities where you can add transforms for metrics and entities.
+|This is the metrics and entities plugin where you add can add transforms for your project
+and group those transforms into modules. You can also re-use existing transforms in your
+modules as well.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
