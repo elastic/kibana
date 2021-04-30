@@ -20,10 +20,10 @@ import { SEARCH_UI_TITLE } from './constants';
 import { SearchUILogic } from './search_ui_logic';
 
 export const SearchUI: React.FC = () => {
-  const { initializeData } = useActions(SearchUILogic);
+  const { loadFieldData } = useActions(SearchUILogic);
 
   useEffect(() => {
-    initializeData();
+    loadFieldData();
   }, []);
 
   return (

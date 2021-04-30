@@ -17,13 +17,13 @@ interface InitialFieldValues {
   validFacetFields: string[];
 }
 interface SearchUIActions {
-  initializeData(): void;
-  dataInitialized(initialFieldValues: InitialFieldValues): InitialFieldValues;
-  titleFieldChanged(titleField: string): { titleField: string };
-  URLFieldChanged(urlField: string): { urlField: string };
-  facetFieldsChanged(facetFields: string[]): { facetFields: string[] };
-  sortFieldsChanged(sortFields: string[]): { sortFields: string[] };
-  activeFieldChanged(activeField: string): { activeField: string };
+  loadFieldData(): void;
+  onFieldDataLoaded(initialFieldValues: InitialFieldValues): InitialFieldValues;
+  onActiveFieldChange(activeField: string): { activeField: string };
+  onFacetFieldsChange(facetFields: string[]): { facetFields: string[] };
+  onSortFieldsChange(sortFields: string[]): { sortFields: string[] };
+  onTitleFieldChange(titleField: string): { titleField: string };
+  onURLFieldChange(urlField: string): { urlField: string };
 }
 
 interface SearchUIValues {
@@ -41,32 +41,32 @@ interface SearchUIValues {
 export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>({
   path: ['enterprise_search', 'app_search', 'search_ui_logic'],
   actions: () => ({
-    initializeData: () => true,
-    dataInitialized: (initialFieldValues) => initialFieldValues,
-    titleFieldChanged: (titleField) => ({ titleField }),
-    URLFieldChanged: (urlField) => ({ urlField }),
-    facetFieldsChanged: (facetFields) => ({ facetFields }),
-    sortFieldsChanged: (sortFields) => ({ sortFields }),
-    activeFieldChanged: (activeField) => ({ activeField }),
+    loadFieldData: () => true,
+    onFieldDataLoaded: (initialFieldValues) => initialFieldValues,
+    onActiveFieldChange: (activeField) => ({ activeField }),
+    onFacetFieldsChange: (facetFields) => ({ facetFields }),
+    onSortFieldsChange: (sortFields) => ({ sortFields }),
+    onTitleFieldChange: (titleField) => ({ titleField }),
+    onURLFieldChange: (urlField) => ({ urlField }),
   }),
   reducers: () => ({
     dataLoading: [
       true,
       {
-        dataInitialized: () => false,
+        onFieldDataLoaded: () => false,
       },
     ],
-    validFields: [[], { dataInitialized: (_, { validFields }) => validFields }],
-    validSortFields: [[], { dataInitialized: (_, { validSortFields }) => validSortFields }],
-    validFacetFields: [[], { dataInitialized: (_, { validFacetFields }) => validFacetFields }],
-    titleField: ['', { titleFieldChanged: (_, { titleField }) => titleField }],
-    urlField: ['', { URLFieldChanged: (_, { urlField }) => urlField }],
-    facetFields: [[], { facetFieldsChanged: (_, { facetFields }) => facetFields }],
-    sortFields: [[], { sortFieldsChanged: (_, { sortFields }) => sortFields }],
-    activeField: ['', { activeFieldChanged: (_, { activeField }) => activeField }],
+    validFields: [[], { onFieldDataLoaded: (_, { validFields }) => validFields }],
+    validSortFields: [[], { onFieldDataLoaded: (_, { validSortFields }) => validSortFields }],
+    validFacetFields: [[], { onFieldDataLoaded: (_, { validFacetFields }) => validFacetFields }],
+    titleField: ['', { onTitleFieldChange: (_, { titleField }) => titleField }],
+    urlField: ['', { onURLFieldChange: (_, { urlField }) => urlField }],
+    facetFields: [[], { onFacetFieldsChange: (_, { facetFields }) => facetFields }],
+    sortFields: [[], { onSortFieldsChange: (_, { sortFields }) => sortFields }],
+    activeField: ['', { onActiveFieldChange: (_, { activeField }) => activeField }],
   }),
   listeners: ({ actions }) => ({
-    initializeData: async () => {
+    loadFieldData: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
@@ -75,7 +75,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
       try {
         const initialFieldValues = await http.get(url);
 
-        actions.dataInitialized(initialFieldValues);
+        actions.onFieldDataLoaded(initialFieldValues);
       } catch (e) {
         flashAPIErrors(e);
       }

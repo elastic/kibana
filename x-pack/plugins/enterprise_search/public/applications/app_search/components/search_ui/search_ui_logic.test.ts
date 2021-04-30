@@ -41,7 +41,7 @@ describe('SearchUILogic', () => {
   });
 
   describe('actions', () => {
-    describe('dataInitialized', () => {
+    describe('onFieldDataLoaded', () => {
       it('sets initial field values fetched from API call and sets dataLoading to false', () => {
         mount({
           validFields: [],
@@ -49,7 +49,7 @@ describe('SearchUILogic', () => {
           validFacetFields: [],
         });
 
-        SearchUILogic.actions.dataInitialized({
+        SearchUILogic.actions.onFieldDataLoaded({
           validFields: ['foo'],
           validSortFields: ['bar'],
           validFacetFields: ['baz'],
@@ -65,10 +65,10 @@ describe('SearchUILogic', () => {
       });
     });
 
-    describe('titleFieldChanged', () => {
+    describe('onTitleFieldChange', () => {
       it('sets the titleField value', () => {
         mount({ titleField: '' });
-        SearchUILogic.actions.titleFieldChanged('foo');
+        SearchUILogic.actions.onTitleFieldChange('foo');
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           titleField: 'foo',
@@ -76,10 +76,10 @@ describe('SearchUILogic', () => {
       });
     });
 
-    describe('URLFieldChanged', () => {
+    describe('onURLFieldChange', () => {
       it('sets the urlField value', () => {
         mount({ urlField: '' });
-        SearchUILogic.actions.URLFieldChanged('foo');
+        SearchUILogic.actions.onURLFieldChange('foo');
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           urlField: 'foo',
@@ -87,10 +87,10 @@ describe('SearchUILogic', () => {
       });
     });
 
-    describe('facetFieldsChanged', () => {
+    describe('onFacetFieldsChange', () => {
       it('sets the facetFields value', () => {
         mount({ facetFields: [] });
-        SearchUILogic.actions.facetFieldsChanged(['foo']);
+        SearchUILogic.actions.onFacetFieldsChange(['foo']);
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           facetFields: ['foo'],
@@ -98,10 +98,10 @@ describe('SearchUILogic', () => {
       });
     });
 
-    describe('sortFieldsChanged', () => {
+    describe('onSortFieldsChange', () => {
       it('sets the sortFields value', () => {
         mount({ sortFields: [] });
-        SearchUILogic.actions.sortFieldsChanged(['foo']);
+        SearchUILogic.actions.onSortFieldsChange(['foo']);
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           sortFields: ['foo'],
@@ -109,10 +109,10 @@ describe('SearchUILogic', () => {
       });
     });
 
-    describe('activeFieldChanged', () => {
+    describe('onActiveFieldChange', () => {
       it('sets the activeField value', () => {
         mount({ activeField: '' });
-        SearchUILogic.actions.activeFieldChanged('foo');
+        SearchUILogic.actions.onActiveFieldChange('foo');
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           activeField: 'foo',
@@ -128,26 +128,26 @@ describe('SearchUILogic', () => {
       validFacetFields: ['test'],
     };
 
-    describe('initializeData', () => {
+    describe('loadFieldData', () => {
       it('should make an API call and set state based on the response', async () => {
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
         mount();
-        jest.spyOn(SearchUILogic.actions, 'dataInitialized');
+        jest.spyOn(SearchUILogic.actions, 'onFieldDataLoaded');
 
-        SearchUILogic.actions.initializeData();
+        SearchUILogic.actions.loadFieldData();
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/app_search/engines/engine1/search_ui/field_config'
         );
-        expect(SearchUILogic.actions.dataInitialized).toHaveBeenCalledWith(MOCK_RESPONSE);
+        expect(SearchUILogic.actions.onFieldDataLoaded).toHaveBeenCalledWith(MOCK_RESPONSE);
       });
 
       it('handles errors', async () => {
         http.get.mockReturnValueOnce(Promise.reject('error'));
         mount();
 
-        SearchUILogic.actions.initializeData();
+        SearchUILogic.actions.loadFieldData();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');

@@ -18,7 +18,7 @@ import { SearchUI } from './';
 
 describe('SearchUI', () => {
   const actions = {
-    initializeData: jest.fn(),
+    loadFieldData: jest.fn(),
   };
 
   beforeEach(() => {
@@ -33,6 +33,6 @@ describe('SearchUI', () => {
 
   it('initializes data on mount', () => {
     shallow(<SearchUI />);
-    expect(actions.initializeData).toHaveBeenCalledTimes(1);
+    expect(actions.loadFieldData).toHaveBeenCalledTimes(1);
   });
 });
