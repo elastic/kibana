@@ -72,9 +72,9 @@ see <<action-settings,Action settings>>.
 
 [float]
 [[rules-long-execution-time]]
-=== Identify long running rules
+=== Identify long-running rules
 
-The following query can help you identify rules that are taking a long time to execute and may be impacting the overall health of your deployment.
+The following query can help you identify rules that are taking a long time to execute and might impact the overall health of your deployment.
 
 Query for a list of rule ids, bucketed by their execution times:
 
@@ -231,6 +231,6 @@ This query returns the following:
 }
 --------------------------------------------------
 <1> Most rule execution durations fall within the first bucket (0 - 10 seconds).
-<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` has taken between 30 and 40 seconds to execute.
+<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 40 seconds to execute.
 
-We can use the <<get-rule-api,Get Rule API>> to retrieve additional information about rules that are taking a long time to execute.
+Use the <<get-rule-api,Get Rule API>> to retrieve additional information about rules that take a long time to execute.
