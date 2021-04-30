@@ -209,14 +209,22 @@ export const useIndexData = (
   };
 
   const fetchColumnChartsData = async function () {
+    const allIndexPatternFieldNames = indexPattern.fields.map((f) => f.name);
     const columnChartsData = await api.getHistogramsForFields(
       indexPattern.title,
       columns
         .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-        .map((cT) => ({
-          fieldName: cT.id,
-          type: getFieldType(cT.schema),
-        })),
+        .map((cT) => {
+          // If a column field name has a corresponding keyword field,
+          // fetch the keyword field instead to be able to do aggregations.
+          const fieldName = cT.id;
+          const fieldNameWithDotKeyword = `${fieldName}.keyword`;
+          const hasKeywordDuplicate = allIndexPatternFieldNames.includes(fieldNameWithDotKeyword);
+          return {
+            fieldName: hasKeywordDuplicate ? fieldNameWithDotKeyword : fieldName,
+            type: getFieldType(hasKeywordDuplicate ? undefined : cT.schema),
+          };
+        }),
       isDefaultQuery(query) ? matchAllQuery : query,
       combinedRuntimeMappings
     );
@@ -226,7 +234,17 @@ export const useIndexData = (
       return;
     }
 
-    setColumnCharts(columnChartsData);
+    setColumnCharts(
+      // revert field names with `.keyword` used to do aggregations to their original column name
+      columnChartsData.map((d) => {
+        const fieldName = d.id;
+        const isKeywordDuplicate =
+          fieldName.endsWith('.keyword') &&
+          allIndexPatternFieldNames.includes(fieldName.split('.').slice(0, -1).join('.'));
+        d.id = isKeywordDuplicate ? fieldName.slice(0, -8) : fieldName;
+        return d;
+      })
+    );
   };
 
   useEffect(() => {
