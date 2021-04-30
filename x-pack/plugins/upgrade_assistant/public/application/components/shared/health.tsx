@@ -11,8 +11,8 @@ import React, { FunctionComponent } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationInfo } from '../../../../../common/types';
-import { COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from '../constants';
+import { DeprecationInfo } from '../../../../common/types';
+import { COLOR_MAP, REVERSE_LEVEL_MAP } from '../constants';
 
 const LocalizedLevels: { [level: string]: string } = {
   warning: i18n.translate('xpack.upgradeAssistant.checkupTab.deprecations.warningLabel', {
@@ -33,7 +33,7 @@ export const LocalizedActions: { [level: string]: string } = {
 };
 
 interface DeprecationHealthProps {
-  deprecations: DeprecationInfo[];
+  deprecationLevels: number[];
   single?: boolean;
 }
 
@@ -54,23 +54,21 @@ const SingleHealth: FunctionComponent<{ level: DeprecationInfo['level']; label: 
  * deprecations in the list.
  */
 export const DeprecationHealth: FunctionComponent<DeprecationHealthProps> = ({
-  deprecations,
+  deprecationLevels,
   single = false,
 }) => {
-  if (deprecations.length === 0) {
+  if (deprecationLevels.length === 0) {
     return <span />;
   }
 
-  const levels = deprecations.map((d) => LEVEL_MAP[d.level]);
-
   if (single) {
-    const highest = Math.max(...levels);
+    const highest = Math.max(...deprecationLevels);
     const highestLevel = REVERSE_LEVEL_MAP[highest];
 
     return <SingleHealth level={highestLevel} label={LocalizedLevels[highestLevel]} />;
   }
 
-  const countByLevel = countBy(levels);
+  const countByLevel = countBy(deprecationLevels);
 
   return (
     <React.Fragment>
