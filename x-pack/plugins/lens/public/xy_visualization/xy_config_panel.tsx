@@ -8,7 +8,7 @@
 import './xy_config_panel.scss';
 import React, { useMemo, useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -36,7 +36,7 @@ import { AxisSettingsPopover } from './axis_settings_popover';
 import { getAxesConfiguration } from './axes_configuration';
 import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
-import { getSortedAccessors } from './to_expression';
+import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -186,6 +186,23 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
+  const onChangeEndzoneVisiblity = state?.layers.every(
+    (layer) =>
+      layer.xAccessor &&
+      getScaleType(
+        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        ScaleType.Linear
+      ) === 'time'
+  )
+    ? (checked: boolean): void => {
+        setState({
+          ...state,
+          hideEndzones: !checked,
+        });
+      }
+    : undefined;
+
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -277,6 +294,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+            endzonesVisible={!state?.hideEndzones}
+            setEndzoneVisibility={onChangeEndzoneVisiblity}
           />
           <TooltipWrapper
             tooltipContent={

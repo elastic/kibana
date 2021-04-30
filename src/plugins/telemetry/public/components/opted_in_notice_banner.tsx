@@ -17,7 +17,7 @@ import { HttpSetup } from '../../../../core/public';
 
 interface Props {
   http: HttpSetup;
-  onSeenBanner: () => any;
+  onSeenBanner: () => unknown;
 }
 
 export class OptedInNoticeBanner extends React.PureComponent<Props> {

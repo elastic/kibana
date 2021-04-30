@@ -445,7 +445,8 @@ export class AnalyticsManager {
             // Check meta data
             if (
               link.isWildcardIndexPattern === false &&
-              (link.meta === undefined || link.meta?.created_by === INDEX_META_DATA_CREATED_BY)
+              (link.meta === undefined ||
+                link.meta?.created_by.includes(INDEX_META_DATA_CREATED_BY))
             ) {
               rootIndexPattern = nextLinkId;
               complete = true;
