@@ -10,10 +10,11 @@ import moment from 'moment-timezone';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { camelCase, isArray, isObject } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
-import { convertToCamelCase } from '../../../cases/containers/utils';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
@@ -50,6 +51,27 @@ export interface AuthenticatedElasticUser {
   authenticationProvider: string;
 }
 
+export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
+  arrayOfSnakes.reduce((acc: unknown[], value) => {
+    if (isArray(value)) {
+      return [...acc, convertArrayToCamelCase(value)];
+    } else if (isObject(value)) {
+      return [...acc, convertToCamelCase(value)];
+    } else {
+      return [...acc, value];
+    }
+  }, []);
+export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
+  Object.entries(snakeCase).reduce((acc, [key, value]) => {
+    if (isArray(value)) {
+      set(acc, camelCase(key), convertArrayToCamelCase(value));
+    } else if (isObject(value)) {
+      set(acc, camelCase(key), convertToCamelCase(value));
+    } else {
+      set(acc, camelCase(key), value);
+    }
+    return acc;
+  }, {} as U);
 export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   const isMounted = useRef(false);
   const [user, setUser] = useState<AuthenticatedElasticUser | null>(null);
