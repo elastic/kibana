@@ -6,25 +6,49 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import Path from 'path';
 import { format } from 'url';
-import { get, toPath } from 'lodash';
+import del from 'del';
+// @ts-expect-error in js
 import { Cluster } from '@kbn/es';
+import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { ToolingLog } from '@kbn/dev-utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
-import { Client } from '@elastic/elasticsearch';
 
 import { KIBANA_ROOT } from '../';
-const path = require('path');
-const del = require('del');
 
-export function createLegacyEsTestCluster(options = {}) {
+interface TestClusterFactoryOptions {
+  port?: number;
+  password?: string;
+  license?: 'basic' | 'trial'; // | 'oss'
+  basePath?: string;
+  esFrom?: string;
+  /**
+   * Path to data archive snapshot to run Elasticsearch with.
+   * To prepare the the snapshot:
+   * - run Elasticsearch server
+   * - index necessary data
+   * - stop Elasticsearch server
+   * - go to Elasticsearch folder: cd .es/${ELASTICSEARCH_VERSION}
+   * - archive data folder: zip -r my_archive.zip data
+   * */
+  dataArchive?: string;
+  esArgs?: string[];
+  esEnvVars?: Record<string, any>;
+  clusterName?: string;
+  log: ToolingLog;
+  ssl?: boolean;
+}
+
+export function createTestEsCluster(options: TestClusterFactoryOptions) {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
     license = 'basic',
     log,
-    basePath = resolve(KIBANA_ROOT, '.es'),
+    basePath = Path.resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
     esArgs: customEsArgs = [],
@@ -46,8 +70,8 @@ export function createLegacyEsTestCluster(options = {}) {
 
   const config = {
     version: esTestConfig.getVersion(),
-    installPath: resolve(basePath, clusterName),
-    sourcePath: resolve(KIBANA_ROOT, '../elasticsearch'),
+    installPath: Path.resolve(basePath, clusterName),
+    sourcePath: Path.resolve(KIBANA_ROOT, '../elasticsearch'),
     password,
     license,
     basePath,
@@ -71,7 +95,7 @@ export function createLegacyEsTestCluster(options = {}) {
         installPath = (await cluster.installSource(config)).installPath;
       } else if (esFrom === 'snapshot') {
         installPath = (await cluster.installSnapshot(config)).installPath;
-      } else if (path.isAbsolute(esFrom)) {
+      } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
       } else {
         throw new Error(`unknown option esFrom "${esFrom}"`);
@@ -102,14 +126,10 @@ export function createLegacyEsTestCluster(options = {}) {
     /**
      * Returns an ES Client to the configured cluster
      */
-    getClient() {
+    getClient(): KibanaClient {
       return new Client({
         node: this.getUrl(),
       });
-    }
-
-    getCallCluster() {
-      return createCallCluster(this.getClient());
     }
 
     getUrl() {
@@ -119,23 +139,4 @@ export function createLegacyEsTestCluster(options = {}) {
       return format(parts);
     }
   })();
-}
-
-/**
- *  Create a callCluster function that properly executes methods on an
- *  elasticsearch-js client
- *
- *  @param  {elasticsearch.Client} esClient
- *  @return {Function}
- */
-function createCallCluster(esClient) {
-  return function callCluster(method, params) {
-    const path = toPath(method);
-    const contextPath = path.slice(0, -1);
-
-    const action = get(esClient, path);
-    const context = contextPath.length ? get(esClient, contextPath) : esClient;
-
-    return action.call(context, params);
-  };
 }
