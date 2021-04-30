@@ -53,7 +53,7 @@ function getStatsForFields(
   timeFieldName: string | undefined,
   earliestMs: number | undefined,
   latestMs: number | undefined,
-  interval: number,
+  interval: number | undefined,
   maxExamples: number,
   runtimeMappings: RuntimeMappings
 ) {

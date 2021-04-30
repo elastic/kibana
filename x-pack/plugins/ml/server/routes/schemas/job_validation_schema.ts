@@ -54,7 +54,10 @@ export const validateJobSchema = schema.object({
     })
   ),
   fields: schema.maybe(schema.any()),
-  job: schema.object(anomalyDetectionJobSchema),
+  job: schema.object({
+    ...anomalyDetectionJobSchema,
+    datafeed_config: datafeedConfigSchema,
+  }),
 });
 
 export const validateCardinalitySchema = schema.object({

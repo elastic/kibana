@@ -136,6 +136,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const body = request.body;
+        // @ts-expect-error event interface incorrect
         const resp = await newCalendar(mlClient, body);
 
         return response.ok({
@@ -172,6 +173,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       try {
         const { calendarId } = request.params;
         const body = request.body;
+        // @ts-expect-error event interface incorrect
         const resp = await updateCalendar(mlClient, calendarId, body);
 
         return response.ok({

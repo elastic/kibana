@@ -14,27 +14,27 @@ export const calendarSchema = schema.object({
   total_job_count: schema.maybe(schema.number()),
   events: schema.arrayOf(
     schema.object({
-      event_id: schema.string(),
-      calendar_id: schema.string(),
-      description: schema.string(),
-      start_time: schema.string(),
-      end_time: schema.string(),
+      event_id: schema.maybe(schema.string()),
+      calendar_id: schema.maybe(schema.string()),
+      description: schema.maybe(schema.string()),
+      start_time: schema.oneOf([schema.string(), schema.number()]),
+      end_time: schema.oneOf([schema.string(), schema.number()]),
     })
   ),
 });
 
 export const updateCalendarSchema = schema.object({
-  calendar_id: schema.string(),
+  calendarId: schema.string(),
   job_ids: schema.arrayOf(schema.string()),
   description: schema.maybe(schema.string()),
   total_job_count: schema.maybe(schema.number()),
   events: schema.arrayOf(
     schema.object({
-      event_id: schema.string(),
-      calendar_id: schema.string(),
-      description: schema.string(),
-      start_time: schema.string(),
-      end_time: schema.string(),
+      event_id: schema.maybe(schema.string()),
+      calendar_id: schema.maybe(schema.string()),
+      description: schema.maybe(schema.string()),
+      start_time: schema.oneOf([schema.string(), schema.number()]),
+      end_time: schema.oneOf([schema.string(), schema.number()]),
     })
   ),
 });
