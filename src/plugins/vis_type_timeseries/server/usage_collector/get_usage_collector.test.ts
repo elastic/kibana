@@ -9,14 +9,12 @@
 import { getStats } from './get_usage_collector';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
 
-const mockedSavedObjects = [
-  {
-    _id: 'visualization:timeseries-123',
-    _source: {
-      type: 'visualization',
-      visualization: {
+const mockedSavedObject = {
+  saved_objects: [
+    {
+      attributes: {
         visState: JSON.stringify({
           type: 'metrics',
           title: 'TSVB visualization 1',
@@ -26,12 +24,8 @@ const mockedSavedObjects = [
         }),
       },
     },
-  },
-  {
-    _id: 'visualization:timeseries-321',
-    _source: {
-      type: 'visualization',
-      visualization: {
+    {
+      attributes: {
         visState: JSON.stringify({
           type: 'metrics',
           title: 'TSVB visualization 2',
@@ -41,12 +35,8 @@ const mockedSavedObjects = [
         }),
       },
     },
-  },
-  {
-    _id: 'visualization:timeseries-456',
-    _source: {
-      type: 'visualization',
-      visualization: {
+    {
+      attributes: {
         visState: JSON.stringify({
           type: 'metrics',
           title: 'TSVB visualization 3',
@@ -56,8 +46,8 @@ const mockedSavedObjects = [
         }),
       },
     },
-  },
-];
+  ],
+} as SavedObjectsFindResponse;
 
 const mockedSavedObjectsByValue = [
   {
@@ -92,13 +82,20 @@ const mockedSavedObjectsByValue = [
   },
 ];
 
-const getMockCollectorFetchContext = (hits?: unknown[], savedObjectsByValue: unknown[] = []) => {
+const getMockCollectorFetchContext = (
+  savedObjects: SavedObjectsFindResponse,
+  savedObjectsByValue: unknown[] = []
+) => {
   const fetchParamsMock = createCollectorFetchContextMock();
 
   fetchParamsMock.soClient = ({
+    find: jest.fn().mockResolvedValue({
+      saved_objects: savedObjectsByValue,
+    }),
     createPointInTimeFinder: jest.fn().mockResolvedValue({
+      close: jest.fn(),
       find: function* asyncGenerator() {
-        yield savedObjectsByValue;
+        yield savedObjects;
       },
     }),
   } as unknown) as SavedObjectsClientContract;
@@ -107,24 +104,21 @@ const getMockCollectorFetchContext = (hits?: unknown[], savedObjectsByValue: unk
 
 describe('Timeseries visualization usage collector', () => {
   test('Returns undefined when no results found (undefined)', async () => {
-    const mockCollectorFetchContext = getMockCollectorFetchContext([], []);
+    const mockCollectorFetchContext = getMockCollectorFetchContext(
+      ({ saved_objects: [] } as unknown) as SavedObjectsFindResponse,
+      []
+    );
     const result = await getStats(mockCollectorFetchContext.soClient);
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no timeseries saved objects found', async () => {
-    const mockCollectorFetchContext = getMockCollectorFetchContext(
-      [
+    const mockCollectorFetchContext = getMockCollectorFetchContext({
+      saved_objects: [
         {
-          _id: 'visualization:myvis-123',
-          _source: {
-            type: 'visualization',
-            visualization: { visState: '{"type": "area"}' },
-          },
+          attributes: { visState: '{"type": "area"}' },
         },
-      ],
-      [
         {
           attributes: {
             panelsJSON: JSON.stringify({
@@ -137,8 +131,9 @@ describe('Timeseries visualization usage collector', () => {
             }),
           },
         },
-      ]
-    );
+      ],
+    } as SavedObjectsFindResponse);
+
     const result = await getStats(mockCollectorFetchContext.soClient);
 
     expect(result).toBeUndefined();
@@ -146,7 +141,7 @@ describe('Timeseries visualization usage collector', () => {
 
   test('Summarizes visualizations response data', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(
-      mockedSavedObjects,
+      mockedSavedObject,
       mockedSavedObjectsByValue
     );
     const result = await getStats(mockCollectorFetchContext.soClient);

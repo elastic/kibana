@@ -15,9 +15,6 @@ import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
 import { findByValueEmbeddables } from '../../../dashboard/server';
 import { SavedVisState } from '../../../visualizations/common';
 
-// elasticsearch index.max_result_window default value
-const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
-
 export interface TimeseriesUsage {
   timeseries_use_last_value_mode_total: number;
 }
@@ -28,7 +25,7 @@ const doTelemetryFoVisualizations = async (
 ) => {
   const finder = await soClient.createPointInTimeFinder({
     type: 'visualization',
-    perPage: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
+    perPage: 1000,
   });
 
   for await (const response of finder.find()) {
@@ -44,7 +41,7 @@ const doTelemetryFoVisualizations = async (
       }
     });
 
-    if (!response.saved_objects.length) {
+    if (!response.saved_objects.length || response.total === response.saved_objects.length) {
       await finder.close();
     }
   }
