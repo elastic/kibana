@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { SchemaAddFieldModal } from './schema_add_field_modal';
-export { SchemaFieldTypeSelect } from './field_type_select';
+export enum ActiveField {
+  Title,
+  Filter,
+  Sort,
+  Url,
+  None,
+}
