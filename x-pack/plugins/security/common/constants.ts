@@ -17,6 +17,12 @@ export const UNKNOWN_SPACE = '?';
 
 export const GLOBAL_RESOURCE = '*';
 export const APPLICATION_PREFIX = 'kibana-';
+
+/**
+ * Reserved application privileges are always assigned to this "wildcard" application.
+ * This allows them to be applied to any Kibana "tenant" (`kibana.index`). Since reserved privileges are always assigned to reserved (built-in) roles,
+ * it's not possible to know the tenant ahead of time.
+ */
 export const RESERVED_PRIVILEGES_APPLICATION_WILDCARD = 'kibana-*';
 
 export const AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER = 'auth_provider_hint';
