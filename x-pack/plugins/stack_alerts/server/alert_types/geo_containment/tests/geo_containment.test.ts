@@ -24,6 +24,29 @@ import {
 } from '../alert_type';
 import { SearchResponse } from 'elasticsearch';
 
+const alertInstanceFactory = (expectedContext: unknown[], testAlertActionArr: unknown[]) => (
+  instanceId: string
+) => {
+  const alertInstance = alertsMock.createAlertInstanceFactory<
+    GeoContainmentInstanceState,
+    GeoContainmentInstanceContext
+  >();
+  alertInstance.scheduleActions.mockImplementation(
+    (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
+      // @ts-ignore
+      const contextKeys = Object.keys(expectedContext[0].context);
+      const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
+      testAlertActionArr.push({
+        actionGroupId,
+        instanceId,
+        context: contextSubset,
+      });
+      return alertInstance;
+    }
+  );
+  return alertInstance;
+};
+
 describe('geo_containment', () => {
   describe('transformResults', () => {
     const dateField = '@timestamp';
@@ -228,26 +251,6 @@ describe('geo_containment', () => {
     ];
     const emptyShapesIdsNamesMap = {};
 
-    const alertInstanceFactory = (instanceId: string) => {
-      const alertInstance = alertsMock.createAlertInstanceFactory<
-        GeoContainmentInstanceState,
-        GeoContainmentInstanceContext
-      >();
-      alertInstance.scheduleActions.mockImplementation(
-        (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
-          const contextKeys = Object.keys(expectedContext[0].context);
-          const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
-          testAlertActionArr.push({
-            actionGroupId,
-            instanceId,
-            context: contextSubset,
-          });
-          return alertInstance;
-        }
-      );
-      return alertInstance;
-    };
-
     const currentDateTime = new Date();
 
     it('should use currently active entities if no older entity entries', () => {
@@ -255,7 +258,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMap,
-        alertInstanceFactory,
+        alertInstanceFactory(expectedContext, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -280,7 +283,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory,
+        alertInstanceFactory(expectedContext, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -319,7 +322,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithNonIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory,
+        alertInstanceFactory(expectedContext, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -342,7 +345,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory,
+        alertInstanceFactory(expectedContext, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -375,7 +378,7 @@ describe('geo_containment', () => {
       getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithThreeMore,
-        alertInstanceFactory,
+        alertInstanceFactory(expectedContext, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -412,7 +415,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory,
+        alertInstanceFactory(expectedContext, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -444,7 +447,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory,
+        alertInstanceFactory(expectedContext, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
