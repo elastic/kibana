@@ -118,8 +118,10 @@ describe('the InfraSources lib', () => {
       const request: any = createRequestContext({
         id: 'TEST_ID',
         version: 'foo',
+        type: infraSourceConfigurationSavedObjectName,
         updated_at: '2000-01-01T00:00:00.000Z',
         attributes: {},
+        references: [],
       });
 
       expect(
