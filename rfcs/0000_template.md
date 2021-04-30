@@ -51,15 +51,12 @@ implementation to implement. This should get into specifics and corner-cases,
 and include examples of how the feature is used. Any new terminology should be
 defined here.
 
-Below are a couple of suggested sections that you can tweak as you desire.
+Include architectural diagrams if you see fit, a picture is worth a thousand
+words.
 
 ## Terminology
 
 A glossary of new terms can be very helpful.
-
-## Architectural diagrams.
-
-A picture is worth a thousand words.
 
 
 # Risks
