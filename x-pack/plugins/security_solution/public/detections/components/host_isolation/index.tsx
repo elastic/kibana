@@ -59,7 +59,12 @@ export const HostIsolationPanel = React.memo(
       return findAlertRule ? findAlertRule[0] : '';
     }, [details]);
 
-    const { loading, isolateHost } = useHostIsolation({ agentId, comment });
+    const alertId = useMemo(() => {
+      const findAlertId = find({ category: '_id', field: '_id' }, details)?.values;
+      return findAlertId ? findAlertId[0] : '';
+    }, [details]);
+
+    const { loading, isolateHost } = useHostIsolation({ agentId, comment, alertId });
 
     const confirmHostIsolation = useCallback(async () => {
       const hostIsolated = await isolateHost();
