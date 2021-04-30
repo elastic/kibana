@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { SEARCH_UI_TITLE } from './constants';
-export { SearchUI } from './search_ui';
-export { SearchUILogic } from './search_ui_logic';
+export enum ActiveField {
+  Title,
+  Filter,
+  Sort,
+  Url,
+  None,
+}
