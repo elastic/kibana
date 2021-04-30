@@ -11,6 +11,8 @@ import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { ActiveField } from './types';
+
 import { SearchUILogic } from './';
 
 describe('SearchUILogic', () => {
@@ -27,7 +29,7 @@ describe('SearchUILogic', () => {
     urlField: '',
     facetFields: [],
     sortFields: [],
-    activeField: '',
+    activeField: ActiveField.None,
   };
 
   beforeEach(() => {
@@ -112,10 +114,10 @@ describe('SearchUILogic', () => {
     describe('onActiveFieldChange', () => {
       it('sets the activeField value', () => {
         mount({ activeField: '' });
-        SearchUILogic.actions.onActiveFieldChange('foo');
+        SearchUILogic.actions.onActiveFieldChange(ActiveField.Sort);
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
-          activeField: 'foo',
+          activeField: ActiveField.Sort,
         });
       });
     });

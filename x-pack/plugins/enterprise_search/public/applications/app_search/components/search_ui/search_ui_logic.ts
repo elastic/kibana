@@ -11,6 +11,8 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 
+import { ActiveField } from './types';
+
 interface InitialFieldValues {
   validFields: string[];
   validSortFields: string[];
@@ -19,7 +21,7 @@ interface InitialFieldValues {
 interface SearchUIActions {
   loadFieldData(): void;
   onFieldDataLoaded(initialFieldValues: InitialFieldValues): InitialFieldValues;
-  onActiveFieldChange(activeField: string): { activeField: string };
+  onActiveFieldChange(activeField: ActiveField): { activeField: ActiveField };
   onFacetFieldsChange(facetFields: string[]): { facetFields: string[] };
   onSortFieldsChange(sortFields: string[]): { sortFields: string[] };
   onTitleFieldChange(titleField: string): { titleField: string };
@@ -35,7 +37,7 @@ interface SearchUIValues {
   urlField: string;
   facetFields: string[];
   sortFields: string[];
-  activeField: string;
+  activeField: ActiveField;
 }
 
 export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>({
@@ -63,7 +65,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     urlField: ['', { onURLFieldChange: (_, { urlField }) => urlField }],
     facetFields: [[], { onFacetFieldsChange: (_, { facetFields }) => facetFields }],
     sortFields: [[], { onSortFieldsChange: (_, { sortFields }) => sortFields }],
-    activeField: ['', { onActiveFieldChange: (_, { activeField }) => activeField }],
+    activeField: [ActiveField.None, { onActiveFieldChange: (_, { activeField }) => activeField }],
   }),
   listeners: ({ actions }) => ({
     loadFieldData: async () => {
