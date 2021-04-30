@@ -39,7 +39,11 @@ import {
   UNISOLATE_HOST_ROUTE,
   metadataTransformPrefix,
 } from '../../../../common/endpoint/constants';
-import { EndpointAction, HostMetadata } from '../../../../common/endpoint/types';
+import {
+  EndpointAction,
+  HostIsolationResponse,
+  HostMetadata,
+} from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createV2SearchResponse } from '../metadata/support/test_support';
 import { ElasticsearchAssetType } from '../../../../../fleet/common';
@@ -174,7 +178,7 @@ describe('Host Isolation', () => {
     expect(mockResponse.ok).not.toBeCalled();
     const response = mockResponse.customError.mock.calls[0][0];
     expect(response.statusCode).toEqual(500);
-    expect((response.body as { message: string }).message).toEqual(ErrMessage);
+    expect((response.body as HostIsolationResponse).message).toEqual(ErrMessage);
   });
   it('accepts a comment field', async () => {
     await callRoute(ISOLATE_HOST_ROUTE, { body: { agent_ids: ['XYZ'], comment: 'XYZ' } });
@@ -216,7 +220,9 @@ describe('Host Isolation', () => {
       .index as jest.Mock).mock.calls[0][0].body;
     const actionID = actionDoc.action_id;
     expect(mockResponse.ok).toBeCalled();
-    expect((mockResponse.ok.mock.calls[0][0]?.body as any).action).toEqual(actionID);
+    expect((mockResponse.ok.mock.calls[0][0]?.body as HostIsolationResponse).action).toEqual(
+      actionID
+    );
   });
 
   it('succeeds when just an endpoint ID is provided', async () => {

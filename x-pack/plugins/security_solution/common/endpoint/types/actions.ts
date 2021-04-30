@@ -20,3 +20,8 @@ export interface EndpointAction {
     comment?: string;
   };
 }
+
+export interface HostIsolationResponse {
+  action?: string;
+  message?: string;
+}

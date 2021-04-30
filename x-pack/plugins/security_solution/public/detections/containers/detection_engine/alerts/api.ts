@@ -6,6 +6,7 @@
  */
 
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import { HostIsolationResponse } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -21,7 +22,6 @@ import {
   AlertSearchResponse,
   AlertsIndex,
   UpdateAlertStatusProps,
-  HostIsolationResponse,
 } from './types';
 
 /**

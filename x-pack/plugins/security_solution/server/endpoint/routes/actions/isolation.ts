@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
-
 import { RequestHandler } from 'src/core/server';
 import uuid from 'uuid';
+import { TypeOf } from '@kbn/config-schema';
+import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import { EndpointAction } from '../../../../common/endpoint/types';
@@ -19,16 +19,6 @@ import {
 } from '../../../types';
 import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
-
-export const HostIsolationRequestSchema = {
-  body: schema.object({
-    agent_ids: schema.nullable(schema.arrayOf(schema.string())),
-    endpoint_ids: schema.nullable(schema.arrayOf(schema.string())),
-    alert_ids: schema.nullable(schema.arrayOf(schema.string())),
-    case_ids: schema.nullable(schema.arrayOf(schema.string())),
-    comment: schema.nullable(schema.string()),
-  }),
-};
 
 export const UserCanIsolate = (roles: readonly string[] | undefined): boolean => {
   // other "admin" type roles: beats_admin, detections_admin, transform_admin, ml_admin
