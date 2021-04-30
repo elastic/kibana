@@ -104,12 +104,20 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
    * @param resultType
    * @param severity
    */
-  const getResultTypeAggRequest = (resultType: AnomalyResultType, severity: number) => {
+  const getResultTypeAggRequest = (
+    resultType: AnomalyResultType,
+    severity: number,
+    useInitialScore?: boolean
+  ) => {
+    const influencerScoreField = `${useInitialScore ? 'initial_' : ''}influencer_score`;
+    const recordScoreField = `${useInitialScore ? 'initial_' : ''}record_score`;
+    const bucketScoreField = `${useInitialScore ? 'initial_' : ''}anomaly_score`;
+
     return {
       influencer_results: {
         filter: {
           range: {
-            influencer_score: {
+            [influencerScoreField]: {
               gte: resultType === ANOMALY_RESULT_TYPE.INFLUENCER ? severity : 0,
             },
           },
@@ -119,7 +127,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             top_hits: {
               sort: [
                 {
-                  influencer_score: {
+                  [influencerScoreField]: {
                     order: 'desc',
                   },
                 },
@@ -141,7 +149,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                 score: {
                   script: {
                     lang: 'painless',
-                    source: 'Math.floor(doc["influencer_score"].value)',
+                    source: `Math.floor(doc["${influencerScoreField}"].value)`,
                   },
                 },
                 unique_key: {
@@ -159,7 +167,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       record_results: {
         filter: {
           range: {
-            record_score: {
+            [recordScoreField]: {
               gte: resultType === ANOMALY_RESULT_TYPE.RECORD ? severity : 0,
             },
           },
@@ -169,7 +177,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             top_hits: {
               sort: [
                 {
-                  record_score: {
+                  [recordScoreField]: {
                     order: 'desc',
                   },
                 },
@@ -198,7 +206,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                 score: {
                   script: {
                     lang: 'painless',
-                    source: 'Math.floor(doc["record_score"].value)',
+                    source: `Math.floor(doc["${recordScoreField}"].value)`,
                   },
                 },
                 unique_key: {
@@ -217,7 +225,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             bucket_results: {
               filter: {
                 range: {
-                  anomaly_score: {
+                  [bucketScoreField]: {
                     gt: severity,
                   },
                 },
@@ -227,7 +235,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                   top_hits: {
                     sort: [
                       {
-                        anomaly_score: {
+                        [bucketScoreField]: {
                           order: 'desc',
                         },
                       },
@@ -247,7 +255,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                       score: {
                         script: {
                           lang: 'painless',
-                          source: 'Math.floor(doc["anomaly_score"].value)',
+                          source: `Math.floor(doc["${bucketScoreField}"].value)`,
                         },
                       },
                       unique_key: {
@@ -404,11 +412,11 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             alerts_over_time: {
               date_histogram: {
                 field: 'timestamp',
-                fixed_interval: lookBackTimeInterval,
+                fixed_interval: `${maxBucket}s`,
                 // Ignore empty buckets
                 min_doc_count: 1,
               },
-              aggs: getResultTypeAggRequest(params.resultType, params.severity),
+              aggs: getResultTypeAggRequest(params.resultType, params.severity, true),
             },
           }
         : getResultTypeAggRequest(params.resultType, params.severity),
