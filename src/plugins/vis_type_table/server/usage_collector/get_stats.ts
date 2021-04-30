@@ -14,9 +14,6 @@ import {
 import { SavedVisState } from 'src/plugins/visualizations/common';
 import { VIS_TYPE_TABLE } from '../../common';
 
-// elasticsearch index.max_result_window default value
-const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
-
 export interface VisTypeTableUsage {
   /**
    * Total number of table type visualizations
@@ -50,7 +47,7 @@ export async function getStats(
 ): Promise<VisTypeTableUsage | undefined> {
   const finder = await soClient.createPointInTimeFinder({
     type: 'visualization',
-    perPage: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
+    perPage: 1000,
   });
 
   const stats: VisTypeTableUsage = {
@@ -98,7 +95,7 @@ export async function getStats(
       }
     });
 
-    if (!response.saved_objects.length) {
+    if (!response.saved_objects.length || response.total === response.saved_objects.length) {
       await finder.close();
     }
   }
