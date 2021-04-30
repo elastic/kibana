@@ -14,9 +14,14 @@ export class AlertingActions {
     this.prefix = `alerting:${versionNumber}:`;
   }
 
-  public get(alertTypeId: string, consumer: string, operation: string): string {
-    if (!alertTypeId || !isString(alertTypeId)) {
-      throw new Error('alertTypeId is required and must be a string');
+  public get(
+    ruleTypeId: string,
+    consumer: string,
+    alertingType: string,
+    operation: string
+  ): string {
+    if (!ruleTypeId || !isString(ruleTypeId)) {
+      throw new Error('ruleTypeId is required and must be a string');
     }
 
     if (!operation || !isString(operation)) {
@@ -27,6 +32,10 @@ export class AlertingActions {
       throw new Error('consumer is required and must be a string');
     }
 
-    return `${this.prefix}${alertTypeId}/${consumer}/${operation}`;
+    if (!alertingType || !isString(alertingType)) {
+      throw new Error('alertingType is required and must be a string');
+    }
+
+    return `${this.prefix}${ruleTypeId}/${consumer}/${alertingType}/${operation}`;
   }
 }
