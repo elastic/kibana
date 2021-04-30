@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiAccordion, EuiTableRow } from '@elastic/eui';
 
-import { EuiButtonEmptyTo } from '../react_router_helpers';
+import { EuiButtonEmptyTo } from '../../react_router_helpers';
 
 import { SchemaErrorsAccordion } from './schema_errors_accordion';
 
