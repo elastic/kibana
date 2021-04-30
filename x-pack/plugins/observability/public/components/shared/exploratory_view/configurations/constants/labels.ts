@@ -183,6 +183,37 @@ export const SERVICE_LATENCY_LABEL = i18n.translate(
   }
 );
 
+export const SERVICE_THROUGHPUT_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.serviceThroughput',
+  {
+    defaultMessage: 'APM Service throughput',
+  }
+);
+
+export const CPU_USAGE_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.cpuUsage', {
+  defaultMessage: 'System CPU usage',
+});
+
+export const NETWORK_ACTIVITY_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.networkActivity',
+  {
+    defaultMessage: 'Network activity',
+  }
+);
+export const MEMORY_USAGE_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.memoryUsage',
+  {
+    defaultMessage: 'System memory usage',
+  }
+);
+
+export const LOGS_FREQUENCY_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.logsFrequency',
+  {
+    defaultMessage: 'Logs frequency',
+  }
+);
+
 export const KIP_OVER_TIME_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.kpiOverTime',
   {
