@@ -36,9 +36,7 @@ const expectIdleTimeoutWarningToast = (
       "iconType": "clock",
       "text": Any<Function>,
       "title": "Warning",
-      "toastLifeTimeMs": ${toastLifeTimeMs},
-    }
-    `
+      "toastLifeTimeMs": `
   );
 };
 
@@ -57,9 +55,7 @@ const expectLifespanWarningToast = (
       "iconType": "alert",
       "text": Any<Function>,
       "title": "Warning",
-      "toastLifeTimeMs": ${toastLifeTimeMs},
-    }
-    `
+      "toastLifeTimeMs": `
   );
 };
 
@@ -112,6 +108,7 @@ describe('Session Timeout', () => {
 
   afterEach(async () => {
     jest.clearAllMocks();
+    jest.unmock('broadcast-channel');
     sessionTimeout.stop();
   });
 
@@ -127,6 +124,23 @@ describe('Session Timeout', () => {
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['channel']).not.toBeUndefined();
       expect(http.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    test(`starts and initializes if the broadcast channel fails to load`, async () => {
+      jest.mock('broadcast-channel', () => {
+        throw new Error('Unable to load broadcast channel!');
+      });
+      const consoleSpy = jest.spyOn(console, 'warn');
+
+      sessionTimeout.start();
+      await nextTick();
+      // eslint-disable-next-line dot-notation
+      expect(sessionTimeout['channel']).toBeUndefined();
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(consoleSpy).toHaveBeenCalledTimes(1);
+      expect(consoleSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+        `"Failed to load broadcast channel. Session management will not be kept in sync when multiple tabs are loaded."`
+      );
     });
 
     test(`starts and does not initialize on an anonymous path`, async () => {
