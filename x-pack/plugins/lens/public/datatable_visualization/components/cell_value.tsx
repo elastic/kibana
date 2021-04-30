@@ -16,6 +16,7 @@ import { IUiSettingsClient } from 'kibana/public';
 import type { FormatFactory } from '../../types';
 import type { DataContextType } from './types';
 import { ColumnConfig } from './table_basic';
+import { ensureStopsAreUpToDate } from './coloring/utils';
 
 function findColorSegment(
   value: number,
@@ -41,17 +42,17 @@ function findColorsByStops(
   colors: string[],
   stops: number[]
 ) {
-  const index = stops.findIndex((s) => comparison(value, s) <= 0);
+  const index = stops.findIndex((s) => comparison(value, s) <= 0) - 1;
   return colors[index] || colors[0];
 }
 
 function getNormalizedValueByRange(
   value: number,
-  { stops, range, rangeMin, rangeMax }: CustomPaletteState,
+  { range }: CustomPaletteState,
   minMax: { min: number; max: number }
 ) {
   let result = value;
-  if (range === 'percent' || (range === 'auto' && stops.length)) {
+  if (range === 'percent') {
     result = (100 * (value - minMax.min)) / (minMax.max - minMax.min);
   }
   // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
@@ -71,29 +72,21 @@ function workoutColorForCell(
     return '';
   }
   const { colors, stops, range, rangeMin, rangeMax, gradient } = params;
+  const isAutoRange = range === 'auto';
   // ranges can be absolute numbers or percentages
   // normalized the incoming value to the same format as range to make easier comparisons
   const normalizedValue = getNormalizedValueByRange(value, params, minMax);
-  const extraRangeArguments = range === 'auto' ? [] : [rangeMin, rangeMax];
+  const extraRangeArguments = isAutoRange ? [minMax.min, minMax.max] : [rangeMin, rangeMax];
   const comparisonFn = (v: number, threshold: number) => v - threshold;
 
-  const maxValue = rangeMax ?? minMax.max;
-  const minValue = rangeMin ?? minMax.min;
-  // Auto mode works in percent for custom mode
-  const shouldNormalizeInPercent = stops.length && range === 'auto';
-
-  const normalizedMaxValue = !shouldNormalizeInPercent
-    ? maxValue
-    : (100 * maxValue) / minMax.max || 1; // 100%
-  const normalizedMinValue = !shouldNormalizeInPercent
-    ? minValue
-    : minValue / (minMax.min || 1) - 1; // 0%
+  const maxValue = !isAutoRange ? rangeMax! : minMax.max;
+  const minValue = !isAutoRange ? rangeMin! : minMax.min;
 
   // in case of shorter rangers, extends the steps on the sides to cover the whole set
-  if (comparisonFn(normalizedValue, normalizedMaxValue) > 0) {
+  if (comparisonFn(normalizedValue, maxValue) > 0) {
     return;
   }
-  if (comparisonFn(normalizedValue, normalizedMinValue) < 0) {
+  if (comparisonFn(normalizedValue, minValue) < 0) {
     return;
   }
 
@@ -102,7 +95,12 @@ function workoutColorForCell(
   }
 
   if (stops.length) {
-    return findColorsByStops(normalizedValue, comparisonFn, colors, stops);
+    return findColorsByStops(
+      normalizedValue,
+      comparisonFn,
+      colors,
+      ensureStopsAreUpToDate(params, minMax)
+    );
   }
 
   return findColorSegment(normalizedValue, minMax, comparisonFn, colors, ...extraRangeArguments);

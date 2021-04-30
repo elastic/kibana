@@ -21,9 +21,10 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
-import { CustomizablePalette, applyPaletteParams, defaultParams } from './palette_configuration';
+import { CustomizablePalette, applyPaletteParams } from './palette_configuration';
 import { PalettePanelContainer } from './palette_panel_container';
 import { findMinMaxByColumnId } from './shared_utils';
+import { defaultParams } from './coloring/constants';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -246,6 +247,9 @@ export function TableDimensionEditor(
                         : (colorStops || []).map(({ color }) => color)
                     }
                     type={paletteMode === 'stepped' ? 'fixed' : paletteMode}
+                    onClick={() => {
+                      setIsPaletteOpen(!isPaletteOpen);
+                    }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

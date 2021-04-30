@@ -21,6 +21,7 @@ import {
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CustomPaletteParams } from './expression';
+import { remapForDisplay } from './components/coloring/utils';
 
 export interface ColumnState {
   columnId: string;
@@ -248,18 +249,23 @@ export const getDatatableVisualization = ({
           accessors: sortedColumns
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
+              const columnConfig = columnMap[accessor];
               const hasColoring = Boolean(
-                columnMap[accessor].colorMode !== 'none' &&
-                  columnMap[accessor].palette?.params?.stops
+                columnConfig.colorMode !== 'none' && columnConfig.palette?.params?.stops
               );
               return {
                 columnId: accessor,
-                triggerIcon: columnMap[accessor].hidden
+                triggerIcon: columnConfig.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring ? columnMap[accessor].palette?.params?.stops : undefined,
+                palette: hasColoring
+                  ? remapForDisplay(
+                      columnConfig.palette?.params?.stops || [],
+                      columnConfig.palette?.params || {}
+                    )
+                  : undefined,
               };
             }),
           supportsMoreColumns: true,
@@ -339,58 +345,64 @@ export const getDatatableVisualization = ({
           arguments: {
             title: [title || ''],
             description: [description || ''],
-            columns: columns.map((column) => ({
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_datatable_column',
-                  arguments: {
-                    columnId: [column.columnId],
-                    hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
-                    width: typeof column.width === 'undefined' ? [] : [column.width],
-                    isTransposed:
-                      typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
-                    transposable: [
-                      !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
-                    ],
-                    alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
-                    colorMode: [column.colorMode ?? 'none'],
-                    palette: [
-                      {
-                        type: 'expression',
-                        chain: [
-                          {
-                            type: 'function',
-                            function: 'palette',
-                            arguments: {
-                              gradient: [column.palette?.params?.progression === 'gradient'],
-                              reverse: [column.palette?.params?.reverse || false],
-                              range: [column.palette?.params?.rangeType || 'auto'],
-                              rangeMin:
-                                column.palette?.params?.rangeMin != null
-                                  ? [column.palette?.params?.rangeMin]
-                                  : [],
-                              rangeMax:
-                                column.palette?.params?.rangeMax != null
-                                  ? [column.palette?.params?.rangeMax]
-                                  : [],
-                              color: (column.palette?.params?.stops || []).map(
-                                ({ color }) => color
-                              ),
-                              stop:
-                                column.palette?.params?.name === 'custom'
-                                  ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
-                                  : [],
+            columns: columns.map((column) => {
+              const paletteConfig = column.palette?.params;
+
+              return {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: 'lens_datatable_column',
+                    arguments: {
+                      columnId: [column.columnId],
+                      hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
+                      width: typeof column.width === 'undefined' ? [] : [column.width],
+                      isTransposed:
+                        typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
+                      transposable: [
+                        !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
+                      ],
+                      alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
+                      colorMode: [column.colorMode ?? 'none'],
+                      palette: [
+                        {
+                          type: 'expression',
+                          chain: [
+                            {
+                              type: 'function',
+                              function: 'palette',
+                              arguments: {
+                                gradient: [paletteConfig?.progression === 'gradient'],
+                                reverse: [paletteConfig?.reverse || false],
+                                range: [paletteConfig?.rangeType || 'auto'],
+                                rangeMin:
+                                  paletteConfig?.rangeMin != null &&
+                                  paletteConfig?.rangeType &&
+                                  paletteConfig.rangeType !== 'auto'
+                                    ? [paletteConfig?.rangeMin]
+                                    : [],
+                                rangeMax:
+                                  paletteConfig?.rangeMax != null &&
+                                  paletteConfig?.rangeType &&
+                                  paletteConfig.rangeType !== 'auto'
+                                    ? [paletteConfig?.rangeMax]
+                                    : [],
+                                color: (paletteConfig?.stops || []).map(({ color }) => color),
+                                stop:
+                                  paletteConfig?.name === 'custom'
+                                    ? (paletteConfig?.stops || []).map(({ stop }) => stop)
+                                    : [],
+                              },
                             },
-                          },
-                        ],
-                      },
-                    ],
+                          ],
+                        },
+                      ],
+                    },
                   },
-                },
-              ],
-            })),
+                ],
+              };
+            }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
           },

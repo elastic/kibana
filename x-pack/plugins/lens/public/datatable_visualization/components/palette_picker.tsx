@@ -11,6 +11,14 @@ import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { CustomPaletteParams } from '../expression';
+import { remapForDisplay, reversePalette } from './coloring/utils';
+import {
+  CUSTOM_PALETTE,
+  DEFAULT_COLOR_STEPS,
+  DEFAULT_CUSTOM_PROGRESSION,
+  DEFAULT_CUSTOM_STEPS,
+  DEFAULT_PROGRESSION,
+} from './coloring/constants';
 
 function getType(
   id: string,
@@ -20,12 +28,12 @@ function getType(
     if (
       activePalette.params &&
       activePalette.params.progression &&
-      activePalette.params.progression !== 'stepped'
+      activePalette.params.progression !== DEFAULT_CUSTOM_PROGRESSION
     ) {
       return activePalette.params.progression;
     }
   }
-  return 'fixed';
+  return DEFAULT_PROGRESSION;
 }
 
 function getPaletteSteps(
@@ -37,7 +45,50 @@ function getPaletteSteps(
       return activePalette.params.steps;
     }
   }
-  return 10;
+  return DEFAULT_COLOR_STEPS;
+}
+
+function getCustomPaletteConfig(
+  palettes: PaletteRegistry,
+  activePalette: PaletteOutput<CustomPaletteParams> | undefined
+) {
+  const { id, title } = palettes.get(CUSTOM_PALETTE);
+  const displayType =
+    activePalette?.params?.progression === DEFAULT_CUSTOM_PROGRESSION
+      ? DEFAULT_PROGRESSION
+      : activePalette?.params?.progression || DEFAULT_PROGRESSION;
+
+  // Try to generate a palette from the current one
+  if (activePalette && activePalette.name !== CUSTOM_PALETTE) {
+    const currentPalette = palettes.get(activePalette.name);
+    if (currentPalette) {
+      const stops = currentPalette.getCategoricalColors(
+        DEFAULT_CUSTOM_STEPS - 1,
+        activePalette?.params
+      );
+      const palette = activePalette.params?.reverse ? stops.reverse() : stops;
+      return {
+        value: id,
+        title,
+        type: displayType,
+        palette,
+      };
+    }
+  }
+  // if not possible just show some text
+  if (!activePalette?.params?.stops) {
+    return { value: id, title, type: 'text' as const };
+  }
+
+  const stops = remapForDisplay(activePalette.params.stops, activePalette.params);
+
+  // full custom palette
+  return {
+    value: id,
+    title,
+    type: displayType,
+    palette: activePalette.params.reverse ? reversePalette(stops) : stops,
+  };
 }
 
 export function PalettePicker({
@@ -71,8 +122,7 @@ export function PalettePicker({
       };
     });
   if (showCustomPalette) {
-    const { id, title } = palettes.get('custom');
-    palettesToShow.push({ value: id, title, type: 'text' });
+    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette));
   }
   return (
     <EuiFormRow
