@@ -5,23 +5,46 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
 import { EuiFormRow, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { validateIndexName } from '../../util/indexing_service';
+import { validateIndexName } from '../../validate_index_name';
 
 export interface Props {
   indexName: string;
   indexNameError?: string;
   onIndexNameChange: (name: string, error?: string) => void;
+  onIndexNameValidationStart: () => void;
+  onIndexNameValidationEnd: () => void;
 }
 
 export class IndexNameForm extends Component<Props> {
-  _onIndexNameChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  private _isMounted = false;
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  _onIndexNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     const indexName = event.target.value;
-    const indexNameError = await validateIndexName(indexName);
-    this.props.onIndexNameChange(indexName, indexNameError);
+    this.props.onIndexNameChange(indexName);
+    this._validateIndexName(indexName);
+    this.props.onIndexNameValidationStart();
   };
+
+  _validateIndexName = _.debounce(async (indexName: string) => {
+    const indexNameError = await validateIndexName(indexName);
+    if (!this._isMounted || indexName !== this.props.indexName) {
+      return;
+    }
+    this.props.onIndexNameValidationEnd();
+    this.props.onIndexNameChange(indexName, indexNameError);
+  }, 500);
 
   render() {
     const errors = [...(this.props.indexNameError ? [this.props.indexNameError] : [])];
