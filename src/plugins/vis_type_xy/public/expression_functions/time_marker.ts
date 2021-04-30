@@ -32,7 +32,7 @@ export const timeMarker = (): ExpressionFunctionDefinition<
   ExpressionValueTimeMarker
 > => ({
   name: 'timemarker',
-  help: i18n.translate('visTypeXy.function.range.help', {
+  help: i18n.translate('visTypeXy.function.timemarker.help', {
     defaultMessage: 'Generates time marker object',
   }),
   type: 'time_marker',

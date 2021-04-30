@@ -41,7 +41,7 @@ export const seriesParam = (): ExpressionFunctionDefinition<
   ExpressionValueSeriesParam
 > => ({
   name: 'seriesparam',
-  help: i18n.translate('visTypeXy.function.label.help', {
+  help: i18n.translate('visTypeXy.function.seriesparam.help', {
     defaultMessage: 'Generates series param object',
   }),
   type: 'series_param',
@@ -106,7 +106,7 @@ export const seriesParam = (): ExpressionFunctionDefinition<
     },
     valueAxis: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.seriesParam.type.help', {
+      help: i18n.translate('visTypeXy.function.seriesParam.valueAxis.help', {
         defaultMessage: 'Name of value axis',
       }),
     },

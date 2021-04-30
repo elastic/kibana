@@ -45,167 +45,167 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
     },
     chartType: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.chartType.help', {
+      help: i18n.translate('visTypeXy.function.args.args.chartType.help', {
         defaultMessage: 'Type of a chart',
       }),
     },
     addTimeMarker: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.addTimeMarker.help', {
+      help: i18n.translate('visTypeXy.function.args.addTimeMarker.help', {
         defaultMessage: 'Show time marker',
       }),
     },
     addLegend: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.addLegend.help', {
+      help: i18n.translate('visTypeXy.function.args.addLegend.help', {
         defaultMessage: 'Show legend chart legend',
       }),
     },
     addTooltip: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.addTooltip.help', {
+      help: i18n.translate('visTypeXy.function.args.addTooltip.help', {
         defaultMessage: 'Show tooltip on hover',
       }),
     },
     legendPosition: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.legendPosition.help', {
+      help: i18n.translate('visTypeXy.function.args.legendPosition.help', {
         defaultMessage: 'Position the legend on top, bottom, left, right of the chart',
       }),
     },
     categoryAxes: {
       types: ['category_axis'],
-      help: i18n.translate('visTypeXy.function.categoryAxes.help', {
+      help: i18n.translate('visTypeXy.function.args.categoryAxes.help', {
         defaultMessage: 'Category axis config',
       }),
       multi: true,
     },
     thresholdLine: {
       types: ['threshold_line'],
-      help: i18n.translate('visTypeXy.function.thresholdLine.help', {
+      help: i18n.translate('visTypeXy.function.args.thresholdLine.help', {
         defaultMessage: 'Threshold line config',
       }),
     },
     labels: {
       types: ['label'],
-      help: i18n.translate('visTypeXy.function.labels.help', {
+      help: i18n.translate('visTypeXy.function.args.labels.help', {
         defaultMessage: 'Chart labels config',
       }),
     },
     orderBucketsBySum: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.orderBucketsBySum.help', {
+      help: i18n.translate('visTypeXy.function.args.orderBucketsBySum.help', {
         defaultMessage: 'Order buckets by sum',
       }),
     },
     seriesParams: {
       types: ['series_param'],
-      help: i18n.translate('visTypeXy.function.seriesParams.help', {
+      help: i18n.translate('visTypeXy.function.args.seriesParams.help', {
         defaultMessage: 'Series param config',
       }),
       multi: true,
     },
     valueAxes: {
       types: ['value_axis'],
-      help: i18n.translate('visTypeXy.function.valueAxes.help', {
+      help: i18n.translate('visTypeXy.function.args.valueAxes.help', {
         defaultMessage: 'Value axis config',
       }),
       multi: true,
     },
     radiusRatio: {
       types: ['number'],
-      help: i18n.translate('visTypeXy.function.radiusRatio.help', {
+      help: i18n.translate('visTypeXy.function.args.radiusRatio.help', {
         defaultMessage: 'Dot size ratio',
       }),
     },
     gridCategoryLines: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.gridCategoryLines.help', {
+      help: i18n.translate('visTypeXy.function.args.gridCategoryLines.help', {
         defaultMessage: 'Show grid category lines in chart',
       }),
     },
     gridValueAxis: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.gridCategoryLines.help', {
+      help: i18n.translate('visTypeXy.function.args.gridValueAxis.help', {
         defaultMessage: 'Name of value axis for which we show grid',
       }),
     },
     isVislibVis: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.isVislibVis.help', {
+      help: i18n.translate('visTypeXy.function.args.isVislibVis.help', {
         defaultMessage:
           'Flag to indicate old vislib visualizations. Used for backwards compatibility including colors',
       }),
     },
     detailedTooltip: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXy.function.detailedTooltip.help', {
+      help: i18n.translate('visTypeXy.function.args.detailedTooltip.help', {
         defaultMessage: 'Show detailed tooltip',
       }),
     },
     fittingFunction: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.fittingFunction.help', {
+      help: i18n.translate('visTypeXy.function.args.fittingFunction.help', {
         defaultMessage: 'Name of fitting function',
       }),
     },
     times: {
       types: ['time_marker'],
-      help: i18n.translate('visTypeXy.function.times.help', {
+      help: i18n.translate('visTypeXy.function.args.times.help', {
         defaultMessage: 'times',
       }),
       multi: true,
     },
     palette: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.palette.help', {
+      help: i18n.translate('visTypeXy.function.args.palette.help', {
         defaultMessage: 'Defines the chart palette name',
       }),
     },
     xDimension: {
       types: ['xy_dimension', 'null'],
-      help: i18n.translate('visTypeXy.function.xDimension.help', {
+      help: i18n.translate('visTypeXy.function.args.xDimension.help', {
         defaultMessage: 'X axis dimension config',
       }),
     },
     yDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.yDimension.help', {
+      help: i18n.translate('visTypeXy.function.args.yDimension.help', {
         defaultMessage: 'Y axis dimension config',
       }),
       multi: true,
     },
     zDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.zDimension.help', {
+      help: i18n.translate('visTypeXy.function.args.zDimension.help', {
         defaultMessage: 'Z axis dimension config',
       }),
       multi: true,
     },
     widthDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.width.help', {
+      help: i18n.translate('visTypeXy.function.args.widthDimension.help', {
         defaultMessage: 'Width dimension config',
       }),
       multi: true,
     },
     seriesDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.series.help', {
+      help: i18n.translate('visTypeXy.function.args.seriesDimension.help', {
         defaultMessage: 'Series dimension config',
       }),
       multi: true,
     },
     splitRowDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.splitRow.help', {
+      help: i18n.translate('visTypeXy.function.args.splitRowDimension.help', {
         defaultMessage: 'Split by row dimension config',
       }),
       multi: true,
     },
     splitColumnDimension: {
       types: ['xy_dimension'],
-      help: i18n.translate('visTypeXy.function.splitRow.help', {
+      help: i18n.translate('visTypeXy.function.args.splitColumnDimension.help', {
         defaultMessage: 'Split by column dimension config',
       }),
       multi: true,

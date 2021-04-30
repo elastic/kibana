@@ -40,7 +40,7 @@ export const xyDimension = (): ExpressionFunctionDefinition<
   ExpressionValueXYDimension
 > => ({
   name: 'xydimension',
-  help: i18n.translate('visTypeXy.function.range.help', {
+  help: i18n.translate('visTypeXy.function.xydimension.help', {
     defaultMessage: 'Generates xy dimension object',
   }),
   type: 'xy_dimension',

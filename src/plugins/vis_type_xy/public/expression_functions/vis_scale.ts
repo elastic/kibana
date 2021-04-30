@@ -77,7 +77,7 @@ export const visScale = (): ExpressionFunctionDefinition<
     },
     type: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.scale.mode.help', {
+      help: i18n.translate('visTypeXy.function.scale.type.help', {
         defaultMessage: 'Scale type',
       }),
       required: true,
