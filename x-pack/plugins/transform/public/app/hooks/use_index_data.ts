@@ -14,6 +14,11 @@ import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/type_guards';
+import {
+  hasKeywordDuplicate,
+  isKeywordDuplicate,
+  removeKeywordPostfix,
+} from '../../../common/utils/field_utils';
 import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
 import { getErrorMessage } from '../../../common/utils/errors';
@@ -209,7 +214,7 @@ export const useIndexData = (
   };
 
   const fetchColumnChartsData = async function () {
-    const allIndexPatternFieldNames = indexPattern.fields.map((f) => f.name);
+    const allIndexPatternFieldNames = new Set(indexPattern.fields.map((f) => f.name));
     const columnChartsData = await api.getHistogramsForFields(
       indexPattern.title,
       columns
@@ -218,12 +223,15 @@ export const useIndexData = (
           // If a column field name has a corresponding keyword field,
           // fetch the keyword field instead to be able to do aggregations.
           const fieldName = cT.id;
-          const fieldNameWithDotKeyword = `${fieldName}.keyword`;
-          const hasKeywordDuplicate = allIndexPatternFieldNames.includes(fieldNameWithDotKeyword);
-          return {
-            fieldName: hasKeywordDuplicate ? fieldNameWithDotKeyword : fieldName,
-            type: getFieldType(hasKeywordDuplicate ? undefined : cT.schema),
-          };
+          return hasKeywordDuplicate(fieldName, allIndexPatternFieldNames)
+            ? {
+                fieldName: `${fieldName}.keyword`,
+                type: getFieldType(undefined),
+              }
+            : {
+                fieldName,
+                type: getFieldType(cT.schema),
+              };
         }),
       isDefaultQuery(query) ? matchAllQuery : query,
       combinedRuntimeMappings
@@ -236,14 +244,12 @@ export const useIndexData = (
 
     setColumnCharts(
       // revert field names with `.keyword` used to do aggregations to their original column name
-      columnChartsData.map((d) => {
-        const fieldName = d.id;
-        const isKeywordDuplicate =
-          fieldName.endsWith('.keyword') &&
-          allIndexPatternFieldNames.includes(fieldName.split('.').slice(0, -1).join('.'));
-        d.id = isKeywordDuplicate ? fieldName.slice(0, -8) : fieldName;
-        return d;
-      })
+      columnChartsData.map((d) => ({
+        ...d,
+        ...(isKeywordDuplicate(d.id, allIndexPatternFieldNames)
+          ? { id: removeKeywordPostfix(d.id) }
+          : {}),
+      }))
     );
   };
 
