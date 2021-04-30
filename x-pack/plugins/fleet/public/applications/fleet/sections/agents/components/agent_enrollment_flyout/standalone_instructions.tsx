@@ -76,7 +76,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
   const yaml = useMemo(() => fullAgentPolicyToYaml(fullAgentPolicy), [fullAgentPolicy]);
   const steps: EuiContainedStepProps[] = [
     DownloadStep(),
-    AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId }),
+    AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId, excludeFleetServer: true }),
     {
       title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigureAgentTitle', {
         defaultMessage: 'Configure the agent',
