@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiButtonEmpty, EuiInMemoryTable, EuiTable } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 
 import { SourceEnginesTable } from './source_engines_table';
 
