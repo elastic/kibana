@@ -20,9 +20,8 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { IndexingStatus } from '../../../../../shared/indexing_status';
 import { Loading } from '../../../../../shared/loading';
-import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
+import { SchemaAddFieldModal, SchemaErrorsCallout } from '../../../../../shared/schema';
 import { AppLogic } from '../../../../app_logic';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { getReindexJobRoute } from '../../../../routes';
@@ -71,16 +70,13 @@ export const Schema: React.FC = () => {
   if (dataLoading) return <Loading />;
 
   const hasSchemaFields = Object.keys(activeSchema).length > 0;
-  const { isActive, hasErrors, percentageComplete, activeReindexJobId } = mostRecentIndexJob;
+  const { hasErrors, percentageComplete, activeReindexJobId } = mostRecentIndexJob;
 
   const addFieldButton = (
     <EuiButtonEmpty color="primary" data-test-subj="AddFieldButton" onClick={openAddFieldModal}>
       {SCHEMA_ADD_FIELD_BUTTON}
     </EuiButtonEmpty>
   );
-  const statusPath = isOrganization
-    ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}/status`
-    : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}/status`;
 
   return (
     <>
@@ -89,17 +85,13 @@ export const Schema: React.FC = () => {
         description={SCHEMA_MANAGE_SCHEMA_DESCRIPTION}
       />
       <div>
-        {(isActive || hasErrors) && (
-          <IndexingStatus
-            itemId={sourceId}
-            viewLinkPath={getReindexJobRoute(
+        {hasErrors && (
+          <SchemaErrorsCallout
+            viewErrorsPath={getReindexJobRoute(
               sourceId,
-              mostRecentIndexJob.activeReindexJobId.toString(),
+              activeReindexJobId.toString(),
               isOrganization
             )}
-            statusPath={statusPath}
-            onComplete={onIndexingComplete}
-            {...mostRecentIndexJob}
           />
         )}
         {hasSchemaFields ? (
