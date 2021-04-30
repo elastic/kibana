@@ -62,32 +62,49 @@ describe('Service overview: Time Comparison', () => {
     cy.url().should('include', 'comparisonEnabled=true&comparisonType=day');
   });
 
-  it('toggles comparison off disables select box and APIs are called without comparison time range', () => {
-    apisToIntercept.map(({ endpoint, as }) => {
-      cy.intercept('GET', endpoint).as(as);
-    });
-    cy.visit(baseUrl);
-    cy.contains('opbeans-java');
+  describe('when comparison is toggled off', () => {
+    it('disables select box', () => {
+      cy.visit(baseUrl);
+      cy.contains('opbeans-java');
 
-    // Comparison is enabled by default
-    cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
-    const comparisonStartEnd =
-      'comparisonStart=2020-12-08T13%3A26%3A03.865Z&comparisonEnd=2020-12-08T13%3A57%3A00.000Z';
-    // When the page loads it fetches all APIs with comparison time range
-    cy.wait(apisToIntercept.map(({ as }) => `@${as}`)).then((interceptions) => {
-      interceptions.map((interception) => {
-        expect(interception.request.url).include(comparisonStartEnd);
-      });
+      // Comparison is enabled by default
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
+
+      // toggles off comparison
+      cy.contains('Comparison').click();
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
     });
 
-    // toggles off comparison
-    cy.contains('Comparison').click();
-    cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
-    // When comparison is disabled APIs are called withou comparison time range
-    cy.wait(apisToIntercept.map(({ as }) => `@${as}`)).then((interceptions) => {
-      interceptions.map((interception) => {
-        expect(interception.request.url).not.include(comparisonStartEnd);
+    it('calls APIs without comparison time range', () => {
+      apisToIntercept.map(({ endpoint, as }) => {
+        cy.intercept('GET', endpoint).as(as);
       });
+      cy.visit(baseUrl);
+      cy.contains('opbeans-java');
+
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
+      const comparisonStartEnd =
+        'comparisonStart=2020-12-08T13%3A26%3A03.865Z&comparisonEnd=2020-12-08T13%3A57%3A00.000Z';
+      // When the page loads it fetches all APIs with comparison time range
+      cy.wait(apisToIntercept.map(({ as }) => `@${as}`)).then(
+        (interceptions) => {
+          interceptions.map((interception) => {
+            expect(interception.request.url).include(comparisonStartEnd);
+          });
+        }
+      );
+
+      // toggles off comparison
+      cy.contains('Comparison').click();
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+      // When comparison is disabled APIs are called withou comparison time range
+      cy.wait(apisToIntercept.map(({ as }) => `@${as}`)).then(
+        (interceptions) => {
+          interceptions.map((interception) => {
+            expect(interception.request.url).not.include(comparisonStartEnd);
+          });
+        }
+      );
     });
   });
 
