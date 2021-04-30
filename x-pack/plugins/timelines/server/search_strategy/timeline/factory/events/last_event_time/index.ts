@@ -12,12 +12,13 @@ import {
   TimelineEventsQueries,
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineEventsLastEventTimeRequestOptions,
-} from '../../../../../../common/search_strategy/timeline';
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionTimelineFactory } from '../../types';
+} from '../../../../../../../security_solution/common/search_strategy/timeline';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { inspectStringifyObject } from '../../../../../../../security_solution/server/utils/build_query';
+import { TimelineFactory } from '../../types';
 import { buildLastEventTimeQuery } from './query.events_last_event_time.dsl';
 
-export const timelineEventsLastEventTime: SecuritySolutionTimelineFactory<TimelineEventsQueries.lastEventTime> = {
+export const timelineEventsLastEventTime: TimelineFactory<TimelineEventsQueries.lastEventTime> = {
   buildDsl: (options: TimelineEventsLastEventTimeRequestOptions) =>
     buildLastEventTimeQuery(options),
   parse: async (

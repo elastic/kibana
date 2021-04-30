@@ -10,14 +10,16 @@ import isEmpty from 'lodash/isEmpty';
 import { IndexPatternsFetcher, ISearchStrategy } from '../../../../../../src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FieldDescriptor } from '../../../../../../src/plugins/data/server/index_patterns';
+
+// TODO cleanup path
 import {
   IndexFieldsStrategyResponse,
   IndexField,
   IndexFieldsStrategyRequest,
   BeatFields,
-} from '../../../common/search_strategy/index_fields';
+} from '../../../../security_solution/common/search_strategy/index_fields';
 
-export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
+export const indexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse
 > => {

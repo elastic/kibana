@@ -16,11 +16,11 @@ import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
   TimelineStrategyRequestType,
-} from '../../../common/search_strategy/timeline';
-import { securitySolutionTimelineFactory } from './factory';
-import { SecuritySolutionTimelineFactory } from './factory/types';
+} from '../../../../security_solution/common/search_strategy/timeline';
+import { timelineFactory } from './factory';
+import { TimelineFactory } from './factory/types';
 
-export const securitySolutionTimelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
+export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
@@ -29,8 +29,7 @@ export const securitySolutionTimelineSearchStrategyProvider = <T extends Timelin
       if (request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
-      const queryFactory: SecuritySolutionTimelineFactory<T> =
-        securitySolutionTimelineFactory[request.factoryQueryType];
+      const queryFactory: TimelineFactory<T> = timelineFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {

@@ -22,6 +22,10 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
       getTimeline: (props: TimelineProps) => {
         return getTimelineLazy(props);
       },
+      getTimelineStore: () => {
+        actions: tGridActions,
+        state: initTGridState,
+      }
     };
   }
 

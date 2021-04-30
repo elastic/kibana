@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocValueFields } from '../../../../../../common/search_strategy';
+import { DocValueFields } from '../../../../../../../security_solution/common/search_strategy';
 
 export const buildTimelineDetailsQuery = (
   indexName: string,

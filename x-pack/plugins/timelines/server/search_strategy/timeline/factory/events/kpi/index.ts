@@ -12,12 +12,13 @@ import {
   TimelineEventsQueries,
   TimelineRequestBasicOptions,
   TimelineKpiStrategyResponse,
-} from '../../../../../../common/search_strategy/timeline';
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionTimelineFactory } from '../../types';
+} from '../../../../../../../security_solution/common/search_strategy/timeline';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { inspectStringifyObject } from '../../../../../../../security_solution/server/utils/build_query';
+import { TimelineFactory } from '../../types';
 import { buildTimelineKpiQuery } from './query.kpi.dsl';
 
-export const timelineKpi: SecuritySolutionTimelineFactory<TimelineEventsQueries.kpi> = {
+export const timelineKpi: TimelineFactory<TimelineEventsQueries.kpi> = {
   buildDsl: (options: TimelineRequestBasicOptions) => buildTimelineKpiQuery(options),
   parse: async (
     options: TimelineRequestBasicOptions,

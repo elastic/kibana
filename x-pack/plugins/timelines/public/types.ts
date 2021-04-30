@@ -6,7 +6,7 @@
  */
 
 import { ReactElement } from 'react';
-
+export * from './store/t_grid';
 export interface TimelinesPluginSetup {
   getTimeline?: (props: TimelineProps) => ReactElement<TimelineProps>;
 }

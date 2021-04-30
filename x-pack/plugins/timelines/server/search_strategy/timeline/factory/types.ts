@@ -10,9 +10,9 @@ import {
   TimelineFactoryQueryTypes,
   TimelineStrategyRequestType,
   TimelineStrategyResponseType,
-} from '../../../../common/search_strategy/timeline';
+} from '../../../../../security_solution/common/search_strategy/timeline';
 
-export interface SecuritySolutionTimelineFactory<T extends TimelineFactoryQueryTypes> {
+export interface TimelineFactory<T extends TimelineFactoryQueryTypes> {
   buildDsl: (options: TimelineStrategyRequestType<T>) => unknown;
   parse: (
     options: TimelineStrategyRequestType<T>,

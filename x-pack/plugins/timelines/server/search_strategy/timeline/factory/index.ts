@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { TimelineFactoryQueryTypes } from '../../../../common/search_strategy/timeline';
-import { SecuritySolutionTimelineFactory } from './types';
+import { TimelineFactoryQueryTypes } from '../../../../../security_solution/common/search_strategy/timeline';
+import { TimelineFactory } from './types';
 import { timelineEventsFactory } from './events';
 
-export const securitySolutionTimelineFactory: Record<
+export const timelineFactory: Record<
   TimelineFactoryQueryTypes,
-  SecuritySolutionTimelineFactory<TimelineFactoryQueryTypes>
+  TimelineFactory<TimelineFactoryQueryTypes>
 > = {
   ...timelineEventsFactory,
 };

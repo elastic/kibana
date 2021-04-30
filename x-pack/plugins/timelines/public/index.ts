@@ -15,4 +15,4 @@ import { TimelinesPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinesPlugin(initializerContext);
 }
-export { TimelinesPluginSetup } from './types';
+export * from './types';

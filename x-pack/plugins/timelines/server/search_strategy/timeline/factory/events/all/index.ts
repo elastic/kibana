@@ -6,8 +6,7 @@
  */
 
 import { cloneDeep, uniq } from 'lodash/fp';
-
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../../security_solution/common/constants';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   EventHit,
@@ -15,14 +14,16 @@ import {
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
   TimelineEdges,
-} from '../../../../../../common/search_strategy';
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionTimelineFactory } from '../../types';
+} from '../../../../../../../security_solution/common/search_strategy';
+import { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { formatTimelineData } from './helpers';
+// TODO we need to move this functionality inside of  the plugin
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { inspectStringifyObject } from '../../../../../../../security_solution/server/utils/build_query';
 
-export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQueries.all> = {
+export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
   buildDsl: (options: TimelineEventsAllRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
