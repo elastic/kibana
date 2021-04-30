@@ -32,7 +32,7 @@ jest.spyOn(document, 'removeEventListener');
 const nowMock = jest.spyOn(Date, 'now');
 const visibilityStateMock = jest.spyOn(document, 'visibilityState', 'get');
 
-function createSessionTimeout(expiresInMs = 60 * 60 * 1000, canBeExtended = true) {
+function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBeExtended = true) {
   const { notifications, http } = coreMock.createSetup();
   const toast = Symbol();
   notifications.toasts.add.mockReturnValue(toast as any);
@@ -262,7 +262,7 @@ describe('SessionTimeout', () => {
   });
 
   it('does not log user out if session does not expire', async () => {
-    const { sessionTimeout, sessionExpired } = createSessionTimeout(0);
+    const { sessionTimeout, sessionExpired } = createSessionTimeout(null);
     await sessionTimeout.start();
 
     jest.runOnlyPendingTimers();
