@@ -24,7 +24,7 @@ import {
 } from '../alert_type';
 import { SearchResponse } from 'elasticsearch';
 
-const alertInstanceFactory = (expectedAlertResults: unknown[], testAlertActionArr: unknown[]) => (
+const alertInstanceFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => (
   instanceId: string
 ) => {
   const alertInstance = alertsMock.createAlertInstanceFactory<
@@ -33,9 +33,8 @@ const alertInstanceFactory = (expectedAlertResults: unknown[], testAlertActionAr
   >();
   alertInstance.scheduleActions.mockImplementation(
     (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
-      // Store descriptive subset of created alerts in passed-in array for calling test
+      // Check subset of alert for comparison to expected results
       // @ts-ignore
-      const contextKeys = Object.keys(expectedAlertResults[0].context);
       const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
       testAlertActionArr.push({
         actionGroupId,
@@ -249,6 +248,7 @@ describe('geo_containment', () => {
         instanceId: 'c-789',
       },
     ];
+    const contextKeys = Object.keys(expectedAlertResults[0].context);
     const emptyShapesIdsNamesMap = {};
 
     const currentDateTime = new Date();
@@ -258,7 +258,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMap,
-        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -283,7 +283,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -322,7 +322,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithNonIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -345,7 +345,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -378,7 +378,7 @@ describe('geo_containment', () => {
       getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithThreeMore,
-        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -415,7 +415,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -447,7 +447,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -515,10 +515,11 @@ describe('geo_containment', () => {
     // Boundary test mocks
     const boundaryCall = jest.fn();
     const esAggCall = jest.fn();
+    const contextKeys = Object.keys(expectedAlertResults[0].context);
     const alertServicesWithSearchMock: AlertServicesMock = {
       ...alertsMock.createAlertServices(),
       // @ts-ignore
-      alertInstanceFactory: alertInstanceFactory(expectedAlertResults, testAlertActionArr),
+      alertInstanceFactory: alertInstanceFactory(contextKeys, testAlertActionArr),
       scopedClusterClient: {
         asCurrentUser: {
           // @ts-ignore
