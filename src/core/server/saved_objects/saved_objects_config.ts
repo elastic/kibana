@@ -15,24 +15,17 @@ const migrationSchema = schema.object({
   scrollDuration: schema.string({ defaultValue: '15m' }),
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
-  enableV2: schema.boolean({ defaultValue: true }),
   retryAttempts: schema.number({ defaultValue: 15 }),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
 
-const migrationDeprecations: ConfigDeprecationProvider = () => [
-  (settings, fromPath, addDeprecation) => {
-    const migrationsConfig = settings[fromPath];
-    if (migrationsConfig?.enableV2 !== undefined) {
-      addDeprecation({
-        message:
-          '"migrations.enableV2" is deprecated and will be removed in an upcoming release without any further notice.',
-        documentationUrl: 'https://ela.st/kbn-so-migration-v2',
-      });
-    }
-    return settings;
-  },
+const migrationDeprecations: ConfigDeprecationProvider = ({ unused }) => [
+  unused('enableV2', {
+    message:
+      '"migrations.enableV2" is deprecated and will be removed in an upcoming release without any further notice.',
+    documentationUrl: 'https://ela.st/kbn-so-migration-v2',
+  }),
 ];
 
 export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> = {

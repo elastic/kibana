@@ -39,7 +39,6 @@ describe('migrationsStateActionMachine', () => {
       pollInterval: 0,
       scrollDuration: '0s',
       skip: false,
-      enableV2: true,
       retryAttempts: 5,
     },
   });

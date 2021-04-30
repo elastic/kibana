@@ -22,13 +22,7 @@ import {
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
 } from '../../serialization';
-import {
-  buildActiveMappings,
-  createMigrationEsClient,
-  IndexMigrator,
-  MigrationResult,
-  MigrationStatus,
-} from '../core';
+import { buildActiveMappings, MigrationResult, MigrationStatus } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
@@ -44,7 +38,6 @@ export interface KibanaMigratorOptions {
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
-  migrationsRetryDelay?: number;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -71,7 +64,6 @@ export class KibanaMigrator {
     status: 'waiting_to_start',
   });
   private readonly activeMappings: IndexMapping;
-  private migrationsRetryDelay?: number;
   // TODO migrationsV2: make private once we remove migrations v1
   public readonly kibanaVersion: string;
   // TODO migrationsV2: make private once we remove migrations v1
@@ -87,7 +79,6 @@ export class KibanaMigrator {
     soMigrationsConfig,
     kibanaVersion,
     logger,
-    migrationsRetryDelay,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaConfig = kibanaConfig;
@@ -105,7 +96,6 @@ export class KibanaMigrator {
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
-    this.migrationsRetryDelay = migrationsRetryDelay;
   }
 
   /**
@@ -174,43 +164,22 @@ export class KibanaMigrator {
       });
 
     const migrators = Object.keys(indexMap).map((index) => {
-      // TODO migrationsV2: remove old migrations algorithm
-      if (this.soMigrationsConfig.enableV2) {
-        return {
-          migrate: (): Promise<MigrationResult> => {
-            return runResilientMigrator({
-              client: this.client,
-              kibanaVersion: this.kibanaVersion,
-              targetMappings: buildActiveMappings(indexMap[index].typeMappings),
-              logger: this.log,
-              preMigrationScript: indexMap[index].script,
-              transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
-                migrateRawDocs(this.serializer, this.documentMigrator.migrateAndConvert, rawDocs),
-              migrationVersionPerType: this.documentMigrator.migrationVersion,
-              indexPrefix: index,
-              migrationsConfig: this.soMigrationsConfig,
-            });
-          },
-        };
-      } else {
-        return new IndexMigrator({
-          batchSize: this.soMigrationsConfig.batchSize,
-          client: createMigrationEsClient(this.client, this.log, this.migrationsRetryDelay),
-          documentMigrator: this.documentMigrator,
-          index,
-          kibanaVersion: this.kibanaVersion,
-          log: this.log,
-          mappingProperties: indexMap[index].typeMappings,
-          setStatus: (status) => this.status$.next(status),
-          pollInterval: this.soMigrationsConfig.pollInterval,
-          scrollDuration: this.soMigrationsConfig.scrollDuration,
-          serializer: this.serializer,
-          // Only necessary for the migrator of the kibana index.
-          obsoleteIndexTemplatePattern:
-            index === kibanaIndexName ? 'kibana_index_template*' : undefined,
-          convertToAliasScript: indexMap[index].script,
-        });
-      }
+      return {
+        migrate: (): Promise<MigrationResult> => {
+          return runResilientMigrator({
+            client: this.client,
+            kibanaVersion: this.kibanaVersion,
+            targetMappings: buildActiveMappings(indexMap[index].typeMappings),
+            logger: this.log,
+            preMigrationScript: indexMap[index].script,
+            transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
+              migrateRawDocs(this.serializer, this.documentMigrator.migrateAndConvert, rawDocs),
+            migrationVersionPerType: this.documentMigrator.migrationVersion,
+            indexPrefix: index,
+            migrationsConfig: this.soMigrationsConfig,
+          });
+        },
+      };
     });
 
     return Promise.all(migrators.map((migrator) => migrator.migrate()));

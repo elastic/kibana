@@ -40,8 +40,6 @@ const createMigrator = (
       scrollDuration: '15m',
       pollInterval: 1500,
       skip: false,
-      // TODO migrationsV2: remove/deprecate once we remove migrations v1
-      enableV2: false,
       retryAttempts: 10,
     },
     runMigrations: jest.fn(),

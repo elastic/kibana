@@ -51,7 +51,6 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
       {
         migrations: {
           skip: false,
-          enableV2: true,
         },
         logging: {
           appenders: {

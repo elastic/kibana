@@ -341,10 +341,10 @@ export class SavedObjectsService
     };
   }
 
-  public async start(
-    { elasticsearch, pluginsInitialized = true }: SavedObjectsStartDeps,
-    migrationsRetryDelay?: number
-  ): Promise<InternalSavedObjectsServiceStart> {
+  public async start({
+    elasticsearch,
+    pluginsInitialized = true,
+  }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
     }
@@ -360,8 +360,7 @@ export class SavedObjectsService
     const migrator = this.createMigrator(
       kibanaConfig,
       this.config.migration,
-      elasticsearch.client.asInternalUser,
-      migrationsRetryDelay
+      elasticsearch.client.asInternalUser
     );
 
     this.migrator$.next(migrator);
@@ -477,8 +476,7 @@ export class SavedObjectsService
   private createMigrator(
     kibanaConfig: KibanaConfigType,
     soMigrationsConfig: SavedObjectsMigrationConfigType,
-    client: ElasticsearchClient,
-    migrationsRetryDelay?: number
+    client: ElasticsearchClient
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -487,7 +485,6 @@ export class SavedObjectsService
       soMigrationsConfig,
       kibanaConfig,
       client,
-      migrationsRetryDelay,
     });
   }
 }
