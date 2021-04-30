@@ -57,7 +57,7 @@ const fetchEngines = (path: string, onComplete: (engines: EngineDetails[]) => vo
 
 const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
   i18n.translate(
-    'xpack.enterpriseSearch.appSearch.engine.souceEngines.removeEngineSuccessMessage',
+    'xpack.enterpriseSearch.appSearch.engine.souceEngines.removeSourceEngineSuccessMessage',
     {
       defaultMessage: 'Engine {engineName} has been removed from this meta engine.',
       values: { engineName },
@@ -66,7 +66,7 @@ const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
 
 const ADD_SOURCE_ENGINES_SUCCESS_MESSAGE = (sourceEngineNames: string[]) =>
   i18n.translate(
-    'xpack.enterpriseSearch.appSearch.engine.souceEngines.removeEngineSuccessMessage',
+    'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesSuccessMessage',
     {
       defaultMessage:
         '{sourceEnginesCount, plural, one {# engine} other {# engines}} has been added to this meta engine.',
