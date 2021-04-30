@@ -1,59 +1,77 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Should render add form row when attribution not provided 1`] = `
-<EuiFormRow
-  describedByIds={Array []}
-  display="columnCompressed"
-  fullWidth={false}
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
-  label="Attribution"
-  labelType="label"
+<fieldset
+  aria-labelledby="mapsLayerSettingsAttributionLegend"
 >
-  <AttributionPopover
-    label=""
-    onChange={[Function]}
-    popoverButtonIcon="plusInCircleFilled"
-    popoverButtonLabel="Add"
-    url=""
-  />
-</EuiFormRow>
+  <div
+    className="mapAttributionFormRow"
+  >
+    <legend
+      className="mapAttributionFormRow__legend"
+      id="mapsLayerSettingsAttributionLegend"
+    >
+      Attribution
+    </legend>
+    <div
+      className="mapAttributionFormRow__field"
+    >
+      <AttributionPopover
+        label=""
+        onChange={[Function]}
+        popoverButtonAriaLabel="Add attribution"
+        popoverButtonClassName="mapAttributionFormRow__addButton"
+        popoverButtonIcon="plusInCircleFilled"
+        popoverButtonLabel="Add attribution"
+        url=""
+      />
+    </div>
+  </div>
+</fieldset>
 `;
 
 exports[`Should render edit form row when attribution not provided 1`] = `
-<EuiFormRow
-  describedByIds={Array []}
-  display="columnCompressed"
-  fullWidth={false}
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
-  label="Attribution"
-  labelType="label"
+<fieldset
+  aria-labelledby="mapsLayerSettingsAttributionLegend"
 >
-  <div>
-    <EuiLink
-      color="text"
-      href="url1"
-      target="_blank"
+  <div
+    className="mapAttributionFormRow"
+  >
+    <legend
+      className="mapAttributionFormRow__legend"
+      id="mapsLayerSettingsAttributionLegend"
     >
-      label1
-    </EuiLink>
-    <EuiFlexGrid>
-      <EuiFlexItem
-        grow={false}
+      Attribution
+    </legend>
+    <div
+      className="mapAttributionFormRow__field"
+    >
+      <EuiPanel
+        color="subdued"
+        paddingSize="s"
+      >
+        <EuiLink
+          color="text"
+          href="url1"
+          target="_blank"
+        >
+          label1
+        </EuiLink>
+      </EuiPanel>
+      <div
+        className="mapAttributionFormRow__buttons"
       >
         <AttributionPopover
           label="label1"
           onChange={[Function]}
+          popoverButtonAriaLabel="Edit attribution"
           popoverButtonIcon="pencil"
           popoverButtonLabel="Edit"
           url="url1"
         />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
         <EuiButtonEmpty
+          aria-label="Clear attribution"
+          color="danger"
           iconType="trash"
           onClick={[Function]}
           size="xs"
@@ -64,10 +82,10 @@ exports[`Should render edit form row when attribution not provided 1`] = `
             values={Object {}}
           />
         </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGrid>
+      </div>
+    </div>
   </div>
-</EuiFormRow>
+</fieldset>
 `;
 
 exports[`Should render null when layer source has attribution provider 1`] = `""`;
