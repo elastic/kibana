@@ -34,50 +34,50 @@ export const visScale = (): ExpressionFunctionDefinition<
   ExpressionValueScale
 > => ({
   name: 'visscale',
-  help: i18n.translate('visTypeXY.function.scale.help', {
+  help: i18n.translate('visTypeXy.function.scale.help', {
     defaultMessage: 'Generates scale object',
   }),
   type: 'vis_scale',
   args: {
     boundsMargin: {
       types: ['number', 'string'],
-      help: i18n.translate('visTypeXY.function.scale.boundsMargin.help', {
+      help: i18n.translate('visTypeXy.function.scale.boundsMargin.help', {
         defaultMessage: 'Margin of bounds',
       }),
     },
     defaultYExtents: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXY.function.scale.defaultYExtents.help', {
+      help: i18n.translate('visTypeXy.function.scale.defaultYExtents.help', {
         defaultMessage: 'Flag which allow to scale to data bounds',
       }),
     },
     setYExtents: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXY.function.scale.setYExtents.help', {
+      help: i18n.translate('visTypeXy.function.scale.setYExtents.help', {
         defaultMessage: 'Flag which allow to set your own extents',
       }),
     },
     max: {
       types: ['number', 'null'],
-      help: i18n.translate('visTypeXY.function.scale.max.help', {
+      help: i18n.translate('visTypeXy.function.scale.max.help', {
         defaultMessage: 'Max value',
       }),
     },
     min: {
       types: ['number', 'null'],
-      help: i18n.translate('visTypeXY.function.scale.min.help', {
+      help: i18n.translate('visTypeXy.function.scale.min.help', {
         defaultMessage: 'Min value',
       }),
     },
     mode: {
       types: ['string'],
-      help: i18n.translate('visTypeXY.function.scale.mode.help', {
+      help: i18n.translate('visTypeXy.function.scale.mode.help', {
         defaultMessage: 'Scale mode',
       }),
     },
     type: {
       types: ['string'],
-      help: i18n.translate('visTypeXY.function.scale.mode.help', {
+      help: i18n.translate('visTypeXy.function.scale.mode.help', {
         defaultMessage: 'Scale type',
       }),
       required: true,

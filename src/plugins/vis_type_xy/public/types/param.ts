@@ -71,7 +71,7 @@ export interface ThresholdLine {
 
 export interface SeriesParam {
   data: { label: string; id: string };
-  drawLinesBetweenPoints: boolean;
+  drawLinesBetweenPoints?: boolean;
   interpolate?: InterpolationMode;
   lineWidth?: number;
   mode: ChartMode;

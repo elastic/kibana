@@ -44,54 +44,54 @@ export const categoryAxis = (): ExpressionFunctionDefinition<
   ExpressionValueCategoryAxis
 > => ({
   name: 'categoryaxis',
-  help: i18n.translate('visTypeXY.function.categoryAxis.help', {
+  help: i18n.translate('visTypeXy.function.categoryAxis.help', {
     defaultMessage: 'Generates category axis object',
   }),
   type: 'category_axis',
   args: {
     id: {
       types: ['string'],
-      help: i18n.translate('visTypeXY.function.categoryAxis.id.help', {
+      help: i18n.translate('visTypeXy.function.categoryAxis.id.help', {
         defaultMessage: 'Id of category axis',
       }),
       required: true,
     },
     show: {
       types: ['boolean'],
-      help: i18n.translate('visTypeXY.function.categoryAxis.show.help', {
+      help: i18n.translate('visTypeXy.function.categoryAxis.show.help', {
         defaultMessage: 'Show the category axis',
       }),
       required: true,
     },
     position: {
       types: ['string'],
-      help: i18n.translate('visTypeXY.function.categoryAxis.position.help', {
+      help: i18n.translate('visTypeXy.function.categoryAxis.position.help', {
         defaultMessage: 'Position of the category axis',
       }),
       required: true,
     },
     type: {
       types: ['string'],
-      help: i18n.translate('visTypeXY.function.categoryAxis.type.help', {
+      help: i18n.translate('visTypeXy.function.categoryAxis.type.help', {
         defaultMessage: 'Type of the category axis',
       }),
       required: true,
     },
     titleText: {
       types: ['string'],
-      help: i18n.translate('visTypeXY.function.categoryAxis.titleText.help', {
+      help: i18n.translate('visTypeXy.function.categoryAxis.titleText.help', {
         defaultMessage: 'Title text of the category axis',
       }),
     },
     scale: {
       types: ['vis_scale'],
-      help: i18n.translate('visTypeXY.function.categoryAxis.scale.help', {
+      help: i18n.translate('visTypeXy.function.categoryAxis.scale.help', {
         defaultMessage: 'Scale config',
       }),
     },
     labels: {
       types: ['label'],
-      help: i18n.translate('visTypeXY.function.categoryAxis.labels.help', {
+      help: i18n.translate('visTypeXy.function.categoryAxis.labels.help', {
         defaultMessage: 'Axis label config',
       }),
     },

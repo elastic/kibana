@@ -43,21 +43,21 @@ export const valueAxis = (): ExpressionFunctionDefinition<
   ExpressionValueValueAxis
 > => ({
   name: 'valueaxis',
-  help: i18n.translate('visTypeXY.function.range.help', {
+  help: i18n.translate('visTypeXy.function.range.help', {
     defaultMessage: 'Generates value axis object',
   }),
   type: 'value_axis',
   args: {
     name: {
       types: ['string'],
-      help: i18n.translate('visTypeXY.function.valueAxis.name.help', {
+      help: i18n.translate('visTypeXy.function.valueAxis.name.help', {
         defaultMessage: 'Name of value axis',
       }),
       required: true,
     },
     axisParams: {
       types: ['category_axis'],
-      help: i18n.translate('visTypeXY.function.valueAxis.axisParams.help', {
+      help: i18n.translate('visTypeXy.function.valueAxis.axisParams.help', {
         defaultMessage: 'Value axis params',
       }),
       required: true,
