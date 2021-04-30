@@ -23,6 +23,14 @@ import {
 } from '../../../../maps/public/ems_autosuggest';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 
+const MAX_ENTITY_VALUES = 3;
+const COMMON_EMS_LAYER_IDS = [
+  'world_countries',
+  'administrative_regions_lvl2',
+  'usa_zip_codes',
+  'usa_states',
+];
+
 function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
   const anomalyRows: Record<
     string,
@@ -143,12 +151,28 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
     if (mapsPlugin) {
       const suggestions = await Promise.all(
         jobIds.map(async (jobId) => {
-          const anomaly = anomalies.find((a) => jobId === a.jobId && a.entityValue !== '');
-          const { entityName, entityValue } = anomaly || {};
-          // Can do a second call to this function (remove columnName) with all entityValue values and emsLayerIds set to the layerId returned the first time - this would confirm there would be results
+          const entityValues = new Set<string>();
+          let entityName;
+          for (let i = 0; i < anomalies.length; i++) {
+            if (jobId === anomalies[i].jobId && anomalies[i].entityValue !== '') {
+              entityValues.add(anomalies[i].entityValue);
+
+              if (!entityName) {
+                entityName = anomalies[i].entityName;
+              }
+            }
+            if (
+              // convert to set so it's unique values
+              entityValues.size === MAX_ENTITY_VALUES ||
+              (anomalies.length > MAX_ENTITY_VALUES && i > Math.floor(anomalies.length / 3))
+            )
+              break;
+          }
+
           const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
-            sampleValues: [entityValue],
-            sampleValuesColumnName: entityName,
+            emsLayerIds: COMMON_EMS_LAYER_IDS,
+            sampleValues: Array.from(entityValues),
+            sampleValuesColumnName: entityName || '',
           });
           if (suggestion) {
             return { jobId, ...suggestion };
@@ -173,7 +197,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
   useEffect(
     function setupMapLayers() {
       // Loop through suggestions list and make a layer for each
-      if (EMSSuggestions) {
+      if (EMSSuggestions?.length) {
         let count = 0;
         const layers = EMSSuggestions.reduce(function (result, suggestion) {
           if (suggestion) {
@@ -196,7 +220,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   return (
     <>
-      <EuiPanel data-test-subj="mlAnomalyExplorerAnomaliesMap loaded">
+      <EuiPanel data-test-subj="mlAnomalyExplorerAnomaliesMap">
         <EuiAccordion
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}
