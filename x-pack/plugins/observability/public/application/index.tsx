@@ -23,7 +23,7 @@ import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { ConfigSchema } from '..';
-import { ObservabilityRuleRegistry } from '../rules/create_observability_rule_registry';
+import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
   return breadcrumbs.map(({ text }) => text).reverse();
@@ -73,12 +73,12 @@ export const renderApp = ({
   core,
   plugins,
   appMountParameters,
-  observabilityRuleRegistry,
+  observabilityRuleTypeRegistry,
 }: {
   config: ConfigSchema;
   core: CoreStart;
   plugins: ObservabilityPublicPluginsStart;
-  observabilityRuleRegistry: ObservabilityRuleRegistry;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
 }) => {
   const { element, history } = appMountParameters;
@@ -95,7 +95,7 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
       <PluginContext.Provider
-        value={{ appMountParameters, config, core, plugins, observabilityRuleRegistry }}
+        value={{ appMountParameters, config, core, plugins, observabilityRuleTypeRegistry }}
       >
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>

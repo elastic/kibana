@@ -8,8 +8,9 @@
 import { Logger } from 'kibana/server';
 import { of } from 'rxjs';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import type { RuleDataClient } from '../../../../../rule_registry/server';
+import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../alerting/server';
 import { APMConfig } from '../../..';
-import { APMRuleRegistry } from '../../../plugin';
 
 export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;
@@ -27,19 +28,16 @@ export const createRuleTypeMocks = () => {
     error: jest.fn(),
   } as unknown) as Logger;
 
-  const registry = {
+  const alerting = {
     registerType: ({ executor }) => {
       alertExecutor = executor;
     },
-  } as APMRuleRegistry;
+  } as AlertingPluginSetupContract;
 
   const scheduleActions = jest.fn();
 
   const services = {
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    scopedRuleRegistryClient: {
-      bulkIndex: jest.fn(),
-    },
     alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     alertWithLifecycle: jest.fn(),
     logger: loggerMock,
@@ -47,9 +45,21 @@ export const createRuleTypeMocks = () => {
 
   return {
     dependencies: {
-      registry,
+      alerting,
       config$: mockedConfig$,
       logger: loggerMock,
+      ruleDataClient: ({
+        getReader: () => {
+          return {
+            search: jest.fn(),
+          };
+        },
+        getWriter: () => {
+          return {
+            bulk: jest.fn(),
+          };
+        },
+      } as unknown) as RuleDataClient,
     },
     services,
     scheduleActions,

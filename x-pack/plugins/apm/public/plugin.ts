@@ -34,19 +34,15 @@ import type {
   HasDataParams,
   ObservabilityPublicSetup,
 } from '../../observability/public';
-import { FormatterRuleRegistry } from '../../observability/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
-import type { APMRuleFieldMap } from '../common/rules/apm_rule_field_map';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
-export type ApmRuleRegistry = ApmPluginSetup['ruleRegistry'];
 
 export type ApmPluginStart = void;
 
@@ -87,11 +83,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
-      ...apmRuleRegistrySettings,
-      fieldMap: {} as APMRuleFieldMap,
-      ctor: FormatterRuleRegistry,
-    });
     const getApmDataHelper = async () => {
       const {
         fetchObservabilityOverviewPageData,
@@ -126,6 +117,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
       return { fetchUxOverviewDate, hasRumData };
     };
+
+    const { observabilityRuleTypeRegistry } = plugins.observability;
 
     plugins.observability.dashboard.register({
       appName: 'ux',
@@ -187,12 +180,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           appMountParameters,
           config,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
-          apmRuleRegistry,
+          observabilityRuleTypeRegistry,
         });
       },
     });
 
-    registerApmAlerts(apmRuleRegistry);
+    registerApmAlerts(observabilityRuleTypeRegistry);
 
     core.application.register({
       id: 'ux',
@@ -231,14 +224,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           appMountParameters,
           config,
           corePlugins: corePlugins as ApmPluginStartDeps,
-          apmRuleRegistry,
+          observabilityRuleTypeRegistry,
         });
       },
     });
 
-    return {
-      ruleRegistry: apmRuleRegistry,
-    };
+    return {};
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     toggleAppLinkInNav(core, this.initializerContext.config.get());

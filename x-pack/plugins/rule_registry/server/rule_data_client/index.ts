@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { TypeMapping } from '@elastic/elasticsearch/api/types';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { IndexPatternsFetcher } from 'src/plugins/data/server';
+import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 import {
   IRuleDataClient,
   RuleDataClientConstructorOptions,
@@ -23,32 +22,36 @@ export class RuleDataClient implements IRuleDataClient {
   constructor(private readonly options: RuleDataClientConstructorOptions) {}
 
   private async getClusterClient() {
-    const { clusterClient } = await this.options.ready();
-    return clusterClient;
+    await this.options.ready();
+    return await this.options.getClusterClient();
   }
 
-  getReader(): RuleDataReader {
+  getReader(options: { namespace?: string } = {}): RuleDataReader {
+    const index = `${[this.options.alias, options.namespace].filter(Boolean).join('-')}*`;
+
     return {
       search: async (request) => {
         const clusterClient = await this.getClusterClient();
 
-        return clusterClient.search({
+        const { body } = (await clusterClient.search({
           ...request,
-          index: this.options.alias,
-        }) as Promise<any>;
+          index,
+        })) as { body: any };
+
+        return body;
       },
-      getDynamicIndexPattern: async (pattern: string = this.options.alias) => {
+      getDynamicIndexPattern: async () => {
         const clusterClient = await this.getClusterClient();
         const indexPatternsFetcher = new IndexPatternsFetcher(clusterClient);
 
         const fields = await indexPatternsFetcher.getFieldsForWildcard({
-          pattern,
+          pattern: index,
         });
 
         return {
           fields,
           timeFieldName: '@timestamp',
-          title: pattern,
+          title: index,
         };
       },
     };
@@ -67,13 +70,20 @@ export class RuleDataClient implements IRuleDataClient {
           index: alias,
         };
 
-        return clusterClient.bulk(requestWithDefaultParameters).catch((error) => {
-          if (error instanceof ResponseError && error.name === 'index_not_found_exception') {
-            return this.createOrUpdateWriteTarget({ namespace }).then(() => {
-              return clusterClient.bulk(requestWithDefaultParameters);
-            });
+        return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
+          if (response.body.errors) {
+            if (
+              response.body.items.length === 1 &&
+              response.body.items[0]?.index?.error?.type === 'index_not_found_exception'
+            ) {
+              return this.createOrUpdateWriteTarget({ namespace }).then(() => {
+                return clusterClient.bulk(requestWithDefaultParameters);
+              });
+            }
+            const error = new ResponseError(response);
+            throw error;
           }
-          throw error;
+          return response;
         });
       },
     };
