@@ -7,7 +7,17 @@
  */
 
 import { memoize, once } from 'lodash';
-import { BehaviorSubject, EMPTY, from, fromEvent, of, Subscription, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  defer,
+  EMPTY,
+  from,
+  fromEvent,
+  merge,
+  of,
+  Subscription,
+  throwError,
+} from 'rxjs';
 import {
   catchError,
   filter,
@@ -198,7 +208,11 @@ export class SearchInterceptor {
     options: IAsyncSearchOptions,
     searchAbortController: SearchAbortController
   ) {
-    const search = () => this.runSearch({ id, ...request }, options);
+    const search = () =>
+      this.runSearch(
+        { id, ...request },
+        { ...options, abortSignal: searchAbortController.getSignal() }
+      );
     const { sessionId, strategy } = options;
 
     // track if this search's session will be send to background
