@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { SchemaType } from './types';
-
-export const fieldTypeSelectOptions = Object.values(SchemaType).map((type) => ({
-  value: type,
-  text: type,
-}));
-
 export const FIELD_NAME_CORRECT_NOTE = i18n.translate(
   'xpack.enterpriseSearch.schema.addFieldModal.fieldNameNote.correct',
   {
@@ -74,12 +67,5 @@ export const ERROR_TABLE_VIEW_LINK = i18n.translate(
   'xpack.enterpriseSearch.schema.errorsTable.link.view',
   {
     defaultMessage: 'View',
-  }
-);
-
-export const RECENTY_ADDED = i18n.translate(
-  'xpack.enterpriseSearch.schema.existingField.status.recentlyAdded',
-  {
-    defaultMessage: 'Recently Added',
   }
 );
