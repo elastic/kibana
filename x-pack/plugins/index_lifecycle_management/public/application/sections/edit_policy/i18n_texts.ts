@@ -80,7 +80,7 @@ export const i18nTexts = {
     searchableSnapshotsRepoFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoFieldLabel',
       {
-        defaultMessage: 'Searchable snapshot repository',
+        defaultMessage: 'Snapshot repository',
       }
     ),
     searchableSnapshotsStorageFieldLabel: i18n.translate(
