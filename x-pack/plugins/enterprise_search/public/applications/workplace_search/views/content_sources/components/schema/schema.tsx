@@ -31,7 +31,6 @@ import {
   SCHEMA_MANAGE_SCHEMA_TITLE,
   SCHEMA_MANAGE_SCHEMA_DESCRIPTION,
   SCHEMA_FILTER_PLACEHOLDER,
-  SCHEMA_UPDATING,
   SCHEMA_SAVE_BUTTON,
   SCHEMA_EMPTY_SCHEMA_TITLE,
   SCHEMA_EMPTY_SCHEMA_DESCRIPTION,
@@ -42,7 +41,6 @@ import { SchemaLogic } from './schema_logic';
 export const Schema: React.FC = () => {
   const {
     initializeSchema,
-    onIndexingComplete,
     addNewField,
     updateFields,
     openAddFieldModal,
@@ -70,7 +68,7 @@ export const Schema: React.FC = () => {
   if (dataLoading) return <Loading />;
 
   const hasSchemaFields = Object.keys(activeSchema).length > 0;
-  const { hasErrors, percentageComplete, activeReindexJobId } = mostRecentIndexJob;
+  const { hasErrors, activeReindexJobId } = mostRecentIndexJob;
 
   const addFieldButton = (
     <EuiButtonEmpty color="primary" data-test-subj="AddFieldButton" onClick={openAddFieldModal}>
@@ -110,20 +108,14 @@ export const Schema: React.FC = () => {
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>{addFieldButton}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    {percentageComplete < 100 ? (
-                      <EuiButton isLoading fill>
-                        {SCHEMA_UPDATING}
-                      </EuiButton>
-                    ) : (
-                      <EuiButton
-                        disabled={formUnchanged}
-                        data-test-subj="UpdateTypesButton"
-                        onClick={updateFields}
-                        fill
-                      >
-                        {SCHEMA_SAVE_BUTTON}
-                      </EuiButton>
-                    )}
+                    <EuiButton
+                      disabled={formUnchanged}
+                      data-test-subj="UpdateTypesButton"
+                      onClick={updateFields}
+                      fill
+                    >
+                      {SCHEMA_SAVE_BUTTON}
+                    </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

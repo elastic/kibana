@@ -24,7 +24,6 @@ import { SchemaFieldsTable } from './schema_fields_table';
 
 describe('Schema', () => {
   const initializeSchema = jest.fn();
-  const onIndexingComplete = jest.fn();
   const addNewField = jest.fn();
   const updateFields = jest.fn();
   const openAddFieldModal = jest.fn();
@@ -58,7 +57,6 @@ describe('Schema', () => {
     setMockValues({ ...mockValues });
     setMockActions({
       initializeSchema,
-      onIndexingComplete,
       addNewField,
       updateFields,
       openAddFieldModal,
