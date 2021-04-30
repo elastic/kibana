@@ -13,6 +13,8 @@ import {
 } from '../../../../../../../../../../src/plugins/data/public';
 
 import { getNestedProperty } from '../../../../../../../common/utils/object_utils';
+import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';
+
 import { isRuntimeMappings } from '../../../../../../../common/shared_imports';
 
 import {
@@ -94,9 +96,7 @@ export function getPivotDropdownOptions(
   const combinedFields = [...indexPatternFields, ...runtimeFields].sort(sortByLabel);
   combinedFields.forEach((field) => {
     const rawFieldName = field.name;
-    const displayFieldName = rawFieldName.endsWith('.keyword')
-      ? rawFieldName.slice(0, -8)
-      : rawFieldName;
+    const displayFieldName = removeKeywordPostfix(rawFieldName);
 
     // Group by
     const availableGroupByAggs: [] = getNestedProperty(pivotGroupByFieldSupport, field.type);
@@ -119,7 +119,7 @@ export function getPivotDropdownOptions(
     }
 
     // Aggregations
-    const aggOption: DropDownOption = { label: field.name, options: [] };
+    const aggOption: DropDownOption = { label: displayFieldName, options: [] };
     const availableAggs: [] = getNestedProperty(pivotAggsFieldSupport, field.type);
 
     if (availableAggs !== undefined) {
