@@ -7688,7 +7688,6 @@
     "xpack.enterpriseSearch.schema.errorsTable.heading.error": "错误",
     "xpack.enterpriseSearch.schema.errorsTable.heading.id": "ID",
     "xpack.enterpriseSearch.schema.errorsTable.link.view": "查看",
-    "xpack.enterpriseSearch.schema.existingField.status.recentlyAdded": "最近添加",
     "xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1": "访问 Elastic Cloud 控制台以{editDeploymentLink}。",
     "xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1LinkText": "编辑您的部署",
     "xpack.enterpriseSearch.setupGuide.cloud.step1.title": "编辑您的部署的配置",
