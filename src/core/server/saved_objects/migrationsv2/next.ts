@@ -121,7 +121,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         transformRawDocs,
         state.outdatedDocuments,
         state.targetIndex,
-        false
+        'wait_for'
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
