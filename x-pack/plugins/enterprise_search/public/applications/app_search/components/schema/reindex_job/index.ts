@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { DocLinksStart } from 'src/core/public';
-
-export let documentationLinks: DocLinksStart['links'];
-
-export const init = (docLinks: DocLinksStart) => {
-  documentationLinks = docLinks.links;
-};
+export { ReindexJob } from './reindex_job';
