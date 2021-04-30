@@ -24,7 +24,7 @@ import {
 } from '../alert_type';
 import { SearchResponse } from 'elasticsearch';
 
-const alertInstanceFactory = (expectedContext: unknown[], testAlertActionArr: unknown[]) => (
+const alertInstanceFactory = (expectedAlertResults: unknown[], testAlertActionArr: unknown[]) => (
   instanceId: string
 ) => {
   const alertInstance = alertsMock.createAlertInstanceFactory<
@@ -33,15 +33,15 @@ const alertInstanceFactory = (expectedContext: unknown[], testAlertActionArr: un
   >();
   alertInstance.scheduleActions.mockImplementation(
     (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
+      // Store descriptive subset of created alerts in passed-in array for calling test
       // @ts-ignore
-      const contextKeys = Object.keys(expectedContext[0].context);
+      const contextKeys = Object.keys(expectedAlertResults[0].context);
       const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
       testAlertActionArr.push({
         actionGroupId,
         instanceId,
         context: contextSubset,
       });
-      return alertInstance;
     }
   );
   return alertInstance;
@@ -217,7 +217,7 @@ describe('geo_containment', () => {
       ],
     ]);
 
-    const expectedContext = [
+    const expectedAlertResults = [
       {
         actionGroupId: 'Tracked entity contained',
         context: {
@@ -258,12 +258,12 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMap,
-        alertInstanceFactory(expectedContext, testAlertActionArr),
+        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(testAlertActionArr).toMatchObject(expectedContext);
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
     it('should overwrite older identical entity entries', () => {
@@ -283,12 +283,12 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory(expectedContext, testAlertActionArr),
+        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(testAlertActionArr).toMatchObject(expectedContext);
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
     it('should preserve older non-identical entity entries', () => {
@@ -305,7 +305,7 @@ describe('geo_containment', () => {
           ],
         ],
       ]);
-      const expectedContextPlusD = [
+      const expectedAlertResultsPlusD = [
         {
           actionGroupId: 'Tracked entity contained',
           context: {
@@ -316,19 +316,19 @@ describe('geo_containment', () => {
           },
           instanceId: 'd-999',
         },
-        ...expectedContext,
+        ...expectedAlertResults,
       ];
 
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithNonIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory(expectedContext, testAlertActionArr),
+        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
       expect(allActiveEntriesMap).not.toEqual(currLocationMap);
       expect(allActiveEntriesMap.has('d')).toBeTruthy();
-      expect(testAlertActionArr).toMatchObject(expectedContextPlusD);
+      expect(testAlertActionArr).toMatchObject(expectedAlertResultsPlusD);
     });
 
     it('should remove "other" entries and schedule the expected number of actions', () => {
@@ -345,12 +345,12 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(expectedContext, testAlertActionArr),
+        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(testAlertActionArr).toMatchObject(expectedContext);
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
     it('should generate multiple alerts per entity if found in multiple shapes in interval', () => {
@@ -378,7 +378,7 @@ describe('geo_containment', () => {
       getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithThreeMore,
-        alertInstanceFactory(expectedContext, testAlertActionArr),
+        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -415,7 +415,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(expectedContext, testAlertActionArr),
+        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -447,7 +447,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(expectedContext, testAlertActionArr),
+        alertInstanceFactory(expectedAlertResults, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
