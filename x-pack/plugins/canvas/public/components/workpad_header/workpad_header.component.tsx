@@ -19,6 +19,7 @@ import { EditMenu } from './edit_menu';
 import { ElementMenu } from './element_menu';
 import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
+import { LabsControl } from './labs_control';
 import { CommitFn } from '../../../types';
 
 const { WorkpadHeader: strings } = ComponentStrings;
@@ -110,6 +111,9 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ShareMenu />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LabsControl />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

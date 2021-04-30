@@ -106,31 +106,56 @@ describe('MultiInputRows', () => {
 
   describe('onSubmit', () => {
     const onSubmit = jest.fn();
+    const preventDefault = jest.fn();
 
-    it('does not render the submit button if onSubmit is not passed', () => {
-      const wrapper = shallow(<MultiInputRows {...props} />);
-      expect(wrapper.find('[data-test-subj="submitInputValuesButton"]').exists()).toBe(false);
+    it('renders a form component', () => {
+      const wrapper = shallow(<MultiInputRows {...props} onSubmit={onSubmit} />);
+
+      expect(wrapper.prop('component')).toEqual('form');
     });
 
-    it('calls the passed onSubmit callback when the submit button is clicked', () => {
+    it('calls the passed onSubmit callback when the form is submitted', () => {
       setMockValues({ ...values, values: ['some value'] });
       const wrapper = shallow(<MultiInputRows {...props} onSubmit={onSubmit} />);
-      wrapper.find('[data-test-subj="submitInputValuesButton"]').simulate('click');
 
+      wrapper.simulate('submit', { preventDefault });
+
+      expect(preventDefault).toHaveBeenCalled();
       expect(onSubmit).toHaveBeenCalledWith(['some value']);
     });
 
-    it('disables the submit button if no value fields have been filled', () => {
-      setMockValues({
-        ...values,
-        values: [''],
-        hasOnlyOneValue: true,
-        hasEmptyValues: true,
-      });
-      const wrapper = shallow(<MultiInputRows {...props} onSubmit={onSubmit} />);
-      const button = wrapper.find('[data-test-subj="submitInputValuesButton"]');
+    it('does not render a form component or onSubmit event if onSubmit is not passed', () => {
+      const wrapper = shallow(<MultiInputRows {...props} />);
 
-      expect(button.prop('isDisabled')).toEqual(true);
+      expect(wrapper.prop('component')).toEqual('div');
+      expect(wrapper.prop('onSubmit')).toBeUndefined();
+    });
+
+    describe('submit button', () => {
+      it('does not render the submit button if onSubmit is not passed', () => {
+        const wrapper = shallow(<MultiInputRows {...props} />);
+        expect(wrapper.find('[data-test-subj="submitInputValuesButton"]').exists()).toBe(false);
+      });
+
+      it('does not render the submit button if showSubmitButton is false', () => {
+        const wrapper = shallow(
+          <MultiInputRows {...props} onSubmit={onSubmit} showSubmitButton={false} />
+        );
+        expect(wrapper.find('[data-test-subj="submitInputValuesButton"]').exists()).toBe(false);
+      });
+
+      it('disables the submit button if no value fields have been filled', () => {
+        setMockValues({
+          ...values,
+          values: [''],
+          hasOnlyOneValue: true,
+          hasEmptyValues: true,
+        });
+        const wrapper = shallow(<MultiInputRows {...props} onSubmit={onSubmit} />);
+        const button = wrapper.find('[data-test-subj="submitInputValuesButton"]');
+
+        expect(button.prop('isDisabled')).toEqual(true);
+      });
     });
   });
 

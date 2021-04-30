@@ -260,9 +260,14 @@ export class AlertsClient {
     );
     const username = await this.getUserName();
 
-    const createdAPIKey = data.enabled
-      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
-      : null;
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = data.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+    }
 
     this.validateActions(alertType, data.actions);
 
@@ -727,9 +732,16 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const createdAPIKey = attributes.enabled
-      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
-      : null;
+
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = attributes.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
+    }
+
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
@@ -837,12 +849,21 @@ export class AlertsClient {
     }
 
     const username = await this.getUserName();
+
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = await this.createAPIKey(
+        this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+      );
+    } catch (error) {
+      throw Boom.badRequest(
+        `Error updating API key for rule: could not create API key - ${error.message}`
+      );
+    }
+
     const updateAttributes = this.updateMeta({
       ...attributes,
-      ...this.apiKeyAsAlertAttributes(
-        await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-        username
-      ),
+      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       updatedAt: new Date().toISOString(),
       updatedBy: username,
     });
@@ -944,13 +965,20 @@ export class AlertsClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
+
+      let createdAPIKey = null;
+      try {
+        createdAPIKey = await this.createAPIKey(
+          this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+        );
+      } catch (error) {
+        throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
+      }
+
       const updateAttributes = this.updateMeta({
         ...attributes,
         enabled: true,
-        ...this.apiKeyAsAlertAttributes(
-          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-          username
-        ),
+        ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
       });
