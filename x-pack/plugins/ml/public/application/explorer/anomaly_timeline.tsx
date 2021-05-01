@@ -37,7 +37,7 @@ import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from '
 import { NoOverallData } from './components/no_overall_data';
 import { HelpPopover, HelpPopoverButton } from '../components/help_popover/help_popover';
 
-const SwimLaneHelpPopover = () => {
+const AnomalyTimelineHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -52,14 +52,32 @@ const SwimLaneHelpPopover = () => {
       }
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
-      title={i18n.translate('xpack.ml.explorer.swimLanePopoverTitle', {
-        defaultMessage: 'Swim lanes',
+      title={i18n.translate('xpack.ml.explorer.anomalyTimelinePopoverTitle', {
+        defaultMessage: 'Anomaly timelines',
       })}
     >
       <p>
-        {i18n.translate('xpack.ml.explorer.swimLanePopoverBasicExplanation', {
+        {i18n.translate('xpack.ml.explorer.anomalyTimelinePopoverBasicExplanation', {
           defaultMessage:
-            'The overall swim lane contains the anomaly scores for each bucket in the selected time period. Each score is a value from 0 to 100, which is a statistically aggregated and normalized view of the combined anomalousness of all the anomaly record results within the bucket. The buckets with high scores are shown in red and low scores are indicated in blue.',
+            'Swim lanes provide an overview of the buckets of data that have been analyzed within the selected time period. You can view an overall swim lane or view them by job or influencer.',
+        })}
+      </p>
+      <p>
+        {i18n.translate('xpack.ml.explorer.anomalyTimelinePopoverScoreExplanation', {
+          defaultMessage:
+            'Each block in a swim lane is colored according to its anomaly score, which is a value from 0 to 100. The blocks with high scores are shown in red and low scores are indicated in blue.',
+        })}
+      </p>
+      <p>
+        {i18n.translate('xpack.ml.explorer.anomalyTimelinePopoverAdvancedExplanation', {
+          defaultMessage:
+            'The anomaly scores that you see in each section of the Anomaly Explorer might differ slightly. This disparity occurs because for each job there are bucket results, overall bucket results, influencer results, and record results. Anomaly scores are generated for each type of result. The overall swim lane shows the maximum overall bucket score for each block. When you view a swim lane by job, it shows the maximum bucket score in each block. When you view by influencer, it shows the maximum influencer score in each block.',
+        })}
+      </p>
+      <p>
+        {i18n.translate('xpack.ml.explorer.anomalyTimelinePopoverSelectionExplanation', {
+          defaultMessage:
+            'When you select one or more blocks in the swim lanes, the list of anomalies and top influencers is likewise filtered to provide information relative to that selection.',
         })}
       </p>
     </HelpPopover>
@@ -256,7 +274,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem grow={false}>{<SwimLaneHelpPopover />}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{<AnomalyTimelineHelpPopover />}</EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
