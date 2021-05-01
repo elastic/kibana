@@ -34,19 +34,13 @@ const learnMoreLink = (
 );
 
 const i18nTexts = {
-  allocateToDataNodesOption: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.allocateToDataNodesOption',
-    { defaultMessage: 'Any data node' }
+  doNotModifyAllocationOption: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.doNotModifyAllocationOption',
+    { defaultMessage: 'Do not modify allocation configuration' }
   ),
 };
 
-export const NodeAllocation: FunctionComponent<SharedProps> = ({
-  phase,
-  nodes,
-  isLoading,
-  isCloudEnabled,
-  isUsingDeprecatedDataRoleConfig,
-}) => {
+export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, isLoading }) => {
   const allocationNodeAttributePath = `_meta.${phase}.allocationNodeAttribute`;
 
   const [formData] = useFormData({
@@ -65,20 +59,6 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({
   }));
 
   nodeOptions.sort((a, b) => a.value.localeCompare(b.value));
-
-  let nodeAllocationOptions = [];
-
-  // On Cloud, allocating to data tiers and allocating to data nodes is mutually exclusive. So we
-  // only let users select this option if they're using data nodes. Otherwise we remove it.
-  //
-  // On prem, users should have the freedom to choose this option, even if they're using node roles.
-  // So we always give them this option.
-  if (!isCloudEnabled || isUsingDeprecatedDataRoleConfig) {
-    const allocateToDataNodesOption = { text: i18nTexts.allocateToDataNodesOption, value: '' };
-    nodeAllocationOptions.push(allocateToDataNodesOption);
-  }
-
-  nodeAllocationOptions = nodeAllocationOptions.concat(nodeOptions);
 
   return (
     <>
@@ -117,7 +97,9 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({
           ) : undefined,
           euiFieldProps: {
             'data-test-subj': `${phase}-selectedNodeAttrs`,
-            options: nodeAllocationOptions,
+            options: [{ text: i18nTexts.doNotModifyAllocationOption, value: '' }].concat(
+              nodeOptions
+            ),
             hasNoInitialSelection: false,
             isLoading,
           },
