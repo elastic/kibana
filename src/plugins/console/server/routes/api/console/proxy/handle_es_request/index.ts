@@ -29,40 +29,19 @@ function toURL(base: string, path: string) {
   return urlResult;
 }
 
-function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
-  const normalizeHeader = function (header: string) {
-    if (!header) {
-      return '';
-    }
-    header = header.toString();
-    return header.trim().toLowerCase();
-  };
-
-  // Normalize list of headers we want to allow in upstream request
-  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
-
-  return pick(originalHeaders, headersToKeepNormalized);
-}
-
 function getRequestConfig(
-  headers: object,
   esConfig: ESConfigForProxy,
   proxyConfigCollection: ProxyConfigCollection,
   uri: string
-): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
-  const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
-  const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
-
+): { agent: Agent; timeout: number; rejectUnauthorized?: boolean } {
   if (proxyConfigCollection.hasConfig()) {
     return {
       ...proxyConfigCollection.configForUri(uri),
-      headers: newHeaders,
     };
   }
 
   return {
     ...getElasticsearchProxyConfig(esConfig),
-    headers: newHeaders,
   };
 }
 
@@ -77,7 +56,8 @@ export const handleEsRequest = async (
   log,
   readLegacyESConfig,
   pathFilters,
-  proxyConfigCollection
+  proxyConfigCollection,
+  requestHeaders
 ) => {
   if (!pathFilters.some((re) => re.test(path))) {
     return response.forbidden({
@@ -99,17 +79,11 @@ export const handleEsRequest = async (
 
       // Because this can technically be provided by a settings-defined proxy config, we need to
       // preserve these property names to maintain BWC.
-      const {
-        timeout,
-        agent,
-        headers: requestConfigHeaders,
-        rejectUnauthorized,
-      } = getRequestConfig(headers, legacyConfig, proxyConfigCollection, uri.toString());
-
-      const requestHeaders = {
-        ...requestConfigHeaders,
-        ...proxyHeaders,
-      };
+      const { timeout, agent, rejectUnauthorized } = getRequestConfig(
+        legacyConfig,
+        proxyConfigCollection,
+        uri.toString()
+      );
 
       esIncomingMessage = await proxyRequest({
         method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
