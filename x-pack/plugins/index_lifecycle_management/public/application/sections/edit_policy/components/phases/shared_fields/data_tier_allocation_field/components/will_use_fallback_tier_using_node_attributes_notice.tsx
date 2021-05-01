@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-import { DataTierRole } from '../../../../../../../../../common/types';
+import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../../common/types';
 import {
   noCustomAttributesTitle,
   nodeAllocationMigrationGuidance,
@@ -17,10 +17,12 @@ import {
 import { nodeRoleToFallbackTierMap } from './node_role_to_fallback_tier_map';
 
 interface Props {
+  phase: PhaseWithAllocation;
   targetNodeRole: DataTierRole;
 }
 
 export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Props> = ({
+  phase,
   targetNodeRole,
 }) => {
   return (
@@ -32,8 +34,9 @@ export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Pro
         {i18n.translate(
           'xpack.indexLifecycleMgmt.dataTier.willUseFallbackTierUsingNodeAttributesDescription',
           {
-            defaultMessage: 'Data will be allocated to the {tier} tier.',
-            values: { tier: nodeRoleToFallbackTierMap[targetNodeRole] },
+            defaultMessage:
+              'No {phase} nodes available. Data will be allocated to the {fallbackTier} tier.',
+            values: { phase, fallbackTier: nodeRoleToFallbackTierMap[targetNodeRole] },
           }
         )}
       </p>

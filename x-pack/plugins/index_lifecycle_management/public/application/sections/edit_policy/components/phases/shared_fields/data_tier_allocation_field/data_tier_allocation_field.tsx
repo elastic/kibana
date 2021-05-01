@@ -149,6 +149,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
               <>
                 <EuiSpacer size="s" />
                 <WillUseFallbackTierUsingNodeAttributesNotice
+                  phase={phase}
                   targetNodeRole={allocationNodeRoleForPhase as DataTierRole}
                 />
               </>

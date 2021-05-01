@@ -25,7 +25,7 @@ export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () =
         {i18n.translate(
           'xpack.indexLifecycleMgmt.dataTier.noTiersAvailableUsingNodeAttributesDescription',
           {
-            defaultMessage: 'There are no available nodes for data allocation.',
+            defaultMessage: 'Unable to allocate data: no available data nodes.',
           }
         )}
       </p>
