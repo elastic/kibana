@@ -50,8 +50,11 @@ export async function ensureAuthorized<T extends string>(
   const missingPrivileges = getMissingPrivileges(privileges);
   const typeActionMap = privileges.kibana.reduce<
     Map<string, Record<T, EnsureAuthorizedActionResult>>
-  >((acc, { resource, privilege, authorized }) => {
-    if (!authorized) {
+  >((acc, { resource, privilege }) => {
+    if (
+      (resource && missingPrivileges.get(resource)?.has(privilege)) ||
+      (!resource && missingPrivileges.get(undefined)?.has(privilege))
+    ) {
       return acc;
     }
     const { type, action } = privilegeActionsMap.get(privilege)!; // always defined
@@ -67,21 +70,24 @@ export async function ensureAuthorized<T extends string>(
   if (hasAllRequested) {
     return { typeActionMap, status: 'fully_authorized' };
   } else if (!requireFullAuthorization) {
-    const isPartiallyAuthorized = privileges.kibana.some(({ authorized }) => authorized);
+    const isPartiallyAuthorized = typeActionMap.size > 0;
     if (isPartiallyAuthorized) {
       return { typeActionMap, status: 'partially_authorized' };
     } else {
       return { typeActionMap, status: 'unauthorized' };
     }
   } else {
-    const targetTypesAndActions = uniq(
-      missingPrivileges
-        .map(({ privilege }) => {
-          const { type, action } = privilegeActionsMap.get(privilege)!;
-          return `(${action} ${type})`;
-        })
-        .sort()
-    ).join(',');
+    const uniqueUnauthorizedPrivileges = [...missingPrivileges.entries()].reduce(
+      (acc, [, privilegeSet]) => new Set([...acc, ...privilegeSet]),
+      new Set<string>()
+    );
+    const targetTypesAndActions = [...uniqueUnauthorizedPrivileges]
+      .map((privilege) => {
+        const { type, action } = privilegeActionsMap.get(privilege)!;
+        return `(${action} ${type})`;
+      })
+      .sort()
+      .join(',');
     const msg = `Unable to ${targetTypesAndActions}`;
     throw deps.errors.decorateForbiddenError(new Error(msg));
   }
@@ -100,14 +106,18 @@ async function checkPrivileges(
 }
 
 function getMissingPrivileges(privileges: CheckPrivilegesResponse['privileges']) {
-  return privileges.kibana
-    .filter(({ authorized }) => !authorized)
-    .map(({ resource, privilege }) => ({ spaceId: resource, privilege }));
-}
-
-/**
- * Returns all unique elements of an array.
- */
-function uniq<T>(arr: T[]): T[] {
-  return Array.from(new Set<T>(arr));
+  return privileges.kibana.reduce<Map<string | undefined, Set<string>>>(
+    (acc, { resource, privilege, authorized }) => {
+      if (!authorized) {
+        if (resource) {
+          acc.set(resource, (acc.get(resource) || new Set()).add(privilege));
+        }
+        // Fail-secure: if a user is not authorized for a specific resource, they are not authorized for the global resource too (global resource is undefined)
+        // The inverse is not true; if a user is not authorized for the global resource, they may still be authorized for a specific resource
+        acc.set(undefined, (acc.get(undefined) || new Set()).add(privilege));
+      }
+      return acc;
+    },
+    new Map()
+  );
 }

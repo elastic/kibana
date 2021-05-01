@@ -120,14 +120,20 @@ describe('ensureAuthorized', () => {
           // For type 'c', the user is authorized to use both actions in space 'x' but not space 'y'
           { privilege: 'mock-saved_object:a/foo', authorized: true },
           { privilege: 'mock-saved_object:a/bar', authorized: false },
+          { privilege: 'mock-saved_object:a/bar', authorized: true }, // fail-secure check
           { resource: 'x', privilege: 'mock-saved_object:b/foo', authorized: true },
           { resource: 'x', privilege: 'mock-saved_object:b/bar', authorized: false },
           { resource: 'x', privilege: 'mock-saved_object:c/foo', authorized: true },
+          { privilege: 'mock-saved_object:c/foo', authorized: false }, // inverse fail-secure check
           { resource: 'x', privilege: 'mock-saved_object:c/bar', authorized: true },
           { resource: 'y', privilege: 'mock-saved_object:b/foo', authorized: true },
           { resource: 'y', privilege: 'mock-saved_object:b/bar', authorized: false },
           { resource: 'y', privilege: 'mock-saved_object:c/foo', authorized: false },
           { resource: 'y', privilege: 'mock-saved_object:c/bar', authorized: false },
+          { privilege: 'mock-saved_object:c/bar', authorized: true }, // fail-secure check
+          { resource: 'y', privilege: 'mock-saved_object:c/bar', authorized: true }, // fail-secure check
+          // The fail-secure checks are a contrived scenario, as we *shouldn't* get both an unauthorized and authorized result for a given resource...
+          // However, in case we do, we should fail-secure (authorized + unauthorized = unauthorized)
         ],
       },
     } as CheckPrivilegesResponse;
@@ -161,8 +167,9 @@ describe('ensureAuthorized', () => {
       hasAllRequested: false,
       privileges: {
         kibana: [
-          { resource: 'x', privilege: 'mock-saved_object:a/foo', authorized: false },
-          { resource: 'x', privilege: 'mock-saved_object:a/bar', authorized: false },
+          { privilege: 'mock-saved_object:a/foo', authorized: false },
+          { privilege: 'mock-saved_object:a/bar', authorized: false },
+          { privilege: 'mock-saved_object:a/bar', authorized: true }, // fail-secure check
           { resource: 'x', privilege: 'mock-saved_object:b/foo', authorized: false },
           { resource: 'x', privilege: 'mock-saved_object:b/bar', authorized: false },
           { resource: 'x', privilege: 'mock-saved_object:c/foo', authorized: false },
@@ -173,6 +180,10 @@ describe('ensureAuthorized', () => {
           { resource: 'y', privilege: 'mock-saved_object:b/bar', authorized: false },
           { resource: 'y', privilege: 'mock-saved_object:c/foo', authorized: false },
           { resource: 'y', privilege: 'mock-saved_object:c/bar', authorized: false },
+          { privilege: 'mock-saved_object:c/bar', authorized: true }, // fail-secure check
+          { resource: 'y', privilege: 'mock-saved_object:c/bar', authorized: true }, // fail-secure check
+          // The fail-secure checks are a contrived scenario, as we *shouldn't* get both an unauthorized and authorized result for a given resource...
+          // However, in case we do, we should fail-secure (authorized + unauthorized = unauthorized)
         ],
       },
     } as CheckPrivilegesResponse;
