@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-import { PhaseWithAllocation } from '../../../../../../../../../common/types';
+import { PhaseWithAllocation } from '../../../../../../../../common/types';
 
 const i18nTexts = {
   warm: {

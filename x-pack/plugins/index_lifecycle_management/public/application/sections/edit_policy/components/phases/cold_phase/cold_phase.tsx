@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useConfiguration } from '../../../form';
 import {
-  DataTierAllocationField,
+  AllocationField,
   SearchableSnapshotField,
   IndexPriorityField,
   ReplicasField,
@@ -43,10 +43,7 @@ export const ColdPhase: FunctionComponent = () => {
       {!isUsingSearchableSnapshotInHotPhase && <ReadonlyField phase="cold" />}
 
       {/* Data tier allocation section */}
-      <DataTierAllocationField
-        description={i18nTexts.dataTierAllocation.description}
-        phase="cold"
-      />
+      <AllocationField description={i18nTexts.dataTierAllocation.description} phase="cold" />
 
       <IndexPriorityField phase="cold" />
     </Phase>

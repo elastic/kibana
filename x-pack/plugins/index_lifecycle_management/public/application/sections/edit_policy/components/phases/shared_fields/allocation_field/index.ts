@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DataTierAllocationField } from './data_tier_allocation_field';
+export { AllocationField } from './allocation_field';

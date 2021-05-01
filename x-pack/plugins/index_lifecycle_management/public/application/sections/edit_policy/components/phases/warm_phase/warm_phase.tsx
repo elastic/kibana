@@ -13,7 +13,7 @@ import { useConfiguration } from '../../../form';
 import {
   ForcemergeField,
   IndexPriorityField,
-  DataTierAllocationField,
+  AllocationField,
   ShrinkField,
   ReadonlyField,
   ReplicasField,
@@ -43,10 +43,7 @@ export const WarmPhase: FunctionComponent = () => {
       {!isUsingSearchableSnapshotInHotPhase && <ReadonlyField phase="warm" />}
 
       {/* Data tier allocation section */}
-      <DataTierAllocationField
-        description={i18nTexts.dataTierAllocation.description}
-        phase="warm"
-      />
+      <AllocationField description={i18nTexts.dataTierAllocation.description} phase="warm" />
 
       <IndexPriorityField phase="warm" />
     </Phase>
