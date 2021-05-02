@@ -1,0 +1,19 @@
+
+.s1bButton {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.s1bAnchor {
+  width: 100%;
+
+  .euiButtonContent {
+    justify-content: end;
+  }
+
+  .euiButtonEmpty__text {
+    width: 100%;
+    text-align: left;
+  }
+}
