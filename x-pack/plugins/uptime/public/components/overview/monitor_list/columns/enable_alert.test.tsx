@@ -7,112 +7,86 @@
 
 import React from 'react';
 import { EnableMonitorAlert } from './enable_alert';
-import * as redux from 'react-redux';
-import {
-  mountWithRouterRedux,
-  renderWithRouterRedux,
-  shallowWithRouterRedux,
-} from '../../../../lib';
-import { EuiPopover, EuiText } from '@elastic/eui';
+import { fireEvent } from '@testing-library/dom';
+
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
-import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
+import { makePing } from '../../../../../common/runtime_types/ping';
+import { render } from '../../../../lib/helper/rtl_helpers';
+import { DISABLE_STATUS_ALERT, ENABLE_STATUS_ALERT } from './translations';
+import { mockState } from '../../../../lib/__mocks__/uptime_store.mock';
+import { AlertsResult } from '../../../../state/actions/types';
 
 describe('EnableAlertComponent', () => {
-  let defaultConnectors: string[] = [];
-  let alerts: any = [];
-
-  beforeEach(() => {
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
-
-    jest.spyOn(redux, 'useSelector').mockImplementation((fn, d) => {
-      if (fn.name === 'selectDynamicSettings') {
-        return {
-          settings: Object.assign(DYNAMIC_SETTINGS_DEFAULTS, {
-            defaultConnectors,
-          }),
-        };
-      }
-      if (fn.name === 'alertsSelector') {
-        return {
-          data: {
-            data: alerts,
-          },
-          loading: false,
-        };
-      }
-      return {};
-    });
-  });
-
-  it('shallow renders without errors for valid props', () => {
-    const wrapper = shallowWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+  it('it displays define connectors when there is none', () => {
+    const { getByTestId, getByLabelText, getByText } = render(
+      <EnableMonitorAlert
+        monitorId={'testMonitor'}
+        selectedMonitor={makePing({ name: 'My website' })}
+      />
     );
-    expect(wrapper).toMatchSnapshot();
-  });
+    expect(getByTestId('uptimeDisplayDefineConnector'));
+    expect(getByLabelText(ENABLE_STATUS_ALERT));
 
-  it('renders without errors for valid props', () => {
-    const wrapper = renderWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
-    );
-    expect(wrapper).toMatchSnapshot();
-  });
+    fireEvent.click(getByTestId('uptimeDisplayDefineConnector'));
 
-  it('displays define connectors when there is none', () => {
-    defaultConnectors = [];
-    const wrapper = mountWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+    expect(getByTestId('uptimeSettingsLink')).toHaveAttribute(
+      'href',
+      '/settings?focusConnectorField=true'
     );
-    expect(wrapper.find(EuiPopover)).toHaveLength(1);
-    wrapper.find('button').simulate('click');
-    expect(wrapper.find(EuiText).text()).toBe(
-      'To start enabling alerts, please define a default alert action connector in Settings'
+    expect(
+      getByText('To start enabling alerts, please define a default alert action connector in')
     );
-    expect(wrapper.find(ReactRouterEuiLink)).toMatchInlineSnapshot(`
-      <ReactRouterEuiLink
-        data-test-subj="uptimeSettingsLink"
-        to="/settings?focusConnectorField=true"
-      >
-        <ReactRouterHelperForEui
-          to="/settings?focusConnectorField=true"
-        >
-          <EuiLink
-            data-test-subj="uptimeSettingsLink"
-            href="/settings?focusConnectorField=true"
-            onClick={[Function]}
-          >
-            <a
-              className="euiLink euiLink--primary"
-              data-test-subj="uptimeSettingsLink"
-              href="/settings?focusConnectorField=true"
-              onClick={[Function]}
-              rel="noreferrer"
-            >
-              Settings
-            </a>
-          </EuiLink>
-        </ReactRouterHelperForEui>
-      </ReactRouterEuiLink>
-    `);
   });
 
   it('does not displays define connectors when there is connector', () => {
-    defaultConnectors = ['infra-slack-connector-id'];
-    const wrapper = mountWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+    const defaultConnectors = ['infra-slack-connector-id'];
+
+    const { getByTestId, getByLabelText } = render(
+      <EnableMonitorAlert
+        monitorId={'testMonitor'}
+        selectedMonitor={makePing({ name: 'My website' })}
+      />,
+      {
+        state: {
+          dynamicSettings: {
+            settings: { ...DYNAMIC_SETTINGS_DEFAULTS, defaultConnectors },
+            loading: false,
+          },
+        },
+      }
     );
 
-    expect(wrapper.find(EuiPopover)).toHaveLength(0);
+    expect(getByTestId('uptimeEnableSimpleDownAlerttestMonitor'));
+    expect(getByLabelText(ENABLE_STATUS_ALERT));
   });
 
   it('displays disable when alert is there', () => {
-    alerts = [{ id: 'test-alert', params: { search: 'testMonitor' } }];
-    defaultConnectors = ['infra-slack-connector-id'];
+    const alerts = [{ id: 'test-alert', params: { search: 'testMonitor' } }];
+    const defaultConnectors = ['infra-slack-connector-id'];
 
-    const wrapper = mountWithRouterRedux(
-      <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
+    const { getByTestId, getByLabelText } = render(
+      <EnableMonitorAlert
+        monitorId={'testMonitor'}
+        selectedMonitor={makePing({ name: 'My website' })}
+      />,
+      {
+        state: {
+          dynamicSettings: {
+            settings: { ...DYNAMIC_SETTINGS_DEFAULTS, defaultConnectors },
+            loading: false,
+          },
+          alerts: {
+            ...mockState.alerts,
+            alerts: {
+              data: ({ data: alerts } as unknown) as AlertsResult,
+              loading: false,
+            },
+          },
+        },
+      }
     );
 
-    expect(wrapper.find('button').prop('aria-label')).toBe('Disable status alert');
+    expect(getByTestId('uptimeDisableSimpleDownAlerttestMonitor'));
+    expect(getByLabelText(DISABLE_STATUS_ALERT));
   });
 });

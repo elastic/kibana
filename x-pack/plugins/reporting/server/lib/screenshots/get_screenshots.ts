@@ -80,6 +80,10 @@ export const getScreenshots = async (
     await resizeToClipArea(item, browser, layout.getBrowserZoom(), logger);
     const base64EncodedData = await browser.screenshot(item.position);
 
+    if (!base64EncodedData) {
+      throw new Error(`Failure in getScreenshots! Base64 data is void`);
+    }
+
     screenshots.push({
       base64EncodedData,
       title: item.attributes.title,
