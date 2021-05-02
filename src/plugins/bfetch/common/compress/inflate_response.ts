@@ -7,19 +7,18 @@
  */
 
 import { unzlibSync, strFromU8 } from 'fflate';
-import { BatchResponseItem, ErrorLike, BatchItemWrapper } from '../../common';
+import { BatchResponseItem, ErrorLike } from '../../common';
 
 export function inflateResponse<Result extends object>(
   response: string
 ): BatchResponseItem<Result, ErrorLike> {
-  const { compressed, payload } = JSON.parse(response) as BatchItemWrapper;
-
   try {
-    const inflatedRes = compressed
-      ? strFromU8(unzlibSync(Buffer.from(payload, 'base64')))
-      : payload;
+    const buff = Buffer.from(response, 'hex');
+
+    const unzip = unzlibSync(buff);
+    const inflatedRes = strFromU8(unzip);
     return JSON.parse(inflatedRes);
   } catch (e) {
-    return JSON.parse(payload);
+    return JSON.parse(response);
   }
 }

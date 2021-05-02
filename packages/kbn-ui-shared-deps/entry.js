@@ -44,6 +44,8 @@ export const Theme = require('./theme.ts');
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
 
+export const Fflate = require('fflate/esm/browser');
+
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
 export const KbnAnalytics = require('@kbn/analytics');

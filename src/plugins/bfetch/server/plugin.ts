@@ -28,7 +28,7 @@ import {
   normalizeError,
 } from '../common';
 import { StreamingRequestHandler } from './types';
-import { createNDJSONStream } from './streaming';
+import { createCompressedStream } from './streaming';
 
 // eslint-disable-next-line
 export interface BfetchServerSetupDependencies {}
@@ -148,7 +148,7 @@ export class BfetchServerPlugin
         const data = request.body;
         return response.ok({
           headers: streamingHeaders,
-          body: createNDJSONStream(handlerInstance.getResponseStream(data), logger),
+          body: createCompressedStream(handlerInstance.getResponseStream(data), logger),
         });
       }
     );
@@ -166,7 +166,7 @@ export class BfetchServerPlugin
     const response$ = await streamHandler(context, request);
     return response.ok({
       headers: streamingHeaders,
-      body: createNDJSONStream(response$, logger),
+      body: createCompressedStream(response$, logger),
     });
   };
 

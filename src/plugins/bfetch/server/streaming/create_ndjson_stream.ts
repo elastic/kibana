@@ -9,7 +9,6 @@
 import { Observable } from 'rxjs';
 import { Logger } from 'src/core/server';
 import { Stream, PassThrough } from 'stream';
-import { deflateResponse } from '../../common';
 
 const delimiter = '\n';
 
@@ -22,7 +21,7 @@ export const createNDJSONStream = <Response>(
   results.subscribe({
     next: (message: Response) => {
       try {
-        const line = deflateResponse(message);
+        const line = JSON.stringify(message);
         stream.write(`${line}${delimiter}`);
       } catch (error) {
         logger.error('Could not serialize or stream a message.');

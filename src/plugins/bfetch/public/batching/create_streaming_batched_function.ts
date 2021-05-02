@@ -127,10 +127,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           for (const { future } of items) future.reject(normalizedError);
         };
 
-        stream.pipe(split('\n')).subscribe({
+        stream.pipe(split('\r\n')).subscribe({
           next: (json: string) => {
             try {
-              const response = inflateResponse<Result>(json);
+              const response = inflateResponse<Result>(json.trim());
               if (response.error) {
                 items[response.id].future.reject(response.error);
               } else if (response.result !== undefined) {
