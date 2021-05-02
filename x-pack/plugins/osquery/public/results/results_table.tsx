@@ -12,10 +12,6 @@ import {
   EuiDataGridProps,
   EuiDataGridColumn,
   EuiLink,
-  EuiTextColor,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
@@ -26,6 +22,11 @@ import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { useActionResults } from '../action_results/use_action_results';
 import { generateEmptyDataMessage } from './translations';
+import {
+  ViewResultsInDiscoverAction,
+  ViewResultsInLensAction,
+  ViewResultsActionButtonType,
+} from '../scheduled_query_groups/scheduled_query_group_queries_table';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -34,13 +35,6 @@ interface ResultsTableComponentProps {
   selectedAgent?: string;
   agentIds?: string[];
   isLive?: boolean;
-}
-
-interface SummaryTableValue {
-  total: number | string;
-  pending: number | string;
-  responded: number;
-  failed: number;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -60,52 +54,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     sortField: '@timestamp',
     isLive,
   });
-
-  const notRespondedCount = useMemo(() => {
-    if (!agentIds || !aggregations.totalResponded) {
-      return '-';
-    }
-
-    return agentIds.length - aggregations.totalResponded;
-  }, [aggregations.totalResponded, agentIds]);
-
-  const summaryColumns: Array<EuiBasicTableColumn<SummaryTableValue>> = useMemo(
-    () => [
-      {
-        field: 'total',
-        name: 'Agents queried',
-      },
-      {
-        field: 'responded',
-        name: 'Successful',
-      },
-      {
-        field: 'pending',
-        name: 'Not yet responded',
-      },
-      {
-        field: 'failed',
-        name: 'Failed',
-        // eslint-disable-next-line react/display-name
-        render: (failed: number) => (
-          <EuiTextColor color={failed ? 'danger' : 'default'}>{failed}</EuiTextColor>
-        ),
-      },
-    ],
-    []
-  );
-
-  const summaryItems = useMemo(
-    () => [
-      {
-        total: agentIds?.length ?? '-',
-        pending: notRespondedCount,
-        responded: aggregations.totalResponded,
-        failed: aggregations.failed,
-      },
-    ],
-    [aggregations, agentIds, notRespondedCount]
-  );
 
   const { getUrlForApp } = useKibana().services.application;
 
@@ -237,8 +185,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   return (
     // @ts-expect-error update types
     <DataContext.Provider value={allResultsData?.edges}>
-      <EuiBasicTable items={summaryItems} rowHeader="total" columns={summaryColumns} />
-      <EuiSpacer />
       {columns.length > 0 ? (
         <EuiDataGrid
           aria-label="Osquery results"
@@ -249,6 +195,21 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           sorting={tableSorting}
           pagination={tablePagination}
           height="500px"
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+          toolbarVisibility={{
+            additionalControls: (
+              <>
+                <ViewResultsInDiscoverAction
+                  actionId={actionId}
+                  buttonType={ViewResultsActionButtonType.button}
+                />
+                <ViewResultsInLensAction
+                  actionId={actionId}
+                  buttonType={ViewResultsActionButtonType.button}
+                />
+              </>
+            ),
+          }}
         />
       ) : (
         <div className={'eui-textCenter'}>

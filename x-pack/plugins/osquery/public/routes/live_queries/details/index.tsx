@@ -27,7 +27,6 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useActionResults } from '../../../action_results/use_action_results';
 import { useActionDetails } from '../../../actions/use_action_details';
 import { ResultTabs } from '../../../queries/edit/tabs';
-import { LiveQueryDetailsActionsMenu } from './actions_menu';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
@@ -120,15 +119,9 @@ const LiveQueryDetailsPageComponent = () => {
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_failed_count_divider">
-          <Divider />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} key="actions_menu">
-          <LiveQueryDetailsActionsMenu actionId={actionId} />
-        </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [actionId, actionResultsData?.aggregations.failed, data?.actionDetails?.fields?.agents?.length]
+    [actionResultsData?.aggregations.failed, data?.actionDetails?.fields?.agents?.length]
   );
 
   return (
