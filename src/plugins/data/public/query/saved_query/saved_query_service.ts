@@ -119,12 +119,15 @@ export const createSavedQueryService = (
     id: string;
     attributes: SerializedSavedQueryAttributes;
   }) => {
-    let queryString;
+    let queryString = savedQuery.attributes.query.query;
+
     try {
-      queryString = JSON.parse(savedQuery.attributes.query.query);
-    } catch (error) {
-      queryString = savedQuery.attributes.query.query;
-    }
+      const parsedQueryString = JSON.parse(savedQuery.attributes.query.query);
+      if (typeof parsedQueryString === 'object') {
+        queryString = parsedQueryString;
+      }
+    } catch (e) {} // eslint-disable-line no-empty
+
     const savedQueryItems: SavedQueryAttributes = {
       title: savedQuery.attributes.title || '',
       description: savedQuery.attributes.description || '',
