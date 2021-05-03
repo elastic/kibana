@@ -18,10 +18,12 @@ use_gio = false
 use_libpci = false
 use_pulseaudio = false
 use_udev = false
-# Please, consult @elastic/kibana-security before changing/removing this option.
-use_kerberos = false
 
 is_debug = false
 symbol_level = 0
 is_component_build = false
-remove_webcore_debug_symbols = true
+
+# Please, consult @elastic/kibana-security before changing/removing this option.
+use_kerberos = false
+
+# target_cpu is appended before build: "x64" or "arm64"

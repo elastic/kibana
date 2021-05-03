@@ -2,10 +2,12 @@
 [[maps-search]]
 == Search geographic data
 
-Use the filters, query bar, and time filter to focus in on just the data you want.
-Only layers requesting data from {es} are narrowed when you submit a search request.
-Layers narrowed by the filters and query bar contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
-Only layers requesting data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the time filter.
+Search across the layers in your map to focus in on just the data you want.
+
+Layers that request data from {es} are narrowed when you submit a <<kibana-concepts-searching-your-data, search request>>.
+Layers narrowed by semi-structured search and filters contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
+
+Layers that request data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time filter>>.
 Layers narrowed by the time filter contain the clock icon image:maps/images/clock_icon.png[] next to the layer name in the legend.
 
 You can create a layer that requests data from {es} from the following:
@@ -19,6 +21,8 @@ You can create a layer that requests data from {es} from the following:
 ** Point to point
 
 ** <<terms-join>>
+
+** Top hits per entity
 
 ** Tracks
 
@@ -47,14 +51,14 @@ A spatial filter narrows search results to documents that either intersect with,
 
 You can create spatial filters in two ways:
 
-* Click the tool icon image:maps/images/tools_icon.png[], and then draw a polygon or bounding box on the map to define the spatial filter.
+* Click the tool icon image:maps/images/tools_icon.png[], and then draw a shape, bounding box, or distance on the map to define the spatial filter.
 * Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
 
 Spatial filters have the following properties:
 
 * *Geometry label* enables you to provide a meaningful name for your spatial filter.
 * *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
-* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations[spatial relation operator] to use at search time. Only available when *Spatial field* is set to geo_shape.
+* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations[spatial relation operator] to use at search time.
 * *Action* specifies whether to apply the filter to the current view or to a drilldown action. Only available when the map is a panel in a {kibana-ref}/dashboard.html[dashboard] with {kibana-ref}/drilldowns.html[drilldowns].
 
 [float]

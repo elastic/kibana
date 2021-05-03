@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageState, EventFiltersPageLocation } from '../state';
 import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
@@ -21,7 +21,7 @@ export const getFormEntry = (
 };
 
 export const getFormHasError = (state: EventFiltersListPageState): boolean => {
-  return state.form.hasItemsError || state.form.hasNameError;
+  return state.form.hasItemsError || state.form.hasNameError || state.form.hasOSError;
 };
 
 export const isCreationInProgress = (state: EventFiltersListPageState): boolean => {
@@ -37,3 +37,6 @@ export const getCreationError = (state: EventFiltersListPageState): ServerApiErr
 
   return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
 };
+
+export const getCurrentLocation = (state: EventFiltersListPageState): EventFiltersPageLocation =>
+  state.location;

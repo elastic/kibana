@@ -193,6 +193,10 @@ export class HeadlessChromiumDriverFactory {
     // Puppeteer doesn't give a handle to the original ChildProcess object
     // See https://github.com/GoogleChrome/puppeteer/issues/1292#issuecomment-521470627
 
+    if (childProcess == null) {
+      throw new TypeError('childProcess is null or undefined!');
+    }
+
     // just log closing of the process
     const processClose$ = Rx.fromEvent<void>(childProcess, 'close').pipe(
       tap(() => {
