@@ -23,6 +23,12 @@ export function checkIndexPatternValid(name: string) {
 }
 
 export const validateIndexName = async (indexName: string) => {
+  if (!indexName) {
+    return i18n.translate('xpack.fileUpload.indexNameNotProvided', {
+      defaultMessage: 'No index name provided.',
+    });
+  }
+
   if (!checkIndexPatternValid(indexName)) {
     return i18n.translate('xpack.fileUpload.indexNameContainsIllegalCharactersErrorMessage', {
       defaultMessage: 'Index name contains illegal characters.',
