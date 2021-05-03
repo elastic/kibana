@@ -25,6 +25,7 @@ export interface EndpointFields {
   endpointPolicy?: Maybe<string>;
   sensorVersion?: Maybe<string>;
   policyStatus?: Maybe<HostPolicyResponseActionStatus>;
+  id?: Maybe<string>;
 }
 
 interface AgentFields {
@@ -80,6 +81,9 @@ export interface HostAggEsItem {
   cloud_machine_type?: HostBuckets;
   cloud_provider?: HostBuckets;
   cloud_region?: HostBuckets;
+  endpoint?: {
+    id: HostBuckets;
+  };
   host_architecture?: HostBuckets;
   host_id?: HostBuckets;
   host_ip?: HostBuckets;

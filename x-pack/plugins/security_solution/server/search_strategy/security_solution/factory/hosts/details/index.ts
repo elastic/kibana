@@ -23,7 +23,7 @@ import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { formatHostItem, getHostEndpoint } from './helpers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
 } from '../../../../../../../../../src/core/server';
 
@@ -33,25 +33,24 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
     options: HostDetailsRequestOptions,
     response: IEsSearchResponse<HostAggEsData>,
     deps: {
-      esLegacyClient: ILegacyScopedClusterClient;
+      esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
     }
   ): Promise<HostDetailsStrategyResponse> => {
-    const aggregations: HostAggEsItem = get('aggregations', response.rawResponse) || {};
-    console.log('-------------');
-    console.log(JSON.stringify(response.rawResponse));
+    const aggregations: HostAggEsItem = get('aggregations', response.rawResponse);
+
     const inspect = {
       dsl: [inspectStringifyObject(buildHostDetailsQuery(options))],
     };
-    const formattedHostItem = formatHostItem(options.fields, aggregations);
+    const formattedHostItem = formatHostItem(aggregations);
     const ident = // endpoint-generated ID, NOT elastic-agent-id
-      formattedHostItem.agent && formattedHostItem.agent.id
-        ? Array.isArray(formattedHostItem.agent.id)
-          ? formattedHostItem.agent.id[0]
-          : formattedHostItem.agent.id
+      formattedHostItem.endpoint && formattedHostItem.endpoint.id
+        ? Array.isArray(formattedHostItem.endpoint.id)
+          ? formattedHostItem.endpoint.id[0]
+          : formattedHostItem.endpoint.id
         : null;
     const endpoint: EndpointFields | null = await getHostEndpoint(ident, deps);
-    return { inspect, _id: options.hostName, ...formattedHostItem };
+    return { ...response, inspect, hostDetails: { ...formattedHostItem, ...endpoint } };
   },
 };

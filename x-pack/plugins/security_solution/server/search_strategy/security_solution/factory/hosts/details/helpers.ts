@@ -8,7 +8,7 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
 } from '../../../../../../../../../src/core/server';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
@@ -45,6 +45,8 @@ export const HOST_FIELDS = [
   'endpoint.endpointPolicy',
   'endpoint.policyStatus',
   'endpoint.sensorVersion',
+  'agent.type',
+  'endpoint.id',
 ];
 
 export const buildFieldsTermAggregation = (esFields: readonly string[]): AggregationRequest =>
@@ -101,11 +103,18 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
   };
 };
 
-export const formatHostItem = (fields: readonly string[], bucket: HostAggEsItem): HostItem =>
-  fields.reduce<HostItem>((flattenedFields, fieldName) => {
+export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
+  HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
-      return set(fieldName, fieldValue, flattenedFields);
+      if (fieldName === '_id') {
+        return set('_id', fieldValue, flattenedFields);
+      }
+      return set(
+        fieldName,
+        toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+        flattenedFields
+      );
     }
     return flattenedFields;
   }, {});
@@ -114,6 +123,7 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
   const aggField = hostFieldsMap[fieldName]
     ? hostFieldsMap[fieldName].replace(/\./g, '_')
     : fieldName.replace(/\./g, '_');
+
   if (
     [
       'host.ip',
@@ -129,10 +139,12 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
     return data.buckets.map((obj) => obj.key);
   } else if (has(`${aggField}.buckets`, bucket)) {
     return getFirstItem(get(`${aggField}`, bucket));
-  } else if (has(aggField, bucket)) {
-    const valueObj: HostValue = get(aggField, bucket);
-    return valueObj.value_as_string;
-  } else if (['host.name', 'host.os.name', 'host.os.version'].includes(fieldName)) {
+  } else if (['host.name', 'host.os.name', 'host.os.version', 'endpoint.id'].includes(fieldName)) {
+    // if (fieldName === 'endpoint.id') {
+    //   console.log('### here we go ###');
+    //   console.log('getHostFieldValue', fieldName, aggField, JSON.stringify(bucket));
+    //   console.log(get('endpoint_id.value.buckets[0].key', bucket));
+    // }
     switch (fieldName) {
       case 'host.name':
         return get('key', bucket) || null;
@@ -140,7 +152,12 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
         return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
       case 'host.os.version':
         return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
+      case 'endpoint.id':
+        return get('endpoint_id.value.buckets[0].key', bucket) || null;
     }
+  } else if (has(aggField, bucket)) {
+    const valueObj: HostValue = get(aggField, bucket);
+    return valueObj.value_as_string;
   } else if (aggField === '_id') {
     const hostName = get(`host_name`, bucket);
     return hostName ? getFirstItem(hostName) : null;
@@ -159,12 +176,12 @@ const getFirstItem = (data: HostBuckets): string | null => {
 export const getHostEndpoint = async (
   id: string | null,
   deps: {
-    esLegacyClient: ILegacyScopedClusterClient;
+    esClient: IScopedClusterClient;
     savedObjectsClient: SavedObjectsClientContract;
     endpointContext: EndpointAppContext;
   }
 ): Promise<EndpointFields | null> => {
-  const { esLegacyClient, endpointContext, savedObjectsClient } = deps;
+  const { esClient, endpointContext, savedObjectsClient } = deps;
   const logger = endpointContext.logFactory.get('metadata');
   try {
     const agentService = endpointContext.service.getAgentService();
@@ -172,15 +189,20 @@ export const getHostEndpoint = async (
       throw new Error('agentService not available');
     }
     const metadataRequestContext = {
-      esLegacyClient,
+      esClient,
       endpointAppContextService: endpointContext.service,
       logger,
       savedObjectsClient,
     };
+
     const endpointData =
       id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
         ? await getHostData(metadataRequestContext, id)
         : null;
+
+    console.log('----endpointData-----', id);
+    console.log(JSON.stringify(endpointData));
+
     return endpointData != null && endpointData.metadata
       ? {
           endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
