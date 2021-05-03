@@ -8,7 +8,7 @@
 import extractZip from 'extract-zip';
 import { ExtractError } from './extract_error';
 
-export async function unzip(filepath, target) {
+export async function unzip(filepath: string, target: string) {
   try {
     await extractZip(filepath, { dir: target });
   } catch (err) {
