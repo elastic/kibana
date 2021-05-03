@@ -626,6 +626,7 @@ export interface DocLinksStart {
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
             createRoleMappingTemplates: string;
+            createRollupJobsRequest: string;
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
