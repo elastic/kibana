@@ -358,16 +358,11 @@ function partitionPatchRequest(
   conflictedCases: CasePatchRequest[];
   casesToAuthorize: Array<SavedObject<ESCaseAttributes>>;
 } {
-  const reqCasesMap = patchReqCases.reduce((acc, req) => {
-    acc.set(req.id, req);
-    return acc;
-  }, new Map<string, CasePatchRequest>());
-
   const nonExistingCases: CasePatchRequest[] = [];
   const conflictedCases: CasePatchRequest[] = [];
   const casesToAuthorize: Array<SavedObject<ESCaseAttributes>> = [];
 
-  for (const reqCase of reqCasesMap.values()) {
+  for (const reqCase of patchReqCases) {
     const foundCase = casesMap.get(reqCase.id);
 
     if (!foundCase || foundCase.error) {

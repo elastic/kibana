@@ -6,7 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { OWNER_FIELD } from './constants';
 import { SavedObjectFindOptionsRt } from '../saved_object';
 
 import { UserRT } from '../user';
@@ -29,7 +28,7 @@ export const CommentAttributesBasicRt = rt.type({
   ]),
   created_at: rt.string,
   created_by: UserRT,
-  [OWNER_FIELD]: rt.string,
+  owner: rt.string,
   pushed_at: rt.union([rt.string, rt.null]),
   pushed_by: rt.union([UserRT, rt.null]),
   updated_at: rt.union([rt.string, rt.null]),
@@ -45,7 +44,7 @@ export enum CommentType {
 export const ContextTypeUserRt = rt.type({
   comment: rt.string,
   type: rt.literal(CommentType.user),
-  [OWNER_FIELD]: rt.string,
+  owner: rt.string,
 });
 
 /**
@@ -61,7 +60,7 @@ export const AlertCommentRequestRt = rt.type({
     id: rt.union([rt.string, rt.null]),
     name: rt.union([rt.string, rt.null]),
   }),
-  [OWNER_FIELD]: rt.string,
+  owner: rt.string,
 });
 
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);

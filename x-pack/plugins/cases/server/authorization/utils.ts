@@ -13,7 +13,7 @@ export const getOwnersFilter = (savedObjectType: string, owners: string[]): Kuer
   return nodeBuilder.or(
     owners.reduce<KueryNode[]>((query, owner) => {
       ensureFieldIsSafeForQuery(OWNER_FIELD, owner);
-      query.push(nodeBuilder.is(`${savedObjectType}.attributes.owner`, owner));
+      query.push(nodeBuilder.is(`${savedObjectType}.attributes.${OWNER_FIELD}`, owner));
       return query;
     }, [])
   );

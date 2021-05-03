@@ -90,7 +90,7 @@ export const push = async (
     // We need to change the logic when we support subcases
     if (theCase?.status === CaseStatuses.closed) {
       throw Boom.conflict(
-        `This case ${theCase.title} is closed. You can not pushed if the case is closed.`
+        `The ${theCase.title} case is closed. Pushing a closed case is not allowed.`
       );
     }
 

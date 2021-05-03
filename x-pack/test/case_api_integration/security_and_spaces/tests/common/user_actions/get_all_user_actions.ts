@@ -35,6 +35,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -358,7 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          auth: { user: superUser, space: 'space1' },
+          auth: superUserSpace1Auth,
         });
       });
 

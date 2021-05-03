@@ -55,6 +55,7 @@ import {
   superUser,
 } from '../../../../common/lib/authentication/users';
 import { User } from '../../../../common/lib/authentication/types';
+import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -294,7 +295,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should push a case that the user has permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           testAgent: supertestWithoutAuth,
-          auth: { user: superUser, space: 'space1' },
+          auth: superUserSpace1Auth,
         });
 
         await pushCase({
@@ -308,7 +309,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should not push a case that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           testAgent: supertestWithoutAuth,
-          auth: { user: superUser, space: 'space1' },
+          auth: superUserSpace1Auth,
           createCaseReq: getPostCaseRequest({ owner: 'observabilityFixture' }),
         });
 
@@ -327,7 +328,7 @@ export default ({ getService }: FtrProviderContext): void => {
         } with role(s) ${user.roles.join()} - should NOT push a case`, async () => {
           const { postedCase, connector } = await createCaseWithConnector({
             testAgent: supertestWithoutAuth,
-            auth: { user: superUser, space: 'space1' },
+            auth: superUserSpace1Auth,
           });
 
           await pushCase({

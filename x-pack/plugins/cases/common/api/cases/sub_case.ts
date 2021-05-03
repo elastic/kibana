@@ -10,7 +10,6 @@ import * as rt from 'io-ts';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { OWNER_FIELD } from './constants';
 import { CasesStatusResponseRt } from './status';
 import { CaseStatusRt } from './status';
 
@@ -27,7 +26,7 @@ export const SubCaseAttributesRt = rt.intersection([
     created_by: rt.union([UserRT, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRT, rt.null]),
-    [OWNER_FIELD]: rt.string,
+    owner: rt.string,
   }),
 ]);
 

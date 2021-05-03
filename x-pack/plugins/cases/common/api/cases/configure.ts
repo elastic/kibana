@@ -18,7 +18,7 @@ const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-b
 const CasesConfigureBasicRt = rt.type({
   connector: CaseConnectorRt,
   closure_type: ClosureTypeRT,
-  [OWNER_FIELD]: rt.string,
+  owner: rt.string,
 });
 
 const CasesConfigureBasicWithoutOwnerRt = rt.type(
@@ -48,12 +48,12 @@ export const CaseConfigureResponseRt = rt.intersection([
     id: rt.string,
     version: rt.string,
     error: rt.union([rt.string, rt.null]),
-    [OWNER_FIELD]: rt.string,
+    owner: rt.string,
   }),
 ]);
 
 export const GetConfigureFindRequestRt = rt.partial({
-  [OWNER_FIELD]: rt.union([rt.array(rt.string), rt.string]),
+  owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
 export const CaseConfigureRequestParamsRt = rt.type({

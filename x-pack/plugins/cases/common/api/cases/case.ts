@@ -13,7 +13,6 @@ import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
-import { OWNER_FIELD } from './constants';
 
 export enum CaseType {
   collection = 'collection',
@@ -39,7 +38,7 @@ const CaseBasicRt = rt.type({
   [caseTypeField]: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
-  [OWNER_FIELD]: rt.string,
+  owner: rt.string,
 });
 
 const CaseExternalServiceBasicRt = rt.type({
@@ -80,7 +79,7 @@ const CasePostRequestNoTypeRt = rt.type({
   title: rt.string,
   connector: CaseConnectorRt,
   settings: SettingsRt,
-  [OWNER_FIELD]: rt.string,
+  owner: rt.string,
 });
 
 /**
@@ -115,7 +114,7 @@ export const CasesFindRequestRt = rt.partial({
   searchFields: rt.union([rt.array(rt.string), rt.string]),
   sortField: rt.string,
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-  [OWNER_FIELD]: rt.union([rt.array(rt.string), rt.string]),
+  owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
 export const CaseResponseRt = rt.intersection([
@@ -177,7 +176,7 @@ export const ExternalServiceResponseRt = rt.intersection([
 ]);
 
 export const AllTagsFindRequestRt = rt.partial({
-  [OWNER_FIELD]: rt.union([rt.array(rt.string), rt.string]),
+  owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;

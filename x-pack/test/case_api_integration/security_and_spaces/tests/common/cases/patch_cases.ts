@@ -58,6 +58,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -1169,7 +1170,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 403,
         });
 
-        const resp = await findCases({ supertest, auth: { user: superUser, space: 'space1' } });
+        const resp = await findCases({ supertest, auth: superUserSpace1Auth });
         expect(resp.cases.length).to.eql(3);
         // the update should have failed and none of the title should have been changed
         expect(resp.cases[0].title).to.eql(postCaseReq.title);

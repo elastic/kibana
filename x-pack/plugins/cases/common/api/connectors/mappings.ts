@@ -6,7 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { OWNER_FIELD } from '../cases/constants';
 
 const ActionTypeRT = rt.union([
   rt.literal('append'),
@@ -32,7 +31,7 @@ export const ConnectorMappingsAttributesRT = rt.type({
 
 export const ConnectorMappingsRt = rt.type({
   mappings: rt.array(ConnectorMappingsAttributesRT),
-  [OWNER_FIELD]: rt.string,
+  owner: rt.string,
 });
 
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRT>;
