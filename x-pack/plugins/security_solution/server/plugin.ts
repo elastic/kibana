@@ -287,19 +287,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    // Create rule-registry scoped to security-solution (APP_ID uses caps, not supported)
-    this.setupPlugins.ruleRegistry = plugins.ruleRegistry.create({
-      name: 'security-solution',
-      // fieldMap: ecsFieldMap,
-      fieldMap: {
-        ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
-      },
-    });
+    // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
+    if (experimentalFeatures.ruleRegistryEnabled) {
+      // Create rule-registry scoped to security-solution (APP_ID uses caps, not supported)
+      this.setupPlugins.ruleRegistry = plugins.ruleRegistry.create({
+        name: 'security-solution',
+        // fieldMap: ecsFieldMap,
+        fieldMap: {
+          ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
+        },
+      });
 
-    // Register reference rule types via rule-registry
-    this.setupPlugins.ruleRegistry.registerType(queryAlertType);
-    this.setupPlugins.ruleRegistry.registerType(eqlAlertType);
-    this.setupPlugins.ruleRegistry.registerType(thresholdAlertType);
+      // Register reference rule types via rule-registry
+      this.setupPlugins.ruleRegistry.registerType(queryAlertType);
+      this.setupPlugins.ruleRegistry.registerType(eqlAlertType);
+      this.setupPlugins.ruleRegistry.registerType(thresholdAlertType);
+    }
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {
