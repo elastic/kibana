@@ -4,5 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+const noop = (..._args: any[]): any => {};
 
-export { IndexingStatus } from './indexing_status';
+export const searchService: any = {
+  search: noop,
+};

@@ -670,6 +670,7 @@
     "cypress-multi-reporters": "^1.4.0",
     "cypress-pipe": "^2.0.0",
     "cypress-promise": "^1.1.0",
+    "cypress-real-events": "^1.4.0",
     "debug": "^2.6.9",
     "del-cli": "^3.0.1",
     "delete-empty": "^2.0.0",
