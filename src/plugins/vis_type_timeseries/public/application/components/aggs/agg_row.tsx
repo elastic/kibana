@@ -12,13 +12,13 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
-import { MetricsItemsSchema } from '../../../../common/types';
+import { MetricsItems } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 
 interface AggRowProps {
   disableDelete: boolean;
-  model: MetricsItemsSchema;
-  siblings: MetricsItemsSchema[];
+  model: MetricsItems;
+  siblings: MetricsItems[];
   dragHandleProps: DragHandleProps;
   children: React.ReactNode;
   onAdd: () => void;
@@ -28,7 +28,7 @@ interface AggRowProps {
 export function AggRow(props: AggRowProps) {
   let iconType = 'eyeClosed';
   let iconColor = 'subdued';
-  const lastSibling = last(props.siblings) as MetricsItemsSchema;
+  const lastSibling = last(props.siblings) as MetricsItems;
 
   if (lastSibling.id === props.model.id) {
     iconType = 'eye';

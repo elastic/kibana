@@ -7,9 +7,9 @@
  */
 
 import uuid from 'uuid';
-import { MetricsItemsSchema } from '../../../../common/types';
+import { MetricsItems } from '../../../../common/types';
 
-export const newMetricAggFn = (): MetricsItemsSchema => {
+export const newMetricAggFn = (): MetricsItems => {
   return {
     id: uuid.v1(),
     type: 'count',

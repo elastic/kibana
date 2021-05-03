@@ -7,12 +7,12 @@
  */
 
 import { AUTO_INTERVAL } from '../../../common/constants';
-import { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../common/types';
+import { FetchedIndexPattern, Panel, SeriesItems } from '../../../common/types';
 import { validateField } from '../../../common/fields_utils';
 
 export function getIntervalAndTimefield(
-  panel: PanelSchema,
-  series: SeriesItemsSchema,
+  panel: Panel,
+  series: SeriesItems,
   index: FetchedIndexPattern
 ) {
   const timeField =

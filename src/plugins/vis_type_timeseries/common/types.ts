@@ -6,27 +6,231 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  metricsItems,
-  panel,
-  seriesItems,
-  visPayloadSchema,
-  fieldObject,
-  indexPattern,
-  annotationsItems,
-} from './vis_schema';
 import { PANEL_TYPES } from './panel_types';
 import { TimeseriesUIRestrictions } from './ui_restrictions';
 import { IndexPattern } from '../../data/common';
 
-export type AnnotationItemsSchema = TypeOf<typeof annotationsItems>;
-export type SeriesItemsSchema = TypeOf<typeof seriesItems>;
-export type MetricsItemsSchema = TypeOf<typeof metricsItems>;
-export type PanelSchema = TypeOf<typeof panel>;
-export type VisPayload = TypeOf<typeof visPayloadSchema>;
-export type FieldObject = TypeOf<typeof fieldObject>;
-export type IndexPatternValue = TypeOf<typeof indexPattern>;
+export type IndexPatternValue = { id: string } | string | undefined;
+
+interface QueryObject {
+  language: string;
+  query: string | { [key: string]: any };
+}
+
+export interface AnnotationItems {
+  color?: string | null;
+  fields?: string | null;
+  hidden?: boolean;
+  icon?: string | null;
+  id: string;
+  ignore_global_filters: number;
+  ignore_panel_filters: number;
+  index_pattern: IndexPatternValue;
+  query_string?: QueryObject;
+  template?: string | null;
+  time_field?: string | null;
+}
+
+export interface MetricsItems {
+  agg_with?: string | null;
+  alias?: string | null;
+  alpha?: number;
+  beta?: number;
+  denominator?: QueryObject;
+  function?: string | null;
+  gamma?: number;
+  id: string;
+  lag?: number | '';
+  metric_agg?: string | null;
+  mode?: string | null;
+  model_type?: string | null;
+  multiplicative?: boolean;
+  numberOfSignificantValueDigits?: number;
+  numerator?: QueryObject;
+  order?: string | null;
+  order_by?: string | null;
+  percentiles?: Array<{
+    field?: string | null;
+    id: string;
+    mode: 'line' | 'band';
+    percentile?: string | null;
+    shade?: number | string | null;
+    value?: number | string | null;
+  }>;
+  period?: number;
+  script?: string | null;
+  sigma?: string | null;
+  size?: string | number | null;
+  type: string;
+  unit?: string | null;
+  value?: string | null;
+  values?: Array<string | null> | null;
+  variables?: Array<{ field?: string | null; id: string; name?: string | null }>;
+  window?: number;
+  field?: string | null;
+}
+interface SplitFiltersItems {
+  color?: string | null;
+  filter?: QueryObject;
+  id?: string | null;
+  label?: string | null;
+}
+
+export interface SeriesItems {
+  aggregate_by?: string | null;
+  aggregate_function?: string | null;
+  axis_min?: string | number | null;
+  axis_max?: string | number | null;
+  axis_position: string;
+  chart_type: string;
+  color: string;
+  color_rules?: Array<{
+    value?: number;
+    id: string;
+    text?: string | null;
+    operator?: string | null;
+  }>;
+  fill?: number | '';
+  filter?:
+    | {
+        query: string;
+        language?: string | null;
+      }
+    | '';
+  formatter: string;
+  hidden?: boolean;
+  hide_in_legend?: number;
+  id: string;
+  ignore_global_filter?: number;
+  label?: string | null;
+  line_width?: number | '';
+  metrics: MetricsItems[];
+  offset_time?: string | null;
+  override_index_pattern?: number;
+  palette: {
+    type: string;
+    name: string;
+  };
+  point_size?: number | '';
+  separate_axis: number;
+  seperate_axis: number;
+  series_drop_last_bucket: number;
+  series_index_pattern: IndexPatternValue;
+  series_interval?: string | null;
+  series_max_bars: number;
+  series_time_field?: string | null;
+  split_color_mode?: string | null;
+  split_filters?: SplitFiltersItems[];
+  split_mode: string;
+  stacked: string;
+  steps: number;
+  terms_direction?: string | null;
+  terms_exclude?: string | null;
+  terms_field?: string | null;
+  terms_include?: string | null;
+  terms_order_by?: string | null;
+  terms_size?: string | null;
+  time_range_mode?: string | null;
+  trend_arrows?: number;
+  type?: string | null;
+  value_template?: string | null;
+  var_name?: string | null;
+}
+
+interface BackgroundColorRulesItems {
+  value?: number | null;
+  id?: string | null;
+  background_color?: string | null;
+  color?: string | null;
+  operator?: string | null;
+}
+
+interface GaugeColorRulesItems {
+  gauge?: string | null;
+  text?: string | null;
+  id?: string | null;
+  operator?: string | null;
+  value?: number | null;
+}
+
+interface BarColorRulesItems {
+  id?: string | null;
+  bar_color?: string | null;
+  operator?: string | null;
+  value?: number | null;
+}
+
+export interface Panel {
+  annotations?: AnnotationItems[];
+  axis_formatter: string;
+  axis_max?: string | number | null;
+  axis_min?: string | number | null;
+  axis_position: string;
+  axis_scale: string;
+  background_color?: string | null;
+  background_color_rules?: BackgroundColorRulesItems[];
+  bar_color_rules: Array<BarColorRulesItems | null>;
+  drilldown_url?: string;
+  drop_last_bucket: number;
+  filter?: QueryObject;
+  gauge_color_rules?: GaugeColorRulesItems[];
+  gauge_inner_color?: string | null;
+  gauge_inner_width?: string | number | null;
+  gauge_max?: number | '';
+  gauge_style?: string | null;
+  gauge_width?: string | number | null;
+  hide_last_value_indicator: boolean;
+  id: string;
+  ignore_global_filter?: number;
+  ignore_global_filters?: number;
+  index_pattern: IndexPatternValue;
+  interval: string;
+  isModelInvalid?: boolean;
+  legend_position?: string | null;
+  markdown?: string | null;
+  markdown_css?: string | null;
+  markdown_less?: string | null;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  markdown_openLinksInNewTab: number;
+  markdown_scrollbars: number;
+  markdown_vertical_align?: string | null;
+  max_bars: number;
+  pivot_id?: string | null;
+  pivot_label?: string | null;
+  pivot_rows?: string | null;
+  pivot_type?: string | null;
+  series: SeriesItems[];
+  show_grid: number;
+  show_legend: number;
+  time_field?: string | null;
+  time_range_mode?: string | null;
+  tooltip_mode?: 'show_all' | 'show_focused';
+  type: 'table' | 'gauge' | 'markdown' | 'top_n' | 'timeseries' | 'metric';
+  use_kibana_indexes?: boolean;
+}
+
+export interface VisPayload {
+  filters: Array<any | null>;
+  panels: Panel[];
+  // general
+  query: QueryObject[] | null;
+  state: {
+    sort?: {
+      column: string;
+      order: 'asc' | 'desc';
+    };
+  };
+  timerange: {
+    timezone: string;
+    min: string;
+    max: string;
+  };
+  searchSession?: {
+    sessionId: string;
+    isRestore: boolean;
+    isStored: boolean;
+  };
+}
 
 export interface FetchedIndexPattern {
   indexPattern: IndexPattern | undefined | null;
