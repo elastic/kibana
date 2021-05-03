@@ -35,6 +35,7 @@ import type {
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
   OutdatedDocumentsSearchClosePit,
+  OutdatedDocumentsRefresh,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -115,13 +116,15 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       ),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
       Actions.closePit(client, state.pitId),
+    OUTDATED_DOCUMENTS_REFRESH: (state: OutdatedDocumentsRefresh) =>
+      Actions.refreshIndex(client, state.targetIndex),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       Actions.transformDocs(
         client,
         transformRawDocs,
         state.outdatedDocuments,
         state.targetIndex,
-        'wait_for'
+        false
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),

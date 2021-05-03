@@ -549,6 +549,22 @@ export interface ReindexResponse {
 }
 
 /**
+ * Wait for Elasticsearch to reindex all the changes after outdated documents migration.
+ */
+export const refreshIndex = (
+  client: ElasticsearchClient,
+  targetIndex: string
+): TaskEither.TaskEither<RetryableEsClientError, { refreshed: boolean }> => () => {
+  return client.indices
+    .refresh({
+      index: targetIndex,
+    })
+    .then((res) => {
+      return Either.right({ refreshed: true });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+/**
  * Reindex documents from the `sourceIndex` into the `targetIndex`. Returns a
  * task ID which can be tracked for progress.
  *
