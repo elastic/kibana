@@ -102,22 +102,19 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           id: createdAlert.id,
           provider: 'alerting',
           actions: new Map([
-            [
-              'execute-action',
-              { gte: (nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE) * 1 },
-            ],
+            ['execute-action', { gte: nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE }],
           ]),
         });
       });
 
       const executeActionsEvents = getEventsByAction(events, 'execute-action');
       expect(executeActionsEvents.length).equal(
-        (nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE) * 1
+        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
       );
 
       const searchResult = await esTestIndexTool.search('action:test.index-record');
       expect(searchResult.hits.total.value).equal(
-        (nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE) * 1
+        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
       );
     });
   });
