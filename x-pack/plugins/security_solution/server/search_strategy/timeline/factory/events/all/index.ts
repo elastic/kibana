@@ -36,7 +36,10 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineEventsAllStrategyResponse> => {
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
-    queryOptions.fields = uniq([...fieldRequested, ...TIMELINE_EVENTS_FIELDS]);
+    queryOptions.fields = uniq([
+      ...fieldRequested.filter((f) => !f.startsWith('_')),
+      ...TIMELINE_EVENTS_FIELDS,
+    ]).map((field) => ({ field, include_unmapped: true }));
     const { activePage, querySize } = options.pagination;
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;

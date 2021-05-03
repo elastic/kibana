@@ -91,10 +91,6 @@ export const getColumns = ({
     width: '30px',
     render: (field: string, data: EventFieldsData) => {
       const label = data.isObjectArray ? i18n.NESTED_COLUMN(field) : i18n.VIEW_COLUMN(field);
-      const fieldFromBrowserField = getFieldFromBrowserField(
-        [data.category, 'fields', field],
-        browserFields
-      );
       return (
         <EuiToolTip content={label}>
           <EuiCheckbox
@@ -110,9 +106,7 @@ export const getColumns = ({
                 initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
               })
             }
-            disabled={
-              (data.isObjectArray && data.type !== 'geo_point') || fieldFromBrowserField == null
-            }
+            disabled={data.isObjectArray && data.type !== 'geo_point'}
           />
         </EuiToolTip>
       );
