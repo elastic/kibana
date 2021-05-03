@@ -23,7 +23,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { CANCEL_BUTTON_LABEL } from '../constants';
+import { CANCEL_BUTTON_LABEL } from '../../constants';
 
 import {
   FIELD_NAME_CORRECT_NOTE,
@@ -31,10 +31,10 @@ import {
   FIELD_NAME_MODAL_TITLE,
   FIELD_NAME_MODAL_DESCRIPTION,
   FIELD_NAME_MODAL_ADD_FIELD,
-} from './constants';
-import { SchemaType } from './types';
+} from '../constants';
+import { SchemaType } from '../types';
 
-import { SchemaFieldTypeSelect } from './';
+import { SchemaFieldTypeSelect } from '../';
 
 interface ISchemaAddFieldModalProps {
   disableForm?: boolean;

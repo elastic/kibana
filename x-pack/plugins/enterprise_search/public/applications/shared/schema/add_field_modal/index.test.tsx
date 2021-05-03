@@ -11,10 +11,11 @@ import { shallow, mount } from 'enzyme';
 
 import { EuiFieldText, EuiModal } from '@elastic/eui';
 
-import { FIELD_NAME_CORRECTED_PREFIX } from './constants';
-import { SchemaType } from './types';
+import { FIELD_NAME_CORRECTED_PREFIX } from '../constants';
+import { SchemaFieldTypeSelect } from '../index';
+import { SchemaType } from '../types';
 
-import { SchemaFieldTypeSelect, SchemaAddFieldModal } from './';
+import { SchemaAddFieldModal } from './';
 
 describe('SchemaAddFieldModal', () => {
   const addNewField = jest.fn();
@@ -54,7 +55,6 @@ describe('SchemaAddFieldModal', () => {
   });
 
   it('handles input change - with non-formatted name', () => {
-    jest.spyOn(React, 'useState').mockImplementationOnce(setStateMock);
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     const input = wrapper.find(EuiFieldText);
     input.simulate('change', { currentTarget: { value: 'foobar' } });
@@ -65,7 +65,6 @@ describe('SchemaAddFieldModal', () => {
   });
 
   it('handles input change - with formatted name', () => {
-    jest.spyOn(React, 'useState').mockImplementationOnce(setStateMock);
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     const input = wrapper.find(EuiFieldText);
     input.simulate('change', { currentTarget: { value: 'foo-bar' } });
@@ -87,7 +86,6 @@ describe('SchemaAddFieldModal', () => {
   });
 
   it('handles form submission', () => {
-    jest.spyOn(React, 'useState').mockImplementationOnce(setStateMock);
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     const preventDefault = jest.fn();
     wrapper.find('form').simulate('submit', { preventDefault });
