@@ -90,8 +90,11 @@ export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
 };
 
 export const goToNotesTab = () => {
-  cy.get(NOTES_TAB_BUTTON)
-    .pipe(($el) => $el.trigger('click'))
+  cy.root()
+    .pipe(($el) => {
+      $el.find(NOTES_TAB_BUTTON).trigger('click');
+      return $el.find(NOTES_TEXT_AREA);
+    })
     .should('be.visible');
 };
 
@@ -100,14 +103,26 @@ export const getNotePreviewByNoteId = (noteId: string) => {
 };
 
 export const goToQueryTab = () => {
-  cy.get(QUERY_TAB_BUTTON).click({ force: true });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(QUERY_TAB_BUTTON).trigger('click');
+      return $el.find(QUERY_TAB_BUTTON);
+    })
+    .should('have.class', 'euiTab-isSelected');
 };
 
 export const addNotesToTimeline = (notes: string) => {
+  cy.wait(150);
   goToNotesTab();
   cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.get(ADD_NOTE_BUTTON).click({ force: true });
-  cy.get(QUERY_TAB_BUTTON).click();
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_NOTE_BUTTON).trigger('click');
+      return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
+    })
+    .should('have.text', '1');
+  goToQueryTab();
+  goToNotesTab();
 };
 
 export const addFilter = (filter: TimelineFilter) => {
@@ -159,13 +174,23 @@ export const closeOpenTimelineModal = () => {
 };
 
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(CLOSE_TIMELINE_BTN).filter(':visible').trigger('click');
+      return $el.find(QUERY_TAB_BUTTON);
+    })
+    .should('not.be.visible');
 };
 
 export const createNewTimeline = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+  cy.get(TIMELINE_SETTINGS_ICON)
+    .filter(':visible')
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
   cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE)
+    .eq(0)
+    .pipe(($el) => $el.trigger('click'));
 };
 
 export const createNewTimelineTemplate = () => {
@@ -207,7 +232,12 @@ export const openTimelineTemplateFromSettings = (id: string) => {
 };
 
 export const openTimelineById = (timelineId: string) => {
-  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).pipe(($el) => $el.trigger('click'));
+  cy.root()
+    .pipe(($el) => {
+      $el.find(TIMELINE_TITLE_BY_ID(timelineId)).trigger('click');
+      return $el.find(QUERY_TAB_BUTTON).find('.euiBadge');
+    })
+    .should('be.visible');
 };
 
 export const pinFirstEvent = () => {
