@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { MouseEvent, useEffect, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -45,7 +45,8 @@ export function VisualizeGeoFieldButton(props: Props) {
     []
   );
 
-  function onClick() {
+  function onClick(event: MouseEvent) {
+    event.preventDefault();
     props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
       indexPatternId: props.indexPatternId,
       fieldName: props.fieldName,
