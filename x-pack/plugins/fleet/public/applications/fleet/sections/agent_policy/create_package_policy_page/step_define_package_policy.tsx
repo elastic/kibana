@@ -200,7 +200,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               helpText={
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                  defaultMessage="Change the default namespace set by the selected agent policy. A namespace makes it easier to search the data and manage user permissions. {learnMore}."
+                  defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
                   values={{
                     learnMore: (
                       <EuiLink

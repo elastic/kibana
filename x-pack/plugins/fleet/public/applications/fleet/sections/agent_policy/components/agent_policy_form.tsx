@@ -171,7 +171,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.namespaceFieldDescription"
-            defaultMessage="Namespaces are part of the data stream naming scheme and make it easier to search for data and manage user permissions. The policy's default namespace is applied to the naming of an integration's data streams. For more information, see the {fleetUserGuide}."
+            defaultMessage="Namespaces are a user-configurable arbitrary grouping that makes it easier to search for data and manage user permissions. A policy namespace is used to name its integration's data streams. {fleetUserGuide}."
             values={{
               fleetUserGuide: (
                 <EuiLink
@@ -180,7 +180,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 >
                   {i18n.translate(
                     'xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel',
-                    { defaultMessage: 'Fleet user guide' }
+                    { defaultMessage: 'Learn more' }
                   )}
                 </EuiLink>
               ),
