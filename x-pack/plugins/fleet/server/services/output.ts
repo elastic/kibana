@@ -15,8 +15,6 @@ import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
-let cachedAdminUser: null | { username: string; password: string } = null;
-
 class OutputService {
   public async getDefaultOutput(soClient: SavedObjectsClientContract) {
     return await soClient.find<OutputSOAttributes>({
@@ -67,31 +65,6 @@ class OutputService {
     }
 
     return outputs.saved_objects[0].id;
-  }
-
-  public async getAdminUser(soClient: SavedObjectsClientContract, useCache = true) {
-    if (useCache && cachedAdminUser) {
-      return cachedAdminUser;
-    }
-
-    const defaultOutputId = await this.getDefaultOutputId(soClient);
-    if (!defaultOutputId) {
-      return null;
-    }
-    const so = await appContextService
-      .getEncryptedSavedObjects()
-      ?.getDecryptedAsInternalUser<OutputSOAttributes>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
-
-    if (!so || !so.attributes.fleet_enroll_username || !so.attributes.fleet_enroll_password) {
-      return null;
-    }
-
-    cachedAdminUser = {
-      username: so!.attributes.fleet_enroll_username,
-      password: so!.attributes.fleet_enroll_password,
-    };
-
-    return cachedAdminUser;
   }
 
   public async create(
@@ -150,12 +123,6 @@ class OutputService {
       page: 1,
       perPage: 1000,
     };
-  }
-
-  // Warning! This method is not going to working in a scenario with multiple Kibana instances,
-  // in this case Kibana should be restarted if the Admin User change
-  public invalidateCache() {
-    cachedAdminUser = null;
   }
 }
 

@@ -31,17 +31,16 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
   const options = opts ?? [];
 
   return (
-    <div style={{ maxWidth: 250 }}>
-      <EuiSuperSelect
-        compressed
-        prepend={'Metric'}
-        options={options.map(({ label, field: fd }) => ({
-          value: fd,
-          inputDisplay: label,
-        }))}
-        valueOfSelected={reportDefinitions?.[field]?.[0] || defaultValue || options?.[0].field}
-        onChange={(value) => onChange(value)}
-      />
-    </div>
+    <EuiSuperSelect
+      fullWidth
+      compressed
+      prepend={'Metric'}
+      options={options.map(({ label, field: fd }) => ({
+        value: fd,
+        inputDisplay: label,
+      }))}
+      valueOfSelected={reportDefinitions?.[field]?.[0] || defaultValue || options?.[0].field}
+      onChange={(value) => onChange(value)}
+    />
   );
 }
