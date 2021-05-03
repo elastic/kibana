@@ -1,6 +1,3 @@
-.react-monaco-editor-container {
-  flex-grow: 1; // Ensure the editor takes the full height of its flex container on Safari.
-  .monaco-editor .inputarea:focus {
-    animation: none !important; // Removes textarea EUI blue underline animation from EUI
-  }
+.react-monaco-editor-container .monaco-editor .inputarea:focus {
+  animation: none !important; // Removes textarea EUI blue underline animation from EUI
 }
