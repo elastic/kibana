@@ -907,7 +907,7 @@ export class CaseService implements CaseServiceSetup {
     }
   }
 
-  private buildCaseIdsAggs = (size: number = 1000): Record<string, AggregationContainer> => ({
+  private buildCaseIdsAggs = (size: number = 100): Record<string, AggregationContainer> => ({
     references: {
       nested: {
         path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
@@ -936,14 +936,14 @@ export class CaseService implements CaseServiceSetup {
       aggs: this.buildCaseIdsAggs(),
       filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
     });
-    if (response.aggregations?.references.doc_count ?? 1000 > 1000) {
+    if (response.total > 100) {
       response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
         type: CASE_COMMENT_SAVED_OBJECT,
         fields: [],
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        aggs: this.buildCaseIdsAggs(response.aggregations?.references.doc_count ?? 1000),
+        aggs: this.buildCaseIdsAggs(response.total),
         filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
       });
     }
