@@ -15,7 +15,7 @@ curl -X POST http://localhost:5601/${BASE_PATH}/api/alerts/alert \
 {
   "params":{
      "indexPatterns": ["*"],
-     "eqlQuery": "sequence by hostname [network where true]"
+     "eqlQuery": "sequence by host.name↵[any where true]↵[any where true]↵[any where true]"
    },
    "consumer":"alerts",
    "alertTypeId":"siem.eqlRule",

@@ -81,7 +81,7 @@ export const eqlAlertType = createSecurityEQLRuleType({
     if (response.hits.sequences !== undefined) {
       alerts = response.hits.sequences.reduce((allAlerts: AlertType[], sequence) => {
         let previousAlertUuid: string | undefined;
-        return {
+        return [
           ...allAlerts,
           ...sequence.events.map((event, idx) => {
             const alert = {
@@ -93,7 +93,7 @@ export const eqlAlertType = createSecurityEQLRuleType({
             previousAlertUuid = alert['kibana.rac.alert.uuid'];
             return alert;
           }),
-        };
+        ];
       }, []);
     } else if (response.hits.events !== undefined) {
       alerts = response.hits.events.map((event) => {

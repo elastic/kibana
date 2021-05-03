@@ -15,8 +15,7 @@ export const createRuleTypeMocks = () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let alertExecutor: (...args: any[]) => Promise<Record<string, any>>;
 
-  const mockedConfig$ = of({
-  } as ConfigType);
+  const mockedConfig$ = of({} as ConfigType);
 
   const loggerMock = ({
     debug: jest.fn(),
