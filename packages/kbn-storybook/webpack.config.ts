@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { externals } from '@kbn/ui-shared-deps';
 import { stringifyRequest } from 'loader-utils';
+import { resolve } from 'path';
 import { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
-import { externals } from '@kbn/ui-shared-deps';
 import { REPO_ROOT } from './lib/constants';
 
 const stats = {
@@ -80,6 +80,12 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     stats,
   };
 
+  // Disable the progress plugin
+  const progressPlugin: any = (storybookConfig.plugins || []).find((plugin: any) => {
+    return 'handler' in plugin && plugin.showActiveModules && plugin.showModules;
+  });
+  progressPlugin.handler = () => {};
+
   // This is the hacky part. We find something that looks like the
   // HtmlWebpackPlugin and mutate its `options.template` to point at our
   // revised template.
@@ -90,8 +96,5 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     htmlWebpackPlugin.options.template = require.resolve('../lib/templates/index.ejs');
   }
 
-  // @ts-ignore There's a long error here about the types of the
-  // incompatibility of Configuration, but it looks like it just may be Webpack
-  // type definition related.
   return webpackMerge(storybookConfig, config);
 }
