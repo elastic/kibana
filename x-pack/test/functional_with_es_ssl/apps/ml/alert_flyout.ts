@@ -119,7 +119,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ml.alerting.assertPreviewButtonState(false);
         await ml.alerting.setTestInterval('2y');
         await ml.alerting.assertPreviewButtonState(true);
-        await ml.alerting.checkPreview('Triggers 2 times in the last 2y');
+        await ml.alerting.checkPreview('Found 13 anomalies in the last 2y.');
 
         await ml.testExecution.logTestStep('should create an alert');
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');
