@@ -109,14 +109,13 @@ export async function fetchIndexShardSize(
   };
 
   const { body: response } = await esClient.search(params);
-  const stats: IndexShardSizeStats[] = [];
   // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
-  const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
-
-  if (!clusterBuckets.length) {
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
+  const stats: IndexShardSizeStats[] = [];
+  if (!clusterBuckets?.length) {
     return stats;
   }
+  const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
   const thresholdBytes = threshold * gbMultiplier;
   for (const clusterBucket of clusterBuckets) {
     const indexBuckets = clusterBucket.over_threshold.index.buckets;
