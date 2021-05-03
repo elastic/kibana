@@ -10,6 +10,7 @@ import {
   getServiceNowITSMActionType,
   getServiceNowSIRActionType,
   getJiraActionType,
+  getSwimlaneActionType,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../triggers_actions_ui/public/common';
 import { ConnectorConfiguration } from './types';
@@ -19,6 +20,7 @@ const resilient = getResilientActionType();
 const serviceNowITSM = getServiceNowITSMActionType();
 const serviceNowSIR = getServiceNowSIRActionType();
 const jira = getJiraActionType();
+const swimlane = getSwimlaneActionType();
 
 export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
   [ConnectorTypes.serviceNowITSM]: {
@@ -36,5 +38,9 @@ export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
   [ConnectorTypes.resilient]: {
     name: resilient.actionTypeTitle ?? '',
     logo: resilient.iconClass,
+  },
+  [ConnectorTypes.swimlane]: {
+    name: swimlane.actionTypeTitle ?? '',
+    logo: swimlane.iconClass,
   },
 };

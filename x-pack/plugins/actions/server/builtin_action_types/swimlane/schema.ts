@@ -25,6 +25,7 @@ export const ConfigMapping = {
   severityConfig: ConfigMapSchema,
 };
 
+export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 export const ConfigMappingSchema = schema.object(ConfigMapping);
 
 export const SwimlaneServiceConfiguration = {
@@ -41,11 +42,6 @@ export const SwimlaneSecretsConfiguration = {
 };
 
 export const SwimlaneSecretsConfigurationSchema = schema.object(SwimlaneSecretsConfiguration);
-
-export const ExecutorSubActionSchema = schema.oneOf([
-  schema.literal('application'),
-  schema.literal('createRecord'),
-]);
 
 export const ExecutorSubActionCreateRecordParamsSchema = schema.object({
   alertName: schema.nullable(schema.string()),

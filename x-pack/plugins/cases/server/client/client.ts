@@ -21,7 +21,7 @@ import {
 import { create } from './cases/create';
 import { update } from './cases/update';
 import { addComment } from './comments/add';
-import { getFields } from './configure/get_fields';
+import { getDefaultMappings } from './configure/get_default_mappings';
 import { getMappings } from './configure/get_mappings';
 import { updateAlertsStatus } from './alerts/update_status';
 import {
@@ -129,9 +129,9 @@ export class CasesClientHandler implements CasesClient {
     }
   }
 
-  public async getFields(fields: ConfigureFields) {
+  public async getDefaultMappings(fields: ConfigureFields) {
     try {
-      return getFields(fields);
+      return getDefaultMappings(fields);
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve fields using client: ${error}`,

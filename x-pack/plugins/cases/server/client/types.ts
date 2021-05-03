@@ -15,18 +15,18 @@ import {
   CaseStatuses,
   CommentRequest,
   ConnectorMappingsAttributes,
-  GetFieldsResponse,
+  GetDefaultMappingsResponse,
   CaseUserActionsResponse,
   User,
 } from '../../common';
 import { AlertInfo } from '../common';
 import {
+  AlertServiceContract,
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
-  AlertServiceContract,
+  ConnectorMappingsServiceSetup,
 } from '../services';
-import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 import { CasesClientGetAlertsResponse } from './alerts/types';
 
 export interface CasesClientGet {
@@ -100,7 +100,7 @@ export interface CasesClient {
   create(theCase: CasePostRequest): Promise<CaseResponse>;
   get(args: CasesClientGet): Promise<CaseResponse>;
   getAlerts(args: CasesClientGetAlerts): Promise<CasesClientGetAlertsResponse>;
-  getFields(args: ConfigureFields): Promise<GetFieldsResponse>;
+  getDefaultMappings(args: ConfigureFields): Promise<GetDefaultMappingsResponse>;
   getMappings(args: MappingsClient): Promise<ConnectorMappingsAttributes[]>;
   getUserActions(args: CasesClientGetUserActions): Promise<CaseUserActionsResponse>;
   push(args: CasesClientPush): Promise<CaseResponse>;

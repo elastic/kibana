@@ -15,6 +15,7 @@ import {
   ExecutorParamsSchema,
   ExecutorSubActionCreateRecordParamsSchema,
   ExecutorSubActionGetApplicationParamsSchema,
+  ExecutorSubActionCommonFieldsParamsSchema,
   ConfigMappingSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -29,6 +30,9 @@ export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 
 export type ExecutorSubActionCreateRecordParams = TypeOf<
   typeof ExecutorSubActionCreateRecordParamsSchema
+>;
+export type ExecutorSubActionCommonFieldsParams = TypeOf<
+  typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
 export interface ExternalServiceCredentials {
@@ -94,4 +98,9 @@ export interface SwimlaneRecordPayload {
   applicationId: string;
   values?: SwimlaneDataValues;
   comments?: SwimlaneDataComments;
+}
+
+export interface GetCommonFieldsHandlerArgs {
+  externalService: ExternalService;
+  params: ExecutorSubActionCommonFieldsParams;
 }

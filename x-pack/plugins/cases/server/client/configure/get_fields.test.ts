@@ -19,7 +19,7 @@ describe('get_fields', () => {
   });
 
   describe('happy path', () => {
-    test('it gets fields', async () => {
+    test('it gets default mappings', async () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: mockCaseMappings,
       });
@@ -30,10 +30,6 @@ describe('get_fields', () => {
         connectorId: '123',
       });
       expect(res).toEqual({
-        fields: [
-          { id: 'summary', name: 'Summary', required: true, type: 'text' },
-          { id: 'description', name: 'Description', required: false, type: 'text' },
-        ],
         defaultMappings: mappings[ConnectorTypes.jira],
       });
     });

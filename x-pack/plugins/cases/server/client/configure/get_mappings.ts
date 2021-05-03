@@ -53,7 +53,7 @@ export const getMappings = async ({
       (myConnectorMappings.total > 0 &&
         !myConnectorMappings.saved_objects[0].attributes.hasOwnProperty('mappings'))
     ) {
-      const res = await casesClient.getFields({
+      const res = await casesClient.getDefaultMappings({
         actionsClient,
         connectorId,
         connectorType,
@@ -61,7 +61,7 @@ export const getMappings = async ({
       theMapping = await connectorMappingsService.post({
         client: savedObjectsClient,
         attributes: {
-          mappings: res.defaultMappings,
+          mappings: res,
         },
         references: [
           {

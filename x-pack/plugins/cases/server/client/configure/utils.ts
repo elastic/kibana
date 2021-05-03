@@ -10,9 +10,10 @@ import {
   JiraGetFieldsResponse,
   ResilientGetFieldsResponse,
   ServiceNowGetFieldsResponse,
+  SwimlaneGetFieldsResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../actions/server/types';
-
+export { SwimlaneGetFieldsResponse };
 const normalizeJiraFields = (jiraFields: JiraGetFieldsResponse): ConnectorField[] =>
   Object.keys(jiraFields).reduce<ConnectorField[]>(
     (acc, data) =>
@@ -59,7 +60,19 @@ const normalizeServiceNowFields = (snFields: ServiceNowGetFieldsResponse): Conne
     ],
     []
   );
+export interface SwimlaneMappings {
+  title: string;
+  description?: string;
+  comments?: string;
+}
+export const mapSwimlaneFields = (slFields: SwimlaneGetFieldsResponse): SwimlaneMappings => ({
+  title: slFields.alertNameConfig.id,
+  description: slFields.commentsConfig?.id,
+  comments: slFields.commentsConfig?.id,
+});
 
+// unused but lets keep for dynamic field mappings
+// https://github.com/elastic/security-team/issues/596
 export const formatFields = (theData: unknown, theType: string): ConnectorField[] => {
   switch (theType) {
     case ConnectorTypes.jira:
@@ -75,7 +88,7 @@ export const formatFields = (theData: unknown, theType: string): ConnectorField[
   }
 };
 
-const getPreferredFields = (theType: string) => {
+const getPreferredFields = (theType: string, swimlaneMappings?: SwimlaneMappings) => {
   let title: string = '';
   let description: string = '';
   let comments: string = '';
@@ -95,16 +108,18 @@ const getPreferredFields = (theType: string) => {
     title = 'short_description';
     description = 'description';
     comments = 'work_notes';
+  } else if (theType === ConnectorTypes.swimlane && swimlaneMappings != null) {
+    return swimlaneMappings;
   }
 
   return { title, description, comments };
 };
 
 export const createDefaultMapping = (
-  fields: ConnectorField[],
-  theType: string
+  theType: string,
+  swimlaneMappings?: SwimlaneMappings
 ): ConnectorMappingsAttributes[] => {
-  const { description, title, comments } = getPreferredFields(theType);
+  const { description, title, comments } = getPreferredFields(theType, swimlaneMappings);
   return [
     {
       source: 'title',

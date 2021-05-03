@@ -16,10 +16,10 @@ import {
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
   ExecutorSubActionGetCapabilitiesParamsSchema,
-  ExecutorSubActionGetIssueTypesParamsSchema,
   ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
   ExecutorSubActionGetIssuesParamsSchema,
   ExecutorSubActionGetIssueParamsSchema,
+  ExecutorSubActionCommonFieldsParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
@@ -125,7 +125,7 @@ export type ExecutorSubActionGetCapabilitiesParams = TypeOf<
 >;
 
 export type ExecutorSubActionGetIssueTypesParams = TypeOf<
-  typeof ExecutorSubActionGetIssueTypesParamsSchema
+  typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
 export type ExecutorSubActionGetFieldsByIssueTypeParams = TypeOf<

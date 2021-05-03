@@ -18,6 +18,7 @@ import { serviceNowSIRExternalServiceFormatter } from './servicenow/sir_formatte
 import { jiraExternalServiceFormatter } from './jira/external_service_formatter';
 import { resilientExternalServiceFormatter } from './resilient/external_service_formatter';
 import { CommentRequest, CommentType, ConnectorTypes } from '../../common';
+import { swimlaneExternalServiceFormatter } from './swimlane/external_service_formatter';
 
 export * from './types';
 export { transformConnectorComment } from './case';
@@ -54,6 +55,7 @@ export const externalServiceFormatters: ExternalServiceFormatterMapper = {
   [ConnectorTypes.serviceNowSIR]: serviceNowSIRExternalServiceFormatter,
   [ConnectorTypes.jira]: jiraExternalServiceFormatter,
   [ConnectorTypes.resilient]: resilientExternalServiceFormatter,
+  [ConnectorTypes.swimlane]: swimlaneExternalServiceFormatter,
 };
 
 export const isCommentGeneratedAlert = (

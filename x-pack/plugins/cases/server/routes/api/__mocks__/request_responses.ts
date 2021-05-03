@@ -125,6 +125,14 @@ export const getActionTypes = (): ActionTypeConnector[] => [
     enabledInConfig: true,
     enabledInLicense: true,
   },
+  {
+    id: ConnectorTypes.swimlane,
+    name: 'Swimlane',
+    minimumLicenseRequired: 'gold',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
 ];
 
 export const getActionExecuteResults = (actionId = '123') => ({

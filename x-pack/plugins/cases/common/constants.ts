@@ -44,6 +44,7 @@ export const SUPPORTED_CONNECTORS = [
   ConnectorTypes.serviceNowSIR,
   ConnectorTypes.jira,
   ConnectorTypes.resilient,
+  ConnectorTypes.swimlane,
 ];
 
 /**
