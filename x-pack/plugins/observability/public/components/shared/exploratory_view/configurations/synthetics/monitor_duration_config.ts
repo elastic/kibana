@@ -8,6 +8,7 @@
 import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
 import { buildExistsFilter } from '../utils';
+import { MONITORS_DURATION_LABEL } from '../constants/labels';
 
 export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -22,7 +23,7 @@ export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps
       {
         operationType: 'average',
         sourceField: 'monitor.duration.us',
-        label: 'Monitor duration (ms)',
+        label: MONITORS_DURATION_LABEL,
       },
     ],
     hasOperationType: true,
@@ -44,6 +45,6 @@ export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps
         field: 'url.full',
       },
     ],
-    labels: { ...FieldLabels, 'monitor.duration.us': 'Monitor duration' },
+    labels: { ...FieldLabels, 'monitor.duration.us': MONITORS_DURATION_LABEL },
   };
 }
