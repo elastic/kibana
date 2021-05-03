@@ -15,6 +15,12 @@ import {
   getCurrentListPageDataState,
   getListApiSuccessResponse,
   getListItems,
+  getCurrentListItemsQuery,
+  getListPagination,
+  getListFetchError,
+  getListIsLoading,
+  getListPageDoesDataExist,
+  listDataNeedsRefresh,
 } from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
@@ -22,11 +28,11 @@ import { EventFiltersListPageState, EventFiltersPageLocation } from '../state';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import {
+  createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
   createUninitialisedResourceState,
   getLastLoadedResourceState,
-  LoadedResourceState,
 } from '../../../state';
 
 describe('event filters selectors', () => {
@@ -45,7 +51,7 @@ describe('event filters selectors', () => {
 
   const setToLoadingState = (
     previousState: EventFiltersListPageState['listPage']['data'] = createLoadedResourceState({
-      query: {},
+      query: { page: 5, perPage: 50 },
       content: getFoundExceptionListItemSchemaMock(),
     })
   ) => {
@@ -69,9 +75,6 @@ describe('event filters selectors', () => {
   describe('getListPageIsActive()', () => {
     it('should return active state', () => {
       expect(getListPageIsActive(initialState)).toBe(false);
-
-      initialState.listPage.active = true;
-      expect(getListPageIsActive(initialState)).toBe(true);
     });
   });
 
@@ -84,7 +87,9 @@ describe('event filters selectors', () => {
   describe('getListApiSuccessResponse()', () => {
     it('should return api response', () => {
       setToLoadedState();
-      expect(getListApiSuccessResponse(initialState)).toEqual(initialState.listPage.data);
+      expect(getListApiSuccessResponse(initialState)).toEqual(
+        getLastLoadedResourceState(initialState.listPage.data)?.data.content
+      );
     });
 
     it('should return undefined if not available', () => {
@@ -95,7 +100,7 @@ describe('event filters selectors', () => {
     it('should return previous success response if currently loading', () => {
       setToLoadingState();
       expect(getListApiSuccessResponse(initialState)).toEqual(
-        getLastLoadedResourceState(previousStateWhileLoading!)?.data
+        getLastLoadedResourceState(previousStateWhileLoading!)?.data.content
       );
     });
   });
@@ -108,22 +113,128 @@ describe('event filters selectors', () => {
       );
     });
 
-    it.todo('should return empty array if no api response');
+    it('should return empty array if no api response', () => {
+      expect(getListItems(initialState)).toEqual([]);
+    });
   });
 
-  describe('getCurrentListItemsQuery()', () => {});
+  describe('getCurrentListItemsQuery()', () => {
+    it('should return empty object if Uninitialized', () => {
+      expect(getCurrentListItemsQuery(initialState)).toEqual({});
+    });
 
-  describe('getListPagination()', () => {});
+    it('should return query from current loaded state', () => {
+      setToLoadedState();
+      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 2, perPage: 10 });
+    });
 
-  describe('getListFetchError()', () => {});
+    it('should return query from previous state while Loading new page', () => {
+      setToLoadingState();
+      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 5, perPage: 50 });
+    });
+  });
 
-  describe('getListIsLoading()', () => {});
+  describe('getListPagination()', () => {
+    it('should return pagination defaults if no API response is available', () => {
+      expect(getListPagination(initialState)).toEqual({
+        totalItemCount: 0,
+        pageSize: 10,
+        pageSizeOptions: [10, 20, 50],
+        pageIndex: 0,
+      });
+    });
 
-  describe('getListPageDataExistsState()', () => {});
+    it('should return pagination based on API response', () => {
+      setToLoadedState();
+      expect(getListPagination(initialState)).toEqual({
+        totalItemCount: 1,
+        pageSize: 1,
+        pageSizeOptions: [10, 20, 50],
+        pageIndex: 0,
+      });
+    });
+  });
 
-  describe('getListPageDataExist()', () => {});
+  describe('getListFetchError()', () => {
+    it('should return undefined if no error exists', () => {
+      expect(getListFetchError(initialState)).toBeUndefined();
+    });
 
-  describe('listdataNeedsRefresh()', () => {});
+    it('should return the API error', () => {
+      const error = {
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: 'Something is not right',
+      };
+
+      initialState.listPage.data = createFailedResourceState(error);
+      expect(getListFetchError(initialState)).toBe(error);
+    });
+  });
+
+  describe('getListIsLoading()', () => {
+    it('should return false if not in a Loading state', () => {
+      expect(getListIsLoading(initialState)).toBe(false);
+    });
+
+    it('should return true if in a Loading state', () => {
+      setToLoadingState();
+      expect(getListIsLoading(initialState)).toBe(true);
+    });
+  });
+
+  describe('getListPageDoesDataExist()', () => {
+    it('should return true (default) until we get a Loaded Resource state', () => {
+      expect(getListPageDoesDataExist(initialState)).toBe(true);
+
+      // Set DataExists to Loading
+      // ts-ignore will be fixed when AsyncResourceState is refactored (#830)
+      // @ts-ignore
+      initialState.listPage.dataExist = createLoadingResourceState(initialState.listPage.dataExist);
+      expect(getListPageDoesDataExist(initialState)).toBe(true);
+
+      // Set DataExists to Failure
+      initialState.listPage.dataExist = createFailedResourceState({
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: 'Something is not right',
+      });
+      expect(getListPageDoesDataExist(initialState)).toBe(true);
+    });
+
+    it('should return false if no data exists', () => {
+      initialState.listPage.dataExist = createLoadedResourceState(false);
+      expect(getListPageDoesDataExist(initialState)).toBe(false);
+    });
+  });
+
+  describe('listDataNeedsRefresh()', () => {
+    beforeEach(() => {
+      setToLoadedState();
+
+      initialState.location = {
+        page_index: 1,
+        page_size: 10,
+        filter: '',
+        id: '',
+        show: undefined,
+      };
+    });
+
+    it('should return false if location url params match those that were used in api call', () => {
+      expect(listDataNeedsRefresh(initialState)).toBe(false);
+    });
+
+    it('should return true if `forceRefresh` is set', () => {
+      initialState.listPage.forceRefresh = true;
+      expect(listDataNeedsRefresh(initialState)).toBe(true);
+    });
+
+    it('should should return true if any of the url params differ from last api call', () => {
+      initialState.location.page_index = 10;
+      expect(listDataNeedsRefresh(initialState)).toBe(true);
+    });
+  });
 
   describe('getFormEntry()', () => {
     it('returns undefined when there is no entry', () => {
