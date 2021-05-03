@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
 import { of } from 'rxjs';
+import { v4 } from 'uuid';
+
+import { Logger } from 'kibana/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+
 import { SecurityRuleRegistry } from '../../../../plugin';
 import { ConfigType } from '../../../../config';
 
@@ -19,6 +22,7 @@ export const createRuleTypeMocks = () => {
 
   const loggerMock = ({
     debug: jest.fn(),
+    info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
   } as unknown) as Logger;
@@ -54,6 +58,9 @@ export const createRuleTypeMocks = () => {
       return alertExecutor({
         services,
         params,
+        rule: {
+          id: v4(),
+        },
         startedAt: new Date(),
       });
     },

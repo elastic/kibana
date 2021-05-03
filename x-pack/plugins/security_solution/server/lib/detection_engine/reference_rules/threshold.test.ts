@@ -8,10 +8,9 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-// import { sequenceResponse } from '../../../search_strategy/timeline/eql/__mocks__';
-
-import { thresholdAlertType } from './threshold';
 import { createRuleTypeMocks } from './__mocks__/rule_type';
+import { mockThresholdResults } from './__mocks__/threshold';
+import { thresholdAlertType } from './threshold';
 
 describe('Threshold alerts', () => {
   it('does not send an alert when threshold is not met', async () => {
@@ -20,11 +19,13 @@ describe('Threshold alerts', () => {
     dependencies.registry.registerType(thresholdAlertType);
 
     const params = {
-      customQuery: 'dne:42',
       indexPatterns: ['*'],
+      customQuery: '*:*',
+      thresholdFields: ['source.ip', 'host.name'],
+      thresholdValue: 4,
     };
 
-    services.scopedClusterClient.asCurrentUser.transport.request.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [],
@@ -33,6 +34,11 @@ describe('Threshold alerts', () => {
           total: {
             relation: 'eq',
             value: 0,
+          },
+        },
+        aggregations: {
+          'threshold_0:source.ip': {
+            buckets: [],
           },
         },
         took: 0,
@@ -60,13 +66,34 @@ describe('Threshold alerts', () => {
       indexPatterns: ['*'],
     };
 
-    services.scopedClusterClient.asCurrentUser.transport.request.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
-          hits: ['TODO'],
+          hits: [],
           total: {
             relation: 'eq',
-            value: 0, // TODO
+            value: 0,
+          },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          skipped: 0,
+          successful: 1,
+          total: 1,
+        },
+      })
+    );
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [],
+          aggregations: mockThresholdResults.rawResponse.body.aggregations,
+          total: {
+            relation: 'eq',
+            value: 0,
           },
         },
         took: 0,
