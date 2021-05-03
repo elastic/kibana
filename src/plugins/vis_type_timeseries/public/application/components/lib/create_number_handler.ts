@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { MetricsItems } from '../../../../common/types';
+import { Metric } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 
 export const createNumberHandler = (
   handleChange: (partialModel: Partial<TimeseriesVisParams>) => void
 ) => {
-  return (name: keyof MetricsItems, defaultValue?: string) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => handleChange?.({ [name]: Number(e.target.value ?? defaultValue) });
+  return (name: keyof Metric, defaultValue?: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleChange?.({ [name]: Number(e.target.value ?? defaultValue) });
 };

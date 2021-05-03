@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { AggSelect } from './agg_select';
 import { METRIC, SERIES } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
-import { MetricsItems } from '../../../../common/types';
+import { Metric } from '../../../../common/types';
 
 describe('TSVB AggSelect', () => {
   const setup = (panelType: string, value: string) => {
@@ -29,7 +29,7 @@ describe('TSVB AggSelect', () => {
           onChange={jest.fn()}
           panelType={panelType}
           value={value}
-          siblings={series.metrics as MetricsItems[]}
+          siblings={series.metrics as Metric[]}
         />
       </div>
     );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnnotationItems, Panel, SeriesItems } from 'src/plugins/vis_type_timeseries/common/types';
+import { Annotation, Panel, Series } from '../../../common/types';
 // @ts-expect-error
 import { handleAnnotationResponse } from './response_processors/annotations';
 import { AnnotationServices, getAnnotationRequestParams } from './annotations/get_request_params';
@@ -14,14 +14,14 @@ import { AnnotationServices, getAnnotationRequestParams } from './annotations/ge
 import { getLastSeriesTimestamp } from './helpers/timestamp';
 import { VisTypeTimeseriesVisDataRequest } from '../../types';
 
-function validAnnotation(annotation: AnnotationItems) {
+function validAnnotation(annotation: Annotation) {
   return annotation.fields && annotation.icon && annotation.template && !annotation.hidden;
 }
 
 interface GetAnnotationsParams {
   req: VisTypeTimeseriesVisDataRequest;
   panel: Panel;
-  series: SeriesItems[];
+  series: Series[];
   services: AnnotationServices;
 }
 

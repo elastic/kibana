@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnnotationItems, Panel } from 'src/plugins/vis_type_timeseries/common/types';
+import { Annotation, Panel } from '../../../../common/types';
 import { buildAnnotationRequest } from './build_request_body';
 import {
   VisTypeTimeseriesRequestHandlerContext,
@@ -24,7 +24,7 @@ export type AnnotationServices = VisTypeTimeseriesRequestServices & {
 export async function getAnnotationRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
   panel: Panel,
-  annotation: AnnotationItems,
+  annotation: Annotation,
   {
     esShardTimeout,
     esQueryConfig,

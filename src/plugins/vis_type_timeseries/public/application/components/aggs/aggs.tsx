@@ -15,16 +15,16 @@ import { Agg } from './agg';
 import { seriesChangeHandler } from '../lib/series_change_handler';
 import { handleAdd, handleDelete } from '../lib/collection_actions';
 import { newMetricAggFn } from '../lib/new_metric_agg_fn';
-import { Panel, SeriesItems } from '../../../../common/types';
+import { Panel, Series } from '../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import { IFieldType } from '../../../../../data/common/index_patterns/fields';
 
 const DROPPABLE_ID = 'aggs_dnd';
 
 export interface AggsProps {
-  name: keyof SeriesItems;
+  name: keyof Series;
   panel: Panel;
-  model: SeriesItems;
+  model: Series;
   fields: IFieldType[];
   uiRestrictions: TimeseriesUIRestrictions;
   onChange(): void;

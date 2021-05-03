@@ -8,7 +8,7 @@
 
 import { buildRequestBody } from './build_request_body';
 
-import type { FetchedIndexPattern, Panel, SeriesItems } from '../../../../common/types';
+import type { FetchedIndexPattern, Panel, Series } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
@@ -19,7 +19,7 @@ export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
   panel: Panel,
   panelIndex: FetchedIndexPattern,
-  series: SeriesItems,
+  series: Series,
   capabilities: DefaultSearchCapabilities,
   {
     esQueryConfig,
