@@ -4,3 +4,90 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
+// import { sequenceResponse } from '../../../search_strategy/timeline/eql/__mocks__';
+
+import { thresholdAlertType } from './threshold';
+import { createRuleTypeMocks } from './__mocks__/rule_type';
+
+describe('Threshold alerts', () => {
+  it('does not send an alert when threshold is not met', async () => {
+    const { services, dependencies, executor } = createRuleTypeMocks();
+
+    dependencies.registry.registerType(thresholdAlertType);
+
+    const params = {
+      customQuery: 'dne:42',
+      indexPatterns: ['*'],
+    };
+
+    services.scopedClusterClient.asCurrentUser.transport.request.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [],
+          sequences: [],
+          events: [],
+          total: {
+            relation: 'eq',
+            value: 0,
+          },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          skipped: 0,
+          successful: 1,
+          total: 1,
+        },
+      })
+    );
+
+    await executor({ params });
+    expect(services.alertInstanceFactory).not.toBeCalled();
+  });
+
+  it('sends a properly formatted alert when threshold is met', async () => {
+    const { services, dependencies, executor } = createRuleTypeMocks();
+
+    dependencies.registry.registerType(thresholdAlertType);
+
+    const params = {
+      eqlQuery: '*:*',
+      indexPatterns: ['*'],
+    };
+
+    services.scopedClusterClient.asCurrentUser.transport.request.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: ['TODO'],
+          total: {
+            relation: 'eq',
+            value: 0, // TODO
+          },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          skipped: 0,
+          successful: 1,
+          total: 1,
+        },
+      })
+    );
+
+    await executor({ params });
+    expect(services.alertInstanceFactory).toBeCalled();
+    expect(services.scopedRuleRegistryClient.bulkIndex).toBeCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          'event.kind': 'signal',
+        }),
+      ])
+    );
+  });
+});
