@@ -265,10 +265,7 @@ export class AlertsAuthorization {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { username, authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
         this.alertTypeRegistry.list(),
-        [
-          // maybe pass in this operation? or require it to be 'find'
-          ReadOperations.Find,
-        ],
+        [ReadOperations.Find],
         authorizationType
       );
 
@@ -368,7 +365,7 @@ export class AlertsAuthorization {
       // add an empty `authorizedConsumers` array on each ruleType
       const ruleTypesWithAuthorization = this.augmentWithAuthorizedConsumers(ruleTypes, {});
 
-      // map from privilege to alertType which we can refer back to when analyzing the result
+      // map from privilege to ruleType which we can refer back to when analyzing the result
       // of checkPrivileges
       const privilegeToRuleType = new Map<
         string,
@@ -417,13 +414,14 @@ export class AlertsAuthorization {
                   ruleType.authorizedConsumers[feature]
                 );
 
-                // this needs to be feature flagged
-                if (isAuthorizedAtProducerLevel) {
-                  // granting privileges under the producer automatically authorized the Alerts Management UI as well
-                  ruleType.authorizedConsumers[ALERTS_FEATURE_ID] = mergeHasPrivileges(
-                    hasPrivileges,
-                    ruleType.authorizedConsumers[ALERTS_FEATURE_ID]
-                  );
+                if (isAuthorizedAtProducerLevel && this.exemptConsumerIds.length > 0) {
+                  // granting privileges under the producer automatically authorized exempt consumer IDs as well
+                  this.exemptConsumerIds.forEach((exemptId: string) => {
+                    ruleType.authorizedConsumers[exemptId] = mergeHasPrivileges(
+                      hasPrivileges,
+                      ruleType.authorizedConsumers[exemptId]
+                    );
+                  });
                 }
                 authorizedRuleTypes.add(ruleType);
               }
