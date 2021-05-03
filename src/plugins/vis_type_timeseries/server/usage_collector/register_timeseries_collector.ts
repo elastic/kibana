@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getStats, TimeseriesUsage } from './get_usage_collector';
+import type { UsageCollectionSetup } from '../../../usage_collection/server';
 
 export function registerTimeseriesUsageCollector(collectorSet: UsageCollectionSetup) {
   const collector = collectorSet.makeUsageCollector<TimeseriesUsage | undefined>({

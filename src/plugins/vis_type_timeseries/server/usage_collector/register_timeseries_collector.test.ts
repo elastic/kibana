@@ -7,8 +7,8 @@
  */
 
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { createUsageCollectionSetupMock } from '../../../usage_collection/server/mocks';
+import { createCollectorFetchContextMock } from '../../../usage_collection/server/mocks';
 import { registerTimeseriesUsageCollector } from './register_timeseries_collector';
 
 describe('registerTimeseriesUsageCollector', () => {

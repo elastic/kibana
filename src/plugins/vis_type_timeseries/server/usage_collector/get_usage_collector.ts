@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import {
+import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
+import { findByValueEmbeddables } from '../../../dashboard/server';
+
+import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
   SavedObjectsFindResult,
-} from 'kibana/server';
-import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
-import { findByValueEmbeddables } from '../../../dashboard/server';
-import { SavedVisState } from '../../../visualizations/common';
+} from '../../../../core/server';
+import type { SavedVisState } from '../../../visualizations/common';
 
 export interface TimeseriesUsage {
   timeseries_use_last_value_mode_total: number;
