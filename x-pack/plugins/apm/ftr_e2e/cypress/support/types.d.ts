@@ -10,5 +10,6 @@ declare namespace Cypress {
     loginAsReadOnlyUser(): void;
     loginAsSuperUser(): void;
     loginAs(params: { username: string; password: string }): void;
+    changeTimeRange(value: string): void;
   }
 }
