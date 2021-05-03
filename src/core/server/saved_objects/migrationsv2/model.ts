@@ -574,24 +574,33 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        controlState: 'REFRESH_TARGET',
       };
     } else {
       const left = res.left;
       if (isLeftTypeof(left, 'index_not_found_exception')) {
-        // index_not_found_exception means another instance alread completed
+        // index_not_found_exception means another instance already completed
         // the MARK_VERSION_INDEX_READY step and removed the temp index
-        // We still perform the OUTDATED_DOCUMENTS_* and
+        // We still perform the REFRESH_TARGET, OUTDATED_DOCUMENTS_* and
         // UPDATE_TARGET_MAPPINGS steps since we might have plugins enabled
         // which the other instances don't.
         return {
           ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          controlState: 'REFRESH_TARGET',
         };
       } else {
         throwBadResponse(stateP, left);
       }
     }
+  } else if (stateP.controlState === 'REFRESH_TARGET') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
+    }
+    throwBadResponse(stateP, res);
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
@@ -600,7 +609,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
         pitId: res.right.pitId,
         lastHitSortValue: undefined,
-        hasTransformedDocs: false,
       };
     } else {
       throwBadResponse(stateP, res);
@@ -623,26 +631,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
-      };
-    } else {
-      throwBadResponse(stateP, res);
-    }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const { pitId, hasTransformedDocs, ...state } = stateP;
-      if (hasTransformedDocs) {
-        return {
-          ...state,
-          controlState: 'OUTDATED_DOCUMENTS_REFRESH',
-        };
-      }
+      const { pitId, ...state } = stateP;
       return {
         ...state,
         controlState: 'UPDATE_TARGET_MAPPINGS',
@@ -656,7 +648,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
-        hasTransformedDocs: true,
       };
     } else {
       throwBadResponse(stateP, res as never);

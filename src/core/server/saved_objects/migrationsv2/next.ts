@@ -35,7 +35,7 @@ import type {
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
   OutdatedDocumentsSearchClosePit,
-  OutdatedDocumentsRefresh,
+  RefreshTarget,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -100,6 +100,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.setWriteBlock(client, state.tempIndex),
     CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
       Actions.cloneIndex(client, state.tempIndex, state.targetIndex),
+    REFRESH_TARGET: (state: RefreshTarget) => Actions.refreshIndex(client, state.targetIndex),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.targetIndex, state.targetIndexMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
@@ -116,8 +117,6 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       ),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
       Actions.closePit(client, state.pitId),
-    OUTDATED_DOCUMENTS_REFRESH: (state: OutdatedDocumentsRefresh) =>
-      Actions.refreshIndex(client, state.targetIndex),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       Actions.transformDocs(
         client,

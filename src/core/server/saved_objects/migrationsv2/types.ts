@@ -205,6 +205,12 @@ export interface CloneTempToSource extends PostInitState {
   readonly sourceIndex: Option.Some<string>;
 }
 
+export interface RefreshTarget extends PostInitState {
+  /** Refresh temp index before searching for outdated docs */
+  readonly controlState: 'REFRESH_TARGET';
+  readonly targetIndex: string;
+}
+
 export interface UpdateTargetMappingsState extends PostInitState {
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS';
@@ -226,20 +232,12 @@ export interface OutdatedDocumentsSearchRead extends PostInitState {
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ';
   readonly pitId: string;
   readonly lastHitSortValue: number[] | undefined;
-  readonly hasTransformedDocs: boolean;
 }
 
 export interface OutdatedDocumentsSearchClosePit extends PostInitState {
   /** Close PiT for target index when found all outdated documents */
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT';
   readonly pitId: string;
-  readonly hasTransformedDocs: boolean;
-}
-
-export interface OutdatedDocumentsRefresh extends PostInitState {
-  /** Reindex transformed documents */
-  readonly controlState: 'OUTDATED_DOCUMENTS_REFRESH';
-  readonly targetIndex: string;
 }
 
 export interface OutdatedDocumentsTransform extends PostInitState {
@@ -248,7 +246,6 @@ export interface OutdatedDocumentsTransform extends PostInitState {
   readonly pitId: string;
   readonly outdatedDocuments: SavedObjectsRawDoc[];
   readonly lastHitSortValue: number[] | undefined;
-  readonly hasTransformedDocs: boolean;
 }
 
 export interface MarkVersionIndexReady extends PostInitState {
@@ -353,7 +350,7 @@ export type State =
   | OutdatedDocumentsSearchRead
   | OutdatedDocumentsSearchClosePit
   | OutdatedDocumentsTransform
-  | OutdatedDocumentsRefresh
+  | RefreshTarget
   | MarkVersionIndexReady
   | MarkVersionIndexReadyConflict
   | LegacyCreateReindexTargetState

@@ -21,13 +21,13 @@ import type {
   ReindexSourceToTempRead,
   ReindexSourceToTempClosePit,
   ReindexSourceToTempIndex,
+  RefreshTarget,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
   OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsTransform,
-  OutdatedDocumentsRefresh,
   MarkVersionIndexReady,
   BaseState,
   CreateReindexTempState,
@@ -891,23 +891,23 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
       };
-      it('CLONE_TEMP_TO_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if response is right', () => {
+      it('CLONE_TEMP_TO_TARGET -> REFRESH_TARGET if response is right', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.right({
           acknowledged: true,
           shardsAcknowledged: true,
         });
         const newState = model(state, res);
-        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.controlState).toBe('REFRESH_TARGET');
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
       });
-      it('CLONE_TEMP_TO_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if response is left index_not_fonud_exception', () => {
+      it('CLONE_TEMP_TO_TARGET -> REFRESH_TARGET if response is left index_not_fonud_exception', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
           type: 'index_not_found_exception',
           index: 'temp_index',
         });
         const newState = model(state, res);
-        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.controlState).toBe('REFRESH_TARGET');
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
       });
@@ -942,7 +942,6 @@ describe('migrations v2 model', () => {
         pitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
-        hasTransformedDocs: false,
       };
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM if found documents to transform', () => {
@@ -977,46 +976,30 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         pitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
-        hasTransformedDocs: false,
       };
 
-      it('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> UPDATE_TARGET_MAPPINGS if no docs have been transformed on the previous steps', () => {
+      it('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> UPDATE_TARGET_MAPPINGS if action succeeded', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT'> = Either.right({});
         const newState = model(state, res) as UpdateTargetMappingsState;
         expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS');
         // @ts-expect-error pitId shouldn't leak outside
         expect(newState.pitId).toBe(undefined);
-        // @ts-expect-error hasTransformedDocs shouldn't leak outside
-        expect(newState.hasTransformedDocs).toBe(undefined);
-      });
-
-      it('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> OUTDATED_DOCUMENTS_REFRESH if transformed docs on the previous steps', () => {
-        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT'> = Either.right({});
-        const newState = model(
-          { ...state, hasTransformedDocs: true },
-          res
-        ) as UpdateTargetMappingsState;
-        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_REFRESH');
-        // @ts-expect-error pitId shouldn't leak outside
-        expect(newState.pitId).toBe(undefined);
-        // @ts-expect-error hasTransformedDocs shouldn't leak outside
-        expect(newState.hasTransformedDocs).toBe(undefined);
       });
     });
 
-    describe('OUTDATED_DOCUMENTS_REFRESH', () => {
-      const state: OutdatedDocumentsRefresh = {
+    describe('REFRESH_TARGET', () => {
+      const state: RefreshTarget = {
         ...baseState,
-        controlState: 'OUTDATED_DOCUMENTS_REFRESH',
+        controlState: 'REFRESH_TARGET',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
       };
 
-      it('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> UPDATE_TARGET_MAPPINGS if action succeeded', () => {
-        const res: ResponseType<'OUTDATED_DOCUMENTS_REFRESH'> = Either.right({ refreshed: true });
+      it('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeded', () => {
+        const res: ResponseType<'REFRESH_TARGET'> = Either.right({ refreshed: true });
         const newState = model(state, res) as UpdateTargetMappingsState;
-        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS');
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
       });
     });
 
@@ -1033,7 +1016,6 @@ describe('migrations v2 model', () => {
         outdatedDocuments,
         pitId: 'pit_id',
         lastHitSortValue: [3, 4],
-        hasTransformedDocs: false,
       };
       test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ if action succeeds', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right(
