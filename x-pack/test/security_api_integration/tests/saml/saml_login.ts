@@ -10,7 +10,6 @@ import url from 'url';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,

@@ -59,7 +59,7 @@ Customize each layer to highlight meaningful dimensions in your data. For exampl
 
 [float]
 === Focus on only the data that’s important to you
-Search across your Elasticsearch layers to focus in on just the data you want. Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>. Set the time filter to restrict layers by time. Draw a polygon on the map or use the shape from features to create spatial filters. Filter individual layers to compares facets.
+Search across the layers in your map to focus in on just the data you want. Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>. Set the time filter to restrict layers by time. Draw a polygon on the map or use the shape from features to create spatial filters. Filter individual layers to compares facets.
 
 
 --
