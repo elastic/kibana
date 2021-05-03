@@ -1,0 +1,151 @@
+{
+  "id": "metricsEntities",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "id": "def-server.MetricsEntitiesPluginSetup",
+      "type": "Interface",
+      "label": "MetricsEntitiesPluginSetup",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-server.MetricsEntitiesPluginSetup.getMetricsEntitiesClient",
+          "type": "Function",
+          "label": "getMetricsEntitiesClient",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/metrics_entities/server/types.ts",
+            "lineNumber": 15
+          },
+          "signature": [
+            "GetMetricsEntitiesClientType"
+          ]
+        }
+      ],
+      "source": {
+        "path": "x-pack/plugins/metrics_entities/server/types.ts",
+        "lineNumber": 14
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "id": "def-server.MetricsEntitiesPluginStart",
+      "type": "Type",
+      "label": "MetricsEntitiesPluginStart",
+      "tags": [],
+      "description": [],
+      "source": {
+        "path": "x-pack/plugins/metrics_entities/server/types.ts",
+        "lineNumber": 18
+      },
+      "signature": [
+        "void"
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "tags": [],
+        "id": "def-common.ELASTIC_NAME",
+        "type": "string",
+        "label": "ELASTIC_NAME",
+        "description": [
+          "\nGlobal prefix for all the transform jobs"
+        ],
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+          "lineNumber": 21
+        },
+        "signature": [
+          "\"estc\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.METRICS_ENTITIES_TRANSFORMS",
+        "type": "string",
+        "label": "METRICS_ENTITIES_TRANSFORMS",
+        "description": [
+          "\nTransforms route"
+        ],
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+          "lineNumber": 16
+        },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.METRICS_ENTITIES_URL",
+        "type": "string",
+        "label": "METRICS_ENTITIES_URL",
+        "description": [
+          "\nBase route"
+        ],
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/constants.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"/api/metrics_entities\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "label": "PLUGIN_ID",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/index.ts",
+          "lineNumber": 8
+        },
+        "signature": [
+          "\"metricsEntities\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/metrics_entities/common/index.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"metrics_entities\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
