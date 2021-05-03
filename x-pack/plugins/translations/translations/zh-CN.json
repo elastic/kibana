@@ -8313,7 +8313,6 @@
     "xpack.fleet.agentPolicyForm.nameFieldLabel": "名称",
     "xpack.fleet.agentPolicyForm.nameFieldPlaceholder": "选择名称",
     "xpack.fleet.agentPolicyForm.nameRequiredErrorMessage": "“代理策略名称”必填。",
-    "xpack.fleet.agentPolicyForm.namespaceFieldDescription": "将默认命名空间应用于使用此策略的集成。集成可以指定自己的命名空间。",
     "xpack.fleet.agentPolicyForm.namespaceFieldLabel": "默认命名空间",
     "xpack.fleet.agentPolicyForm.systemMonitoringFieldLabel": "系统监测",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "收集系统指标",

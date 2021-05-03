@@ -8238,7 +8238,6 @@
     "xpack.fleet.agentPolicyForm.nameFieldLabel": "名前",
     "xpack.fleet.agentPolicyForm.nameFieldPlaceholder": "名前を選択",
     "xpack.fleet.agentPolicyForm.nameRequiredErrorMessage": "エージェントポリシー名が必要です。",
-    "xpack.fleet.agentPolicyForm.namespaceFieldDescription": "このポリシーを使用する統合にデフォルトの名前空間を適用します。統合はその独自の名前空間を指定できます。",
     "xpack.fleet.agentPolicyForm.namespaceFieldLabel": "デフォルト名前空間",
     "xpack.fleet.agentPolicyForm.systemMonitoringFieldLabel": "システム監視",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "システムメトリックを収集",
