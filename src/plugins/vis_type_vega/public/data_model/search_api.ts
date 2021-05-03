@@ -40,16 +40,10 @@ export class SearchAPI {
     return combineLatest(
       searchRequests.map((request) => {
         const requestId = request.name;
-        const paramsFromRequest = getSearchParamsFromRequest(request, {
+        const params = getSearchParamsFromRequest(request, {
           getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
         });
-        const params = {
-          ...paramsFromRequest,
-          body: {
-            ...paramsFromRequest.body,
-            runtime_mappings: request.runtimeFields,
-          },
-        };
+        params.body.runtime_mappings = request.runtimeFields;
 
         if (this.inspectorAdapters) {
           requestResponders[requestId] = this.inspectorAdapters.requests.start(requestId, {
