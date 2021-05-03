@@ -50,12 +50,13 @@ export function getSpaceIdFromPath(
 }
 
 /**
- * Given a server base path, space id, and requested resource, this will construct a space-aware path.
+ * Given a server base path, space id, and requested resource, this will construct a space-aware path
+ * that includes a URL identifier with the space id.
  *
- * @param basePath the server's base path
- * @param spaceId the space id
- * @param requestedPath the requested path (e.g. `/app/dashboard`)
- * @returns the space-aware version of the requested path, inclusive of the server's base path
+ * @param basePath the server's base path.
+ * @param spaceId the space id.
+ * @param requestedPath the requested path (e.g. `/app/dashboard`).
+ * @returns the space-aware version of the requested path, inclusive of the server's base path.
  */
 export function addSpaceIdToPath(
   basePath: string = '/',

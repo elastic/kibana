@@ -27,7 +27,7 @@ export interface SpacesApi {
   getActiveSpace(): Promise<Space>;
 
   /**
-   * UI components and services to add spaces capabilities to an application
+   * UI components and services to add spaces capabilities to an application.
    */
   ui: SpacesApiUi;
 }
@@ -38,7 +38,7 @@ export interface SpacesApi {
 export type LazyComponentFn<T> = (props: T) => ReactElement;
 
 /**
- * UI components and services to add spaces capabilities to an application
+ * UI components and services to add spaces capabilities to an application.
  */
 export interface SpacesApiUi {
   /**
@@ -279,7 +279,7 @@ export interface SpaceAvatarProps {
   /** The size of the avatar. */
   size?: 's' | 'm' | 'l' | 'xl';
 
-  /** Optional class(es) to apply. */
+  /** Optional CSS class(es) to apply. */
   className?: string;
 
   /**

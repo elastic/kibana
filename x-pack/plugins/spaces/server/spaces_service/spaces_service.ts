@@ -96,7 +96,7 @@ interface SpacesServiceStartDeps {
 }
 
 /**
- * Service for interacting with Kibana spaces.
+ * Service for interacting with spaces.
  */
 export class SpacesService {
   public setup({ basePath }: SpacesServiceSetupDeps): SpacesServiceSetup {

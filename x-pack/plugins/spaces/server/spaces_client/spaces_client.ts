@@ -24,7 +24,7 @@ const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
 const DEFAULT_PURPOSE = 'any';
 
 /**
- * Client interface for interacting with Kibana spaces.
+ * Client interface for interacting with spaces.
  */
 export interface ISpacesClient {
   /**
@@ -41,14 +41,14 @@ export interface ISpacesClient {
 
   /**
    * Creates a space.
-   * @param space the space to create
+   * @param space the space to create.
    */
   create(space: Space): Promise<Space>;
 
   /**
    * Updates a space.
    * @param id  the id of the space to update.
-   * @param space The updated space.
+   * @param space the updated space.
    */
   update(id: string, space: Space): Promise<Space>;
 
@@ -60,7 +60,7 @@ export interface ISpacesClient {
 }
 
 /**
- * Client for interacting with Kibana spaces.
+ * Client for interacting with spaces.
  */
 export class SpacesClient implements ISpacesClient {
   constructor(

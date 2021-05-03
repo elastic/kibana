@@ -56,7 +56,7 @@ export interface PluginsStart {
  */
 export interface SpacesPluginSetup {
   /**
-   * Service for interacting with Kibana spaces.
+   * Service for interacting with spaces.
    *
    * @deprecated Please use the `spacesService` available on this plugin's start contract.
    * @removeBy 7.16
@@ -64,7 +64,7 @@ export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
 
   /**
-   * Registries exposed for the security plugin to transparently provide authorization and audit logging
+   * Registries exposed for the security plugin to transparently provide authorization and audit logging.
    * @private
    */
   spacesClient: {
@@ -85,7 +85,7 @@ export interface SpacesPluginSetup {
  * Start contract for the spaces plugin.
  */
 export interface SpacesPluginStart {
-  /** Service for interacting with Kibana spaces. */
+  /** Service for interacting with spaces. */
   spacesService: SpacesServiceStart;
 }
 

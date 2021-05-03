@@ -14,7 +14,7 @@ export interface Space {
    * The unique identifier for this space.
    * The id becomes part of the "URL Identifier" of the space.
    *
-   * Example: an id of `marketing` would result in the URL identifier of `/s/marketing`
+   * Example: an id of `marketing` would result in the URL identifier of `/s/marketing`.
    */
   id: string;
 
