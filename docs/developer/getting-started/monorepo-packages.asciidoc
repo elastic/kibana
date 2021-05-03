@@ -69,6 +69,7 @@ yarn kbn watch-bazel
 - @kbn/apm-utils
 - @kbn/babel-code-parser
 - @kbn/babel-preset
+- @kbn/config
 - @kbn/config-schema
 - @kbn/dev-utils
 - @kbn/eslint-import-resolver-kibana
