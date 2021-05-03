@@ -7,6 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { ApplicationStart } from 'kibana/public';
+
 import {
   DeleteTrustedAppsRequestSchema,
   GetOneTrustedAppRequestSchema,
@@ -69,9 +70,15 @@ export enum ConditionEntryField {
   SIGNER = 'process.Ext.code_signature',
 }
 
+export enum OperatorFieldIds {
+  is = 'is',
+  matches = 'matches',
+}
+
+export type TrustedAppEntryTypes = 'match' | 'wildcard';
 export interface ConditionEntry<T extends ConditionEntryField = ConditionEntryField> {
   field: T;
-  type: 'match';
+  type: TrustedAppEntryTypes;
   operator: 'included';
   value: string;
 }

@@ -16,7 +16,7 @@ import {
   mockCaseComments,
 } from '../../__fixtures__';
 import { initDeleteCommentApi } from './delete_comment';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common';
 
 describe('DELETE comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
