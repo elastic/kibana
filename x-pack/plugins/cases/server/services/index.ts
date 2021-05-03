@@ -927,27 +927,34 @@ export class CaseService implements CaseServiceSetup {
     client,
     alertId,
   }: GetCaseIdsByAlertIdArgs): Promise<string[]> {
-    let response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
-      type: CASE_COMMENT_SAVED_OBJECT,
-      fields: [],
-      page: 1,
-      perPage: 1,
-      sortField: defaultSortField,
-      aggs: this.buildCaseIdsAggs(),
-      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
-    });
-    if (response.total > 100) {
-      response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+    try {
+      this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
+
+      let response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
         type: CASE_COMMENT_SAVED_OBJECT,
         fields: [],
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        aggs: this.buildCaseIdsAggs(response.total),
+        aggs: this.buildCaseIdsAggs(),
         filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
       });
+      if (response.total > 100) {
+        response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+          type: CASE_COMMENT_SAVED_OBJECT,
+          fields: [],
+          page: 1,
+          perPage: 1,
+          sortField: defaultSortField,
+          aggs: this.buildCaseIdsAggs(response.total),
+          filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
+        });
+      }
+      return response.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
+    } catch (error) {
+      this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
+      throw error;
     }
-    return response.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
   }
 
   /**
