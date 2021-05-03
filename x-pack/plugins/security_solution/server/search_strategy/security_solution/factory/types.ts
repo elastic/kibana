@@ -25,7 +25,7 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
   parse: (
     options: StrategyRequestType<T>,
     response: IEsSearchResponse,
-    deps: {
+    deps?: {
       esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
