@@ -13,7 +13,7 @@ import { omit } from 'lodash';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
+import { Schema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 
 import { ServerFieldResultSettingObject } from './types';
 
@@ -77,9 +77,9 @@ describe('ResultSettingsLogic', () => {
         bar: { raw: { size: 5 } },
       };
       const schema: Schema = {
-        foo: 'text' as SchemaTypes,
-        bar: 'number' as SchemaTypes,
-        baz: 'text' as SchemaTypes,
+        foo: SchemaType.Text,
+        bar: SchemaType.Number,
+        baz: SchemaType.Text,
       };
       const schemaConflicts: SchemaConflicts = {
         foo: {
@@ -437,7 +437,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set (but no size) as worth 1.5', () => {
           mount({
             resultFields: { foo: { raw: true } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
         });
@@ -445,7 +445,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set and a size over 250 as also worth 1.5', () => {
           mount({
             resultFields: { foo: { raw: true, rawSize: 251 } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
         });
@@ -453,7 +453,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set and a size less than or equal to 250 as worth 1', () => {
           mount({
             resultFields: { foo: { raw: true, rawSize: 250 } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1);
         });
@@ -461,7 +461,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with a snippet set as worth 2', () => {
           mount({
             resultFields: { foo: { snippet: true, snippetSize: 50, snippetFallback: true } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(2);
         });
@@ -469,7 +469,7 @@ describe('ResultSettingsLogic', () => {
         it('will sum raw and snippet values if both are set', () => {
           mount({
             resultFields: { foo: { snippet: true, raw: true } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           // 1.5 (raw) + 2 (snippet) = 3.5
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(3.5);
@@ -478,7 +478,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a non-text value with raw set as 0.2', () => {
           mount({
             resultFields: { foo: { raw: true } },
-            schema: { foo: 'number' as SchemaTypes },
+            schema: { foo: SchemaType.Number },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(0.2);
         });
@@ -491,9 +491,9 @@ describe('ResultSettingsLogic', () => {
               baz: { raw: true },
             },
             schema: {
-              foo: 'text' as SchemaTypes,
-              bar: 'text' as SchemaTypes,
-              baz: 'number' as SchemaTypes,
+              foo: SchemaType.Text,
+              bar: SchemaType.Text,
+              baz: SchemaType.Number,
             },
           });
           // 1.5 (foo) + 3.5 (bar) + baz (.2) = 5.2
