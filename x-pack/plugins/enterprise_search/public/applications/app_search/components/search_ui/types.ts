@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { IndexingStatus } from './indexing_status';
+export enum ActiveField {
+  Title,
+  Filter,
+  Sort,
+  Url,
+  None,
+}

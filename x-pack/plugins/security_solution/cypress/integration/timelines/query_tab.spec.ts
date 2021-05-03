@@ -14,13 +14,7 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import {
-  addFilter,
-  closeTimeline,
-  openTimelineById,
-  pinFirstEvent,
-  waitForEventsPanelToBeLoaded,
-} from '../../tasks/timeline';
+import { addFilter, closeTimeline, openTimelineById, pinFirstEvent } from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
@@ -41,13 +35,9 @@ describe('Timeline query tab', () => {
         addNoteToTimeline(note, timelineId!).should((response) => {
           expect(response.status).to.equal(200);
           waitForTimelinesPanelToBeLoaded();
-          openTimelineById(timelineId!)
-            .click({ force: true })
-            .then(() => {
-              waitForEventsPanelToBeLoaded();
-              pinFirstEvent();
-              addFilter(timeline.filter);
-            });
+          openTimelineById(timelineId!);
+          pinFirstEvent();
+          addFilter(timeline.filter);
         });
       });
   });

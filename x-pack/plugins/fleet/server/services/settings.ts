@@ -51,6 +51,30 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
   }
 }
 
+function getPortForURL(url: URL) {
+  if (url.port !== '') {
+    return url.port;
+  }
+
+  if (url.protocol === 'http:') {
+    return '80';
+  }
+
+  if (url.protocol === 'https:') {
+    return '443';
+  }
+}
+
+export function normalizeFleetServerHost(host: string) {
+  // Fleet server is not using default port for http|https https://github.com/elastic/beats/issues/25420
+  const fleetServerURL = new URL(host);
+
+  // We are building the URL manualy as url format will not include the port if the port is 80 or 443
+  return `${fleetServerURL.protocol}//${fleetServerURL.hostname}:${getPortForURL(fleetServerURL)}${
+    fleetServerURL.pathname === '/' ? '' : fleetServerURL.pathname
+  }`;
+}
+
 export async function saveSettings(
   soClient: SavedObjectsClientContract,
   newData: Partial<Omit<Settings, 'id'>>
@@ -58,10 +82,15 @@ export async function saveSettings(
   try {
     const settings = await getSettings(soClient);
 
+    const data = { ...newData };
+    if (data.fleet_server_hosts) {
+      data.fleet_server_hosts = data.fleet_server_hosts.map(normalizeFleetServerHost);
+    }
+
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
-      newData
+      data
     );
 
     return {
