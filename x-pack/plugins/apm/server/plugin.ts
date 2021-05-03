@@ -16,7 +16,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { mapValues, once } from 'lodash';
+import { mapValues, once, merge } from 'lodash';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { RuleDataClient } from '../../rule_registry/server';
@@ -143,20 +143,37 @@ export class APMPlugin
             settings: {
               number_of_shards: 1,
             },
-            mappings: mappingFromFieldMap({
-              [SERVICE_NAME]: {
-                type: 'keyword',
-              },
-              [SERVICE_ENVIRONMENT]: {
-                type: 'keyword',
-              },
-              [TRANSACTION_TYPE]: {
-                type: 'keyword',
-              },
-              [PROCESSOR_EVENT]: {
-                type: 'keyword',
-              },
-            }),
+            mappings: merge(
+              {},
+              mappingFromFieldMap({
+                [SERVICE_NAME]: {
+                  type: 'keyword',
+                },
+                [SERVICE_ENVIRONMENT]: {
+                  type: 'keyword',
+                },
+                [TRANSACTION_TYPE]: {
+                  type: 'keyword',
+                },
+                [PROCESSOR_EVENT]: {
+                  type: 'keyword',
+                },
+              }),
+              {
+                dynamic: 'runtime',
+                dynamic_templates: [
+                  {
+                    metrics_as_float: {
+                      match_mapping_type: 'double',
+                      match: 'metric_',
+                      mapping: {
+                        type: 'double',
+                      },
+                    },
+                  },
+                ],
+              }
+            ),
           },
         },
       });
@@ -188,6 +205,10 @@ export class APMPlugin
         return coreStart.elasticsearch.client.asInternalUser;
       },
       ready,
+    });
+
+    ruleDataClient.createOrUpdateWriteTarget().catch((err) => {
+      this.logger!.error(err);
     });
 
     registerRoutes({

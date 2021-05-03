@@ -15,11 +15,7 @@ export async function alertingEsClient<TParams extends ESSearchRequest>({
   scopedClusterClient,
   params,
 }: {
-  scopedClusterClient: AlertServices<
-    never,
-    never,
-    never
-  >['scopedClusterClient'];
+  scopedClusterClient: AlertingScopedClusterClient;
   params: TParams;
 }): Promise<ESSearchResponse<unknown, TParams>> {
   const response = await scopedClusterClient.asCurrentUser.search({
@@ -29,3 +25,9 @@ export async function alertingEsClient<TParams extends ESSearchRequest>({
 
   return (response.body as unknown) as ESSearchResponse<unknown, TParams>;
 }
+
+export type AlertingScopedClusterClient = AlertServices<
+  never,
+  never,
+  never
+>['scopedClusterClient'];

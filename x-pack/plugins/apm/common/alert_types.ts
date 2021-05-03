@@ -10,11 +10,19 @@ import type { ValuesType } from 'utility-types';
 import type { ActionGroup } from '../../alerting/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
 
+enum AlertSeverityLevel {
+  Unknown = 'unknown',
+  Warning = 'warning',
+  Critical = 'critical',
+  Ok = 'ok',
+}
+
 export enum AlertType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
   TransactionErrorRate = 'apm.transaction_error_rate',
   TransactionDuration = 'apm.transaction_duration',
   TransactionDurationAnomaly = 'apm.transaction_duration_anomaly',
+  Metric = 'apm.metric',
 }
 
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
@@ -30,9 +38,9 @@ export const ALERT_TYPES_CONFIG: Record<
   AlertType,
   {
     name: string;
-    actionGroups: Array<ActionGroup<ThresholdMetActionGroupId>>;
-    defaultActionGroupId: ThresholdMetActionGroupId;
-    minimumLicenseRequired: string;
+    actionGroups: Array<ActionGroup<string>>;
+    defaultActionGroupId: string;
+    minimumLicenseRequired: 'basic' | 'gold';
     producer: string;
   }
 > = {
@@ -69,6 +77,20 @@ export const ALERT_TYPES_CONFIG: Record<
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
+    minimumLicenseRequired: 'basic',
+    producer: 'apm',
+  },
+  [AlertType.Metric]: {
+    name: i18n.translate('xpack.apm.metricAlert.name', {
+      defaultMessage: 'Metric alert',
+    }),
+    actionGroups: [
+      { id: AlertSeverityLevel.Unknown, name: AlertSeverityLevel.Unknown },
+      { id: AlertSeverityLevel.Ok, name: AlertSeverityLevel.Ok },
+      { id: AlertSeverityLevel.Warning, name: AlertSeverityLevel.Warning },
+      { id: AlertSeverityLevel.Critical, name: AlertSeverityLevel.Critical },
+    ],
+    defaultActionGroupId: AlertSeverityLevel.Warning,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
   },

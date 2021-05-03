@@ -252,4 +252,24 @@ export function registerApmAlerts(
       }
     ),
   });
+
+  observabilityRuleTypeRegistry.register({
+    id: AlertType.Metric,
+    description: i18n.translate('xpack.apm.alertTypes.metric.description', {
+      defaultMessage: 'Programmable metric rule type.',
+    }),
+    format: ({ fields }) => ({
+      reason: '',
+      link: '',
+    }),
+    iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
+    alertParamsExpression: lazy(() => import('./metric_rule_trigger')),
+    validate: () => ({
+      errors: [],
+    }),
+    requiresAppContext: false,
+  });
 }

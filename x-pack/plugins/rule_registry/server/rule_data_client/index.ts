@@ -89,7 +89,7 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
-  async createOrUpdateWriteTarget({ namespace }: { namespace?: string }) {
+  async createOrUpdateWriteTarget({ namespace }: { namespace?: string } = {}) {
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
 
     const clusterClient = await this.getClusterClient();
@@ -118,7 +118,7 @@ export class RuleDataClient implements IRuleDataClient {
       path: `/_index_template/_simulate_index/${concreteIndexName}`,
     });
 
-    const mappings: TypeMapping = simulateResponse.mappings;
+    const mappings: TypeMapping = simulateResponse.template.mappings;
 
     await clusterClient.indices.putMapping({ index: `${alias}*`, body: mappings });
   }

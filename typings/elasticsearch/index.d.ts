@@ -6,10 +6,16 @@
  * Side Public License, v 1.
  */
 import { estypes } from '@elastic/elasticsearch';
-import { InferSearchResponseOf, AggregateOf as AggregationResultOf, SearchHit } from './search';
+import {
+  InferSearchResponseOf,
+  AggregateOf as AggregationResultOf,
+  SearchHit,
+  ESSearchRequestWithValidAggregations,
+} from './search';
 
 export type ESFilter = estypes.QueryContainer;
 export type ESSearchRequest = estypes.SearchRequest;
+
 export type AggregationOptionsByType = Required<estypes.AggregationContainer>;
 
 // Typings for Elasticsearch queries and aggregations. These are intended to be
@@ -29,4 +35,9 @@ export type ESSearchResponse<
   TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
-export { InferSearchResponseOf, AggregationResultOf, SearchHit };
+export {
+  InferSearchResponseOf,
+  AggregationResultOf,
+  SearchHit,
+  ESSearchRequestWithValidAggregations,
+};

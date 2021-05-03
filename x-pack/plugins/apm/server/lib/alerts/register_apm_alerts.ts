@@ -15,6 +15,7 @@ import { registerErrorCountAlertType } from './register_error_count_alert_type';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
+import { registerMetricRuleType } from './metric_rule_type/register_metric_rule_type';
 
 export interface RegisterRuleDependencies {
   ruleDataClient: RuleDataClient;
@@ -29,4 +30,5 @@ export function registerApmAlerts(dependencies: RegisterRuleDependencies) {
   registerTransactionDurationAnomalyAlertType(dependencies);
   registerErrorCountAlertType(dependencies);
   registerTransactionErrorRateAlertType(dependencies);
+  registerMetricRuleType(dependencies);
 }

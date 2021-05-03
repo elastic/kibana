@@ -25,7 +25,7 @@ export interface RuleExecutorData {
 }
 
 export function getRuleExecutorData(
-  type: AlertTypeWithExecutor<any, any, any>,
+  type: Pick<AlertTypeWithExecutor<any, any, any>, 'id' | 'name' | 'producer'>,
   options: Parameters<AlertTypeExecutor>[0]
 ) {
   return {
