@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+
+import { useValues } from 'kea';
+
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText } from '@elastic/eui';
+
+import { LicensingLogic } from '../../../shared/licensing';
+
+import { LICENSE_CALLOUT_HEADING, LICENSE_CALLOUT_BODY, LICENSE_CALLOUT_BUTTON } from './constants';
+
+export const LicenseCallout: React.FC = () => {
+  const { hasPlatinumLicense, isTrial } = useValues(LicensingLogic);
+
+  if (hasPlatinumLicense && !isTrial) return null;
+
+  return (
+    <EuiPanel hasShadow={false} hasBorder className="productCard" paddingSize="l">
+      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem grow={7}>
+          <EuiText>
+            <h3>{LICENSE_CALLOUT_HEADING}</h3>
+          </EuiText>
+          <EuiText size="s">{LICENSE_CALLOUT_BODY}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <div />
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <div>
+            <EuiButton href="/app/management/stack/license_management">
+              <EuiText size="s">{LICENSE_CALLOUT_BUTTON}</EuiText>
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
