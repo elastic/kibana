@@ -118,10 +118,14 @@ export class HeadlessChromiumDriverFactory {
         async kill() {
           try {
             const endMetrics = await devTools.send('Performance.getMetrics');
-            const { cpu, cpuInPercentage } = getMetrics(startMetrics, endMetrics);
+            const { cpu, cpuInPercentage, memory, memoryInMegabytes } = getMetrics(
+              startMetrics,
+              endMetrics
+            );
 
             apm.currentTransaction?.setLabel('cpu', cpu, false);
-            logger.debug(`Chromium used CPU ${cpuInPercentage}% `);
+            apm.currentTransaction?.setLabel('memory', memory, false);
+            logger.debug(`Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`);
           } catch (error) {
             logger.error(error);
           }

@@ -32,6 +32,8 @@ interface NormalizedMetrics extends Required<PuppeteerMetrics> {
 interface PerformanceMetrics {
   cpu: number;
   cpuInPercentage: number;
+  memory: number;
+  memoryInMegabytes: number;
 }
 
 function normalizeMetrics({ metrics }: Metrics) {
@@ -48,15 +50,23 @@ function toPercentage(value: number) {
   return Math.round((value + Number.EPSILON) * 10000) / 100;
 }
 
+function toMegabytes(value: number) {
+  return Math.round((value / 1024 / 1024 + Number.EPSILON) * 100) / 100;
+}
+
 export function getMetrics(start: Metrics, end: Metrics): PerformanceMetrics {
   const startMetrics = normalizeMetrics(start);
   const endMetrics = normalizeMetrics(end);
 
   const cpu = getCpuUsage(startMetrics, endMetrics);
   const cpuInPercentage = toPercentage(cpu);
+  const { JSHeapTotalSize: memory } = endMetrics;
+  const memoryInMegabytes = toMegabytes(memory);
 
   return {
     cpu,
     cpuInPercentage,
+    memory,
+    memoryInMegabytes,
   };
 }

@@ -15,20 +15,22 @@ describe('getMetrics', () => {
     metrics: [
       { name: 'ProcessTime', value: 10 },
       { name: 'Timestamp', value: 1000 },
+      { name: 'JSHeapTotalSize', value: 1 * 1024 * 1024 },
     ],
   } as Metrics;
   const end = {
     metrics: [
       { name: 'ProcessTime', value: 110 },
       { name: 'Timestamp', value: 2000 },
+      { name: 'JSHeapTotalSize', value: 5 * 1024 * 1024 },
     ],
   } as Metrics;
 
-  describe('cpu', () => {
-    beforeEach(() => {
-      (cpus as jest.MockedFunction<typeof cpus>).mockReturnValue([{} as any]);
-    });
+  beforeEach(() => {
+    (cpus as jest.MockedFunction<typeof cpus>).mockReturnValue([{} as any]);
+  });
 
+  describe('cpu', () => {
     it('should evaluate CPU usage during the runtime', () => {
       const { cpu } = getMetrics(start, end);
 
@@ -46,6 +48,20 @@ describe('getMetrics', () => {
       const { cpuInPercentage } = getMetrics(start, end);
 
       expect(cpuInPercentage).toBe(10);
+    });
+  });
+
+  describe('memory', () => {
+    it('should evaluate memory consumption during the runtime', () => {
+      const { memory } = getMetrics(start, end);
+
+      expect(memory).toBe(5 * 1024 * 1024);
+    });
+
+    it('should return memory consumption in megabytes', () => {
+      const { memoryInMegabytes } = getMetrics(start, end);
+
+      expect(memoryInMegabytes).toBe(5);
     });
   });
 });
