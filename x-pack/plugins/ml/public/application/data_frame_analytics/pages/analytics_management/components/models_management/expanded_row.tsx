@@ -102,7 +102,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 {JSON.stringify(value, null, 2)}
               </EuiCodeBlock>
             ) : (
-              value
+              value.toString()
             ),
         };
       })
