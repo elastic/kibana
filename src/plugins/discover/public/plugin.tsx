@@ -62,6 +62,7 @@ import {
 import { SearchEmbeddableFactory } from './application/embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
+import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -133,6 +134,7 @@ export interface DiscoverStartPlugins {
   inspector: InspectorPublicPluginStart;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 const innerAngularName = 'app/discover';

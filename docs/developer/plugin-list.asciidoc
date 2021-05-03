@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within packages/kbn-dev-utils/target/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -216,14 +216,27 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 
 
 |<<uiactions-plugin>>
-|An API for:
+|UI Actions plugins provides API to manage *triggers* and *actions*.
 
-- creating custom functionality (`actions`)
-- creating custom user interaction events (`triggers`)
-- attaching and detaching `actions` to `triggers`.
-- emitting `trigger` events
-- executing `actions` attached to a given `trigger`.
-- exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
+*Trigger* is an abstract description of user's intent to perform an action
+(like user clicking on a value inside chart). It allows us to do runtime
+binding between code from different plugins. For, example one such
+trigger is when somebody applies filters on dashboard; another one is when
+somebody opens a Dashboard panel context menu.
+
+*Actions* are pieces of code that execute in response to a trigger. For example,
+to the dashboard filtering trigger multiple actions can be attached. Once a user
+filters on the dashboard all possible actions are displayed to the user in a
+popup menu and the user has to chose one.
+
+In general this plugin provides:
+
+- Creating custom functionality (actions).
+- Creating custom user interaction events (triggers).
+- Attaching and detaching actions to triggers.
+- Emitting trigger events.
+- Executing actions attached to a given trigger.
+- Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
@@ -325,11 +338,12 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
-|Experimental Feature
+|Case management in Kibana
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
 |The cloud plugin adds cloud specific features to Kibana.
+The client-side plugin configures following values:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
@@ -349,7 +363,7 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
-|The data_enhanced plugin is the x-pack counterpart to the OSS data plugin.
+|The data_enhanced plugin is the x-pack counterpart to the src/plguins/data plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
@@ -377,6 +391,10 @@ actitivies.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/file_data_visualizer[fileDataVisualizer]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
@@ -431,6 +449,10 @@ the infrastructure monitoring use-case within Kibana.
 |Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/license_api_guard/README.md[licenseApiGuard]
+|This plugin is used by ES UI plugins to reject API requests when the plugin is unsupported by the user's license.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]
 |This plugin enables users to activate a trial license, downgrade to Basic, and upload a new license.
 
@@ -450,6 +472,12 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
+|This is the metrics and entities plugin where you add can add transforms for your project
+and group those transforms into modules. You can also re-use existing transforms in your
+modules as well.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
@@ -483,6 +511,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/rule_registry/README.md[ruleRegistry]
+|The rule registry plugin aims to make it easy for rule type producers to have their rules produce the data that they need to build rich experiences on top of a unified experience, without the risk of mapping conflicts.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]

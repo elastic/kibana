@@ -11,7 +11,13 @@
           "\nReact component for displaying the example data associated with the Telemetry opt-in banner."
         ],
         "signature": [
-          "OptInExampleFlyout",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.OptInExampleFlyout",
+            "text": "OptInExampleFlyout"
+          },
           " extends React.PureComponent<Props, State, any>"
         ],
         "children": [
@@ -123,6 +129,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.OptInExampleFlyout.renderBody.$1",
                 "type": "Object",
                 "label": "{ data, isLoading, hasPrivilegeToRead }",
                 "isRequired": true,

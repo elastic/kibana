@@ -53,6 +53,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AbstractDashboardDrilldown.Unnamed.$1",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -130,6 +131,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AbstractDashboardDrilldown.getURL.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -149,6 +151,7 @@
                 }
               },
               {
+                "id": "def-public.AbstractDashboardDrilldown.getURL.$2",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -279,6 +282,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.AbstractDashboardDrilldown.isConfigValid.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -330,6 +334,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.AbstractDashboardDrilldown.getHref.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -349,6 +354,7 @@
                 }
               },
               {
+                "id": "def-public.AbstractDashboardDrilldown.getHref.$2",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -387,6 +393,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.AbstractDashboardDrilldown.execute.$1",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -406,6 +413,7 @@
                 }
               },
               {
+                "id": "def-public.AbstractDashboardDrilldown.execute.$2",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -879,7 +887,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.createExtract.{\n- drilldownId,\n}",
+            "id": "def-common.createExtract.$1.drilldownId",
             "type": "Object",
             "label": "{\n  drilldownId,\n}",
             "tags": [],
@@ -887,7 +895,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.createExtract.{\n- drilldownId,\n}.drilldownId",
+                "id": "def-common.createExtract.$1.drilldownId.drilldownId",
                 "type": "string",
                 "label": "drilldownId",
                 "description": [],
@@ -939,7 +947,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.createInject.{\n- drilldownId,\n}",
+            "id": "def-common.createInject.$1.drilldownId",
             "type": "Object",
             "label": "{\n  drilldownId,\n}",
             "tags": [],
@@ -947,7 +955,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.createInject.{\n- drilldownId,\n}.drilldownId",
+                "id": "def-common.createInject.$1.drilldownId.drilldownId",
                 "type": "string",
                 "label": "drilldownId",
                 "description": [],

@@ -10,7 +10,6 @@ import { InternalArtifactCompleteSchema } from '../../schemas';
 import { getArtifactId } from './common';
 import { isEmptyManifestDiff, Manifest } from './manifest';
 import { getMockArtifacts, toArtifactRecords } from './mocks';
-import { cloneDeepWith, CloneDeepWithCustomizer } from 'lodash';
 
 describe('manifest', () => {
   const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -693,52 +692,6 @@ describe('manifest', () => {
       };
 
       expect(isEmptyManifestDiff(diff)).toBe(false);
-    });
-  });
-
-  describe('and Fleet Server is enabled', () => {
-    const convertToFleetServerRelativeUrl: CloneDeepWithCustomizer<unknown> = (value, key) => {
-      if (key === 'relative_url') {
-        return value.replace('/api/endpoint/artifacts/download/', '/api/fleet/artifacts/');
-      }
-    };
-    let manifest: Manifest;
-
-    beforeEach(() => {
-      manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' }, true);
-
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
-    });
-
-    test('should write manifest for global artifacts with fleet-server relative url', () => {
-      expect(manifest.toPackagePolicyManifest()).toStrictEqual({
-        schema_version: 'v1',
-        manifest_version: '1.0.0',
-        artifacts: cloneDeepWith(
-          toArtifactRecords({
-            'endpoint-exceptionlist-windows-v1': ARTIFACT_EXCEPTIONS_WINDOWS,
-            'endpoint-exceptionlist-macos-v1': ARTIFACT_EXCEPTIONS_MACOS,
-          }),
-          convertToFleetServerRelativeUrl
-        ),
-      });
-    });
-
-    test('should write policy specific manifest with fleet-server relative url', () => {
-      expect(manifest.toPackagePolicyManifest(TEST_POLICY_ID_1)).toStrictEqual({
-        schema_version: 'v1',
-        manifest_version: '1.0.0',
-        artifacts: cloneDeepWith(
-          toArtifactRecords({
-            'endpoint-exceptionlist-windows-v1': ARTIFACT_EXCEPTIONS_WINDOWS,
-            'endpoint-trustlist-macos-v1': ARTIFACT_TRUSTED_APPS_MACOS,
-          }),
-          convertToFleetServerRelativeUrl
-        ),
-      });
     });
   });
 });

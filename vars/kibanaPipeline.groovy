@@ -201,6 +201,7 @@ def withGcsArtifactUpload(workerName, closure) {
     'x-pack/test/**/screenshots/session/*.png',
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
     'x-pack/test/functional/failure_debug/html/*.html',
+    '.es/**/*.hprof'
   ]
 
   withEnv([
@@ -468,7 +469,13 @@ def allCiTasks() {
     },
     jest: {
       workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
-        scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+        catchErrors {
+          scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+        }
+
+        catchErrors {
+          runbld.junit()
+        }
       }
     },
   ])

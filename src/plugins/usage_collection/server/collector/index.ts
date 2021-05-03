@@ -7,7 +7,6 @@
  */
 
 export { CollectorSet } from './collector_set';
-export type { CollectorSetPublic } from './collector_set';
 export { Collector } from './collector';
 export type {
   AllowedSchemaTypes,

@@ -13,11 +13,23 @@ import { omit } from 'lodash';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
+import { Schema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 
-import { OpenModal, ServerFieldResultSettingObject } from './types';
+import { ServerFieldResultSettingObject } from './types';
 
 import { ResultSettingsLogic } from '.';
+
+// toHaveBeenCalledWith uses toEqual which is a more lenient check. We have a couple of
+// methods that need a stricter check, using `toStrictEqual`.
+const expectToHaveBeenCalledWithStrict = (
+  mock: jest.Mock,
+  expectedParam1: string,
+  expectedParam2: object
+) => {
+  const [param1, param2] = mock.mock.calls[0];
+  expect(param1).toEqual(expectedParam1);
+  expect(param2).toStrictEqual(expectedParam2);
+};
 
 describe('ResultSettingsLogic', () => {
   const { mount } = new LogicMounter(ResultSettingsLogic);
@@ -25,7 +37,6 @@ describe('ResultSettingsLogic', () => {
   const DEFAULT_VALUES = {
     dataLoading: true,
     saving: false,
-    openModal: OpenModal.None,
     resultFields: {},
     lastSavedResultFields: {},
     schema: {},
@@ -35,8 +46,8 @@ describe('ResultSettingsLogic', () => {
   const SELECTORS = {
     serverResultFields: {},
     reducedServerResultFields: {},
-    resultFieldsAtDefaultSettings: true,
     resultFieldsEmpty: true,
+    resultFieldsAtDefaultSettings: true,
     stagedUpdates: false,
     nonTextResultFields: {},
     textResultFields: {},
@@ -66,9 +77,9 @@ describe('ResultSettingsLogic', () => {
         bar: { raw: { size: 5 } },
       };
       const schema: Schema = {
-        foo: 'text' as SchemaTypes,
-        bar: 'number' as SchemaTypes,
-        baz: 'text' as SchemaTypes,
+        foo: SchemaType.Text,
+        bar: SchemaType.Number,
+        baz: SchemaType.Text,
       };
       const schemaConflicts: SchemaConflicts = {
         foo: {
@@ -83,7 +94,6 @@ describe('ResultSettingsLogic', () => {
         mount({
           dataLoading: true,
           saving: true,
-          openModal: OpenModal.ConfirmSaveModal,
         });
 
         ResultSettingsLogic.actions.initializeResultFields(
@@ -139,8 +149,6 @@ describe('ResultSettingsLogic', () => {
               snippetFallback: false,
             },
           },
-          // The modal should be reset back to closed if it had been opened previously
-          openModal: OpenModal.None,
           // Stores the provided schema details
           schema,
           schemaConflicts,
@@ -153,47 +161,6 @@ describe('ResultSettingsLogic', () => {
         ResultSettingsLogic.actions.initializeResultFields(serverResultFields, schema);
 
         expect(ResultSettingsLogic.values.schemaConflicts).toEqual({});
-      });
-    });
-
-    describe('openConfirmSaveModal', () => {
-      mount({
-        openModal: OpenModal.None,
-      });
-
-      ResultSettingsLogic.actions.openConfirmSaveModal();
-
-      expect(resultSettingLogicValues()).toEqual({
-        ...DEFAULT_VALUES,
-        openModal: OpenModal.ConfirmSaveModal,
-      });
-    });
-
-    describe('openConfirmResetModal', () => {
-      mount({
-        openModal: OpenModal.None,
-      });
-
-      ResultSettingsLogic.actions.openConfirmResetModal();
-
-      expect(resultSettingLogicValues()).toEqual({
-        ...DEFAULT_VALUES,
-        openModal: OpenModal.ConfirmResetModal,
-      });
-    });
-
-    describe('closeModals', () => {
-      it('should close open modals', () => {
-        mount({
-          openModal: OpenModal.ConfirmSaveModal,
-        });
-
-        ResultSettingsLogic.actions.closeModals();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          openModal: OpenModal.None,
-        });
       });
     });
 
@@ -235,19 +202,6 @@ describe('ResultSettingsLogic', () => {
             quuz: { raw: true, snippet: false, snippetFallback: false },
             corge: { raw: true, snippet: false, snippetFallback: false },
           },
-        });
-      });
-
-      it('should close open modals', () => {
-        mount({
-          openModal: OpenModal.ConfirmSaveModal,
-        });
-
-        ResultSettingsLogic.actions.resetAllFields();
-
-        expect(resultSettingLogicValues()).toEqual({
-          ...DEFAULT_VALUES,
-          openModal: OpenModal.None,
         });
       });
     });
@@ -297,7 +251,7 @@ describe('ResultSettingsLogic', () => {
     });
 
     describe('saving', () => {
-      it('sets saving to true and close any open modals', () => {
+      it('sets saving to true', () => {
         mount({
           saving: false,
         });
@@ -307,7 +261,6 @@ describe('ResultSettingsLogic', () => {
         expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           saving: true,
-          openModal: OpenModal.None,
         });
       });
     });
@@ -382,26 +335,16 @@ describe('ResultSettingsLogic', () => {
     });
 
     describe('resultFieldsEmpty', () => {
-      it('should return true if all fields are empty', () => {
+      it('should return true if no raw or snippet fields are enabled', () => {
         mount({
           resultFields: {
-            foo: {},
+            foo: { raw: false },
             bar: {},
+            baz: { raw: false, snippet: false },
           },
         });
 
         expect(ResultSettingsLogic.values.resultFieldsEmpty).toEqual(true);
-      });
-
-      it('should return false otherwise', () => {
-        mount({
-          resultFields: {
-            foo: {},
-            bar: { raw: true, snippet: true, snippetFallback: false },
-          },
-        });
-
-        expect(ResultSettingsLogic.values.resultFieldsEmpty).toEqual(false);
       });
     });
 
@@ -494,7 +437,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set (but no size) as worth 1.5', () => {
           mount({
             resultFields: { foo: { raw: true } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
         });
@@ -502,7 +445,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set and a size over 250 as also worth 1.5', () => {
           mount({
             resultFields: { foo: { raw: true, rawSize: 251 } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1.5);
         });
@@ -510,7 +453,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with raw set and a size less than or equal to 250 as worth 1', () => {
           mount({
             resultFields: { foo: { raw: true, rawSize: 250 } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(1);
         });
@@ -518,7 +461,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a text value with a snippet set as worth 2', () => {
           mount({
             resultFields: { foo: { snippet: true, snippetSize: 50, snippetFallback: true } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(2);
         });
@@ -526,7 +469,7 @@ describe('ResultSettingsLogic', () => {
         it('will sum raw and snippet values if both are set', () => {
           mount({
             resultFields: { foo: { snippet: true, raw: true } },
-            schema: { foo: 'text' as SchemaTypes },
+            schema: { foo: SchemaType.Text },
           });
           // 1.5 (raw) + 2 (snippet) = 3.5
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(3.5);
@@ -535,7 +478,7 @@ describe('ResultSettingsLogic', () => {
         it('considers a non-text value with raw set as 0.2', () => {
           mount({
             resultFields: { foo: { raw: true } },
-            schema: { foo: 'number' as SchemaTypes },
+            schema: { foo: SchemaType.Number },
           });
           expect(ResultSettingsLogic.values.queryPerformanceScore).toEqual(0.2);
         });
@@ -548,9 +491,9 @@ describe('ResultSettingsLogic', () => {
               baz: { raw: true },
             },
             schema: {
-              foo: 'text' as SchemaTypes,
-              bar: 'text' as SchemaTypes,
-              baz: 'number' as SchemaTypes,
+              foo: SchemaType.Text,
+              bar: SchemaType.Text,
+              baz: SchemaType.Number,
             },
           });
           // 1.5 (foo) + 3.5 (bar) + baz (.2) = 5.2
@@ -563,6 +506,12 @@ describe('ResultSettingsLogic', () => {
   describe('listeners', () => {
     const { http } = mockHttpValues;
     const { flashAPIErrors } = mockFlashMessageHelpers;
+    let confirmSpy: jest.SpyInstance;
+
+    beforeAll(() => {
+      confirmSpy = jest.spyOn(window, 'confirm');
+    });
+    afterAll(() => confirmSpy.mockRestore());
 
     const serverFieldResultSettings = {
       foo: {
@@ -588,17 +537,20 @@ describe('ResultSettingsLogic', () => {
         mount({
           resultFields: {
             foo: { raw: true, rawSize: 5, snippet: false },
-            bar: { raw: true, rawSize: 5, snippet: false },
           },
         });
         jest.spyOn(ResultSettingsLogic.actions, 'updateField');
 
         ResultSettingsLogic.actions.clearRawSizeForField('foo');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
-          raw: true,
-          snippet: false,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'foo',
+          {
+            raw: true,
+            snippet: false,
+          }
+        );
       });
     });
 
@@ -607,17 +559,20 @@ describe('ResultSettingsLogic', () => {
         mount({
           resultFields: {
             foo: { raw: false, snippet: true, snippetSize: 5 },
-            bar: { raw: true, rawSize: 5, snippet: false },
           },
         });
         jest.spyOn(ResultSettingsLogic.actions, 'updateField');
 
         ResultSettingsLogic.actions.clearSnippetSizeForField('foo');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
-          raw: false,
-          snippet: true,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'foo',
+          {
+            raw: false,
+            snippet: true,
+          }
+        );
       });
     });
 
@@ -625,7 +580,6 @@ describe('ResultSettingsLogic', () => {
       it('should toggle the raw value on for a field', () => {
         mount({
           resultFields: {
-            foo: { raw: false, snippet: true, snippetSize: 5 },
             bar: { raw: false, snippet: false },
           },
         });
@@ -633,16 +587,19 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.toggleRawForField('bar');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
-          raw: true,
-          snippet: false,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'bar',
+          {
+            raw: true,
+            snippet: false,
+          }
+        );
       });
 
       it('should maintain rawSize if it was set prior', () => {
         mount({
           resultFields: {
-            foo: { raw: false, snippet: true, snippetSize: 5 },
             bar: { raw: false, rawSize: 10, snippet: false },
           },
         });
@@ -650,17 +607,20 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.toggleRawForField('bar');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
-          raw: true,
-          rawSize: 10,
-          snippet: false,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'bar',
+          {
+            raw: true,
+            rawSize: 10,
+            snippet: false,
+          }
+        );
       });
 
       it('should remove rawSize value when toggling off', () => {
         mount({
           resultFields: {
-            foo: { raw: false, snippet: true, snippetSize: 5 },
             bar: { raw: true, rawSize: 5, snippet: false },
           },
         });
@@ -668,16 +628,19 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.toggleRawForField('bar');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
-          raw: false,
-          snippet: false,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'bar',
+          {
+            raw: false,
+            snippet: false,
+          }
+        );
       });
 
       it('should still work if the object is empty', () => {
         mount({
           resultFields: {
-            foo: { raw: false, snippet: true, snippetSize: 5 },
             bar: {},
           },
         });
@@ -685,9 +648,13 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.toggleRawForField('bar');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
-          raw: true,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'bar',
+          {
+            raw: true,
+          }
+        );
       });
     });
 
@@ -695,7 +662,6 @@ describe('ResultSettingsLogic', () => {
       it('should toggle the raw value on for a field, always setting the snippet size to 100', () => {
         mount({
           resultFields: {
-            foo: { raw: false, snippet: true, snippetSize: 5 },
             bar: { raw: false, snippet: false },
           },
         });
@@ -703,17 +669,20 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.toggleSnippetForField('bar');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
-          raw: false,
-          snippet: true,
-          snippetSize: 100,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'bar',
+          {
+            raw: false,
+            snippet: true,
+            snippetSize: 100,
+          }
+        );
       });
 
       it('should remove rawSize value when toggling off', () => {
         mount({
           resultFields: {
-            foo: { raw: false, snippet: true, snippetSize: 5 },
             bar: { raw: false, snippet: true, snippetSize: 5 },
           },
         });
@@ -721,16 +690,19 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.toggleSnippetForField('bar');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
-          raw: false,
-          snippet: false,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'bar',
+          {
+            raw: false,
+            snippet: false,
+          }
+        );
       });
 
       it('should still work if the object is empty', () => {
         mount({
           resultFields: {
-            foo: { raw: false, snippet: true, snippetSize: 5 },
             bar: {},
           },
         });
@@ -738,10 +710,14 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.toggleSnippetForField('bar');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
-          snippet: true,
-          snippetSize: 100,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'bar',
+          {
+            snippet: true,
+            snippetSize: 100,
+          }
+        );
       });
     });
 
@@ -750,19 +726,22 @@ describe('ResultSettingsLogic', () => {
         mount({
           resultFields: {
             foo: { raw: false, snippet: true, snippetSize: 5, snippetFallback: true },
-            bar: { raw: false, snippet: false },
           },
         });
         jest.spyOn(ResultSettingsLogic.actions, 'updateField');
 
         ResultSettingsLogic.actions.toggleSnippetFallbackForField('foo');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
-          raw: false,
-          snippet: true,
-          snippetSize: 5,
-          snippetFallback: false,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'foo',
+          {
+            raw: false,
+            snippet: true,
+            snippetSize: 5,
+            snippetFallback: false,
+          }
+        );
       });
     });
 
@@ -770,7 +749,6 @@ describe('ResultSettingsLogic', () => {
       it('should update the rawSize value for a field', () => {
         mount({
           resultFields: {
-            foo: { raw: false, snippet: true, snippetSize: 5, snippetFallback: true },
             bar: { raw: true, rawSize: 5, snippet: false },
           },
         });
@@ -778,11 +756,15 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.updateRawSizeForField('bar', 7);
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
-          raw: true,
-          rawSize: 7,
-          snippet: false,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'bar',
+          {
+            raw: true,
+            rawSize: 7,
+            snippet: false,
+          }
+        );
       });
     });
 
@@ -791,19 +773,22 @@ describe('ResultSettingsLogic', () => {
         mount({
           resultFields: {
             foo: { raw: false, snippet: true, snippetSize: 5, snippetFallback: true },
-            bar: { raw: true, rawSize: 5, snippet: false },
           },
         });
         jest.spyOn(ResultSettingsLogic.actions, 'updateField');
 
         ResultSettingsLogic.actions.updateSnippetSizeForField('foo', 7);
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
-          raw: false,
-          snippet: true,
-          snippetSize: 7,
-          snippetFallback: true,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'foo',
+          {
+            raw: false,
+            snippet: true,
+            snippetSize: 7,
+            snippetFallback: true,
+          }
+        );
       });
     });
 
@@ -812,17 +797,20 @@ describe('ResultSettingsLogic', () => {
         mount({
           resultFields: {
             foo: { raw: false, snippet: true, snippetSize: 5 },
-            bar: { raw: true, rawSize: 5, snippet: false },
           },
         });
         jest.spyOn(ResultSettingsLogic.actions, 'updateField');
 
         ResultSettingsLogic.actions.clearSnippetSizeForField('foo');
 
-        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
-          raw: false,
-          snippet: true,
-        });
+        expectToHaveBeenCalledWithStrict(
+          ResultSettingsLogic.actions.updateField as jest.Mock,
+          'foo',
+          {
+            raw: false,
+            snippet: true,
+          }
+        );
       });
     });
 
@@ -864,20 +852,55 @@ describe('ResultSettingsLogic', () => {
       });
     });
 
+    describe('confirmResetAllFields', () => {
+      it('will reset all fields as long as the user confirms the action', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => true);
+        jest.spyOn(ResultSettingsLogic.actions, 'resetAllFields');
+
+        ResultSettingsLogic.actions.confirmResetAllFields();
+
+        expect(ResultSettingsLogic.actions.resetAllFields).toHaveBeenCalled();
+      });
+
+      it('will do nothing if the user cancels the action', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => false);
+        jest.spyOn(ResultSettingsLogic.actions, 'resetAllFields');
+
+        ResultSettingsLogic.actions.confirmResetAllFields();
+
+        expect(ResultSettingsLogic.actions.resetAllFields).not.toHaveBeenCalled();
+      });
+    });
+
     describe('saveResultSettings', () => {
+      beforeEach(() => {
+        confirmSpy.mockImplementation(() => true);
+      });
+
       it('should make an API call to update result settings and update state accordingly', async () => {
+        const resultFields = {
+          foo: { raw: true, rawSize: 100 },
+        };
+
+        const serverResultFields = {
+          foo: { raw: { size: 100 } },
+        };
+
         mount({
           schema,
+          resultFields,
         });
         http.put.mockReturnValueOnce(
           Promise.resolve({
-            result_fields: serverFieldResultSettings,
+            result_fields: serverResultFields,
           })
         );
         jest.spyOn(ResultSettingsLogic.actions, 'saving');
         jest.spyOn(ResultSettingsLogic.actions, 'initializeResultFields');
 
-        ResultSettingsLogic.actions.saveResultSettings(serverFieldResultSettings);
+        ResultSettingsLogic.actions.saveResultSettings();
 
         expect(ResultSettingsLogic.actions.saving).toHaveBeenCalled();
 
@@ -887,12 +910,12 @@ describe('ResultSettingsLogic', () => {
           '/api/app_search/engines/test-engine/result_settings',
           {
             body: JSON.stringify({
-              result_fields: serverFieldResultSettings,
+              result_fields: serverResultFields,
             }),
           }
         );
         expect(ResultSettingsLogic.actions.initializeResultFields).toHaveBeenCalledWith(
-          serverFieldResultSettings,
+          serverResultFields,
           schema
         );
       });
@@ -901,10 +924,20 @@ describe('ResultSettingsLogic', () => {
         mount();
         http.put.mockReturnValueOnce(Promise.reject('error'));
 
-        ResultSettingsLogic.actions.saveResultSettings(serverFieldResultSettings);
+        ResultSettingsLogic.actions.saveResultSettings();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+
+      it('does nothing if the user does not confirm', async () => {
+        mount();
+        confirmSpy.mockImplementation(() => false);
+
+        ResultSettingsLogic.actions.saveResultSettings();
+        await nextTick();
+
+        expect(http.put).not.toHaveBeenCalled();
       });
     });
   });

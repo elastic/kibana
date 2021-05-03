@@ -21,8 +21,6 @@ export enum SyntaxType {
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
 export const useQueryBar = () => {
-  const { index_pattern: indexPattern } = useIndexPattern();
-
   const dispatch = useDispatch();
 
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
@@ -45,6 +43,8 @@ export const useQueryBar = () => {
           language: storage.get(SYNTAX_STORAGE) ?? SyntaxType.text,
         }
   );
+
+  const { index_pattern: indexPattern } = useIndexPattern();
 
   const updateUrlParams = useUrlParams()[1];
 

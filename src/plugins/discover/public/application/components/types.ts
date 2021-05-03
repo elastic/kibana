@@ -167,4 +167,6 @@ export interface DiscoverProps {
      */
     showUnmappedFields: boolean;
   };
+
+  refreshAppState?: () => void;
 }

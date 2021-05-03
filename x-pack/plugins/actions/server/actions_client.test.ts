@@ -92,6 +92,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -123,6 +124,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -162,6 +164,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -199,6 +202,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -250,6 +254,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -274,6 +279,7 @@ describe('create()', () => {
       isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       config: {},
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -283,6 +289,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -347,6 +354,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {
           a: true,
           b: true,
@@ -373,6 +381,7 @@ describe('create()', () => {
       isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       config: {
         a: true,
         b: true,
@@ -390,6 +399,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -405,6 +415,7 @@ describe('create()', () => {
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
+      preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true,
       rejectUnauthorized: true,
@@ -412,6 +423,12 @@ describe('create()', () => {
       proxyOnlyHosts: undefined,
       maxResponseContentLength: new ByteSizeValue(1000000),
       responseTimeout: moment.duration('60s'),
+      cleanupFailedExecutionsTask: {
+        enabled: true,
+        cleanupInterval: schema.duration().validate('5m'),
+        idleInterval: schema.duration().validate('1h'),
+        pageSize: 100,
+      },
     });
 
     const localActionTypeRegistryParams = {
@@ -442,6 +459,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -475,6 +493,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -511,6 +530,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -559,6 +579,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -621,6 +642,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -646,6 +668,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -814,6 +837,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
+              isMissingSecrets: false,
               config: {
                 foo: 'bar',
               },
@@ -874,6 +898,7 @@ describe('getAll()', () => {
           type: 'type',
           attributes: {
             name: 'test',
+            isMissingSecrets: false,
             config: {
               foo: 'bar',
             },
@@ -925,6 +950,7 @@ describe('getAll()', () => {
         config: {
           foo: 'bar',
         },
+        isMissingSecrets: false,
         referencedByCount: 6,
       },
       {
@@ -952,6 +978,7 @@ describe('getBulk()', () => {
               config: {
                 foo: 'bar',
               },
+              isMissingSecrets: false,
             },
             references: [],
           },
@@ -1023,6 +1050,7 @@ describe('getBulk()', () => {
               config: {
                 foo: 'bar',
               },
+              isMissingSecrets: false,
             },
             references: [],
           },
@@ -1081,6 +1109,7 @@ describe('getBulk()', () => {
             config: {
               foo: 'bar',
             },
+            isMissingSecrets: false,
           },
           references: [],
         },
@@ -1136,6 +1165,7 @@ describe('getBulk()', () => {
           foo: 'bar',
         },
         id: '1',
+        isMissingSecrets: false,
         isPreconfigured: false,
         name: 'test',
       },
@@ -1224,6 +1254,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
       },
       references: [],
     });
@@ -1232,6 +1263,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1312,6 +1344,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
       },
       references: [],
     });
@@ -1320,6 +1353,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1338,6 +1372,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       name: 'my name',
       config: {},
     });
@@ -1348,6 +1383,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1363,6 +1399,70 @@ describe('update()', () => {
       Array [
         "action",
         "my-action",
+      ]
+    `);
+  });
+
+  test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    const result = await actionsClient.update({
+      id: 'my-action',
+      action: {
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+    });
+    expect(result).toEqual({
+      id: 'my-action',
+      isPreconfigured: false,
+      actionTypeId: 'my-action-type',
+      isMissingSecrets: true,
+      name: 'my name',
+      config: {},
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        Object {
+          "actionTypeId": "my-action-type",
+          "config": Object {},
+          "isMissingSecrets": false,
+          "name": "my name",
+          "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
+          "references": Array [],
+        },
       ]
     `);
   });
@@ -1421,6 +1521,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
         name: 'my name',
         config: {
           a: true,
@@ -1447,6 +1548,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
+      isMissingSecrets: true,
       name: 'my name',
       config: {
         a: true,
@@ -1465,6 +1567,7 @@ describe('update()', () => {
             "b": true,
             "c": true,
           },
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1500,6 +1603,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},

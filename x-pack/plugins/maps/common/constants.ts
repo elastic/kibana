@@ -54,6 +54,8 @@ export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id_
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
+export const MVT_TOKEN_PARAM_NAME = 'token';
+
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
   return MAP_BASE_URL;
@@ -82,7 +84,7 @@ export enum SOURCE_TYPES {
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
-  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
+  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
   REGIONMAP_FILE = 'REGIONMAP_FILE',
@@ -293,7 +295,7 @@ export enum DATA_MAPPING_FUNCTION {
 }
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
-export type RawValue = string | number | boolean | undefined | null;
+export type RawValue = string | string[] | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
 

@@ -63,7 +63,6 @@ import {
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
-import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
 
@@ -177,10 +176,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { overview: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
 
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -200,10 +198,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { detections: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
 
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -223,9 +220,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { hosts: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -245,9 +241,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { network: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -267,9 +262,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { timelines: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -289,9 +283,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { cases: subPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -311,9 +304,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { management: managementSubPlugin } = await this.subPlugins();
-        const { renderApp, composeLibs } = await this.lazyApplicationDependencies();
+        const { renderApp } = await this.lazyApplicationDependencies();
         return renderApp({
-          ...composeLibs(coreStart),
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins),
@@ -333,8 +325,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
-
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
 
     return {
       resolver: async () => {
@@ -458,7 +448,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._store) {
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
-        { composeLibs, createStore, createInitialState },
+        { createStore, createInitialState },
         kibanaIndexPatterns,
         {
           detections: detectionsSubPlugin,
@@ -491,8 +481,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         signal = { name: null };
       }
 
-      const { apolloClient } = composeLibs(coreStart);
-      const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
+      const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
 
       const detectionsStart = detectionsSubPlugin.start(this.storage);
@@ -534,7 +523,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...timelinesStart.store.reducer,
           ...managementSubPluginStart.store.reducer,
         },
-        libs$.pipe(pluck('apolloClient')),
         libs$.pipe(pluck('kibana')),
         this.storage,
         [...(managementSubPluginStart.store.middleware ?? [])]

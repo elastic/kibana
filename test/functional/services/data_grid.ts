@@ -23,6 +23,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
+  const retry = getService('retry');
 
   class DataGrid {
     async getDataGridTableData(): Promise<TabbedGridData> {
@@ -126,6 +127,9 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
      */
     public async getDocTableRows() {
       const table = await this.getTable();
+      if (!table) {
+        return [];
+      }
       const cells = await table.findAllByCssSelector('.euiDataGridRowCell');
 
       const rows: WebElementWrapper[][] = [];
@@ -168,7 +172,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const textArr = [];
       let idx = 0;
       for (const cell of result) {
-        if (idx > 0) {
+        if (idx > 1) {
           textArr.push(await cell.getVisibleText());
         }
         idx++;
@@ -183,14 +187,39 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       return await detailsRow.findAllByTestSubject('~docTableRowAction');
     }
 
-    public async clickDocSortAsc() {
-      await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      await find.clickByButtonText('Sort New-Old');
+    public async openColMenuByField(field: string) {
+      await retry.waitFor('header cell action being displayed', async () => {
+        // to prevent flakiness
+        await testSubjects.click(`dataGridHeaderCell-${field}`);
+        return await testSubjects.exists(`dataGridHeaderCellActionGroup-${field}`);
+      });
     }
 
-    public async clickDocSortDesc() {
-      await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      await find.clickByButtonText('Sort Old-New');
+    public async clickDocSortAsc(field?: string, sortText = 'Sort New-Old') {
+      if (field) {
+        await this.openColMenuByField(field);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      }
+      await find.clickByButtonText(sortText);
+    }
+
+    public async clickDocSortDesc(field?: string, sortText = 'Sort Old-New') {
+      if (field) {
+        await this.openColMenuByField(field);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      }
+      await find.clickByButtonText(sortText);
+    }
+
+    public async clickRemoveColumn(field?: string) {
+      if (field) {
+        await this.openColMenuByField(field);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      }
+      await find.clickByButtonText('Remove column');
     }
     public async getDetailsRow(): Promise<WebElementWrapper> {
       const detailRows = await this.getDetailsRows();
@@ -233,6 +262,10 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    public async hasNoResults() {
+      return await find.existsByCssSelector('.euiDataGrid__noResults');
     }
   }
 

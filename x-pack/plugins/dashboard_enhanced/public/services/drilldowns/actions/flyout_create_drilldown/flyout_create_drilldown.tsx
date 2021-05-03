@@ -10,16 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
-  isEnhancedEmbeddable,
-  embeddableEnhancedDrilldownGrouping,
-} from '../../../../../../embeddable_enhanced/public';
-import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableContext,
 } from '../../../../../../../../src/plugins/embeddable/public';
+import {
+  isEnhancedEmbeddable,
+  embeddableEnhancedDrilldownGrouping,
+} from '../../../../../../embeddable_enhanced/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { ensureNestedTriggers } from '../drilldown_shared';
+import { ensureNestedTriggers, createDrilldownTemplatesFromSiblings } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -81,14 +81,18 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
       );
     }
 
+    const templates = createDrilldownTemplatesFromSiblings(embeddable);
+
     const handle = core.overlays.openFlyout(
       toMountPoint(
-        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-          onClose={() => handle.close()}
-          viewMode={'create'}
+        <plugins.uiActionsEnhanced.DrilldownManager
+          closeAfterCreate
+          initialRoute={'/new'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
+          templates={templates}
+          onClose={() => handle.close()}
         />
       ),
       {

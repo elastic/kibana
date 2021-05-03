@@ -14,14 +14,11 @@ import { MlStartDependencies } from '../../plugin';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import {
   AppStateSelectedCells,
-  ExplorerJob,
   getSelectionInfluencers,
   getSelectionJobIds,
   getSelectionTimeRange,
-  loadDataForCharts,
 } from '../../application/explorer/explorer_utils';
 import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import { parseInterval } from '../../../common/util/parse_interval';
 import {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
@@ -46,7 +43,7 @@ export function useAnomalyChartsInputResolver(
   const [
     { uiSettings },
     { data: dataServices },
-    { anomalyDetectorService, anomalyExplorerService, mlResultsService },
+    { anomalyDetectorService, anomalyExplorerService },
   ] = services;
   const { timefilter } = dataServices.query.timefilter;
 
@@ -77,8 +74,8 @@ export function useAnomalyChartsInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        switchMap(([jobs, input, embeddableContainerWidth, severityValue]) => {
-          if (!jobs) {
+        switchMap(([explorerJobs, input, embeddableContainerWidth, severityValue]) => {
+          if (!explorerJobs) {
             // couldn't load the list of jobs
             return of(undefined);
           }
@@ -88,15 +85,6 @@ export function useAnomalyChartsInputResolver(
           const viewBySwimlaneFieldName = OVERALL_LABEL;
 
           anomalyExplorerService.setTimeRange(timeRangeInput);
-
-          const explorerJobs: ExplorerJob[] = jobs.map((job) => {
-            const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-            return {
-              id: job.job_id,
-              selected: true,
-              bucketSpanSeconds: bucketSpan!.asSeconds(),
-            };
-          });
 
           let influencersFilterQuery: InfluencersFilterQuery;
           try {
@@ -125,15 +113,13 @@ export function useAnomalyChartsInputResolver(
           const timeRange = getSelectionTimeRange(selections, bucketInterval.asSeconds(), bounds);
           return forkJoin({
             combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
-            anomalyChartRecords: loadDataForCharts(
-              mlResultsService,
+            anomalyChartRecords: anomalyExplorerService.loadDataForCharts$(
               jobIds,
               timeRange.earliestMs,
               timeRange.latestMs,
               selectionInfluencers,
               selections,
-              influencersFilterQuery,
-              false
+              influencersFilterQuery
             ),
           }).pipe(
             switchMap(({ combinedJobs, anomalyChartRecords }) => {

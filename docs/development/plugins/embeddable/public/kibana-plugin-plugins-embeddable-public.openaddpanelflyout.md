@@ -14,6 +14,7 @@ export declare function openAddPanelFlyout(options: {
     overlays: OverlayStart;
     notifications: NotificationsStart;
     SavedObjectFinder: React.ComponentType<any>;
+    showCreateNewMenu?: boolean;
 }): OverlayRef;
 ```
 
@@ -21,7 +22,7 @@ export declare function openAddPanelFlyout(options: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>{</code><br/><code>    embeddable: IContainer;</code><br/><code>    getFactory: EmbeddableStart['getEmbeddableFactory'];</code><br/><code>    getAllFactories: EmbeddableStart['getEmbeddableFactories'];</code><br/><code>    overlays: OverlayStart;</code><br/><code>    notifications: NotificationsStart;</code><br/><code>    SavedObjectFinder: React.ComponentType&lt;any&gt;;</code><br/><code>}</code> |  |
+|  options | <code>{</code><br/><code>    embeddable: IContainer;</code><br/><code>    getFactory: EmbeddableStart['getEmbeddableFactory'];</code><br/><code>    getAllFactories: EmbeddableStart['getEmbeddableFactories'];</code><br/><code>    overlays: OverlayStart;</code><br/><code>    notifications: NotificationsStart;</code><br/><code>    SavedObjectFinder: React.ComponentType&lt;any&gt;;</code><br/><code>    showCreateNewMenu?: boolean;</code><br/><code>}</code> |  |
 
 <b>Returns:</b>
 

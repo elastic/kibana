@@ -5,50 +5,17 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import * as Rx from 'rxjs';
-import { toArray, map } from 'rxjs/operators';
-
-import { AlertingPlugin } from '../../../../alerting/server';
-import { APMConfig } from '../..';
-
 import { registerErrorCountAlertType } from './register_error_count_alert_type';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-
-type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
-const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
-  return (source: Rx.Observable<T1>) => {
-    return Rx.defer(() => fn(source));
-  };
-};
-const mockedConfig$ = (Rx.of('apm_oss.errorIndices').pipe(
-  pipeClosure((source$) => {
-    return source$.pipe(map((i) => i));
-  }),
-  toArray()
-) as unknown) as Observable<APMConfig>;
+import { createRuleTypeMocks } from './test_utils';
 
 describe('Error count alert', () => {
   it("doesn't send an alert when error count is less than threshold", async () => {
-    let alertExecutor: any;
-    const alerting = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as AlertingPlugin['setup'];
+    const { services, dependencies, executor } = createRuleTypeMocks();
 
-    registerErrorCountAlertType({
-      alerting,
-      config$: mockedConfig$,
-    });
-    expect(alertExecutor).toBeDefined();
+    registerErrorCountAlertType(dependencies);
 
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      alertInstanceFactory: jest.fn(),
-    };
     const params = { threshold: 1 };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
@@ -71,30 +38,21 @@ describe('Error count alert', () => {
       })
     );
 
-    await alertExecutor!({ services, params });
+    await executor({ params });
     expect(services.alertInstanceFactory).not.toBeCalled();
   });
 
-  it('sends alerts with service name and environment', async () => {
-    let alertExecutor: any;
-    const alerting = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as AlertingPlugin['setup'];
+  it('sends alerts with service name and environment for those that exceeded the threshold', async () => {
+    const {
+      services,
+      dependencies,
+      executor,
+      scheduleActions,
+    } = createRuleTypeMocks();
 
-    registerErrorCountAlertType({
-      alerting,
-      config$: mockedConfig$,
-    });
-    expect(alertExecutor).toBeDefined();
+    registerErrorCountAlertType(dependencies);
 
-    const scheduleActions = jest.fn();
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
+    const params = { threshold: 2, windowSize: 5, windowUnit: 'm' };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -106,18 +64,62 @@ describe('Error count alert', () => {
           },
         },
         aggregations: {
-          services: {
+          error_counts: {
             buckets: [
               {
-                key: 'foo',
-                environments: {
-                  buckets: [{ key: 'env-foo' }, { key: 'env-foo-2' }],
+                key: ['foo', 'env-foo'],
+                doc_count: 5,
+                latest: {
+                  top: [
+                    {
+                      metrics: {
+                        'service.name': 'foo',
+                        'service.environment': 'env-foo',
+                      },
+                    },
+                  ],
                 },
               },
               {
-                key: 'bar',
-                environments: {
-                  buckets: [{ key: 'env-bar' }, { key: 'env-bar-2' }],
+                key: ['foo', 'env-foo-2'],
+                doc_count: 4,
+                latest: {
+                  top: [
+                    {
+                      metrics: {
+                        'service.name': 'foo',
+                        'service.environment': 'env-foo-2',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: ['bar', 'env-bar'],
+                doc_count: 3,
+                latest: {
+                  top: [
+                    {
+                      metrics: {
+                        'service.name': 'bar',
+                        'service.environment': 'env-bar',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: ['bar', 'env-bar-2'],
+                doc_count: 1,
+                latest: {
+                  top: [
+                    {
+                      metrics: {
+                        'service.name': 'bar',
+                        'service.environment': 'env-bar-2',
+                      },
+                    },
+                  ],
                 },
               },
             ],
@@ -134,115 +136,36 @@ describe('Error count alert', () => {
       })
     );
 
-    await alertExecutor!({ services, params });
+    await executor({ params });
     [
       'apm.error_rate_foo_env-foo',
       'apm.error_rate_foo_env-foo-2',
       'apm.error_rate_bar_env-bar',
-      'apm.error_rate_bar_env-bar-2',
     ].forEach((instanceName) =>
       expect(services.alertInstanceFactory).toHaveBeenCalledWith(instanceName)
     );
 
+    expect(scheduleActions).toHaveBeenCalledTimes(3);
+
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
       environment: 'env-foo',
-      threshold: 1,
-      triggerValue: 2,
+      threshold: 2,
+      triggerValue: 5,
       interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
       environment: 'env-foo-2',
-      threshold: 1,
-      triggerValue: 2,
+      threshold: 2,
+      triggerValue: 4,
       interval: '5m',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: 'env-bar',
-      threshold: 1,
-      triggerValue: 2,
-      interval: '5m',
-    });
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'bar',
-      environment: 'env-bar-2',
-      threshold: 1,
-      triggerValue: 2,
-      interval: '5m',
-    });
-  });
-  it('sends alerts with service name', async () => {
-    let alertExecutor: any;
-    const alerting = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as AlertingPlugin['setup'];
-
-    registerErrorCountAlertType({
-      alerting,
-      config$: mockedConfig$,
-    });
-    expect(alertExecutor).toBeDefined();
-
-    const scheduleActions = jest.fn();
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
-
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          total: {
-            relation: 'eq',
-            value: 2,
-          },
-        },
-        aggregations: {
-          services: {
-            buckets: [
-              {
-                key: 'foo',
-              },
-              {
-                key: 'bar',
-              },
-            ],
-          },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
-
-    await alertExecutor!({ services, params });
-    ['apm.error_rate_foo', 'apm.error_rate_bar'].forEach((instanceName) =>
-      expect(services.alertInstanceFactory).toHaveBeenCalledWith(instanceName)
-    );
-
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'foo',
-      environment: undefined,
-      threshold: 1,
-      triggerValue: 2,
-      interval: '5m',
-    });
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'bar',
-      environment: undefined,
-      threshold: 1,
-      triggerValue: 2,
+      threshold: 2,
+      triggerValue: 3,
       interval: '5m',
     });
   });

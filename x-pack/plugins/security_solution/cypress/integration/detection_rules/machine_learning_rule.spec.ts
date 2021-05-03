@@ -129,8 +129,10 @@ describe('Detection rules, machine learning', () => {
       );
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'Stopped');
-      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningRule.machineLearningJob);
+      machineLearningRule.machineLearningJobs.forEach((machineLearningJob, jobIndex) => {
+        cy.get(MACHINE_LEARNING_JOB_STATUS).eq(jobIndex).should('have.text', 'Stopped');
+        cy.get(MACHINE_LEARNING_JOB_ID).eq(jobIndex).should('have.text', machineLearningJob);
+      });
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS).should(

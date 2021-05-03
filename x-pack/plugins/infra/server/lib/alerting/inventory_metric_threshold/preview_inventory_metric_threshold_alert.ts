@@ -32,6 +32,7 @@ interface PreviewInventoryMetricThresholdAlertParams {
   params: InventoryMetricThresholdParams;
   source: InfraSource;
   logQueryFields: LogQueryFields;
+  compositeSize: number;
   lookback: Unit;
   alertInterval: string;
   alertThrottle: string;
@@ -46,6 +47,7 @@ export const previewInventoryMetricThresholdAlert: (
   params,
   source,
   logQueryFields,
+  compositeSize,
   lookback,
   alertInterval,
   alertThrottle,
@@ -70,8 +72,17 @@ export const previewInventoryMetricThresholdAlert: (
 
   try {
     const results = await Promise.all(
-      criteria.map((c) =>
-        evaluateCondition(c, nodeType, source, logQueryFields, esClient, filterQuery, lookbackSize)
+      criteria.map((condition) =>
+        evaluateCondition({
+          condition,
+          nodeType,
+          source,
+          logQueryFields,
+          esClient,
+          compositeSize,
+          filterQuery,
+          lookbackSize,
+        })
       )
     );
 

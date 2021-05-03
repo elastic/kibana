@@ -52,7 +52,12 @@ export const extractIndexPatternValues = (
 
 export const fetchIndexPattern = async (
   indexPatternValue: IndexPatternValue | undefined,
-  indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>
+  indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>,
+  options: {
+    fetchKibabaIndexForStringIndexes: boolean;
+  } = {
+    fetchKibabaIndexForStringIndexes: false,
+  }
 ): Promise<FetchedIndexPattern> => {
   let indexPattern: FetchedIndexPattern['indexPattern'];
   let indexPatternString: string = '';
@@ -61,13 +66,16 @@ export const fetchIndexPattern = async (
     indexPattern = await indexPatternsService.getDefault();
   } else {
     if (isStringTypeIndexPattern(indexPatternValue)) {
-      indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
-        (index) => index.title === indexPatternValue
-      );
-
+      if (options.fetchKibabaIndexForStringIndexes) {
+        indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
+          (index) => index.title === indexPatternValue
+        );
+      }
       if (!indexPattern) {
         indexPatternString = indexPatternValue;
       }
+
+      indexPatternString = indexPatternValue;
     } else if (indexPatternValue.id) {
       indexPattern = await indexPatternsService.get(indexPatternValue.id);
     }

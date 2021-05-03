@@ -4,87 +4,119 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-public.DashboardPicker",
-        "type": "Function",
-        "label": "DashboardPicker",
-        "signature": [
-          "(props: ",
-          "DashboardPickerProps",
-          ") => JSX.Element"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Object",
-            "label": "props",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.DashboardPickerProps",
-                "text": "DashboardPickerProps"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-              "lineNumber": 27
-            }
-          }
-        ],
         "tags": [],
-        "returnComment": [],
+        "id": "def-public.LazyDashboardPicker",
+        "type": "Function",
+        "label": "LazyDashboardPicker",
+        "description": [],
         "source": {
-          "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-          "lineNumber": 27
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 34
         },
+        "signature": [
+          "React.LazyExoticComponent<typeof ",
+          "DashboardPicker",
+          ">"
+        ],
         "initialIsOpen": false
       },
       {
-        "id": "def-public.SavedObjectSaveModalDashboard",
+        "tags": [],
+        "id": "def-public.LazyLabsBeakerButton",
         "type": "Function",
-        "label": "SavedObjectSaveModalDashboard",
+        "label": "LazyLabsBeakerButton",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 28
+        },
         "signature": [
           "(props: ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.SaveModalDashboardProps",
-            "text": "SaveModalDashboardProps"
-          },
+          "Props",
           ") => JSX.Element"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.LazyLabsFlyout",
+        "type": "Function",
+        "label": "LazyLabsFlyout",
         "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 32
+        },
+        "signature": [
+          "(props: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.LazySavedObjectSaveModalDashboard",
+        "type": "Function",
+        "label": "LazySavedObjectSaveModalDashboard",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 36
+        },
+        "signature": [
+          "React.LazyExoticComponent<typeof ",
+          "default",
+          ">"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.withSuspense",
+        "type": "Function",
         "children": [
           {
-            "type": "Object",
-            "label": "props",
+            "id": "def-public.withSuspense.$1",
+            "type": "CompoundType",
+            "label": "Component",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.SaveModalDashboardProps",
-                "text": "SaveModalDashboardProps"
-              }
+              "React.ComponentType<P>"
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 37
+              "path": "src/plugins/presentation_util/public/components/index.tsx",
+              "lineNumber": 18
+            }
+          },
+          {
+            "id": "def-public.withSuspense.$2",
+            "type": "CompoundType",
+            "label": "fallback",
+            "isRequired": false,
+            "signature": [
+              "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/index.tsx",
+              "lineNumber": 19
             }
           }
         ],
+        "signature": [
+          "<P extends {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null) => (props: P) => JSX.Element"
+        ],
+        "description": [
+          "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
+        ],
+        "label": "withSuspense",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 17
+        },
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 37
-        },
         "initialIsOpen": false
       }
     ],
@@ -103,12 +135,23 @@
             "label": "documentInfo",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 30
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 18
             },
             "signature": [
               "SaveModalDocumentInfo"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SaveModalDashboardProps.canSaveByReference",
+            "type": "boolean",
+            "label": "canSaveByReference",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 19
+            }
           },
           {
             "tags": [],
@@ -117,8 +160,8 @@
             "label": "objectType",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 31
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 20
             }
           },
           {
@@ -128,8 +171,8 @@
             "label": "onClose",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 32
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 21
             },
             "signature": [
               "() => void"
@@ -142,8 +185,8 @@
             "label": "onSave",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 33
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 22
             },
             "signature": [
               "(props: ",
@@ -164,8 +207,8 @@
             "label": "tagOptions",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 34
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 23
             },
             "signature": [
               "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | ((state: ",
@@ -181,15 +224,62 @@
           }
         ],
         "source": {
-          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 29
+          "path": "src/plugins/presentation_util/public/components/types.ts",
+          "lineNumber": 17
         },
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": [],
+    "misc": [
+      {
+        "id": "def-public.Project",
+        "type": "Type",
+        "label": "Project",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 59
+        },
+        "signature": [
+          "ProjectConfig & { status: ProjectStatus; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ProjectID",
+        "type": "Type",
+        "label": "ProjectID",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 36
+        },
+        "signature": [
+          "\"labs:presentation:unifiedToolbar\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "tags": [],
+        "id": "def-public.projectIDs",
+        "type": "Object",
+        "label": "projectIDs",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "readonly [\"labs:presentation:unifiedToolbar\"]"
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "id": "def-public.PresentationUtilPluginSetup",
       "type": "Interface",
@@ -199,7 +289,7 @@
       "children": [],
       "source": {
         "path": "src/plugins/presentation_util/public/types.ts",
-        "lineNumber": 10
+        "lineNumber": 12
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -219,16 +309,30 @@
           "description": [],
           "source": {
             "path": "src/plugins/presentation_util/public/types.ts",
-            "lineNumber": 13
+            "lineNumber": 15
           },
           "signature": [
             "React.FC<{}>"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.PresentationUtilPluginStart.labsService",
+          "type": "Object",
+          "label": "labsService",
+          "description": [],
+          "source": {
+            "path": "src/plugins/presentation_util/public/types.ts",
+            "lineNumber": 16
+          },
+          "signature": [
+            "PresentationLabsService"
           ]
         }
       ],
       "source": {
         "path": "src/plugins/presentation_util/public/types.ts",
-        "lineNumber": 12
+        "lineNumber": 14
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -244,10 +348,467 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "id": "def-common.getProjectIDs",
+        "type": "Function",
+        "children": [],
+        "signature": [
+          "() => readonly [\"labs:presentation:unifiedToolbar\"]"
+        ],
+        "description": [],
+        "label": "getProjectIDs",
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 61
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.isProjectEnabledByStatus",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-common.isProjectEnabledByStatus.$1",
+            "type": "boolean",
+            "label": "active",
+            "isRequired": true,
+            "signature": [
+              "boolean"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 63
+            }
+          },
+          {
+            "id": "def-common.isProjectEnabledByStatus.$2",
+            "type": "Object",
+            "label": "status",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.EnvironmentStatus",
+                "text": "EnvironmentStatus"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 63
+            }
+          }
+        ],
+        "signature": [
+          "(active: boolean, status: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "common",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-common.EnvironmentStatus",
+            "text": "EnvironmentStatus"
+          },
+          ") => boolean"
+        ],
+        "description": [],
+        "label": "isProjectEnabledByStatus",
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 63
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "id": "def-common.ProjectConfig",
+        "type": "Interface",
+        "label": "ProjectConfig",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 51
+            },
+            "signature": [
+              "\"labs:presentation:unifiedToolbar\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 52
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.isActive",
+            "type": "boolean",
+            "label": "isActive",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 53
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.environments",
+            "type": "Array",
+            "label": "environments",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 54
+            },
+            "signature": [
+              "(\"kibana\" | \"browser\" | \"session\")[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 55
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.solutions",
+            "type": "Array",
+            "label": "solutions",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 56
+            },
+            "signature": [
+              "(\"dashboard\" | \"canvas\" | \"presentation\")[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 50
+        },
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "id": "def-common.EnvironmentName",
+        "type": "Type",
+        "label": "EnvironmentName",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 37
+        },
+        "signature": [
+          "\"kibana\" | \"browser\" | \"session\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.EnvironmentStatus",
+        "type": "Type",
+        "label": "EnvironmentStatus",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 40
+        },
+        "signature": [
+          "{ kibana?: boolean | undefined; browser?: boolean | undefined; session?: boolean | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "label": "PLUGIN_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/index.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"presentationUtil\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/index.ts",
+          "lineNumber": 10
+        },
+        "signature": [
+          "\"presentationUtil\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Project",
+        "type": "Type",
+        "label": "Project",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 59
+        },
+        "signature": [
+          "ProjectConfig & { status: ProjectStatus; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ProjectID",
+        "type": "Type",
+        "label": "ProjectID",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 36
+        },
+        "signature": [
+          "\"labs:presentation:unifiedToolbar\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ProjectStatus",
+        "type": "Type",
+        "label": "ProjectStatus",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 44
+        },
+        "signature": [
+          "{ defaultValue: boolean; isEnabled: boolean; isOverride: boolean; } & EnvironmentStatus"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.SolutionName",
+        "type": "Type",
+        "label": "SolutionName",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 38
+        },
+        "signature": [
+          "\"dashboard\" | \"canvas\" | \"presentation\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.UNIFIED_TOOLBAR",
+        "type": "string",
+        "label": "UNIFIED_TOOLBAR",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"labs:presentation:unifiedToolbar\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "tags": [],
+        "id": "def-common.environmentNames",
+        "type": "Object",
+        "label": "environmentNames",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 14
+        },
+        "signature": [
+          "readonly [\"kibana\", \"browser\", \"session\"]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.projectIDs",
+        "type": "Object",
+        "label": "projectIDs",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "readonly [\"labs:presentation:unifiedToolbar\"]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.projects",
+        "type": "Object",
+        "tags": [],
+        "children": [
+          {
+            "id": "def-common.projects.UNIFIED_TOOLBAR",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.id",
+                "type": "string",
+                "label": "id",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 23
+                },
+                "signature": [
+                  "\"labs:presentation:unifiedToolbar\""
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.isActive",
+                "type": "boolean",
+                "label": "isActive",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 24
+                },
+                "signature": [
+                  "false"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.environments",
+                "type": "Array",
+                "label": "environments",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 25
+                },
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.name",
+                "type": "string",
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 26
+                }
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.description",
+                "type": "string",
+                "label": "description",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 29
+                }
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.UNIFIED_TOOLBAR.solutions",
+                "type": "Array",
+                "label": "solutions",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 32
+                },
+                "signature": [
+                  "(\"dashboard\" | \"canvas\")[]"
+                ]
+              }
+            ],
+            "description": [],
+            "label": "[UNIFIED_TOOLBAR]",
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 22
+            }
+          }
+        ],
+        "description": [
+          "\nThis is a list of active Labs Projects for the Presentation Team.  It is the \"source of truth\" for all projects\nprovided to users of our solutions in Kibana."
+        ],
+        "label": "projects",
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 21
+        },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.solutionNames",
+        "type": "Object",
+        "label": "solutionNames",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 15
+        },
+        "signature": [
+          "readonly [\"canvas\", \"dashboard\", \"presentation\"]"
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

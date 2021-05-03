@@ -36,6 +36,7 @@ import {
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
+  SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_NAME_LABEL,
@@ -52,7 +53,7 @@ import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
 export const SourceSettings: React.FC = () => {
-  const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
@@ -68,7 +69,6 @@ export const SourceSettings: React.FC = () => {
 
   useEffect(() => {
     getSourceConfigData(serviceType);
-    return resetSourceState;
   }, []);
 
   const {
@@ -129,7 +129,7 @@ export const SourceSettings: React.FC = () => {
 
   return (
     <>
-      <ViewContentHeader title="Source settings" />
+      <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
           <EuiFlexGroup>

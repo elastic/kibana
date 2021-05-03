@@ -125,6 +125,7 @@ const requiredDependencies = [
   'triggersActionsUi',
   'embeddable',
   'infra',
+  'observability',
 ] as const;
 
 const optionalDependencies = [
@@ -134,7 +135,6 @@ const optionalDependencies = [
   'taskManager',
   'actions',
   'alerting',
-  'observability',
   'security',
   'ml',
   'home',

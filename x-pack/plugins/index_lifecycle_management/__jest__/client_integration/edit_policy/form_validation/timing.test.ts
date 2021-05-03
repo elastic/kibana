@@ -81,6 +81,10 @@ describe('<EditPolicy /> timing validation', () => {
       test(`${phase}: ${name}`, async () => {
         const { actions } = testBed;
         await actions[phase as 'warm' | 'cold' | 'delete' | 'frozen'].enable(true);
+        // 1. We first set as dummy value to have a starting min_age value
+        await actions[phase as 'warm' | 'cold' | 'delete' | 'frozen'].setMinAgeValue('111');
+        // 2. At this point we are sure there will be a change of value and that any validation
+        // will be displayed under the field.
         await actions[phase as 'warm' | 'cold' | 'delete' | 'frozen'].setMinAgeValue(value);
 
         runTimers();
@@ -88,5 +92,53 @@ describe('<EditPolicy /> timing validation', () => {
         actions.expectErrorMessages(error);
       });
     });
+  });
+
+  test('should validate that min_age is equal or greater than previous phase min_age', async () => {
+    const { actions, form } = testBed;
+    await actions.warm.enable(true);
+    await actions.cold.enable(true);
+    await actions.frozen.enable(true);
+    await actions.delete.enable(true);
+
+    await actions.warm.setMinAgeValue('10');
+
+    await actions.cold.setMinAgeValue('9');
+    runTimers();
+    expect(form.getErrorsMessages('cold-phase')).toEqual([
+      'Must be greater or equal than the warm phase value (10d)',
+    ]);
+
+    await actions.frozen.setMinAgeValue('8');
+    runTimers();
+    expect(form.getErrorsMessages('frozen-phase')).toEqual([
+      'Must be greater or equal than the cold phase value (9d)',
+    ]);
+
+    await actions.delete.setMinAgeValue('7');
+    runTimers();
+    expect(form.getErrorsMessages('delete-phaseContent')).toEqual([
+      'Must be greater or equal than the frozen phase value (8d)',
+    ]);
+
+    // Disable the warm phase
+    await actions.warm.enable(false);
+
+    // No more error for the cold phase
+    expect(form.getErrorsMessages('cold-phase')).toEqual([]);
+
+    // Change to smaller unit for cold phase
+    await actions.cold.setMinAgeUnits('h');
+
+    // No more error for the frozen phase...
+    expect(form.getErrorsMessages('frozen-phase')).toEqual([]);
+    // ...but the delete phase has still the error
+    expect(form.getErrorsMessages('delete-phaseContent')).toEqual([
+      'Must be greater or equal than the frozen phase value (8d)',
+    ]);
+
+    await actions.delete.setMinAgeValue('9');
+    // No more error for the delete phase
+    expect(form.getErrorsMessages('delete-phaseContent')).toEqual([]);
   });
 });

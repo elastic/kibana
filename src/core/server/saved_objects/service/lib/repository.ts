@@ -66,6 +66,7 @@ import {
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
+import { validateAndConvertAggregations } from './aggregations';
 import {
   ALL_NAMESPACES_STRING,
   FIND_DEFAULT_PAGE,
@@ -748,7 +749,9 @@ export class SavedObjectsRepository {
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
+  async find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponse<T, A>> {
     const {
       search,
       defaultSearchOperator = 'OR',
@@ -768,6 +771,7 @@ export class SavedObjectsRepository {
       typeToNamespacesMap,
       filter,
       preference,
+      aggs,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -799,7 +803,7 @@ export class SavedObjectsRepository {
       : Array.from(typeToNamespacesMap!.keys());
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
-      return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+      return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -811,16 +815,24 @@ export class SavedObjectsRepository {
     }
 
     let kueryNode;
-
-    try {
-      if (filter) {
+    if (filter) {
+      try {
         kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
+      } catch (e) {
+        if (e.name === 'KQLSyntaxError') {
+          throw SavedObjectsErrorHelpers.createBadRequestError(`KQLSyntaxError: ${e.message}`);
+        } else {
+          throw e;
+        }
       }
-    } catch (e) {
-      if (e.name === 'KQLSyntaxError') {
-        throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
-      } else {
-        throw e;
+    }
+
+    let aggsObject;
+    if (aggs) {
+      try {
+        aggsObject = validateAndConvertAggregations(allowedTypes, aggs, this._mappings);
+      } catch (e) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(`Invalid aggregation: ${e.message}`);
       }
     }
 
@@ -838,6 +850,7 @@ export class SavedObjectsRepository {
         seq_no_primary_term: true,
         from: perPage * (page - 1),
         _source: includedFields(type, fields),
+        ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
@@ -872,6 +885,7 @@ export class SavedObjectsRepository {
     }
 
     return {
+      ...(body.aggregations ? { aggregations: (body.aggregations as unknown) as A } : {}),
       page,
       per_page: perPage,
       total: body.hits.total,
@@ -885,7 +899,7 @@ export class SavedObjectsRepository {
         })
       ),
       pit_id: body.pit_id,
-    } as SavedObjectsFindResponse<T>;
+    } as SavedObjectsFindResponse<T, A>;
   }
 
   /**
@@ -1160,13 +1174,13 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: SavedObjectsUpdateOptions = {}
+    options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, references, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: SavedObjectsRawDoc | undefined;
@@ -1175,6 +1189,30 @@ export class SavedObjectsRepository {
     }
 
     const time = this._getCurrentTime();
+
+    let rawUpsert: SavedObjectsRawDoc | undefined;
+    if (upsert) {
+      let savedObjectNamespace: string | undefined;
+      let savedObjectNamespaces: string[] | undefined;
+
+      if (this._registry.isSingleNamespace(type) && namespace) {
+        savedObjectNamespace = namespace;
+      } else if (this._registry.isMultiNamespace(type)) {
+        savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
+      }
+
+      const migrated = this._migrator.migrateDocument({
+        id,
+        type,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+        attributes: {
+          ...upsert,
+        },
+        updated_at: time,
+      });
+      rawUpsert = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
+    }
 
     const doc = {
       [type]: attributes,
@@ -1191,6 +1229,7 @@ export class SavedObjectsRepository {
 
         body: {
           doc,
+          ...(rawUpsert && { upsert: rawUpsert._source }),
         },
         _source_includes: ['namespace', 'namespaces', 'originId'],
         require_alias: true,
@@ -1903,10 +1942,7 @@ export class SavedObjectsRepository {
       ...(preference ? { preference } : {}),
     };
 
-    const {
-      body,
-      statusCode,
-    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(
+    const { body, statusCode } = await this.client.openPointInTime(
       // @ts-expect-error @elastic/elasticsearch OpenPointInTimeRequest.index expected to accept string[]
       esOptions,
       {

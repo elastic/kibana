@@ -18,6 +18,7 @@ import {
   ESIndexActionType,
   ESIndexActionTypeExecutorOptions,
 } from './es_index';
+import { AlertHistoryEsIndexConnectorId } from '../../common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 
@@ -115,6 +116,7 @@ describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
     const params: Record<string, unknown> = {
       documents: [{ rando: 'thing' }],
+      indexOverride: null,
     };
     expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
         Object {
@@ -123,6 +125,7 @@ describe('params validation', () => {
               "rando": "thing",
             },
           ],
+          "indexOverride": null,
         }
     `);
   });
@@ -159,6 +162,7 @@ describe('execute()', () => {
     config = { index: 'index-value', refresh: false, executionTimeField: null };
     params = {
       documents: [{ jim: 'bob' }],
+      indexOverride: null,
     };
 
     const actionId = 'some-id';
@@ -200,6 +204,7 @@ describe('execute()', () => {
     config = { index: 'index-value', executionTimeField: 'field_to_use_for_time', refresh: true };
     params = {
       documents: [{ jimbob: 'jr' }],
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -237,6 +242,7 @@ describe('execute()', () => {
     config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
       documents: [{ jim: 'bob' }],
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -270,6 +276,7 @@ describe('execute()', () => {
     config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
       documents: [{ a: 1 }, { b: 2 }],
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -305,12 +312,244 @@ describe('execute()', () => {
     `);
   });
 
+  test('renders parameter templates as expected', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
+    };
+    const variables = {
+      who: 'world',
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      'action-type-id'
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "hello": "world",
+          },
+        ],
+        "indexOverride": null,
+      }
+    `);
+  });
+
+  test('ignores indexOverride for generic es index connector', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: 'hello-world',
+    };
+    const variables = {
+      who: 'world',
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      'action-type-id'
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "hello": "world",
+          },
+        ],
+        "indexOverride": null,
+      }
+    `);
+  });
+
+  test('renders parameter templates as expected for preconfigured alert history connector', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
+    };
+    const variables = {
+      date: '2021-01-01T00:00:00.000Z',
+      rule: {
+        id: 'rule-id',
+        name: 'rule-name',
+        type: 'rule-type',
+      },
+      context: {
+        contextVar1: 'contextValue1',
+        contextVar2: 'contextValue2',
+      },
+      params: {
+        ruleParam: 1,
+        ruleParamString: 'another param',
+      },
+      tags: ['abc', 'xyz'],
+      alert: {
+        id: 'alert-id',
+        actionGroup: 'action-group-id',
+        actionGroupName: 'Action Group',
+      },
+      state: {
+        alertStateValue: true,
+        alertStateAnotherValue: 'yes',
+      },
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      AlertHistoryEsIndexConnectorId
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "@timestamp": "2021-01-01T00:00:00.000Z",
+            "event": Object {
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alert": Object {
+                "actionGroup": "action-group-id",
+                "actionGroupName": "Action Group",
+                "context": Object {
+                  "rule-type": Object {
+                    "contextVar1": "contextValue1",
+                    "contextVar2": "contextValue2",
+                  },
+                },
+                "id": "alert-id",
+              },
+            },
+            "rule": Object {
+              "id": "rule-id",
+              "name": "rule-name",
+              "params": Object {
+                "rule-type": Object {
+                  "ruleParam": 1,
+                  "ruleParamString": "another param",
+                },
+              },
+              "type": "rule-type",
+            },
+            "tags": Array [
+              "abc",
+              "xyz",
+            ],
+          },
+        ],
+        "indexOverride": null,
+      }
+    `);
+  });
+
+  test('passes through indexOverride for preconfigured alert history connector', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: 'hello-world',
+    };
+    const variables = {
+      date: '2021-01-01T00:00:00.000Z',
+      rule: {
+        id: 'rule-id',
+        name: 'rule-name',
+        type: 'rule-type',
+      },
+      context: {
+        contextVar1: 'contextValue1',
+        contextVar2: 'contextValue2',
+      },
+      params: {
+        ruleParam: 1,
+        ruleParamString: 'another param',
+      },
+      tags: ['abc', 'xyz'],
+      alert: {
+        id: 'alert-id',
+        actionGroup: 'action-group-id',
+        actionGroupName: 'Action Group',
+      },
+      state: {
+        alertStateValue: true,
+        alertStateAnotherValue: 'yes',
+      },
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      AlertHistoryEsIndexConnectorId
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "@timestamp": "2021-01-01T00:00:00.000Z",
+            "event": Object {
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alert": Object {
+                "actionGroup": "action-group-id",
+                "actionGroupName": "Action Group",
+                "context": Object {
+                  "rule-type": Object {
+                    "contextVar1": "contextValue1",
+                    "contextVar2": "contextValue2",
+                  },
+                },
+                "id": "alert-id",
+              },
+            },
+            "rule": Object {
+              "id": "rule-id",
+              "name": "rule-name",
+              "params": Object {
+                "rule-type": Object {
+                  "ruleParam": 1,
+                  "ruleParamString": "another param",
+                },
+              },
+              "type": "rule-type",
+            },
+            "tags": Array [
+              "abc",
+              "xyz",
+            ],
+          },
+        ],
+        "indexOverride": "hello-world",
+      }
+    `);
+  });
+
+  test('throws error for preconfigured alert history index when no variables are available', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
+    };
+    const variables = {};
+
+    expect(() =>
+      actionType.renderParameterTemplates!(
+        paramsWithTemplates,
+        variables,
+        AlertHistoryEsIndexConnectorId
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error creating alert history document for ${AlertHistoryEsIndexConnectorId} connector"`
+    );
+  });
+
   test('resolves with an error when an error occurs in the indexing operation', async () => {
     const secrets = {};
     // minimal params
     const config = { index: 'index-value', refresh: false, executionTimeField: null };
     const params = {
       documents: [{ '': 'bob' }],
+      indexOverride: null,
     };
 
     const actionId = 'some-id';

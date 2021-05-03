@@ -42,6 +42,10 @@ import {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
+import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
+import { apmRuleFieldMap } from '../common/rules/apm_rule_field_map';
+
+export type APMRuleRegistry = ReturnType<APMPlugin['setup']>['ruleRegistry'];
 
 export class APMPlugin
   implements
@@ -71,15 +75,6 @@ export class APMPlugin
     core.savedObjects.registerType(apmTelemetry);
 
     core.uiSettings.register(uiSettings);
-
-    if (plugins.actions && plugins.alerting) {
-      registerApmAlerts({
-        alerting: plugins.alerting,
-        actions: plugins.actions,
-        ml: plugins.ml,
-        config$: mergedConfig$,
-      });
-    }
 
     const currentConfig = mergeConfigs(
       plugins.apmOss.config,
@@ -129,6 +124,11 @@ export class APMPlugin
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
+    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
+      ...apmRuleRegistrySettings,
+      fieldMap: apmRuleFieldMap,
+    });
+
     registerRoutes({
       core: {
         setup: core,
@@ -137,6 +137,7 @@ export class APMPlugin
       logger: this.logger,
       config: currentConfig,
       repository: getGlobalApmServerRouteRepository(),
+      apmRuleRegistry,
       plugins: mapValues(plugins, (value, key) => {
         return {
           setup: value,
@@ -156,6 +157,12 @@ export class APMPlugin
         savedObjectsClient: await getInternalSavedObjectsClient(core),
         config: await mergedConfig$.pipe(take(1)).toPromise(),
       });
+    registerApmAlerts({
+      registry: apmRuleRegistry,
+      ml: plugins.ml,
+      config$: mergedConfig$,
+      logger: this.logger!.get('rule'),
+    });
 
     return {
       config$: mergedConfig$,
@@ -186,6 +193,7 @@ export class APMPlugin
           },
         });
       },
+      ruleRegistry: apmRuleRegistry,
     };
   }
 

@@ -71,7 +71,7 @@ def base(Map params, Closure closure) {
     if (config.scm) {
       // Try to clone from Github up to 8 times, waiting 15 secs between attempts
       retryWithDelay(8, 15) {
-        checkout scm
+        kibanaCheckout()
       }
 
       dir("kibana") {
@@ -101,6 +101,7 @@ def base(Map params, Closure closure) {
       "TEST_BROWSER_HEADLESS=1",
       "GIT_BRANCH=${checkoutInfo.branch}",
       "TMPDIR=${env.WORKSPACE}/tmp", // For Chrome and anything else that respects it
+      "BUILD_TS_REFS_DISABLE=true", // no need to build ts refs in bootstrap
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),

@@ -20,6 +20,7 @@ export {
   EntryExists,
   EntryMatch,
   EntryMatchAny,
+  EntryMatchWildcard,
   EntryNested,
   EntryList,
   EntriesArray,
@@ -39,6 +40,7 @@ export {
   nestedEntryItem,
   entriesMatch,
   entriesMatchAny,
+  entriesMatchWildcard,
   entriesExists,
   entriesList,
   namespaceType,
@@ -51,4 +53,12 @@ export {
 
 export { buildExceptionFilter } from './exceptions';
 
-export { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from './constants';
+export {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  EXCEPTION_LIST_URL,
+  EXCEPTION_LIST_ITEM_URL,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_NAME,
+  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
+} from './constants';

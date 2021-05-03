@@ -369,40 +369,27 @@ export function createSpatialFilterWithGeometry({
   geometryLabel,
   indexPatternId,
   geoFieldName,
-  geoFieldType,
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
-  preIndexedShape?: PreIndexedShape;
+  preIndexedShape?: PreIndexedShape | null;
   geometry: Polygon;
   geometryLabel: string;
   indexPatternId: string;
   geoFieldName: string;
-  geoFieldType: ES_GEO_FIELD_TYPE;
   relation: ES_SPATIAL_RELATIONS;
 }): GeoFilter {
-  ensureGeoField(geoFieldType);
-
-  const isGeoPoint = geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
-
-  const relationLabel = isGeoPoint
-    ? i18n.translate('xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel', {
-        defaultMessage: 'in',
-      })
-    : getEsSpatialRelationLabel(relation);
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
     key: geoFieldName,
-    alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
+    alias: `${geoFieldName} ${getEsSpatialRelationLabel(relation)} ${geometryLabel}`,
     disabled: false,
   };
 
   const shapeQuery: GeoShapeQueryBody = {
-    // geo_shape query with geo_point field only supports intersects relation
-    relation: isGeoPoint ? ES_SPATIAL_RELATIONS.INTERSECTS : relation,
+    relation,
   };
-
   if (preIndexedShape) {
     shapeQuery.indexed_shape = preIndexedShape;
   } else {
