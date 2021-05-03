@@ -18,7 +18,6 @@ export interface HostDetailsStrategyResponse extends IEsSearchResponse {
 }
 
 export interface HostDetailsRequestOptions extends Partial<RequestOptionsPaginated<HostsFields>> {
-  fields: string[];
   hostName: string;
   skip?: boolean;
   timerange: TimerangeInput;

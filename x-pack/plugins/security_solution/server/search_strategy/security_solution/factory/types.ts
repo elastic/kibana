@@ -6,7 +6,7 @@
  */
 
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
 import {
@@ -26,7 +26,7 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
     options: StrategyRequestType<T>,
     response: IEsSearchResponse,
     deps: {
-      esLegacyClient: ILegacyScopedClusterClient;
+      esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
     }

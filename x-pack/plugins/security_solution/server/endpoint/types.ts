@@ -7,7 +7,6 @@
 
 import { LoggerFactory } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
@@ -46,5 +45,5 @@ export interface MetadataQueryStrategy {
   queryResponseToHostListResult: (
     searchResponse: SearchResponse<HostMetadata>
   ) => HostListQueryResult;
-  queryResponseToHostResult: (searchResponse: ApiResponse<HostMetadata>) => HostQueryResult;
+  queryResponseToHostResult: (searchResponse: SearchResponse<HostMetadata>) => HostQueryResult;
 }

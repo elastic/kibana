@@ -20,12 +20,10 @@ import {
 import { securitySolutionFactory } from './factory';
 import { SecuritySolutionFactory } from './factory/types';
 import { EndpointAppContext } from '../../endpoint/types';
-import { ILegacyScopedClusterClient } from '../../../../../../src/core/server';
 
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
-  endpointContext: EndpointAppContext,
-  esLegacyClient: ILegacyScopedClusterClient
+  endpointContext: EndpointAppContext
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -48,7 +46,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
         }),
         mergeMap((esSearchRes) =>
           queryFactory.parse(request, esSearchRes, {
-            esLegacyClient,
+            esClient: deps.esClient,
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,
           })
