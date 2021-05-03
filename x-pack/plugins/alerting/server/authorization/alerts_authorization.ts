@@ -15,7 +15,7 @@ import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
-import { asFiltersByAlertTypeAndConsumer } from './alerts_authorization_kuery';
+import { asFiltersByRuleTypeAndConsumer } from './alerts_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 
 export enum AlertingAuthorizationTypes {
@@ -259,11 +259,11 @@ export class AlertsAuthorization {
     authorizationType: AlertingAuthorizationTypes
   ): Promise<{
     filter?: KueryNode;
-    ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
+    ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
-      const { username, authorizedAlertTypes } = await this.augmentAlertTypesWithAuthorization(
+      const { username, authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
         this.alertTypeRegistry.list(),
         [
           // maybe pass in this operation? or require it to be 'find'
@@ -272,40 +272,41 @@ export class AlertsAuthorization {
         authorizationType
       );
 
-      if (!authorizedAlertTypes.size) {
+      if (!authorizedRuleTypes.size) {
         throw Boom.forbidden(
           this.auditLogger.alertsUnscopedAuthorizationFailure(username!, 'find')
         );
       }
 
-      const authorizedAlertTypeIdsToConsumers = new Set<string>(
-        [...authorizedAlertTypes].reduce<string[]>((alertTypeIdConsumerPairs, alertType) => {
-          for (const consumer of Object.keys(alertType.authorizedConsumers)) {
-            alertTypeIdConsumerPairs.push(`${alertType.id}/${consumer}`);
+      const authorizedRuleTypeIdsToConsumers = new Set<string>(
+        [...authorizedRuleTypes].reduce<string[]>((ruleTypeIdConsumerPairs, ruleType) => {
+          for (const consumer of Object.keys(ruleType.authorizedConsumers)) {
+            ruleTypeIdConsumerPairs.push(`${ruleType.id}/${consumer}`);
           }
-          return alertTypeIdConsumerPairs;
+          return ruleTypeIdConsumerPairs;
         }, [])
       );
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
-        filter: asFiltersByAlertTypeAndConsumer(authorizedAlertTypes),
-        ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {
-          if (!authorizedAlertTypeIdsToConsumers.has(`${alertTypeId}/${consumer}`)) {
+        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes),
+        ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string) => {
+          if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}`)) {
             throw Boom.forbidden(
               this.auditLogger.alertsAuthorizationFailure(
                 username!,
-                alertTypeId,
+                ruleTypeId,
                 ScopeType.Consumer,
                 consumer,
-                'find'
+                'find',
+                authorizationType
               )
             );
           } else {
-            if (authorizedEntries.has(alertTypeId)) {
-              authorizedEntries.get(alertTypeId)!.add(consumer);
+            if (authorizedEntries.has(ruleTypeId)) {
+              authorizedEntries.get(ruleTypeId)!.add(consumer);
             } else {
-              authorizedEntries.set(alertTypeId, new Set([consumer]));
+              authorizedEntries.set(ruleTypeId, new Set([consumer]));
             }
           }
         },
@@ -323,39 +324,40 @@ export class AlertsAuthorization {
                 []
               ),
               ScopeType.Consumer,
-              'find'
+              'find',
+              authorizationType
             );
           }
         },
       };
     }
     return {
-      ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {},
+      ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string) => {},
       logSuccessfulAuthorization: () => {},
     };
   }
 
-  public async filterByAlertTypeAuthorization(
-    alertTypes: Set<RegistryAlertType>,
+  public async filterByRuleTypeAuthorization(
+    ruleTypes: Set<RegistryAlertType>,
     operations: Array<ReadOperations | WriteOperations>,
     authorizationType: AlertingAuthorizationTypes
   ): Promise<Set<RegistryAlertTypeWithAuth>> {
-    const { authorizedAlertTypes } = await this.augmentAlertTypesWithAuthorization(
-      alertTypes,
+    const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
+      ruleTypes,
       operations,
       authorizationType
     );
-    return authorizedAlertTypes;
+    return authorizedRuleTypes;
   }
 
-  private async augmentAlertTypesWithAuthorization(
-    alertTypes: Set<RegistryAlertType>,
+  private async augmentRuleTypesWithAuthorization(
+    ruleTypes: Set<RegistryAlertType>,
     operations: Array<ReadOperations | WriteOperations>,
     authorizationType: AlertingAuthorizationTypes
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
-    authorizedAlertTypes: Set<RegistryAlertTypeWithAuth>;
+    authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
     const featuresIds = await this.featuresIds;
     if (this.authorization && this.shouldCheckAuthorization()) {
@@ -363,81 +365,76 @@ export class AlertsAuthorization {
         this.request
       );
 
-      // add an empty `authorizedConsumers` array on each alertType
-      const alertTypesWithAuthorization = this.augmentWithAuthorizedConsumers(alertTypes, {});
+      // add an empty `authorizedConsumers` array on each ruleType
+      const ruleTypesWithAuthorization = this.augmentWithAuthorizedConsumers(ruleTypes, {});
 
       // map from privilege to alertType which we can refer back to when analyzing the result
       // of checkPrivileges
-      const privilegeToAlertType = new Map<
+      const privilegeToRuleType = new Map<
         string,
         [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
       >();
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
       // and alertType in the system whether this user has this privilege
-      for (const alertType of alertTypesWithAuthorization) {
+      for (const ruleType of ruleTypesWithAuthorization) {
         for (const feature of featuresIds) {
           for (const operation of operations) {
-            privilegeToAlertType.set(
+            privilegeToRuleType.set(
               // this function needs to be swappable
               this.authorization!.actions.alerting.get(
-                alertType.id,
+                ruleType.id,
                 feature,
                 authorizationType,
                 operation
               ),
-              [
-                alertType,
-                feature,
-                hasPrivilegeByOperation(operation),
-                alertType.producer === feature,
-              ]
+              [ruleType, feature, hasPrivilegeByOperation(operation), ruleType.producer === feature]
             );
           }
         }
       }
 
       const { username, hasAllRequested, privileges } = await checkPrivileges({
-        kibana: [...privilegeToAlertType.keys()],
+        kibana: [...privilegeToRuleType.keys()],
       });
 
       return {
         username,
         hasAllRequested,
-        authorizedAlertTypes: hasAllRequested
+        authorizedRuleTypes: hasAllRequested
           ? // has access to all features
-            this.augmentWithAuthorizedConsumers(alertTypes, await this.allPossibleConsumers)
+            this.augmentWithAuthorizedConsumers(ruleTypes, await this.allPossibleConsumers)
           : // only has some of the required privileges
-            privileges.kibana.reduce((authorizedAlertTypes, { authorized, privilege }) => {
-              if (authorized && privilegeToAlertType.has(privilege)) {
+            privileges.kibana.reduce((authorizedRuleTypes, { authorized, privilege }) => {
+              if (authorized && privilegeToRuleType.has(privilege)) {
                 const [
-                  alertType,
+                  ruleType,
                   feature,
                   hasPrivileges,
                   isAuthorizedAtProducerLevel,
-                ] = privilegeToAlertType.get(privilege)!;
-                alertType.authorizedConsumers[feature] = mergeHasPrivileges(
+                ] = privilegeToRuleType.get(privilege)!;
+                ruleType.authorizedConsumers[feature] = mergeHasPrivileges(
                   hasPrivileges,
-                  alertType.authorizedConsumers[feature]
+                  ruleType.authorizedConsumers[feature]
                 );
 
                 // this needs to be feature flagged
                 if (isAuthorizedAtProducerLevel) {
                   // granting privileges under the producer automatically authorized the Alerts Management UI as well
-                  alertType.authorizedConsumers[ALERTS_FEATURE_ID] = mergeHasPrivileges(
+                  ruleType.authorizedConsumers[ALERTS_FEATURE_ID] = mergeHasPrivileges(
                     hasPrivileges,
-                    alertType.authorizedConsumers[ALERTS_FEATURE_ID]
+                    ruleType.authorizedConsumers[ALERTS_FEATURE_ID]
                   );
                 }
-                authorizedAlertTypes.add(alertType);
+                authorizedRuleTypes.add(ruleType);
               }
-              return authorizedAlertTypes;
+              return authorizedRuleTypes;
             }, new Set<RegistryAlertTypeWithAuth>()),
       };
     } else {
       return {
         hasAllRequested: true,
-        authorizedAlertTypes: this.augmentWithAuthorizedConsumers(
-          new Set([...alertTypes].filter((alertType) => featuresIds.has(alertType.producer))),
+        authorizedRuleTypes: this.augmentWithAuthorizedConsumers(
+          new Set([...ruleTypes].filter((ruleType) => featuresIds.has(ruleType.producer))),
           await this.allPossibleConsumers
         ),
       };
@@ -445,12 +442,12 @@ export class AlertsAuthorization {
   }
 
   private augmentWithAuthorizedConsumers(
-    alertTypes: Set<RegistryAlertType>,
+    ruleTypes: Set<RegistryAlertType>,
     authorizedConsumers: AuthorizedConsumers
   ): Set<RegistryAlertTypeWithAuth> {
     return new Set(
-      Array.from(alertTypes).map((alertType) => ({
-        ...alertType,
+      Array.from(ruleTypes).map((ruleType) => ({
+        ...ruleType,
         authorizedConsumers: { ...authorizedConsumers },
       }))
     );

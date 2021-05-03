@@ -472,7 +472,7 @@ export class AlertsClient {
     }
     const {
       filter: authorizationFilter,
-      ensureAlertTypeIsAuthorized,
+      ensureRuleTypeIsAuthorized,
       logSuccessfulAuthorization,
     } = authorizationTuple;
 
@@ -494,7 +494,7 @@ export class AlertsClient {
 
     const authorizedData = data.map(({ id, attributes, references }) => {
       try {
-        ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
+        ensureRuleTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
       } catch (error) {
         this.auditLogger?.log(
           alertAuditEvent({
@@ -1371,7 +1371,7 @@ export class AlertsClient {
   }
 
   public async listAlertTypes() {
-    return await this.authorization.filterByAlertTypeAuthorization(
+    return await this.authorization.filterByRuleTypeAuthorization(
       this.alertTypeRegistry.list(),
       [ReadOperations.Get, WriteOperations.Create],
       AlertingAuthorizationTypes.Rule
