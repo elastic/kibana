@@ -609,6 +609,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
         pitId: res.right.pitId,
         lastHitSortValue: undefined,
+        hasTransformedDocs: false,
       };
     } else {
       throwBadResponse(stateP, res);
@@ -631,10 +632,26 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res);
     }
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS',
+      };
+    } else {
+      throwBadResponse(stateP, res);
+    }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const { pitId, ...state } = stateP;
+      const { pitId, hasTransformedDocs, ...state } = stateP;
+      if (hasTransformedDocs) {
+        return {
+          ...state,
+          controlState: 'OUTDATED_DOCUMENTS_REFRESH',
+        };
+      }
       return {
         ...state,
         controlState: 'UPDATE_TARGET_MAPPINGS',
@@ -648,6 +665,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+        hasTransformedDocs: true,
       };
     } else {
       throwBadResponse(stateP, res as never);

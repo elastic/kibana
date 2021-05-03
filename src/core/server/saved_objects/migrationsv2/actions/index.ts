@@ -528,6 +528,7 @@ export const transformDocs = (
   transformRawDocs: TransformRawDocs,
   outdatedDocuments: SavedObjectsRawDoc[],
   index: string,
+  // used for testing purposes only
   refresh: estypes.Refresh
 ): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotFound | TargetIndexHadWriteBlock,
@@ -549,7 +550,7 @@ export interface ReindexResponse {
 }
 
 /**
- * Wait for Elasticsearch to reindex all the changes after outdated documents migration.
+ * Wait for Elasticsearch to reindex all the changes.
  */
 export const refreshIndex = (
   client: ElasticsearchClient,

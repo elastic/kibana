@@ -942,6 +942,7 @@ describe('migrations v2 model', () => {
         pitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
+        hasTransformedDocs: false,
       };
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM if found documents to transform', () => {
@@ -976,6 +977,7 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         pitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
+        hasTransformedDocs: false,
       };
 
       it('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT -> UPDATE_TARGET_MAPPINGS if action succeeded', () => {
@@ -1016,6 +1018,7 @@ describe('migrations v2 model', () => {
         outdatedDocuments,
         pitId: 'pit_id',
         lastHitSortValue: [3, 4],
+        hasTransformedDocs: false,
       };
       test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ if action succeeds', () => {
         const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right(
