@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-
 import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
@@ -105,19 +104,20 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           actions: new Map([
             [
               'execute-action',
-              { gte: nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE * 2 },
+              { gte: (nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE) * 1 },
             ],
           ]),
         });
       });
 
-      expect(getEventsByAction(events, 'execute-action').length).equal(
-        (nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE) * 2
+      const executeActionsEvents = getEventsByAction(events, 'execute-action');
+      expect(executeActionsEvents.length).equal(
+        (nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE) * 1
       );
 
       const searchResult = await esTestIndexTool.search('action:test.index-record');
       expect(searchResult.hits.total.value).equal(
-        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
+        (nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE) * 1
       );
     });
   });

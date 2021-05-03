@@ -149,6 +149,7 @@ export function createExecutionHandler<
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
     const tasks: EphemeralTask[] = [];
+    const eventLogsExecutors = [];
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     for (const action of actions) {
@@ -165,6 +166,7 @@ export function createExecutionHandler<
       const actionLabel = `${action.actionTypeId}:${action.id}`;
 
       if (supportsEphemeralTasks) {
+        eventLogsExecutors.push(logToEventLog);
         tasks.push({
           taskType: `actions:${action.actionTypeId}`,
           params: {
@@ -188,35 +190,39 @@ export function createExecutionHandler<
             type: 'alert',
           }),
         });
+        logToEventLog();
       }
 
-      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+      function logToEventLog() {
+        const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
-      const event: IEvent = {
-        event: { action: EVENT_LOG_ACTIONS.executeAction },
-        kibana: {
-          alerting: {
-            instance_id: alertInstanceId,
-            action_group_id: actionGroup,
-            action_subgroup: actionSubgroup,
+        const event: IEvent = {
+          event: { action: EVENT_LOG_ACTIONS.executeAction },
+          kibana: {
+            alerting: {
+              instance_id: alertInstanceId,
+              action_group_id: actionGroup,
+              action_subgroup: actionSubgroup,
+            },
+            saved_objects: [
+              { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
+              { type: 'action', id: action.id, ...namespace },
+            ],
           },
-          saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-            { type: 'action', id: action.id, ...namespace },
-          ],
-        },
-      };
+        };
 
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
-        actionSubgroup
-          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-          : `actionGroup: '${actionGroup}'`
-      } action: ${actionLabel}`;
-      eventLogger.logEvent(event);
+        event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+          actionSubgroup
+            ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+            : `actionGroup: '${actionGroup}'`
+        } action: ${actionLabel}`;
+        eventLogger.logEvent(event);
+      }
     }
 
     if (supportsEphemeralTasks && tasks.length) {
       await actionsClient.executeEphemeralTasks(tasks);
+      eventLogsExecutors.forEach((eventLogExecutor) => eventLogExecutor());
     }
   };
 }
