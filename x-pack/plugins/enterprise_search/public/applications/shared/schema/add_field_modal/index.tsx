@@ -36,6 +36,7 @@ import {
   FIELD_NAME_CORRECT_NOTE,
   FIELD_NAME_CORRECTED_NOTE,
 } from './constants';
+import { formatFieldName } from './utils';
 
 interface ISchemaAddFieldModalProps {
   disableForm?: boolean;
@@ -139,11 +140,3 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
     </EuiModal>
   );
 };
-
-const formatFieldName = (rawName: string) =>
-  rawName
-    .trim()
-    .replace(/[^a-zA-Z0-9]+/g, '_')
-    .replace(/^[^a-zA-Z0-9]+/, '')
-    .replace(/[^a-zA-Z0-9]+$/, '')
-    .toLowerCase();
