@@ -32,18 +32,10 @@ import {
   ERROR_TABLE_REVIEW_CONTROL,
   ERROR_TABLE_VIEW_LINK,
 } from './constants';
-
-interface IFieldCoercionError {
-  external_id: string;
-  error: string;
-}
-
-interface IFieldCoercionErrors {
-  [key: string]: IFieldCoercionError[];
-}
+import { FieldCoercionErrors } from './types';
 
 interface ISchemaErrorsAccordionProps {
-  fieldCoercionErrors: IFieldCoercionErrors;
+  fieldCoercionErrors: FieldCoercionErrors;
   schema: { [key: string]: string };
   itemId?: string;
   getRoute?(itemId: string, externalId: string): string;
