@@ -42,7 +42,11 @@ export class AlertingAuthorizationClientFactory {
     this.features = options.features;
   }
 
-  public create(request: KibanaRequest, privilegeName?: string): AlertsAuthorization {
+  public create(
+    request: KibanaRequest,
+    privilegeName: string,
+    exemptConsumerIds: string[] = []
+  ): AlertsAuthorization {
     const { securityPluginSetup, securityPluginStart, features } = this;
     return new AlertsAuthorization({
       authorization: securityPluginStart?.authz,
@@ -54,6 +58,7 @@ export class AlertingAuthorizationClientFactory {
         securityPluginSetup?.audit.getLogger(ALERTS_FEATURE_ID)
       ),
       privilegeName,
+      exemptConsumerIds,
     });
   }
 }

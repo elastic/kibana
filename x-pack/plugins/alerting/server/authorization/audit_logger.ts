@@ -29,9 +29,10 @@ export class AlertsAuthorizationAuditLogger {
     alertTypeId: string,
     scopeType: ScopeType,
     scope: string,
-    operation: string
+    operation: string,
+    authorizationType: string
   ): string {
-    return `${authorizationResult} to ${operation} a "${alertTypeId}" alert ${
+    return `${authorizationResult} to ${operation} a "${alertTypeId}" ${authorizationType} ${
       scopeType === ScopeType.Consumer ? `for "${scope}"` : `by "${scope}"`
     }`;
   }
@@ -41,14 +42,16 @@ export class AlertsAuthorizationAuditLogger {
     alertTypeId: string,
     scopeType: ScopeType,
     scope: string,
-    operation: string
+    operation: string,
+    authorizationType: string
   ): string {
     const message = this.getAuthorizationMessage(
       AuthorizationResult.Unauthorized,
       alertTypeId,
       scopeType,
       scope,
-      operation
+      operation,
+      authorizationType
     );
     this.auditLogger.log('alerts_authorization_failure', `${username} ${message}`, {
       username,
@@ -56,6 +59,7 @@ export class AlertsAuthorizationAuditLogger {
       scopeType,
       scope,
       operation,
+      authorizationType,
     });
     return message;
   }
@@ -74,14 +78,16 @@ export class AlertsAuthorizationAuditLogger {
     alertTypeId: string,
     scopeType: ScopeType,
     scope: string,
-    operation: string
+    operation: string,
+    authorizationType: string
   ): string {
     const message = this.getAuthorizationMessage(
       AuthorizationResult.Authorized,
       alertTypeId,
       scopeType,
       scope,
-      operation
+      operation,
+      authorizationType
     );
     this.auditLogger.log('alerts_authorization_success', `${username} ${message}`, {
       username,
@@ -89,6 +95,7 @@ export class AlertsAuthorizationAuditLogger {
       scopeType,
       scope,
       operation,
+      authorizationType,
     });
     return message;
   }
@@ -97,12 +104,13 @@ export class AlertsAuthorizationAuditLogger {
     username: string,
     authorizedEntries: Array<[string, string]>,
     scopeType: ScopeType,
-    operation: string
+    operation: string,
+    authorizationType: string
   ): string {
     const message = `${AuthorizationResult.Authorized} to ${operation}: ${authorizedEntries
       .map(
         ([alertTypeId, scope]) =>
-          `"${alertTypeId}" alert ${
+          `"${alertTypeId}" ${authorizationType}s ${
             scopeType === ScopeType.Consumer ? `for "${scope}"` : `by "${scope}"`
           }`
       )
@@ -112,6 +120,7 @@ export class AlertsAuthorizationAuditLogger {
       scopeType,
       authorizedEntries,
       operation,
+      authorizationType,
     });
     return message;
   }

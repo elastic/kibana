@@ -105,7 +105,10 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
   getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
-  getAlertingAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsAuthorization>;
+  getAlertingAuthorizationWithRequest(
+    request: KibanaRequest,
+    privilegeName: string
+  ): PublicMethodsOf<AlertsAuthorization>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
@@ -340,8 +343,8 @@ export class AlertingPlugin {
       return alertsClientFactory!.create(request, core.savedObjects);
     };
 
-    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
-      return alertingAuthorizationClientFactory!.create(request);
+    const getAlertingAuthorizationWithRequest = (request: KibanaRequest, privilegeName: string) => {
+      return alertingAuthorizationClientFactory!.create(request, privilegeName);
     };
 
     taskRunnerFactory.initialize({

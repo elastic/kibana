@@ -60,16 +60,15 @@ export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
 }
 
 type IsAuthorizedAtProducerLevel = boolean;
-
-const DEFAULT_PRIVILEGE_NAME = 'alerting';
 export interface ConstructorOptions {
   alertTypeRegistry: AlertTypeRegistry;
   request: KibanaRequest;
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   auditLogger: AlertsAuthorizationAuditLogger;
+  privilegeName: string;
+  exemptConsumerIds: string[];
   authorization?: SecurityPluginSetup['authz'];
-  privilegeName?: string;
 }
 
 export class AlertsAuthorization {
@@ -80,6 +79,7 @@ export class AlertsAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly privilegeName: string;
+  private readonly exemptConsumerIds: string[];
 
   constructor({
     alertTypeRegistry,
@@ -89,12 +89,18 @@ export class AlertsAuthorization {
     auditLogger,
     getSpace,
     privilegeName,
+    exemptConsumerIds,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
-    this.privilegeName = privilegeName ?? DEFAULT_PRIVILEGE_NAME;
+    this.privilegeName = privilegeName;
+
+    // List of consumer ids that are exempt from privilege check. This should be used sparingly.
+    // An example of this is the Rules Management `consumer` as we don't want to have to
+    // manually authorize each rule type in the management UI.
+    this.exemptConsumerIds = exemptConsumerIds;
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -107,7 +113,7 @@ export class AlertsAuthorization {
                 // ignore features which are disabled in the user's space
                 return (
                   !disabledFeatures.has(feature.id) &&
-                  // ignore features which don't grant privileges to alerting
+                  // ignore features which don't grant privileges to the specified privilege
                   (get(feature, this.privilegeName, undefined)?.length ?? 0 > 0)
                 );
               })
@@ -120,12 +126,9 @@ export class AlertsAuthorization {
         return new Set();
       });
 
-    // TODO
-    // This adds { alerts: { read: true, all: true }} to the list of consumers
-    // Do we need a flag to skip this???
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) =>
       featuresIds.size
-        ? asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
+        ? asAuthorizedConsumers([...this.exemptConsumerIds, ...featuresIds], {
             read: true,
             all: true,
           })
@@ -137,10 +140,6 @@ export class AlertsAuthorization {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  // alertTypeId determines the producer
-  // consumer determines the consumer/owner
-  // operation enum needs to be passed in in the constructor
-  // also pass in a type rule/alert to pass into the .get function???
   public async ensureAuthorized({
     ruleTypeId,
     consumer,
@@ -167,11 +166,8 @@ export class AlertsAuthorization {
         ),
       };
 
-      // This needs to be feature flagged
-
-      // We special case the Alerts Management `consumer` as we don't want to have to
-      // manually authorize each alert type in the management UI
-      const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
+      // Skip authorizing consumer if it is in the list of exempt consumer ids
+      const shouldAuthorizeConsumer = !this.exemptConsumerIds.includes(consumer);
 
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges({
@@ -184,8 +180,8 @@ export class AlertsAuthorization {
                 requiredPrivilegesByScope.producer,
               ]
             : [
-                // skip consumer privilege checks under `alerts` as all alert types can
-                // be created under `alerts` if you have producer level privileges
+                // skip consumer privilege checks for exempt consumer ids as all rule types can
+                // be created for exempt consumers if user has producer level privileges
                 requiredPrivilegesByScope.producer,
               ],
       });
@@ -198,14 +194,14 @@ export class AlertsAuthorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        // This should also log the type they're trying to access rule/alert
         throw Boom.forbidden(
           this.auditLogger.alertsAuthorizationFailure(
             username,
             ruleTypeId,
             ScopeType.Consumer,
             consumer,
-            operation
+            operation,
+            authorizationType
           )
         );
       }
@@ -216,7 +212,8 @@ export class AlertsAuthorization {
           ruleTypeId,
           ScopeType.Consumer,
           consumer,
-          operation
+          operation,
+          authorizationType
         );
       } else {
         const authorizedPrivileges = map(
@@ -239,7 +236,8 @@ export class AlertsAuthorization {
             ruleTypeId,
             unauthorizedScopeType,
             unauthorizedScope,
-            operation
+            operation,
+            authorizationType
           )
         );
       }
@@ -250,7 +248,8 @@ export class AlertsAuthorization {
           ruleTypeId,
           ScopeType.Consumer,
           consumer,
-          operation
+          operation,
+          authorizationType
         )
       );
     }
