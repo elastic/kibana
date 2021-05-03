@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await PageObjects.visualize.initTests();
-      initLineChart();
+      await initLineChart();
     });
 
     afterEach(async () => {

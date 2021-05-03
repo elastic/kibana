@@ -25,9 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('line charts - split chart', function () {
-    before(async () => {
-      await PageObjects.visualize.initTests();
-    });
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -46,7 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     };
 
-    before(initLineChart);
+    before(async () => {
+      await PageObjects.visualize.initTests();
+      await initLineChart();
+    });
 
     afterEach(async () => {
       await inspector.close();
