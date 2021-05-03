@@ -136,7 +136,7 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
     values.entries.forEach((entry, index) => {
       const isPathValid =
         entry.type === 'wildcard'
-          ? values.os === OperatingSystem.LINUX
+          ? values.os === OperatingSystem.WINDOWS
             ? isWindowsWildcardPathValid(entry.value)
             : isMacWildcardPathValid(entry.value)
           : isValidPath({ value: entry.value, os: values.os });
