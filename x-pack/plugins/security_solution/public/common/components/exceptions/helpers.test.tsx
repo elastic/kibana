@@ -98,6 +98,30 @@ const mockEndpointFields = [
   },
 ];
 
+const mockLinuxEndpointFields = [
+  {
+    name: 'file.path',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    name: 'file.Ext.code_signature.status',
+    type: 'string',
+    esTypes: ['text'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+    subType: { nested: { path: 'file.Ext.code_signature' } },
+  },
+];
+
 export const getEndpointField = (name: string) =>
   mockEndpointFields.find((field) => field.name === name) as IFieldType;
 
@@ -113,7 +137,7 @@ describe('Exception helpers', () => {
   describe('#filterIndexPatterns', () => {
     test('it returns index patterns without filtering if list type is "detection"', () => {
       const mockIndexPatterns = getMockIndexPattern();
-      const output = filterIndexPatterns(mockIndexPatterns, 'detection');
+      const output = filterIndexPatterns(mockIndexPatterns, 'detection', ['windows']);
 
       expect(output).toEqual(mockIndexPatterns);
     });
@@ -123,9 +147,19 @@ describe('Exception helpers', () => {
         ...getMockIndexPattern(),
         fields: [...fields, ...mockEndpointFields],
       };
-      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint');
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['windows']);
 
       expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockEndpointFields] });
+    });
+
+    test('it returns filtered index patterns if list type is "endpoint" and os contains "linux"', () => {
+      const mockIndexPatterns = {
+        ...getMockIndexPattern(),
+        fields: [...fields, ...mockLinuxEndpointFields],
+      };
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['linux']);
+
+      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockLinuxEndpointFields] });
     });
   });
 
