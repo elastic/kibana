@@ -32,12 +32,14 @@ describe('config schema', () => {
           "interval": "10s",
         },
         "cluster_alerts": Object {
+          "allowedSpaces": Array [
+            "default",
+          ],
           "email_notifications": Object {
             "email_address": "",
             "enabled": true,
           },
           "enabled": true,
-          "allowedSpaces": ["default"]
         },
         "enabled": true,
         "kibana": Object {
