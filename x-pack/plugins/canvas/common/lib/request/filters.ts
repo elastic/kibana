@@ -11,7 +11,7 @@ import {
   CanvasTimeFilter,
   CanvasLuceneFilter,
   CanvasExactlyFilter,
-} from '../../types';
+} from '../../../types';
 
 /*
  TODO: This could be pluggable
