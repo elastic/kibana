@@ -47,6 +47,7 @@ export interface EnsureAuthorizedOpts {
   ruleTypeId: string;
   consumer: string;
   operation: ReadOperations | WriteOperations;
+  authorizationType: AlertingAuthorizationTypes;
 }
 
 interface HasPrivileges {
@@ -69,7 +70,6 @@ export interface ConstructorOptions {
   auditLogger: AlertsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
   privilegeName?: string;
-  authorizationType?: AlertingAuthorizationTypes;
 }
 
 export class AlertsAuthorization {
@@ -80,7 +80,6 @@ export class AlertsAuthorization {
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly privilegeName: string;
-  private readonly alertingAuthorizationType: AlertingAuthorizationTypes;
 
   constructor({
     alertTypeRegistry,
@@ -90,14 +89,12 @@ export class AlertsAuthorization {
     auditLogger,
     getSpace,
     privilegeName,
-    authorizationType,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
     this.privilegeName = privilegeName ?? DEFAULT_PRIVILEGE_NAME;
-    this.alertingAuthorizationType = authorizationType ?? AlertingAuthorizationTypes.Rule;
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -144,7 +141,12 @@ export class AlertsAuthorization {
   // consumer determines the consumer/owner
   // operation enum needs to be passed in in the constructor
   // also pass in a type rule/alert to pass into the .get function???
-  public async ensureAuthorized({ ruleTypeId, consumer, operation }: EnsureAuthorizedOpts) {
+  public async ensureAuthorized({
+    ruleTypeId,
+    consumer,
+    operation,
+    authorizationType,
+  }: EnsureAuthorizedOpts) {
     const { authorization } = this;
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
@@ -154,13 +156,13 @@ export class AlertsAuthorization {
         consumer: authorization.actions.alerting.get(
           ruleTypeId,
           consumer,
-          this.alertingAuthorizationType,
+          authorizationType,
           operation
         ),
         producer: authorization.actions.alerting.get(
           ruleTypeId,
           ruleType.producer,
-          this.alertingAuthorizationType,
+          authorizationType,
           operation
         ),
       };
@@ -254,7 +256,9 @@ export class AlertsAuthorization {
     }
   }
 
-  public async getFindAuthorizationFilter(): Promise<{
+  public async getFindAuthorizationFilter(
+    authorizationType: AlertingAuthorizationTypes
+  ): Promise<{
     filter?: KueryNode;
     ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
     logSuccessfulAuthorization: () => void;
@@ -265,7 +269,8 @@ export class AlertsAuthorization {
         [
           // maybe pass in this operation? or require it to be 'find'
           ReadOperations.Find,
-        ]
+        ],
+        authorizationType
       );
 
       if (!authorizedAlertTypes.size) {
@@ -333,18 +338,21 @@ export class AlertsAuthorization {
 
   public async filterByAlertTypeAuthorization(
     alertTypes: Set<RegistryAlertType>,
-    operations: Array<ReadOperations | WriteOperations>
+    operations: Array<ReadOperations | WriteOperations>,
+    authorizationType: AlertingAuthorizationTypes
   ): Promise<Set<RegistryAlertTypeWithAuth>> {
     const { authorizedAlertTypes } = await this.augmentAlertTypesWithAuthorization(
       alertTypes,
-      operations
+      operations,
+      authorizationType
     );
     return authorizedAlertTypes;
   }
 
   private async augmentAlertTypesWithAuthorization(
     alertTypes: Set<RegistryAlertType>,
-    operations: Array<ReadOperations | WriteOperations>
+    operations: Array<ReadOperations | WriteOperations>,
+    authorizationType: AlertingAuthorizationTypes
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
@@ -375,7 +383,7 @@ export class AlertsAuthorization {
               this.authorization!.actions.alerting.get(
                 alertType.id,
                 feature,
-                this.alertingAuthorizationType,
+                authorizationType,
                 operation
               ),
               [
