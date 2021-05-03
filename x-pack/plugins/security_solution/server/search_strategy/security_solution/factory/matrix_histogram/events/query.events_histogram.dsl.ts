@@ -22,14 +22,43 @@ export const buildEventsHistogramQuery = ({
   defaultIndex,
   stackByField = 'event.action',
   threshold,
+  includeMissingData = true,
 }: MatrixHistogramRequestOptions) => {
   const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    {
-      exists: {
-        field: stackByField,
+    ...[
+      ...createQueryFilterClauses(filterQuery),
+      {
+        bool: {
+          ...createQueryFilterClauses(filterQuery)[0].bool,
+          ...(stackByField != null &&
+          showAllOthersBucket.includes(stackByField) &&
+          stackByField.endsWith('.ip') &&
+          includeMissingData
+            ? {
+                must_not: [
+                  {
+                    exists: {
+                      field: stackByField,
+                    },
+                  },
+                ],
+              }
+            : {}),
+        },
       },
-    },
+    ],
+    ...(stackByField != null &&
+    showAllOthersBucket.includes(stackByField) &&
+    !includeMissingData &&
+    stackByField.endsWith('.ip')
+      ? [
+          {
+            exists: {
+              field: stackByField,
+            },
+          },
+        ]
+      : []),
     {
       range: {
         '@timestamp': {
@@ -57,9 +86,10 @@ export const buildEventsHistogramQuery = ({
     };
 
     const missing =
-      stackByField != null && showAllOthersBucket.includes(stackByField)
+      stackByField != null && showAllOthersBucket.includes(stackByField) && includeMissingData
         ? {
             missing: stackByField?.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
+            ...(stackByField?.endsWith('.ip') ? { value_type: 'ip' } : {}),
           }
         : {};
 

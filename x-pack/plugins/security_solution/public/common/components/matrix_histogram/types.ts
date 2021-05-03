@@ -79,6 +79,7 @@ export interface MatrixHistogramQueryProps {
   threshold?: Threshold;
   skip?: boolean;
   isPtrIncluded?: boolean;
+  includeMissingData?: boolean;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

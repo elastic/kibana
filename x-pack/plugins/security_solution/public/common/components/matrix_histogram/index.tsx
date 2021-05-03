@@ -135,7 +135,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [defaultStackByOption, stackByOptions]
   );
 
-  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogram({
+  const matrixHistogramRequest = {
     endDate,
     errorMessage,
     filterQuery,
@@ -146,7 +146,30 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     isPtrIncluded,
     docValueFields,
+    includeMissingData: true,
+  };
+
+  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogram({
+    ...matrixHistogramRequest,
+    includeMissingData: true,
   });
+
+  const [loadingWithoutMissingData, withoutMissingResult] = useMatrixHistogram({
+    ...matrixHistogramRequest,
+    includeMissingData: false,
+    /* we include missing data in a single query by default,
+     * but we do extra query for missing data if value type is ip, due to https://github.com/elastic/kibana/issues/89205
+     **/
+    skip: !selectedStackByOption.value?.endsWith('.ip'),
+  });
+
+  const combinedData = useMemo(
+    () =>
+      !loading && !loadingWithoutMissingData
+        ? [...data, ...(withoutMissingResult?.data ?? [])]
+        : null,
+    [data, loading, loadingWithoutMissingData, withoutMissingResult?.data]
+  );
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -167,14 +190,17 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     totalCount,
     hideHistogramIfEmpty,
   ]);
-  const barChartData = useMemo(() => getCustomChartData(data, mapping), [data, mapping]);
+  const barChartData = useMemo(() => getCustomChartData(combinedData, mapping), [
+    combinedData,
+    mapping,
+  ]);
 
   useEffect(() => {
     if (!loading && !isInitialLoading) {
       setQuery({ id, inspect, loading, refetch });
     }
 
-    if (isInitialLoading && !!barChartData && data) {
+    if (isInitialLoading && !!barChartData && combinedData) {
       setIsInitialLoading(false);
     }
   }, [
@@ -185,7 +211,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     refetch,
     isInitialLoading,
     barChartData,
-    data,
+    combinedData,
     setIsInitialLoading,
   ]);
 

@@ -57,6 +57,7 @@ export const useMatrixHistogram = ({
   startDate,
   threshold,
   skip = false,
+  includeMissingData = true,
 }: MatrixHistogramQueryProps): [
   boolean,
   UseMatrixHistogramArgs,
@@ -84,6 +85,7 @@ export const useMatrixHistogram = ({
     threshold,
     ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
     ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
+    ...(includeMissingData != null ? { includeMissingData } : {}),
   });
   const { addError, addWarning } = useAppToasts();
 
@@ -185,6 +187,7 @@ export const useMatrixHistogram = ({
   ]);
 
   useEffect(() => {
+    // We want to search if it is not skipped, stackByField ends with ip and include missing data
     if (!skip) {
       hostsSearch(matrixHistogramRequest);
     }
@@ -192,7 +195,7 @@ export const useMatrixHistogram = ({
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [matrixHistogramRequest, hostsSearch, skip]);
+  }, [matrixHistogramRequest, hostsSearch, skip, includeMissingData, stackByField]);
 
   const runMatrixHistogramSearch = useCallback(
     (to: string, from: string) => {
