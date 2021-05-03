@@ -301,9 +301,16 @@ export function jobSavedObjectServiceFactory(
     return filterJobObjectIdsForSpace('anomaly-detector', ids, 'datafeed_id', allowWildcards);
   }
 
-  async function assignJobsToSpaces(jobType: JobType, jobIds: string[], spaces: string[]) {
+  async function updateJobsSpaces(
+    jobType: JobType,
+    jobIds: string[],
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ) {
     const results: Record<string, { success: boolean; error?: any }> = {};
     const jobs = await _getJobObjects(jobType);
+    const jobObjectIdMap = new Map<string, string>();
+    const objectsToUpdate: Array<{ type: string; id: string }> = [];
     for (const id of jobIds) {
       const job = jobs.find((j) => j.attributes.job_id === id);
       if (job === undefined) {
@@ -312,40 +319,29 @@ export function jobSavedObjectServiceFactory(
           error: createError(id, 'job_id'),
         };
       } else {
-        try {
-          await savedObjectsClient.addToNamespaces(ML_SAVED_OBJECT_TYPE, job.id, spaces);
-          results[id] = {
-            success: true,
-          };
-        } catch (error) {
-          results[id] = {
-            success: false,
-            error: getSavedObjectClientError(error),
-          };
-        }
+        jobObjectIdMap.set(job.id, id);
+        objectsToUpdate.push({ type: ML_SAVED_OBJECT_TYPE, id: job.id });
       }
     }
-    return results;
-  }
 
-  async function removeJobsFromSpaces(jobType: JobType, jobIds: string[], spaces: string[]) {
-    const results: Record<string, { success: boolean; error?: any }> = {};
-    const jobs = await _getJobObjects(jobType);
-    for (const job of jobs) {
-      if (jobIds.includes(job.attributes.job_id)) {
-        try {
-          await savedObjectsClient.deleteFromNamespaces(ML_SAVED_OBJECT_TYPE, job.id, spaces);
-          results[job.attributes.job_id] = {
-            success: true,
-          };
-        } catch (error) {
-          results[job.attributes.job_id] = {
-            success: false,
-            error: getSavedObjectClientError(error),
-          };
-        }
+    const updateResult = await savedObjectsClient.updateObjectsSpaces(
+      objectsToUpdate,
+      spacesToAdd,
+      spacesToRemove
+    );
+    updateResult.objects.forEach(({ id, error }) => {
+      if (error) {
+        results[id] = {
+          success: false,
+          error: getSavedObjectClientError(error),
+        };
+      } else {
+        results[id] = {
+          success: true,
+        };
       }
-    }
+    });
+
     return results;
   }
 
@@ -372,8 +368,7 @@ export function jobSavedObjectServiceFactory(
     filterJobIdsForSpace,
     filterDatafeedsForSpace,
     filterDatafeedIdsForSpace,
-    assignJobsToSpaces,
-    removeJobsFromSpaces,
+    updateJobsSpaces,
     bulkCreateJobs,
     getAllJobObjectsForAllSpaces,
     canCreateGlobalJobs,
