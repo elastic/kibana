@@ -85,9 +85,7 @@ export class AlertsClientFactory {
         excludedWrappers: ['security'],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
-      authorization: this.authorization!.create(request, FEATURE_PRIVILEGE_NAME, [
-        ALERTS_FEATURE_ID,
-      ]),
+      authorization: this.authorization!.create(request, [ALERTS_FEATURE_ID]),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,

@@ -70,7 +70,6 @@ export interface ConstructorOptions {
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   auditLogger: AlertsAuthorizationAuditLogger;
-  privilegeName: string;
   exemptConsumerIds: string[];
   authorization?: SecurityPluginSetup['authz'];
 }
@@ -82,7 +81,6 @@ export class AlertsAuthorization {
   private readonly auditLogger: AlertsAuthorizationAuditLogger;
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
-  private readonly privilegeName: string;
   private readonly exemptConsumerIds: string[];
 
   constructor({
@@ -92,14 +90,12 @@ export class AlertsAuthorization {
     features,
     auditLogger,
     getSpace,
-    privilegeName,
     exemptConsumerIds,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
-    this.privilegeName = privilegeName;
 
     // List of consumer ids that are exempt from privilege check. This should be used sparingly.
     // An example of this is the Rules Management `consumer` as we don't want to have to
@@ -113,14 +109,13 @@ export class AlertsAuthorization {
           new Set(
             features
               .getKibanaFeatures()
-              .filter((feature) => {
-                // ignore features which are disabled in the user's space
-                return (
-                  !disabledFeatures.has(feature.id) &&
-                  // ignore features which don't grant privileges to the specified privilege
-                  (get(feature, this.privilegeName, undefined)?.length ?? 0 > 0)
-                );
-              })
+              .filter(
+                ({ id, alerting }) =>
+                  // ignore features which are disabled in the user's space
+                  !disabledFeatures.has(id) &&
+                  // ignore features which don't grant privileges to alerting
+                  (alerting?.length ?? 0 > 0)
+              )
               .map((feature) => feature.id)
           )
       )
