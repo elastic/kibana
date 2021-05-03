@@ -20,15 +20,17 @@ export interface EventFiltersPageLocation {
   id?: string;
   filter: string;
 }
+
+export interface EventFiltersForm {
+  entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema | undefined;
+  newComment: string;
+  hasNameError: boolean;
+  hasItemsError: boolean;
+  hasOSError: boolean;
+  submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
+}
 export interface EventFiltersListPageState {
   entries: ExceptionListItemSchema[];
-  form: {
-    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema | undefined;
-    newComment: string;
-    hasNameError: boolean;
-    hasItemsError: boolean;
-    hasOSError: boolean;
-    submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
-  };
+  form: EventFiltersForm;
   location: EventFiltersPageLocation;
 }

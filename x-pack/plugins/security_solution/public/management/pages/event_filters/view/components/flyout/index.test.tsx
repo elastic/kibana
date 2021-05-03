@@ -20,6 +20,8 @@ import {
 } from '../../../../../../shared_imports';
 import { EventFiltersHttpService } from '../../../service';
 import { createdEventFilterEntryMock } from '../../../test_utils';
+import { getFormEntryState, isUninitialisedForm } from '../../../store/selector';
+import { EventFiltersListPageState } from '../../../types';
 
 jest.mock('../form');
 jest.mock('../../../service');
@@ -42,6 +44,7 @@ let render: (
 const act = reactTestingLibrary.act;
 let onCancelMock: jest.Mock;
 const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
+let getState: () => EventFiltersListPageState;
 
 describe('Event filter flyout', () => {
   beforeAll(() => {
@@ -57,6 +60,7 @@ describe('Event filter flyout', () => {
     mockedContext = createAppRootMockRenderer();
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     onCancelMock = jest.fn();
+    getState = () => mockedContext.store.getState().management.eventFilters;
     render = (props) =>
       mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
   });
@@ -76,10 +80,8 @@ describe('Event filter flyout', () => {
       await waitForAction('eventFiltersInitForm');
     });
 
-    expect(mockedContext.store.getState().management.eventFilters.form.entry).not.toBeUndefined();
-    expect(
-      mockedContext.store.getState().management.eventFilters.form.entry!.entries[0].field
-    ).toBe('');
+    expect(getFormEntryState(getState())).not.toBeUndefined();
+    expect(getFormEntryState(getState())!.entries[0].field).toBe('');
   });
 
   it('should confirm form when button is disabled', () => {
@@ -88,9 +90,7 @@ describe('Event filter flyout', () => {
     act(() => {
       fireEvent.click(confirmButton);
     });
-    expect(
-      mockedContext.store.getState().management.eventFilters.form.submissionResourceState.type
-    ).toBe('UninitialisedResourceState');
+    expect(isUninitialisedForm(getState())).toBeTruthy();
   });
 
   it('should confirm form when button is enabled', async () => {
@@ -99,8 +99,7 @@ describe('Event filter flyout', () => {
       type: 'eventFiltersChangeForm',
       payload: {
         entry: {
-          ...(mockedContext.store.getState().management.eventFilters.form!
-            .entry as CreateExceptionListItemSchema),
+          ...(getState().form!.entry as CreateExceptionListItemSchema),
           name: 'test',
           os_types: ['windows'],
         },
@@ -114,9 +113,7 @@ describe('Event filter flyout', () => {
       fireEvent.click(confirmButton);
       await waitForAction('eventFiltersCreateSuccess');
     });
-    expect(
-      mockedContext.store.getState().management.eventFilters.form.submissionResourceState.type
-    ).toBe('UninitialisedResourceState');
+    expect(isUninitialisedForm(getState())).toBeTruthy();
     expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
   });
 
@@ -129,8 +126,7 @@ describe('Event filter flyout', () => {
         type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: mockedContext.store.getState().management.eventFilters.form!
-            .entry as ExceptionListItemSchema,
+          data: getState().form!.entry as ExceptionListItemSchema,
         },
       });
     });
@@ -198,9 +194,7 @@ describe('Event filter flyout', () => {
       await waitForAction('eventFiltersInitFromId');
     });
 
-    expect(mockedContext.store.getState().management.eventFilters.form.entry).not.toBeUndefined();
-    expect(mockedContext.store.getState().management.eventFilters.form.entry!.item_id).toBe(
-      createdEventFilterEntryMock().item_id
-    );
+    expect(getFormEntryState(getState())).not.toBeUndefined();
+    expect(getFormEntryState(getState())!.item_id).toBe(createdEventFilterEntryMock().item_id);
   });
 });

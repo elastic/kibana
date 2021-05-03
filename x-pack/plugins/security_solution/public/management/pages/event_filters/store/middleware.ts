@@ -22,6 +22,7 @@ import {
   transformOutput,
   UpdateExceptionListItemSchema,
 } from '../../../../shared_imports';
+import { getFormEntry, getSubmissionResource, getNewComment } from './selector';
 
 const addNewComments = (
   entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema,
@@ -38,9 +39,9 @@ const eventFiltersCreate = async (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
   eventFiltersService: EventFiltersService
 ) => {
-  const submissionResourceState = store.getState().form.submissionResourceState;
+  const submissionResourceState = getSubmissionResource(store.getState());
   try {
-    const formEntry = store.getState().form.entry;
+    const formEntry = getFormEntry(store.getState());
     if (!formEntry) return;
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
@@ -53,7 +54,7 @@ const eventFiltersCreate = async (
     const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
     const updatedCommentsEntry = addNewComments(
       sanitizedEntry,
-      store.getState().form.newComment
+      getNewComment(store.getState())
     ) as CreateExceptionListItemSchema;
 
     const exception = await eventFiltersService.addEventFilters(updatedCommentsEntry);
@@ -86,9 +87,9 @@ const eventFiltersUpdate = async (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
   eventFiltersService: EventFiltersService
 ) => {
-  const submissionResourceState = store.getState().form.submissionResourceState;
+  const submissionResourceState = getSubmissionResource(store.getState());
   try {
-    const formEntry = store.getState().form.entry;
+    const formEntry = getFormEntry(store.getState());
     if (!formEntry) return;
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
@@ -103,7 +104,7 @@ const eventFiltersUpdate = async (
     );
     const updatedCommentsEntry = addNewComments(
       sanitizedEntry,
-      store.getState().form.newComment
+      getNewComment(store.getState())
     ) as UpdateExceptionListItemSchema;
 
     // Clean unnecessary fields for update action
@@ -150,7 +151,7 @@ const eventFiltersLoadById = async (
   eventFiltersService: EventFiltersService,
   id: string
 ) => {
-  const submissionResourceState = store.getState().form.submissionResourceState;
+  const submissionResourceState = getSubmissionResource(store.getState());
   try {
     // TODO: Try to get the entry from the list before perform API call
     const entry = await eventFiltersService.getOne(id);

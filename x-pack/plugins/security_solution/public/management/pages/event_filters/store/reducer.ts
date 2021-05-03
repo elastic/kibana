@@ -14,6 +14,7 @@ import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { MANAGEMENT_ROUTING_EVENT_FILTERS_PATH } from '../../../common/constants';
 import { extractEventFiltetrsPageLocation } from '../../../common/routing';
+import { isUninitialisedResourceState } from '../../../state/async_resource_state';
 
 import {
   EventFiltersInitForm,
@@ -82,8 +83,8 @@ const eventFiltersFormStateChanged: CaseReducer<EventFiltersFormStateChanged> = 
     ...state,
     form: {
       ...state.form,
-      entry: action.payload.type === 'UninitialisedResourceState' ? undefined : state.form.entry,
-      newComment: action.payload.type === 'UninitialisedResourceState' ? '' : state.form.newComment,
+      entry: isUninitialisedResourceState(action.payload) ? undefined : state.form.entry,
+      newComment: isUninitialisedResourceState(action.payload) ? '' : state.form.newComment,
       submissionResourceState: action.payload,
     },
   };

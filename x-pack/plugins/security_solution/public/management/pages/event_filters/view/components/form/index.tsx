@@ -29,7 +29,7 @@ import { AppAction } from '../../../../../../common/store/actions';
 import { ExceptionListItemSchema, ExceptionBuilder } from '../../../../../../shared_imports';
 
 import { useEventFiltersSelector } from '../../hooks';
-import { getFormEntry, getHasNameError, getNewComment } from '../../../store/selector';
+import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
 import {
   FORM_DESCRIPTION,
   NAME_LABEL,
@@ -54,7 +54,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
   ({ allowSelectOs = false }) => {
     const { http, data } = useKibana().services;
     const dispatch = useDispatch<Dispatch<AppAction>>();
-    const exception = useEventFiltersSelector(getFormEntry);
+    const exception = useEventFiltersSelector(getFormEntryStateMutable);
     const hasNameError = useEventFiltersSelector(getHasNameError);
     const newComment = useEventFiltersSelector(getNewComment);
 
