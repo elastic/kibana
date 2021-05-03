@@ -89,7 +89,7 @@ describe('listAlertTypes', () => {
 
   test('should return a list of AlertTypes that exist in the registry', async () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-    authorization.filterByAlertTypeAuthorization.mockResolvedValue(
+    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
       new Set<RegistryAlertTypeWithAuth>([
         { ...myAppAlertType, authorizedConsumers },
         { ...alertingAlertType, authorizedConsumers },
@@ -147,7 +147,7 @@ describe('listAlertTypes', () => {
           enabledInLicense: true,
         },
       ]);
-      authorization.filterByAlertTypeAuthorization.mockResolvedValue(authorizedTypes);
+      authorization.filterByRuleTypeAuthorization.mockResolvedValue(authorizedTypes);
 
       expect(await alertsClient.listAlertTypes()).toEqual(authorizedTypes);
     });

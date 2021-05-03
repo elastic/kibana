@@ -67,7 +67,7 @@ describe('aggregate()', () => {
   ]);
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
-      ensureAlertTypeIsAuthorized() {},
+      ensureRuleTypeIsAuthorized() {},
       logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find
@@ -102,7 +102,7 @@ describe('aggregate()', () => {
         saved_objects: [],
       });
     alertTypeRegistry.list.mockReturnValue(listedTypes);
-    authorization.filterByAlertTypeAuthorization.mockResolvedValue(
+    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
       new Set([
         {
           id: 'myType',

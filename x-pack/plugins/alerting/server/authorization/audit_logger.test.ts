@@ -22,13 +22,15 @@ describe(`#constructor`, () => {
     const scopeType = ScopeType.Consumer;
     const scope = 'myApp';
     const operation = 'create';
+    const authorizationType = 'rule';
     expect(() => {
       alertsAuditLogger.alertsAuthorizationFailure(
         username,
         alertTypeId,
         scopeType,
         scope,
-        operation
+        operation,
+        authorizationType
       );
 
       alertsAuditLogger.alertsAuthorizationSuccess(
@@ -36,7 +38,8 @@ describe(`#constructor`, () => {
         alertTypeId,
         scopeType,
         scope,
-        operation
+        operation,
+        authorizationType
       );
     }).not.toThrow();
   });
@@ -48,13 +51,14 @@ describe(`#alertsUnscopedAuthorizationFailure`, () => {
     const alertsAuditLogger = new AlertsAuthorizationAuditLogger(auditLogger);
     const username = 'foo-user';
     const operation = 'create';
+    const authorizationType = 'rule';
 
-    alertsAuditLogger.alertsUnscopedAuthorizationFailure(username, operation);
+    alertsAuditLogger.alertsUnscopedAuthorizationFailure(username, operation, authorizationType);
 
     expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alerts_unscoped_authorization_failure",
-        "foo-user Unauthorized to create any alert types",
+        "foo-user Unauthorized to create rules for any rule types",
         Object {
           "operation": "create",
           "username": "foo-user",
@@ -71,21 +75,24 @@ describe(`#alertsUnscopedAuthorizationFailure`, () => {
     const scopeType = ScopeType.Producer;
     const scope = 'myOtherApp';
     const operation = 'create';
+    const authorizationType = 'rule';
 
     alertsAuditLogger.alertsAuthorizationFailure(
       username,
       alertTypeId,
       scopeType,
       scope,
-      operation
+      operation,
+      authorizationType
     );
 
     expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alerts_authorization_failure",
-        "foo-user Unauthorized to create a \\"alert-type-id\\" alert by \\"myOtherApp\\"",
+        "foo-user Unauthorized to create a \\"alert-type-id\\" rule by \\"myOtherApp\\"",
         Object {
           "alertTypeId": "alert-type-id",
+          "authorizationType": "rule",
           "operation": "create",
           "scope": "myOtherApp",
           "scopeType": 1,
@@ -105,21 +112,24 @@ describe(`#alertsAuthorizationFailure`, () => {
     const scopeType = ScopeType.Consumer;
     const scope = 'myApp';
     const operation = 'create';
+    const authorizationType = 'rule';
 
     alertsAuditLogger.alertsAuthorizationFailure(
       username,
       alertTypeId,
       scopeType,
       scope,
-      operation
+      operation,
+      authorizationType
     );
 
     expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alerts_authorization_failure",
-        "foo-user Unauthorized to create a \\"alert-type-id\\" alert for \\"myApp\\"",
+        "foo-user Unauthorized to create a \\"alert-type-id\\" rule for \\"myApp\\"",
         Object {
           "alertTypeId": "alert-type-id",
+          "authorizationType": "rule",
           "operation": "create",
           "scope": "myApp",
           "scopeType": 0,
@@ -137,21 +147,24 @@ describe(`#alertsAuthorizationFailure`, () => {
     const scopeType = ScopeType.Producer;
     const scope = 'myOtherApp';
     const operation = 'create';
+    const authorizationType = 'rule';
 
     alertsAuditLogger.alertsAuthorizationFailure(
       username,
       alertTypeId,
       scopeType,
       scope,
-      operation
+      operation,
+      authorizationType
     );
 
     expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alerts_authorization_failure",
-        "foo-user Unauthorized to create a \\"alert-type-id\\" alert by \\"myOtherApp\\"",
+        "foo-user Unauthorized to create a \\"alert-type-id\\" rule by \\"myOtherApp\\"",
         Object {
           "alertTypeId": "alert-type-id",
+          "authorizationType": "rule",
           "operation": "create",
           "scope": "myOtherApp",
           "scopeType": 1,
@@ -173,19 +186,22 @@ describe(`#alertsBulkAuthorizationSuccess`, () => {
       ['other-alert-type-id', 'myOtherApp'],
     ];
     const operation = 'create';
+    const authorizationType = 'rule';
 
     alertsAuditLogger.alertsBulkAuthorizationSuccess(
       username,
       authorizedEntries,
       scopeType,
-      operation
+      operation,
+      authorizationType
     );
 
     expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alerts_authorization_success",
-        "foo-user Authorized to create: \\"alert-type-id\\" alert for \\"myApp\\", \\"other-alert-type-id\\" alert for \\"myOtherApp\\"",
+        "foo-user Authorized to create: \\"alert-type-id\\" rules for \\"myApp\\", \\"other-alert-type-id\\" rules for \\"myOtherApp\\"",
         Object {
+          "authorizationType": "rule",
           "authorizedEntries": Array [
             Array [
               "alert-type-id",
@@ -214,19 +230,22 @@ describe(`#alertsBulkAuthorizationSuccess`, () => {
       ['other-alert-type-id', 'myOtherApp'],
     ];
     const operation = 'create';
+    const authorizationType = 'rule';
 
     alertsAuditLogger.alertsBulkAuthorizationSuccess(
       username,
       authorizedEntries,
       scopeType,
-      operation
+      operation,
+      authorizationType
     );
 
     expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alerts_authorization_success",
-        "foo-user Authorized to create: \\"alert-type-id\\" alert by \\"myApp\\", \\"other-alert-type-id\\" alert by \\"myOtherApp\\"",
+        "foo-user Authorized to create: \\"alert-type-id\\" rules by \\"myApp\\", \\"other-alert-type-id\\" rules by \\"myOtherApp\\"",
         Object {
+          "authorizationType": "rule",
           "authorizedEntries": Array [
             Array [
               "alert-type-id",
@@ -255,21 +274,24 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
     const scopeType = ScopeType.Consumer;
     const scope = 'myApp';
     const operation = 'create';
+    const authorizationType = 'rule';
 
     alertsAuditLogger.alertsAuthorizationSuccess(
       username,
       alertTypeId,
       scopeType,
       scope,
-      operation
+      operation,
+      authorizationType
     );
 
     expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alerts_authorization_success",
-        "foo-user Authorized to create a \\"alert-type-id\\" alert for \\"myApp\\"",
+        "foo-user Authorized to create a \\"alert-type-id\\" rule for \\"myApp\\"",
         Object {
           "alertTypeId": "alert-type-id",
+          "authorizationType": "rule",
           "operation": "create",
           "scope": "myApp",
           "scopeType": 0,
@@ -287,21 +309,24 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
     const scopeType = ScopeType.Producer;
     const scope = 'myOtherApp';
     const operation = 'create';
+    const authorizationType = 'rule';
 
     alertsAuditLogger.alertsAuthorizationSuccess(
       username,
       alertTypeId,
       scopeType,
       scope,
-      operation
+      operation,
+      authorizationType
     );
 
     expect(auditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alerts_authorization_success",
-        "foo-user Authorized to create a \\"alert-type-id\\" alert by \\"myOtherApp\\"",
+        "foo-user Authorized to create a \\"alert-type-id\\" rule by \\"myOtherApp\\"",
         Object {
           "alertTypeId": "alert-type-id",
+          "authorizationType": "rule",
           "operation": "create",
           "scope": "myOtherApp",
           "scopeType": 1,

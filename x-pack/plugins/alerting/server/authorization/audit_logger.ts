@@ -64,8 +64,12 @@ export class AlertsAuthorizationAuditLogger {
     return message;
   }
 
-  public alertsUnscopedAuthorizationFailure(username: string, operation: string): string {
-    const message = `Unauthorized to ${operation} any alert types`;
+  public alertsUnscopedAuthorizationFailure(
+    username: string,
+    operation: string,
+    authorizationType: string
+  ): string {
+    const message = `Unauthorized to ${operation} ${authorizationType}s for any rule types`;
     this.auditLogger.log('alerts_unscoped_authorization_failure', `${username} ${message}`, {
       username,
       operation,

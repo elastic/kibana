@@ -75,7 +75,7 @@ describe('find()', () => {
   ]);
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
-      ensureAlertTypeIsAuthorized() {},
+      ensureRuleTypeIsAuthorized() {},
       logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
@@ -117,7 +117,7 @@ describe('find()', () => {
       ],
     });
     alertTypeRegistry.list.mockReturnValue(listedTypes);
-    authorization.filterByAlertTypeAuthorization.mockResolvedValue(
+    authorization.filterByRuleTypeAuthorization.mockResolvedValue(
       new Set([
         {
           id: 'myType',
@@ -196,7 +196,7 @@ describe('find()', () => {
       );
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         filter,
-        ensureAlertTypeIsAuthorized() {},
+        ensureRuleTypeIsAuthorized() {},
         logSuccessfulAuthorization() {},
       });
 
@@ -219,10 +219,10 @@ describe('find()', () => {
     });
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
-      const ensureAlertTypeIsAuthorized = jest.fn();
+      const ensureRuleTypeIsAuthorized = jest.fn();
       const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        ensureAlertTypeIsAuthorized,
+        ensureRuleTypeIsAuthorized,
         logSuccessfulAuthorization,
       });
 
@@ -271,7 +271,7 @@ describe('find()', () => {
         fields: ['tags', 'alertTypeId', 'consumer'],
         type: 'alert',
       });
-      expect(ensureAlertTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp');
+      expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'rule');
       expect(logSuccessfulAuthorization).toHaveBeenCalled();
     });
   });
@@ -313,7 +313,7 @@ describe('find()', () => {
     test('logs audit event when not authorised to search alert type', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        ensureAlertTypeIsAuthorized: jest.fn(() => {
+        ensureRuleTypeIsAuthorized: jest.fn(() => {
           throw new Error('Unauthorized');
         }),
         logSuccessfulAuthorization: jest.fn(),

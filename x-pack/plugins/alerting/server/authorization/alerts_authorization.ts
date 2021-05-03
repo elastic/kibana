@@ -259,7 +259,7 @@ export class AlertsAuthorization {
     authorizationType: AlertingAuthorizationTypes
   ): Promise<{
     filter?: KueryNode;
-    ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string) => void;
+    ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
@@ -271,14 +271,14 @@ export class AlertsAuthorization {
 
       if (!authorizedRuleTypes.size) {
         throw Boom.forbidden(
-          this.auditLogger.alertsUnscopedAuthorizationFailure(username!, 'find')
+          this.auditLogger.alertsUnscopedAuthorizationFailure(username!, 'find', authorizationType)
         );
       }
 
       const authorizedRuleTypeIdsToConsumers = new Set<string>(
         [...authorizedRuleTypes].reduce<string[]>((ruleTypeIdConsumerPairs, ruleType) => {
           for (const consumer of Object.keys(ruleType.authorizedConsumers)) {
-            ruleTypeIdConsumerPairs.push(`${ruleType.id}/${consumer}`);
+            ruleTypeIdConsumerPairs.push(`${ruleType.id}/${consumer}/${authorizationType}`);
           }
           return ruleTypeIdConsumerPairs;
         }, [])
@@ -287,8 +287,8 @@ export class AlertsAuthorization {
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
         filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes),
-        ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string) => {
-          if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}`)) {
+        ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
+          if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
               this.auditLogger.alertsAuthorizationFailure(
                 username!,
@@ -329,7 +329,7 @@ export class AlertsAuthorization {
       };
     }
     return {
-      ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string) => {},
+      ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
       logSuccessfulAuthorization: () => {},
     };
   }
