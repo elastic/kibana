@@ -164,17 +164,30 @@ export const DiscoverGrid = ({
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
+  const usedSelectedDocs = useMemo(() => {
+    if (!selectedDocs.length || !rows?.length) {
+      return [];
+    }
+    const idMap = rows.reduce((prev, row) => {
+      return prev.set(getDocId(row), true);
+    }, new Map());
+    return selectedDocs.filter((docId) => idMap.get(docId));
+  }, [selectedDocs, rows]);
   const displayedRows = useMemo(() => {
     if (!rows) {
       return [];
     }
-    if (!isFilterActive || selectedDocs.length === 0) {
+    if (!isFilterActive || usedSelectedDocs.length === 0) {
       return rows;
     }
-    return rows.filter((row) => {
-      return selectedDocs.includes(getDocId(row));
-    });
-  }, [rows, selectedDocs, isFilterActive]);
+    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(getDocId(row)));
+    if (!rowsFiltered.length) {
+      // in case the selected docs are no longer part of the sample of 500, show all docs
+      return rows;
+    } else {
+      return rowsFiltered;
+    }
+  }, [rows, usedSelectedDocs, isFilterActive]);
 
   /**
    * Pagination
@@ -258,16 +271,16 @@ export const DiscoverGrid = ({
 
   const additionalControls = useMemo(
     () =>
-      selectedDocs.length ? (
+      usedSelectedDocs.length ? (
         <DiscoverGridDocumentToolbarBtn
           isFilterActive={isFilterActive}
           rows={rows!}
-          selectedDocs={selectedDocs}
+          selectedDocs={usedSelectedDocs}
           setSelectedDocs={setSelectedDocs}
           setIsFilterActive={setIsFilterActive}
         />
       ) : null,
-    [selectedDocs, isFilterActive, rows, setIsFilterActive]
+    [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
   if (!rowCount) {
@@ -291,7 +304,7 @@ export const DiscoverGrid = ({
         onFilter,
         indexPattern,
         isDarkMode: services.uiSettings.get('theme:darkMode'),
-        selectedDocs,
+        selectedDocs: usedSelectedDocs,
         setSelectedDocs: (newSelectedDocs) => {
           setSelectedDocs(newSelectedDocs);
           if (isFilterActive && newSelectedDocs.length === 0) {
