@@ -46,21 +46,20 @@ export interface TrainedModelStat {
 }
 
 export interface TrainedModelConfigResponse {
-  description: string;
+  description?: string;
   created_by: string;
   create_time: string;
   default_field_map: Record<string, string>;
   estimated_heap_memory_usage_bytes: number;
   estimated_operations: number;
   license_level: string;
-  metadata?:
-    | {
-        analytics_config: DataFrameAnalyticsConfig;
-        input: any;
-        total_feature_importance?: TotalFeatureImportance[];
-        feature_importance_baseline?: FeatureImportanceBaseline;
-      }
-    | Record<string, any>;
+  metadata?: {
+    analytics_config: DataFrameAnalyticsConfig;
+    input: unknown;
+    total_feature_importance?: TotalFeatureImportance[];
+    feature_importance_baseline?: FeatureImportanceBaseline;
+    model_aliases?: string[];
+  } & Record<string, unknown>;
   model_id: string;
   tags: string[];
   version: string;

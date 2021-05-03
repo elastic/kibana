@@ -28,6 +28,8 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { ModelItemFull } from './models_list';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
+import { isDefined } from '../../../../../../../common/types/guards';
+import { isPopulatedObject } from '../../../../../../../common';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -69,7 +71,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     description,
   } = item;
 
-  const { analytics_config: analyticsConfig, ...restMetaData } = metadata;
+  const { analytics_config: analyticsConfig, ...restMetaData } = metadata ?? {};
 
   const details = {
     description,
@@ -83,6 +85,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
 
   function formatToListItems(items: Record<string, any>): EuiDescriptionListProps['listItems'] {
     return Object.entries(items)
+      .filter(([, value]) => isDefined(value))
       .map(([title, value]) => {
         if (title in formatterDictionary) {
           return {
@@ -151,7 +154,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 />
               </EuiPanel>
             </EuiFlexItem>
-            {restMetaData ? (
+            {isPopulatedObject(restMetaData) ? (
               <EuiFlexItem>
                 <EuiPanel>
                   <EuiTitle size={'xs'}>
