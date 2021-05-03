@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { includes } from 'lodash';
 import url from 'url';
 import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
 import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
@@ -60,10 +61,10 @@ const apisToIntercept = [
 
 describe('Service overview - header filters', () => {
   before(() => {
-    // esArchiverLoad('apm_8.0.0');
+    esArchiverLoad('apm_8.0.0');
   });
   after(() => {
-    // esArchiverUnload('apm_8.0.0');
+    esArchiverUnload('apm_8.0.0');
   });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
@@ -119,12 +120,19 @@ describe('Service overview - header filters', () => {
   });
 
   describe('Filtering by kuerybar', () => {
-    it('filters by transaction.name', () => {
-      cy.visit(baseUrl);
-      cy.contains('Kibana');
+    it.only('filters by transaction.name', () => {
+      cy.visit(url.format({
+        pathname: '/app/apm/services/opbeans-java/overview',
+        query: { rangeFrom: start, rangeTo: end },
+      }));
+      cy.contains('opbeans-java');
       cy.get('[data-test-subj="headerFilterKuerybar"]').type('transaction.n');
-      // cy.get('[data-test-subj="transaction.name"]').click();
-      // cy.contains('transaction.name').click();
+      cy.contains('transaction.name');
+      cy.get('[data-test-subj="suggestionContainer"]').find('li').first().click();
+      cy.get('[data-test-subj="headerFilterKuerybar"]').type(':');
+      cy.get('[data-test-subj="suggestionContainer"]').find('li').first().click();
+      cy.get('[data-test-subj="suggestionContainer"]').realPress('{enter}')
+      cy.url().should('include', '&kuery=transaction.name')
     });
   });
 });

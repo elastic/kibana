@@ -108,7 +108,6 @@ function Suggestion(props) {
       selected={props.selected}
       onClick={() => props.onClick(props.suggestion)}
       onMouseEnter={props.onMouseEnter}
-      data-test-subj={props.suggestion.text}
     >
       <Icon type={props.suggestion.type}>
         <EuiIcon type={getEuiIconType(props.suggestion.type)} />
