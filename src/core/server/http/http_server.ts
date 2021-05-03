@@ -33,6 +33,7 @@ import {
   KibanaRouteOptions,
   KibanaRequestState,
   isSafeMethod,
+  RouterRoute,
 } from './router';
 import {
   SessionStorageCookieOptions,
@@ -52,6 +53,13 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouter: (router: IRouter) => void;
+  /**
+   * Add all the routes registered with `router` to HTTP server request listeners.
+   * Unlike `registerRouter`, this function allows routes to be registered even after the server
+   * has started listening for requests.
+   * @param router {@link IRouter} - a router with registered route handlers.
+   */
+  registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
@@ -114,6 +122,17 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
+  private registerRouterAfterListening(router: IRouter) {
+    if (this.isListening()) {
+      for (const route of router.getRoutes()) {
+        this.configureRoute(route);
+      }
+    } else {
+      // Not listening yet, add to set of registeredRouters so that it can be added after listening has started.
+      this.registeredRouters.add(router);
+    }
+  }
+
   public async setup(config: HttpConfig): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
@@ -130,6 +149,7 @@ export class HttpServer {
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
@@ -170,45 +190,7 @@ export class HttpServer {
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
-        this.log.debug(`registering route handler for [${route.path}]`);
-        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-        const { authRequired, tags, body = {}, timeout } = route.options;
-        const { accepts: allow, maxBytes, output, parse } = body;
-
-        const kibanaRouteOptions: KibanaRouteOptions = {
-          xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
-        };
-
-        this.server.route({
-          handler: route.handler,
-          method: route.method,
-          path: route.path,
-          options: {
-            auth: this.getAuthOption(authRequired),
-            app: kibanaRouteOptions,
-            tags: tags ? Array.from(tags) : undefined,
-            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
-            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
-            // validation applied in ./http_tools#getServerOptions
-            // (All NP routes are already required to specify their own validation in order to access the payload)
-            validate,
-            // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
-            payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
-              ? {
-                  allow,
-                  maxBytes,
-                  output,
-                  parse,
-                  timeout: timeout?.payload,
-                  multipart: true,
-                }
-              : undefined,
-            timeout: {
-              socket: timeout?.idleSocket ?? this.config!.socketTimeout,
-            },
-          },
-        });
+        this.configureRoute(route);
       }
     }
 
@@ -484,6 +466,48 @@ export class HttpServer {
         },
       },
       options: { auth: false },
+    });
+  }
+
+  private configureRoute(route: RouterRoute) {
+    this.log.debug(`registering route handler for [${route.path}]`);
+    // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+    const validate = isSafeMethod(route.method) ? undefined : { payload: true };
+    const { authRequired, tags, body = {}, timeout } = route.options;
+    const { accepts: allow, maxBytes, output, parse } = body;
+
+    const kibanaRouteOptions: KibanaRouteOptions = {
+      xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+    };
+
+    this.server!.route({
+      handler: route.handler,
+      method: route.method,
+      path: route.path,
+      options: {
+        auth: this.getAuthOption(authRequired),
+        app: kibanaRouteOptions,
+        tags: tags ? Array.from(tags) : undefined,
+        // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+        // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+        // validation applied in ./http_tools#getServerOptions
+        // (All NP routes are already required to specify their own validation in order to access the payload)
+        validate,
+        // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
+        payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
+          ? {
+              allow,
+              maxBytes,
+              output,
+              parse,
+              timeout: timeout?.payload,
+              multipart: true,
+            }
+          : undefined,
+        timeout: {
+          socket: timeout?.idleSocket ?? this.config!.socketTimeout,
+        },
+      },
     });
   }
 }
