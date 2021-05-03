@@ -120,5 +120,6 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:backgroundColor': string;
   'labs:canvas:enable_ui': boolean;
+  'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
 }
