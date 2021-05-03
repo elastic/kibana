@@ -10,10 +10,10 @@ import { BrowserDownload } from '../';
 import { CaptureConfig } from '../../../server/types';
 import { LevelLogger } from '../../lib';
 import { HeadlessChromiumDriverFactory } from './driver_factory';
-import { paths } from './paths';
+import { ChromiumArchivePaths } from './paths';
 
 export const chromium: BrowserDownload = {
-  paths,
+  paths: new ChromiumArchivePaths(),
   createDriverFactory: (binaryPath: string, captureConfig: CaptureConfig, logger: LevelLogger) =>
     new HeadlessChromiumDriverFactory(binaryPath, captureConfig, logger),
 };
@@ -32,3 +32,5 @@ export const getDisallowedOutgoingUrlError = (interceptedUrl: string) =>
       values: { interceptedUrl },
     })
   );
+
+export { ChromiumArchivePaths };

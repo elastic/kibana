@@ -6,4 +6,4 @@
  */
 
 export { SchemaAddFieldModal } from './schema_add_field_modal';
-export { SchemaExistingField } from './schema_existing_field';
+export { SchemaFieldTypeSelect } from './field_type_select';
