@@ -28,7 +28,7 @@ import { createSecuritySolutionStorageMock, localStorageMock } from './mock_loca
 const state: State = mockGlobalState;
 
 interface Props {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
 }
