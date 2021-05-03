@@ -30,7 +30,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     // TODO: Remove when vislib is removed
-    describe.only('new charts library', function () {
+    describe('new charts library', function () {
       this.tags('ciGroup7');
 
       before(() => update(false));
@@ -39,11 +39,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       [
         // Test replaced vislib chart types
-        './_line_chart_split_series',
         './_line_chart_split_chart',
         './_point_series_options',
         './_vertical_bar_chart',
         './_vertical_bar_chart_nontimeindex',
+        './_line_chart_split_series',
       ].forEach(load);
     });
 
