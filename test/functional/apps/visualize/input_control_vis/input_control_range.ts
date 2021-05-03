@@ -15,11 +15,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const security = getService('security');
+  const PageObjects = getPageObjects(['visualize']);
 
   const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
 
   describe('input control range', () => {
     before(async () => {
+      await PageObjects.visualize.initTests();
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       await esArchiver.load('kibana_sample_data_flights_index_pattern');
       await visualize.navigateToNewVisualization();

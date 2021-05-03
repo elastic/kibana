@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create and delete', function () {
       before(async function () {
+        await PageObjects.visualize.initTests();
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.deleteAllVisualizations();
       });

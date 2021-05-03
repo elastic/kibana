@@ -15,6 +15,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
 
   describe('dynamic options', () => {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
+
     describe('without chained controls', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('visualize');

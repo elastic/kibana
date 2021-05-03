@@ -28,6 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
+
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
+
     beforeEach(async () => {
       await security.testUser.setRoles(
         ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],

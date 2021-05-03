@@ -9,14 +9,16 @@
 import { FtrProviderContext } from '../../../ftr_provider_context.d';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getPageObjects, getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const PageObjects = getPageObjects(['visualize']);
 
   describe('visualize with legacy visualizations', () => {
     before(async () => {
+      await PageObjects.visualize.initTests();
       log.debug('Starting visualize legacy before method');
       await browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');

@@ -34,6 +34,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
 
   describe('area charts', function indexPatternCreation() {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
     const initAreaChart = async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
