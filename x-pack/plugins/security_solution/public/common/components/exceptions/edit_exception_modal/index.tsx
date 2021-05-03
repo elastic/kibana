@@ -53,6 +53,7 @@ import {
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import { OsTypeArray, OsType } from '../../../../../../lists/common/schemas';
 
 interface EditExceptionModalProps {
   ruleName: string;
@@ -281,6 +282,21 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     return false;
   }, [maybeRule]);
 
+  const osDisplay = (osTypes: OsTypeArray): string => {
+    const translateOS = (currentOs: OsType): string => {
+      return currentOs === 'linux'
+        ? sharedI18n.OPERATING_SYSTEM_LINUX
+        : currentOs === 'macos'
+        ? sharedI18n.OPERATING_SYSTEM_MAC
+        : sharedI18n.OPERATING_SYSTEM_WINDOWS;
+    };
+    return osTypes
+      .reduce((osString, currentOs) => {
+        return `${translateOS(currentOs)}, ${osString}`;
+      }, '')
+      .slice(0, -2);
+  };
+
   return (
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
       <ModalHeader>
@@ -289,6 +305,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
             : i18n.EDIT_EXCEPTION_TITLE}
         </EuiModalHeaderTitle>
+        <EuiSpacer size="xs" />
         <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
           {ruleName}
         </ModalHeaderSubtitle>
@@ -314,6 +331,17 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiText size="xs">
+                    <dl>
+                      <dt>{sharedI18n.OPERATING_SYSTEM_LABEL}</dt>
+                      <dd>{osDisplay(exceptionItem.os_types)}</dd>
+                    </dl>
+                  </EuiText>
+                  <EuiSpacer />
+                </>
+              )}
               <ExceptionBuilder.ExceptionBuilderComponent
                 allowLargeValueLists={
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
@@ -328,6 +356,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 ruleName={ruleName}
                 isOrDisabled
                 isAndDisabled={false}
+                osTypes={exceptionItem.os_types}
                 isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"
@@ -359,7 +388,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               </EuiFormRow>
               {exceptionListType === 'endpoint' && (
                 <>
-                  <EuiSpacer />
+                  <EuiSpacer size="s" />
                   <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>

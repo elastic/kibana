@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useActions } from 'kea';
 
 import { EuiPageHeader, EuiPageContentBody } from '@elastic/eui';
 
@@ -15,8 +17,15 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { getEngineBreadcrumbs } from '../engine';
 
 import { SEARCH_UI_TITLE } from './constants';
+import { SearchUILogic } from './search_ui_logic';
 
 export const SearchUI: React.FC = () => {
+  const { loadFieldData } = useActions(SearchUILogic);
+
+  useEffect(() => {
+    loadFieldData();
+  }, []);
+
   return (
     <>
       <SetPageChrome trail={getEngineBreadcrumbs([SEARCH_UI_TITLE])} />

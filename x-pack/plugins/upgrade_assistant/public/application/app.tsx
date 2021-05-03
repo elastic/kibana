@@ -11,6 +11,7 @@ import { I18nStart, ScopedHistory } from 'src/core/public';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
 import { ComingSoonPrompt } from './components/coming_soon_prompt';
 import { EsDeprecationsContent } from './components/es_deprecations';
+import { KibanaDeprecationsContent } from './components/kibana_deprecations';
 import { DeprecationsOverview } from './components/overview';
 
 export interface AppDependencies extends ContextValue {
@@ -30,6 +31,7 @@ const App: React.FunctionComponent = () => {
     <Switch>
       <Route exact path="/overview" component={DeprecationsOverview} />
       <Route exact path="/es_deprecations/:tabName" component={EsDeprecationsContent} />
+      <Route exact path="/kibana_deprecations" component={KibanaDeprecationsContent} />
       <Redirect from="/" to="/overview" />
     </Switch>
   );

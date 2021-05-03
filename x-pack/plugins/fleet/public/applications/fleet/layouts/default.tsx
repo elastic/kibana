@@ -7,7 +7,14 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiPortal,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { Section } from '../sections';
@@ -58,11 +65,13 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   return (
     <>
       {modal === 'settings' && (
-        <SettingFlyout
-          onClose={() => {
-            setModal(null);
-          }}
-        />
+        <EuiPortal>
+          <SettingFlyout
+            onClose={() => {
+              setModal(null);
+            }}
+          />
+        </EuiPortal>
       )}
 
       <Container>
