@@ -244,6 +244,7 @@ export function DiscoverSidebar({
               fieldName,
               onDelete: async () => {
                 onEditRuntimeField();
+                setFieldCounts({});
               },
             });
             if (setFieldEditorRef) {
