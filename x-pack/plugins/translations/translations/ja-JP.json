@@ -8516,7 +8516,6 @@
     "xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail": "{strongNote} {title}をアンインストールできません。この統合を使用しているアクティブなエージェントがあります。アンインストールするには、エージェントポリシーからすべての{title}統合を削除します。",
     "xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel": "注：",
     "xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail": "{strongNote} {title}統合は既定でインストールされているため、削除できません。",
-    "xpack.fleet.integrations.settings.packageUninstallTitle": "{title}をアンインストール",
     "xpack.fleet.integrations.settings.packageVersionTitle": "{title}バージョン",
     "xpack.fleet.integrations.settings.versionInfo.installedVersion": "インストールされているバージョン",
     "xpack.fleet.integrations.settings.versionInfo.latestVersion": "最新バージョン",
