@@ -14,7 +14,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
 
 import { Result } from './result';
 import { ResultField } from './result_field';
@@ -45,9 +45,9 @@ describe('Result', () => {
   };
 
   const schema = {
-    title: 'text' as SchemaTypes,
-    description: 'text' as SchemaTypes,
-    length: 'number' as SchemaTypes,
+    title: SchemaType.Text,
+    description: SchemaType.Text,
+    length: SchemaType.Number,
   };
 
   it('renders', () => {
