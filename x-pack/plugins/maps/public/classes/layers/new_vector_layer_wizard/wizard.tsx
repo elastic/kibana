@@ -13,7 +13,6 @@ import { RenderWizardArguments } from '../layer_wizard_registry';
 import { VectorLayer } from '../vector_layer';
 import { ESSearchSource } from '../../sources/es_search_source';
 import { ADD_LAYER_STEP_ID } from '../../../connected_components/add_layer_panel/view';
-import { IndexNameFormProps } from '../../../../../file_upload/public';
 import { getIndexNameFormComponent } from '../../../kibana_services';
 
 interface State {
@@ -21,7 +20,6 @@ interface State {
   indexError: string;
   indexingTriggered: boolean;
   indexPatternId: string;
-  indexNameFormComponent: React.ComponentType<IndexNameFormProps> | null;
 }
 
 export class NewVectorLayerEditor extends Component<RenderWizardArguments, State> {
@@ -32,7 +30,6 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     indexError: '',
     indexingTriggered: false,
     indexPatternId: '',
-    indexNameFormComponent: null,
   };
 
   componentDidMount() {
