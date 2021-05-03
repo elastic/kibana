@@ -134,7 +134,7 @@ describe('actions', () => {
         'my_target_index',
         Option.none,
         false,
-        undefined
+        {}
       );
       try {
         await task();
