@@ -108,20 +108,21 @@ export const goToQueryTab = () => {
   cy.root()
     .pipe(($el) => {
       $el.find(QUERY_TAB_BUTTON).trigger('click');
-      return $el.find(TIMELINE_DATA_PROVIDERS);
+      return $el.find(QUERY_TAB_BUTTON);
     })
-    .should('be.visible');
+    .should('have.class', 'euiTab-isSelected');
 };
 
 export const addNotesToTimeline = (notes: string) => {
-  cy.intercept('PATCH', '/api/note').as('addNote');
+  cy.wait(150);
   goToNotesTab();
   cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.get(ADD_NOTE_BUTTON).pipe(($el) => $el.trigger('click'));
-  cy.wait('@addNote').then(({ response }) => {
-    cy.wrap(response!.statusCode).should('eql', 200);
-    cy.get(NOTE_BY_NOTE_ID(response!.body.data.persistNote.note.noteId)).should('be.visible');
-  });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_NOTE_BUTTON).trigger('click');
+      return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
+    })
+    .should('have.text', '1');
   goToQueryTab();
   goToNotesTab();
 };
