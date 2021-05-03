@@ -186,40 +186,56 @@ export const getColumns = ({
     name: i18n.VALUE,
     sortable: true,
     truncateText: false,
-    render: (values: string[] | null | undefined, data: EventFieldsData) => (
-      <FullWidthFlexGroup
-        direction="column"
-        alignItems="flexStart"
-        component="span"
-        gutterSize="none"
-      >
-        {values != null &&
-          values.map((value, i) => (
-            <FullWidthFlexItem
-              grow={false}
-              component="span"
-              key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-            >
-              <div data-colindex={3} onFocus={onFocusReFocusDraggable} role="button" tabIndex={0}>
-                {data.field === MESSAGE_FIELD_NAME ? (
-                  <OverflowField value={value} />
-                ) : (
-                  <FormattedFieldValue
-                    contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-                    eventId={eventId}
-                    fieldFormat={data.format}
-                    fieldName={data.field}
-                    fieldType={data.type}
-                    isObjectArray={data.isObjectArray}
-                    value={value}
-                    linkValue={getLinkValue(data.field)}
-                  />
-                )}
-              </div>
-            </FullWidthFlexItem>
-          ))}
-      </FullWidthFlexGroup>
-    ),
+    render: (values: string[] | null | undefined, data: EventFieldsData) => {
+      const fieldFromBrowserField = getFieldFromBrowserField(
+        [data.category, 'fields', data.field],
+        browserFields
+      );
+      return (
+        <FullWidthFlexGroup
+          direction="column"
+          alignItems="flexStart"
+          component="span"
+          gutterSize="none"
+        >
+          {values != null &&
+            values.map((value, i) => {
+              if (fieldFromBrowserField == null) {
+                return <EuiText size="s">{value}</EuiText>;
+              }
+              return (
+                <FullWidthFlexItem
+                  grow={false}
+                  component="span"
+                  key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                >
+                  <div
+                    data-colindex={3}
+                    onFocus={onFocusReFocusDraggable}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {data.field === MESSAGE_FIELD_NAME ? (
+                      <OverflowField value={value} />
+                    ) : (
+                      <FormattedFieldValue
+                        contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                        eventId={eventId}
+                        fieldFormat={data.format}
+                        fieldName={data.field}
+                        fieldType={data.type}
+                        isObjectArray={data.isObjectArray}
+                        value={value}
+                        linkValue={getLinkValue(data.field)}
+                      />
+                    )}
+                  </div>
+                </FullWidthFlexItem>
+              );
+            })}
+        </FullWidthFlexGroup>
+      );
+    },
   },
   {
     field: 'valuesConcatenated',
