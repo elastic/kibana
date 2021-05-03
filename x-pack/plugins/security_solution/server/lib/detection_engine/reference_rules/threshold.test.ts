@@ -62,50 +62,52 @@ describe('Threshold alerts', () => {
     dependencies.registry.registerType(thresholdAlertType);
 
     const params = {
-      eqlQuery: '*:*',
       indexPatterns: ['*'],
+      customQuery: '*:*',
+      thresholdFields: ['source.ip', 'host.name'],
+      thresholdValue: 4,
     };
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          total: {
-            relation: 'eq',
-            value: 0,
+    services.scopedClusterClient.asCurrentUser.search
+      .mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          hits: {
+            hits: [],
+            total: {
+              relation: 'eq',
+              value: 0,
+            },
           },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
-
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
+          took: 0,
+          timed_out: false,
+          _shards: {
+            failed: 0,
+            skipped: 0,
+            successful: 1,
+            total: 1,
+          },
+        })
+      )
+      .mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          hits: {
+            hits: [],
+            total: {
+              relation: 'eq',
+              value: 0,
+            },
+          },
           aggregations: mockThresholdResults.rawResponse.body.aggregations,
-          total: {
-            relation: 'eq',
-            value: 0,
+          took: 0,
+          timed_out: false,
+          _shards: {
+            failed: 0,
+            skipped: 0,
+            successful: 1,
+            total: 1,
           },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+        })
+      );
 
     await executor({ params });
     expect(services.alertInstanceFactory).toBeCalled();

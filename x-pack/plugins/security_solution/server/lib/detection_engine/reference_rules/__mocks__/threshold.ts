@@ -27,9 +27,9 @@ export const mockThresholdResults = {
             {
               key: '127.0.0.1',
               doc_count: 5,
-              buckets: [
-                {
-                  'threshold_1:host.name': {
+              'threshold_1:host.name': {
+                buckets: [
+                  {
                     key: 'tardigrade',
                     doc_count: 3,
                     top_threshold_hits: {
@@ -50,8 +50,8 @@ export const mockThresholdResults = {
                       value: 3,
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
           ],
         },
