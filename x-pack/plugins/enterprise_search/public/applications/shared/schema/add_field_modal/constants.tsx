@@ -10,6 +10,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+export const FORM_ID = 'schemaAddFieldForm';
+
 export const ADD_FIELD_MODAL_TITLE = i18n.translate(
   'xpack.enterpriseSearch.schema.addFieldModal.title',
   { defaultMessage: 'Add a new field' }

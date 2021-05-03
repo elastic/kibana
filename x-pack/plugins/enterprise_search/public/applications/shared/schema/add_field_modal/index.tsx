@@ -32,6 +32,7 @@ import {
   ADD_FIELD_MODAL_TITLE,
   ADD_FIELD_MODAL_DESCRIPTION,
   ADD_FIELD_BUTTON,
+  FORM_ID,
   FIELD_NAME_PLACEHOLDER,
   FIELD_NAME_CORRECT_NOTE,
   FIELD_NAME_CORRECTED_NOTE,
@@ -78,65 +79,64 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
 
   return (
     <EuiModal onClose={closeAddFieldModal} maxWidth={500}>
-      <form onSubmit={submitForm}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{ADD_FIELD_MODAL_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <p>{ADD_FIELD_MODAL_DESCRIPTION}</p>
-          <EuiForm>
-            <EuiSpacer />
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <EuiFormRow
-                  label={FIELD_NAME}
-                  helpText={fieldNameNote}
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{ADD_FIELD_MODAL_TITLE}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <p>{ADD_FIELD_MODAL_DESCRIPTION}</p>
+        <EuiSpacer />
+        <EuiForm component="form" id={FORM_ID} onSubmit={submitForm}>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <EuiFormRow
+                label={FIELD_NAME}
+                helpText={fieldNameNote}
+                fullWidth
+                data-test-subj="SchemaAddFieldNameRow"
+                error={addFieldFormErrors}
+                isInvalid={!!addFieldFormErrors}
+              >
+                <EuiFieldText
+                  placeholder={FIELD_NAME_PLACEHOLDER}
+                  type="text"
+                  onChange={handleChange}
+                  required
+                  value={rawFieldName}
                   fullWidth
-                  data-test-subj="SchemaAddFieldNameRow"
-                  error={addFieldFormErrors}
-                  isInvalid={!!addFieldFormErrors}
-                >
-                  <EuiFieldText
-                    placeholder={FIELD_NAME_PLACEHOLDER}
-                    type="text"
-                    onChange={handleChange}
-                    required
-                    value={rawFieldName}
-                    fullWidth
-                    autoFocus
-                    isLoading={loading}
-                    data-test-subj="SchemaAddFieldNameField"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow label={FIELD_TYPE} data-test-subj="SchemaAddFieldTypeRow">
-                  <SchemaFieldTypeSelect
-                    fieldName=""
-                    fieldType={newFieldType}
-                    updateExistingFieldType={(_, type: SchemaType) => updateNewFieldType(type)}
-                    disabled={disableForm}
-                    data-test-subj="SchemaSelect"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiForm>
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeAddFieldModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
-          <EuiButton
-            color="primary"
-            fill
-            disabled={disableForm}
-            type="submit"
-            isLoading={loading}
-            data-test-subj="SchemaAddFieldAddFieldButton"
-          >
-            {ADD_FIELD_BUTTON}
-          </EuiButton>
-        </EuiModalFooter>
-      </form>
+                  autoFocus
+                  isLoading={loading}
+                  data-test-subj="SchemaAddFieldNameField"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow label={FIELD_TYPE} data-test-subj="SchemaAddFieldTypeRow">
+                <SchemaFieldTypeSelect
+                  fieldName=""
+                  fieldType={newFieldType}
+                  updateExistingFieldType={(_, type: SchemaType) => updateNewFieldType(type)}
+                  disabled={disableForm}
+                  data-test-subj="SchemaSelect"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={closeAddFieldModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButton
+          color="primary"
+          fill
+          disabled={disableForm}
+          type="submit"
+          form={FORM_ID}
+          isLoading={loading}
+          data-test-subj="SchemaAddFieldAddFieldButton"
+        >
+          {ADD_FIELD_BUTTON}
+        </EuiButton>
+      </EuiModalFooter>
     </EuiModal>
   );
 };

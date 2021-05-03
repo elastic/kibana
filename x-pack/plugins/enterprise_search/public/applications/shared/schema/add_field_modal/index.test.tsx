@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow, mount } from 'enzyme';
 
-import { EuiFieldText, EuiModal } from '@elastic/eui';
+import { EuiForm, EuiFieldText, EuiModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SchemaFieldTypeSelect } from '../index';
@@ -87,7 +87,7 @@ describe('SchemaAddFieldModal', () => {
   it('handles form submission', () => {
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     const preventDefault = jest.fn();
-    wrapper.find('form').simulate('submit', { preventDefault });
+    wrapper.find(EuiForm).simulate('submit', { preventDefault });
 
     expect(addNewField).toHaveBeenCalled();
     expect(setState).toHaveBeenCalled();
