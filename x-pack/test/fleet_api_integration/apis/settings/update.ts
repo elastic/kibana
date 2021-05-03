@@ -39,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('fleet/empty_fleet_server');
     });
 
-    it('should explicetly set port on fleet_server_hosts', async function () {
+    it('should explicitly set port on fleet_server_hosts', async function () {
       await supertest
         .put(`/api/fleet/settings`)
         .set('kbn-xsrf', 'xxxx')
