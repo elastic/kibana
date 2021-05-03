@@ -341,6 +341,7 @@ export class AlertingPlugin {
       alertTypeRegistry: this.alertTypeRegistry!,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
+      ephemeralTasksPerCycle: plugins.taskManager.getEphemeralTasksPerCycle(),
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

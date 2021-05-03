@@ -54,6 +54,7 @@ export interface CreateExecutionHandlerOptions<
   request: KibanaRequest;
   alertParams: AlertTypeParams;
   supportsEphemeralTasks: boolean;
+  ephemeralTasksPerCycle: number;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -90,6 +91,7 @@ export function createExecutionHandler<
   request,
   alertParams,
   supportsEphemeralTasks,
+  ephemeralTasksPerCycle,
 }: CreateExecutionHandlerOptions<
   Params,
   State,
@@ -151,6 +153,7 @@ export function createExecutionHandler<
     const tasks: EphemeralTask[] = [];
     const eventLogsExecutors = [];
 
+    let actionsQueued = 0;
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     for (const action of actions) {
       if (
@@ -165,7 +168,7 @@ export function createExecutionHandler<
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
 
-      if (supportsEphemeralTasks) {
+      if (supportsEphemeralTasks && actionsQueued++ < ephemeralTasksPerCycle) {
         eventLogsExecutors.push(logToEventLog);
         tasks.push({
           taskType: `actions:${action.actionTypeId}`,

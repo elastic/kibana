@@ -44,7 +44,7 @@ export type TaskManagerStartContract = Pick<
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
-  } & { supportsEphemeralTasks: () => boolean };
+  } & { supportsEphemeralTasks: () => boolean; getEphemeralTasksPerCycle: () => number };
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
@@ -184,6 +184,7 @@ export class TaskManagerPlugin
       ephemeralRunNow: (tasks: EphemeralTask[], options?: Record<string, unknown>) =>
         taskScheduling.ephemeralRunNow(tasks),
       supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled,
+      getEphemeralTasksPerCycle: () => this.config.ephemeral_tasks.max_per_cycle,
     };
   }
 

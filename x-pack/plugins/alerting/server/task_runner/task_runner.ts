@@ -188,6 +188,7 @@ export class TaskRunner<
       request: this.getFakeKibanaRequest(spaceId, apiKey),
       alertParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
+      ephemeralTasksPerCycle: this.context.ephemeralTasksPerCycle,
     });
   }
 
