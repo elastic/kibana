@@ -117,6 +117,125 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
       );
     });
+
+    it('should ensure alerts are rescheduled and ran properly', async () => {
+      const nonEphemeralTasks = 3;
+      const actionPromises = [];
+      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + nonEphemeralTasks; i++) {
+        actionPromises.push(
+          supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: `My action${i}`,
+              connector_type_id: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200)
+        );
+      }
+      const createdActions = await Promise.all(actionPromises);
+      createdActions.forEach((createdAction) =>
+        objectRemover.add(Spaces.space1.id, createdAction.body.id, 'action', 'actions')
+      );
+
+      const pattern = {
+        instance: [true, true, true, false, true, true],
+      };
+      const { body: createdAlert1 } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            rule_type_id: 'test.patternFiring',
+            params: { pattern },
+            schedule: { interval: '1s' },
+            throttle: null,
+            notify_when: 'onActiveAlert',
+            actions: createdActions.map((createdAction) => {
+              return {
+                id: createdAction.body.id,
+                group: 'default',
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference: 'one',
+                  message: 'test message1',
+                },
+              };
+            }),
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert1.id, 'rule', 'alerting');
+      const { body: createdAlert2 } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            rule_type_id: 'test.patternFiring',
+            params: { pattern },
+            schedule: { interval: '1s' },
+            throttle: null,
+            notify_when: 'onActiveAlert',
+            actions: [
+              {
+                id: createdActions[0].body.id,
+                group: 'default',
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference: 'two',
+                  message: 'test message2',
+                },
+              },
+            ],
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert2.id, 'rule', 'alerting');
+
+      const events1 = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert1.id,
+          provider: 'alerting',
+          actions: new Map([
+            ['execute-action', { gte: nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE }],
+          ]),
+        });
+      });
+
+      const events2 = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert2.id,
+          provider: 'alerting',
+          actions: new Map([['execute-action', { gte: 2 }]]),
+        });
+      });
+
+      const executeActionsEvents1 = getEventsByAction(events1, 'execute-action');
+      const executeActionsEvents2 = getEventsByAction(events2, 'execute-action');
+      expect(executeActionsEvents1.length).equal(
+        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
+      );
+      expect(executeActionsEvents2.length).equal(2);
+
+      const searchResult1 = await esTestIndexTool.search('action:test.index-record', 'one');
+      const searchResult2 = await esTestIndexTool.search('action:test.index-record', 'two');
+      expect(searchResult1.hits.total.value).greaterThan(
+        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
+      );
+      expect(searchResult2.hits.total.value).equal(2);
+    });
   });
 }
 
