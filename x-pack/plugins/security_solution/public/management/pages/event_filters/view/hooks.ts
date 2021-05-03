@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 
 import {
   isCreationSuccessful,
-  getFormEntry,
+  getFormEntryStateMutable,
   getActionError,
   getCurrentLocation,
 } from '../store/selector';
@@ -43,7 +43,7 @@ export function useEventFiltersSelector<R>(selector: (state: EventFiltersListPag
 export const useEventFiltersNotification = () => {
   const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
   const actionError = useEventFiltersSelector(getActionError);
-  const formEntry = useEventFiltersSelector(getFormEntry);
+  const formEntry = useEventFiltersSelector(getFormEntryStateMutable);
   const toasts = useToasts();
   const [wasAlreadyHandled] = useState(new WeakSet());
 

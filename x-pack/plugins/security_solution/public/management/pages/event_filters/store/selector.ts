@@ -24,6 +24,7 @@ export const getFormEntryState: EventFiltersSelector<StoreState['form']['entry']
   return state.form.entry;
 };
 
+// Needed for form component as we modify the existing entry on exceptuionBuilder component
 export const getFormEntryStateMutable = (
   state: EventFiltersListPageState
 ): EventFiltersListPageState['form']['entry'] => {
