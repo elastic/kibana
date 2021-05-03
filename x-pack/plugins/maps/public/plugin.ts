@@ -21,6 +21,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
+  setAsyncComponents,
   setEMSSettings,
   setKibanaCommonConfig,
   setKibanaVersion,
@@ -169,6 +170,7 @@ export class MapsPlugin
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
+    setAsyncComponents();
 
     if (core.application.capabilities.maps.show) {
       plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);

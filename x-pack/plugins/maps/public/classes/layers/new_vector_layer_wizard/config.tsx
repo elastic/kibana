@@ -8,14 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { NewVectorLayerEditor } from './index';
+import { NewVectorLayerEditor } from './wizard';
 import { DrawLayerIcon } from '../../layers/icons/draw_layer_icon';
 import { getFileUpload } from '../../../kibana_services';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common';
 
 const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 
 export const newVectorLayerWizardConfig: LayerWizard = {
-  categories: [],
+  categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
     defaultMessage: 'Draw points, lines, and polygons to create or edit documents',
   }),

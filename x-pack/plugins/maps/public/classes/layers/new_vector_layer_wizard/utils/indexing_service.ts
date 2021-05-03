@@ -6,10 +6,10 @@
  */
 
 import { getHttp } from '../../../../kibana_services';
-import { INDEX_SOURCE_API_PATH } from '../../../../../common';
+import { CreateDocSourceResp, INDEX_SOURCE_API_PATH } from '../../../../../common';
 
 export const createNewIndexAndPattern = async (indexName: string) => {
-  return await getHttp().fetch({
+  return await getHttp().fetch<CreateDocSourceResp>({
     path: `/${INDEX_SOURCE_API_PATH}`,
     method: 'POST',
     body: convertObjectToBlob({

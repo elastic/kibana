@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { NewVectorLayerEditor } from './wizard';
+export { newVectorLayerWizardConfig } from './config';

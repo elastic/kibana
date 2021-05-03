@@ -9,12 +9,12 @@ import React, { Component, Fragment } from 'react';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createNewIndexAndPattern } from './utils/indexing_service';
-import { getFileUpload } from '../../../kibana_services';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { VectorLayer } from '../vector_layer';
 import { ESSearchSource } from '../../sources/es_search_source';
 import { ADD_LAYER_STEP_ID } from '../../../connected_components/add_layer_panel/view';
 import { IndexNameFormProps } from '../../../../../file_upload/public';
+import { getIndexNameFormComponent } from '../../../kibana_services';
 
 interface State {
   indexName: string;
@@ -37,37 +37,28 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadIndexNameFormComponent();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async _loadIndexNameFormComponent() {
-    if (this._isMounted) {
-      this.setState({
-        indexNameFormComponent: await getFileUpload().getIndexNameFormComponent(),
-      });
-    }
-  }
-
   async componentDidUpdate() {
-    const { enableNextBtn, disableNextBtn } = this.props;
-    if (this.state.indexName && !this.state.indexError) {
-      enableNextBtn();
-    } else {
-      disableNextBtn();
-    }
     if (this.props.currentStepId === ADD_LAYER_STEP_ID && !this.state.indexingTriggered) {
       this.setState({ indexingTriggered: true });
       await this._createNewIndex();
+      if (!this._isMounted) {
+        return;
+      }
       this.props.advanceToNextStep();
     }
   }
 
   _createNewIndex = async () => {
     const { indexPatternId } = await createNewIndexAndPattern(this.state.indexName);
+    if (!this._isMounted) {
+      return;
+    }
     // Creates empty layer
     const sourceDescriptor = ESSearchSource.createDescriptor({
       indexPatternId,
@@ -81,11 +72,25 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     this.props.previewLayers([layerDescriptor]);
   };
 
+  _onIndexChange = (indexName: string, indexError?: string) => {
+    this.setState(
+      {
+        indexName,
+        ...(indexError ? { indexError } : { indexError: '' }),
+      },
+      () => {
+        const { enableNextBtn, disableNextBtn } = this.props;
+        if (this.state.indexName && !this.state.indexError) {
+          enableNextBtn();
+        } else {
+          disableNextBtn();
+        }
+      }
+    );
+  };
+
   render() {
-    if (!this.state.indexNameFormComponent) {
-      return null;
-    }
-    const IndexNameForm = this.state.indexNameFormComponent;
+    const IndexNameForm = getIndexNameFormComponent();
     return (
       <EuiPanel>
         <>
@@ -113,12 +118,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
           <IndexNameForm
             indexName={this.state.indexName}
             indexNameError={this.state.indexError}
-            onIndexNameChange={(indexName, indexError) => {
-              this.setState({
-                indexName,
-                ...(indexError ? { indexError } : { indexError: '' }),
-              });
-            }}
+            onIndexNameChange={this._onIndexChange}
           />
         </>
       </EuiPanel>
