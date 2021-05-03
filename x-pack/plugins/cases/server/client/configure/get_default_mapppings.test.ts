@@ -11,7 +11,7 @@ import { createMockSavedObjectsRepository, mockCaseMappings } from '../../routes
 import { createCasesClientWithMockSavedObjectsClient } from '../mocks';
 import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
 import { actionsErrResponse, mappings, mockGetFieldsResponse } from './mock';
-describe('get_fields', () => {
+describe('get_default_mappings', () => {
   const execute = jest.fn().mockReturnValue(mockGetFieldsResponse);
   const actionsMock = { ...actionsClientMock.create(), execute };
   beforeEach(async () => {
@@ -24,14 +24,12 @@ describe('get_fields', () => {
         caseMappingsSavedObject: mockCaseMappings,
       });
       const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await casesClient.client.getFields({
+      const res = await casesClient.client.getDefaultMappings({
         actionsClient: actionsMock,
         connectorType: ConnectorTypes.jira,
         connectorId: '123',
       });
-      expect(res).toEqual({
-        defaultMappings: mappings[ConnectorTypes.jira],
-      });
+      expect(res).toEqual(mappings[ConnectorTypes.jira]);
     });
   });
 
@@ -42,7 +40,7 @@ describe('get_fields', () => {
       });
       const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       await casesClient.client
-        .getFields({
+        .getDefaultMappings({
           actionsClient: { ...actionsMock, execute: jest.fn().mockReturnValue(actionsErrResponse) },
           connectorType: ConnectorTypes.jira,
           connectorId: '123',

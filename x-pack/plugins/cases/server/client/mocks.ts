@@ -26,7 +26,7 @@ export const createExternalCasesClientMock = (): CasesClientPluginContractMock =
   get: jest.fn(),
   push: jest.fn(),
   getAlerts: jest.fn(),
-  getFields: jest.fn(),
+  getDefaultMappings: jest.fn(),
   getMappings: jest.fn(),
   getUserActions: jest.fn(),
   update: jest.fn(),

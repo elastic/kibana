@@ -259,6 +259,7 @@ export const prepareFieldsForTransformation = ({
   mappings.reduce(
     (acc: PipedField[], mapping) =>
       mapping != null &&
+      mapping.target != null && // TODO put warning if no target
       mapping.target !== 'not_mapped' &&
       mapping.action_type !== 'nothing' &&
       mapping.source !== 'comments'

@@ -23,9 +23,9 @@ describe('client/configure/utils', () => {
     });
   });
   describe('createDefaultMapping', () => {
-    formatFieldsTestData.forEach(({ expected, fields, type }) => {
+    formatFieldsTestData.forEach(({ type }) => {
       it(`normalizes ${type} fields to common type ConnectorField`, () => {
-        const result = createDefaultMapping(expected, type);
+        const result = createDefaultMapping(type);
         expect(result).toEqual(mappings[type]);
       });
     });

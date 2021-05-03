@@ -9,8 +9,7 @@ import Boom from '@hapi/boom';
 
 import { ConnectorTypes, GetDefaultMappingsResponse } from '../../../common';
 import { ConfigureFields } from '../types';
-import { createDefaultMapping, mapSwimlaneFields, SwimlaneGetFieldsResponse } from './utils';
-import { ActionResult } from '../../../../actions/server';
+import { createDefaultMapping, mapSwimlaneFields, SwimlanePublicConfigurationType } from './utils';
 
 export const getDefaultMappings = async ({
   actionsClient,
@@ -19,11 +18,14 @@ export const getDefaultMappings = async ({
 }: ConfigureFields): Promise<GetDefaultMappingsResponse> => {
   let fields;
   if (connectorType === ConnectorTypes.swimlane) {
-    const results: ActionResult<SwimlaneGetFieldsResponse> = await actionsClient.get({
+    const results = await actionsClient.get({
       id: connectorId,
     });
+
     if (results.config && results.config.mappings) {
-      fields = mapSwimlaneFields(results.config.mappings);
+      fields = mapSwimlaneFields(
+        (results.config.mappings as unknown) as SwimlanePublicConfigurationType['mappings']
+      );
     } else {
       throw Boom.failedDependency('Something is wrong with the Swimlane connector field mappings.');
     }

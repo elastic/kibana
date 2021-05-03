@@ -10,10 +10,10 @@ import {
   JiraGetFieldsResponse,
   ResilientGetFieldsResponse,
   ServiceNowGetFieldsResponse,
-  SwimlaneGetFieldsResponse,
+  SwimlanePublicConfigurationType,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../actions/server/types';
-export { SwimlaneGetFieldsResponse };
+export { SwimlanePublicConfigurationType };
 const normalizeJiraFields = (jiraFields: JiraGetFieldsResponse): ConnectorField[] =>
   Object.keys(jiraFields).reduce<ConnectorField[]>(
     (acc, data) =>
@@ -65,7 +65,9 @@ export interface SwimlaneMappings {
   description?: string;
   comments?: string;
 }
-export const mapSwimlaneFields = (slFields: SwimlaneGetFieldsResponse): SwimlaneMappings => ({
+export const mapSwimlaneFields = (
+  slFields: SwimlanePublicConfigurationType['mappings']
+): SwimlaneMappings => ({
   title: slFields.alertNameConfig.id,
   description: slFields.commentsConfig?.id,
   comments: slFields.commentsConfig?.id,
