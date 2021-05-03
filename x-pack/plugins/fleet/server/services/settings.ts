@@ -79,13 +79,13 @@ export async function saveSettings(
   soClient: SavedObjectsClientContract,
   newData: Partial<Omit<Settings, 'id'>>
 ): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
+  const data = { ...newData };
+  if (data.fleet_server_hosts) {
+    data.fleet_server_hosts = data.fleet_server_hosts.map(normalizeFleetServerHost);
+  }
+
   try {
     const settings = await getSettings(soClient);
-
-    const data = { ...newData };
-    if (data.fleet_server_hosts) {
-      data.fleet_server_hosts = data.fleet_server_hosts.map(normalizeFleetServerHost);
-    }
 
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -102,7 +102,7 @@ export async function saveSettings(
       const defaultSettings = createDefaultSettings();
       const res = await soClient.create<SettingsSOAttributes>(GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, {
         ...defaultSettings,
-        ...newData,
+        ...data,
       });
 
       return {
