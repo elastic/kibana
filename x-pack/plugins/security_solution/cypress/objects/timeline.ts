@@ -17,6 +17,10 @@ export interface CompleteTimeline extends Timeline {
   filter: TimelineFilter;
 }
 
+export interface IndicatorMatchtimelineTemplate extends CompleteTimeline {
+  templateTimelineId: string;
+}
+
 export interface TimelineFilter {
   field: string;
   operator: string;
@@ -35,6 +39,15 @@ export const timeline: CompleteTimeline = {
   query: 'host.name: *',
   notes: 'Yes, the best timeline',
   filter,
+};
+
+export const indicatorMatchtimelineTemplate: IndicatorMatchtimelineTemplate = {
+  title: 'Security Timeline',
+  description: 'This is the best timeline',
+  query: 'host.name: *',
+  notes: 'Yes, the best timeline',
+  filter,
+  templateTimelineId: '92c07a47-7584-4f8c-8d19-79adb8a8beec',
 };
 
 export const caseTimeline: Timeline = {

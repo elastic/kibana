@@ -8,7 +8,12 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
 import { mockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
-import { CompleteTimeline, timeline } from './timeline';
+import {
+  CompleteTimeline,
+  timeline,
+  IndicatorMatchtimelineTemplate,
+  indicatorMatchtimelineTemplate,
+} from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
@@ -75,6 +80,7 @@ export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexField: string;
   type?: string;
   atomic?: string;
+  timeline: IndicatorMatchtimelineTemplate;
 }
 
 export interface MachineLearningRule {
@@ -316,7 +322,7 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
   type: 'file',
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-  timeline,
+  timeline: indicatorMatchtimelineTemplate,
   maxSignals: 100,
 };
 

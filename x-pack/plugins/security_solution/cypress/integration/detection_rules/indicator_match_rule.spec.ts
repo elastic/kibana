@@ -54,10 +54,19 @@ import {
   TIMELINE_FIELD,
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
+import {
+  COLUMNS,
+  COLUMN_TEXT,
+  HEADER_GROUP,
+  HEADER_TEXT,
+  INDICATOR_MATCH_ROW_RENDER,
+  PROVIDER_BADGE,
+} from '../../screens/timeline';
 
 import {
   expandFirstAlert,
   goToManageAlertsDetectionRules,
+  investigateFirstAlertInTimeline,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
@@ -75,6 +84,7 @@ import {
   checkDuplicatedRule,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
+import { createIndicatorMatchTimelineTemplate } from '../../tasks/api_calls/timelines';
 import { cleanKibana, reload } from '../../tasks/common';
 import {
   createAndActivateRule,
@@ -484,6 +494,65 @@ describe('indicator match', () => {
           .first()
           .should('have.text', newThreatIndicatorRule.severity.toLowerCase());
         cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThreatIndicatorRule.riskScore);
+      });
+    });
+
+    describe('Investigate alert in timeline', () => {
+      const expectedFieldsColumns = [
+        'threat.indicator.matched.type',
+        'threat.indicator.matched.field',
+        'threat.indicator.matched.atomic',
+      ];
+
+      const expectedFieldsText = [
+        newThreatIndicatorRule.type,
+        newThreatIndicatorRule.indicatorMappingField,
+        newThreatIndicatorRule.atomic,
+      ];
+
+      before(() => {
+        cleanKibana();
+        createIndicatorMatchTimelineTemplate(newThreatIndicatorRule.timeline);
+        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        goToManageAlertsDetectionRules();
+        createCustomIndicatorRule(newThreatIndicatorRule);
+        reload();
+        goToRuleDetails();
+        waitForAlertsToPopulate();
+        investigateFirstAlertInTimeline();
+      });
+
+      it('Displays the custom data providers', () => {
+        cy.get(PROVIDER_BADGE).should(
+          'have.text',
+          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"threat.indicator.matched.type: "${newThreatIndicatorRule.type}"`
+        );
+      });
+
+      it('Displays the custom columns', () => {
+        cy.get(HEADER_GROUP)
+          .eq(1)
+          .within(() => {
+            cy.get(HEADER_TEXT).should('have.length', expectedFieldsColumns.length);
+            expectedFieldsColumns.forEach((field, index) => {
+              cy.get(HEADER_TEXT).eq(index).should('have.text', field);
+            });
+          });
+      });
+
+      it('Displays the data of the custom columns', () => {
+        cy.get(COLUMNS).within(() => {
+          expectedFieldsText.forEach((field, index) => {
+            cy.get(COLUMN_TEXT).eq(index).should('have.text', field);
+          });
+        });
+      });
+
+      it('Displays the indicator match row render', () => {
+        cy.get(INDICATOR_MATCH_ROW_RENDER).should(
+          'have.text',
+          'threat.indicator.matched.fieldmyhash.mysha256Press enter for options, or press space to begin dragging.matchedmyhash.mysha256a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3Press enter for options, or press space to begin dragging.threat.indicator.matched.typefilePress enter for options, or press space to begin dragging.fromthreat.indicator.event.datasetthreatintel.abusemalwarePress enter for options, or press space to begin dragging.:threat.indicator.event.referencehttps://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/(opens in a new tab or window)Press enter for options, or press space to begin dragging.'
+        );
       });
     });
 
