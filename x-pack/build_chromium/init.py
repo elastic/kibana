@@ -1,6 +1,6 @@
 import os, platform, sys
 from os import path
-from build_util import runcmd, mkdir, md5_file, configure_environment
+from build_util import runcmd, mkdir
 
 # This is a cross-platform initialization script which should only be run
 # once per environment, and isn't intended to be run directly. You should
@@ -44,6 +44,3 @@ if not path.isdir(chromium_dir):
   runcmd('fetch chromium --nohooks=1 --no-history=1')
 else:
   print('Directory exists: ' + chromium_dir + '. Skipping chromium fetch.')
-
-# This depends on having the chromium/src directory with the complete checkout
-configure_environment(arch_name, build_path, src_path)

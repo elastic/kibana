@@ -87,6 +87,7 @@
     { "path": "./x-pack/plugins/licensing/tsconfig.json" },
     { "path": "./x-pack/plugins/logstash/tsconfig.json" },
     { "path": "./x-pack/plugins/maps/tsconfig.json" },
+    { "path": "./x-pack/plugins/metrics_entities/tsconfig.json" },
     { "path": "./x-pack/plugins/ml/tsconfig.json" },
     { "path": "./x-pack/plugins/monitoring/tsconfig.json" },
     { "path": "./x-pack/plugins/observability/tsconfig.json" },
