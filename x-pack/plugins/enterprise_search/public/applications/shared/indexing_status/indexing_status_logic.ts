@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { flashAPIErrors } from '../flash_messages';
 import { HttpLogic } from '../http';
-import { IIndexingStatus } from '../types';
+import { IIndexingStatus } from '../schema/types';
 
 interface IndexingStatusProps {
   statusPath: string;
