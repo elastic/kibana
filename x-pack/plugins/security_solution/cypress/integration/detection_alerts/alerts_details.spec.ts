@@ -37,13 +37,16 @@ describe('Alert details with unmapped fields', () => {
     expandFirstAlert();
   });
   it('Displays the unmapped field on the JSON view', () => {
-    const expectedUnmappedField = { line: 33, text: '  "unmapped": "This is the unmapped field"' };
+    const expectedUnmappedField = { line: 2, text: '  "unmapped": "This is the unmapped field"' };
 
     openJsonView();
     scrollJsonViewToBottom();
 
-    cy.get(JSON_LINES)
-      .eq(expectedUnmappedField.line)
-      .should('have.text', expectedUnmappedField.text);
+    cy.get(JSON_LINES).then((elements) => {
+      const length = elements.length;
+      cy.wrap(elements)
+        .eq(length - expectedUnmappedField.line)
+        .should('have.text', expectedUnmappedField.text);
+    });
   });
 });
