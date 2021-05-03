@@ -18,7 +18,6 @@ import { outputService } from './output';
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 
@@ -40,14 +39,7 @@ async function createSetupSideEffects(
 ): Promise<SetupStatus> {
   const [defaultOutput] = await Promise.all([
     outputService.ensureDefaultOutput(soClient),
-    settingsService.getSettings(soClient).catch((e: any) => {
-      if (e.isBoom && e.output.statusCode === 404) {
-        const defaultSettings = createDefaultSettings();
-        return settingsService.saveSettings(soClient, defaultSettings);
-      }
-
-      return Promise.reject(e);
-    }),
+    settingsService.settingsSetup(soClient),
   ]);
 
   await awaitIfFleetServerSetupPending();

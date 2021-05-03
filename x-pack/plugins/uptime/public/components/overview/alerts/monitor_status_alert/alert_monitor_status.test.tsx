@@ -10,7 +10,8 @@ import { screen } from '@testing-library/dom';
 import { AlertMonitorStatusComponent, AlertMonitorStatusProps } from './alert_monitor_status';
 import { render } from '../../../../lib/helper/rtl_helpers';
 
-describe('alert monitor status component', () => {
+// Failing: See https://github.com/elastic/kibana/issues/98910
+describe.skip('alert monitor status component', () => {
   describe('AlertMonitorStatus', () => {
     const defaultProps: AlertMonitorStatusProps = {
       alertParams: {

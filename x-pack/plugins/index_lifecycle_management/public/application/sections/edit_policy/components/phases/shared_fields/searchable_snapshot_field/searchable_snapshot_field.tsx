@@ -25,31 +25,60 @@ export interface Props {
   canBeDisabled?: boolean;
 }
 
-const geti18nTexts = (phase: Props['phase']) => ({
-  title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
-    defaultMessage: 'Searchable snapshot',
-  }),
-  description:
-    phase === 'frozen' ? (
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.searchableSnapshotFieldDescription"
-        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. To reduce costs, only a cache of the snapshot is mounted in the frozen tier. {learnMoreLink}"
-        values={{
-          learnMoreLink: (
-            <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
-          ),
-        }}
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
-        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. {learnMoreLink}"
-        values={{
-          learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
-        }}
-      />
-    ),
-});
+const geti18nTexts = (phase: Props['phase']) => {
+  switch (phase) {
+    // Hot and cold phases both create fully mounted snapshots.
+    case 'hot':
+    case 'cold':
+      return {
+        title: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.title',
+          {
+            defaultMessage: 'Searchable snapshot',
+          }
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
+            defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. You can reduce the number of replicas and rely on the snapshot for resiliency. {learnMoreLink}"
+            values={{
+              learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
+            }}
+          />
+        ),
+        toggleLabel: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.toggleLabel',
+          { defaultMessage: 'Convert to fully-mounted index' }
+        ),
+      };
+
+    // Frozen phase creates a partially mounted snapshot.
+    case 'frozen':
+      return {
+        title: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.title',
+          {
+            defaultMessage: 'Searchable snapshot',
+          }
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.partiallyMountedSearchableSnapshotField.description"
+            defaultMessage="Convert to a partially-mounted index that caches the index metadata. Data is retrieved from the snapshot as needed to process search requests. This minimizes the index footprint while keeping all of your data fully searchable. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
+              ),
+            }}
+          />
+        ),
+        toggleLabel: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.toggleLabel',
+          { defaultMessage: 'Convert to partially-mounted index' }
+        ),
+      };
+  }
+};
 
 export const SearchableSnapshotField: FunctionComponent<Props> = ({
   phase,
@@ -228,7 +257,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Force merge, shrink, read only and freeze actions are not allowed when searchable snapshots are enabled in this phase.',
+                'Force merge, shrink, read only, and freeze actions are not allowed when converting data to a fully-mounted index in this phase.',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"
@@ -273,10 +302,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
               disabled: isDisabledDueToLicense,
               onChange: setIsFieldToggleChecked,
               'data-test-subj': 'searchableSnapshotToggle',
-              label: i18n.translate(
-                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-                { defaultMessage: 'Create searchable snapshot' }
-              ),
+              label: i18nTexts.toggleLabel,
             }
           : undefined
       }
