@@ -118,9 +118,9 @@ GET /.kibana-event-log*/_search
   },
   "runtime_mappings": { <3>
     "event.duration_in_seconds": {
-      "type": "long",
+      "type": "double",
       "script": {
-        "source": "emit(doc['event.duration'].value / 1000000000)"
+        "source": "emit(doc['event.duration'].value / 1E9)"
       }
     }
   },
@@ -128,7 +128,8 @@ GET /.kibana-event-log*/_search
     "ruleIdsByExecutionDuration": {
       "histogram": {
         "field": "event.duration_in_seconds",
-        "interval": 10 <4>
+        "min_doc_count": 1,
+        "interval": 1 <4>
       },
       "aggs": {
         "ruleId": {
@@ -154,7 +155,7 @@ GET /.kibana-event-log*/_search
 <1> This queries for rules executed in the last day. Update the values of `lte` and `gte` to query over a different time range.
 <2> Use `event.provider: actions` to query for long-running action executions.
 <3> Execution durations are stored as nanoseconds. This adds a runtime field to convert that duration into seconds.
-<4> This interval buckets the event.duration_in_seconds runtime field into 10 second intervals. Update this value to change the granularity of the buckets. If you are unable to use runtime fields, make sure this aggregation targets `event.duration` and use nanoseconds for the interval.
+<4> This interval buckets the event.duration_in_seconds runtime field into 1 second intervals. Update this value to change the granularity of the buckets. If you are unable to use runtime fields, make sure this aggregation targets `event.duration` and use nanoseconds for the interval.
 <5> This retrieves the top 10 rule ids for this duration interval. Update this value to retrieve more rule ids.
 
 This query returns the following:
@@ -172,7 +173,7 @@ This query returns the following:
   },
   "hits" : {
     "total" : {
-      "value" : 204,
+      "value" : 326,
       "relation" : "eq"
     },
     "max_score" : null,
@@ -207,31 +208,7 @@ This query returns the following:
           }
         },
         {
-          "key" : 1.0E10,
-          "doc_count" : 0,
-          "ruleId" : {
-            "doc_count" : 0,
-            "ruleId" : {
-              "doc_count_error_upper_bound" : 0,
-              "sum_other_doc_count" : 0,
-              "buckets" : [ ]
-            }
-          }
-        },
-        {
-          "key" : 2.0E10,
-          "doc_count" : 0,
-          "ruleId" : {
-            "doc_count" : 0,
-            "ruleId" : {
-              "doc_count_error_upper_bound" : 0,
-              "sum_other_doc_count" : 0,
-              "buckets" : [ ]
-            }
-          }
-        },
-        {
-          "key" : 3.0E10, <2>
+          "key" : 30.0, <2>
           "doc_count" : 6,
           "ruleId" : {
             "doc_count" : 6,
@@ -252,7 +229,7 @@ This query returns the following:
   }
 }
 --------------------------------------------------
-<1> Most rule execution durations fall within the first bucket (0 - 10 seconds).
-<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 40 seconds to execute.
+<1> Most rule execution durations fall within the first bucket (0 - 1 seconds).
+<2> A single rule with id `41893910-6bca-11eb-9e0d-85d233e3ee35` took between 30 and 31 seconds to execute.
 
 Use the <<get-rule-api,Get Rule API>> to retrieve additional information about rules that take a long time to execute.
