@@ -108,8 +108,11 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
   };
 };
 
-export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
-  HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
+export const formatHostItem = (bucket: HostAggEsItem | undefined): HostItem => {
+  if (bucket == null) {
+    return {};
+  }
+  return HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
       if (fieldName === '_id') {
@@ -123,6 +126,7 @@ export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
     }
     return flattenedFields;
   }, {});
+};
 
 const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | string[] | null => {
   const aggField = hostFieldsMap[fieldName]
@@ -145,11 +149,6 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
   } else if (has(`${aggField}.buckets`, bucket)) {
     return getFirstItem(get(`${aggField}`, bucket));
   } else if (['host.name', 'host.os.name', 'host.os.version', 'endpoint.id'].includes(fieldName)) {
-    // if (fieldName === 'endpoint.id') {
-    //   console.log('### here we go ###');
-    //   console.log('getHostFieldValue', fieldName, aggField, JSON.stringify(bucket));
-    //   console.log(get('endpoint_id.value.buckets[0].key', bucket));
-    // }
     switch (fieldName) {
       case 'host.name':
         return get('key', bucket) || null;
@@ -199,14 +198,11 @@ export const getHostEndpoint = async (
       logger,
       savedObjectsClient,
     };
-
+    const includeAgentData = false;
     const endpointData =
       id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
-        ? await getHostData(metadataRequestContext, id)
+        ? await getHostData(metadataRequestContext, id, undefined, includeAgentData)
         : null;
-
-    console.log('----endpointData-----', id);
-    console.log(JSON.stringify(endpointData));
 
     return endpointData != null && endpointData.metadata
       ? {

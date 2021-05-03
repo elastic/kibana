@@ -10,7 +10,6 @@ import { get } from 'lodash/fp';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   HostAggEsData,
-  HostAggEsItem,
   HostDetailsStrategyResponse,
   HostsQueries,
   HostDetailsRequestOptions,
@@ -38,7 +37,7 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
       endpointContext: EndpointAppContext;
     }
   ): Promise<HostDetailsStrategyResponse> => {
-    const aggregations: HostAggEsItem = get('aggregations', response.rawResponse);
+    const aggregations = get('aggregations', response.rawResponse);
 
     const inspect = {
       dsl: [inspectStringifyObject(buildHostDetailsQuery(options))],
@@ -51,6 +50,6 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
           : formattedHostItem.endpoint.id
         : null;
     const endpoint: EndpointFields | null = await getHostEndpoint(ident, deps);
-    return { ...response, inspect, hostDetails: { ...formattedHostItem, ...endpoint } };
+    return { ...response, inspect, hostDetails: { ...formattedHostItem, endpoint } };
   },
 };

@@ -191,7 +191,6 @@ export async function countInactiveAgents(
 export async function getAgentById(esClient: ElasticsearchClient, agentId: string) {
   const agentNotFoundError = new AgentNotFoundError(`Agent ${agentId} not found`);
   try {
-    console.log('--------', AGENTS_INDEX, agentId);
     const agentHit = await esClient.get<FleetServerAgent>({
       index: AGENTS_INDEX,
       id: agentId,
@@ -204,7 +203,6 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
 
     return agent;
   } catch (err) {
-    console.log('--------crud error ----', err);
     if (isESClientError(err) && err.meta.statusCode === 404) {
       throw agentNotFoundError;
     }
