@@ -19,7 +19,7 @@ yarn build --help
 === Building OS packages
 
 Packages are built using fpm, dpkg, and rpm, and Docker.  Package building has only been tested on Linux and is not supported on any other platform.
-Docker installation instructions can be found at https://docs.docker.com/engine/install/[Install Docker Engine]]
+Docker installation instructions can be found at https://docs.docker.com/engine/install/[Install Docker Engine].
 
 [source,bash]
 ----
