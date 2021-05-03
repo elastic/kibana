@@ -13,6 +13,7 @@ import {
   EuiDataGridProps,
   EuiDataGridColumn,
   EuiLink,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
@@ -93,7 +94,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const { data: allResultsData, isSuccess } = useAllResults({
+  const { data: allResultsData, isFetched } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -215,7 +216,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [actionId, endDate, startDate]
   );
 
-  if (isSuccess && !columns.length) {
+  if (!aggregations.totalResponded) {
+    return <EuiLoadingContent lines={5} />;
+  }
+
+  if (aggregations.totalResponded && isFetched && !allResultsData?.edges.length) {
     return <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />;
   }
 
