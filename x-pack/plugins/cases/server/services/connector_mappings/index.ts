@@ -13,7 +13,7 @@ import {
   SavedObjectsFindResponse,
 } from 'kibana/server';
 
-import { ConnectorMappings, SavedObjectFindOptions } from '../../../common/api';
+import { ConnectorMappings, SavedObjectFindOptions } from '../../../common';
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../saved_object_types';
 
 interface ClientArgs {
