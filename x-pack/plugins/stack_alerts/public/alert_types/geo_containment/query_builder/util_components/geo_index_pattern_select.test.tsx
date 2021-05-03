@@ -9,6 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { GeoIndexPatternSelect } from './geo_index_pattern_select';
 import { IndexPatternsContract } from 'src/plugins/data/public';
+import { HttpSetup } from 'kibana/public';
 
 class MockIndexPatternSelectComponent extends React.Component {
   render() {
@@ -35,8 +36,8 @@ const mockIndexPatternService: IndexPatternsContract = ({
 
 test('should render without error after mounting', async () => {
   const component = shallow(
-    // @ts-expect-error
     <GeoIndexPatternSelect
+      http={({} as unknown) as HttpSetup}
       onChange={() => {}}
       value={'foobar_with_geopoint'}
       includedGeoTypes={['geo_point']}
@@ -45,19 +46,17 @@ test('should render without error after mounting', async () => {
     />
   );
 
-  // componentDidMount has async check
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      expect(component).toMatchSnapshot();
-      resolve(true);
-    }, 1);
-  });
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
+  expect(component).toMatchSnapshot();
 });
 
 test('should render with error when index pattern does not have geo_point field', async () => {
   const component = shallow(
-    // @ts-expect-error
     <GeoIndexPatternSelect
+      http={({} as unknown) as HttpSetup}
       onChange={() => {}}
       value={'foobar_without_geopoint'}
       includedGeoTypes={['geo_point']}
