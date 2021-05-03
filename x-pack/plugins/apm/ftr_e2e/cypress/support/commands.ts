@@ -39,3 +39,20 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.contains(value).click();
 });
+
+Cypress.Commands.add(
+  'expectAPIsToHaveBeenCalledWith',
+  ({
+    apisIntercepted,
+    value,
+  }: {
+    apisIntercepted: string[];
+    value: string;
+  }) => {
+    cy.wait(apisIntercepted).then((interceptions) => {
+      interceptions.map((interception) => {
+        expect(interception.request.url).include(value);
+      });
+    });
+  }
+);
