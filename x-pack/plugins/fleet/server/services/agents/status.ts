@@ -91,7 +91,7 @@ export async function getAgentStatusForAgentPolicy(
     offline: offline.total,
     updating: updating.total,
     other: all.total - online.total - error.total - offline.total,
-    // Deprecated Agent events do not exists anymore
+    /* @deprecated Agent events do not exists anymore */
     events: 0,
   };
 }
