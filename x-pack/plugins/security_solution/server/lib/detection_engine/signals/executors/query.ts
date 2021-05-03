@@ -21,7 +21,7 @@ import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { AlertAttributes, RuleRangeTuple } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { QueryRuleParams } from '../../schemas/rule_schemas';
+import { QueryRuleParams, SavedQueryRuleParams } from '../../schemas/rule_schemas';
 
 export const queryExecutor = async ({
   rule,
@@ -36,7 +36,7 @@ export const queryExecutor = async ({
   eventsTelemetry,
   buildRuleMessage,
 }: {
-  rule: SavedObject<AlertAttributes<QueryRuleParams>>;
+  rule: SavedObject<AlertAttributes<QueryRuleParams | SavedQueryRuleParams>>;
   tuples: RuleRangeTuple[];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];

@@ -14,6 +14,5 @@ export * from './functions';
 export * from './renderers';
 export * from './shortcuts';
 export * from './state';
-export * from './strategy';
 export * from './style';
 export * from './telemetry';

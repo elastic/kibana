@@ -23,6 +23,7 @@ import {
   exceptionListItemSchema,
 } from '../../../../common';
 import { AndOrBadge } from '../and_or_badge';
+import { OsTypeArray } from '../../../../common/schemas';
 
 import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
@@ -72,6 +73,7 @@ export interface ExceptionBuilderProps {
   autocompleteService: AutocompleteStart;
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
+  osTypes?: OsTypeArray;
   indexPatterns: IIndexPattern;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
@@ -85,6 +87,7 @@ export interface ExceptionBuilderProps {
   ) => IIndexPattern;
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
+  isDisabled?: boolean;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -102,6 +105,8 @@ export const ExceptionBuilderComponent = ({
   listTypeSpecificIndexPatternFilter,
   onChange,
   ruleName,
+  isDisabled = false,
+  osTypes,
 }: ExceptionBuilderProps): JSX.Element => {
   const [
     {
@@ -187,7 +192,6 @@ export const ExceptionBuilderComponent = ({
     (shouldAddNested: boolean): void => {
       dispatch({
         addNested: shouldAddNested,
-
         type: 'setAddNested',
       });
     },
@@ -342,6 +346,10 @@ export const ExceptionBuilderComponent = ({
     });
   }, [onChange, exceptionsToDelete, exceptions, errorExists]);
 
+  useEffect(() => {
+    setUpdateExceptions([]);
+  }, [osTypes, setUpdateExceptions]);
+
   // Defaults builder to never be sans entry, instead
   // always falls back to an empty entry if user deletes all
   useEffect(() => {
@@ -401,6 +409,8 @@ export const ExceptionBuilderComponent = ({
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
+                osTypes={osTypes}
+                isDisabled={isDisabled}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -417,8 +427,8 @@ export const ExceptionBuilderComponent = ({
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
               isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
-              isAndDisabled={disableAnd}
-              isNestedDisabled={disableNested}
+              isAndDisabled={isAndDisabled ? isAndDisabled : disableAnd}
+              isNestedDisabled={isNestedDisabled ? isNestedDisabled : disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}
