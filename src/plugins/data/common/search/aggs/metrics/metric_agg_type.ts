@@ -81,7 +81,9 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
     // split at this point if there are time shifts and this is the first metric
     this.splitForTimeShift = (agg, aggs) =>
-      aggs.hasTimeShifts() && aggs.byType(AggGroupNames.Metrics)[0] === agg;
+      aggs.hasTimeShifts() &&
+      aggs.byType(AggGroupNames.Metrics)[0] === agg &&
+      !aggs.byType(AggGroupNames.Buckets).some((bucketAgg) => bucketAgg.splitForTimeShift(aggs));
   }
 }
 
