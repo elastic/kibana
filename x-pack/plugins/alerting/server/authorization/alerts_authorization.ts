@@ -14,8 +14,13 @@ import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
-import { asKqlFiltersByRuleTypeAndConsumer, FilterFieldNames } from './alerts_authorization_kuery';
+import {
+  asFiltersByRuleTypeAndConsumer,
+  FilterFieldNames,
+  AlertingAuthorizationFilterType,
+} from './alerts_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
+import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 
 export enum AlertingAuthorizationTypes {
   Rule = 'rule',
@@ -256,9 +261,10 @@ export class AlertsAuthorization {
 
   public async getFindAuthorizationFilter(
     authorizationType: AlertingAuthorizationTypes,
+    filterType: AlertingAuthorizationFilterType,
     filterFieldNames: FilterFieldNames
   ): Promise<{
-    filter?: KueryNode;
+    filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
@@ -286,7 +292,7 @@ export class AlertsAuthorization {
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
-        filter: asKqlFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterFieldNames),
+        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterFieldNames, filterType),
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(

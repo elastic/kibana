@@ -51,6 +51,7 @@ import {
   WriteOperations,
   ReadOperations,
   AlertingAuthorizationTypes,
+  AlertingAuthorizationFilterType,
 } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
@@ -62,7 +63,7 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
+import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
@@ -460,6 +461,7 @@ export class AlertsClient {
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
         AlertingAuthorizationTypes.Rule,
+        AlertingAuthorizationFilterType.KQL,
         { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' }
       );
     } catch (error) {
@@ -545,10 +547,14 @@ export class AlertsClient {
         const {
           filter: authorizationFilter,
           logSuccessfulAuthorization,
-        } = await this.authorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
-          ruleTypeId: 'alert.attributes.alertTypeId',
-          consumer: 'alert.attributes.consumer',
-        });
+        } = await this.authorization.getFindAuthorizationFilter(
+          AlertingAuthorizationTypes.Rule,
+          AlertingAuthorizationFilterType.KQL,
+          {
+            ruleTypeId: 'alert.attributes.alertTypeId',
+            consumer: 'alert.attributes.consumer',
+          }
+        );
         const filter = options.filter
           ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
           : `alert.attributes.executionStatus.status:(${status})`;
@@ -556,7 +562,10 @@ export class AlertsClient {
           ...options,
           filter:
             (authorizationFilter && filter
-              ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter])
+              ? nodeBuilder.and([
+                  esKuery.fromKueryExpression(filter),
+                  authorizationFilter as KueryNode,
+                ])
               : authorizationFilter) ?? filter,
           page: 1,
           perPage: 0,
