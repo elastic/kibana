@@ -10,20 +10,31 @@ import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 import { RegistryAlertTypeWithAuth } from './alerts_authorization';
 
+enum FilterType {
+  KQL = 'kql',
+  ESDSL = 'dsl',
+}
+
+export interface FilterFieldNames {
+  ruleTypeId: string;
+  consumer: string;
+}
 // pass in the field name instead of hardcoding `alert.attributes.alertTypeId` and `alertTypeId`
-export function asFiltersByRuleTypeAndConsumer(
-  alertTypes: Set<RegistryAlertTypeWithAuth>
+function asFiltersByRuleTypeAndConsumer(
+  ruleTypes: Set<RegistryAlertTypeWithAuth>,
+  filterFieldNames: FilterFieldNames,
+  filterType: FilterType
 ): KueryNode {
-  return nodeBuilder.or(
-    Array.from(alertTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
-      ensureFieldIsSafeForQuery('alertTypeId', id);
+  const kueryNode = nodeBuilder.or(
+    Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
+      ensureFieldIsSafeForQuery('ruleTypeId', id);
       filters.push(
         nodeBuilder.and([
-          nodeBuilder.is(`alert.attributes.alertTypeId`, id),
+          nodeBuilder.is(filterFieldNames.ruleTypeId, id),
           nodeBuilder.or(
             Object.keys(authorizedConsumers).map((consumer) => {
               ensureFieldIsSafeForQuery('consumer', consumer);
-              return nodeBuilder.is(`alert.attributes.consumer`, consumer);
+              return nodeBuilder.is(filterFieldNames.consumer, consumer);
             })
           ),
         ])
@@ -31,6 +42,24 @@ export function asFiltersByRuleTypeAndConsumer(
       return filters;
     }, [])
   );
+
+  // console.log(`KUERY ${JSON.stringify(kueryNode)}`);
+
+  return kueryNode;
+}
+
+export function asKqlFiltersByRuleTypeAndConsumer(
+  ruleTypes: Set<RegistryAlertTypeWithAuth>,
+  filterFieldNames: FilterFieldNames
+): KueryNode {
+  return asFiltersByRuleTypeAndConsumer(ruleTypes, filterFieldNames, FilterType.KQL);
+}
+
+export function asEsDslFiltersByRuleTypeAndConsumer(
+  ruleTypes: Set<RegistryAlertTypeWithAuth>,
+  filterFieldNames: FilterFieldNames
+): KueryNode {
+  return asFiltersByRuleTypeAndConsumer(ruleTypes, filterFieldNames, FilterType.ESDSL);
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {

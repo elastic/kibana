@@ -7,14 +7,15 @@
 
 import { RecoveredActionGroup } from '../../common';
 import {
-  asFiltersByAlertTypeAndConsumer,
+  asKqlFiltersByRuleTypeAndConsumer,
   ensureFieldIsSafeForQuery,
 } from './alerts_authorization_kuery';
+import { esKuery } from '../../../../../src/plugins/data/server';
 
-describe('asFiltersByAlertTypeAndConsumer', () => {
-  test('constructs filter for single alert type with single authorized consumer', async () => {
+describe('asKqlFiltersByRuleTypeAndConsumer', () => {
+  test('constructs KQL filter for single rule type with single authorized consumer', async () => {
     expect(
-      asFiltersByAlertTypeAndConsumer(
+      asKqlFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -29,21 +30,20 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
             },
             enabledInLicense: true,
           },
-        ])
+        ]),
+        {
+          ruleTypeId: 'path.to.rule.id',
+          consumer: 'consumer-field',
+        }
       )
-    ).toMatchSnapshot();
-    // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
-    // resolved, we can start using this code again instead of toMatchSnapshot()
-    // ).toEqual(
-    //   esKuery.fromKueryExpression(
-    //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(myApp)))`
-    //   )
-    // );
+    ).toEqual(
+      esKuery.fromKueryExpression(`((path.to.rule.id:myAppAlertType and consumer-field:(myApp)))`)
+    );
   });
 
-  test('constructs filter for single alert type with multiple authorized consumer', async () => {
+  test('constructs KQL filter for single rule type with multiple authorized consumers', async () => {
     expect(
-      asFiltersByAlertTypeAndConsumer(
+      asKqlFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -60,21 +60,22 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
             },
             enabledInLicense: true,
           },
-        ])
+        ]),
+        {
+          ruleTypeId: 'path.to.rule.id',
+          consumer: 'consumer-field',
+        }
       )
-    ).toMatchSnapshot();
-    // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
-    // resolved, we can start using this code again, instead of toMatchSnapshot():
-    // ).toEqual(
-    //   esKuery.fromKueryExpression(
-    //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp)))`
-    //  )
-    // );
+    ).toEqual(
+      esKuery.fromKueryExpression(
+        `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp)))`
+      )
+    );
   });
 
-  test('constructs filter for multiple alert types across authorized consumer', async () => {
+  test('constructs KQL filter for multiple rule types across authorized consumer', async () => {
     expect(
-      asFiltersByAlertTypeAndConsumer(
+      asKqlFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -124,16 +125,17 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
             },
             enabledInLicense: true,
           },
-        ])
+        ]),
+        {
+          ruleTypeId: 'path.to.rule.id',
+          consumer: 'consumer-field',
+        }
       )
-    ).toMatchSnapshot();
-    // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
-    // resolved, we can start using this code again, instead of toMatchSnapshot():
-    // ).toEqual(
-    //   esKuery.fromKueryExpression(
-    //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-    //   )
-    // );
+    ).toEqual(
+      esKuery.fromKueryExpression(
+        `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+      )
+    );
   });
 });
 

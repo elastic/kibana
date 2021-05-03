@@ -24,6 +24,7 @@ import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_log
 import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryAlertType } from '../alert_type_registry';
+import { esKuery } from '../../../../../src/plugins/data/server';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -685,7 +686,10 @@ describe('AlertsAuthorization', () => {
       const {
         filter,
         ensureRuleTypeIsAuthorized,
-      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule);
+      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
+        ruleTypeId: 'ruleId',
+        consumer: 'consumer',
+      });
 
       expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
 
@@ -704,7 +708,11 @@ describe('AlertsAuthorization', () => {
       });
 
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
-        AlertingAuthorizationTypes.Rule
+        AlertingAuthorizationTypes.Rule,
+        {
+          ruleTypeId: 'ruleId',
+          consumer: 'consumer',
+        }
       );
 
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
@@ -737,20 +745,18 @@ describe('AlertsAuthorization', () => {
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-      // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
-      // resolved, we can start using this code again, instead of toMatchSnapshot():
-      //
-      // expect((await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule)).filter).toEqual(
-      //   esKuery.fromKueryExpression(
-      //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-      //   )
-      // );
-
-      // This code is the replacement code for above
-      // expect(
-      //   (await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule))
-      //     .filter
-      // ).toMatchSnapshot();
+      expect(
+        (
+          await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+          })
+        ).filter
+      ).toEqual(
+        esKuery.fromKueryExpression(
+          `((path.to.rule.id:myAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:mySecondAppAlertType and consumer-field:(myApp or myOtherApp or myAppWithSubFeature)))`
+        )
+      );
 
       expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
     });
@@ -804,7 +810,11 @@ describe('AlertsAuthorization', () => {
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
-        AlertingAuthorizationTypes.Alert
+        AlertingAuthorizationTypes.Alert,
+        {
+          ruleTypeId: 'ruleId',
+          consumer: 'consumer',
+        }
       );
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'alert');
@@ -875,7 +885,11 @@ describe('AlertsAuthorization', () => {
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
-        AlertingAuthorizationTypes.Rule
+        AlertingAuthorizationTypes.Rule,
+        {
+          ruleTypeId: 'ruleId',
+          consumer: 'consumer',
+        }
       );
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
@@ -949,7 +963,10 @@ describe('AlertsAuthorization', () => {
       const {
         ensureRuleTypeIsAuthorized,
         logSuccessfulAuthorization,
-      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule);
+      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
+        ruleTypeId: 'ruleId',
+        consumer: 'consumer',
+      });
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
         ensureRuleTypeIsAuthorized('mySecondAppAlertType', 'myOtherApp', 'rule');

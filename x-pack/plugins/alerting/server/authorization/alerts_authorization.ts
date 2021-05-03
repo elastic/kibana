@@ -8,14 +8,13 @@
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has, get } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
-import { asFiltersByRuleTypeAndConsumer } from './alerts_authorization_kuery';
+import { asKqlFiltersByRuleTypeAndConsumer, FilterFieldNames } from './alerts_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 
 export enum AlertingAuthorizationTypes {
@@ -256,7 +255,8 @@ export class AlertsAuthorization {
   }
 
   public async getFindAuthorizationFilter(
-    authorizationType: AlertingAuthorizationTypes
+    authorizationType: AlertingAuthorizationTypes,
+    filterFieldNames: FilterFieldNames
   ): Promise<{
     filter?: KueryNode;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
@@ -286,7 +286,7 @@ export class AlertsAuthorization {
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
-        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes),
+        filter: asKqlFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterFieldNames),
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
