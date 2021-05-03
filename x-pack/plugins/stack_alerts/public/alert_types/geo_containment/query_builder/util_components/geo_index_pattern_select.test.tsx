@@ -33,7 +33,7 @@ const mockIndexPatternService: IndexPatternsContract = ({
   },
 } as unknown) as IndexPatternsContract;
 
-test('should render without error after ', async () => {
+test('should render without error after mounting', async () => {
   const component = shallow(
     // @ts-expect-error
     <GeoIndexPatternSelect
