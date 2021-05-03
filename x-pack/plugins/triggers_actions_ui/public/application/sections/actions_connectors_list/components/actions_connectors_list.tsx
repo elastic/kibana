@@ -19,6 +19,7 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   Criteria,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
@@ -202,6 +203,22 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       render: (item: ActionConnectorTableItem) => {
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+            {item.isMissingSecrets ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  data-test-subj="fixConnectorButton"
+                  onClick={() => editItem(item, EditConectorTabs.Configuration)}
+                >
+                  {i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
+                    {
+                      defaultMessage: 'Fix',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
             <DeleteOperation
               canDelete={canDelete}
               item={item}
