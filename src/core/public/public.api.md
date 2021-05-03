@@ -619,6 +619,9 @@ export interface DocLinksStart {
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
             bulkIndexAlias: string;
+            byteSizeUnits: string;
+            createAutoFollowPattern: string;
+            createFollower: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
@@ -638,6 +641,7 @@ export interface DocLinksStart {
             putIndexTemplateV1: string;
             putWatch: string;
             simulatePipeline: string;
+            timeUnits: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;
@@ -1226,7 +1230,7 @@ export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
     find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
 // @public
@@ -1447,10 +1451,11 @@ export interface SavedObjectsStart {
 }
 
 // @public (undocumented)
-export interface SavedObjectsUpdateOptions {
-    migrationVersion?: SavedObjectsMigrationVersion;
+export interface SavedObjectsUpdateOptions<Attributes = unknown> {
     // (undocumented)
     references?: SavedObjectReference[];
+    // (undocumented)
+    upsert?: Attributes;
     // (undocumented)
     version?: string;
 }

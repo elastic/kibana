@@ -39,6 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         await visualBuilder.markdownSwitchSubTab('options');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.setDropLastBucket(true);
         await visualBuilder.markdownSwitchSubTab('markdown');
       });
 
