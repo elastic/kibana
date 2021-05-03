@@ -260,6 +260,6 @@ export const push = async (
       })
     );
   } catch (error) {
-    throw createCaseError({ message: 'Failed to push case', error, logger });
+    throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }
 };
