@@ -14,7 +14,12 @@ import {
   IndexPatternColumn,
   RequiredReference,
 } from './definitions';
-import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
+import type {
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+  IndexPatternPrivateState,
+} from '../types';
 import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
@@ -986,17 +991,36 @@ export function updateLayerIndexPattern(
  */
 export function getErrorMessages(
   layer: IndexPatternLayer,
-  indexPattern: IndexPattern
-): string[] | undefined {
-  const errors: string[] = Object.entries(layer.columns)
+  indexPattern: IndexPattern,
+  state: IndexPatternPrivateState,
+  layerId: string
+):
+  | Array<
+      | string
+      | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+    >
+  | undefined {
+  const errors: Array<
+    string | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+  > = Object.entries(layer.columns)
     .flatMap(([columnId, column]) => {
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
-        return def.getErrorMessage(layer, columnId, indexPattern);
+        return def.getErrorMessage(layer, columnId, indexPattern, state, layerId);
       }
     })
     // remove the undefined values
-    .filter((v: string | undefined): v is string => v != null);
+    .filter(
+      (
+        v:
+          | string
+          | undefined
+          | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+      ): v is
+        | string
+        | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } } =>
+        v != null
+    );
 
   return errors.length ? errors : undefined;
 }

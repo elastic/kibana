@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Query } from 'src/plugins/data/public';
 import { search } from '../../../../../../src/plugins/data/public';
-import { parseTimeShift } from '../../../../../../src/plugins/data/common';
+import { parseTimeShift, ShiftError } from '../../../../../../src/plugins/data/common';
 import { IndexPatternColumn, operationDefinitionMap } from '../operations';
 import { IndexPattern, IndexPatternLayer } from '../types';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
@@ -118,6 +118,7 @@ export function TimeShift({
   isFocused,
   activeData,
   layerId,
+  runtimeError,
 }: {
   selectedColumn: IndexPatternColumn;
   indexPattern: IndexPattern;
@@ -127,6 +128,7 @@ export function TimeShift({
   isFocused: boolean;
   activeData: IndexPatternDimensionEditorProps['activeData'];
   layerId: string;
+  runtimeError?: Error | undefined;
 }) {
   const [localValue, setLocalValue] = useState(selectedColumn.timeShift);
   useEffect(() => {
@@ -159,9 +161,35 @@ export function TimeShift({
     );
   }
 
+  function isValueNotMultiple(parsedValue: ReturnType<typeof parseTimeShift>) {
+    return (
+      dateHistogramInterval &&
+      parsedValue &&
+      typeof parsedValue === 'object' &&
+      !Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval.asMilliseconds())
+    );
+  }
+
+  function getRuntimeErrorReason() {
+    if (!(runtimeError instanceof ShiftError)) {
+      return undefined;
+    }
+    if (!runtimeError.aggIds.includes(columnId)) {
+      return undefined;
+    }
+    return runtimeError.reason;
+  }
+
   const parsedLocalValue = localValue && parseTimeShift(localValue);
-  const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
-  const isLocalValueInvalid = Boolean(parsedLocalValue === 'invalid' || localValueTooSmall);
+  const localValueTooSmall =
+    (parsedLocalValue && isValueTooSmall(parsedLocalValue)) ||
+    getRuntimeErrorReason() === 'tooSmall';
+  const localValueNotMultiple =
+    (parsedLocalValue && isValueNotMultiple(parsedLocalValue)) ||
+    getRuntimeErrorReason() === 'notAMultiple';
+  const isLocalValueInvalid = Boolean(
+    parsedLocalValue === 'invalid' || localValueTooSmall || localValueNotMultiple
+  );
 
   function getSelectedOption() {
     if (!localValue) return [];
@@ -196,11 +224,17 @@ export function TimeShift({
           defaultMessage: 'Time shift is specified by a number followed by a time unit',
         })}
         error={
-          localValueTooSmall &&
-          i18n.translate('xpack.lens.indexPattern.timeShift.tooSmallHelp', {
-            defaultMessage:
-              'Time shift has to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
-          })
+          localValueTooSmall
+            ? i18n.translate('xpack.lens.indexPattern.timeShift.tooSmallHelp', {
+                defaultMessage:
+                  'Time shift has to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
+              })
+            : localValueNotMultiple
+            ? i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
+                defaultMessage:
+                  'Time shift has to be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
+              })
+            : undefined
         }
         isInvalid={isLocalValueInvalid}
       >
@@ -214,13 +248,22 @@ export function TimeShift({
               placeholder={i18n.translate('xpack.lens.indexPattern.timeShiftPlaceholder', {
                 defaultMessage: 'Time shift (e.g. 1d)',
               })}
-              options={timeShiftOptions}
+              options={timeShiftOptions.filter(({ value }) => {
+                const parsedValue = parseTimeShift(value);
+                return (
+                  parsedValue && !isValueTooSmall(parsedValue) && !isValueNotMultiple(parsedValue)
+                );
+              })}
               selectedOptions={getSelectedOption()}
               singleSelection={{ asPlainText: true }}
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);
-                if (parsedVal !== 'invalid' && !isValueTooSmall(parsedVal)) {
+                if (
+                  parsedVal !== 'invalid' &&
+                  !isValueTooSmall(parsedVal) &&
+                  !isValueNotMultiple(parsedVal)
+                ) {
                   updateLayer(setTimeShift(columnId, layer, val));
                 } else {
                   setLocalValue(val);
@@ -234,7 +277,11 @@ export function TimeShift({
 
                 const choice = choices[0].value as string;
                 const parsedVal = parseTimeShift(choice);
-                if (parsedVal !== 'invalid' && !isValueTooSmall(parsedVal)) {
+                if (
+                  parsedVal !== 'invalid' &&
+                  !isValueTooSmall(parsedVal) &&
+                  !isValueNotMultiple(parsedVal)
+                ) {
                   updateLayer(setTimeShift(columnId, layer, choice));
                 } else {
                   setLocalValue(choice);

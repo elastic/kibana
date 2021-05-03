@@ -44,14 +44,15 @@ function wrapOnDot(str?: string) {
 export const IndexPatternDimensionTriggerComponent = function IndexPatternDimensionTrigger(
   props: IndexPatternDimensionTriggerProps
 ) {
+  const runtimeError = props.runtimeError;
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
   const { columnId, uniqueLabel } = props;
 
   const currentColumnHasErrors = useMemo(
-    () => isColumnInvalid(layer, columnId, currentIndexPattern),
-    [layer, columnId, currentIndexPattern]
+    () => isColumnInvalid(layer, columnId, currentIndexPattern, runtimeError),
+    [layer, columnId, currentIndexPattern, runtimeError]
   );
 
   const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] ?? null;

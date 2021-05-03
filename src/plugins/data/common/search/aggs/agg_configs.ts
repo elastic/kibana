@@ -30,6 +30,7 @@ import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { TimeRange, getTime, isRangeFilter } from '../../../common';
+import { ShiftError } from './utils';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -300,7 +301,27 @@ export class AggConfigs {
     const timeShiftInterval = config.getTimeShiftInterval();
     Object.entries(timeShifts).forEach(([key, shift]) => {
       if (timeShiftInterval && timeShiftInterval.asMilliseconds() > shift.asMilliseconds()) {
-        throw new Error('All time shifts need to be larger than underlying date interval');
+        const aggIds = this.getAll()
+          .filter((agg) => agg.getTimeShift()?.asMilliseconds() === shift.asMilliseconds())
+          .map((agg) => agg.id);
+        throw new ShiftError(
+          `All time shifts need to be larger than underlying date interval of ${timeShiftInterval.humanize()}`,
+          aggIds,
+          'tooSmall'
+        );
+      }
+      if (
+        timeShiftInterval &&
+        !Number.isInteger(shift.asMilliseconds() / timeShiftInterval.asMilliseconds())
+      ) {
+        const aggIds = this.getAll()
+          .filter((agg) => agg.getTimeShift()?.asMilliseconds() === shift.asMilliseconds())
+          .map((agg) => agg.id);
+        throw new ShiftError(
+          `All time shifts need to be a multiple of the underlying interval of ${timeShiftInterval.humanize()}`,
+          aggIds,
+          'notAMultiple'
+        );
       }
       filters[key] = {
         range: {

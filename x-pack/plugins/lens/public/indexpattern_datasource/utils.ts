@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ShiftError } from '../../../../../src/plugins/data/common';
 import { DataType } from '../types';
 import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
 import type {
@@ -49,7 +50,8 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
 export function isColumnInvalid(
   layer: IndexPatternLayer,
   columnId: string,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  runtimeError?: Error
 ) {
   const column: IndexPatternColumn | undefined = layer.columns[columnId];
   if (!column) return;
@@ -67,7 +69,14 @@ export function isColumnInvalid(
     indexPattern
   );
 
-  return (operationErrorMessages && operationErrorMessages.length > 0) || referencesHaveErrors;
+  const hasTimeShiftError =
+    runtimeError instanceof ShiftError && runtimeError.aggIds.includes(columnId);
+
+  return (
+    (operationErrorMessages && operationErrorMessages.length > 0) ||
+    referencesHaveErrors ||
+    hasTimeShiftError
+  );
 }
 
 function getReferencesErrors(

@@ -110,6 +110,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
     activeData: state.activeData,
+    runtimeError: state.lastRuntimeError,
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
@@ -366,6 +367,7 @@ export function EditorFrame(props: EditorFrameProps) {
               plugins={props.plugins}
               visualizeTriggerFieldContext={visualizeTriggerFieldContext}
               getSuggestionForField={getSuggestionForField}
+              hasRuntimeError={Boolean(state.lastRuntimeError)}
             />
           )
         }

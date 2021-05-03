@@ -38,7 +38,12 @@ import { countOperation, CountIndexPatternColumn } from './count';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
-import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
+import {
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+  IndexPatternPrivateState,
+} from '../../types';
 import { DateRange } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
@@ -222,8 +227,16 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   getErrorMessage?: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern: IndexPattern
-  ) => string[] | undefined;
+    indexPattern: IndexPattern,
+    // TODO - remove these again and remap the state on a higher level
+    state?: IndexPatternPrivateState,
+    layerId?: string
+  ) =>
+    | Array<
+        | string
+        | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+      >
+    | undefined;
 
   /*
    * Flag whether this operation can be scaled by time unit if a date histogram is available.
@@ -320,11 +333,18 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    * - Requires a date histogram operation somewhere before it in order
    * - Missing references
    */
-  getErrorMessage: (
+  getErrorMessage?: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern: IndexPattern
-  ) => string[] | undefined;
+    indexPattern: IndexPattern,
+    state?: IndexPatternPrivateState,
+    layerId?: string
+  ) =>
+    | Array<
+        | string
+        | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+      >
+    | undefined;
 }
 
 export interface RequiredReference {

@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiPageContentBody,
+  EuiButton,
 } from '@elastic/eui';
 import { CoreStart, ApplicationStart } from 'kibana/public';
 import {
@@ -74,12 +75,17 @@ export interface WorkspacePanelProps {
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
+  hasRuntimeError?: boolean;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
 }
 
 interface WorkspaceState {
-  expressionBuildError?: Array<{ shortMessage: string; longMessage: string }>;
+  expressionBuildError?: Array<{
+    shortMessage: string;
+    longMessage: string;
+    fixAction?: { label: string; newState: unknown };
+  }>;
   expandError: boolean;
 }
 
@@ -127,6 +133,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   title,
   visualizeTriggerFieldContext,
   suggestionForDraggedField,
+  hasRuntimeError,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -334,6 +341,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
         application={core.application}
+        hasRuntimeError={hasRuntimeError}
+        activeDatasourceId={activeDatasourceId}
       />
     );
   };
@@ -377,6 +386,8 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent,
   dispatch,
   application,
+  hasRuntimeError,
+  activeDatasourceId,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -385,11 +396,17 @@ export const VisualizationWrapper = ({
   dispatch: (action: Action) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
-    configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
+    configurationValidationError?: Array<{
+      shortMessage: string;
+      longMessage: string;
+      fixAction?: { label: string; newState: unknown };
+    }>;
     missingRefsErrors?: Array<{ shortMessage: string; longMessage: string }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;
+  hasRuntimeError?: boolean;
+  activeDatasourceId: string | null;
 }) => {
   const context: ExecutionContextSearch = useMemo(
     () => ({
@@ -467,6 +484,19 @@ export const VisualizationWrapper = ({
                 <p className="eui-textBreakWord" data-test-subj="configuration-failure-error">
                   {localState.configurationValidationError[0].longMessage}
                 </p>
+                {localState.configurationValidationError[0].fixAction && activeDatasourceId && (
+                  <EuiButton
+                    onClick={() => {
+                      dispatch({
+                        type: 'UPDATE_DATASOURCE_STATE',
+                        datasourceId: activeDatasourceId,
+                        updater: localState.configurationValidationError?.[0].fixAction?.newState,
+                      });
+                    }}
+                  >
+                    {localState.configurationValidationError[0].fixAction.label}
+                  </EuiButton>
+                )}
 
                 {showExtraErrors}
               </>
@@ -526,6 +556,7 @@ export const VisualizationWrapper = ({
   }
 
   if (localState.expressionBuildError?.length) {
+    const firstError = localState.expressionBuildError[0];
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -539,7 +570,7 @@ export const VisualizationWrapper = ({
                   />
                 </p>
 
-                <p>{localState.expressionBuildError[0].longMessage}</p>
+                <p>{firstError.longMessage}</p>
               </>
             }
             iconColor="danger"
@@ -562,6 +593,12 @@ export const VisualizationWrapper = ({
         onData$={onData$}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
+          if (!hasRuntimeError && error?.original) {
+            dispatch({
+              type: 'RUNTIME_ERROR',
+              error: error.original,
+            });
+          }
           const errorsFromRequest = getOriginalRequestErrorMessages(error);
           const visibleErrorMessages = errorsFromRequest.length
             ? errorsFromRequest

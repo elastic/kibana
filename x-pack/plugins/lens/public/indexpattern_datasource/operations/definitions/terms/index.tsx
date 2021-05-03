@@ -24,7 +24,7 @@ import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
-import type { IndexPatternLayer } from '../../../types';
+import type { IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 
 function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -50,7 +50,12 @@ function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
   );
 }
 
-function getInvalidNestingOrderMessage(layer: IndexPatternLayer, columnId: string) {
+function getInvalidNestingOrderMessage(
+  layer: IndexPatternLayer,
+  columnId: string,
+  state?: IndexPatternPrivateState,
+  layerId?: string
+) {
   const usesTimeShift = Object.values(layer.columns).some(
     (col) => col.timeShift && col.timeShift !== ''
   );
@@ -64,14 +69,41 @@ function getInvalidNestingOrderMessage(layer: IndexPatternLayer, columnId: strin
   if (!dateHistogramParent) {
     return undefined;
   }
-  return i18n.translate('xpack.lens.indexPattern.termsInShiftedDateHistogramError', {
-    defaultMessage:
-      'Date histogram "{dateLabel}" is grouped by before "{dimensionLabel}". When using time shifts, make sure to group by top values first.',
-    values: {
-      dateLabel: layer.columns[dateHistogramParent].label,
-      dimensionLabel: layer.columns[columnId].label,
-    },
-  });
+  return {
+    message: i18n.translate('xpack.lens.indexPattern.termsInShiftedDateHistogramError', {
+      defaultMessage:
+        'Date histogram "{dateLabel}" is grouped by before "{dimensionLabel}". When using time shifts, make sure to group by top values first.',
+      values: {
+        dateLabel: layer.columns[dateHistogramParent].label,
+        dimensionLabel: layer.columns[columnId].label,
+      },
+    }),
+    fixAction:
+      state && layerId
+        ? {
+            label: i18n.translate(
+              'xpack.lens.indexPattern.termsInShiftedDateHistogramFixActionLabel',
+              {
+                defaultMessage: 'Reorder dimensions',
+              }
+            ),
+            newState: {
+              ...state,
+              layers: {
+                ...state.layers,
+                [layerId]: {
+                  ...layer,
+                  columns: {
+                    ...layer.columns,
+                    [dateHistogramParent]: layer.columns[columnId],
+                    [columnId]: layer.columns[dateHistogramParent],
+                  },
+                },
+              },
+            },
+          }
+        : undefined,
+  };
 }
 
 const DEFAULT_SIZE = 3;
@@ -113,13 +145,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
-  getErrorMessage: (layer, columnId, indexPattern) =>
+  getErrorMessage: (layer, columnId, indexPattern, state, layerId) =>
     [
       ...(getInvalidFieldMessage(
         layer.columns[columnId] as FieldBasedIndexPatternColumn,
         indexPattern
       ) || []),
-      getInvalidNestingOrderMessage(layer, columnId) || '',
+      getInvalidNestingOrderMessage(layer, columnId, state, layerId) || '',
     ].filter(Boolean),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);

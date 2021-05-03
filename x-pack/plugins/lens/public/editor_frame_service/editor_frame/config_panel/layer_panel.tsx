@@ -357,6 +357,7 @@ export function LayerPanel(
                                   columnId: accessorConfig.columnId,
                                   groupId: group.groupId,
                                   filterOperations: group.filterOperations,
+                                  runtimeError: props.framePublicAPI.runtimeError,
                                 }}
                               />
                             </DimensionButton>
@@ -433,6 +434,7 @@ export function LayerPanel(
                   hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
                   dimensionGroups: groups,
+                  runtimeError: props.framePublicAPI.runtimeError,
                   setState: (
                     newState: unknown,
                     {

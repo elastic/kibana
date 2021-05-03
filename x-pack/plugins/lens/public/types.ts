@@ -236,7 +236,13 @@ export interface Datasource<T = unknown, P = unknown> {
   getErrorMessages: (
     state: T,
     layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>
-  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  ) =>
+    | Array<{
+        shortMessage: string;
+        longMessage: string;
+        fixAction?: { label: string; newState: T };
+      }>
+    | undefined;
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
@@ -289,6 +295,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  runtimeError?: Error;
 };
 
 // The only way a visualization has to restrict the query building
@@ -310,6 +317,7 @@ export interface DatasourceLayerPanelProps<T> {
   state: T;
   setState: StateSetter<T>;
   activeData?: Record<string, Datatable>;
+  runtimeError?: Error;
 }
 
 export interface DraggedOperation extends DraggingIdentifier {
@@ -510,6 +518,7 @@ export interface FramePublicAPI {
    * If accessing, make sure to check whether expected columns actually exist.
    */
   activeData?: Record<string, Datatable>;
+  runtimeError?: Error;
 
   dateRange: DateRange;
   query: Query;
@@ -682,7 +691,12 @@ export interface Visualization<T = unknown> {
   getErrorMessages: (
     state: T,
     datasourceLayers?: Record<string, DatasourcePublicAPI>
-  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  ) =>
+    | Array<{
+        shortMessage: string;
+        longMessage: string;
+      }>
+    | undefined;
 
   /**
    * The frame calls this function to display warnings about visualization
