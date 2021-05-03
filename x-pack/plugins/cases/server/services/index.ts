@@ -20,6 +20,7 @@ import {
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import {
+  ENABLE_CASE_CONNECTOR,
   ESCaseAttributes,
   CommentAttributes,
   SavedObjectFindOptions,
@@ -33,8 +34,7 @@ import {
   CaseResponse,
   caseTypeField,
   CasesFindRequest,
-} from '../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
+} from '../../common';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {
