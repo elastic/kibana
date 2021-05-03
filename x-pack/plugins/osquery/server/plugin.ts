@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -48,40 +46,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
     };
-
-    plugins.features.registerKibanaFeature({
-      id: 'osquery',
-      name: i18n.translate('xpack.osquery.featureRegistry.osqueryFeatureName', {
-        defaultMessage: 'Osquery',
-      }),
-      order: 4000,
-      category: DEFAULT_APP_CATEGORIES.management,
-      app: ['osquery', 'kibana'],
-      catalogue: ['osquery'],
-      // see x-pack/plugins/features/common/feature_kibana_privileges.ts
-      privileges: {
-        all: {
-          app: ['osquery', 'kibana'],
-          api: ['osquery', 'osquery_write'],
-          catalogue: ['osquery'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['show', 'save'],
-        },
-        read: {
-          app: ['osquery', 'kibana'],
-          api: ['osquery'],
-          catalogue: ['osquery'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: ['show'],
-        },
-      },
-    });
 
     initSavedObjects(core.savedObjects, osqueryContext);
     defineRoutes(router, osqueryContext);

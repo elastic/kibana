@@ -18,6 +18,7 @@
     ],
     "optionalPlugins": [
       "home",
+      "reporting",
       "usageCollection"
     ],
     "requiredBundles": [

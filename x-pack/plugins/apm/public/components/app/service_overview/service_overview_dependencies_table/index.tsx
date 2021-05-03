@@ -13,7 +13,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { keyBy } from 'lodash';
 import React from 'react';
+import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
@@ -32,6 +35,7 @@ import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
 import { SpanIcon } from '../../../shared/span_icon';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
@@ -39,12 +43,68 @@ interface Props {
   serviceName: string;
 }
 
+type ServiceDependencyPeriods = ServiceDependencyItem & {
+  latency: { previousPeriodTimeseries?: Coordinate[] };
+  throughput: { previousPeriodTimeseries?: Coordinate[] };
+  errorRate: { previousPeriodTimeseries?: Coordinate[] };
+  previousPeriodImpact?: number;
+};
+
+function mergeCurrentAndPreviousPeriods({
+  currentPeriod = [],
+  previousPeriod = [],
+}: {
+  currentPeriod?: ServiceDependencyItem[];
+  previousPeriod?: ServiceDependencyItem[];
+}): ServiceDependencyPeriods[] {
+  const previousPeriodMap = keyBy(previousPeriod, 'name');
+
+  return currentPeriod.map((currentDependency) => {
+    const previousDependency = previousPeriodMap[currentDependency.name];
+    if (!previousDependency) {
+      return currentDependency;
+    }
+    return {
+      ...currentDependency,
+      latency: {
+        ...currentDependency.latency,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.latency.timeseries,
+          previousPeriodTimeseries: previousDependency.latency?.timeseries,
+        }),
+      },
+      throughput: {
+        ...currentDependency.throughput,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.throughput.timeseries,
+          previousPeriodTimeseries: previousDependency.throughput?.timeseries,
+        }),
+      },
+      errorRate: {
+        ...currentDependency.errorRate,
+        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
+          currentPeriodTimeseries: currentDependency.errorRate.timeseries,
+          previousPeriodTimeseries: previousDependency.errorRate?.timeseries,
+        }),
+      },
+      previousPeriodImpact: previousDependency.impact,
+    };
+  });
+}
+
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end, environment },
+    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
   } = useUrlParams();
 
-  const columns: Array<EuiBasicTableColumn<ServiceDependencyItem>> = [
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
+
+  const columns: Array<EuiBasicTableColumn<ServiceDependencyPeriods>> = [
     {
       field: 'name',
       name: i18n.translate(
@@ -102,6 +162,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
+            comparisonSeries={
+              comparisonEnabled ? latency.previousPeriodTimeseries : undefined
+            }
             valueLabel={asMillisecondDuration(latency.value)}
           />
         );
@@ -121,6 +184,11 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             compact
             color="euiColorVis0"
             series={throughput.timeseries}
+            comparisonSeries={
+              comparisonEnabled
+                ? throughput.previousPeriodTimeseries
+                : undefined
+            }
             valueLabel={asTransactionRate(throughput.value)}
           />
         );
@@ -142,6 +210,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             compact
             color="euiColorVis7"
             series={errorRate.timeseries}
+            comparisonSeries={
+              comparisonEnabled ? errorRate.previousPeriodTimeseries : undefined
+            }
             valueLabel={asPercent(errorRate.value, 1)}
           />
         );
@@ -157,13 +228,28 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         }
       ),
       width: px(unit * 5),
-      render: (_, { impact }) => {
-        return <ImpactBar size="m" value={impact} />;
+      render: (_, { impact, previousPeriodImpact }) => {
+        return (
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem>
+              <ImpactBar value={impact} size="m" />
+            </EuiFlexItem>
+            {comparisonEnabled && previousPeriodImpact !== undefined && (
+              <EuiFlexItem>
+                <ImpactBar
+                  value={previousPeriodImpact}
+                  size="s"
+                  color="subdued"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
       },
       sortable: true,
     },
   ];
-
+  // Fetches current period dependencies
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -173,22 +259,41 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       return callApmApi({
         endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
         params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            environment,
-            numBuckets: 20,
-          },
+          path: { serviceName },
+          query: { start, end, environment, numBuckets: 20 },
         },
       });
     },
     [start, end, serviceName, environment]
   );
 
-  const serviceDependencies = data?.serviceDependencies ?? [];
+  // Fetches previous period dependencies
+  const { data: previousPeriodData, status: previousPeriodStatus } = useFetcher(
+    (callApmApi) => {
+      if (!comparisonStart || !comparisonEnd) {
+        return;
+      }
+
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        params: {
+          path: { serviceName },
+          query: {
+            start: comparisonStart,
+            end: comparisonEnd,
+            environment,
+            numBuckets: 20,
+          },
+        },
+      });
+    },
+    [comparisonStart, comparisonEnd, serviceName, environment]
+  );
+
+  const serviceDependencies = mergeCurrentAndPreviousPeriods({
+    currentPeriod: data?.serviceDependencies,
+    previousPeriod: previousPeriodData?.serviceDependencies,
+  });
 
   // need top-level sortable fields for the managed table
   const items = serviceDependencies.map((item) => ({
@@ -238,7 +343,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
               columns={columns}
               items={items}
               allowNeutralSort={false}
-              loading={status === FETCH_STATUS.LOADING}
+              loading={
+                status === FETCH_STATUS.LOADING ||
+                previousPeriodStatus === FETCH_STATUS.LOADING
+              }
               pagination={{
                 initialPageSize: 5,
                 pageSizeOptions: [5],

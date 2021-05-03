@@ -14,9 +14,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const inspector = getService('inspector');
-  const docTable = getService('docTable');
   const PageObjects = getPageObjects(['discover', 'common', 'timePicker', 'header', 'context']);
   const searchSessions = getService('searchSessions');
+  const retry = getService('retry');
 
   describe('discover async search', () => {
     before(async () => {
@@ -66,9 +66,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('navigation to context cleans the session', async () => {
       await PageObjects.common.clearAllToasts();
-      await docTable.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-      await rowActions[0].click();
+      const table = await PageObjects.discover.getDocTable();
+      const isLegacy = await PageObjects.discover.useLegacyTable();
+      await table.clickRowToggle({ rowIndex: 0 });
+
+      await retry.try(async () => {
+        const rowActions = await table.getRowActions({ rowIndex: 0 });
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        const idxToClick = isLegacy ? 0 : 1;
+        await rowActions[idxToClick].click();
+      });
+
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       await searchSessions.missingOrFail();
     });

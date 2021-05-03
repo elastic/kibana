@@ -12,8 +12,11 @@ In order to support Windows development we currently require you to use one of t
 - https://git-scm.com/download/win[Git bash] (other bash emulators like https://cmder.net/[Cmder] could work but we did not test them)
 - https://docs.microsoft.com/en-us/windows/wsl/about[WSL]
 
-Before running the steps listed below, please make sure you have installed Git bash or WSL and that 
-you are running the mentioned commands through one of them.
+As well as installing https://www.microsoft.com/en-us/download/details.aspx?id=48145[Visual C++ Redistributable for Visual Studio 2015].
+
+Before running the steps listed below, please make sure you have installed everything 
+that we require and listed above and that you are running the mentioned commands 
+through Git bash or WSL.
 
 [discrete]
 [[get-kibana-code]]

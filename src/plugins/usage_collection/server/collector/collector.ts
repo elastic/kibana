@@ -141,11 +141,11 @@ export type CollectorOptions<
       });
 
 export class Collector<TFetchReturn, ExtraOptions extends object = {}> {
-  public readonly extendFetchContext: CollectorOptionsFetchExtendedContext<any>;
-  public readonly type: CollectorOptions<TFetchReturn, any>['type'];
-  public readonly init?: CollectorOptions<TFetchReturn, any>['init'];
-  public readonly fetch: CollectorFetchMethod<any, TFetchReturn, ExtraOptions>;
-  public readonly isReady: CollectorOptions<TFetchReturn, any>['isReady'];
+  public readonly extendFetchContext: CollectorOptionsFetchExtendedContext<boolean>;
+  public readonly type: CollectorOptions<TFetchReturn, boolean>['type'];
+  public readonly init?: CollectorOptions<TFetchReturn, boolean>['init'];
+  public readonly fetch: CollectorFetchMethod<boolean, TFetchReturn, ExtraOptions>;
+  public readonly isReady: CollectorOptions<TFetchReturn, boolean>['isReady'];
   /**
    * @private Constructor of a Collector. It should be called via the CollectorSet factory methods: `makeStatsCollector` and `makeUsageCollector`
    * @param log {@link Logger}
@@ -160,7 +160,9 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}> {
       isReady,
       extendFetchContext = {},
       ...options
-    }: CollectorOptions<TFetchReturn, any, ExtraOptions>
+    }: // Any does not affect here, but needs to be set so it doesn't affect anything else down the line
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CollectorOptions<TFetchReturn, any, ExtraOptions>
   ) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');

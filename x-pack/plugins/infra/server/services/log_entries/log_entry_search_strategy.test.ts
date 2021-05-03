@@ -18,14 +18,17 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
-import { getIndexPatternsMock } from './mocks';
+import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import {
+  createIndexPatternMock,
+  createIndexPatternsStartMock,
+} from '../../../common/dependency_mocks/index_patterns';
+import { InfraSource } from '../../../common/source_configuration/source_configuration';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   logEntrySearchRequestStateRT,
   logEntrySearchStrategyProvider,
 } from './log_entry_search_strategy';
-import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
-import { InfraSource } from '../../../common/source_configuration/source_configuration';
 
 describe('LogEntry search strategy', () => {
   it('handles initial search requests', async () => {
@@ -61,7 +64,33 @@ describe('LogEntry search strategy', () => {
       .toPromise();
 
     expect(sourcesMock.getSourceConfiguration).toHaveBeenCalled();
-    expect(esSearchStrategyMock.search).toHaveBeenCalled();
+    expect(esSearchStrategyMock.search).toHaveBeenCalledWith(
+      {
+        params: expect.objectContaining({
+          index: 'log-indices-*',
+          body: expect.objectContaining({
+            query: {
+              ids: {
+                values: ['LOG_ENTRY_ID'],
+              },
+            },
+            runtime_mappings: {
+              runtime_field: {
+                type: 'keyword',
+                script: {
+                  lang: 'painless',
+                  source: 'emit("runtime value")',
+                },
+              },
+            },
+          }),
+          terminate_after: 1,
+          track_total_hits: false,
+        }),
+      },
+      expect.anything(),
+      expect.anything()
+    );
     expect(response.id).toEqual(expect.any(String));
     expect(response.isRunning).toBe(true);
   });
@@ -207,7 +236,7 @@ const createSourceConfigurationMock = (): InfraSource => ({
     description: 'SOURCE_DESCRIPTION',
     logIndices: {
       type: 'index_pattern',
-      indexPatternId: 'some-test-id',
+      indexPatternId: 'test-index-pattern',
     },
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
@@ -261,5 +290,33 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
     getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
   },
-  indexPatterns: getIndexPatternsMock(),
+  indexPatterns: createIndexPatternsStartMock(0, [
+    createIndexPatternMock({
+      id: 'test-index-pattern',
+      title: 'log-indices-*',
+      timeFieldName: '@timestamp',
+      fields: [
+        {
+          name: 'event.dataset',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'runtime_field',
+          type: 'string',
+          runtimeField: {
+            type: 'keyword',
+            script: {
+              source: 'emit("runtime value")',
+            },
+          },
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    }),
+  ]),
 });

@@ -38,11 +38,22 @@ export const indexPatternList: Record<AppDataType, string> = {
 };
 
 const appToPatternMap: Record<AppDataType, string> = {
-  synthetics: '(synthetics-data-view)*,heartbeat-*,synthetics-*',
+  synthetics: '(synthetics-data-view)*',
   apm: 'apm-*',
-  ux: '(rum-data-view)*,apm-*',
-  infra_logs: 'logs-*,filebeat-*',
-  infra_metrics: 'metrics-*,metricbeat-*',
+  ux: '(rum-data-view)*',
+  infra_logs: '',
+  infra_metrics: '',
+};
+
+const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
+  return `${appToPatternMap[app]},${indices}`;
+};
+
+const getAppIndexPatternId = (app: AppDataType, indices: string) => {
+  // Replace characters / ? , " < > | * with _
+  const postfix = indices.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+
+  return `${indexPatternList[app]}_${postfix}`;
 };
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
@@ -65,16 +76,16 @@ export class ObservabilityIndexPatterns {
     this.data = data;
   }
 
-  async createIndexPattern(app: AppDataType) {
+  async createIndexPattern(app: AppDataType, indices: string) {
     if (!this.data) {
       throw new Error('data is not defined');
     }
 
-    const pattern = appToPatternMap[app];
+    const appIndicesPattern = getAppIndicesWithPattern(app, indices);
 
     return await this.data.indexPatterns.createAndSave({
-      title: pattern,
-      id: indexPatternList[app],
+      title: appIndicesPattern,
+      id: getAppIndexPatternId(app, indices),
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
     });
@@ -108,19 +119,27 @@ export class ObservabilityIndexPatterns {
     return fieldFormatMap;
   }
 
-  async getIndexPattern(app: AppDataType): Promise<IndexPattern | undefined> {
+  async getIndexPattern(app: AppDataType, indices: string): Promise<IndexPattern | undefined> {
     if (!this.data) {
       throw new Error('data is not defined');
     }
     try {
-      const indexPattern = await this.data?.indexPatterns.get(indexPatternList[app]);
+      const indexPatternId = getAppIndexPatternId(app, indices);
+      const indexPatternTitle = getAppIndicesWithPattern(app, indices);
+      // we will get index pattern by id
+      const indexPattern = await this.data?.indexPatterns.get(indexPatternId);
+
+      // and make sure title matches, otherwise, we will need to create it
+      if (indexPattern.title !== indexPatternTitle) {
+        return await this.createIndexPattern(app, indices);
+      }
 
       // this is intentional a non blocking call, so no await clause
       this.validateFieldFormats(app, indexPattern);
       return indexPattern;
     } catch (e: unknown) {
       if (e instanceof SavedObjectNotFound) {
-        return await this.createIndexPattern(app || 'apm');
+        return await this.createIndexPattern(app, indices);
       }
     }
   }

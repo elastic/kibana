@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import supertestAsPromised from 'supertest-as-promised';
+import { omit } from 'lodash';
 import { basicUiCounters } from './__fixtures__/ui_counters';
 import { basicUsageCounters } from './__fixtures__/usage_counters';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -86,6 +87,35 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(true);
         expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
         expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage).to.be.an('object');
+        // non-default kibana configs. Configs set at 'test/api_integration/config.js'.
+        expect(omit(stats.stack_stats.kibana.plugins.kibana_config_usage, 'server.port')).to.eql({
+          'elasticsearch.username': '[redacted]',
+          'elasticsearch.password': '[redacted]',
+          'elasticsearch.hosts': '[redacted]',
+          'elasticsearch.healthCheck.delay': 3600000,
+          'plugins.paths': '[redacted]',
+          'logging.json': false,
+          'server.xsrf.disableProtection': true,
+          'server.compression.referrerWhitelist': '[redacted]',
+          'server.maxPayload': 1679958,
+          'status.allowAnonymous': true,
+          'home.disableWelcomeScreen': true,
+          'data.search.aggs.shardDelay.enabled': true,
+          'security.showInsecureClusterWarning': false,
+          'telemetry.banner': false,
+          'telemetry.url': '[redacted]',
+          'telemetry.optInStatusUrl': '[redacted]',
+          'telemetry.optIn': false,
+          'newsfeed.service.urlRoot': '[redacted]',
+          'newsfeed.service.pathTemplate': '[redacted]',
+          'savedObjects.maxImportPayloadBytes': 10485760,
+          'savedObjects.maxImportExportSize': 10001,
+          'usageCollection.usageCounters.bufferDuration': 0,
+        });
+        expect(stats.stack_stats.kibana.plugins.kibana_config_usage['server.port']).to.be.a(
+          'number'
+        );
 
         // Testing stack_stats.data
         expect(stats.stack_stats.data).to.be.an('object');

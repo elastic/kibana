@@ -24,6 +24,8 @@ import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type Buckets = Array<{
   key: string;
@@ -60,29 +62,45 @@ export const useMatrixHistogram = ({
   UseMatrixHistogramArgs,
   (to: string, from: string) => void
 ] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    matrixHistogramRequest,
-    setMatrixHistogramRequest,
-  ] = useState<MatrixHistogramRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: MatrixHistogramQuery,
-    filterQuery: createFilter(filterQuery),
+  const { getTransformChangesIfTheyExist } = useTransforms();
+
+  const {
+    indices: initialIndexName,
+    factoryQueryType: initialFactoryQueryType,
+    histogramType: initialHistogramType,
+    timerange: initialTimerange,
+  } = getTransformChangesIfTheyExist({
     histogramType,
+    factoryQueryType: MatrixHistogramQuery,
+    indices: indexNames,
+    filterQuery,
     timerange: {
       interval: '12h',
       from: startDate,
       to: endDate,
     },
+  });
+
+  const [
+    matrixHistogramRequest,
+    setMatrixHistogramRequest,
+  ] = useState<MatrixHistogramRequestOptions>({
+    defaultIndex: initialIndexName,
+    factoryQueryType: initialFactoryQueryType,
+    filterQuery: createFilter(filterQuery),
+    histogramType: initialHistogramType ?? histogramType,
+    timerange: initialTimerange,
     stackByField,
     threshold,
     ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
     ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
   });
+  const { addError, addWarning } = useAppToasts();
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
     data: [],
@@ -126,14 +144,13 @@ export const useMatrixHistogram = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
+                addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addError(msg, {
+              addError(msg, {
                 title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
               });
               searchSubscription$.current.unsubscribe();
@@ -145,21 +162,35 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, errorMessage, notifications.toasts]
+    [data.search, errorMessage, addError, addWarning]
   );
 
   useEffect(() => {
+    const {
+      indices,
+      factoryQueryType,
+      histogramType: newHistogramType,
+      timerange,
+    } = getTransformChangesIfTheyExist({
+      histogramType,
+      factoryQueryType: MatrixHistogramQuery,
+      indices: indexNames,
+      filterQuery,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+    });
+
     setMatrixHistogramRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexNames,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
-        histogramType,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        histogramType: newHistogramType ?? histogramType,
+        timerange,
         stackByField,
         threshold,
         ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
@@ -180,6 +211,7 @@ export const useMatrixHistogram = ({
     threshold,
     isPtrIncluded,
     docValueFields,
+    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {

@@ -10,7 +10,11 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 import type { Agent, AgentAction, AgentActionSOAttributes, BulkActionResult } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
 import { agentPolicyService } from '../../services';
-import { AgentReassignmentError, IngestManagerError } from '../../errors';
+import {
+  AgentReassignmentError,
+  HostedAgentPolicyRestrictionRelatedError,
+  IngestManagerError,
+} from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
 
@@ -46,7 +50,7 @@ export async function sendUpgradeAgentAction({
 
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new IngestManagerError(
+    throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot upgrade agent ${agentId} in hosted agent policy ${agentPolicy.id}`
     );
   }
@@ -142,7 +146,7 @@ export async function sendUpgradeAgentsActions(
       }
 
       if (!options.force && isHostedAgent(agent)) {
-        throw new IngestManagerError(
+        throw new HostedAgentPolicyRestrictionRelatedError(
           `Cannot upgrade agent in hosted agent policy ${agent.policy_id}`
         );
       }

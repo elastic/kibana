@@ -7,9 +7,8 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from 'src/core/server';
-import { ReportingConfig, ReportingCore } from '../../';
+import { ReportingCore } from '../../';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
@@ -19,7 +18,6 @@ import { ReportingStore } from './store';
 
 describe('ReportingStore', () => {
   const mockLogger = createMockLevelLogger();
-  let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
@@ -28,9 +26,7 @@ describe('ReportingStore', () => {
       index: '.reporting-test',
       queue: { indexInterval: 'week' },
     };
-    const mockSchema = createMockConfigSchema(reportingConfig);
-    mockConfig = createMockConfig(mockSchema);
-    mockCore = await createMockReportingCore(mockConfig);
+    mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
     mockEsClient = (await mockCore.getEsClient()).asInternalUser as typeof mockEsClient;
 
     mockEsClient.indices.create.mockResolvedValue({} as any);
@@ -71,9 +67,7 @@ describe('ReportingStore', () => {
         index: '.reporting-test',
         queue: { indexInterval: 'centurially' },
       };
-      const mockSchema = createMockConfigSchema(reportingConfig);
-      mockConfig = createMockConfig(mockSchema);
-      mockCore = await createMockReportingCore(mockConfig);
+      mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
 
       const store = new ReportingStore(mockCore, mockLogger);
       const mockReport = new Report({

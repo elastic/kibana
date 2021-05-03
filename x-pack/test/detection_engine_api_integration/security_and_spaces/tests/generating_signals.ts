@@ -11,6 +11,7 @@ import { orderBy, get } from 'lodash';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
+  SavedQueryCreateSchema,
   ThresholdCreateSchema,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../plugins/security_solution/common/constants';
@@ -20,6 +21,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getOpenSignals,
   getRuleForSignalTesting,
   getSignalsByIds,
   getSignalsByRuleIds,
@@ -39,6 +41,7 @@ export const ID = 'BhbXBmkBR346wHgn4PeZ';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   describe('Generating signals from source indexes', () => {
     beforeEach(async () => {
@@ -100,6 +103,57 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: QueryCreateSchema = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
+        };
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id);
+        await waitForSignalsToBePresent(supertest, 1, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id]);
+        // remove rule to cut down on touch points for test changes when the rule format changes
+        const { rule: removedRule, ...signalNoRule } = signalsOpen.hits.hits[0]._source.signal;
+        expect(signalNoRule).eql({
+          parents: [
+            {
+              id: 'BhbXBmkBR346wHgn4PeZ',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+          ],
+          ancestors: [
+            {
+              id: 'BhbXBmkBR346wHgn4PeZ',
+              type: 'event',
+              index: 'auditbeat-8.0.0-2019.02.19-000001',
+              depth: 0,
+            },
+          ],
+          status: 'open',
+          depth: 1,
+          parent: {
+            id: 'BhbXBmkBR346wHgn4PeZ',
+            type: 'event',
+            index: 'auditbeat-8.0.0-2019.02.19-000001',
+            depth: 0,
+          },
+          original_time: '2019-02-19T17:40:03.790Z',
+          original_event: {
+            action: 'socket_closed',
+            dataset: 'socket',
+            kind: 'event',
+            module: 'system',
+          },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
+        });
+      });
+
+      it('should query and get back expected signal structure using a saved query rule', async () => {
+        const rule: SavedQueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          type: 'saved_query',
+          query: `_id:${ID}`,
+          saved_id: 'doesnt-exist',
         };
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
@@ -727,9 +781,8 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(0);
         });
 
@@ -752,9 +805,8 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(0);
         });
 
@@ -777,9 +829,8 @@ export default ({ getService }: FtrProviderContext) => {
               ],
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(1);
           const signal = signalsOpen.hits.hits[0];
           expect(signal._source.signal.threshold_result).eql({
@@ -813,9 +864,8 @@ export default ({ getService }: FtrProviderContext) => {
               value: 22,
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(0);
         });
 
@@ -832,9 +882,8 @@ export default ({ getService }: FtrProviderContext) => {
               value: 21,
             },
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          const signalsOpen = await getSignalsByRuleIds(supertest, [ruleId]);
+          const createdRule = await createRule(supertest, rule);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).eql(1);
           const signal = signalsOpen.hits.hits[0];
           expect(signal._source.signal.threshold_result).eql({
@@ -1320,6 +1369,119 @@ export default ({ getService }: FtrProviderContext) => {
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });
+      });
+    });
+
+    describe('Signals generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
+      beforeEach(async () => {
+        await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
+      });
+
+      /**
+       * This represents our worst case scenario where this field is not mapped on any index
+       * We want to check that our logic continues to function within the constraints of search after
+       * Elasticsearch returns java's long.MAX_VALUE for unmapped date fields
+       * Javascript does not support numbers this large, but without passing in a number of this size
+       * The search_after will continue to return the same results and not iterate to the next set
+       * So to circumvent this limitation of javascript we return the stringified version of Java's
+       * Long.MAX_VALUE so that search_after does not enter into an infinite loop.
+       *
+       * ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
+       */
+      it('should generate 200 signals when timestamp override does not exist', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          timestamp_override: 'event.fakeingested',
+          max_signals: 200,
+        };
+
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+        await waitForSignalsToBePresent(supertest, 200, [id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id], 200);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+
+        expect(signals.length).equal(200);
+      });
+    });
+
+    /**
+     * Here we test the functionality of timestamp overrides. If the rule specifies a timestamp override,
+     * then the documents will be queried and sorted using the timestamp override field.
+     * If no timestamp override field exists in the indices but one was provided to the rule,
+     * the rule's query will additionally search for events using the `@timestamp` field
+     */
+    describe('Signals generated from events with timestamp override field', async () => {
+      beforeEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await createSignalsIndex(supertest);
+        await esArchiver.load('security_solution/timestamp_override_1');
+        await esArchiver.load('security_solution/timestamp_override_2');
+        await esArchiver.load('security_solution/timestamp_override_3');
+        await esArchiver.load('security_solution/timestamp_override_4');
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+        await esArchiver.unload('security_solution/timestamp_override_1');
+        await esArchiver.unload('security_solution/timestamp_override_2');
+        await esArchiver.unload('security_solution/timestamp_override_3');
+        await esArchiver.unload('security_solution/timestamp_override_4');
+      });
+
+      it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['myfa*']),
+          timestamp_override: 'event.ingested',
+        };
+
+        const { id } = await createRule(supertest, rule);
+
+        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+        await waitForSignalsToBePresent(supertest, 3, [id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id], 3);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+        expect(signalsOrderedByEventId.length).equal(3);
+      });
+
+      it('should generate 2 signals with @timestamp', async () => {
+        const rule: QueryCreateSchema = getRuleForSignalTesting(['myfa*']);
+
+        const { id } = await createRule(supertest, rule);
+
+        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+        await waitForSignalsToBePresent(supertest, 2, [id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id]);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+        expect(signalsOrderedByEventId.length).equal(2);
+      });
+
+      it('should generate 2 signals when timestamp override does not exist', async () => {
+        const rule: QueryCreateSchema = {
+          ...getRuleForSignalTesting(['myfa*']),
+          timestamp_override: 'event.fakeingestfield',
+        };
+        const { id } = await createRule(supertest, rule);
+
+        await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
+        await waitForSignalsToBePresent(supertest, 2, [id]);
+        const signalsResponse = await getSignalsByIds(supertest, [id, id]);
+        const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+        const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+        expect(signalsOrderedByEventId.length).equal(2);
       });
     });
   });

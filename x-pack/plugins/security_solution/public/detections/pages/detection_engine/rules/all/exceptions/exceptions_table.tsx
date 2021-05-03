@@ -13,9 +13,9 @@ import {
   EuiProgress,
   EuiSearchBarProps,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { History } from 'history';
 
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
@@ -33,10 +33,6 @@ import { ReferenceErrorModal } from '../../../../../components/value_lists_manag
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';
-
-// Known lost battle with Eui :(
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
 export type Func = () => Promise<void>;
 
@@ -93,6 +89,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
     const [exportingListIds, setExportingListIds] = useState<string[]>([]);
     const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+    const { addError } = useAppToasts();
 
     const handleDeleteSuccess = useCallback(
       (listId?: string) => () => {
@@ -105,12 +102,11 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
 
     const handleDeleteError = useCallback(
       (err: Error & { body?: { message: string } }): void => {
-        notifications.toasts.addError(err, {
+        addError(err, {
           title: i18n.EXCEPTION_DELETE_ERROR,
-          toastMessage: err.body != null ? err.body.message : err.message,
         });
       },
-      [notifications.toasts]
+      [addError]
     );
 
     const handleDelete = useCallback(
@@ -175,9 +171,9 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
 
     const handleExportError = useCallback(
       (err: Error) => {
-        notifications.toasts.addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
+        addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
       },
-      [notifications.toasts]
+      [addError]
     );
 
     const handleExport = useCallback(
@@ -317,7 +313,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       () => ({
         pageIndex: pagination.page - 1,
         pageSize: pagination.perPage,
-        totalItemCount: pagination.total,
+        totalItemCount: pagination.total || 0,
         pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
       }),
       [pagination]
@@ -368,7 +364,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                   numberSelectedItems={0}
                   onRefresh={handleRefresh}
                 />
-                <MyEuiBasicTable
+                <EuiBasicTable
                   data-test-subj="exceptions-table"
                   columns={exceptionsColumns}
                   isSelectable={!hasNoPermissions ?? false}

@@ -33,7 +33,10 @@ import {
   createMockPackageService,
   createRouteHandlerContext,
 } from '../../mocks';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import {
+  EndpointAppContextService,
+  EndpointAppContextServiceStartContract,
+} from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
@@ -41,6 +44,7 @@ import { Agent, EsAssetReference } from '../../../../../fleet/common/types/model
 import { createV1SearchResponse } from './support/test_support';
 import { PackageService } from '../../../../../fleet/server/services';
 import type { SecuritySolutionPluginRouter } from '../../../types';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 
 describe('test endpoint route v1', () => {
   let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
@@ -58,6 +62,7 @@ describe('test endpoint route v1', () => {
     ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];
   let endpointAppContextService: EndpointAppContextService;
+  let startContract: EndpointAppContextServiceStartContract;
   const noUnenrolledAgent = {
     agents: [],
     total: 0,
@@ -77,9 +82,20 @@ describe('test endpoint route v1', () => {
     mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
       Promise.resolve(([] as unknown) as EsAssetReference[])
     );
-    const startContract = createMockEndpointAppContextServiceStartContract();
+    startContract = createMockEndpointAppContextServiceStartContract();
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     mockAgentService = startContract.agentService!;
+
+    (startContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>).list.mockImplementation(
+      () => {
+        return Promise.resolve({
+          items: [],
+          total: 0,
+          page: 1,
+          perPage: 1000,
+        });
+      }
+    );
 
     registerEndpointRoutes(routerMock, {
       logFactory: loggingSystemMock.create(),
