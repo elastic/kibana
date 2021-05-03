@@ -34,6 +34,7 @@ import type { SourceTooltipConfig } from '../../../maps/public';
 import type { IVectorSource } from '../../../maps/public';
 import { getResultsForJobId } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
+import { string } from '../../../security_solution/public/resolver/models/schema';
 
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
@@ -246,6 +247,9 @@ export class AnomalySource implements IVectorSource {
 
   // -----------------
   // API ML probably can ignore
+  getAttributionProvider() {
+    return null;
+  }
 
   getIndexPatternIds(): string[] {
     // IGNORE: This is only relevant if your source is backed by an index-pattern

@@ -42,6 +42,7 @@ export class UpdateAnomalySourceEditor extends Component<Props, State> {
             typicalActual={this.props.typicalActual}
           />
         </EuiPanel>
+        <EuiSpacer size="s" />
       </Fragment>
     );
   }
