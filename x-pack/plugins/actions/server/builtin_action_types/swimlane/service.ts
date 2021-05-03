@@ -62,7 +62,6 @@ export const createExternalService = (
         method: 'post',
         data,
       });
-      // console.log('res', res);
       return { id: res.data.id };
     } catch (error) {
       throw new Error(

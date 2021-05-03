@@ -13,6 +13,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../triggers_actions_ui/public/common';
 import { ConnectorConfiguration } from './types';
+import { ConnectorTypes } from '../../../common';
 
 const resilient = getResilientActionType();
 const serviceNowITSM = getServiceNowITSMActionType();
@@ -20,19 +21,19 @@ const serviceNowSIR = getServiceNowSIRActionType();
 const jira = getJiraActionType();
 
 export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
-  '.servicenow': {
+  [ConnectorTypes.serviceNowITSM]: {
     name: serviceNowITSM.actionTypeTitle ?? '',
     logo: serviceNowITSM.iconClass,
   },
-  '.servicenow-sir': {
+  [ConnectorTypes.serviceNowSIR]: {
     name: serviceNowSIR.actionTypeTitle ?? '',
     logo: serviceNowSIR.iconClass,
   },
-  '.jira': {
+  [ConnectorTypes.jira]: {
     name: jira.actionTypeTitle ?? '',
     logo: jira.iconClass,
   },
-  '.resilient': {
+  [ConnectorTypes.resilient]: {
     name: resilient.actionTypeTitle ?? '',
     logo: resilient.iconClass,
   },

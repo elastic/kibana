@@ -44,7 +44,7 @@ export const getActions = (): FindActionResult[] => [
   },
   {
     id: '123',
-    actionTypeId: '.servicenow',
+    actionTypeId: ConnectorTypes.serviceNowITSM,
     name: 'ServiceNow',
     config: {
       apiUrl: 'https://dev102283.service-now.com',
@@ -54,7 +54,7 @@ export const getActions = (): FindActionResult[] => [
   },
   {
     id: '456',
-    actionTypeId: '.jira',
+    actionTypeId: ConnectorTypes.jira,
     name: 'Connector without isCaseOwned',
     config: {
       apiUrl: 'https://elastic.jira.com',
@@ -64,7 +64,7 @@ export const getActions = (): FindActionResult[] => [
   },
   {
     id: '789',
-    actionTypeId: '.resilient',
+    actionTypeId: ConnectorTypes.resilient,
     name: 'Connector without mapping',
     config: {
       apiUrl: 'https://elastic.resilient.com',
@@ -74,7 +74,7 @@ export const getActions = (): FindActionResult[] => [
   },
   {
     id: 'for-mock-case-id-3',
-    actionTypeId: '.jira',
+    actionTypeId: ConnectorTypes.jira,
     name: 'For mock case id 3',
     config: {
       apiUrl: 'https://elastic.jira.com',
@@ -102,7 +102,7 @@ export const getActionTypes = (): ActionTypeConnector[] => [
     enabledInLicense: true,
   },
   {
-    id: '.servicenow',
+    id: ConnectorTypes.serviceNowITSM,
     name: 'ServiceNow',
     minimumLicenseRequired: 'platinum',
     enabled: false,
@@ -110,7 +110,7 @@ export const getActionTypes = (): ActionTypeConnector[] => [
     enabledInLicense: true,
   },
   {
-    id: '.jira',
+    id: ConnectorTypes.jira,
     name: 'Jira',
     minimumLicenseRequired: 'gold',
     enabled: true,
@@ -118,7 +118,7 @@ export const getActionTypes = (): ActionTypeConnector[] => [
     enabledInLicense: true,
   },
   {
-    id: '.resilient',
+    id: ConnectorTypes.resilient,
     name: 'IBM Resilient',
     minimumLicenseRequired: 'platinum',
     enabled: false,

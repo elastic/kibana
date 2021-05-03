@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ConnectorTypes } from './api';
+
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
 
@@ -37,16 +39,11 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
 
 export const ACTION_URL = '/api/actions';
 export const ACTION_TYPES_URL = '/api/actions/list_action_types';
-export const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
-export const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';
-export const JIRA_ACTION_TYPE_ID = '.jira';
-export const RESILIENT_ACTION_TYPE_ID = '.resilient';
-
 export const SUPPORTED_CONNECTORS = [
-  SERVICENOW_ITSM_ACTION_TYPE_ID,
-  SERVICENOW_SIR_ACTION_TYPE_ID,
-  JIRA_ACTION_TYPE_ID,
-  RESILIENT_ACTION_TYPE_ID,
+  ConnectorTypes.serviceNowITSM,
+  ConnectorTypes.serviceNowSIR,
+  ConnectorTypes.jira,
+  ConnectorTypes.resilient,
 ];
 
 /**

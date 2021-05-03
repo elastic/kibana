@@ -11,6 +11,7 @@ import { useToasts } from '../common/lib/kibana';
 import { getActionLicense } from './api';
 import * as i18n from './translations';
 import { ActionLicense } from './types';
+import { ConnectorTypes } from '../../common';
 
 export interface ActionLicenseState {
   actionLicense: ActionLicense | null;
@@ -24,7 +25,7 @@ export const initialData: ActionLicenseState = {
   isError: false,
 };
 
-const MINIMUM_LICENSE_REQUIRED_CONNECTOR = '.jira';
+const MINIMUM_LICENSE_REQUIRED_CONNECTOR = ConnectorTypes.jira;
 
 export const useGetActionLicense = (): ActionLicenseState => {
   const [actionLicenseState, setActionLicensesState] = useState<ActionLicenseState>(initialData);

@@ -32,10 +32,11 @@ export const ConnectorFieldsRt = rt.union([
 
 export enum ConnectorTypes {
   jira = '.jira',
+  none = '.none',
   resilient = '.resilient',
   serviceNowITSM = '.servicenow',
   serviceNowSIR = '.servicenow-sir',
-  none = '.none',
+  swimlane = '.swimlane',
 }
 
 const ConnectorJiraTypeFieldsRt = rt.type({
