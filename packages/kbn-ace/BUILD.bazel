@@ -8,7 +8,10 @@ SOURCE_FILES = glob(
   [
     "src/**/*.ts",
   ],
-  exclude = ["**/*.test.*"],
+  exclude = [
+    "src/ace/modes/x_json/worker/worker.d.ts",
+    "**/*.test.*",
+  ],
 )
 
 SRCS = SOURCE_FILES
@@ -20,12 +23,13 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md",
+  "README.md"
 ]
 
 SRC_DEPS = [
   "@npm//brace",
   "@npm//lodash",
+  "@npm//raw-loader",
 ]
 
 TYPES_DEPS = [
@@ -63,14 +67,6 @@ js_library(
   deps = [":tsc"] + DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
-)
-
-genrule(
-    name = "copy",
-    srcs = ["src/ace/modes/x_json/worker/x_json.ace.worker.js"],
-    outs = ["target/ace/modes/x_json/worker/x_json.ace.worker.js"],
-    output_to_bindir = 1,
-    cmd = "cp $(SRCS) $(OUTS)",
 )
 
 pkg_npm(
