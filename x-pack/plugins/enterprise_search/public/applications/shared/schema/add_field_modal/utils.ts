@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { SchemaAddFieldModal } from './add_field_modal';
-export { SchemaFieldTypeSelect } from './field_type_select';
-export { SchemaErrorsCallout } from './errors_callout';
+export const formatFieldName = (rawName: string) =>
+  rawName
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^(_+)|(_+)$/g, '')
+    .toLowerCase();

@@ -9,12 +9,13 @@ import React from 'react';
 
 import { shallow, mount } from 'enzyme';
 
-import { EuiFieldText, EuiModal } from '@elastic/eui';
+import { EuiForm, EuiFieldText, EuiModal } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FIELD_NAME_CORRECTED_PREFIX } from './constants';
-import { SchemaType } from './types';
+import { SchemaFieldTypeSelect } from '../index';
+import { SchemaType } from '../types';
 
-import { SchemaFieldTypeSelect, SchemaAddFieldModal } from './';
+import { SchemaAddFieldModal } from './';
 
 describe('SchemaAddFieldModal', () => {
   const addNewField = jest.fn();
@@ -53,8 +54,15 @@ describe('SchemaAddFieldModal', () => {
     expect(setState).toHaveBeenCalledWith(false);
   });
 
+  it('passes disabled state', () => {
+    const wrapper = shallow(<SchemaAddFieldModal {...props} disableForm />);
+
+    expect(wrapper.find('[data-test-subj="SchemaAddFieldNameField"]').prop('disabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="SchemaSelect"]').prop('disabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="SchemaAddFieldButton"]').prop('disabled')).toBe(true);
+  });
+
   it('handles input change - with non-formatted name', () => {
-    jest.spyOn(React, 'useState').mockImplementationOnce(setStateMock);
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     const input = wrapper.find(EuiFieldText);
     input.simulate('change', { currentTarget: { value: 'foobar' } });
@@ -65,16 +73,14 @@ describe('SchemaAddFieldModal', () => {
   });
 
   it('handles input change - with formatted name', () => {
-    jest.spyOn(React, 'useState').mockImplementationOnce(setStateMock);
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     const input = wrapper.find(EuiFieldText);
     input.simulate('change', { currentTarget: { value: 'foo-bar' } });
 
-    expect(wrapper.find('[data-test-subj="SchemaAddFieldNameRow"]').prop('helpText')).toEqual(
-      <React.Fragment>
-        {FIELD_NAME_CORRECTED_PREFIX} <strong>foo_bar</strong>
-      </React.Fragment>
-    );
+    const helpText = wrapper
+      .find('[data-test-subj="SchemaAddFieldNameRow"]')
+      .prop('helpText') as React.ReactElement;
+    expect(helpText.type).toEqual(FormattedMessage);
   });
 
   it('handles field type select change', () => {
@@ -87,10 +93,9 @@ describe('SchemaAddFieldModal', () => {
   });
 
   it('handles form submission', () => {
-    jest.spyOn(React, 'useState').mockImplementationOnce(setStateMock);
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     const preventDefault = jest.fn();
-    wrapper.find('form').simulate('submit', { preventDefault });
+    wrapper.find(EuiForm).simulate('submit', { preventDefault });
 
     expect(addNewField).toHaveBeenCalled();
     expect(setState).toHaveBeenCalled();
