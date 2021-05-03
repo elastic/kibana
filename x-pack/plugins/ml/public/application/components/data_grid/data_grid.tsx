@@ -270,7 +270,7 @@ export const DataGrid: FC<Props> = memo(
       if (wrapperEl.current !== null) {
         const els = wrapperEl.current.querySelectorAll('.euiDataGrid__virtualized');
         for (const el of Array.from(els)) {
-          if (isPopulatedObject(el) && isPopulatedObject(el.style)) {
+          if (isPopulatedObject(el) && isPopulatedObject(el.style) && el.style.height !== 'auto') {
             el.style.height = 'auto';
           }
         }
