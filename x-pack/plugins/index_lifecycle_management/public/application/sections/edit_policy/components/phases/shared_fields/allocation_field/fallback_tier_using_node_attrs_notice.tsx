@@ -21,7 +21,7 @@ interface Props {
   targetNodeRole: DataTierRole;
 }
 
-export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Props> = ({
+export const FallbackTierUsingNodeAttrsNotice: FunctionComponent<Props> = ({
   phase,
   targetNodeRole,
 }) => {
