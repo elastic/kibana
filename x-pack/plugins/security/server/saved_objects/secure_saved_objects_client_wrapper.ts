@@ -700,52 +700,94 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       (acc, { type, id }) => acc.add(`${type}:${id}`),
       new Set<string>()
     );
-    const filteredAndRedactedObjectsMap = response.objects.reduce(
-      (acc, { type, id, spaces, spacesWithMatchingAliases, inboundReferences }) => {
-        if (!spaces.length) {
-          return acc;
+    const traversedObjects = new Set<string>();
+    const filteredObjectsMap = new Map<string, SavedObjectReferenceWithContext>();
+    const getIsAuthorizedForInboundReference = (inbound: { type: string; id: string }) => {
+      const found = filteredObjectsMap.get(`${inbound.type}:${inbound.id}`);
+      return found && !found.isMissing; // If true, this object can be linked back to one of the requested objects
+    };
+    const loopCount = 0;
+    const recursiveLoop = (objs: SavedObjectReferenceWithContext[]) => {
+      if (!objs.length) {
+        return;
+      }
+      const obj = objs.shift()!;
+      const { type, id, spaces, inboundReferences } = obj;
+      const objKey = `${type}:${id}`;
+      traversedObjects.add(objKey);
+      // Is the user authorized to access this object in all required space(s)?
+      const isAuthorizedForObject = isAuthorizedForObjectInAllSpaces(
+        type,
+        authAction,
+        typeActionMap,
+        [currentSpaceId]
+      );
+      // Redact the inbound references so we don't leak any info about other objects that the user is not authorized to access
+      const redactedInboundReferences = inboundReferences.filter((inbound) => {
+        if (inbound.type === type && inbound.id === id) {
+          // circular reference, don't redact it
+          return true;
         }
-        // Is the user authorized to access this object in all required space(s)?
-        const isAuthorizedForObject = isAuthorizedForObjectInAllSpaces(
-          type,
-          authAction,
-          typeActionMap,
-          [currentSpaceId]
-        );
-        // If the user is not authorized to access at least one inbound reference of this object, then we should omit this object.
-        // Note: this check relies on the fact that the order of the objects array is retained!
-        const isAuthorizedForInboundReference =
-          requestedObjectsSet.has(`${type}:${id}`) || // If true, this is one of the requested objects, and we checked authorization above
-          inboundReferences.some((inbound) => acc.has(`${inbound.type}:${inbound.id}`)); // If true, this object can be linked back to one of the requested objects
+        return getIsAuthorizedForInboundReference(inbound);
+      });
+      // If the user is not authorized to access at least one inbound reference of this object, then we should omit this object.
+      const isAuthorizedForGraph =
+        requestedObjectsSet.has(objKey) || // If true, this is one of the requested objects, and we checked authorization above
+        redactedInboundReferences.some(getIsAuthorizedForInboundReference);
 
-        if (isAuthorizedForObject && isAuthorizedForInboundReference) {
+      if (isAuthorizedForObject && isAuthorizedForGraph) {
+        if (spaces.length) {
+          // Don't generate audit records for "empty results" with zero spaces (requested object was a non-multi-namespace type or hidden type)
           this.auditLogger.log(
             savedObjectEvent({
               action: SavedObjectAction.COLLECT_MULTINAMESPACE_REFERENCES,
               savedObject: { type, id },
             })
           );
-          const redactedSpaces = getRedactedSpaces(type, 'bulk_get', typeActionMap, spaces);
-          const redactedSpacesWithMatchingAliases =
-            spacesWithMatchingAliases &&
-            getRedactedSpaces(type, 'bulk_get', typeActionMap, spacesWithMatchingAliases);
-          return acc.set(`${type}:${id}`, {
-            type,
-            id,
-            spaces: redactedSpaces,
-            ...(redactedSpacesWithMatchingAliases && {
-              spacesWithMatchingAliases: redactedSpacesWithMatchingAliases,
-            }),
-            inboundReferences,
-          });
         }
-        return acc;
-      },
-      new Map<string, SavedObjectReferenceWithContext>()
-    );
+        filteredObjectsMap.set(objKey, obj);
+      } else if (!isAuthorizedForObject && isAuthorizedForGraph) {
+        filteredObjectsMap.set(objKey, { ...obj, spaces: [], isMissing: true });
+      } else if (
+        isAuthorizedForObject &&
+        !isAuthorizedForGraph &&
+        inboundReferences.some((x) => !traversedObjects.has(`${x.type}:${x.id}`)) &&
+        loopCount < response.objects.length // circuit-breaker to prevent infinite loops
+      ) {
+        // this object has inbound reference(s) that we haven't traversed yet; bump it to the back of the list
+        recursiveLoop([...objs, obj]);
+        return;
+      }
+      recursiveLoop(objs);
+    };
+    recursiveLoop(response.objects);
+
+    const filteredAndRedactedObjects = [...filteredObjectsMap.values()].map((obj) => {
+      const { type, id, spaces, spacesWithMatchingAliases, inboundReferences } = obj;
+      // Redact the inbound references so we don't leak any info about other objects that the user is not authorized to access
+      const redactedInboundReferences = inboundReferences.filter((inbound) => {
+        if (inbound.type === type && inbound.id === id) {
+          // circular reference, don't redact it
+          return true;
+        }
+        return getIsAuthorizedForInboundReference(inbound);
+      });
+      const redactedSpaces = getRedactedSpaces(type, 'bulk_get', typeActionMap, spaces);
+      const redactedSpacesWithMatchingAliases =
+        spacesWithMatchingAliases &&
+        getRedactedSpaces(type, 'bulk_get', typeActionMap, spacesWithMatchingAliases);
+      return {
+        ...obj,
+        spaces: redactedSpaces,
+        ...(redactedSpacesWithMatchingAliases && {
+          spacesWithMatchingAliases: redactedSpacesWithMatchingAliases,
+        }),
+        inboundReferences: redactedInboundReferences,
+      };
+    });
 
     return {
-      objects: Array.from(filteredAndRedactedObjectsMap.values()),
+      objects: filteredAndRedactedObjects,
     };
   }
 
@@ -778,13 +820,13 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       { requireFullAuthorization: false }
     );
 
-    // The user must be authorized to share every requested object in each of: the current space, spacesToAdd, and spacesToRemove.
+    const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
+    const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
     try {
+      // The user must be authorized to share every requested object in each of: the current space, spacesToAdd, and spacesToRemove.
       const spaces = this.getUniqueSpaces(currentSpaceId, ...spacesToAdd, ...spacesToRemove);
       this.ensureAuthorizedInAllSpaces(objects, 'share_to_space', typeActionMap, spaces);
     } catch (error) {
-      const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
-      const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
       objects.forEach(({ type, id }) =>
         this.auditLogger.log(
           savedObjectEvent({
@@ -797,6 +839,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         )
       );
       throw error;
+    }
+    for (const { type, id } of objectsToUpdate) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.UPDATE_OBJECTS_SPACES,
+          outcome: 'unknown',
+          savedObject: { type, id },
+          addToSpaces,
+          deleteFromSpaces,
+        })
+      );
     }
 
     const response = await this.baseClient.updateObjectsSpaces(
