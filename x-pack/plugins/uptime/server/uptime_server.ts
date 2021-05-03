@@ -5,28 +5,56 @@
  * 2.0.
  */
 
-import { UMServerLibs } from './lib/lib';
+import { createUptimeESClient, UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
 import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters';
 import { uptimeAlertTypeFactories } from './lib/alerts';
-import { uptimeRuleRegistrySettings } from '../common/rules/uptime_rule_registry_settings';
-import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
+import { UptimeRuleRegistry } from './plugin';
+import { createLifecycleRuleTypeFactory } from '../../rule_registry/server';
+import { savedObjectsAdapter } from './lib/saved_objects';
+
+const createUptimeLifecycleRuleType = createLifecycleRuleTypeFactory<UptimeRuleRegistry>();
 
 export const initUptimeServer = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
-  plugins: UptimeCorePlugins
+  plugins: UptimeCorePlugins,
+  ruleRegistry: UptimeRuleRegistry
 ) => {
   restApiRoutes.forEach((route) =>
     libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
   );
 
-  const uptimeRuleRegistry = plugins.observability.ruleRegistry.create({
-    ...uptimeRuleRegistrySettings,
-    fieldMap: uptimeRuleFieldMap,
-  });
+  uptimeAlertTypeFactories.forEach((alertTypeFactory) => {
+    const alertType = alertTypeFactory(server, libs, plugins);
+    return ruleRegistry.registerType(
+      createUptimeLifecycleRuleType({
+        ...alertType,
+        producer: 'uptime',
+        executor: async ({
+          params,
+          state,
+          services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient },
+        }) => {
+          const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+            savedObjectsClient
+          );
 
-  uptimeAlertTypeFactories.forEach((alertTypeFactory) =>
-    uptimeRuleRegistry.registerType(alertTypeFactory(server, libs, plugins))
-  );
+          const uptimeEsClient = createUptimeESClient({
+            esClient: scopedClusterClient.asCurrentUser,
+            savedObjectsClient,
+          });
+
+          return alertType.executor({
+            params,
+            state,
+            uptimeEsClient,
+            dynamicSettings,
+            alertWithLifecycle,
+            savedObjectsClient,
+          });
+        },
+      })
+    );
+  });
 };

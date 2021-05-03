@@ -8,7 +8,6 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { updateState } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
@@ -19,9 +18,6 @@ import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
 import { getLatestMonitor } from '../requests/get_latest_monitor';
-import { uptimeAlertWrapper } from './uptime_alert_wrapper';
-
-export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
 export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
   return {
@@ -63,62 +59,52 @@ const getAnomalies = async (
   );
 };
 
-export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
-  _server,
-  _libs,
-  plugins
-) =>
-  uptimeAlertWrapper<ActionGroupIds>({
-    id: 'xpack.uptime.alerts.durationAnomaly',
-    name: durationAnomalyTranslations.alertFactoryName,
-    validate: {
-      params: schema.object({
-        monitorId: schema.string(),
-        severity: schema.number(),
-      }),
+export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _libs, plugins) => ({
+  id: 'xpack.uptime.alerts.durationAnomaly',
+  name: durationAnomalyTranslations.alertFactoryName,
+  validate: {
+    params: schema.object({
+      monitorId: schema.string(),
+      severity: schema.number(),
+    }),
+  },
+  defaultActionGroupId: DURATION_ANOMALY.id,
+  actionGroups: [
+    {
+      id: DURATION_ANOMALY.id,
+      name: DURATION_ANOMALY.name,
     },
-    defaultActionGroupId: DURATION_ANOMALY.id,
-    actionGroups: [
-      {
-        id: DURATION_ANOMALY.id,
-        name: DURATION_ANOMALY.name,
-      },
-    ],
-    actionVariables: {
-      context: [],
-      state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
-    },
-    minimumLicenseRequired: 'basic',
-    async executor({ options, uptimeEsClient, savedObjectsClient, dynamicSettings }) {
-      const {
-        services: { alertInstanceFactory },
-        state,
-        params,
-      } = options;
+  ],
+  actionVariables: {
+    context: [],
+    state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
+  },
+  // TODO: really this should be platinum?
+  minimumLicenseRequired: 'trial',
+  async executor({ alertWithLifecycle, params, savedObjectsClient, state, uptimeEsClient }) {
+    const { anomalies } =
+      (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt)) ?? {};
 
-      const { anomalies } =
-        (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt)) ?? {};
+    const foundAnomalies = anomalies?.length > 0;
 
-      const foundAnomalies = anomalies?.length > 0;
+    if (foundAnomalies) {
+      const monitorInfo = await getLatestMonitor({
+        uptimeEsClient,
+        dateStart: 'now-15m',
+        dateEnd: 'now',
+        monitorId: params.monitorId,
+      });
+      anomalies.forEach((anomaly, index) => {
+        const alertInstance = alertWithLifecycle(DURATION_ANOMALY.id + index);
+        const summary = getAnomalySummary(anomaly, monitorInfo);
+        alertInstance.state = {
+          ...updateState(state, false),
+          ...summary,
+        };
+        alertInstance.scheduleActions(DURATION_ANOMALY.id);
+      });
+    }
 
-      if (foundAnomalies) {
-        const monitorInfo = await getLatestMonitor({
-          uptimeEsClient,
-          dateStart: 'now-15m',
-          dateEnd: 'now',
-          monitorId: params.monitorId,
-        });
-        anomalies.forEach((anomaly, index) => {
-          const alertInstance = alertInstanceFactory(DURATION_ANOMALY.id + index);
-          const summary = getAnomalySummary(anomaly, monitorInfo);
-          alertInstance.replaceState({
-            ...updateState(state, false),
-            ...summary,
-          });
-          alertInstance.scheduleActions(DURATION_ANOMALY.id);
-        });
-      }
-
-      return updateState(state, foundAnomalies);
-    },
-  });
+    return updateState(state, foundAnomalies);
+  },
+});

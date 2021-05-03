@@ -11,6 +11,7 @@ import type {
   ISavedObjectsRepository,
   IScopedClusterClient,
 } from 'src/core/server';
+import { ObservabilityPluginSetup } from '../../../../../observability/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
@@ -37,7 +38,7 @@ export interface UptimeCorePlugins {
   features: PluginSetupContract;
   alerting: any;
   elasticsearch: any;
-  observability: any;
+  observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
 }
