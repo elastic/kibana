@@ -7,7 +7,6 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
-import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -31,115 +30,93 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     // TODO: Remove when vislib is removed
-    describe('new charts library', function () {
+    describe.only('new charts library', function () {
       this.tags('ciGroup7');
 
-      before(async () => {
-        await initTests();
+      before(() => update(false));
 
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': false,
-        });
-        await browser.refresh();
-      });
+      after(() => update(true));
 
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': true,
-        });
-        await browser.refresh();
-      });
-
-      // Test replaced vislib chart types
-      loadTestFile(require.resolve('./_line_chart_split_series'));
-      loadTestFile(require.resolve('./_line_chart_split_chart'));
-      loadTestFile(require.resolve('./_point_series_options'));
-      loadTestFile(require.resolve('./_vertical_bar_chart'));
-      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+      [
+        // Test replaced vislib chart types
+        './_line_chart_split_series',
+        './_line_chart_split_chart',
+        './_point_series_options',
+        './_vertical_bar_chart',
+        './_vertical_bar_chart_nontimeindex',
+      ].forEach(load);
     });
 
     describe('', function () {
       this.tags('ciGroup9');
 
-      before(async () => {
-        await initTests();
-      });
-
-      loadTestFile(require.resolve('./_embedding_chart'));
-      loadTestFile(require.resolve('./_area_chart'));
-      loadTestFile(require.resolve('./_data_table'));
-      loadTestFile(require.resolve('./_data_table_nontimeindex'));
-      loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
+      [
+        './_embedding_chart',
+        './_area_chart',
+        './_data_table',
+        './_data_table_nontimeindex',
+        './_data_table_notimeindex_filters',
+      ].forEach(load);
 
       // this check is not needed when the CI doesn't run anymore for the OSS
-      if (!isOss) {
-        loadTestFile(require.resolve('./_chart_types'));
-      }
+      if (!isOss) load('./_chart_types');
     });
 
     describe('', function () {
       this.tags('ciGroup10');
 
-      before(async () => {
-        await initTests();
-      });
-
-      loadTestFile(require.resolve('./_inspector'));
-      loadTestFile(require.resolve('./_experimental_vis'));
-      loadTestFile(require.resolve('./_gauge_chart'));
-      loadTestFile(require.resolve('./_heatmap_chart'));
-      loadTestFile(require.resolve('./input_control_vis'));
-      loadTestFile(require.resolve('./_histogram_request_start'));
-      loadTestFile(require.resolve('./_metric_chart'));
+      [
+        './_inspector',
+        './_experimental_vis',
+        './_gauge_chart',
+        './_heatmap_chart',
+        './input_control_vis',
+        './_histogram_request_start',
+        './_metric_chart',
+      ].forEach(load);
     });
 
     describe('', function () {
       this.tags('ciGroup4');
 
-      before(async () => {
-        await initTests();
-      });
+      [
+        './_pie_chart',
+        './_point_series_options',
+        './_markdown_vis',
+        './_shared_item',
+        './_lab_mode',
+        './_linked_saved_searches',
+        './_visualize_listing',
+        './_add_to_dashboard.ts',
+      ].forEach(load);
 
-      loadTestFile(require.resolve('./_pie_chart'));
-      loadTestFile(require.resolve('./_point_series_options'));
-      loadTestFile(require.resolve('./_markdown_vis'));
-      loadTestFile(require.resolve('./_shared_item'));
-      loadTestFile(require.resolve('./_lab_mode'));
-      loadTestFile(require.resolve('./_linked_saved_searches'));
-      loadTestFile(require.resolve('./_visualize_listing'));
-      loadTestFile(require.resolve('./_add_to_dashboard.ts'));
-
-      if (isOss) {
-        loadTestFile(require.resolve('./_tile_map'));
-        loadTestFile(require.resolve('./_region_map'));
-      }
+      if (isOss) ['./_tile_map', './_region_map'].forEach(load);
     });
 
     describe('', function () {
       this.tags('ciGroup12');
 
-      before(async () => {
-        await initTests();
-      });
-
-      loadTestFile(require.resolve('./_tag_cloud'));
-      loadTestFile(require.resolve('./_vertical_bar_chart'));
-      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
-      loadTestFile(require.resolve('./_tsvb_chart'));
-      loadTestFile(require.resolve('./_tsvb_time_series'));
-      loadTestFile(require.resolve('./_tsvb_markdown'));
-      loadTestFile(require.resolve('./_tsvb_table'));
-      loadTestFile(require.resolve('./_vega_chart'));
+      [
+        './_tag_cloud',
+        './_vertical_bar_chart',
+        './_vertical_bar_chart_nontimeindex',
+        './_tsvb_chart',
+        './_tsvb_time_series',
+        './_tsvb_markdown',
+        './_tsvb_table',
+        './_vega_chart',
+      ].forEach(load);
     });
   });
 
-  async function initTests() {
-    await kibanaServer.savedObjects.clean({ types: ['visualization'] });
-    await kibanaServer.importExport.load('visualize');
-
-    await kibanaServer.uiSettings.replace({
-      defaultIndex: 'logstash-*',
-      [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
+  async function update(x: boolean) {
+    await kibanaServer.uiSettings.update({
+      'visualization:visualize:legacyChartsLibrary': x,
     });
+    await browser.refresh();
+  }
+
+  function load(x: string) {
+    loadTestFile(require.resolve(x));
   }
 }

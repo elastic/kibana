@@ -8,6 +8,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
+import { UI_SETTINGS } from '../../../src/plugins/data/common';
 
 // TODO: Remove & Refactor to use the TTV page objects
 interface VisualizeSaveModalArgs {
@@ -23,6 +24,7 @@ type DashboardPickerOption =
   | 'new-dashboard-option';
 
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
@@ -47,6 +49,16 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       LOGSTASH_TIME_BASED: 'logstash-*',
       LOGSTASH_NON_TIME_BASED: 'logstash*',
     };
+
+    public async initTests() {
+      await kibanaServer.savedObjects.clean({ types: ['visualization'] });
+      await kibanaServer.importExport.load('visualize');
+
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
+      });
+    }
 
     public async gotoVisualizationLandingPage() {
       await common.navigateToApp('visualize');
