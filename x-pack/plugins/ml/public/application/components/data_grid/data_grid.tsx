@@ -6,8 +6,9 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, FC, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useRef, FC } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -192,6 +193,8 @@ export const DataGrid: FC<Props> = memo(
       }
     }, [invalidSortingColumnns, toastNotifications]);
 
+    const wrapperEl = useRef<HTMLDivElement>(null);
+
     if (status === INDEX_STATUS.LOADED && data.length === 0) {
       return (
         <div data-test-subj={`${dataTestSubj} empty`}>
@@ -264,17 +267,21 @@ export const DataGrid: FC<Props> = memo(
     }
 
     const onMutation = () => {
-      const els = document.querySelectorAll('.euiDataGrid__virtualized');
-      // Our TypeScript lacks recognizing NodeList as iterable
-      for (const el of els as any) {
-        if (isPopulatedObject(el) && isPopulatedObject(el.style)) {
-          el.style.height = 'auto';
+      if (wrapperEl.current !== null) {
+        const els = wrapperEl.current.querySelectorAll('.euiDataGrid__virtualized');
+        for (const el of Array.from(els)) {
+          if (isPopulatedObject(el) && isPopulatedObject(el.style)) {
+            el.style.height = 'auto';
+          }
         }
       }
     };
 
     return (
-      <div data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}>
+      <div
+        data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}
+        ref={wrapperEl}
+      >
         {isWithHeader(props) && (
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -368,9 +375,10 @@ export const DataGrid: FC<Props> = memo(
                               onClick={toggleChartVisibility}
                               disabled={chartsVisible === undefined}
                             >
-                              {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
-                                defaultMessage: 'Histogram charts',
-                              })}
+                              <FormattedMessage
+                                id="xpack.ml.dataGrid.histogramButtonText"
+                                defaultMessage="Histogram charts"
+                              />
                             </EuiButtonEmpty>
                           </EuiToolTip>
                         ),
