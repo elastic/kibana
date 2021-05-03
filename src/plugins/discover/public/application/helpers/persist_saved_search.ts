@@ -40,7 +40,6 @@ export async function persistSavedSearch(
     indexPattern,
     services,
     sort: state.sort as SortOrder[],
-    columns: state.columns || [],
     useNewFieldsApi: false,
   });
 

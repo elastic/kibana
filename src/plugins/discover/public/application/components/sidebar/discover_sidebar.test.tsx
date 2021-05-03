@@ -94,7 +94,6 @@ function getCompProps(): DiscoverSidebarProps {
   return {
     config: configMock,
     columns: ['extension'],
-    fieldCounts,
     hits,
     indexPatternList,
     indexPatterns: indexPatternsMock,

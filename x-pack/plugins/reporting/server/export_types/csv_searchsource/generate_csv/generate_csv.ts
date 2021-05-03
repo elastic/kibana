@@ -351,7 +351,7 @@ export class CsvGenerator {
 
         // If columns exists in the job params, use it to order the CSV columns
         // otherwise, get the ordering from the searchSource's fields / fieldsFromSource
-        const columns = this.getColumns(searchSource, table);
+        const columns = this.getColumns(searchSource, table) || [];
 
         if (first) {
           first = false;

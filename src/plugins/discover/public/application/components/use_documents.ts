@@ -75,7 +75,10 @@ export function useDocuments({
             title: i18n.translate('discover.inspectorRequestDataTitle', {
               defaultMessage: 'data',
             }),
-            description: '',
+            description: i18n.translate('discover.inspectorRequestDescription', {
+              defaultMessage:
+                'This request queries Elasticsearch to fetch the data for the search.',
+            }),
           },
         })
         .toPromise()

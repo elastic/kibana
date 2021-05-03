@@ -28,7 +28,6 @@ const state = ({} as unknown) as GetStateReturn;
 
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
-    getFieldCounts: jest.fn(),
     indexPattern: indexPatternMock,
     navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
