@@ -12,25 +12,20 @@ import { mockBrowserFields } from '../../../common/containers/source/mock';
 
 import { CATEGORY_PANE_WIDTH, getFieldCount } from './helpers';
 import { CategoriesPane } from './categories_pane';
-import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 
 const timelineId = 'test';
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('getCategoryColumns', () => {
   Object.keys(mockBrowserFields).forEach((categoryId) => {
     test(`it renders the ${categoryId} category name (from filteredBrowserFields)`, () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <CategoriesPane
-            filteredBrowserFields={mockBrowserFields}
-            width={CATEGORY_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            selectedCategoryId={''}
-            timelineId={timelineId}
-          />
-        </ThemeProvider>
+        <CategoriesPane
+          filteredBrowserFields={mockBrowserFields}
+          width={CATEGORY_PANE_WIDTH}
+          onCategorySelected={jest.fn()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
       );
 
       const fieldCount = Object.keys(mockBrowserFields[categoryId].fields ?? {}).length;
@@ -44,15 +39,13 @@ describe('getCategoryColumns', () => {
   Object.keys(mockBrowserFields).forEach((categoryId) => {
     test(`it renders the correct field count for the ${categoryId} category (from filteredBrowserFields)`, () => {
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <CategoriesPane
-            filteredBrowserFields={mockBrowserFields}
-            width={CATEGORY_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            selectedCategoryId={''}
-            timelineId={timelineId}
-          />
-        </ThemeProvider>
+        <CategoriesPane
+          filteredBrowserFields={mockBrowserFields}
+          width={CATEGORY_PANE_WIDTH}
+          onCategorySelected={jest.fn()}
+          selectedCategoryId={''}
+          timelineId={timelineId}
+        />
       );
 
       expect(
@@ -65,15 +58,13 @@ describe('getCategoryColumns', () => {
     const selectedCategoryId = 'auditd';
 
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <CategoriesPane
-          filteredBrowserFields={mockBrowserFields}
-          width={CATEGORY_PANE_WIDTH}
-          onCategorySelected={jest.fn()}
-          selectedCategoryId={selectedCategoryId}
-          timelineId={timelineId}
-        />
-      </ThemeProvider>
+      <CategoriesPane
+        filteredBrowserFields={mockBrowserFields}
+        width={CATEGORY_PANE_WIDTH}
+        onCategorySelected={jest.fn()}
+        selectedCategoryId={selectedCategoryId}
+        timelineId={timelineId}
+      />
     );
 
     expect(
@@ -89,15 +80,13 @@ describe('getCategoryColumns', () => {
     const notTheSelectedCategoryId = 'base';
 
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <CategoriesPane
-          filteredBrowserFields={mockBrowserFields}
-          width={CATEGORY_PANE_WIDTH}
-          onCategorySelected={jest.fn()}
-          selectedCategoryId={selectedCategoryId}
-          timelineId={timelineId}
-        />
-      </ThemeProvider>
+      <CategoriesPane
+        filteredBrowserFields={mockBrowserFields}
+        width={CATEGORY_PANE_WIDTH}
+        onCategorySelected={jest.fn()}
+        selectedCategoryId={selectedCategoryId}
+        timelineId={timelineId}
+      />
     );
 
     expect(
@@ -115,15 +104,13 @@ describe('getCategoryColumns', () => {
     const onCategorySelected = jest.fn();
 
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <CategoriesPane
-          filteredBrowserFields={mockBrowserFields}
-          width={CATEGORY_PANE_WIDTH}
-          onCategorySelected={onCategorySelected}
-          selectedCategoryId={selectedCategoryId}
-          timelineId={timelineId}
-        />
-      </ThemeProvider>
+      <CategoriesPane
+        filteredBrowserFields={mockBrowserFields}
+        width={CATEGORY_PANE_WIDTH}
+        onCategorySelected={onCategorySelected}
+        selectedCategoryId={selectedCategoryId}
+        timelineId={timelineId}
+      />
     );
 
     wrapper

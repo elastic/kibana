@@ -9,13 +9,14 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
+import { EuiTable, EuiEmptyPrompt, EuiRange } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
 
 import { GroupSourcePrioritization } from './group_source_prioritization';
-
-import { EuiTable, EuiEmptyPrompt, EuiRange } from '@elastic/eui';
 
 const updatePriority = jest.fn();
 const saveGroupSourcePrioritization = jest.fn();

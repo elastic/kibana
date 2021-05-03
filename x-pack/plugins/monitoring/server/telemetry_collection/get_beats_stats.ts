@@ -77,7 +77,7 @@ export interface BeatsStats {
       queue?: {
         name?: string;
       };
-      heartbeat?: HeartbeatBase;
+      heartbeat?: Heartbeat;
       functionbeat?: {
         functions?: {
           count?: number;
@@ -91,11 +91,11 @@ export interface BeatsStats {
   };
 }
 
+type Heartbeat = HeartbeatBase & { [key: string]: HeartbeatBase | undefined };
+
 interface HeartbeatBase {
   monitors: number;
   endpoints: number;
-  // I have to add the '| number' bit because otherwise TS complains about 'monitors' and 'endpoints' not being of type HeartbeatBase
-  [key: string]: HeartbeatBase | number | undefined;
 }
 
 export interface BeatsBaseStats {
@@ -122,7 +122,7 @@ export interface BeatsBaseStats {
     count: number;
     architectures: BeatsArchitecture[];
   };
-  heartbeat?: HeartbeatBase;
+  heartbeat?: Heartbeat;
   functionbeat?: {
     functions: {
       count: number;
@@ -237,7 +237,7 @@ export function processResults(
           clusters[clusterUuid].heartbeat = {
             monitors: 0,
             endpoints: 0,
-          };
+          } as Heartbeat; // Needed because TS complains about the additional index signature
         }
         const clusterHb = clusters[clusterUuid].heartbeat!;
 

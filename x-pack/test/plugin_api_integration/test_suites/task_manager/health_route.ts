@@ -34,6 +34,7 @@ interface MonitoringStats {
       timestamp: string;
       value: {
         drift: Record<string, object>;
+        drift_by_type: Record<string, Record<string, object>>;
         load: Record<string, object>;
         execution: {
           duration: Record<string, Record<string, object>>;
@@ -43,6 +44,7 @@ interface MonitoringStats {
           last_successful_poll: string;
           last_polling_delay: string;
           duration: Record<string, object>;
+          claim_duration: Record<string, object>;
           result_frequency_percent_as_number: Record<string, number>;
         };
       };
@@ -174,7 +176,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         runtime: {
-          value: { drift, load, polling, execution },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          value: { drift, drift_by_type, load, polling, execution },
         },
       } = (await getHealth()).stats;
 
@@ -192,10 +195,20 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof polling.duration.p95).to.eql('number');
       expect(typeof polling.duration.p99).to.eql('number');
 
+      expect(typeof polling.claim_duration.p50).to.eql('number');
+      expect(typeof polling.claim_duration.p90).to.eql('number');
+      expect(typeof polling.claim_duration.p95).to.eql('number');
+      expect(typeof polling.claim_duration.p99).to.eql('number');
+
       expect(typeof drift.p50).to.eql('number');
       expect(typeof drift.p90).to.eql('number');
       expect(typeof drift.p95).to.eql('number');
       expect(typeof drift.p99).to.eql('number');
+
+      expect(typeof drift_by_type.sampleTask.p50).to.eql('number');
+      expect(typeof drift_by_type.sampleTask.p90).to.eql('number');
+      expect(typeof drift_by_type.sampleTask.p95).to.eql('number');
+      expect(typeof drift_by_type.sampleTask.p99).to.eql('number');
 
       expect(typeof load.p50).to.eql('number');
       expect(typeof load.p90).to.eql('number');

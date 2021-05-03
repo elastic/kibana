@@ -38,10 +38,9 @@ import { FullTimeRangeSelector } from '../../components/full_time_range_selector
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useMlContext } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { useTimefilter } from '../../contexts/kibana';
+import { useNotifications, useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
-import { getToastNotifications } from '../../util/dependency_cache';
 import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
@@ -124,14 +123,16 @@ export const Page: FC = () => {
     ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
     restorableDefaults
   );
+  const [currentSavedSearch, setCurrentSavedSearch] = useState(mlContext.currentSavedSearch);
 
-  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
+  const { combinedQuery, currentIndexPattern, kibanaConfig } = mlContext;
   const timefilter = useTimefilter({
     timeRangeSelector: currentIndexPattern.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
-  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, getToastNotifications()), [
+  const { toasts } = useNotifications();
+  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, toasts), [
     currentIndexPattern,
   ]);
 
@@ -193,6 +194,12 @@ export const Page: FC = () => {
     searchString: Query['query'];
     queryLanguage: SearchQueryLanguage;
   }) => {
+    // When the user loads saved search and then clear or modify the query
+    // we should remove the saved search and replace it with the index pattern id
+    if (currentSavedSearch !== null) {
+      setCurrentSavedSearch(null);
+    }
+
     setDataVisualizerListState({
       ...dataVisualizerListState,
       searchQuery: searchParams.searchQuery,
@@ -743,7 +750,7 @@ export const Page: FC = () => {
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <EuiPanel>
-                  {documentCountStats && overallStats?.totalCount !== undefined && (
+                  {overallStats?.totalCount !== undefined && (
                     <EuiFlexItem grow={true}>
                       <DocumentCountContent
                         config={documentCountStats}

@@ -11,7 +11,7 @@ import {
   PluginStart,
   shimHitsTotal,
 } from '../../../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/common';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/common';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
@@ -24,7 +24,6 @@ export const securitySolutionTimelineSearchStrategyProvider = <T extends Timelin
   data: PluginStart
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
-
   return {
     search: (request, options, deps) => {
       if (request.factoryQueryType == null) {
@@ -33,7 +32,6 @@ export const securitySolutionTimelineSearchStrategyProvider = <T extends Timelin
       const queryFactory: SecuritySolutionTimelineFactory<T> =
         securitySolutionTimelineFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
-
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {
           return {

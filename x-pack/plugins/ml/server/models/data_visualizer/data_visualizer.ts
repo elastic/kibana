@@ -16,9 +16,10 @@ import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../lib/query_utils';
-import { AggCardinality } from '../../../common/types/fields';
+import { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -182,7 +183,8 @@ const getAggIntervals = async (
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
-  samplerShardSize: number
+  samplerShardSize: number,
+  runtimeMappings?: RuntimeMappings
 ): Promise<NumericColumnStatsMap> => {
   const numericColumns = fields.filter((field) => {
     return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
@@ -209,6 +211,7 @@ const getAggIntervals = async (
       query,
       aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
       size: 0,
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 
@@ -239,7 +242,8 @@ export const getHistogramsForFields = async (
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
-  samplerShardSize: number
+  samplerShardSize: number,
+  runtimeMappings?: RuntimeMappings
 ) => {
   const { asCurrentUser } = client;
   const aggIntervals = await getAggIntervals(
@@ -247,7 +251,8 @@ export const getHistogramsForFields = async (
     indexPatternTitle,
     query,
     fields,
-    samplerShardSize
+    samplerShardSize,
+    runtimeMappings
   );
 
   const chartDataAggs = fields.reduce((aggs, field) => {
@@ -292,6 +297,7 @@ export const getHistogramsForFields = async (
       query,
       aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
       size: 0,
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 
@@ -363,7 +369,8 @@ export class DataVisualizer {
     samplerShardSize: number,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    runtimeMappings?: RuntimeMappings
   ) {
     const stats = {
       totalCount: 0,
@@ -394,7 +401,9 @@ export class DataVisualizer {
           samplerShardSize,
           timeFieldName,
           earliestMs,
-          latestMs
+          latestMs,
+          undefined,
+          runtimeMappings
         );
 
         // Total count will be returned with each batch of fields. Just overwrite.
@@ -414,7 +423,8 @@ export class DataVisualizer {
           field,
           timeFieldName,
           earliestMs,
-          latestMs
+          latestMs,
+          runtimeMappings
         );
 
         const fieldData: FieldData = {
@@ -441,14 +451,16 @@ export class DataVisualizer {
     indexPatternTitle: string,
     query: any,
     fields: HistogramField[],
-    samplerShardSize: number
+    samplerShardSize: number,
+    runtimeMappings?: RuntimeMappings
   ): Promise<any> {
     return await getHistogramsForFields(
       this._client,
       indexPatternTitle,
       query,
       fields,
-      samplerShardSize
+      samplerShardSize,
+      runtimeMappings
     );
   }
 
@@ -464,7 +476,8 @@ export class DataVisualizer {
     earliestMs: number,
     latestMs: number,
     intervalMs: number,
-    maxExamples: number
+    maxExamples: number,
+    runtimeMappings: RuntimeMappings
   ): Promise<BatchStats[]> {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
@@ -510,7 +523,8 @@ export class DataVisualizer {
                 samplerShardSize,
                 timeFieldName,
                 earliestMs,
-                latestMs
+                latestMs,
+                runtimeMappings
               );
             } else {
               // Will only ever be one document count card,
@@ -521,7 +535,8 @@ export class DataVisualizer {
                 timeFieldName,
                 earliestMs,
                 latestMs,
-                intervalMs
+                intervalMs,
+                runtimeMappings
               );
               batchStats.push(stats);
             }
@@ -535,7 +550,8 @@ export class DataVisualizer {
               samplerShardSize,
               timeFieldName,
               earliestMs,
-              latestMs
+              latestMs,
+              runtimeMappings
             );
             break;
           case ML_JOB_FIELD_TYPES.DATE:
@@ -546,7 +562,8 @@ export class DataVisualizer {
               samplerShardSize,
               timeFieldName,
               earliestMs,
-              latestMs
+              latestMs,
+              runtimeMappings
             );
             break;
           case ML_JOB_FIELD_TYPES.BOOLEAN:
@@ -557,7 +574,8 @@ export class DataVisualizer {
               samplerShardSize,
               timeFieldName,
               earliestMs,
-              latestMs
+              latestMs,
+              runtimeMappings
             );
             break;
           case ML_JOB_FIELD_TYPES.TEXT:
@@ -573,7 +591,8 @@ export class DataVisualizer {
                   timeFieldName,
                   earliestMs,
                   latestMs,
-                  maxExamples
+                  maxExamples,
+                  runtimeMappings
                 );
                 batchStats.push(stats);
               })
@@ -596,7 +615,8 @@ export class DataVisualizer {
     timeFieldName: string,
     earliestMs?: number,
     latestMs?: number,
-    datafeedConfig?: Datafeed
+    datafeedConfig?: Datafeed,
+    runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -606,7 +626,14 @@ export class DataVisualizer {
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
-    const runtimeMappings: any = {};
+
+    // Combine runtime fields from the index pattern as well as the datafeed
+    const combinedRuntimeMappings: RuntimeMappings = {
+      ...(isPopulatedObject(runtimeMappings) ? runtimeMappings : {}),
+      ...(isPopulatedObject(datafeedConfig) && isPopulatedObject(datafeedConfig.runtime_mappings)
+        ? datafeedConfig.runtime_mappings
+        : {}),
+    };
 
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
@@ -619,11 +646,6 @@ export class DataVisualizer {
         cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
           cardinality: { script: datafeedConfig?.script_fields[field].script },
         };
-      } else if (datafeedConfig?.runtime_mappings?.hasOwnProperty(field)) {
-        cardinalityField = {
-          cardinality: { field },
-        };
-        runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
       } else {
         cardinalityField = {
           cardinality: { field },
@@ -638,8 +660,10 @@ export class DataVisualizer {
           filter: filterCriteria,
         },
       },
-      aggs: buildSamplerAggregation(aggs, samplerShardSize),
-      ...runtimeMappings,
+      ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
+      ...(isPopulatedObject(combinedRuntimeMappings)
+        ? { runtime_mappings: combinedRuntimeMappings }
+        : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -648,7 +672,9 @@ export class DataVisualizer {
       size,
       body: searchBody,
     });
+
     const aggregations = body.aggregations;
+    // @ts-expect-error incorrect search response type
     const totalCount = body.hits.total.value;
     const stats = {
       totalCount,
@@ -714,7 +740,8 @@ export class DataVisualizer {
     field: string,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -726,6 +753,7 @@ export class DataVisualizer {
           filter: filterCriteria,
         },
       },
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
     filterCriteria.push({ exists: { field } });
 
@@ -734,6 +762,7 @@ export class DataVisualizer {
       size,
       body: searchBody,
     });
+    // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;
   }
 
@@ -743,7 +772,8 @@ export class DataVisualizer {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    intervalMs: number
+    intervalMs: number,
+    runtimeMappings: RuntimeMappings
   ): Promise<DocumentCountStats> {
     const index = indexPatternTitle;
     const size = 0;
@@ -769,6 +799,7 @@ export class DataVisualizer {
         },
       },
       aggs,
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -803,7 +834,8 @@ export class DataVisualizer {
     samplerShardSize: number,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -872,6 +904,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -951,7 +984,8 @@ export class DataVisualizer {
     samplerShardSize: number,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -993,6 +1027,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -1041,7 +1076,8 @@ export class DataVisualizer {
     samplerShardSize: number,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -1067,6 +1103,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -1107,7 +1144,8 @@ export class DataVisualizer {
     samplerShardSize: number,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -1134,6 +1172,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -1175,7 +1214,8 @@ export class DataVisualizer {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    maxExamples: number
+    maxExamples: number,
+    runtimeMappings?: RuntimeMappings
   ): Promise<FieldExamples> {
     const index = indexPatternTitle;
 
@@ -1197,6 +1237,7 @@ export class DataVisualizer {
           filter: filterCriteria,
         },
       },
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -1208,6 +1249,7 @@ export class DataVisualizer {
       fieldName: field,
       examples: [] as any[],
     };
+    // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       const hits = body.hits.hits;
       for (let i = 0; i < hits.length; i++) {

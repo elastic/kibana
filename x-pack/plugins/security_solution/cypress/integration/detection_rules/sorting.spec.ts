@@ -12,6 +12,8 @@ import {
   SECOND_RULE,
   RULE_AUTO_REFRESH_IDLE_MODAL,
   FOURTH_RULE,
+  RULES_TABLE,
+  pageSelector,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -21,12 +23,14 @@ import {
 } from '../../tasks/alerts';
 import {
   activateRule,
+  changeRowsPerPageTo,
   checkAllRulesIdleModal,
   checkAutoRefresh,
   dismissAllRulesIdleModal,
+  goToPage,
   resetAllRulesIdleModalTimeout,
   sortByActivatedRules,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
+  waitForRulesTableToBeLoaded,
   waitForRuleToBeActivated,
 } from '../../tasks/alerts_detection_rules';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -49,12 +53,9 @@ describe('Alerts detection rules', () => {
     createCustomRule(newThresholdRule, '4');
   });
 
-  after(() => {
-    cy.clock().invoke('restore');
-  });
-
   it('Sorts by activated rules', () => {
     goToManageAlertsDetectionRules();
+    waitForRulesTableToBeLoaded();
 
     cy.get(RULE_NAME)
       .eq(SECOND_RULE)
@@ -88,15 +89,50 @@ describe('Alerts detection rules', () => {
       });
   });
 
-  // FIXME: UI hangs on loading
-  it.skip('Auto refreshes rules', () => {
+  it('Pagination updates page number and results', () => {
+    createCustomRule({ ...newRule, name: 'Test a rule' }, '5');
+    createCustomRule({ ...newRule, name: 'Not same as first rule' }, '6');
+
+    goToManageAlertsDetectionRules();
+    waitForRulesTableToBeLoaded();
+
+    changeRowsPerPageTo(5);
+
+    const FIRST_PAGE_SELECTOR = pageSelector(1);
+    const SECOND_PAGE_SELECTOR = pageSelector(2);
+
+    cy.get(RULES_TABLE)
+      .find(FIRST_PAGE_SELECTOR)
+      .should('have.class', 'euiPaginationButton-isActive');
+
+    cy.get(RULES_TABLE)
+      .find(RULE_NAME)
+      .first()
+      .invoke('text')
+      .then((ruleNameFirstPage) => {
+        goToPage(2);
+        cy.get(RULES_TABLE)
+          .find(RULE_NAME)
+          .first()
+          .invoke('text')
+          .should((ruleNameSecondPage) => {
+            expect(ruleNameFirstPage).not.to.eq(ruleNameSecondPage);
+          });
+      });
+
+    cy.get(RULES_TABLE)
+      .find(FIRST_PAGE_SELECTOR)
+      .should('not.have.class', 'euiPaginationButton-isActive');
+    cy.get(RULES_TABLE)
+      .find(SECOND_PAGE_SELECTOR)
+      .should('have.class', 'euiPaginationButton-isActive');
+  });
+
+  it('Auto refreshes rules', () => {
     cy.clock(Date.now());
 
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
 
     // mock 1 minute passing to make sure refresh
     // is conducted
@@ -105,7 +141,7 @@ describe('Alerts detection rules', () => {
     // mock 45 minutes passing to check that idle modal shows
     // and refreshing is paused
     checkAllRulesIdleModal('be.visible');
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.be.visible');
+    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
 
     // clicking on modal to continue, should resume refreshing
     dismissAllRulesIdleModal();
@@ -115,7 +151,5 @@ describe('Alerts detection rules', () => {
     // show after 45 min
     resetAllRulesIdleModalTimeout();
     cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
-
-    cy.clock().invoke('restore');
   });
 });

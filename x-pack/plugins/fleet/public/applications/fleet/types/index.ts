@@ -49,6 +49,7 @@ export {
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
+  GetPackagePoliciesResponse,
   // API schemas - Data streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -87,6 +88,7 @@ export {
   PutSettingsResponse,
   // API schemas - app
   CheckPermissionsResponse,
+  GenerateServiceTokenResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
@@ -122,6 +124,7 @@ export {
   InstallationStatus,
   Installable,
   RegistryRelease,
+  PackageSpecCategory,
 } from '../../../../common';
 
 export * from './intra_app_route_state';

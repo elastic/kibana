@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VectorLayer } from '../vector_layer/vector_layer';
+import { IVectorLayer, VectorLayer } from '../vector_layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
@@ -22,9 +22,9 @@ import {
   LAYER_STYLE_TYPE,
   FIELD_ORIGIN,
 } from '../../../../common/constants';
+import { isTotalHitsGreaterThan, TotalHits } from '../../../../common/elasticsearch_util';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { IVectorLayer } from '../vector_layer/vector_layer';
 import { IESSource } from '../../sources/es_source';
 import { ISource } from '../../sources/source';
 import { DataRequestContext } from '../../../actions';
@@ -169,6 +169,7 @@ function getClusterStyleDescriptor(
 }
 
 export interface BlendedVectorLayerArguments {
+  chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
 }
@@ -205,7 +206,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       this._documentStyle,
       this._clusterSource
     );
-    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
+    this._clusterStyle = new VectorStyle(
+      clusterStyleDescriptor,
+      this._clusterSource,
+      this,
+      options.chartsPaletteServiceGetColor
+    );
 
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
@@ -293,10 +299,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       this.getSource(),
       this.getCurrentStyle()
     );
+    const source = this.getSource();
     const canSkipFetch = await canSkipSourceUpdate({
-      source: this.getSource(),
+      source,
       prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
+      extentAware: source.isFilterByMapBounds(),
     });
 
     let activeSource;
@@ -316,13 +324,18 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
         syncContext.startLoading(dataRequestId, requestToken, searchFilters);
         const abortController = new AbortController();
         syncContext.registerCancelCallback(requestToken, () => abortController.abort());
+        const maxResultWindow = await this._documentSource.getMaxResultWindow();
         const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
+        searchSource.setField('trackTotalHits', maxResultWindow + 1);
         const resp = await searchSource.fetch({
           abortSignal: abortController.signal,
           sessionId: syncContext.dataFilters.searchSessionId,
+          legacyHitsTotal: false,
         });
-        const maxResultWindow = await this._documentSource.getMaxResultWindow();
-        isSyncClustered = resp.hits.total > maxResultWindow;
+        isSyncClustered = isTotalHitsGreaterThan(
+          (resp.hits.total as unknown) as TotalHits,
+          maxResultWindow
+        );
         const countData = { isSyncClustered } as CountData;
         syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
       } catch (error) {

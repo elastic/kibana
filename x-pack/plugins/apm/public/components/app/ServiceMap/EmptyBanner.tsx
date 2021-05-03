@@ -8,12 +8,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
 import { useTheme } from '../../../hooks/use_theme';
 
-const EmptyBannerContainer = styled.div`
+const EmptyBannerContainer = euiStyled.div`
   margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
   /* Add some extra margin so it displays to the right of the controls. */
   left: calc(

@@ -19,7 +19,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -31,48 +30,42 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export function Modal(props) {
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={props.close} maxWidth={860} data-test-subj="mlModalForecast">
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastingTitle"
-              defaultMessage="Forecasting"
-            />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+    <EuiModal onClose={props.close} maxWidth={860} data-test-subj="mlModalForecast">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastingTitle"
+            defaultMessage="Forecasting"
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-        <EuiModalBody>
-          {props.messages.map((message, i) => (
-            <React.Fragment key={i}>
-              <MessageCallOut {...message} />
-              <EuiSpacer size="m" />
-            </React.Fragment>
-          ))}
+      <EuiModalBody>
+        {props.messages.map((message, i) => (
+          <React.Fragment key={i}>
+            <MessageCallOut {...message} />
+            <EuiSpacer size="m" />
+          </React.Fragment>
+        ))}
 
-          {props.forecasts.length > 0 && (
-            <React.Fragment>
-              <ForecastsList forecasts={props.forecasts} viewForecast={props.viewForecast} />
-              <EuiSpacer />
-            </React.Fragment>
-          )}
-          <RunControls {...props} />
-        </EuiModalBody>
+        {props.forecasts.length > 0 && (
+          <React.Fragment>
+            <ForecastsList forecasts={props.forecasts} viewForecast={props.viewForecast} />
+            <EuiSpacer />
+          </React.Fragment>
+        )}
+        <RunControls {...props} />
+      </EuiModalBody>
 
-        <EuiModalFooter>
-          <EuiButtonEmpty
-            onClick={props.close}
-            size="s"
-            data-test-subj="mlModalForecastButtonClose"
-          >
-            <FormattedMessage
-              id="xpack.ml.timeSeriesExplorer.forecastingModal.closeButtonLabel"
-              defaultMessage="Close"
-            />
-          </EuiButtonEmpty>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={props.close} size="s" data-test-subj="mlModalForecastButtonClose">
+          <FormattedMessage
+            id="xpack.ml.timeSeriesExplorer.forecastingModal.closeButtonLabel"
+            defaultMessage="Close"
+          />
+        </EuiButtonEmpty>
+      </EuiModalFooter>
+    </EuiModal>
   );
 }
 

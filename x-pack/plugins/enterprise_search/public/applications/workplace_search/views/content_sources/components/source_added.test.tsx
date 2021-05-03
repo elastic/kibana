@@ -7,12 +7,12 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockActions } from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { useLocation } from 'react-router-dom';
+
+import { shallow } from 'enzyme';
 
 import { Loading } from '../../../../shared/loading';
 
@@ -20,9 +20,11 @@ import { SourceAdded } from './source_added';
 
 describe('SourceAdded', () => {
   const saveSourceParams = jest.fn();
+  const setChromeIsVisible = jest.fn();
 
   beforeEach(() => {
     setMockActions({ saveSourceParams });
+    setMockValues({ setChromeIsVisible });
   });
 
   it('renders', () => {
@@ -32,5 +34,6 @@ describe('SourceAdded', () => {
 
     expect(wrapper.find(Loading)).toHaveLength(1);
     expect(saveSourceParams).toHaveBeenCalled();
+    expect(setChromeIsVisible).toHaveBeenCalled();
   });
 });

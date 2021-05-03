@@ -8,7 +8,8 @@
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { licensingMock } from '../../../../../licensing/public/mocks';
 import { homePluginMock } from '../../../../../../../src/plugins/home/public/mocks';
-import { MockedFleetSetupDeps, MockedFleetStartDeps } from './types';
+
+import type { MockedFleetSetupDeps, MockedFleetStartDeps } from './types';
 
 export const createSetupDepsMock = (): MockedFleetSetupDeps => {
   return {

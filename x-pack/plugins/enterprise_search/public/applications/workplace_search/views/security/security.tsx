@@ -20,18 +20,15 @@ import {
   EuiSpacer,
   EuiPanel,
   EuiConfirmModal,
-  EuiOverlayMask,
 } from '@elastic/eui';
 
-import { LicensingLogic } from '../../../shared/licensing';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { LicenseCallout } from '../../components/shared/license_callout';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { LicensingLogic } from '../../../shared/licensing';
 import { Loading } from '../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+import { LicenseCallout } from '../../components/shared/license_callout';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { SecurityLogic } from './security_logic';
-
-import { PrivateSourcesTable } from './components/private_sources_table';
-
 import {
   SECURITY_UNSAVED_CHANGES_MESSAGE,
   RESET_BUTTON,
@@ -44,7 +41,11 @@ import {
   PRIVATE_PLATINUM_LICENSE_CALLOUT,
   CONFIRM_CHANGES_TEXT,
   PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT,
+  NAV,
 } from '../../constants';
+
+import { PrivateSourcesTable } from './components/private_sources_table';
+import { SecurityLogic } from './security_logic';
 
 export const Security: React.FC = () => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
@@ -71,18 +72,7 @@ export const Security: React.FC = () => {
     initializeSourceRestrictions();
   }, []);
 
-  useEffect(() => {
-    window.onbeforeunload = unsavedChanges ? () => SECURITY_UNSAVED_CHANGES_MESSAGE : null;
-    return () => {
-      window.onbeforeunload = null;
-    };
-  }, [unsavedChanges]);
-
   if (dataLoading) return <Loading />;
-
-  const panelClass = classNames('euiPanel--noShadow', {
-    'euiPanel--disabled': !hasPlatinumLicense,
-  });
 
   const savePrivateSources = () => {
     saveSourceRestrictions();
@@ -122,7 +112,14 @@ export const Security: React.FC = () => {
   );
 
   const allSourcesToggle = (
-    <EuiPanel paddingSize="none" className={panelClass}>
+    <EuiPanel
+      paddingSize="none"
+      hasShadow={false}
+      color="subdued"
+      className={classNames({
+        'euiPanel--disabled': !hasPlatinumLicense,
+      })}
+    >
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiSwitch
@@ -170,27 +167,32 @@ export const Security: React.FC = () => {
   );
 
   const confirmModal = (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={CONFIRM_CHANGES_TEXT}
-        onConfirm={savePrivateSources}
-        onCancel={hideConfirmModal}
-        buttonColor="primary"
-        cancelButtonText={KEEP_EDITING_BUTTON}
-        confirmButtonText={SAVE_CHANGES_BUTTON}
-      >
-        {PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={CONFIRM_CHANGES_TEXT}
+      onConfirm={savePrivateSources}
+      onCancel={hideConfirmModal}
+      buttonColor="primary"
+      cancelButtonText={KEEP_EDITING_BUTTON}
+      confirmButtonText={SAVE_CHANGES_BUTTON}
+    >
+      {PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT}
+    </EuiConfirmModal>
   );
 
   return (
     <>
+      <SetPageChrome trail={[NAV.SECURITY]} />
       <FlashMessages />
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={unsavedChanges}
+        messageText={SECURITY_UNSAVED_CHANGES_MESSAGE}
+      />
       {header}
-      {allSourcesToggle}
-      {!hasPlatinumLicense && platinumLicenseCallout}
-      {sourceTables}
+      <EuiPanel color="subdued" hasBorder={false}>
+        {allSourcesToggle}
+        {!hasPlatinumLicense && platinumLicenseCallout}
+        {sourceTables}
+      </EuiPanel>
       {confirmModalVisible && confirmModal}
     </>
   );

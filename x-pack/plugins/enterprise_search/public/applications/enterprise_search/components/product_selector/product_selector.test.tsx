@@ -8,11 +8,13 @@
 import { setMockValues } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiPage } from '@elastic/eui';
 
-import { SetupGuideCta } from '../setup_guide';
 import { ProductCard } from '../product_card';
+import { SetupGuideCta } from '../setup_guide';
 
 import { ProductSelector } from './';
 

@@ -8,6 +8,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
+import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
@@ -16,9 +17,11 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
+import { defaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { defaultRowRenderers } from './renderers';
 
 const mockSort: Sort[] = [
   {
@@ -39,8 +42,8 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
-  useDeepEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+  useShallowEqualSelector: () => mockTimelineModel,
+  useDeepEqualSelector: () => mockTimelineModel,
 }));
 
 jest.mock('../../../../common/components/link_to');
@@ -76,12 +79,16 @@ describe('Body', () => {
     loadingEventIds: [],
     pinnedEventIds: {},
     refetch: jest.fn(),
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
     selectedEventIds: {},
     setSelected: (jest.fn() as unknown) as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
+    leadingControlColumns: [defaultControlColumn],
+    trailingControlColumns: [],
   };
 
   describe('rendering', () => {
@@ -240,14 +247,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'query',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -263,14 +271,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'pinned',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -286,14 +295,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'notes',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
   });

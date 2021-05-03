@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
@@ -25,8 +23,6 @@ jest.mock('@elastic/eui', () => {
     EuiScreenReaderOnly: () => <></>,
   };
 });
-
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 const allOthersDataProviderId =
   'draggable-legend-item-527adabe-8e1c-4a1f-965c-2f3d65dda9e1-event_dataset-All others';
@@ -74,11 +70,9 @@ describe('DraggableLegend', () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <DraggableLegend height={height} legendItems={legendItems} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <DraggableLegend height={height} legendItems={legendItems} />
+        </TestProviders>
       );
     });
 
@@ -120,11 +114,9 @@ describe('DraggableLegend', () => {
 
   it('does NOT render the legend when an empty collection of legendItems is provided', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <TestProviders>
-          <DraggableLegend height={height} legendItems={[]} />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <DraggableLegend height={height} legendItems={[]} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="draggable-legend"]').exists()).toBe(false);
@@ -132,11 +124,9 @@ describe('DraggableLegend', () => {
 
   it(`renders a legend with the minimum height when 'height' is zero`, () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <TestProviders>
-          <DraggableLegend height={0} legendItems={legendItems} />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <DraggableLegend height={0} legendItems={legendItems} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(

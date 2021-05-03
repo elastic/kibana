@@ -13,13 +13,14 @@ import { CoreSetup, Plugin, UiSettingsParams } from 'kibana/server';
 
 import { LEGACY_CHARTS_LIBRARY } from '../common';
 
-export const uiSettingsConfig: Record<string, UiSettingsParams<boolean>> = {
+export const getUiSettingsConfig: () => Record<string, UiSettingsParams<boolean>> = () => ({
   // TODO: Remove this when vis_type_vislib is removed
   // https://github.com/elastic/kibana/issues/56143
   [LEGACY_CHARTS_LIBRARY]: {
     name: i18n.translate('visTypeXy.advancedSettings.visualization.legacyChartsLibrary.name', {
       defaultMessage: 'Legacy charts library',
     }),
+    requiresPageReload: true,
     value: false,
     description: i18n.translate(
       'visTypeXy.advancedSettings.visualization.legacyChartsLibrary.description',
@@ -30,11 +31,11 @@ export const uiSettingsConfig: Record<string, UiSettingsParams<boolean>> = {
     category: ['visualization'],
     schema: schema.boolean(),
   },
-};
+});
 
 export class VisTypeXyServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup) {
-    core.uiSettings.register(uiSettingsConfig);
+    core.uiSettings.register(getUiSettingsConfig());
 
     return {};
   }

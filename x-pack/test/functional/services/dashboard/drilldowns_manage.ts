@@ -5,16 +5,11 @@
  * 2.0.
  */
 
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'createDrilldownFlyout';
 const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'editDrilldownFlyout';
-const DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM =
-  'actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN';
-const DASHBOARD_TO_DASHBOARD_ACTION_WIZARD =
-  'selectedActionFactory-DASHBOARD_TO_DASHBOARD_DRILLDOWN';
-const DASHBOARD_TO_URL_ACTION_LIST_ITEM = 'actionFactoryItem-URL_DRILLDOWN';
-const DASHBOARD_TO_URL_ACTION_WIZARD = 'selectedActionFactory-URL_DRILLDOWN';
 const DESTINATION_DASHBOARD_SELECT = 'dashboardDrilldownSelectDashboard';
 const DRILLDOWN_WIZARD_SUBMIT = 'drilldownWizardSubmit';
 
@@ -24,7 +19,8 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
   const esArchiver = getService('esArchiver');
-
+  const find = getService('find');
+  const browser = getService('browser');
   return new (class DashboardDrilldownsManage {
     readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
@@ -67,7 +63,6 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       destinationDashboardTitle: string;
     }) {
       await this.fillInDrilldownName(drilldownName);
-      await this.selectDashboardToDashboardActionIfNeeded();
       await this.selectDestinationDashboard(destinationDashboardTitle);
     }
 
@@ -81,27 +76,12 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER';
     }) {
       await this.fillInDrilldownName(drilldownName);
-      await this.selectDashboardToURLActionIfNeeded();
       await this.selectTriggerIfNeeded(trigger);
       await this.fillInURLTemplate(destinationURLTemplate);
     }
 
     async fillInDrilldownName(name: string) {
       await testSubjects.setValue('drilldownNameInput', name);
-    }
-
-    async selectDashboardToURLActionIfNeeded() {
-      if (await testSubjects.exists(DASHBOARD_TO_URL_ACTION_LIST_ITEM)) {
-        await testSubjects.click(DASHBOARD_TO_URL_ACTION_LIST_ITEM);
-      }
-      await testSubjects.existOrFail(DASHBOARD_TO_URL_ACTION_WIZARD);
-    }
-
-    async selectDashboardToDashboardActionIfNeeded() {
-      if (await testSubjects.exists(DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM)) {
-        await testSubjects.click(DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM);
-      }
-      await testSubjects.existOrFail(DASHBOARD_TO_DASHBOARD_ACTION_WIZARD);
     }
 
     async selectDestinationDashboard(title: string) {
@@ -116,8 +96,22 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       }
     }
 
+    async eraseInput(maxChars: number) {
+      const keys = [
+        ...Array(maxChars).fill(Key.ARROW_RIGHT),
+        ...Array(maxChars).fill(Key.BACK_SPACE),
+      ];
+      await browser
+        .getActions()
+        .sendKeys(...keys)
+        .perform();
+    }
+
     async fillInURLTemplate(destinationURLTemplate: string) {
-      await testSubjects.setValue('urlInput', destinationURLTemplate);
+      const monaco = await find.byCssSelector('.urlTemplateEditor__container .monaco-editor');
+      await monaco.clickMouseButton();
+      await this.eraseInput(300);
+      await browser.pressKeys(destinationURLTemplate);
     }
 
     async saveChanges() {

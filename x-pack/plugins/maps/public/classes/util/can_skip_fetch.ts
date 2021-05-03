@@ -55,14 +55,15 @@ export async function canSkipSourceUpdate({
   source,
   prevDataRequest,
   nextMeta,
+  extentAware,
 }: {
   source: ISource;
   prevDataRequest: DataRequest | undefined;
   nextMeta: DataMeta;
+  extentAware: boolean;
 }): Promise<boolean> {
   const timeAware = await source.isTimeAware();
   const refreshTimerAware = await source.isRefreshTimerAware();
-  const extentAware = source.isFilterByMapBounds();
   const isFieldAware = source.isFieldAware();
   const isQueryAware = source.isQueryAware();
   const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
@@ -132,11 +133,12 @@ export async function canSkipSourceUpdate({
   }
 
   let updateDueToPrecisionChange = false;
+  let updateDueToExtentChange = false;
+
   if (isGeoGridPrecisionAware) {
     updateDueToPrecisionChange = !_.isEqual(prevMeta.geogridPrecision, nextMeta.geogridPrecision);
   }
 
-  let updateDueToExtentChange = false;
   if (extentAware) {
     updateDueToExtentChange = updateDueToExtent(prevMeta, nextMeta);
   }

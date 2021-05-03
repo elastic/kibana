@@ -10,7 +10,7 @@ import { IUiSettingsClient, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { interval } from 'rxjs';
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   Chart,
   LineAnnotation,
@@ -39,7 +39,7 @@ import {
 } from './index_threshold_api';
 import { AggregationType, Comparator } from '../../../../triggers_actions_ui/public';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../alerts/common/parse_duration';
+import { parseDuration } from '../../../../alerting/common/parse_duration';
 
 const customTheme = () => {
   return {
@@ -202,6 +202,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   if (loadingState === LoadingStateType.FirstLoad) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="firstLoad"
         title={<EuiLoadingChart size="xl" />}
         body={
           <EuiText color="subdued">
@@ -220,6 +221,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="l" />
         <EuiCallOut
+          data-test-subj="errorCallout"
           title={
             <FormattedMessage
               id="xpack.stackAlerts.threshold.ui.visualization.errorLoadingAlertVisualizationTitle"
@@ -301,7 +303,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
                 <LineAnnotation
                   key={specId}
                   id={specId}
-                  domainType={AnnotationDomainTypes.YDomain}
+                  domainType={AnnotationDomainType.YDomain}
                   dataValues={[{ dataValue: threshold[thresholdIndex], details: specId }]}
                 />
               );
@@ -309,6 +311,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           </Chart>
         ) : (
           <EuiCallOut
+            data-test-subj="noDataCallout"
             size="s"
             title={
               <FormattedMessage

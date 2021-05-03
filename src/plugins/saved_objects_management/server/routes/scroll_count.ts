@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
+import { chain } from 'lodash';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
@@ -30,18 +31,27 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { client } = context.core.savedObjects;
+      const { getClient, typeRegistry } = context.core.savedObjects;
+      const { typesToInclude, searchString, references } = req.body;
 
+      const includedHiddenTypes = chain(typesToInclude)
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value();
+
+      const client = getClient({ includedHiddenTypes });
       const findOptions: SavedObjectsFindOptions = {
-        type: req.body.typesToInclude,
+        type: typesToInclude,
         perPage: 1000,
       };
-      if (req.body.searchString) {
-        findOptions.search = `${req.body.searchString}*`;
+      if (searchString) {
+        findOptions.search = `${searchString}*`;
         findOptions.searchFields = ['title'];
       }
-      if (req.body.references) {
-        findOptions.hasReference = req.body.references;
+      if (references) {
+        findOptions.hasReference = references;
         findOptions.hasReferenceOperator = 'OR';
       }
 
@@ -54,7 +64,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         return accum;
       }, {} as Record<string, number>);
 
-      for (const type of req.body.typesToInclude) {
+      for (const type of typesToInclude) {
         if (!counts[type]) {
           counts[type] = 0;
         }

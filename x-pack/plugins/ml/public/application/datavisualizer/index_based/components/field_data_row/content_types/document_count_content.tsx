@@ -6,20 +6,21 @@
  */
 
 import React, { FC } from 'react';
-
-import type { FieldDataRowProps } from '../../../../stats_table/types/field_data_row';
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../../total_count_header';
+import { FieldVisConfig, FileBasedFieldVisConfig } from '../../../../stats_table/types';
 
-export interface Props extends FieldDataRowProps {
+export interface Props {
+  config?: FieldVisConfig | FileBasedFieldVisConfig;
   totalCount: number;
 }
 
 export const DocumentCountContent: FC<Props> = ({ config, totalCount }) => {
-  const { stats } = config;
-  if (stats === undefined) return null;
+  if (config?.stats === undefined) {
+    return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
+  }
 
-  const { documentCounts, timeRangeEarliest, timeRangeLatest } = stats;
+  const { documentCounts, timeRangeEarliest, timeRangeLatest } = config.stats;
   if (
     documentCounts === undefined ||
     timeRangeEarliest === undefined ||
@@ -40,6 +41,7 @@ export const DocumentCountContent: FC<Props> = ({ config, totalCount }) => {
         chartPoints={chartPoints}
         timeRangeEarliest={timeRangeEarliest}
         timeRangeLatest={timeRangeLatest}
+        interval={documentCounts.interval}
       />
     </>
   );

@@ -19,11 +19,12 @@ import type {
 } from '../../../plugins/triggers_actions_ui/public';
 import type { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 import type {
-  ObservabilityPluginSetup,
-  ObservabilityPluginStart,
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
 } from '../../observability/public';
 import type { SpacesPluginStart } from '../../spaces/public';
-import { MlPluginStart } from '../../ml/public';
+import { MlPluginStart, MlPluginSetup } from '../../ml/public';
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
@@ -32,20 +33,22 @@ export type InfraClientStartExports = void;
 export interface InfraClientSetupDeps {
   dataEnhanced: DataEnhancedSetup;
   home?: HomePublicPluginSetup;
-  observability: ObservabilityPluginSetup;
+  observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  ml: MlPluginSetup;
   embeddable: EmbeddableSetup;
 }
 
 export interface InfraClientStartDeps {
   data: DataPublicPluginStart;
   dataEnhanced: DataEnhancedStart;
-  observability: ObservabilityPluginStart;
+  observability: ObservabilityPublicStart;
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionStart;
   ml: MlPluginStart;
+  embeddable?: EmbeddableStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { mountWithIntl } from '@kbn/test/jest';
+
 import { SessionIdleTimeoutWarning } from './session_idle_timeout_warning';
 
 describe('SessionIdleTimeoutWarning', () => {

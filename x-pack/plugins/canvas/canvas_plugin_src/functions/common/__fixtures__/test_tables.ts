@@ -205,4 +205,34 @@ const stringTable: Datatable = {
   ],
 };
 
-export { emptyTable, testTable, stringTable };
+const relationalTable: Datatable = {
+  type: 'datatable',
+  columns: [
+    {
+      id: 'id',
+      name: 'id',
+      meta: { type: 'string' },
+    },
+    {
+      id: 'name',
+      name: 'name',
+      meta: { type: 'string' },
+    },
+  ],
+  rows: [
+    {
+      id: '1',
+      name: 'One',
+    },
+    {
+      id: '2',
+      name: 'Two',
+    },
+    {
+      id: '3',
+      name: 'Three',
+    },
+  ],
+};
+
+export { emptyTable, testTable, stringTable, relationalTable };

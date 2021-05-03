@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { mountWithIntl, mockKibanaValues } from '../../../../../__mocks__';
+import { mountWithIntl } from '../../../../../__mocks__';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+
 import { EuiBasicTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
+
+import { runActionColumnTests } from './test_helpers/shared_columns_tests';
 
 import { RecentQueriesTable } from './';
 
 describe('RecentQueriesTable', () => {
-  const { navigateToUrl } = mockKibanaValues;
-
   const items = [
     {
       query_string: 'some search',
@@ -47,9 +48,9 @@ describe('RecentQueriesTable', () => {
     expect(tableContent).toContain('""');
 
     expect(tableContent).toContain('Time');
-    expect(tableContent).toContain('1/3/1970');
-    expect(tableContent).toContain('1/2/1970');
-    expect(tableContent).toContain('1/1/1970');
+    expect(tableContent).toContain('Jan 3, 1970');
+    expect(tableContent).toContain('Jan 2, 1970');
+    expect(tableContent).toContain('Jan 1, 1970');
 
     expect(tableContent).toContain('Analytics tags');
     expect(tableContent).toContain('tagA');
@@ -62,18 +63,9 @@ describe('RecentQueriesTable', () => {
     expect(tableContent).toContain('3');
   });
 
-  it('renders an action column', () => {
+  describe('renders an action column', () => {
     const wrapper = mountWithIntl(<RecentQueriesTable items={items} />);
-    const viewQuery = wrapper.find('[data-test-subj="AnalyticsTableViewQueryButton"]').first();
-    const editQuery = wrapper.find('[data-test-subj="AnalyticsTableEditQueryButton"]').first();
-
-    viewQuery.simulate('click');
-    expect(navigateToUrl).toHaveBeenCalledWith(
-      '/engines/some-engine/analytics/query_detail/some%20search'
-    );
-
-    editQuery.simulate('click');
-    // TODO
+    runActionColumnTests(wrapper);
   });
 
   it('renders an empty prompt if no items are passed', () => {

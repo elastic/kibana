@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
-import { staticSourceData } from '../views/content_sources/source_data';
 import { groups } from './groups.mock';
+
+import { staticSourceData } from '../views/content_sources/source_data';
+import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
 
 export const contentSources = [
   {
@@ -20,7 +21,7 @@ export const contentSources = [
     name: 'source',
     documentCount: '123',
     isFederatedSource: false,
-    errorReason: 0,
+    errorReason: null,
     allowsReauth: true,
     boost: 1,
   },
@@ -34,7 +35,7 @@ export const contentSources = [
     name: 'Jira',
     documentCount: '34234',
     isFederatedSource: false,
-    errorReason: 0,
+    errorReason: null,
     allowsReauth: true,
     boost: 0.5,
   },

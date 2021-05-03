@@ -12,7 +12,6 @@ import {
   initGetLogEntryCategoryDatasetsRoute,
   initGetLogEntryCategoryDatasetsStatsRoute,
   initGetLogEntryCategoryExamplesRoute,
-  initGetLogEntryRateRoute,
   initGetLogEntryExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
@@ -27,14 +26,13 @@ import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initNodeDetailsRoute } from './routes/node_details';
 import {
-  initLogEntriesRoute,
   initLogEntriesHighlightsRoute,
   initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
-import { initSourceRoute } from './routes/source';
+import { initMetricsSourceConfigurationRoutes } from './routes/metrics_sources';
 import { initOverviewRoute } from './routes/overview';
 import { initAlertPreviewRoute } from './routes/alerting';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
@@ -46,17 +44,15 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initGetLogEntryCategoryDatasetsRoute(libs);
   initGetLogEntryCategoryDatasetsStatsRoute(libs);
   initGetLogEntryCategoryExamplesRoute(libs);
-  initGetLogEntryRateRoute(libs);
   initGetLogEntryAnomaliesRoute(libs);
   initGetLogEntryAnomaliesDatasetsRoute(libs);
   initGetK8sAnomaliesRoute(libs);
   initGetHostsAnomaliesRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
-  initSourceRoute(libs);
+  initMetricsSourceConfigurationRoutes(libs);
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
-  initLogEntriesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);

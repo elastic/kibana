@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { NewAgentActionSchema } from '../models';
 
 export const GetAgentsRequestSchema = {
@@ -171,7 +172,8 @@ export const PostAgentUnenrollRequestSchema = {
   }),
   body: schema.nullable(
     schema.object({
-      force: schema.boolean(),
+      force: schema.maybe(schema.boolean()),
+      revoke: schema.maybe(schema.boolean()),
     })
   ),
 };
@@ -180,6 +182,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     force: schema.maybe(schema.boolean()),
+    revoke: schema.maybe(schema.boolean()),
   }),
 };
 

@@ -7,11 +7,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import type { IAggType } from 'src/plugins/data/public';
-import type {
+import {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
@@ -23,8 +24,9 @@ import { ColumnState } from './visualization';
 
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
 import type { DatatableRender } from './components/types';
+import { transposeTable } from './transpose_helpers';
 
-interface Args {
+export interface Args {
   title: string;
   description?: string;
   columns: Array<ColumnState & { type: 'lens_datatable_column' }>;
@@ -34,6 +36,7 @@ interface Args {
 
 export interface DatatableProps {
   data: LensMultiTable;
+  untransposedData?: LensMultiTable;
   args: Args;
 }
 
@@ -78,6 +81,7 @@ export const getDatatable = ({
     },
   },
   fn(data, args, context) {
+    let untransposedData: LensMultiTable | undefined;
     // do the sorting at this level to propagate it also at CSV download
     const [firstTable] = Object.values(data.tables);
     const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
@@ -86,6 +90,15 @@ export const getDatatable = ({
     firstTable.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);
     });
+
+    const hasTransposedColumns = args.columns.some((c) => c.isTransposed);
+    if (hasTransposedColumns) {
+      // store original shape of data separately
+      untransposedData = cloneDeep(data);
+      // transposes table and args inplace
+      transposeTable(args, firstTable, formatters);
+    }
+
     const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
     const columnsReverseLookup = firstTable.columns.reduce<
@@ -95,7 +108,7 @@ export const getDatatable = ({
       return memo;
     }, {});
 
-    if (sortBy && sortDirection !== 'none') {
+    if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
       // Sort on raw values for these types, while use the formatted value for the rest
       const sortingCriteria = getSortingCriteria(
         isRange(columnsReverseLookup[sortBy]?.meta)
@@ -111,12 +124,16 @@ export const getDatatable = ({
         .sort(sortingCriteria);
       // replace also the local copy
       firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
+    } else {
+      args.sortingColumnId = undefined;
+      args.sortingDirection = 'none';
     }
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
         data,
+        untransposedData,
         args,
       },
     };
@@ -138,8 +155,11 @@ export const datatableColumn: ExpressionFunctionDefinition<
   inputTypes: ['null'],
   args: {
     columnId: { types: ['string'], help: '' },
+    alignment: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
+    isTransposed: { types: ['boolean'], help: '' },
+    transposable: { types: ['boolean'], help: '' },
   },
   fn: function fn(input: unknown, args: ColumnState) {
     return {

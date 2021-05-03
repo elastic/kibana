@@ -23,15 +23,18 @@ const INITIAL_DATA = {
 
 export function useTransactionDistributionFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
   const {
-    start,
-    end,
-    transactionType,
-    transactionId,
-    traceId,
-    transactionName,
-  } = urlParams;
+    urlParams: {
+      environment,
+      kuery,
+      start,
+      end,
+      transactionType,
+      transactionId,
+      traceId,
+      transactionName,
+    },
+  } = useUrlParams();
 
   const history = useHistory();
   const { data = INITIAL_DATA, status, error } = useFetcher(
@@ -45,13 +48,14 @@ export function useTransactionDistributionFetcher() {
               serviceName,
             },
             query: {
+              environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
               transactionId,
               traceId,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
@@ -92,7 +96,15 @@ export function useTransactionDistributionFetcher() {
     },
     // the histogram should not be refetched if the transactionId or traceId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [serviceName, start, end, transactionType, transactionName, uiFilters]
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+    ]
   );
 
   return {

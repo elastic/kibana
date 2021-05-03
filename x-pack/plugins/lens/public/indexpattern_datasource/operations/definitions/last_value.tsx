@@ -15,7 +15,7 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
@@ -105,6 +105,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       label: ofName(field.displayName),
       sourceField: field.name,
       params: newParams,
+      scale: field.type === 'string' ? 'ordinal' : 'ratio',
     };
   },
   getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
@@ -160,11 +161,14 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
+      filter: previousColumn?.filter,
       params: {
         sortField,
+        ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },
+  filterable: true,
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
       id: columnId,

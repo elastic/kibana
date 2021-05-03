@@ -8,15 +8,17 @@
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { shallow } from 'enzyme';
+
 import { Route, Switch } from 'react-router-dom';
+
+import { shallow } from 'enzyme';
 
 import { AnalyticsRouter } from './';
 
 describe('AnalyticsRouter', () => {
   // Detailed route testing is better done via E2E tests
   it('renders', () => {
-    const wrapper = shallow(<AnalyticsRouter engineBreadcrumb={['Engines', 'some-engine']} />);
+    const wrapper = shallow(<AnalyticsRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
     expect(wrapper.find(Route)).toHaveLength(9);

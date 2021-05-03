@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useLinks } from '../../hooks';
 import { useStartServices } from '../../../../hooks';
 

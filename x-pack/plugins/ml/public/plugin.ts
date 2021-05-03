@@ -47,6 +47,12 @@ import { registerFeature } from './register_feature';
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 import type { MapsStartApi } from '../../maps/public';
 import { LensPublicStart } from '../../lens/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
+import { FileDataVisualizerPluginStart } from '../../file_data_visualizer/public';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerWithMaps } from './maps/register_with_maps';
 
 export interface MlStartDependencies {
@@ -58,7 +64,10 @@ export interface MlStartDependencies {
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
   lens?: LensPublicStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  fileDataVisualizer: FileDataVisualizerPluginStart;
 }
+
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
@@ -70,6 +79,8 @@ export interface MlSetupDependencies {
   kibanaVersion: string;
   share: SharePluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
+  alerting?: AlertingSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -111,6 +122,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             uiActions: pluginsStart.uiActions,
             lens: pluginsStart.lens,
             kibanaVersion,
+            triggersActionsUi: pluginsStart.triggersActionsUi,
+            fileDataVisualizer: pluginsStart.fileDataVisualizer,
           },
           params
         );
@@ -151,6 +164,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerManagementSection,
         registerMlUiActions,
         registerSearchLinks,
+        registerMlAlerts,
       } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
@@ -166,6 +180,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
+
+          const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
+          if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
+            registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+          }
         }
       }
     });
@@ -175,7 +194,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     };
   }
 
-  start(core: CoreStart, deps: any) {
+  start(core: CoreStart, deps: MlStartDependencies) {
     registerWithMaps(deps.maps);
     setDependencyCache({
       docLinks: core.docLinks!,
@@ -183,6 +202,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       http: core.http,
       i18n: core.i18n,
     });
+
     return {
       urlGenerator: this.urlGenerator,
     };

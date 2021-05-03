@@ -11,6 +11,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
+import { useUiTracker } from '../../../../../observability/public';
 
 export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration,
@@ -20,8 +21,10 @@ export const useLogAnalysisModule = <JobType extends string>({
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { spaceId, sourceId, timestampField } = sourceConfiguration;
+  const { spaceId, sourceId, timestampField, runtimeMappings } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
+
+  const trackMetric = useUiTracker({ app: 'infra_logs' });
 
   const [, fetchJobStatus] = useTrackedPromise(
     {
@@ -64,6 +67,7 @@ export const useLogAnalysisModule = <JobType extends string>({
             sourceId,
             spaceId,
             timestampField,
+            runtimeMappings,
           },
           services.http.fetch
         );
@@ -75,6 +79,25 @@ export const useLogAnalysisModule = <JobType extends string>({
         return { setupResult, jobSummaries };
       },
       onResolve: ({ setupResult: { datafeeds, jobs }, jobSummaries }) => {
+        // Track failures
+        if (
+          [...datafeeds, ...jobs]
+            .reduce<string[]>((acc, resource) => [...acc, ...Object.keys(resource)], [])
+            .some((key) => key === 'error')
+        ) {
+          const reasons = [...datafeeds, ...jobs]
+            .filter((resource) => resource.error !== undefined)
+            .map((resource) => resource.error?.error?.reason ?? '');
+          // NOTE: Lack of indices and a missing field mapping have the same error
+          if (
+            reasons.filter((reason) => reason.includes('because it has no mappings')).length > 0
+          ) {
+            trackMetric({ metric: 'logs_ml_setup_error_bad_indices_or_mappings' });
+          } else {
+            trackMetric({ metric: 'logs_ml_setup_error_unknown_cause' });
+          }
+        }
+
         dispatchModuleStatus({
           type: 'finishedSetup',
           datafeedSetupResults: datafeeds,
@@ -84,8 +107,11 @@ export const useLogAnalysisModule = <JobType extends string>({
           sourceId,
         });
       },
-      onReject: () => {
+      onReject: (e: any) => {
         dispatchModuleStatus({ type: 'failedSetup' });
+        if (e?.body?.statusCode === 403) {
+          trackMetric({ metric: 'logs_ml_setup_error_lack_of_privileges' });
+        }
       },
     },
     [moduleDescriptor.setUpModule, spaceId, sourceId, timestampField]

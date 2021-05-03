@@ -44,6 +44,14 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail409(!overwrite || spaceId !== SPACE_1_ID) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail409(!overwrite || spaceId !== SPACE_2_ID) },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+      ...fail409(!overwrite || spaceId !== DEFAULT_SPACE_ID),
+    },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
+      ...fail409(!overwrite || spaceId !== SPACE_1_ID),
+    },
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     { ...CASES.HIDDEN, ...fail400() },
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
@@ -57,9 +65,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions } = createTestSuiteFactory(es, esArchiver, supertest);
+  const { addTests, createTestDefinitions } = createTestSuiteFactory(esArchiver, supertest);
   const createTests = (overwrite: boolean, spaceId: string) => {
     const testCases = createTestCases(overwrite, spaceId);
     return createTestDefinitions(testCases, false, overwrite, { spaceId });

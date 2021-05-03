@@ -25,6 +25,8 @@ import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_wit
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { DiscoverProps } from './types';
 import { RequestAdapter } from '../../../../inspector/common';
+import { Subject } from 'rxjs';
+import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 
 const mockNavigation = navigationPluginMock.createStartContract();
 
@@ -60,6 +62,7 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
     fetch: jest.fn(),
     fetchCounter: 0,
     fetchError: undefined,
+    fetchStatus: 'loading',
     fieldCounts: calcFieldCounts({}, esHits, indexPattern),
     hits: esHits.length,
     indexPattern,
@@ -73,8 +76,10 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
       indexPatternList: (indexPattern as unknown) as Array<SavedObject<IndexPatternAttributes>>,
       inspectorAdapters: { requests: {} as RequestAdapter },
       navigateTo: jest.fn(),
+      refetch$: {} as Subject<undefined>,
       sampleSize: 10,
       savedSearch: savedSearchMock,
+      searchSessionManager: {} as DiscoverSearchSessionManager,
       setHeaderActionMenu: jest.fn(),
       timefield: indexPattern.timeFieldName || '',
       setAppState: jest.fn(),
@@ -86,7 +91,6 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
     rows: esHits,
     searchSource: searchSourceMock,
     state: { columns: [] },
-    updateQuery: jest.fn(),
   };
 }
 

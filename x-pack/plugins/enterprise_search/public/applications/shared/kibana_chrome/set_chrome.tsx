@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+
 import { useValues } from 'kea';
 
 import { KibanaLogic } from '../kibana';

@@ -51,6 +51,8 @@ export const tagCloudVisTypeDefinition = {
           '!derivative',
           '!geo_bounds',
           '!geo_centroid',
+          '!filtered_metric',
+          '!single_percentile',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

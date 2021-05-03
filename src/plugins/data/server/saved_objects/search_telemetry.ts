@@ -7,6 +7,7 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
+import { migrate712 } from './migrations/to_v7_12_0';
 
 export const searchTelemetry: SavedObjectsType = {
   name: 'search-telemetry',
@@ -15,5 +16,8 @@ export const searchTelemetry: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {},
+  },
+  migrations: {
+    '7.12.0': migrate712,
   },
 };

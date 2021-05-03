@@ -17,6 +17,7 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
+import { getFormatFromPreviousColumn } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -65,29 +66,34 @@ export const counterRateOperation: OperationDefinition<
   },
   getDefaultLabel: (column, indexPattern, columns) => {
     const ref = columns[column.references[0]];
-    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
+    return ofName(
+      ref && 'sourceField' in ref
+        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        : undefined,
+      column.timeScale
+    );
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }) => {
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
     return {
-      label: ofName(metric && 'sourceField' in metric ? metric.sourceField : undefined, timeScale),
+      label: ofName(
+        metric && 'sourceField' in metric
+          ? indexPattern.getFieldByName(metric.sourceField)?.displayName
+          : undefined,
+        timeScale
+      ),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format }
-          : undefined,
+      filter: previousColumn?.filter,
+      params: getFormatFromPreviousColumn(previousColumn),
     };
   },
   isTransferable: (column, newIndexPattern) => {
@@ -111,4 +117,5 @@ export const counterRateOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'mandatory',
+  filterable: true,
 };

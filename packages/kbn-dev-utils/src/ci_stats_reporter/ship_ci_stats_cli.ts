@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { CiStatsReporter } from './ci_stats_reporter';
-import { run, createFlagError } from '../run';
+import { run, createFlagError, createFailError } from '../run';
 
 export function shipCiStatsCli() {
   run(
@@ -22,13 +22,29 @@ export function shipCiStatsCli() {
         throw createFlagError('expected --metrics to be a string');
       }
 
+      const maybeFail = (message: string) => {
+        const error = createFailError(message);
+        if (process.env.IGNORE_SHIP_CI_STATS_ERROR === 'true') {
+          error.exitCode = 0;
+        }
+        return error;
+      };
+
       const reporter = CiStatsReporter.fromEnv(log);
+
+      if (!reporter.isEnabled()) {
+        throw maybeFail('unable to initilize the CI Stats reporter');
+      }
+
       for (const path of metricPaths) {
         // resolve path from CLI relative to CWD
         const abs = Path.resolve(path);
         const json = Fs.readFileSync(abs, 'utf8');
-        await reporter.metrics(JSON.parse(json));
-        log.success('shipped metrics from', path);
+        if (await reporter.metrics(JSON.parse(json))) {
+          log.success('shipped metrics from', path);
+        } else {
+          throw maybeFail('failed to ship metrics');
+        }
       }
     },
     {

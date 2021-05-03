@@ -48,6 +48,9 @@ export class GeoJsonFileSource extends AbstractVectorSource {
       type: SOURCE_TYPES.GEOJSON_FILE,
       __featureCollection: getFeatureCollection(descriptor.__featureCollection),
       __fields: descriptor.__fields || [],
+      areResultsTrimmed:
+        descriptor.areResultsTrimmed !== undefined ? descriptor.areResultsTrimmed : false,
+      tooltipContent: descriptor.tooltipContent ? descriptor.tooltipContent : null,
       name: descriptor.name || 'Features',
     };
   }
@@ -120,6 +123,13 @@ export class GeoJsonFileSource extends AbstractVectorSource {
 
   canFormatFeatureProperties() {
     return true;
+  }
+
+  getSourceTooltipContent() {
+    return {
+      tooltipContent: (this._descriptor as GeojsonFileSourceDescriptor).tooltipContent,
+      areResultsTrimmed: (this._descriptor as GeojsonFileSourceDescriptor).areResultsTrimmed,
+    };
   }
 }
 

@@ -19,7 +19,9 @@ const MOCKED_PATHS = [
 
 beforeEach(() => {
   const spy = jest.spyOn(fs, 'readFileSync').mockImplementation();
-  MOCKED_PATHS.forEach((file) => when(spy).calledWith(file).mockReturnValue(`contents-of-${file}`));
+  MOCKED_PATHS.forEach((file) =>
+    when(spy).calledWith(file, 'utf8').mockReturnValue(`contents-of-${file}`)
+  );
 });
 
 describe('config schema', () => {
@@ -56,6 +58,9 @@ describe('config schema', () => {
             "enabled": true,
           },
           "container": Object {
+            "apm": Object {
+              "enabled": false,
+            },
             "elasticsearch": Object {
               "enabled": false,
             },

@@ -7,86 +7,45 @@
 
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import { ValuesType } from 'utility-types';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import {
-  asMillisecondDuration,
-  asPercent,
-  asTransactionRate,
-} from '../../../../../common/utils/formatters';
+import uuid from 'uuid';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { px, unit } from '../../../../style/variables';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ImpactBar } from '../../../shared/ImpactBar';
-import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
-
-type ServiceTransactionGroupItem = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>['transactionGroups']
->;
+import { getColumns } from './get_columns';
 
 interface Props {
   serviceName: string;
 }
 
+type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+const INITIAL_STATE = {
+  transactionGroups: [] as ApiResponse['transactionGroups'],
+  isAggregationAccurate: true,
+  requestId: '',
+  transactionGroupsTotalItems: 0,
+};
+
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
 type SortDirection = 'asc' | 'desc';
-
 const PAGE_SIZE = 5;
 const DEFAULT_SORT = {
   direction: 'desc' as const,
   field: 'impact' as const,
 };
 
-function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
-  switch (latencyAggregationType) {
-    case 'avg':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
-        {
-          defaultMessage: 'Latency (avg.)',
-        }
-      );
-
-    case 'p95':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p95',
-        {
-          defaultMessage: 'Latency (95th)',
-        }
-      );
-
-    case 'p99':
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.p99',
-        {
-          defaultMessage: 'Latency (99th)',
-        }
-      );
-  }
-}
-
-export function ServiceOverviewTransactionsTable(props: Props) {
-  const { serviceName } = props;
-  const { transactionType } = useApmServiceContext();
-  const {
-    uiFilters,
-    urlParams: { start, end, latencyAggregationType },
-  } = useUrlParams();
-
+export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -98,167 +57,143 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     sort: DEFAULT_SORT,
   });
 
+  const { pageIndex, sort } = tableOptions;
+  const { direction, field } = sort;
+
+  const { transactionType } = useApmServiceContext();
   const {
-    data = {
-      totalItemCount: 0,
-      items: [],
-      tableOptions: {
-        pageIndex: 0,
-        sort: DEFAULT_SORT,
-      },
+    urlParams: {
+      start,
+      end,
+      latencyAggregationType,
+      comparisonType,
+      comparisonEnabled,
+      environment,
+      kuery,
     },
-    status,
-  } = useFetcher(
+  } = useUrlParams();
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+    comparisonEnabled,
+  });
+
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !latencyAggregationType || !transactionType) {
         return;
       }
-
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/overview',
+          'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
+            environment,
+            kuery,
             start,
             end,
-            uiFilters: JSON.stringify(uiFilters),
-            size: PAGE_SIZE,
-            numBuckets: 20,
-            pageIndex: tableOptions.pageIndex,
-            sortField: tableOptions.sort.field,
-            sortDirection: tableOptions.sort.direction,
             transactionType,
-            latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+            latencyAggregationType,
           },
         },
       }).then((response) => {
+        const currentPageTransactionGroups = orderBy(
+          response.transactionGroups,
+          field,
+          direction
+        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+
         return {
-          items: response.transactionGroups,
-          totalItemCount: response.totalTransactionGroups,
-          tableOptions: {
-            pageIndex: tableOptions.pageIndex,
-            sort: {
-              field: tableOptions.sort.field,
-              direction: tableOptions.sort.direction,
-            },
-          },
+          ...response,
+          // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
+          requestId: uuid(),
+          transactionGroupsTotalItems: response.transactionGroups.length,
+          transactionGroups: currentPageTransactionGroups,
         };
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      environment,
+      kuery,
       serviceName,
       start,
       end,
-      uiFilters,
-      tableOptions.pageIndex,
-      tableOptions.sort.field,
-      tableOptions.sort.direction,
       transactionType,
       latencyAggregationType,
+      pageIndex,
+      direction,
+      field,
+      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
+      comparisonType,
+      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
+      comparisonEnabled,
     ]
   );
 
-  const {
-    items,
-    totalItemCount,
-    tableOptions: { pageIndex, sort },
-  } = data;
+  const { transactionGroups, requestId, transactionGroupsTotalItems } = data;
 
-  const columns: Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> = [
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnName',
-        {
-          defaultMessage: 'Name',
-        }
-      ),
-      render: (_, { name, transactionType: type }) => {
-        return (
-          <TruncateWithTooltip
-            text={name}
-            content={
-              <TransactionDetailLink
-                serviceName={serviceName}
-                transactionName={name}
-                transactionType={type}
-                latencyAggregationType={latencyAggregationType}
-              >
-                {name}
-              </TransactionDetailLink>
-            }
-          />
-        );
-      },
+  const {
+    data: transactionGroupDetailedStatistics,
+    status: transactionGroupDetailedStatisticsStatus,
+  } = useFetcher(
+    (callApmApi) => {
+      if (
+        transactionGroupsTotalItems &&
+        start &&
+        end &&
+        transactionType &&
+        latencyAggregationType
+      ) {
+        return callApmApi({
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              numBuckets: 20,
+              transactionType,
+              latencyAggregationType,
+              transactionNames: JSON.stringify(
+                transactionGroups.map(({ name }) => name).sort()
+              ),
+              comparisonStart,
+              comparisonEnd,
+            },
+          },
+        });
+      }
     },
-    {
-      field: 'latency',
-      name: getLatencyAggregationTypeLabel(latencyAggregationType),
-      width: px(unit * 10),
-      render: (_, { latency }) => {
-        return (
-          <SparkPlot
-            color="euiColorVis1"
-            compact
-            series={latency.timeseries ?? undefined}
-            valueLabel={asMillisecondDuration(latency.value)}
-          />
-        );
-      },
-    },
-    {
-      field: 'throughput',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
-      ),
-      width: px(unit * 10),
-      render: (_, { throughput }) => {
-        return (
-          <SparkPlot
-            color="euiColorVis0"
-            compact
-            series={throughput.timeseries ?? undefined}
-            valueLabel={asTransactionRate(throughput.value)}
-          />
-        );
-      },
-    },
-    {
-      field: 'errorRate',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        {
-          defaultMessage: 'Error rate',
-        }
-      ),
-      width: px(unit * 8),
-      render: (_, { errorRate }) => {
-        return (
-          <SparkPlot
-            color="euiColorVis7"
-            compact
-            series={errorRate.timeseries ?? undefined}
-            valueLabel={asPercent(errorRate.value, 1)}
-          />
-        );
-      },
-    },
-    {
-      field: 'impact',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnImpact',
-        {
-          defaultMessage: 'Impact',
-        }
-      ),
-      width: px(unit * 5),
-      render: (_, { impact }) => {
-        return <ImpactBar value={impact ?? 0} size="m" />;
-      },
-    },
-  ];
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId],
+    { preservePreviousData: false }
+  );
+
+  const columns = getColumns({
+    serviceName,
+    latencyAggregationType,
+    transactionGroupDetailedStatistics,
+    comparisonEnabled,
+  });
+
+  const isLoading =
+    status === FETCH_STATUS.LOADING ||
+    transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
+
+  const pagination = {
+    pageIndex,
+    pageSize: PAGE_SIZE,
+    totalItemCount: transactionGroupsTotalItems,
+    hidePerPageOptions: true,
+  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -295,21 +230,14 @@ export function ServiceOverviewTransactionsTable(props: Props) {
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
             <ServiceOverviewTableContainer
-              isEmptyAndLoading={
-                items.length === 0 && status === FETCH_STATUS.LOADING
-              }
+              isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable
+                loading={isLoading}
+                items={transactionGroups}
                 columns={columns}
-                items={items}
-                pagination={{
-                  pageIndex,
-                  pageSize: PAGE_SIZE,
-                  totalItemCount,
-                  pageSizeOptions: [PAGE_SIZE],
-                  hidePerPageOptions: true,
-                }}
-                loading={status === FETCH_STATUS.LOADING}
+                pagination={pagination}
+                sorting={{ sort: { field, direction } }}
                 onChange={(newTableOptions: {
                   page?: {
                     index: number;
@@ -325,13 +253,6 @@ export function ServiceOverviewTransactionsTable(props: Props) {
                         }
                       : DEFAULT_SORT,
                   });
-                }}
-                sorting={{
-                  enableAllColumns: true,
-                  sort: {
-                    direction: sort.direction,
-                    field: sort.field,
-                  },
                 }}
               />
             </ServiceOverviewTableContainer>

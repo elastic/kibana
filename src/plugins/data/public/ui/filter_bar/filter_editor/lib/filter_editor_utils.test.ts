@@ -123,6 +123,13 @@ describe('Filter editor utils', () => {
       const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
     });
+
+    it('does not return phrase for number_range fields', () => {
+      const [field] = stubFields.filter(({ type }) => type === 'string');
+      const operatorOptions = getOperatorOptions(field);
+      const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
+      expect(rangeOperator).toBeUndefined();
+    });
   });
 
   describe('isFilterValid', () => {

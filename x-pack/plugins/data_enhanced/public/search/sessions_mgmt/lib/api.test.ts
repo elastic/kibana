@@ -13,7 +13,7 @@ import { coreMock } from 'src/core/public/mocks';
 import type { SavedObjectsFindResponse } from 'src/core/server';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import type { SessionsConfigSchema } from '../';
-import { SearchSessionStatus } from '../../../../common/search';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 
@@ -46,7 +46,13 @@ describe('Search Sessions Management API', () => {
           saved_objects: [
             {
               id: 'hello-pizza-123',
-              attributes: { name: 'Veggie', appId: 'pizza', status: 'complete' },
+              attributes: {
+                name: 'Veggie',
+                appId: 'pizza',
+                status: 'complete',
+                initialState: {},
+                restoreState: {},
+              },
             },
           ],
         } as SavedObjectsFindResponse;
@@ -61,6 +67,8 @@ describe('Search Sessions Management API', () => {
         Array [
           Object {
             "actions": Array [
+              "inspect",
+              "rename",
               "extend",
               "delete",
             ],
@@ -68,8 +76,10 @@ describe('Search Sessions Management API', () => {
             "created": undefined,
             "expires": undefined,
             "id": "hello-pizza-123",
+            "initialState": Object {},
             "name": "Veggie",
             "reloadUrl": "hello-cool-undefined-url",
+            "restoreState": Object {},
             "restoreUrl": "hello-cool-undefined-url",
             "status": "complete",
           },
@@ -168,7 +178,7 @@ describe('Search Sessions Management API', () => {
 
   describe('extend', () => {
     beforeEach(() => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
+      sessionsClient.extend = jest.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -188,6 +198,20 @@ describe('Search Sessions Management API', () => {
       });
       await api.sendExtend('my-id', '5d');
 
+      expect(sessionsClient.extend).toHaveBeenCalledTimes(1);
+      expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
+    });
+
+    test('displays error on reject', async () => {
+      sessionsClient.extend = jest.fn().mockRejectedValue({});
+      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        urls: mockUrls,
+        notifications: mockCoreStart.notifications,
+        application: mockCoreStart.application,
+      });
+      await api.sendExtend('my-id', '5d');
+
+      expect(sessionsClient.extend).toHaveBeenCalledTimes(1);
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalled();
     });
   });

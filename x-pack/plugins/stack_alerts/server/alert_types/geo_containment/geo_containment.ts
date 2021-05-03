@@ -6,10 +6,10 @@
  */
 
 import _ from 'lodash';
-import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'src/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import { AlertServices } from '../../../../alerts/server';
+import { AlertServices } from '../../../../alerting/server';
 import {
   ActionGroupId,
   GEO_CONTAINMENT_ID,
@@ -22,7 +22,7 @@ export type LatestEntityLocation = GeoContainmentInstanceState;
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
-  results: SearchResponse<unknown> | undefined,
+  results: estypes.SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
 ): Map<string, LatestEntityLocation[]> {
@@ -148,17 +148,22 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
           params.boundaryIndexTitle,
           params.boundaryGeoField,
           params.geoField,
-          services.callCluster,
+          services.scopedClusterClient.asCurrentUser,
           log,
           alertId,
           params.boundaryNameField,
           params.boundaryIndexQuery
         );
 
-    const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);
+    const executeEsQuery = await executeEsQueryFactory(
+      params,
+      services.scopedClusterClient.asCurrentUser,
+      log,
+      shapesFilters
+    );
 
     // Start collecting data only on the first cycle
-    let currentIntervalResults: SearchResponse<unknown> | undefined;
+    let currentIntervalResults: estypes.SearchResponse<unknown> | undefined;
     if (!currIntervalStartTime) {
       log.debug(`alert ${GEO_CONTAINMENT_ID}:${alertId} alert initialized. Collecting data`);
       // Consider making first time window configurable?
@@ -171,7 +176,8 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     }
 
     const currLocationMap: Map<string, LatestEntityLocation[]> = transformResults(
-      currentIntervalResults,
+      // @ts-expect-error body doesn't exist on currentIntervalResults
+      currentIntervalResults?.body,
       params.dateField,
       params.geoField
     );

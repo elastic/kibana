@@ -13,6 +13,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 export enum HostsFields {
@@ -31,7 +32,7 @@ export interface HostItem {
   cloud?: Maybe<CloudEcs>;
   endpoint?: Maybe<EndpointFields>;
   host?: Maybe<HostEcs>;
-  lastSeen?: Maybe<string>;
+  lastSeen?: Maybe<string[]>;
 }
 
 export interface HostValue {
@@ -69,7 +70,6 @@ export interface HostAggEsItem {
   cloud_machine_type?: HostBuckets;
   cloud_provider?: HostBuckets;
   cloud_region?: HostBuckets;
-  firstSeen?: HostValue;
   host_architecture?: HostBuckets;
   host_id?: HostBuckets;
   host_ip?: HostBuckets;
@@ -79,7 +79,6 @@ export interface HostAggEsItem {
   host_os_version?: HostBuckets;
   host_type?: HostBuckets;
   key?: string;
-  lastSeen?: HostValue;
   os?: HostOsHitsItem;
 }
 

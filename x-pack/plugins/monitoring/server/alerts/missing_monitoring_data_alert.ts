@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -17,7 +18,7 @@ import {
   CommonAlertParams,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN,
   ALERT_MISSING_MONITORING_DATA,
@@ -25,8 +26,8 @@ import {
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
-import { parseDuration } from '../../../alerts/common/parse_duration';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { parseDuration } from '../../../alerting/common/parse_duration';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { AlertingDefaults, createLink } from './alert_helpers';
@@ -66,7 +67,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
   }
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -78,7 +79,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
     const limit = parseDuration(params.limit!);
     const now = +new Date();
     const missingData = await fetchMissingMonitoringData(
-      callCluster,
+      esClient,
       clusters,
       indexPattern,
       Globals.app.config.ui.max_bucket_size,

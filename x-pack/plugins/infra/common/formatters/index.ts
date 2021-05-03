@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Mustache from 'mustache';
 import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
@@ -34,5 +33,5 @@ export const createFormatter = (format: InventoryFormatterType, template: string
   }
   const fmtFn = FORMATTERS[format];
   const value = fmtFn(Number(val));
-  return Mustache.render(template, { value });
+  return template.replace(/{{value}}/g, value);
 };

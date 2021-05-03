@@ -8,14 +8,14 @@
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
+import { UserIcon } from '../../../components/shared/user_icon';
 import { User } from '../../../types';
 
-import { GroupUsers } from './group_users';
 import { GroupRowUsersDropdown } from './group_row_users_dropdown';
-
-import { UserIcon } from '../../../components/shared/user_icon';
+import { GroupUsers } from './group_users';
 
 const props = {
   groupUsers: users,

@@ -27,8 +27,6 @@ import {
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
-  EuiIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -37,7 +35,6 @@ export interface State {
   aggregatable: string;
   type: string;
   missing: boolean;
-  unmappedFields: boolean;
   [index: string]: string | boolean;
 }
 
@@ -61,31 +58,13 @@ export interface Props {
    * use new fields api
    */
   useNewFieldsApi?: boolean;
-
-  /**
-   * callback funtion to change the value of unmapped fields switch
-   * @param value new value to set
-   */
-  onChangeUnmappedFields?: (value: boolean) => void;
-
-  /**
-   * should unmapped fields switch be rendered
-   */
-  showUnmappedFields?: boolean;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({
-  onChange,
-  value,
-  types,
-  useNewFieldsApi,
-  showUnmappedFields,
-  onChangeUnmappedFields,
-}: Props) {
+export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -111,7 +90,6 @@ export function DiscoverFieldSearch({
     aggregatable: 'any',
     type: 'any',
     missing: true,
-    unmappedFields: !!showUnmappedFields,
   });
 
   if (typeof value !== 'string') {
@@ -179,14 +157,6 @@ export function DiscoverFieldSearch({
   const handleMissingChange = (e: EuiSwitchEvent) => {
     const missingValue = e.target.checked;
     handleValueChange('missing', missingValue);
-  };
-
-  const handleUnmappedFieldsChange = (e: EuiSwitchEvent) => {
-    const unmappedFieldsValue = e.target.checked;
-    handleValueChange('unmappedFields', unmappedFieldsValue);
-    if (onChangeUnmappedFields) {
-      onChangeUnmappedFields(unmappedFieldsValue);
-    }
   };
 
   const buttonContent = (
@@ -262,46 +232,16 @@ export function DiscoverFieldSearch({
   };
 
   const footer = () => {
-    if (!showUnmappedFields && useNewFieldsApi) {
-      return null;
-    }
     return (
-      <EuiPopoverFooter>
-        {showUnmappedFields ? (
-          <EuiFlexGroup>
-            <EuiFlexItem component="span">
-              <EuiSwitch
-                label={i18n.translate('discover.fieldChooser.filter.showUnmappedFields', {
-                  defaultMessage: 'Show unmapped fields',
-                })}
-                checked={values.unmappedFields}
-                onChange={handleUnmappedFieldsChange}
-                data-test-subj="unmappedFieldsSwitch"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem component="span" grow={false}>
-              <EuiToolTip
-                position="right"
-                content={i18n.translate('discover.fieldChooser.filter.unmappedFieldsWarning', {
-                  defaultMessage:
-                    'Unmapped fields will be deprecated and removed in a future release.',
-                })}
-              >
-                <EuiIcon type="alert" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null}
-        {useNewFieldsApi ? null : (
-          <EuiSwitch
-            label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
-              defaultMessage: 'Hide missing fields',
-            })}
-            checked={values.missing}
-            onChange={handleMissingChange}
-            data-test-subj="missingSwitch"
-          />
-        )}
+      <EuiPopoverFooter paddingSize="s">
+        <EuiSwitch
+          label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
+            defaultMessage: 'Hide missing fields',
+          })}
+          checked={values.missing}
+          onChange={handleMissingChange}
+          data-test-subj="missingSwitch"
+        />
       </EuiPopoverFooter>
     );
   };
@@ -351,7 +291,7 @@ export function DiscoverFieldSearch({
             }}
             button={buttonContent}
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">
               {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
                 defaultMessage: 'Filter by type',
               })}

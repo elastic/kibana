@@ -27,8 +27,8 @@ export const useSelectedCells = (
 
     let times =
       appState.mlExplorerSwimlane.selectedTimes ?? appState.mlExplorerSwimlane.selectedTime!;
-    if (typeof times === 'number' && bucketIntervalInSeconds) {
-      times = [times, times + bucketIntervalInSeconds];
+    if (typeof times === 'number') {
+      times = [times, times + bucketIntervalInSeconds!];
     }
 
     let lanes =

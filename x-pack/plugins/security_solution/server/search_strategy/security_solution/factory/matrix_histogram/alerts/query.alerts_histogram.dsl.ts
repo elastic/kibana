@@ -85,6 +85,7 @@ export const buildAlertsHistogramQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: true,
     body: {
       aggregations: getHistogramAggregation(),
       query: {
@@ -93,7 +94,6 @@ export const buildAlertsHistogramQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
     },
   };
 

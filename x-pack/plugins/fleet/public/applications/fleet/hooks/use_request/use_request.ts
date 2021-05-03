@@ -6,20 +6,26 @@
  */
 
 import { useState, useEffect } from 'react';
-import { HttpSetup } from 'src/core/public';
+import type { HttpSetup } from 'src/core/public';
+
 import {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig as _UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
+} from '../../../../../../../../src/plugins/es_ui_shared/public';
+import type {
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestConfig,
 } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
 let httpClient: HttpSetup;
 
-export type UseRequestConfig = _UseRequestConfig;
+export type { UseRequestConfig } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
-interface RequestError extends Error {
+/**
+ * @internal
+ */
+export interface RequestError extends Error {
   statusCode?: number;
 }
 

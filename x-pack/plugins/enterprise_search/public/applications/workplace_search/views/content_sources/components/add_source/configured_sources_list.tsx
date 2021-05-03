@@ -21,8 +21,8 @@ import {
 
 import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { SourceDataItem } from '../../../../types';
 import { getSourcesPath } from '../../../../routes';
+import { SourceDataItem } from '../../../../types';
 
 import {
   CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,
@@ -79,16 +79,12 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                     responsive={false}
                   >
                     <EuiFlexItem grow={false}>
-                      <SourceIcon
-                        serviceType={serviceType}
-                        name={name}
-                        className="source-card-configured__icon"
-                      />
+                      <SourceIcon serviceType={serviceType} name={name} size="l" />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText size="s">
                         <h4>
-                          {name}&nbsp;
+                          {name}
                           {!connected &&
                             !accountContextOnly &&
                             isOrganization &&

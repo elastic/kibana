@@ -5,57 +5,26 @@
  * 2.0.
  */
 
+import { eventHit } from '../../../../../../common/utils/mock_event_details';
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
-import { formatTimelineData } from './helpers';
+import { buildObjectForFieldPath, formatTimelineData } from './helpers';
 
 describe('#formatTimelineData', () => {
-  it('happy path', () => {
-    const response: EventHit = {
-      _index: 'auditbeat-7.8.0-2020.11.05-000003',
-      _id: 'tkCt1nUBaEgqnrVSZ8R_',
-      _score: 0,
-      _type: '',
-      fields: {
-        'event.category': ['process'],
-        'process.ppid': [3977],
-        'user.name': ['jenkins'],
-        'process.args': ['go', 'vet', './...'],
-        message: ['Process go (PID: 4313) by user jenkins STARTED'],
-        'process.pid': [4313],
-        'process.working_directory': [
-          '/var/lib/jenkins/workspace/Beats_beats_PR-22624/src/github.com/elastic/beats/libbeat',
-        ],
-        'process.entity_id': ['Z59cIkAAIw8ZoK0H'],
-        'host.ip': ['10.224.1.237', 'fe80::4001:aff:fee0:1ed', '172.17.0.1'],
-        'process.name': ['go'],
-        'event.action': ['process_started'],
-        'agent.type': ['auditbeat'],
-        '@timestamp': ['2020-11-17T14:48:08.922Z'],
-        'event.module': ['system'],
-        'event.type': ['start'],
-        'host.name': ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
-        'process.hash.sha1': ['1eac22336a41e0660fb302add9d97daa2bcc7040'],
-        'host.os.family': ['debian'],
-        'event.kind': ['event'],
-        'host.id': ['e59991e835905c65ed3e455b33e13bd6'],
-        'event.dataset': ['process'],
-        'process.executable': [
-          '/var/lib/jenkins/workspace/Beats_beats_PR-22624/.gvm/versions/go1.14.7.linux.amd64/bin/go',
-        ],
-      },
-      _source: {},
-      sort: ['1605624488922', 'beats-ci-immutable-ubuntu-1804-1605624279743236239'],
-      aggregations: {},
-    };
-
-    expect(
-      formatTimelineData(
-        ['@timestamp', 'host.name', 'destination.ip', 'source.ip'],
-        TIMELINE_EVENTS_FIELDS,
-        response
-      )
-    ).toEqual({
+  it('happy path', async () => {
+    const res = await formatTimelineData(
+      [
+        '@timestamp',
+        'host.name',
+        'destination.ip',
+        'source.ip',
+        'source.geo.location',
+        'threat.indicator.matched.field',
+      ],
+      TIMELINE_EVENTS_FIELDS,
+      eventHit
+    );
+    expect(res).toEqual({
       cursor: {
         tiebreaker: 'beats-ci-immutable-ubuntu-1804-1605624279743236239',
         value: '1605624488922',
@@ -71,6 +40,14 @@ describe('#formatTimelineData', () => {
           {
             field: 'host.name',
             value: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
+          },
+          {
+            field: 'threat.indicator.matched.field',
+            value: ['matched_field', 'other_matched_field', 'matched_field_2'],
+          },
+          {
+            field: 'source.geo.location',
+            value: [`{"lon":118.7778,"lat":32.0617}`],
           },
         ],
         ecs: {
@@ -117,12 +94,40 @@ describe('#formatTimelineData', () => {
           user: {
             name: ['jenkins'],
           },
+          threat: {
+            indicator: [
+              {
+                event: {
+                  dataset: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['matched_atomic'],
+                  field: ['matched_field', 'other_matched_field'],
+                  type: [],
+                },
+                provider: ['yourself'],
+              },
+              {
+                event: {
+                  dataset: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['matched_atomic_2'],
+                  field: ['matched_field_2'],
+                  type: [],
+                },
+                provider: ['other_you'],
+              },
+            ],
+          },
         },
       },
     });
   });
 
-  it('rule signal results', () => {
+  it('rule signal results', async () => {
     const response: EventHit = {
       _index: '.siem-signals-patrykkopycinski-default-000007',
       _id: 'a77040f198355793c35bf22b900902371309be615381f0a2ec92c208b6132562',
@@ -290,7 +295,7 @@ describe('#formatTimelineData', () => {
     };
 
     expect(
-      formatTimelineData(
+      await formatTimelineData(
         ['@timestamp', 'host.name', 'destination.ip', 'source.ip'],
         TIMELINE_EVENTS_FIELDS,
         response
@@ -320,6 +325,7 @@ describe('#formatTimelineData', () => {
           signal: {
             original_time: ['2021-01-09T13:39:32.595Z'],
             status: ['open'],
+            threshold_result: ['{"count":10000,"value":"2a990c11-f61b-4c8e-b210-da2574e9f9db"}'],
             rule: {
               building_block_type: [],
               exceptions_list: [],
@@ -391,6 +397,175 @@ describe('#formatTimelineData', () => {
           },
         },
       },
+    });
+  });
+
+  describe('buildObjectForFieldPath', () => {
+    it('builds an object from a single non-nested field', () => {
+      expect(buildObjectForFieldPath('@timestamp', eventHit)).toEqual({
+        '@timestamp': ['2020-11-17T14:48:08.922Z'],
+      });
+    });
+
+    it('builds an object with no fields response', () => {
+      const { fields, ...fieldLessHit } = eventHit;
+      // @ts-expect-error fieldLessHit is intentionally missing fields
+      expect(buildObjectForFieldPath('@timestamp', fieldLessHit)).toEqual({
+        '@timestamp': [],
+      });
+    });
+
+    it('does not misinterpret non-nested fields with a common prefix', () => {
+      // @ts-expect-error hit is minimal
+      const hit: EventHit = {
+        fields: {
+          'foo.bar': ['baz'],
+          'foo.barBaz': ['foo'],
+        },
+      };
+
+      expect(buildObjectForFieldPath('foo.barBaz', hit)).toEqual({
+        foo: { barBaz: ['foo'] },
+      });
+    });
+
+    it('builds an array of objects from a nested field', () => {
+      // @ts-expect-error hit is minimal
+      const hit: EventHit = {
+        fields: {
+          foo: [{ bar: ['baz'] }],
+        },
+      };
+      expect(buildObjectForFieldPath('foo.bar', hit)).toEqual({
+        foo: [{ bar: ['baz'] }],
+      });
+    });
+
+    it('builds intermediate objects for nested fields', () => {
+      // @ts-expect-error nestedHit is minimal
+      const nestedHit: EventHit = {
+        fields: {
+          'foo.bar': [
+            {
+              baz: ['host.name'],
+            },
+          ],
+        },
+      };
+      expect(buildObjectForFieldPath('foo.bar.baz', nestedHit)).toEqual({
+        foo: {
+          bar: [
+            {
+              baz: ['host.name'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('builds intermediate objects at multiple levels', () => {
+      expect(buildObjectForFieldPath('threat.indicator.matched.atomic', eventHit)).toEqual({
+        threat: {
+          indicator: [
+            {
+              matched: {
+                atomic: ['matched_atomic'],
+              },
+            },
+            {
+              matched: {
+                atomic: ['matched_atomic_2'],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('preserves multiple values for a single leaf', () => {
+      expect(buildObjectForFieldPath('threat.indicator.matched.field', eventHit)).toEqual({
+        threat: {
+          indicator: [
+            {
+              matched: {
+                field: ['matched_field', 'other_matched_field'],
+              },
+            },
+            {
+              matched: {
+                field: ['matched_field_2'],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    describe('multiple levels of nested fields', () => {
+      let nestedHit: EventHit;
+
+      beforeEach(() => {
+        // @ts-expect-error nestedHit is minimal
+        nestedHit = {
+          fields: {
+            'nested_1.foo': [
+              {
+                'nested_2.bar': [
+                  { leaf: ['leaf_value'], leaf_2: ['leaf_2_value'] },
+                  { leaf_2: ['leaf_2_value_2', 'leaf_2_value_3'] },
+                ],
+              },
+              {
+                'nested_2.bar': [
+                  { leaf: ['leaf_value_2'], leaf_2: ['leaf_2_value_4'] },
+                  { leaf: ['leaf_value_3'], leaf_2: ['leaf_2_value_5'] },
+                ],
+              },
+            ],
+          },
+        };
+      });
+
+      it('includes objects without the field', () => {
+        expect(buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf', nestedHit)).toEqual({
+          nested_1: {
+            foo: [
+              {
+                nested_2: {
+                  bar: [{ leaf: ['leaf_value'] }, { leaf: [] }],
+                },
+              },
+              {
+                nested_2: {
+                  bar: [{ leaf: ['leaf_value_2'] }, { leaf: ['leaf_value_3'] }],
+                },
+              },
+            ],
+          },
+        });
+      });
+
+      it('groups multiple leaf values', () => {
+        expect(buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf_2', nestedHit)).toEqual({
+          nested_1: {
+            foo: [
+              {
+                nested_2: {
+                  bar: [
+                    { leaf_2: ['leaf_2_value'] },
+                    { leaf_2: ['leaf_2_value_2', 'leaf_2_value_3'] },
+                  ],
+                },
+              },
+              {
+                nested_2: {
+                  bar: [{ leaf_2: ['leaf_2_value_4'] }, { leaf_2: ['leaf_2_value_5'] }],
+                },
+              },
+            ],
+          },
+        });
+      });
     });
   });
 });

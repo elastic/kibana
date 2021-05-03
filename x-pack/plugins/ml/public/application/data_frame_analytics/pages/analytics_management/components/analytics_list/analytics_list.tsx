@@ -29,6 +29,7 @@ import {
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
+import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { SourceSelection } from '../source_selection';
@@ -84,7 +85,7 @@ function getItemIdToExpandedRowMap(
 interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
-  spacesEnabled?: boolean;
+  spacesApi?: SpacesPluginStart;
   blockRefresh?: boolean;
   pageState: ListingPageUrlState;
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
@@ -92,7 +93,7 @@ interface Props {
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   isMlEnabledInSpace = true,
-  spacesEnabled = false,
+  spacesApi,
   blockRefresh = false,
   pageState,
   updatePageState,
@@ -178,7 +179,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setExpandedRowItemIds,
     isManagementTable,
     isMlEnabledInSpace,
-    spacesEnabled,
+    spacesApi,
     refresh
   );
 

@@ -25,6 +25,7 @@ const pushToServiceHandler = async ({
   externalService,
   params,
   secrets,
+  commentFieldKey,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   const { comments } = params;
   let res: PushToServiceResponse;
@@ -53,7 +54,7 @@ const pushToServiceHandler = async ({
         incidentId: res.id,
         incident: {
           ...incident,
-          comments: currentComment.comment,
+          [commentFieldKey]: currentComment.comment,
         },
       });
       res.comments = [

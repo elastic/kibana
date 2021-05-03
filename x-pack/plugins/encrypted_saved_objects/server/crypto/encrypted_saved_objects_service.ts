@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { Crypto, EncryptOutput } from '@elastic/node-crypto';
-import typeDetect from 'type-detect';
+import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
-import { Logger } from 'src/core/server';
-import { AuthenticatedUser } from '../../../security/common/model';
-import { EncryptedSavedObjectsAuditLogger } from '../audit';
-import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
+import typeDetect from 'type-detect';
+
+import type { Logger } from 'src/core/server';
+
+import type { AuthenticatedUser } from '../../../security/common/model';
+import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
+import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 
 /**
  * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users
@@ -61,6 +63,14 @@ interface DecryptParameters extends CommonParameters {
    * Indicates whether decryption should only be performed using secondary decryption-only keys.
    */
   omitPrimaryEncryptionKey?: boolean;
+  /**
+   * Indicates whether the object to be decrypted is being converted from a single-namespace type to a multi-namespace type. In this case,
+   * we may need to attempt decryption twice: once with a namespace in the descriptor (for use during index migration), and again without a
+   * namespace in the descriptor (for use during object migration). In other words, if the object is being decrypted during index migration,
+   * the object was previously encrypted with its namespace in the descriptor portion of the AAD; on the other hand, if the object is being
+   * decrypted during object migration, the object was never encrypted with its namespace in the descriptor portion of the AAD.
+   */
+  convertToMultiNamespaceType?: boolean;
 }
 
 interface EncryptedSavedObjectsServiceOptions {
@@ -77,7 +87,7 @@ interface EncryptedSavedObjectsServiceOptions {
   /**
    * NodeCrypto instance used for both encryption and decryption.
    */
-  primaryCrypto: Crypto;
+  primaryCrypto?: Crypto;
 
   /**
    * NodeCrypto instances used ONLY for decryption (i.e. rotated encryption keys).
@@ -293,12 +303,17 @@ export class EncryptedSavedObjectsService {
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
-      try {
-        iteratorResult = iterator.next(
-          await this.options.primaryCrypto.encrypt(attributeValue, encryptionAAD)
-        );
-      } catch (err) {
-        iterator.throw!(err);
+      // We check this inside of the iterator to throw only if we do need to encrypt anything.
+      if (this.options.primaryCrypto) {
+        try {
+          iteratorResult = iterator.next(
+            await this.options.primaryCrypto.encrypt(attributeValue, encryptionAAD)
+          );
+        } catch (err) {
+          iterator.throw!(err);
+        }
+      } else {
+        iterator.throw!(new Error('Encryption is disabled because of missing encryption key.'));
       }
     }
 
@@ -324,12 +339,17 @@ export class EncryptedSavedObjectsService {
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
-      try {
-        iteratorResult = iterator.next(
-          this.options.primaryCrypto.encryptSync(attributeValue, encryptionAAD)
-        );
-      } catch (err) {
-        iterator.throw!(err);
+      // We check this inside of the iterator to throw only if we do need to encrypt anything.
+      if (this.options.primaryCrypto) {
+        try {
+          iteratorResult = iterator.next(
+            this.options.primaryCrypto.encryptSync(attributeValue, encryptionAAD)
+          );
+        } catch (err) {
+          iterator.throw!(err);
+        }
+      } else {
+        iterator.throw!(new Error('Encryption is disabled because of missing encryption key.'));
       }
     }
 
@@ -356,10 +376,17 @@ export class EncryptedSavedObjectsService {
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
-      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      const [attributeValue, encryptionAADs] = iteratorResult.value;
 
-      let decryptionError;
-      for (const decrypter of decrypters) {
+      // We check this inside of the iterator to throw only if we do need to decrypt anything.
+      let decryptionError =
+        decrypters.length === 0
+          ? new Error('Decryption is disabled because of missing decryption keys.')
+          : undefined;
+      const decryptersPerAAD = decrypters.flatMap((decr) =>
+        encryptionAADs.map((aad) => [decr, aad] as [Crypto, string])
+      );
+      for (const [decrypter, encryptionAAD] of decryptersPerAAD) {
         try {
           iteratorResult = iterator.next(await decrypter.decrypt(attributeValue, encryptionAAD));
           decryptionError = undefined;
@@ -400,10 +427,17 @@ export class EncryptedSavedObjectsService {
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
-      const [attributeValue, encryptionAAD] = iteratorResult.value;
+      const [attributeValue, encryptionAADs] = iteratorResult.value;
 
-      let decryptionError;
-      for (const decrypter of decrypters) {
+      // We check this inside of the iterator to throw only if we do need to decrypt anything.
+      let decryptionError =
+        decrypters.length === 0
+          ? new Error('Decryption is disabled because of missing decryption keys.')
+          : undefined;
+      const decryptersPerAAD = decrypters.flatMap((decr) =>
+        encryptionAADs.map((aad) => [decr, aad] as [Crypto, string])
+      );
+      for (const [decrypter, encryptionAAD] of decryptersPerAAD) {
         try {
           iteratorResult = iterator.next(decrypter.decryptSync(attributeValue, encryptionAAD));
           decryptionError = undefined;
@@ -427,13 +461,13 @@ export class EncryptedSavedObjectsService {
   private *attributesToDecryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
-    params?: CommonParameters
-  ): Iterator<[string, string], T, EncryptOutput> {
+    params?: DecryptParameters
+  ): Iterator<[string, string[]], T, EncryptOutput> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
     }
-    let encryptionAAD: string | undefined;
+    const encryptionAADs: string[] = [];
     const decryptedAttributes: Record<string, EncryptOutput> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
@@ -449,11 +483,16 @@ export class EncryptedSavedObjectsService {
           )}`
         );
       }
-      if (!encryptionAAD) {
-        encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+      if (!encryptionAADs.length) {
+        encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
+        if (params?.convertToMultiNamespaceType && descriptor.namespace) {
+          // This is happening during a migration; create an alternate AAD for decrypting the object attributes by stripping out the namespace from the descriptor.
+          const { namespace, ...alternateDescriptor } = descriptor;
+          encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));
+        }
       }
       try {
-        decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
+        decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAADs])!;
       } catch (err) {
         this.options.logger.error(
           `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
@@ -541,6 +580,9 @@ export class EncryptedSavedObjectsService {
       return this.options.decryptionOnlyCryptos;
     }
 
-    return [this.options.primaryCrypto, ...(this.options.decryptionOnlyCryptos ?? [])];
+    return [
+      ...(this.options.primaryCrypto ? [this.options.primaryCrypto] : []),
+      ...(this.options.decryptionOnlyCryptos ?? []),
+    ];
   }
 }

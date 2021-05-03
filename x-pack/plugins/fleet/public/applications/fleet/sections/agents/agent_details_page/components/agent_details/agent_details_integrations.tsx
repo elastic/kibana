@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type { EuiBasicTableProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,19 +17,19 @@ import {
   EuiPanel,
   EuiButtonIcon,
   EuiBasicTable,
-  EuiBasicTableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
+
+import type { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
 import { useLink } from '../../../../../hooks';
 import { PackageIcon } from '../../../../../components';
+
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .ingest-integration-title-button {
-    padding: ${(props) => props.theme.eui.paddingSizes.m}
-      ${(props) => props.theme.eui.paddingSizes.m};
+    padding: ${(props) => props.theme.eui.paddingSizes.m};
   }
 
   &.euiAccordion-isOpen .ingest-integration-title-button {
@@ -38,6 +39,10 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   .euiTableRow:last-child .euiTableRowCell {
     border-bottom: none;
   }
+
+  .euiIEFlexWrapFix {
+    min-width: 0;
+  }
 `;
 
 const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
@@ -46,11 +51,11 @@ const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
   children,
 }) => {
   return (
-    <EuiPanel paddingSize="none" style={{ overflow: 'hidden' }}>
+    <EuiPanel paddingSize="none">
       <StyledEuiAccordion
         id={id}
         arrowDisplay="right"
-        buttonClassName={'ingest-integration-title-button'}
+        buttonClassName="ingest-integration-title-button"
         buttonContent={title}
       >
         {children}
@@ -128,8 +133,9 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                   <PackageIcon size="l" packageName="default" version="0" />
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem className="eui-textTruncate">
                 <EuiLink
+                  className="eui-textTruncate"
                   href={getHref('edit_integration', {
                     policyId: agentPolicy.id,
                     packagePolicyId: packagePolicy.id,

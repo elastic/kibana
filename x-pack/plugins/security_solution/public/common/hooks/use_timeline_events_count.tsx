@@ -12,17 +12,28 @@ import { createPortalNode, OutPortal } from 'react-reverse-portal';
  * A singleton portal for rendering content in the global header
  */
 const timelineEventsCountPortalNodeSingleton = createPortalNode();
+const eqlEventsCountPortalNodeSingleton = createPortalNode();
 
 export const useTimelineEventsCountPortal = () => {
   const [timelineEventsCountPortalNode] = useState(timelineEventsCountPortalNodeSingleton);
-
-  return { timelineEventsCountPortalNode };
+  return { portalNode: timelineEventsCountPortalNode };
 };
 
 export const TimelineEventsCountBadge = React.memo(() => {
-  const { timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
-
-  return <OutPortal node={timelineEventsCountPortalNode} />;
+  const { portalNode } = useTimelineEventsCountPortal();
+  return <OutPortal node={portalNode} />;
 });
 
 TimelineEventsCountBadge.displayName = 'TimelineEventsCountBadge';
+
+export const useEqlEventsCountPortal = () => {
+  const [eqlEventsCountPortalNode] = useState(eqlEventsCountPortalNodeSingleton);
+  return { portalNode: eqlEventsCountPortalNode };
+};
+
+export const EqlEventsCountBadge = React.memo(() => {
+  const { portalNode } = useEqlEventsCountPortal();
+  return <OutPortal node={portalNode} />;
+});
+
+EqlEventsCountBadge.displayName = 'EqlEventsCountBadge';

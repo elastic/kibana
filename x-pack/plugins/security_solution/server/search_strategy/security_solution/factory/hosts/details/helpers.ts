@@ -8,10 +8,15 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { toStringArray } from '../../../../helpers/to_array';
-
-import { HostAggEsItem, HostBuckets, HostValue } from '../../../../../lib/hosts/types';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
+import { Direction } from '../../../../../../common/search_strategy/common';
+import {
+  AggregationRequest,
+  HostAggEsItem,
+  HostBuckets,
+  HostItem,
+  HostValue,
+} from '../../../../../../common/search_strategy/security_solution/hosts';
 
 export const HOST_FIELDS = [
   '_id',
@@ -35,6 +40,65 @@ export const HOST_FIELDS = [
   'endpoint.sensorVersion',
 ];
 
+export const buildFieldsTermAggregation = (esFields: readonly string[]): AggregationRequest =>
+  esFields.reduce<AggregationRequest>(
+    (res, field) => ({
+      ...res,
+      ...getTermsAggregationTypeFromField(field),
+    }),
+    {}
+  );
+
+const getTermsAggregationTypeFromField = (field: string): AggregationRequest => {
+  if (field === 'host.ip') {
+    return {
+      host_ip: {
+        terms: {
+          script: {
+            // We might be able to remove this when PR is fixed in Elasticsearch: https://github.com/elastic/elasticsearch/issues/72276
+            // Currently we cannot use "value_type" with an aggregation when we have a mapping conflict which is why this painless script exists
+            // See public ticket: https://github.com/elastic/kibana/pull/78912
+            // See private ticket: https://github.com/elastic/security-team/issues/333
+            // for more details on the use cases and causes of the conflicts and why this is here.
+            source: "doc['host.ip']",
+            lang: 'painless',
+          },
+          size: 10,
+          order: {
+            timestamp: Direction.desc,
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
+      },
+    };
+  }
+
+  return {
+    [field.replace(/\./g, '_')]: {
+      terms: {
+        field,
+        size: 10,
+        order: {
+          timestamp: Direction.desc,
+        },
+      },
+      aggs: {
+        timestamp: {
+          max: {
+            field: '@timestamp',
+          },
+        },
+      },
+    },
+  };
+};
+
 export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
   HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
@@ -42,7 +106,11 @@ export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
       if (fieldName === '_id') {
         return set('_id', fieldValue, flattenedFields);
       }
-      return set(fieldName, toStringArray(fieldValue), flattenedFields);
+      return set(
+        fieldName,
+        toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+        flattenedFields
+      );
     }
     return flattenedFields;
   }, {});

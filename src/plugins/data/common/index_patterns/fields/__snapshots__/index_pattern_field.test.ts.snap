@@ -14,7 +14,7 @@ Object {
   },
   "count": 1,
   "esTypes": Array [
-    "text",
+    "keyword",
   ],
   "lang": "lang",
   "name": "name",
@@ -49,7 +49,7 @@ Object {
   "count": 1,
   "customLabel": undefined,
   "esTypes": Array [
-    "text",
+    "keyword",
   ],
   "format": Object {
     "id": "number",

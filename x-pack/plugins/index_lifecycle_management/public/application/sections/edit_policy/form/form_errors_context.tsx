@@ -26,6 +26,7 @@ interface Errors {
   hot: ErrorGroup;
   warm: ErrorGroup;
   cold: ErrorGroup;
+  frozen: ErrorGroup;
   delete: ErrorGroup;
   /**
    * Errors that are not specific to a phase should go here.
@@ -37,6 +38,7 @@ interface ContextValue {
   errors: Errors;
   addError(phase: PhasesAndOther, fieldPath: string, errorMessages: string[]): void;
   clearError(phase: PhasesAndOther, fieldPath: string): void;
+  isFormSubmitted: boolean;
 }
 
 const FormErrorsContext = createContext<ContextValue>(null as any);
@@ -46,6 +48,7 @@ const createEmptyErrors = (): Errors => ({
   hot: {},
   warm: {},
   cold: {},
+  frozen: {},
   delete: {},
   other: {},
 });
@@ -53,6 +56,8 @@ const createEmptyErrors = (): Errors => ({
 export const FormErrorsProvider: FunctionComponent = ({ children }) => {
   const [errors, setErrors] = useState<Errors>(createEmptyErrors);
   const form = useFormContext<FormInternal>();
+
+  const { getErrors: getFormErrors, isSubmitted } = form;
 
   const addError: ContextValue['addError'] = useCallback(
     (phase, fieldPath, errorMessages) => {
@@ -70,20 +75,23 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
 
   const clearError: ContextValue['clearError'] = useCallback(
     (phase, fieldPath) => {
-      if (form.getErrors().length) {
+      if (getFormErrors().length) {
         setErrors((previousErrors) => {
           const {
             [phase]: { [fieldPath]: fieldErrorToOmit, ...restOfPhaseErrors },
+            hasErrors,
             ...otherPhases
           } = previousErrors;
 
-          const hasErrors =
-            Object.keys(restOfPhaseErrors).length === 0 &&
-            Object.keys(otherPhases).some((phaseErrors) => !!Object.keys(phaseErrors).length);
+          const nextHasErrors =
+            Object.keys(restOfPhaseErrors).length > 0 ||
+            Object.values(otherPhases).some((phaseErrors) => {
+              return Object.keys(phaseErrors).length > 0;
+            });
 
           return {
             ...previousErrors,
-            hasErrors,
+            hasErrors: nextHasErrors,
             [phase]: restOfPhaseErrors,
           };
         });
@@ -91,7 +99,7 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
         setErrors(createEmptyErrors);
       }
     },
-    [form, setErrors]
+    [getFormErrors, setErrors]
   );
 
   return (
@@ -100,6 +108,7 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
         errors,
         addError,
         clearError,
+        isFormSubmitted: isSubmitted,
       }}
     >
       {children}

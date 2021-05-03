@@ -1,0 +1,15 @@
+/* GIS plugin styles */
+
+// Prefix all styles with "map" to avoid conflicts.
+// Examples
+//   mapChart
+//   mapChart__legend
+//   mapChart__legend--small
+//   mapChart__legend-isLoading
+
+@import 'mixins';
+@import 'main';
+@import 'mapbox_hacks';
+@import 'connected_components/index';
+@import 'components/index';
+@import 'classes/index';

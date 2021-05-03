@@ -5,32 +5,28 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import pMap from 'p-map';
-import { getAgent, listAgents } from './crud';
-import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentStatus } from '../../types';
 
+import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
-import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
-import { normalizeKuery } from '../saved_object';
-import { appContextService } from '../app_context';
-import { removeSOAttributes } from './crud_fleet_server';
+import { esKuery } from '../../../../../../src/plugins/data/server';
+import type { KueryNode } from '../../../../../../src/plugins/data/server';
+
+import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
 export async function getAgentStatusById(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  const agent = await getAgent(soClient, esClient, agentId);
+  const agent = await getAgentById(esClient, agentId);
   return AgentStatusKueryHelper.getAgentStatus(agent);
 }
 
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
 function joinKuerys(...kuerys: Array<string | undefined>) {
-  const isFleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
-
   return kuerys
     .filter((kuery) => kuery !== undefined)
     .reduce((acc: KueryNode | undefined, kuery: string | undefined): KueryNode | undefined => {
@@ -38,9 +34,7 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
         return acc;
       }
       const normalizedKuery: KueryNode = esKuery.fromKueryExpression(
-        isFleetServerEnabled
-          ? removeSOAttributes(kuery || '')
-          : normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery || '')
+        removeSOAttributes(kuery || '')
       );
 
       if (!acc) {
@@ -61,17 +55,18 @@ export async function getAgentStatusForAgentPolicy(
   agentPolicyId?: string,
   filterKuery?: string
 ) {
-  const [all, online, error, offline, updating] = await pMap(
+  const [all, allActive, online, error, offline, updating] = await pMap(
     [
-      undefined,
+      undefined, // All agents, including inactive
+      undefined, // All active agents
       AgentStatusKueryHelper.buildKueryForOnlineAgents(),
       AgentStatusKueryHelper.buildKueryForErrorAgents(),
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
-    (kuery) =>
-      listAgents(soClient, esClient, {
-        showInactive: false,
+    (kuery, index) =>
+      getAgentsByKuery(esClient, {
+        showInactive: index === 0,
         perPage: 0,
         page: 1,
         kuery: joinKuerys(
@@ -90,7 +85,8 @@ export async function getAgentStatusForAgentPolicy(
 
   return {
     events: await getEventsCount(soClient, agentPolicyId),
-    total: all.total,
+    total: allActive.total,
+    inactive: all.total - allActive.total,
     online: online.total,
     error: error.total,
     offline: offline.total,

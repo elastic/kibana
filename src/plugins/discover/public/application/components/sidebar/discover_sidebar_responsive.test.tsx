@@ -10,9 +10,9 @@ import { each, cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
-import realHits from 'fixtures/real_hits.js';
+import realHits from '../../../__fixtures__/real_hits.js';
 // @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -102,6 +102,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     setAppState: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
+    onEditRuntimeField: jest.fn(),
   };
 }
 
@@ -137,9 +138,7 @@ describe('discover responsive sidebar', function () {
   });
   it('renders sidebar with unmapped fields config', function () {
     const unmappedFieldsConfig = {
-      onChangeUnmappedFields: jest.fn(),
       showUnmappedFields: false,
-      showUnmappedFieldsDefaultValue: false,
     };
     const componentProps = { ...props, unmappedFieldsConfig };
     const component = mountWithIntl(<DiscoverSidebarResponsive {...componentProps} />);

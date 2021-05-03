@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
+import { errors, estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
-import { IndexPattern, IndexPatternsService } from 'src/plugins/data/common';
+import { IndexPattern, IndexPatternsService, RuntimeField } from 'src/plugins/data/common';
 import { BASE_API_URL } from '../../common';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 import { PluginStartContract } from '../plugin';
@@ -30,6 +30,7 @@ export interface Field {
   isMeta: boolean;
   lang?: string;
   script?: string;
+  runtimeField?: RuntimeField;
 }
 
 export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>, logger: Logger) {
@@ -67,8 +68,15 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           }),
         });
       } catch (e) {
+        if (e instanceof errors.TimeoutError) {
+          logger.info(`Field existence check timed out on ${req.params.indexPatternId}`);
+          // 408 is Request Timeout
+          return res.customError({ statusCode: 408, body: e.message });
+        }
         logger.info(
-          `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
+          `Field existence check failed on ${req.params.indexPatternId}: ${
+            isBoomError(e) ? e.output.payload.message : e.message
+          }`
         );
         if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound({ body: e.message });
@@ -77,11 +85,9 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           if (e.output.statusCode === 404) {
             return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError({ body: e.output.payload.message });
+          throw new Error(e.output.payload.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }
@@ -138,6 +144,7 @@ export function buildFieldList(indexPattern: IndexPattern, metaFields: string[])
       // id is a special case - it doesn't show up in the meta field list,
       // but as it's not part of source, it has to be handled separately.
       isMeta: metaFields.includes(field.name) || field.name === '_id',
+      runtimeField: !field.isMapped ? field.runtimeField : undefined,
     };
   });
 }
@@ -181,35 +188,52 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const { body: result } = await client.search({
-    index,
-    body: {
-      size: SAMPLE_SIZE,
-      query,
-      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
-      fields: ['*'],
-      _source: false,
-      script_fields: scriptedFields.reduce((acc, field) => {
-        acc[field.name] = {
-          script: {
-            lang: field.lang,
-            source: field.script,
-          },
-        };
-        return acc;
-      }, {} as Record<string, unknown>),
+  const runtimeFields = fields.filter((f) => f.runtimeField);
+  const { body: result } = await client.search(
+    {
+      index,
+      body: {
+        size: SAMPLE_SIZE,
+        query,
+        // Sorted queries are usually able to skip entire shards that don't match
+        sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
+        fields: ['*'],
+        _source: false,
+        runtime_mappings: runtimeFields.reduce((acc, field) => {
+          if (!field.runtimeField) return acc;
+          // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
+          acc[field.name] = field.runtimeField;
+          return acc;
+        }, {} as Record<string, estypes.RuntimeField>),
+        script_fields: scriptedFields.reduce((acc, field) => {
+          acc[field.name] = {
+            script: {
+              lang: field.lang!,
+              source: field.script!,
+            },
+          };
+          return acc;
+        }, {} as Record<string, estypes.ScriptField>),
+        // Small improvement because there is overhead in counting
+        track_total_hits: false,
+        // Per-shard timeout, must be lower than overall. Shards return partial results on timeout
+        timeout: '4500ms',
+      },
     },
-  });
+    {
+      // Global request timeout. Will cancel the request if exceeded. Overrides the elasticsearch.requestTimeout
+      requestTimeout: '5000ms',
+      // Fails fast instead of retrying- default is to retry
+      maxRetries: 0,
+    }
+  );
   return result.hits.hits;
 }
 
 /**
  * Exported only for unit tests.
  */
-export function existingFields(
-  docs: Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>,
-  fields: Field[]
-): string[] {
+export function existingFields(docs: estypes.Hit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {
@@ -218,7 +242,7 @@ export function existingFields(
     }
 
     missingFields.forEach((field) => {
-      let fieldStore: Record<string, unknown> = doc.fields;
+      let fieldStore = doc.fields!;
       if (field.isMeta) {
         fieldStore = doc;
       }

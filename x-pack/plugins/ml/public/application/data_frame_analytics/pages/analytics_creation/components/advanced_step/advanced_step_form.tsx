@@ -138,14 +138,18 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { form, isJobCreated, estimatedModelMemoryLimit } = state;
   const {
+    alpha,
     computeFeatureInfluence,
+    downsampleFactor,
     eta,
+    etaGrowthRatePerTree,
     featureBagFraction,
     featureInfluenceThreshold,
     gamma,
     jobType,
     lambda,
     maxNumThreads,
+    maxOptimizationRoundsPerHyperparameter,
     maxTrees,
     method,
     modelMemoryLimit,
@@ -157,6 +161,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     outlierFraction,
     predictionFieldName,
     randomizeSeed,
+    softTreeDepthLimit,
+    softTreeDepthTolerance,
     useEstimatedMml,
   } = form;
 
@@ -197,7 +203,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     setFetchingAdvancedParamErrors(true);
     (async function () {
-      const { success, errorMessage, expectedMemory } = await fetchExplainData(form);
+      const { success, errorMessage, errorReason, expectedMemory } = await fetchExplainData(form);
       const paramErrors: AdvancedParamErrors = {};
 
       if (success) {
@@ -212,6 +218,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
         Object.values(ANALYSIS_ADVANCED_FIELDS).forEach((param) => {
           if (errorMessage.includes(`[${param}]`)) {
             paramErrors[param] = errorMessage;
+          } else if (errorReason?.includes(`[${param}]`)) {
+            paramErrors[param] = errorReason;
           }
         });
       }
@@ -219,12 +227,16 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       setAdvancedParamErrors(paramErrors);
     })();
   }, [
+    alpha,
+    downsampleFactor,
     eta,
+    etaGrowthRatePerTree,
     featureBagFraction,
     featureInfluenceThreshold,
     gamma,
     lambda,
     maxNumThreads,
+    maxOptimizationRoundsPerHyperparameter,
     maxTrees,
     method,
     nNeighbors,
@@ -232,6 +244,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     numTopFeatureImportanceValues,
     outlierFraction,
     randomizeSeed,
+    softTreeDepthLimit,
+    softTreeDepthTolerance,
   ]);
 
   const outlierDetectionAdvancedConfig = (
@@ -395,6 +409,34 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedLabel', {
+            defaultMessage: 'Randomize seed',
+          })}
+          helpText={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedText', {
+            defaultMessage: 'The seed for the random generator used to pick training data.',
+          })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED]}
+        >
+          <EuiFieldNumber
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.randomizeSeedInputAriaLabel',
+              {
+                defaultMessage: 'The seed for the random generator used to pick training data.',
+              }
+            )}
+            data-test-subj="mlAnalyticsCreateJobWizardRandomizeSeedInput"
+            onChange={(e) =>
+              setFormState({ randomizeSeed: e.target.value === '' ? undefined : +e.target.value })
+            }
+            isInvalid={randomizeSeed !== undefined && typeof randomizeSeed !== 'number'}
+            value={getNumberValue(randomizeSeed)}
+            step={1}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     </Fragment>
   );
 
@@ -518,7 +560,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             })}
             helpText={i18n.translate('xpack.ml.dataframe.analytics.create.maxNumThreadsHelpText', {
               defaultMessage:
-                'The maximum number of threads to be used by the analysis. The default value is 1',
+                'The maximum number of threads to be used by the analysis. The default value is 1.',
             })}
             isInvalid={maxNumThreads === 0}
             error={

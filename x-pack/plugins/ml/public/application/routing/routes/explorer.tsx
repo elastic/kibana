@@ -37,6 +37,7 @@ import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
+import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -84,9 +85,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [lastRefresh, setLastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
+
+  const timeBuckets = useTimeBuckets();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
+  const selectedJobsRunning = jobsWithTimeRange.some(
+    (job) => jobIds.includes(job.id) && job.isRunning === true
+  );
 
   const explorerAppState = useObservable(explorerService.appState$);
   const explorerState = useObservable(explorerService.state$);
@@ -152,6 +158,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.clearJobs();
     }
   }, [JSON.stringify(jobIds)]);
+
+  useEffect(() => {
+    return () => {
+      // upon component unmounting
+      // clear any data to prevent next page from rendering old charts
+      explorerService.clearExplorerData();
+    };
+  }, []);
 
   /**
    * TODO get rid of the intermediate state in explorerService.
@@ -261,6 +275,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           severity: tableSeverity.val,
           stoppedPartitions,
           invalidTimeRangeError,
+          selectedJobsRunning,
+          timeBuckets,
+          timefilter,
         }}
       />
     </div>

@@ -15,11 +15,15 @@ export interface MetricsChartsByAgentAPIResponse {
 }
 
 export async function getMetricsChartDataByAgent({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
   agentName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -27,11 +31,22 @@ export async function getMetricsChartDataByAgent({
 }): Promise<MetricsChartsByAgentAPIResponse> {
   switch (agentName) {
     case 'java': {
-      return getJavaMetricsCharts({ setup, serviceName, serviceNodeName });
+      return getJavaMetricsCharts({
+        environment,
+        kuery,
+        setup,
+        serviceName,
+        serviceNodeName,
+      });
     }
 
     default: {
-      return getDefaultMetricsCharts(setup, serviceName);
+      return getDefaultMetricsCharts({
+        environment,
+        kuery,
+        setup,
+        serviceName,
+      });
     }
   }
 }

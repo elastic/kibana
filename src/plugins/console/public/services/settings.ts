@@ -8,6 +8,14 @@
 
 import { Storage } from './index';
 
+export const DEFAULT_SETTINGS = Object.freeze({
+  fontSize: 14,
+  polling: true,
+  tripleQuotes: true,
+  wrapMode: true,
+  autocomplete: Object.freeze({ fields: true, indices: true, templates: true }),
+});
+
 export interface DevToolsSettings {
   fontSize: number;
   wrapMode: boolean;
@@ -24,50 +32,46 @@ export class Settings {
   constructor(private readonly storage: Storage) {}
 
   getFontSize() {
-    return this.storage.get('font_size', 14);
+    return this.storage.get('font_size', DEFAULT_SETTINGS.fontSize);
   }
 
-  setFontSize(size: any) {
+  setFontSize(size: number) {
     this.storage.set('font_size', size);
     return true;
   }
 
   getWrapMode() {
-    return this.storage.get('wrap_mode', true);
+    return this.storage.get('wrap_mode', DEFAULT_SETTINGS.wrapMode);
   }
 
-  setWrapMode(mode: any) {
+  setWrapMode(mode: boolean) {
     this.storage.set('wrap_mode', mode);
     return true;
   }
 
-  setTripleQuotes(tripleQuotes: any) {
+  setTripleQuotes(tripleQuotes: boolean) {
     this.storage.set('triple_quotes', tripleQuotes);
     return true;
   }
 
   getTripleQuotes() {
-    return this.storage.get('triple_quotes', true);
+    return this.storage.get('triple_quotes', DEFAULT_SETTINGS.tripleQuotes);
   }
 
   getAutocomplete() {
-    return this.storage.get('autocomplete_settings', {
-      fields: true,
-      indices: true,
-      templates: true,
-    });
+    return this.storage.get('autocomplete_settings', DEFAULT_SETTINGS.autocomplete);
   }
 
-  setAutocomplete(settings: any) {
+  setAutocomplete(settings: object) {
     this.storage.set('autocomplete_settings', settings);
     return true;
   }
 
   getPolling() {
-    return this.storage.get('console_polling', true);
+    return this.storage.get('console_polling', DEFAULT_SETTINGS.polling);
   }
 
-  setPolling(polling: any) {
+  setPolling(polling: boolean) {
     this.storage.set('console_polling', polling);
     return true;
   }

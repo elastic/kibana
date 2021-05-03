@@ -294,10 +294,12 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       return await testSubjects.isEnabled('savedObjectsManagementDelete');
     }
 
-    async clickDelete() {
+    async clickDelete({ confirmDelete = true }: { confirmDelete?: boolean } = {}) {
       await testSubjects.click('savedObjectsManagementDelete');
-      await testSubjects.click('confirmModalConfirmButton');
-      await this.waitTableIsLoaded();
+      if (confirmDelete) {
+        await testSubjects.click('confirmModalConfirmButton');
+        await this.waitTableIsLoaded();
+      }
     }
 
     async getImportWarnings() {
@@ -314,6 +316,18 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
           };
         })
       );
+    }
+
+    async getImportErrorsCount() {
+      log.debug(`Toggling overwriteAll`);
+      const errorCountNode = await testSubjects.find('importSavedObjectsErrorsCount');
+      const errorCountText = await errorCountNode.getVisibleText();
+      const match = errorCountText.match(/(\d)+/);
+      if (!match) {
+        throw Error(`unable to parse error count from text ${errorCountText}`);
+      }
+
+      return +match[1];
     }
   }
 

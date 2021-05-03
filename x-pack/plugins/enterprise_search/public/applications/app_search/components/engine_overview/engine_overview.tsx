@@ -6,15 +6,18 @@
  */
 
 import React, { useEffect } from 'react';
+
 import { useActions, useValues } from 'kea';
 
+import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 import { EngineLogic } from '../engine';
-import { Loading } from '../../../shared/loading';
+
+import { EmptyEngineOverview } from './engine_overview_empty';
+
+import { EngineOverviewMetrics } from './engine_overview_metrics';
 
 import { EngineOverviewLogic } from './';
-import { EmptyEngineOverview } from './engine_overview_empty';
-import { EngineOverviewMetrics } from './engine_overview_metrics';
 
 export const EngineOverview: React.FC = () => {
   const {

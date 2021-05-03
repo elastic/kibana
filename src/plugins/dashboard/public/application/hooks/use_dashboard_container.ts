@@ -14,6 +14,7 @@ import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
+  EmbeddablePackageState,
   ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
@@ -24,12 +25,23 @@ import { getDashboardContainerInput, getSearchSessionIdFromURL } from '../dashbo
 import { DashboardContainer, DashboardContainerInput } from '../..';
 import { DashboardAppServices } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
+import { TimefilterContract } from '../../services/data';
 
-export const useDashboardContainer = (
-  dashboardStateManager: DashboardStateManager | null,
-  history: History,
-  isEmbeddedExternally: boolean
-) => {
+export const useDashboardContainer = ({
+  history,
+  timeFilter,
+  setUnsavedChanges,
+  getIncomingEmbeddable,
+  dashboardStateManager,
+  isEmbeddedExternally,
+}: {
+  history: History;
+  isEmbeddedExternally?: boolean;
+  timeFilter?: TimefilterContract;
+  setUnsavedChanges?: (dirty: boolean) => void;
+  dashboardStateManager: DashboardStateManager | null;
+  getIncomingEmbeddable: (removeAfterFetch?: boolean) => EmbeddablePackageState | undefined;
+}) => {
   const {
     dashboardCapabilities,
     data,
@@ -68,17 +80,17 @@ export const useDashboardContainer = (
       searchSession.restore(searchSessionIdFromURL);
     }
 
-    const incomingEmbeddable = embeddable.getStateTransfer().getIncomingEmbeddablePackage(true);
+    const incomingEmbeddable = getIncomingEmbeddable(true);
 
     let canceled = false;
     let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
       pendingContainer = await dashboardFactory.create(
         getDashboardContainerInput({
+          isEmbeddedExternally: Boolean(isEmbeddedExternally),
           dashboardCapabilities,
           dashboardStateManager,
           incomingEmbeddable,
-          isEmbeddedExternally,
           query,
           searchSessionId: searchSessionIdFromURL ?? searchSession.start(),
         })
@@ -115,13 +127,13 @@ export const useDashboardContainer = (
           (incomingEmbeddable.embeddableId &&
             !pendingContainer.getInput().panels[incomingEmbeddable.embeddableId]))
       ) {
-        dashboardStateManager.switchViewMode(ViewMode.EDIT);
         pendingContainer.addNewEmbeddable<EmbeddableInput>(
           incomingEmbeddable.type,
           incomingEmbeddable.input
         );
       }
       setDashboardContainer(pendingContainer);
+      setUnsavedChanges?.(dashboardStateManager.getIsDirty(data.query.timefilter.timefilter));
     })();
     return () => {
       canceled = true;
@@ -136,11 +148,15 @@ export const useDashboardContainer = (
       setDashboardContainer(null);
     };
   }, [
+    data.query.timefilter.timefilter,
     dashboardCapabilities,
     dashboardStateManager,
+    getIncomingEmbeddable,
     isEmbeddedExternally,
+    setUnsavedChanges,
     searchSession,
     scopedHistory,
+    timeFilter,
     embeddable,
     history,
     query,

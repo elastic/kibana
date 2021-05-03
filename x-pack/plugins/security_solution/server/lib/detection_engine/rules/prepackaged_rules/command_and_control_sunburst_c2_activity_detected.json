@@ -8,7 +8,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "SUNBURST Command and Control Activity",
   "note": "The SUNBURST malware attempts to hide within the Orion Improvement Program (OIP) network traffic. As this rule detects post-exploitation network traffic, investigations into this should be prioritized.",
   "query": "event.category:network and event.type:protocol and network.protocol:http and process.name:( ConfigurationWizard.exe or NetFlowService.exe or NetflowDatabaseMaintenance.exe or SolarWinds.Administration.exe or SolarWinds.BusinessLayerHost.exe or SolarWinds.BusinessLayerHostx64.exe or SolarWinds.Collector.Service.exe or SolarwindsDiagnostics.exe) and http.request.body.content:(( (*/swip/Upload.ashx* and (POST* or PUT*)) or (*/swip/SystemDescription* and (GET* or HEAD*)) or (*/swip/Events* and (GET* or HEAD*))) and not *solarwinds.com*)",
@@ -71,6 +71,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

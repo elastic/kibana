@@ -11,7 +11,7 @@ import { getErrorMarks } from './get_error_marks';
 describe('getErrorMarks', () => {
   describe('returns empty array', () => {
     it('when items are missing', () => {
-      expect(getErrorMarks([], {})).toEqual([]);
+      expect(getErrorMarks([])).toEqual([]);
     });
   });
 
@@ -22,17 +22,17 @@ describe('getErrorMarks', () => {
         offset: 10,
         skew: 5,
         doc: { error: { id: 1 }, service: { name: 'opbeans-java' } },
+        color: 'red',
       } as unknown,
       {
         docType: 'error',
         offset: 50,
         skew: 0,
         doc: { error: { id: 2 }, service: { name: 'opbeans-node' } },
+        color: 'blue',
       } as unknown,
     ] as IWaterfallError[];
-    expect(
-      getErrorMarks(items, { 'opbeans-java': 'red', 'opbeans-node': 'blue' })
-    ).toEqual([
+    expect(getErrorMarks(items)).toEqual([
       {
         type: 'errorMark',
         offset: 15,
@@ -59,22 +59,24 @@ describe('getErrorMarks', () => {
         offset: 10,
         skew: 5,
         doc: { error: { id: 1 }, service: { name: 'opbeans-java' } },
+        color: '',
       } as unknown,
       {
         docType: 'error',
         offset: 50,
         skew: 0,
         doc: { error: { id: 2 }, service: { name: 'opbeans-node' } },
+        color: '',
       } as unknown,
     ] as IWaterfallError[];
-    expect(getErrorMarks(items, {})).toEqual([
+    expect(getErrorMarks(items)).toEqual([
       {
         type: 'errorMark',
         offset: 15,
         verticalLine: false,
         id: 1,
         error: { error: { id: 1 }, service: { name: 'opbeans-java' } },
-        serviceColor: undefined,
+        serviceColor: '',
       },
       {
         type: 'errorMark',
@@ -82,7 +84,7 @@ describe('getErrorMarks', () => {
         verticalLine: false,
         id: 2,
         error: { error: { id: 2 }, service: { name: 'opbeans-node' } },
-        serviceColor: undefined,
+        serviceColor: '',
       },
     ]);
   });

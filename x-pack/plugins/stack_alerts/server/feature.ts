@@ -8,20 +8,21 @@
 import { i18n } from '@kbn/i18n';
 import { ID as IndexThreshold } from './alert_types/index_threshold/alert_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './alert_types/geo_containment/alert_type';
+import { ES_QUERY_ID as ElasticsearchQuery } from './alert_types/es_query/alert_type';
 import { STACK_ALERTS_FEATURE_ID } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const BUILT_IN_ALERTS_FEATURE = {
   id: STACK_ALERTS_FEATURE_ID,
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Stack Alerts',
+    defaultMessage: 'Stack Rules',
   }),
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [IndexThreshold, GeoContainment],
+  alerting: [IndexThreshold, GeoContainment, ElasticsearchQuery],
   privileges: {
     all: {
       app: [],
@@ -30,7 +31,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: {
-        all: [IndexThreshold, GeoContainment],
+        all: [IndexThreshold, GeoContainment, ElasticsearchQuery],
         read: [],
       },
       savedObject: {
@@ -48,7 +49,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
       },
       alerting: {
         all: [],
-        read: [IndexThreshold, GeoContainment],
+        read: [IndexThreshold, GeoContainment, ElasticsearchQuery],
       },
       savedObject: {
         all: [],

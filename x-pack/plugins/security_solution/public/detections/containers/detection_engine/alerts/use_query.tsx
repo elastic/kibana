@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import React, { SetStateAction, useEffect, useState } from 'react';
 
 import { fetchQueryAlerts } from './api';
@@ -41,7 +42,7 @@ export const useQueryAlerts = <Hit, Aggs>(
     setQuery,
     refetch: null,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -80,7 +81,9 @@ export const useQueryAlerts = <Hit, Aggs>(
       }
     };
 
-    fetchData();
+    if (!isEmpty(query)) {
+      fetchData();
+    }
     return () => {
       isSubscribed = false;
       abortCtrl.abort();

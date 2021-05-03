@@ -9,8 +9,11 @@ import { setMockActions } from '../../../__mocks__/kea.mock';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiCard } from '@elastic/eui';
+
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 
 import { DocumentCreationButtons } from './';

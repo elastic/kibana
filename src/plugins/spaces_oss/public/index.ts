@@ -8,8 +8,24 @@
 
 import { SpacesOssPlugin } from './plugin';
 
-export { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
+export {
+  SpacesOssPluginSetup,
+  SpacesOssPluginStart,
+  SpacesAvailableStartContract,
+  SpacesUnavailableStartContract,
+} from './types';
 
-export { SpacesApi } from './api';
+export {
+  LazyComponentFn,
+  SpacesApi,
+  SpacesApiUi,
+  SpacesApiUiComponent,
+  SpacesContextProps,
+  ShareToSpaceFlyoutProps,
+  ShareToSpaceSavedObjectTarget,
+  SpaceListProps,
+  LegacyUrlConflictProps,
+  SpaceAvatarProps,
+} from './api';
 
 export const plugin = () => new SpacesOssPlugin();

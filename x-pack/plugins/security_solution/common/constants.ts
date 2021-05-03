@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { TransformConfigSchema } from './transforms/types';
+import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
+
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
@@ -23,17 +26,20 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+// The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
+// If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
-export const DEFAULT_FROM = 'now-24h';
-export const DEFAULT_TO = 'now';
+export const DEFAULT_FROM = 'now/d';
+export const DEFAULT_TO = 'now/d';
 export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
+export const DEFAULT_TRANSFORMS = 'securitySolution:transforms';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
 export const GLOBAL_HEADER_HEIGHT = 98; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
@@ -44,6 +50,11 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
+
+// Document path where threat indicator fields are expected. Fields are used
+// to enrich signals, and are copied to threat.indicator.
+export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
+export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
 export enum SecurityPageName {
   detections = 'detections',
@@ -97,6 +108,38 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
 
+/** The default settings for the transforms */
+export const defaultTransformsSetting: TransformConfigSchema = {
+  enabled: false,
+  auto_start: true,
+  auto_create: true,
+  query: {
+    range: {
+      '@timestamp': {
+        gte: 'now-1d/d',
+        format: 'strict_date_optional_time',
+      },
+    },
+  },
+  retention_policy: {
+    time: {
+      field: '@timestamp',
+      max_age: '1w',
+    },
+  },
+  max_page_search_size: 5000,
+  settings: [
+    {
+      prefix: 'all',
+      indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+      data_sources: [
+        ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+      ],
+    },
+  ],
+};
+export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSetting, null, 2);
+
 /**
  * Id for the signals alerting type
  */
@@ -129,10 +172,15 @@ export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 
 export const TIMELINE_URL = '/api/timeline';
+export const TIMELINES_URL = '/api/timelines';
+export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
 export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
+
+export const NOTE_URL = '/api/note';
+export const PINNED_EVENT_URL = '/api/pinned_event';
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -166,7 +214,6 @@ export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 /*
   Rule notifications options
 */
-export const ENABLE_CASE_CONNECTOR = false;
 export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
@@ -175,6 +222,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.servicenow',
   '.jira',
   '.resilient',
+  '.teams',
 ];
 
 if (ENABLE_CASE_CONNECTOR) {
@@ -200,3 +248,10 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+/**
+ * Used for transforms for metrics_entities. If the security_solutions pulls in
+ * the metrics_entities plugin, then it should pull this constant from there rather
+ * than use it from here.
+ */
+export const ELASTIC_NAME = 'estc';

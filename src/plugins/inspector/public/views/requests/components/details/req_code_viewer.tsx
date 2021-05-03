@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { XJsonLang } from '@kbn/monaco';
 import { EuiFlexItem, EuiFlexGroup, EuiCopy, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { CodeEditor } from '../../../../../../kibana_react/public';
@@ -51,7 +52,7 @@ export const RequestCodeViewer = ({ json }: RequestCodeViewerProps) => (
     </EuiFlexItem>
     <EuiFlexItem grow={true}>
       <CodeEditor
-        languageId="json"
+        languageId={XJsonLang.ID}
         value={json}
         onChange={() => {}}
         options={{
@@ -61,6 +62,7 @@ export const RequestCodeViewer = ({ json }: RequestCodeViewerProps) => (
           minimap: {
             enabled: false,
           },
+          folding: true,
           scrollBeyondLastLine: false,
           wordWrap: 'on',
           wrappingIndent: 'indent',

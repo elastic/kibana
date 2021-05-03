@@ -8,20 +8,19 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../__mocks__';
-
-import React from 'react';
-import { shallow } from 'enzyme';
-import { useParams } from 'react-router-dom';
-
-import { Route, Switch } from 'react-router-dom';
-
+import { mockLocation } from '../../../__mocks__/react_router_history.mock';
+import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
+
+import { shallow } from 'enzyme';
+
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-
-import { NAV } from '../../constants';
-
 import { Loading } from '../../../shared/loading';
+import { NAV } from '../../constants';
 
 import { DisplaySettingsRouter } from './components/display_settings';
 import { Overview } from './components/overview';
@@ -29,11 +28,11 @@ import { Schema } from './components/schema';
 import { SchemaChangeErrors } from './components/schema/schema_change_errors';
 import { SourceContent } from './components/source_content';
 import { SourceSettings } from './components/source_settings';
-
 import { SourceRouter } from './source_router';
 
 describe('SourceRouter', () => {
   const initializeSource = jest.fn();
+  const resetSourceState = jest.fn();
   const contentSource = contentSources[1];
   const customSource = contentSources[0];
   const mockValues = {
@@ -44,10 +43,11 @@ describe('SourceRouter', () => {
   beforeEach(() => {
     setMockActions({
       initializeSource,
+      resetSourceState,
     });
     setMockValues({ ...mockValues });
     (useParams as jest.Mock).mockImplementationOnce(() => ({
-      sourceId: '1',
+      sourceId: contentSource.id,
     }));
   });
 
@@ -92,7 +92,7 @@ describe('SourceRouter', () => {
     const contentBreadCrumb = wrapper.find(SetPageChrome).at(1);
     const settingsBreadCrumb = wrapper.find(SetPageChrome).at(2);
 
-    expect(overviewBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.OVERVIEW]);
+    expect(overviewBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs]);
     expect(contentBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.CONTENT]);
     expect(settingsBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.SETTINGS]);
   });
@@ -117,5 +117,23 @@ describe('SourceRouter', () => {
       ...loadingBreadcrumbs,
       NAV.DISPLAY_SETTINGS,
     ]);
+  });
+
+  describe('reset state', () => {
+    it('does not reset state when switching between source tree views', () => {
+      mockLocation.pathname = `/sources/${contentSource.id}`;
+      shallow(<SourceRouter />);
+      unmountHandler();
+
+      expect(resetSourceState).not.toHaveBeenCalled();
+    });
+
+    it('resets state when leaving source tree', () => {
+      mockLocation.pathname = '/home';
+      shallow(<SourceRouter />);
+      unmountHandler();
+
+      expect(resetSourceState).toHaveBeenCalled();
+    });
   });
 });

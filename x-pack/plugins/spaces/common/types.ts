@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Space } from '../../../../src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 export interface GetAllSpacesOptions {
   purpose?: GetAllSpacesPurpose;

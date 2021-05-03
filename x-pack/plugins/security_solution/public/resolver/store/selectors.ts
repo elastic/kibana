@@ -54,6 +54,11 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
  */
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
+export const resolverTreeHasNodes = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverTreeHasNodes
+);
+
 /**
  * The position of nodes and edges.
  */
@@ -80,8 +85,13 @@ export const treeRequestParametersToAbort = composeSelectors(
  */
 export const treeParameterIndices = composeSelectors(
   dataStateSelector,
-  dataSelectors.treeParamterIndices
+  dataSelectors.treeParameterIndices
 );
+
+/**
+ * An array of indices to use for resolver panel requests.
+ */
+export const eventIndices = composeSelectors(dataStateSelector, dataSelectors.eventIndices);
 
 export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,

@@ -50,7 +50,10 @@ export class CategorizationExamplesLoader {
       this._timeFieldName,
       this._jobCreator.start,
       this._jobCreator.end,
-      analyzer
+      analyzer,
+      this._jobCreator.runtimeMappings ?? undefined,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+      this._jobCreator.datafeedConfig.indices_options
     );
     return resp;
   }

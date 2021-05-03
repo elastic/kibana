@@ -112,6 +112,8 @@ const executorParams: ExecutorSubActionPushParams = {
     severity: '1',
     urgency: '2',
     impact: '3',
+    category: 'software',
+    subcategory: 'os',
   },
   comments: [
     {

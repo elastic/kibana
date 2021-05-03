@@ -34,6 +34,7 @@ import { getHistory } from './kibana_services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -59,6 +60,7 @@ export interface DiscoverServices {
   getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export async function buildServices(
@@ -100,5 +102,6 @@ export async function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
+    indexPatternFieldEditor: plugins.indexPatternFieldEditor,
   };
 }

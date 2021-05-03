@@ -6,7 +6,6 @@
  */
 
 import React, { ReactNode, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -21,6 +20,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 
 interface GenericConfirmationModalProps {
   description: ReactNode;
@@ -77,9 +79,7 @@ export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> =
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty data-test-subj="GenericConfirmationModalCancel" onClick={onClose}>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.modal.cancel', {
-            defaultMessage: 'Cancel',
-          })}
+          {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
         <EuiButton
           data-test-subj="GenericConfirmationModalSave"

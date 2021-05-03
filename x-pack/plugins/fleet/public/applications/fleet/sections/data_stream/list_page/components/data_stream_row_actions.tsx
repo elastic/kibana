@@ -8,7 +8,8 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DataStream } from '../../../../types';
+
+import type { DataStream } from '../../../../types';
 import { useKibanaLink } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 

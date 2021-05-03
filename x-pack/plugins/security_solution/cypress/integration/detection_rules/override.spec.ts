@@ -68,12 +68,11 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo300,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
@@ -113,7 +112,7 @@ describe('Detection rules, override', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
@@ -122,8 +121,7 @@ describe('Detection rules, override', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    changeRowsPerPageTo300();
 
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {

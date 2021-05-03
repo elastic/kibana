@@ -14,16 +14,14 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
 
   const originalMarkdownText = 'Original markdown text';
   const modifiedMarkdownText = 'Modified markdown text';
 
   const createMarkdownVis = async (title) => {
-    await testSubjects.click('dashboardAddNewPanelButton');
-    await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-    await PageObjects.visualize.clickMarkdownWidget();
+    await dashboardAddPanel.clickMarkdownQuickButton();
     await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
     await PageObjects.visEditor.clickGo();
     if (title) {
@@ -104,9 +102,94 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualizationAndReturn();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualize Library');
       await PageObjects.common.clickConfirmOnModal();
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+    });
+
+    it('visualize app menu navigates to the visualize listing page if the last opened visualization was linked to dashboard', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      // Create markdown by reference.
+      await createMarkdownVis('by reference');
+
+      // Edit then save and return
+      await editMarkdownVis();
+      await PageObjects.visualize.saveVisualizationAndReturn();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await appsMenu.clickLink('Visualize Library');
+      await PageObjects.common.clickConfirmOnModal();
+      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+    });
+
+    describe('by value', () => {
+      it('save and return button returns to dashboard after editing visualization with changes saved', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await createMarkdownVis();
+
+        const originalPanelCount = PageObjects.dashboard.getPanelCount();
+
+        await editMarkdownVis();
+        await PageObjects.visualize.saveVisualizationAndReturn();
+
+        const markdownText = await testSubjects.find('markdownBody');
+        expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
+
+        const newPanelCount = PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.eql(originalPanelCount);
+      });
+
+      it('cancel button returns to dashboard after editing visualization without saving', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await createMarkdownVis();
+
+        await editMarkdownVis();
+        await PageObjects.visualize.cancelAndReturn(true);
+
+        const markdownText = await testSubjects.find('markdownBody');
+        expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+      });
+
+      it('save to library button returns to dashboard after editing visualization with changes saved', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await createMarkdownVis();
+
+        const originalPanelCount = PageObjects.dashboard.getPanelCount();
+
+        await editMarkdownVis();
+        await PageObjects.visualize.saveVisualization('test save to library', {
+          redirectToOrigin: true,
+        });
+
+        const markdownText = await testSubjects.find('markdownBody');
+        expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
+
+        const newPanelCount = PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.eql(originalPanelCount);
+      });
+
+      it('should lose its connection to the dashboard when creating new visualization', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.clickNewVisualization();
+        await PageObjects.visualize.clickMarkdownWidget();
+        await PageObjects.visualize.notLinkedToOriginatingApp();
+
+        // return to origin should not be present in save modal
+        await testSubjects.click('visualizeSaveButton');
+        const redirectToOriginCheckboxExists = await testSubjects.exists(
+          'returnToOriginModeSwitch'
+        );
+        expect(redirectToOriginCheckboxExists).to.be(false);
+      });
     });
   });
 }

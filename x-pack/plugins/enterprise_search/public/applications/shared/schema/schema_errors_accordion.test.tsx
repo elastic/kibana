@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiAccordion, EuiTableRow } from '@elastic/eui';
 
-import { EuiLinkTo } from '../react_router_helpers';
+import { EuiButtonEmptyTo } from '../react_router_helpers';
+
 import { SchemaErrorsAccordion } from './schema_errors_accordion';
 
 describe('SchemaErrorsAccordion', () => {
@@ -38,12 +40,12 @@ describe('SchemaErrorsAccordion', () => {
 
     expect(wrapper.find(EuiAccordion)).toHaveLength(1);
     expect(wrapper.find(EuiTableRow)).toHaveLength(2);
-    expect(wrapper.find(EuiLinkTo)).toHaveLength(0);
+    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(0);
   });
 
   it('renders document buttons', () => {
     const wrapper = shallow(<SchemaErrorsAccordion {...props} itemId="123" getRoute={jest.fn()} />);
 
-    expect(wrapper.find(EuiLinkTo)).toHaveLength(2);
+    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(2);
   });
 });

@@ -35,6 +35,8 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
+import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
 
 type Func = () => Promise<void>;
 
@@ -158,7 +160,9 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
+      <NeedAdminForUpdateRulesCallOut />
       <ReadOnlyRulesCallOut />
+      <MlJobCompatibilityCallout />
       <ValueListsModal
         showModal={showValueListsModal}
         onClose={() => setShowValueListsModal(false)}

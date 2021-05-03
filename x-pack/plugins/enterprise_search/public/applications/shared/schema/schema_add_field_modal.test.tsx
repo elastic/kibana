@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
+
 import { shallow, mount } from 'enzyme';
 
-import { NUMBER } from '../constants/field_types';
+import { EuiFieldText, EuiModal } from '@elastic/eui';
 
 import { FIELD_NAME_CORRECTED_PREFIX } from './constants';
+import { SchemaType } from './types';
 
-import { SchemaAddFieldModal } from './';
-
-import { EuiFieldText, EuiModal, EuiSelect } from '@elastic/eui';
+import { SchemaFieldTypeSelect, SchemaAddFieldModal } from './';
 
 describe('SchemaAddFieldModal', () => {
   const addNewField = jest.fn();
@@ -77,11 +77,13 @@ describe('SchemaAddFieldModal', () => {
     );
   });
 
-  it('handles option change', () => {
+  it('handles field type select change', () => {
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
-    wrapper.find(EuiSelect).simulate('change', { target: { value: NUMBER } });
+    const fieldTypeUpdate = wrapper.find(SchemaFieldTypeSelect).prop('updateExistingFieldType');
 
-    expect(wrapper.find('[data-test-subj="SchemaSelect"]').prop('value')).toEqual(NUMBER);
+    fieldTypeUpdate('_', SchemaType.Number); // The fieldName arg is irrelevant for this modal
+
+    expect(wrapper.find(SchemaFieldTypeSelect).prop('fieldType')).toEqual(SchemaType.Number);
   });
 
   it('handles form submission', () => {

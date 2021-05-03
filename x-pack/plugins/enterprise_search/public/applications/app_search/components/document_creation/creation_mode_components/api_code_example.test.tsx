@@ -9,7 +9,9 @@ import '../../../../__mocks__/enterprise_search_url.mock';
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiCode, EuiCodeBlock, EuiButtonEmpty } from '@elastic/eui';
 
 import { ApiCodeExample, FlyoutHeader, FlyoutBody, FlyoutFooter } from './api_code_example';

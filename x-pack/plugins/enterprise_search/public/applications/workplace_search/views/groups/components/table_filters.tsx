@@ -9,9 +9,8 @@ import React, { ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { AppLogic } from '../../../app_logic';
 import { GroupsLogic } from '../groups_logic';

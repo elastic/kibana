@@ -20,12 +20,14 @@ import {
   updateGroupsSchema,
   revertModelSnapshotSchema,
   jobsExistSchema,
+  datafeedPreviewSchema,
 } from './schemas/job_service_schema';
 
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**
  * Routes for job service
@@ -225,9 +227,13 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
-        const { jobsSummary } = jobServiceProvider(client, mlClient);
+        const { jobsSummary } = jobServiceProvider(
+          client,
+          mlClient,
+          context.alerting?.getAlertsClient()
+        );
         const { jobIds } = request.body;
         const resp = await jobsSummary(jobIds);
 
@@ -326,9 +332,13 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
-        const { createFullJobsList } = jobServiceProvider(client, mlClient);
+        const { createFullJobsList } = jobServiceProvider(
+          client,
+          mlClient,
+          context.alerting?.getAlertsClient()
+        );
         const { jobIds } = request.body;
         const resp = await createFullJobsList(jobIds);
 
@@ -534,6 +544,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           aggFieldNamePairs,
           splitFieldName,
           splitFieldValue,
+          runtimeMappings,
+          indicesOptions,
         } = request.body;
 
         const { newJobLineChart } = jobServiceProvider(client, mlClient);
@@ -546,7 +558,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           query,
           aggFieldNamePairs,
           splitFieldName,
-          splitFieldValue
+          splitFieldValue,
+          runtimeMappings,
+          indicesOptions
         );
 
         return response.ok({
@@ -588,6 +602,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           query,
           aggFieldNamePairs,
           splitFieldName,
+          runtimeMappings,
+          indicesOptions,
         } = request.body;
 
         const { newJobPopulationChart } = jobServiceProvider(client, mlClient);
@@ -599,7 +615,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           intervalMs,
           query,
           aggFieldNamePairs,
-          splitFieldName
+          splitFieldName,
+          runtimeMappings,
+          indicesOptions
         );
 
         return response.ok({
@@ -705,6 +723,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           start,
           end,
           analyzer,
+          runtimeMappings,
+          indicesOptions,
         } = request.body;
 
         const resp = await validateCategoryExamples(
@@ -715,7 +735,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           timeField,
           start,
           end,
-          analyzer
+          analyzer,
+          runtimeMappings,
+          indicesOptions
         );
 
         return response.ok({
@@ -754,6 +776,52 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
 
         return response.ok({
           body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/datafeed_preview Get datafeed preview
+   * @apiName DatafeedPreview
+   * @apiDescription Returns a preview of the datafeed search
+   *
+   * @apiSchema (body) datafeedPreviewSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/datafeed_preview',
+      validate: {
+        body: datafeedPreviewSchema,
+      },
+      options: {
+        tags: ['access:ml:canPreviewDatafeed'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { datafeedId, job, datafeed } = request.body;
+
+        if (datafeedId !== undefined) {
+          const { body } = await mlClient.previewDatafeed(
+            {
+              datafeed_id: datafeedId,
+            },
+            getAuthorizationHeader(request)
+          );
+          return response.ok({
+            body,
+          });
+        }
+
+        const { datafeedPreview } = jobServiceProvider(client, mlClient);
+        const body = await datafeedPreview(job, datafeed);
+        return response.ok({
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

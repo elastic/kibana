@@ -86,6 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasIpFilter).to.be(true);
     });
 
+    // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
+    // setting set in kibana.yml to work (not enabled by default)
     it('should be able to drill down to discover', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
@@ -120,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '[data-test-subj="embeddablePanelHeading-lnsPieVis"]',
         'lnsPieVis'
       );
-      const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
+      const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'AL');
       expect(hasGeoDestFilter).to.be(true);
       await filterBar.addFilter('geo.src', 'is', 'US');
       await filterBar.toggleFilterPinned('geo.src');
@@ -134,7 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter('geo.dest', 'is', 'LS');
 
       await dashboardAddPanel.clickCreateNewLink();
-      await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
       expect(hasGeoDestFilter).to.be(false);
@@ -155,6 +156,77 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await panelActions.openContextMenu();
       await panelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+    });
+
+    it('unlink lens panel from embeddable library', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
+      await find.clickByButtonText('lnsPieVis');
+      await dashboardAddPanel.closeAddPanel();
+
+      const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
+      await panelActions.unlinkFromLibary(originalPanel);
+      await testSubjects.existOrFail('unlinkPanelSuccess');
+
+      const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
+      const libraryActionExists = await testSubjects.descendantExists(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
+        updatedPanel
+      );
+      expect(libraryActionExists).to.be(false);
+    });
+
+    it('save lens panel to embeddable library', async () => {
+      const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
+      await panelActions.saveToLibrary('lnsPieVis - copy', originalPanel);
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await testSubjects.existOrFail('addPanelToLibrarySuccess');
+
+      const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis-copy');
+      const libraryActionExists = await testSubjects.descendantExists(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
+        updatedPanel
+      );
+      expect(libraryActionExists).to.be(true);
+
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
+      await find.existsByLinkText('lnsPieVis');
+    });
+
+    it('should show validation messages if any error appears', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.clickCreateNewLink();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'moving_average',
+        keepOpen: true,
+      });
+      await PageObjects.lens.configureReference({
+        operation: 'sum',
+        field: 'bytes',
+      });
+      await PageObjects.lens.closeDimensionEditor();
+
+      // remove the x dimension to trigger the validation error
+      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+      await PageObjects.lens.saveAndReturn();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('embeddable-lens-failure');
     });
   });
 }

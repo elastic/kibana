@@ -56,12 +56,11 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo300,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
@@ -104,7 +103,7 @@ describe('Detection rules, EQL', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
@@ -114,8 +113,7 @@ describe('Detection rules, EQL', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    changeRowsPerPageTo300();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -200,7 +198,7 @@ describe('Detection rules, sequence EQL', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    waitForRulesTableToBeLoaded();
     goToCreateNewRule();
     selectEqlRuleType();
     fillDefineEqlRuleAndContinue(this.rule);
@@ -210,8 +208,7 @@ describe('Detection rules, sequence EQL', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeToThreeHundredRowsPerPage();
-    waitForRulesToBeLoaded();
+    changeRowsPerPageTo300();
 
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);

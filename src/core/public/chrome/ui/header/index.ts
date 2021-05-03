@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { Header, HeaderProps } from './header';
-export { OnIsLockedUpdate, NavType } from './types';
-export {
+export { Header } from './header';
+export type { HeaderProps } from './header';
+export type { OnIsLockedUpdate, NavType } from './types';
+export type {
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,

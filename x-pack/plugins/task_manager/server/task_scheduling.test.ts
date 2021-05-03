@@ -7,13 +7,14 @@
 
 import _ from 'lodash';
 import { Subject } from 'rxjs';
-import { none } from 'fp-ts/lib/Option';
+import { none, some } from 'fp-ts/lib/Option';
 
 import {
   asTaskMarkRunningEvent,
   asTaskRunEvent,
   asTaskClaimEvent,
   asTaskRunRequestEvent,
+  TaskClaimErrorType,
 } from './task_events';
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
@@ -24,16 +25,27 @@ import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
 import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
   const mockTaskManager = taskPollingLifecycleMock.create({});
+  const definitions = new TaskTypeDictionary(mockLogger());
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
     taskPollingLifecycle: mockTaskManager,
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
+    definitions,
   };
+
+  definitions.registerTaskDefinitions({
+    foo: {
+      title: 'foo',
+      maxConcurrency: 2,
+      createTaskRunner: jest.fn(),
+    },
+  });
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -114,7 +126,7 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      const task = { id } as ConcreteTaskInstance;
+      const task = mockTask({ id });
       events$.next(asTaskRunEvent(id, asOk({ task, result: TaskRunResult.Success })));
 
       return expect(result).resolves.toEqual({ id });
@@ -131,7 +143,7 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      const task = { id } as ConcreteTaskInstance;
+      const task = mockTask({ id });
       events$.next(asTaskClaimEvent(id, asOk(task)));
       events$.next(asTaskMarkRunningEvent(id, asOk(task)));
       events$.next(
@@ -161,7 +173,7 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      const task = { id } as ConcreteTaskInstance;
+      const task = mockTask({ id });
       events$.next(asTaskClaimEvent(id, asOk(task)));
       events$.next(asTaskMarkRunningEvent(id, asErr(new Error('some thing gone wrong'))));
 
@@ -183,13 +195,46 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toEqual(
         new Error(`Failed to run task "${id}" as it does not exist`)
       );
 
       expect(mockTaskStore.getLifecycle).toHaveBeenCalledWith(id);
+    });
+
+    test('when a task claim due to insufficient capacity we return an explciit message', async () => {
+      const events$ = new Subject<TaskLifecycleEvent>();
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+
+      mockTaskStore.getLifecycle.mockResolvedValue(TaskLifecycleResult.NotFound);
+
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        taskPollingLifecycle: taskPollingLifecycleMock.create({ events$ }),
+      });
+
+      const result = taskScheduling.runNow(id);
+
+      const task = mockTask({ id, taskType: 'foo' });
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: some(task), errorType: TaskClaimErrorType.CLAIMED_BY_ID_OUT_OF_CAPACITY })
+        )
+      );
+
+      await expect(result).rejects.toEqual(
+        new Error(
+          `Failed to run task "${id}" as we would exceed the max concurrency of "${task.taskType}" which is 2. Rescheduled the task to ensure it is picked up as soon as possible.`
+        )
+      );
     });
 
     test('when a task claim fails we ensure the task isnt already claimed', async () => {
@@ -205,7 +250,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toEqual(
         new Error(`Failed to run task "${id}" as it is currently running`)
@@ -227,7 +277,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toEqual(
         new Error(`Failed to run task "${id}" as it is currently running`)
@@ -270,7 +325,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "idle")]`
@@ -292,7 +352,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "failed")]`
@@ -313,7 +378,7 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      const task = { id } as ConcreteTaskInstance;
+      const task = mockTask({ id });
       const otherTask = { id: differentTask } as ConcreteTaskInstance;
       events$.next(asTaskClaimEvent(id, asOk(task)));
       events$.next(asTaskClaimEvent(differentTask, asOk(otherTask)));
@@ -338,3 +403,23 @@ describe('TaskScheduling', () => {
     });
   });
 });
+
+function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {
+  return {
+    id: 'claimed-by-id',
+    runAt: new Date(),
+    taskType: 'foo',
+    schedule: undefined,
+    attempts: 0,
+    status: TaskStatus.Claiming,
+    params: { hello: 'world' },
+    state: { baby: 'Henhen' },
+    user: 'jimbo',
+    scope: ['reporting'],
+    ownerId: '',
+    startedAt: null,
+    retryAt: null,
+    scheduledAt: new Date(),
+    ...overrides,
+  };
+}

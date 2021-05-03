@@ -96,15 +96,17 @@ import {
   ThreatLanguageOrUndefined,
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
+  ThreatIndicatorPathOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 
-import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
-import { Alert, SanitizedAlert } from '../../../../../alerts/common';
+import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
+import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { RuleTypeParams, PartialFilter } from '../types';
+import { PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
+import { RuleParams } from '../schemas/rule_schemas';
 
-export type RuleAlertType = Alert<RuleTypeParams>;
+export type RuleAlertType = Alert<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
@@ -162,6 +164,19 @@ export interface IRuleStatusFindType {
   saved_objects: IRuleStatusSavedObject[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface IRuleAssetSOAttributes extends Record<string, any> {
+  rule_id: string | null | undefined;
+  version: string | null | undefined;
+  name: string | null | undefined;
+}
+
+export interface IRuleAssetSavedObject {
+  type: string;
+  id: string;
+  attributes: IRuleAssetSOAttributes & SavedObjectAttributes;
+}
+
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
@@ -173,13 +188,13 @@ export interface Clients {
 }
 
 export const isAlertTypes = (
-  partialAlert: Array<PartialAlert<RuleTypeParams>>
+  partialAlert: Array<PartialAlert<RuleParams>>
 ): partialAlert is RuleAlertType[] => {
   return partialAlert.every((rule) => isAlertType(rule));
 };
 
 export const isAlertType = (
-  partialAlert: PartialAlert<RuleTypeParams>
+  partialAlert: PartialAlert<RuleParams>
 ): partialAlert is RuleAlertType => {
   return partialAlert.alertTypeId === SIGNALS_ID;
 };
@@ -238,6 +253,7 @@ export interface CreateRulesOptions {
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   concurrentSearches: ConcurrentSearchesOrUndefined;
@@ -308,7 +324,7 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert<RuleTypeParams> | null;
+  rule: SanitizedAlert<RuleParams> | null;
 }
 
 export interface ReadRuleOptions {

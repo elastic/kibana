@@ -10,16 +10,18 @@ import { requestContextMock } from './request_context';
 import { serverMock } from './server';
 import { requestMock } from './request';
 import { responseMock } from './response_factory';
+import { ConfigType } from '../../../../config';
 
 export { requestMock, requestContextMock, responseMock, serverMock };
 
-export const createMockConfig = () => ({
+export const createMockConfig = (): ConfigType => ({
   enabled: true,
   [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
   maxRuleImportExportSize: 10000,
   maxRuleImportPayloadBytes: 10485760,
   maxTimelineImportExportSize: 10000,
   maxTimelineImportPayloadBytes: 10485760,
+  enableExperimental: [],
   endpointResultListDefaultFirstPageIndex: 0,
   endpointResultListDefaultPageSize: 10,
   alertResultListDefaultDateRange: {

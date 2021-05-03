@@ -4,24 +4,24 @@
 
 ## SearchInterceptor.search() method
 
-Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort either when `cancelPending` is called, when the request times out, or when the original `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
+Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort either when the request times out, or when the original `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
 
 <b>Signature:</b>
 
 ```typescript
-search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
+search({ id, ...request }: IKibanaSearchRequest, options?: IAsyncSearchOptions): import("rxjs").Observable<IKibanaSearchResponse<any>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  request | <code>IKibanaSearchRequest</code> |  |
-|  options | <code>ISearchOptions</code> |  |
+|  { id, ...request } | <code>IKibanaSearchRequest</code> |  |
+|  options | <code>IAsyncSearchOptions</code> |  |
 
 <b>Returns:</b>
 
-`Observable<IKibanaSearchResponse>`
+`import("rxjs").Observable<IKibanaSearchResponse<any>>`
 
 `Observable` emitting the search response or an error.
 

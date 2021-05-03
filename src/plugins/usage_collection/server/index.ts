@@ -9,17 +9,29 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { UsageCollectionPlugin } from './plugin';
 
-export {
+export { Collector } from './collector';
+export type {
   AllowedSchemaTypes,
   MakeSchemaFrom,
   SchemaField,
   CollectorOptions,
   UsageCollectorOptions,
-  Collector,
   CollectorFetchContext,
 } from './collector';
 
-export { UsageCollectionSetup } from './plugin';
+export type {
+  UsageCountersSavedObject,
+  UsageCountersSavedObjectAttributes,
+  IncrementCounterParams,
+} from './usage_counters';
+
+export {
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  serializeCounterKey,
+  UsageCounter,
+} from './usage_counters';
+
+export type { UsageCollectionSetup } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new UsageCollectionPlugin(initializerContext);

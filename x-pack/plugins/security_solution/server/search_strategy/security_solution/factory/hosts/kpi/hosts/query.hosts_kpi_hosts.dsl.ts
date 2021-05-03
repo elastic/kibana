@@ -30,6 +30,7 @@ export const buildHostsKpiHostsQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         hosts: {
@@ -40,7 +41,7 @@ export const buildHostsKpiHostsQuery = ({
         hosts_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {
@@ -57,7 +58,6 @@ export const buildHostsKpiHostsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

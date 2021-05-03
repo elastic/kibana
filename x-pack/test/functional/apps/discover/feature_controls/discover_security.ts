@@ -75,6 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+        await PageObjects.common.navigateToApp('discover');
       });
 
       after(async () => {
@@ -84,11 +85,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Discover']);
+        expect(navLinks.map((link) => link.text)).to.eql([
+          'Overview',
+          'Discover',
+          'Stack Management', // because `global_discover_all_role` enables search sessions and reporting
+        ]);
       });
 
       it('shows save button', async () => {
-        await PageObjects.common.navigateToApp('discover');
         await testSubjects.existOrFail('discoverSaveButton', { timeout: 20000 });
       });
 
@@ -100,6 +104,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
+        await PageObjects.share.clickShareTopNavButton();
+      });
+
+      it('shows CSV reports', async () => {
+        await PageObjects.share.clickShareTopNavButton();
+        await testSubjects.existOrFail('sharePanel-CSVReports');
         await PageObjects.share.clickShareTopNavButton();
       });
 
@@ -209,8 +219,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.createShortUrlMissingOrFail();
+        await PageObjects.share.clickShareTopNavButton();
+      });
+
+      it(`doesn't show CSV reports`, async () => {
+        await PageObjects.share.clickShareTopNavButton();
+        await testSubjects.missingOrFail('sharePanel-CSVReports');
+        await PageObjects.share.clickShareTopNavButton();
       });
 
       it('allows loading a saved query via the saved query management component', async () => {
@@ -300,7 +317,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
         await PageObjects.share.clickShareTopNavButton();

@@ -6,6 +6,8 @@
  */
 
 import { ReactNode } from 'react';
+import { Ecs } from '../../../../common/ecs';
+import { CodeSignature } from '../../../../common/ecs/file';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
 import {
@@ -13,6 +15,7 @@ import {
   Entry,
   EntryMatch,
   EntryMatchAny,
+  EntryMatchWildcard,
   EntryExists,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -58,16 +61,18 @@ export interface ExceptionsPagination {
 }
 
 export interface FormattedBuilderEntry {
+  id: string;
   field: IFieldType | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
   nested: 'parent' | 'child' | undefined;
   entryIndex: number;
-  parent: { parent: EntryNested; parentIndex: number } | undefined;
+  parent: { parent: BuilderEntryNested; parentIndex: number } | undefined;
   correspondingKeywordField: IFieldType | undefined;
 }
 
 export interface EmptyEntry {
+  id: string;
   field: string | undefined;
   operator: OperatorEnum;
   type: OperatorTypeEnum.MATCH | OperatorTypeEnum.MATCH_ANY;
@@ -75,6 +80,7 @@ export interface EmptyEntry {
 }
 
 export interface EmptyListEntry {
+  id: string;
   field: string | undefined;
   operator: OperatorEnum;
   type: OperatorTypeEnum.LIST;
@@ -82,12 +88,33 @@ export interface EmptyListEntry {
 }
 
 export interface EmptyNestedEntry {
+  id: string;
   field: string | undefined;
   type: OperatorTypeEnum.NESTED;
-  entries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists>;
+  entries: Array<
+    | (EntryMatch & { id?: string })
+    | (EntryMatchWildcard & { id?: string })
+    | (EntryMatchAny & { id?: string })
+    | (EntryExists & { id?: string })
+  >;
 }
 
-export type BuilderEntry = Entry | EmptyListEntry | EmptyEntry | EntryNested | EmptyNestedEntry;
+export type BuilderEntry =
+  | (Entry & { id?: string })
+  | EmptyListEntry
+  | EmptyEntry
+  | BuilderEntryNested
+  | EmptyNestedEntry;
+
+export type BuilderEntryNested = Omit<EntryNested, 'entries'> & {
+  id?: string;
+  entries: Array<
+    | (EntryMatch & { id?: string })
+    | (EntryMatchWildcard & { id?: string })
+    | (EntryMatchAny & { id?: string })
+    | (EntryExists & { id?: string })
+  >;
+};
 
 export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entries'> & {
   entries: BuilderEntry[];
@@ -104,3 +131,32 @@ export type CreateExceptionListItemBuilderSchema = Omit<
 export type ExceptionsBuilderExceptionItem =
   | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;
+
+export interface FlattenedCodeSignature {
+  subject_name: string;
+  trusted: string;
+}
+
+export type Flattened<T> = {
+  [K in keyof T]: T[K] extends infer AliasType
+    ? AliasType extends CodeSignature[]
+      ? FlattenedCodeSignature[]
+      : AliasType extends Array<infer rawType>
+      ? rawType
+      : AliasType extends object
+      ? Flattened<AliasType>
+      : AliasType
+    : never;
+};
+
+export type AlertData = {
+  '@timestamp': string;
+} & Flattened<Ecs>;
+
+export interface EcsHit {
+  _id: string;
+  _index: string;
+  _source: {
+    '@timestamp': string;
+  } & Omit<Flattened<Ecs>, '_id' | '_index'>;
+}

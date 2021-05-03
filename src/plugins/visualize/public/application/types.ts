@@ -15,6 +15,7 @@ import {
   VisualizeEmbeddableContract,
   VisSavedObject,
   PersistedState,
+  VisParams,
 } from 'src/plugins/visualizations/public';
 import {
   CoreStart,
@@ -114,9 +115,9 @@ export interface ByValueVisInstance {
 
 export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
 
-export type VisEditorConstructor = new (
+export type VisEditorConstructor<TVisParams = VisParams> = new (
   element: HTMLElement,
-  vis: Vis,
+  vis: Vis<TVisParams>,
   eventEmitter: EventEmitter,
   embeddableHandler: VisualizeEmbeddableContract
 ) => IEditorController;

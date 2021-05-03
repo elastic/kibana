@@ -8,11 +8,13 @@
 import { setMockValues } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiBadge } from '@elastic/eui';
-import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';
+
 import { ExampleDocumentJson, MoreDocumentsText } from './summary_documents';
+import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';
 
 import {
   InvalidDocumentsSummary,

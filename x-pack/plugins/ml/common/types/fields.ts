@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
@@ -27,6 +28,7 @@ export interface Field {
   aggregatable?: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
+  runtimeField?: estypes.RuntimeField;
 }
 
 export interface Aggregation {
@@ -46,6 +48,10 @@ export interface Aggregation {
 export interface NewJobCaps {
   fields: Field[];
   aggs: Aggregation[];
+}
+
+export interface NewJobCapsResponse {
+  [indexPattern: string]: NewJobCaps;
 }
 
 export interface AggFieldPair {
@@ -103,3 +109,7 @@ export interface ScriptAggCardinality {
 export interface AggCardinality {
   cardinality: FieldAggCardinality | ScriptAggCardinality;
 }
+
+export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
+
+export type RuntimeMappings = estypes.RuntimeFields;

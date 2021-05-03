@@ -16,7 +16,8 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 export function createTheme(
   euiTheme: typeof darkTheme | typeof lightTheme,
-  selectionBackgroundColor: string
+  selectionBackgroundColor: string,
+  backgroundColor?: string
 ): monaco.editor.IStandaloneThemeData {
   return {
     base: 'vs',
@@ -41,7 +42,7 @@ export function createTheme(
       { token: 'annotation', foreground: euiTheme.euiColorMediumShade },
       { token: 'type', foreground: euiTheme.euiColorVis0 },
 
-      { token: 'delimiter', foreground: euiTheme.euiColorDarkestShade },
+      { token: 'delimiter', foreground: euiTheme.euiTextSubduedColor },
       { token: 'delimiter.html', foreground: euiTheme.euiColorDarkShade },
       { token: 'delimiter.xml', foreground: euiTheme.euiColorPrimary },
 
@@ -81,10 +82,13 @@ export function createTheme(
       { token: 'operator.sql', foreground: euiTheme.euiColorMediumShade },
       { token: 'operator.swift', foreground: euiTheme.euiColorMediumShade },
       { token: 'predefined.sql', foreground: euiTheme.euiColorMediumShade },
+
+      { token: 'text', foreground: euiTheme.euiTitleColor },
+      { token: 'label', foreground: euiTheme.euiColorVis9 },
     ],
     colors: {
       'editor.foreground': euiTheme.euiColorDarkestShade,
-      'editor.background': euiTheme.euiFormBackgroundColor,
+      'editor.background': backgroundColor ?? euiTheme.euiFormBackgroundColor,
       'editorLineNumber.foreground': euiTheme.euiColorDarkShade,
       'editorLineNumber.activeForeground': euiTheme.euiColorDarkShade,
       'editorIndentGuide.background': euiTheme.euiColorLightShade,
@@ -102,5 +106,7 @@ export function createTheme(
 
 const DARK_THEME = createTheme(darkTheme, '#343551');
 const LIGHT_THEME = createTheme(lightTheme, '#E3E4ED');
+const DARK_THEME_TRANSPARENT = createTheme(darkTheme, '#343551', '#00000000');
+const LIGHT_THEME_TRANSPARENT = createTheme(lightTheme, '#E3E4ED', '#00000000');
 
-export { DARK_THEME, LIGHT_THEME };
+export { DARK_THEME, LIGHT_THEME, DARK_THEME_TRANSPARENT, LIGHT_THEME_TRANSPARENT };

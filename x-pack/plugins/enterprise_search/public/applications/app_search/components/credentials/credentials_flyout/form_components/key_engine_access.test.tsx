@@ -8,7 +8,9 @@
 import { setMockValues, setMockActions, rerender } from '../../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiRadio, EuiCheckbox } from '@elastic/eui';
 
 import { FormKeyEngineAccess, EngineSelection } from './key_engine_access';

@@ -326,7 +326,7 @@ describe('Policy Details', () => {
         const userNotificationCustomMessageTextArea = policyView.find(
           'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
         );
-        const tooltip = policyView.find('EuiIconTip');
+        const tooltip = policyView.find('EuiIconTip[data-test-subj="malwareTooltip"]');
         expect(userNotificationCheckbox).toHaveLength(0);
         expect(userNotificationCustomMessageTextArea).toHaveLength(0);
         expect(tooltip).toHaveLength(0);

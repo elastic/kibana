@@ -27,3 +27,16 @@ export interface FlatSettings {
     _meta?: MetaProperties;
   };
 }
+
+// Specific to 7.x-8 upgrade
+export interface FlatSettingsWithTypeName {
+  settings: {
+    [key: string]: string;
+  };
+  mappings: {
+    [typeName: string]: {
+      properties?: MappingProperties;
+      _meta?: MetaProperties;
+    };
+  };
+}

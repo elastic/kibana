@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const READ_ONLY_SAVED_OBJECT_TITLE = i18n.translate(
-  'xpack.securitySolution.case.readOnlySavedObjectTitle',
+  'xpack.securitySolution.cases.readOnlySavedObjectTitle',
   {
     defaultMessage: 'You cannot open new or update existing cases',
   }
 );
 
 export const READ_ONLY_SAVED_OBJECT_MSG = i18n.translate(
-  'xpack.securitySolution.case.readOnlySavedObjectDescription',
+  'xpack.securitySolution.cases.readOnlySavedObjectDescription',
   {
     defaultMessage:
       'You only have permissions to view cases. If you need to open and update cases, contact your Kibana administrator.',
@@ -23,7 +23,7 @@ export const READ_ONLY_SAVED_OBJECT_MSG = i18n.translate(
 );
 
 export const DISMISS_CALLOUT = i18n.translate(
-  'xpack.securitySolution.case.dismissErrorsPushServiceCallOutTitle',
+  'xpack.securitySolution.cases.dismissErrorsPushServiceCallOutTitle',
   {
     defaultMessage: 'Dismiss',
   }

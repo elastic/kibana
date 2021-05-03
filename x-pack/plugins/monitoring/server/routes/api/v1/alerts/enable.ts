@@ -13,7 +13,7 @@ import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { ActionResult } from '../../../../../../actions/common';
 import { AlertingSecurity } from '../../../../lib/elasticsearch/verify_alerting_security';
 import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
-import { Alert, AlertTypeParams } from '../../../../../../alerts/common';
+import { AlertTypeParams, SanitizedAlert } from '../../../../../../alerting/common';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
@@ -25,8 +25,7 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
     },
     async (context, request, response) => {
       try {
-        const alerts = AlertsFactory.getAll().filter((a) => a.isEnabled(npRoute.licenseService));
-
+        const alerts = AlertsFactory.getAll();
         if (alerts.length) {
           const {
             isSufficientlySecure,
@@ -78,7 +77,7 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
           },
         ];
 
-        let createdAlerts: Array<Alert<AlertTypeParams>> = [];
+        let createdAlerts: Array<SanitizedAlert<AlertTypeParams>> = [];
         const disabledWatcherClusterAlerts = await disableWatcherClusterAlerts(
           npRoute.cluster.asScoped(request).callAsCurrentUser,
           npRoute.logger

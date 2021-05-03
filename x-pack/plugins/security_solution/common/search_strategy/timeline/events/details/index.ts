@@ -16,6 +16,7 @@ export interface TimelineEventsDetailsItem {
   values?: Maybe<string[]>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   originalValue?: Maybe<any>;
+  isObjectArray: boolean;
 }
 
 export interface TimelineEventsDetailsStrategyResponse extends IEsSearchResponse {

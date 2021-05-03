@@ -7,16 +7,17 @@
 
 import * as t from 'io-ts';
 
-import { listArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
+import { listArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
   threat_mapping,
   threat_index,
   threat_query,
   concurrentSearchesOrUndefined,
   itemsPerSearchOrUndefined,
+  threatIndicatorPathOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 import {
-  authorOrUndefined,
+  author,
   buildingBlockTypeOrUndefined,
   description,
   enabled,
@@ -35,13 +36,12 @@ import {
   query,
   queryOrUndefined,
   filtersOrUndefined,
-  machine_learning_job_id,
   max_signals,
   risk_score,
-  riskScoreMappingOrUndefined,
+  risk_score_mapping,
   ruleNameOverrideOrUndefined,
   severity,
-  severityMappingOrUndefined,
+  severity_mapping,
   tags,
   timestampOverrideOrUndefined,
   threats,
@@ -51,7 +51,7 @@ import {
   eventCategoryOverrideOrUndefined,
   savedIdOrUndefined,
   saved_id,
-  threshold,
+  thresholdNormalized,
   anomaly_threshold,
   actionsCamel,
   throttleOrNull,
@@ -61,11 +61,12 @@ import {
   updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
+import { machine_learning_job_id_normalized } from '../../../../common/detection_engine/schemas/types/normalized_ml_job_id';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
   t.type({
-    author: authorOrUndefined,
+    author,
     buildingBlockType: buildingBlockTypeOrUndefined,
     description,
     note: noteOrUndefined,
@@ -81,16 +82,16 @@ export const baseRuleParams = t.exact(
     // maxSignals not used in ML rules but probably should be used
     maxSignals: max_signals,
     riskScore: risk_score,
-    riskScoreMapping: riskScoreMappingOrUndefined,
+    riskScoreMapping: risk_score_mapping,
     ruleNameOverride: ruleNameOverrideOrUndefined,
     severity,
-    severityMapping: severityMappingOrUndefined,
+    severityMapping: severity_mapping,
     timestampOverride: timestampOverrideOrUndefined,
     threat: threats,
     to,
     references,
     version,
-    exceptionsList: listArrayOrUndefined,
+    exceptionsList: listArray,
   })
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
@@ -103,6 +104,8 @@ const eqlSpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   eventCategoryOverride: eventCategoryOverrideOrUndefined,
 });
+export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
+export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;
 
 const threatSpecificRuleParams = t.type({
   type: t.literal('threat_match'),
@@ -116,9 +119,12 @@ const threatSpecificRuleParams = t.type({
   threatMapping: threat_mapping,
   threatLanguage: t.union([nonEqlLanguages, t.undefined]),
   threatIndex: threat_index,
+  threatIndicatorPath: threatIndicatorPathOrUndefined,
   concurrentSearches: concurrentSearchesOrUndefined,
   itemsPerSearch: itemsPerSearchOrUndefined,
 });
+export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
+export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
 
 const querySpecificRuleParams = t.exact(
   t.type({
@@ -130,6 +136,8 @@ const querySpecificRuleParams = t.exact(
     savedId: savedIdOrUndefined,
   })
 );
+export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
+export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
 
 const savedQuerySpecificRuleParams = t.type({
   type: t.literal('saved_query'),
@@ -141,6 +149,8 @@ const savedQuerySpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   savedId: saved_id,
 });
+export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
+export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
 
 const thresholdSpecificRuleParams = t.type({
   type: t.literal('threshold'),
@@ -149,14 +159,21 @@ const thresholdSpecificRuleParams = t.type({
   query,
   filters: filtersOrUndefined,
   savedId: savedIdOrUndefined,
-  threshold,
+  threshold: thresholdNormalized,
 });
+export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
+export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
 
 const machineLearningSpecificRuleParams = t.type({
   type: t.literal('machine_learning'),
   anomalyThreshold: anomaly_threshold,
-  machineLearningJobId: machine_learning_job_id,
+  machineLearningJobId: machine_learning_job_id_normalized,
 });
+export const machineLearningRuleParams = t.intersection([
+  baseRuleParams,
+  machineLearningSpecificRuleParams,
+]);
+export type MachineLearningRuleParams = t.TypeOf<typeof machineLearningRuleParams>;
 
 export const typeSpecificRuleParams = t.union([
   eqlSpecificRuleParams,

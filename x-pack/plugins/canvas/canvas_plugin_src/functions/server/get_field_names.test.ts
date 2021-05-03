@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-expect-error untyped library
 import { parse } from '@kbn/tinymath';
 import { getFieldNames } from './pointseries/lib/get_field_names';
 

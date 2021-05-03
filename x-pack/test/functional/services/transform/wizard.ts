@@ -10,12 +10,22 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function TransformWizardProvider({ getService }: FtrProviderContext) {
+import type { CanvasElementColorStats } from '../canvas_element';
+
+export type HistogramCharts = Array<{
+  chartAvailable: boolean;
+  id: string;
+  legend?: string;
+  colorStats?: CanvasElementColorStats;
+}>;
+
+export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const canvasElement = getService('canvasElement');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
     async clickNextButton() {
@@ -136,6 +146,24 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
+      await retry.tryForTime(2000, async () => {
+        // get a 2D array of rows and cell values
+        const rows = await this.parseEuiDataGrid(tableSubj);
+
+        // reduce the rows data to an array of unique values in the specified column
+        const uniqueColumnValues = rows
+          .map((row) => row[column])
+          .flat()
+          .filter((v, i, a) => a.indexOf(v) === i);
+
+        uniqueColumnValues.forEach((value) => {
+          // check if the returned unique value is not empty
+          expect(value).to.not.eql('');
+        });
+      });
+    },
+
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
@@ -161,8 +189,16 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertEuiDataGridColumnValues('transformIndexPreview', column, values);
     },
 
+    async assertIndexPreviewColumnValuesNotEmpty(column: number) {
+      await this.assertEuiDataGridColumnValuesNotEmpty('transformIndexPreview', column);
+    },
+
     async assertPivotPreviewColumnValues(column: number, values: string[]) {
       await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
+    },
+
+    async assertPivotPreviewColumnValuesNotEmpty(column: number) {
+      await this.assertEuiDataGridColumnValuesNotEmpty('transformPivotPreview', column);
     },
 
     async assertPivotPreviewLoaded() {
@@ -177,10 +213,12 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformIndexPreviewHistogramButton');
     },
 
-    async enableIndexPreviewHistogramCharts() {
-      await this.assertIndexPreviewHistogramChartButtonCheckState(false);
-      await testSubjects.click('transformIndexPreviewHistogramButton');
-      await this.assertIndexPreviewHistogramChartButtonCheckState(true);
+    async enableIndexPreviewHistogramCharts(expectedDefaultButtonState: boolean) {
+      await this.assertIndexPreviewHistogramChartButtonCheckState(expectedDefaultButtonState);
+      if (expectedDefaultButtonState === false) {
+        await testSubjects.click('transformIndexPreviewHistogramButton');
+        await this.assertIndexPreviewHistogramChartButtonCheckState(true);
+      }
     },
 
     async assertIndexPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
@@ -195,52 +233,67 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async assertIndexPreviewHistogramCharts(
-      expectedHistogramCharts: Array<{
-        chartAvailable: boolean;
-        id: string;
-        legend: string;
-        colorStats?: any[];
-      }>
-    ) {
+    async assertIndexPreviewHistogramCharts(expectedHistogramCharts: HistogramCharts) {
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
-        for (const [index, expected] of expectedHistogramCharts.entries()) {
-          await testSubjects.existOrFail(`mlDataGridChart-${index}`);
+        const table = await testSubjects.find(`~transformIndexPreview`);
+        const $ = await table.parseDomContent();
+        const actualColumnLength = $('.euiDataGridHeaderCell__content').toArray().length;
+
+        expect(actualColumnLength).to.eql(
+          expectedHistogramCharts.length,
+          `Number of index preview column charts should be '${expectedHistogramCharts.length}' (got '${actualColumnLength}')`
+        );
+
+        for (const expected of expectedHistogramCharts.values()) {
+          const id = expected.id;
+          await testSubjects.existOrFail(`mlDataGridChart-${id}`);
 
           if (expected.chartAvailable) {
-            await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+            await testSubjects.existOrFail(`mlDataGridChart-${id}-histogram`);
 
             if (expected.colorStats !== undefined) {
-              const actualColorStats = await canvasElement.getColorStats(
-                `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`,
-                expected.colorStats
+              const sortedExpectedColorStats = [...expected.colorStats].sort((a, b) =>
+                a.color.localeCompare(b.color)
               );
 
+              const actualColorStats = await canvasElement.getColorStats(
+                `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
+                sortedExpectedColorStats,
+                undefined,
+                4
+              );
+
+              expect(actualColorStats.length).to.eql(
+                sortedExpectedColorStats.length,
+                `Expected and actual color stats for column '${expected.id}' should have the same amount of elements. Expected: ${sortedExpectedColorStats.length} (got ${actualColorStats.length})`
+              );
               expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
                 true,
                 `Color stats for column '${
                   expected.id
                 }' should be within tolerance. Expected: '${JSON.stringify(
-                  expected.colorStats
+                  sortedExpectedColorStats
                 )}' (got '${JSON.stringify(actualColorStats)}')`
               );
             }
           } else {
-            await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
+            await testSubjects.missingOrFail(`mlDataGridChart-${id}-histogram`);
           }
 
-          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
-          expect(actualLegend).to.eql(
-            expected.legend,
-            `Legend text for column '${expected.id}' should be '${expected.legend}' (got '${actualLegend}')`
-          );
+          if (expected.legend !== undefined) {
+            const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${id}-legend`);
+            expect(actualLegend).to.eql(
+              expected.legend,
+              `Legend text for column '${expected.id}' should be '${expected.legend}' (got '${actualLegend}')`
+            );
+          }
 
-          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${id}-id`);
           expect(actualId).to.eql(
             expected.id,
-            `Id text for column '${index}' should be '${expected.id}' (got '${actualId}')`
+            `Id text for column '${id}' should be '${expected.id}' (got '${actualId}')`
           );
         }
       });
@@ -277,6 +330,74 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Advanced query editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertRuntimeMappingsEditorSwitchExists() {
+      await testSubjects.existOrFail(`transformAdvancedRuntimeMappingsEditorSwitch`);
+    },
+
+    async assertRuntimeMappingsEditorSwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getRuntimeMappingsEditorSwitchCheckedState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Advanced runtime mappings editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async getRuntimeMappingsEditorSwitchCheckedState(): Promise<boolean> {
+      const subj = 'transformAdvancedRuntimeMappingsEditorSwitch';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      return isSelected === 'true';
+    },
+
+    async toggleRuntimeMappingsEditorSwitch(toggle: boolean) {
+      const subj = 'transformAdvancedRuntimeMappingsEditorSwitch';
+      if ((await this.getRuntimeMappingsEditorSwitchCheckedState()) !== toggle) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(subj);
+          await this.assertRuntimeMappingsEditorSwitchCheckState(toggle);
+        });
+      }
+    },
+
+    async assertRuntimeMappingsEditorExists() {
+      await testSubjects.existOrFail('transformAdvancedRuntimeMappingsEditor');
+    },
+
+    async assertRuntimeMappingsEditorMissing() {
+      await testSubjects.missingOrFail('transformAdvancedRuntimeMappingsEditor');
+    },
+
+    async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
+      await this.assertRuntimeMappingsEditorExists();
+
+      const runtimeMappingsEditorString = await aceEditor.getValue(
+        'transformAdvancedRuntimeMappingsEditor'
+      );
+      // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
+      // This means we might not get back valid JSON so we only test against the first few lines
+      // and see if the string matches.
+      const splicedAdvancedEditorValue = runtimeMappingsEditorString.split('\n').splice(0, 3);
+      expect(splicedAdvancedEditorValue).to.eql(
+        expectedContent,
+        `Expected the first editor lines to be '${expectedContent}' (got '${splicedAdvancedEditorValue}')`
+      );
+    },
+
+    async setRuntimeMappingsEditorContent(input: string) {
+      await this.assertRuntimeMappingsEditorExists();
+      await aceEditor.setValue('transformAdvancedRuntimeMappingsEditor', input);
+    },
+
+    async applyRuntimeMappings() {
+      const subj = 'transformRuntimeMappingsApplyButton';
+      await testSubjects.existOrFail(subj);
+      await testSubjects.clickWhenNotDisabled(subj);
+      const isEnabled = await testSubjects.isEnabled(subj);
+      expect(isEnabled).to.eql(
+        false,
+        `Expected runtime mappings 'Apply changes' button to be disabled, got enabled.`
       );
     },
 
@@ -748,6 +869,33 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
     async assertDiscoverCardExists() {
       await testSubjects.existOrFail(`transformWizardCardDiscover`);
+    },
+
+    async redirectToDiscover() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.click('transformWizardCardDiscover');
+        await PageObjects.discover.isDiscoverAppOnScreen();
+      });
+    },
+
+    async setDiscoverTimeRange(fromTime: string, toTime: string) {
+      await PageObjects.discover.isDiscoverAppOnScreen();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    },
+
+    async assertDiscoverContainField(field: string) {
+      await PageObjects.discover.isDiscoverAppOnScreen();
+      await retry.tryForTime(60 * 1000, async () => {
+        const allFields = await PageObjects.discover.getAllFieldNames();
+        if (Array.isArray(allFields)) {
+          // For some reasons, Discover returns fields with dot (e.g '.avg') with extra space
+          const fields = allFields.map((n) => n.replace('.​', '.'));
+          expect(fields).to.contain(
+            field,
+            `Expected Discover to contain field ${field}, got ${allFields.join()}`
+          );
+        }
+      });
     },
 
     async assertProgressbarExists() {

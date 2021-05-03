@@ -98,9 +98,9 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
   }
 
   _togglePopover = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
+    this.setState((prevState) => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
   };
 
   _closePopover = () => {

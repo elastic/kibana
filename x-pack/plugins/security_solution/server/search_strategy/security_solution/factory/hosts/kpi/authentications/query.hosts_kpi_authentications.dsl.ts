@@ -41,6 +41,7 @@ export const buildHostsKpiAuthenticationsQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggs: {
         authentication_success: {
@@ -53,7 +54,7 @@ export const buildHostsKpiAuthenticationsQuery = ({
         authentication_success_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {
@@ -75,7 +76,7 @@ export const buildHostsKpiAuthenticationsQuery = ({
         authentication_failure_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {
@@ -94,7 +95,6 @@ export const buildHostsKpiAuthenticationsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiCard,
   EuiLink,
-  EuiOverlayMask,
   EuiText,
   EuiModal,
   EuiModalFooter,
@@ -78,154 +77,152 @@ export class StartTrial extends Component<Props, State> {
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiModal className="licManagement__modal" onClose={this.cancel}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
-              <FormattedMessage
-                id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalTitle"
-                defaultMessage="Start your free 30-day trial"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText data-test-subj="confirmModalBodyText">
-              <div>
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription"
-                      defaultMessage="This trial is for the full set of {subscriptionFeaturesLinkText} of the Elastic Stack.
+      <EuiModal className="licManagement__modal" onClose={this.cancel}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalTitle"
+              defaultMessage="Start your free 30-day trial"
+            />
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiText data-test-subj="confirmModalBodyText">
+            <div>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription"
+                    defaultMessage="This trial is for the full set of {subscriptionFeaturesLinkText} of the Elastic Stack.
                       You'll get immediate access to:"
+                    values={{
+                      subscriptionFeaturesLinkText: (
+                        <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
+                          <FormattedMessage
+                            id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.subscriptionFeaturesLinkText"
+                            defaultMessage="subscription features"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+                <ul>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.mashingLearningFeatureTitle"
+                      defaultMessage="Machine learning"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.alertingFeatureTitle"
+                      defaultMessage="Alerting"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.graphCapabilitiesFeatureTitle"
+                      defaultMessage="Graph capabilities"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.dataBaseConnectivityFeatureTitle"
+                      defaultMessage="{jdbcStandard} and {odbcStandard} connectivity for {sqlDataBase}"
                       values={{
-                        subscriptionFeaturesLinkText: (
-                          <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
-                            <FormattedMessage
-                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.subscriptionFeaturesLinkText"
-                              defaultMessage="subscription features"
-                            />
-                          </EuiLink>
-                        ),
+                        jdbcStandard: 'JDBC',
+                        odbcStandard: 'ODBC',
+                        sqlDataBase: 'SQL',
                       }}
                     />
-                  </p>
-                  <ul>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.mashingLearningFeatureTitle"
-                        defaultMessage="Machine learning"
-                      />
-                    </li>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.alertingFeatureTitle"
-                        defaultMessage="Alerting"
-                      />
-                    </li>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.graphCapabilitiesFeatureTitle"
-                        defaultMessage="Graph capabilities"
-                      />
-                    </li>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.dataBaseConnectivityFeatureTitle"
-                        defaultMessage="{jdbcStandard} and {odbcStandard} connectivity for {sqlDataBase}"
-                        values={{
-                          jdbcStandard: 'JDBC',
-                          odbcStandard: 'ODBC',
-                          sqlDataBase: 'SQL',
-                        }}
-                      />
-                    </li>
-                  </ul>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityFeaturesConfigurationDescription"
-                      defaultMessage="Advanced security features, such as authentication ({authenticationTypeList}),
+                  </li>
+                </ul>
+                <p>
+                  <FormattedMessage
+                    id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityFeaturesConfigurationDescription"
+                    defaultMessage="Advanced security features, such as authentication ({authenticationTypeList}),
                       field- and document-level security, and auditing, require configuration.
                       See the {securityDocumentationLinkText} for instructions."
-                      values={{
-                        authenticationTypeList: 'AD/LDAP, SAML, PKI, SAML/SSO',
-                        securityDocumentationLinkText: (
-                          <EuiLink href={docLinks.security} target="_blank">
-                            <FormattedMessage
-                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityDocumentationLinkText"
-                              defaultMessage="documentation"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsDescription"
-                      defaultMessage="By starting this trial, you agree that it is subject to these {termsAndConditionsLinkText}."
-                      values={{
-                        termsAndConditionsLinkText: (
-                          <EuiLink href={EXTERNAL_LINKS.TRIAL_LICENSE} target="_blank">
-                            <FormattedMessage
-                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsLinkText"
-                              defaultMessage="terms and conditions"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiText>
-              </div>
-            </EuiText>
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                {shouldShowTelemetryOptIn(telemetry) && (
-                  <TelemetryOptIn
-                    telemetry={telemetry}
-                    isStartTrial={true}
-                    onOptInChange={this.onOptInChange}
-                    isOptingInToTelemetry={isOptingInToTelemetry}
+                    values={{
+                      authenticationTypeList: 'AD/LDAP, SAML, PKI, SAML/SSO',
+                      securityDocumentationLinkText: (
+                        <EuiLink href={docLinks.security} target="_blank">
+                          <FormattedMessage
+                            id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityDocumentationLinkText"
+                            defaultMessage="documentation"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
                   />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} className="licManagement__ieFlex">
-                <EuiFlexGroup responsive={false}>
-                  <EuiFlexItem grow={false} className="licManagement__ieFlex">
-                    <EuiButtonEmpty
-                      data-test-subj="confirmModalCancelButton"
-                      onClick={this.cancel}
-                      buttonRef={this.cancelRef}
-                    >
-                      <FormattedMessage
-                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModal.cancelButtonLabel"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} className="licManagement__ieFlex">
-                    <EuiButton
-                      data-test-subj="confirmModalConfirmButton"
-                      onClick={this.onStartLicenseTrial}
-                      fill
-                      buttonRef={this.confirmRef}
-                      color="primary"
-                    >
-                      <FormattedMessage
-                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModal.startTrialButtonLabel"
-                        defaultMessage="Start my trial"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsDescription"
+                    defaultMessage="By starting this trial, you agree that it is subject to these {termsAndConditionsLinkText}."
+                    values={{
+                      termsAndConditionsLinkText: (
+                        <EuiLink href={EXTERNAL_LINKS.TRIAL_LICENSE} target="_blank">
+                          <FormattedMessage
+                            id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsLinkText"
+                            defaultMessage="terms and conditions"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </div>
+          </EuiText>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {shouldShowTelemetryOptIn(telemetry) && (
+                <TelemetryOptIn
+                  telemetry={telemetry}
+                  isStartTrial={true}
+                  onOptInChange={this.onOptInChange}
+                  isOptingInToTelemetry={isOptingInToTelemetry}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="licManagement__ieFlex">
+              <EuiFlexGroup responsive={false}>
+                <EuiFlexItem grow={false} className="licManagement__ieFlex">
+                  <EuiButtonEmpty
+                    data-test-subj="confirmModalCancelButton"
+                    onClick={this.cancel}
+                    buttonRef={this.cancelRef}
+                  >
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModal.cancelButtonLabel"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="licManagement__ieFlex">
+                  <EuiButton
+                    data-test-subj="confirmModalConfirmButton"
+                    onClick={this.onStartLicenseTrial}
+                    fill
+                    buttonRef={this.confirmRef}
+                    color="primary"
+                  >
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModal.startTrialButtonLabel"
+                      defaultMessage="Start my trial"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalFooter>
+      </EuiModal>
     );
   }
 

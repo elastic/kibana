@@ -17,13 +17,13 @@ import { ColumnarPage } from '../../../components/page';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
-import { Source } from '../../../containers/source';
+import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
+import { Source } from '../../../containers/metrics_source';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Layout } from './components/layout';
 import { useLinkProps } from '../../../hooks/use_link_props';
-import { SavedView } from '../../../containers/saved_view/saved_view';
+import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 
@@ -64,13 +64,13 @@ export const SnapshotPage = () => {
         ) : metricIndicesExist ? (
           <>
             <FilterBar />
-            <SavedView.Provider
+            <SavedViewProvider
               shouldLoadDefault={optionsSource === 'default'}
               viewType={'inventory-view'}
               defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
             >
               <Layout />
-            </SavedView.Provider>
+            </SavedViewProvider>
           </>
         ) : hasFailedLoadingSource ? (
           <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />

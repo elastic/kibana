@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import './__mocks__/overview_logic.mock';
 import { setMockValues } from './__mocks__';
+import './__mocks__/overview_logic.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFlexGrid } from '@elastic/eui';
 
 import { OrganizationStats } from './organization_stats';

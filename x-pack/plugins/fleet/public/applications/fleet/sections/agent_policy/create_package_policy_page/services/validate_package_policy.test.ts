@@ -6,7 +6,8 @@
  */
 
 import { installationStatuses } from '../../../../../../../common/constants';
-import { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../../../../types';
+import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../../../../types';
+
 import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
 
 describe('Fleet - validatePackagePolicy()', () => {

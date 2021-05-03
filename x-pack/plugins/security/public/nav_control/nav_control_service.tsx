@@ -6,16 +6,18 @@
  */
 
 import { sortBy } from 'lodash';
-import { Observable, Subscription, BehaviorSubject, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
-import { CoreStart } from 'src/core/public';
-
-import ReactDOM from 'react-dom';
 import React from 'react';
+import ReactDOM from 'react-dom';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 
-import { SecurityLicense } from '../../common/licensing';
-import { SecurityNavControl, UserMenuLink } from './nav_control_component';
-import { AuthenticationServiceSetup } from '../authentication';
+import type { CoreStart } from 'src/core/public';
+
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { UserMenuLink } from './nav_control_component';
+import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
@@ -75,6 +77,23 @@ export class SecurityNavControlService {
         this.userMenuLinks$.pipe(map(this.sortUserMenuLinks), takeUntil(this.stop$)),
       addUserMenuLinks: (userMenuLinks: UserMenuLink[]) => {
         const currentLinks = this.userMenuLinks$.value;
+        const hasCustomProfileLink = currentLinks.find(({ setAsProfile }) => setAsProfile === true);
+        const passedCustomProfileLinkCount = userMenuLinks.filter(
+          ({ setAsProfile }) => setAsProfile === true
+        ).length;
+
+        if (hasCustomProfileLink && passedCustomProfileLinkCount > 0) {
+          throw new Error(
+            `Only one custom profile link can be set. A custom profile link named ${hasCustomProfileLink.label} (${hasCustomProfileLink.href}) already exists`
+          );
+        }
+
+        if (passedCustomProfileLinkCount > 1) {
+          throw new Error(
+            `Only one custom profile link can be passed at a time (found ${passedCustomProfileLinkCount})`
+          );
+        }
+
         const newLinks = [...currentLinks, ...userMenuLinks];
         this.userMenuLinks$.next(newLinks);
       },

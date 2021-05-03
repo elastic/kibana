@@ -9,9 +9,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ResultView } from '.';
-import { SchemaTypes } from '../../../../../shared/types';
+import { SchemaType } from '../../../../../shared/schema/types';
 import { Result } from '../../../result/result';
+
+import { ResultView } from '.';
 
 describe('ResultView', () => {
   const result = {
@@ -29,7 +30,7 @@ describe('ResultView', () => {
   };
 
   const schema = {
-    title: 'string' as SchemaTypes,
+    title: SchemaType.Text,
   };
 
   it('renders', () => {

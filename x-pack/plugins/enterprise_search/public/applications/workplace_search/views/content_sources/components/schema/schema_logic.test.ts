@@ -6,6 +6,7 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
+import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -14,7 +15,6 @@ jest.mock('../../source_logic', () => ({
   SourceLogic: { values: { contentSource } },
 }));
 
-import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
@@ -22,21 +22,25 @@ jest.mock('../../../../app_logic', () => ({
 const spyScrollTo = jest.fn();
 Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
 
-import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
-import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
+import { SchemaType } from '../../../../../shared/schema/types';
+import { AppLogic } from '../../../../app_logic';
 
 import {
   SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
   SCHEMA_FIELD_ADDED_MESSAGE,
   SCHEMA_UPDATED_MESSAGE,
 } from './constants';
-
 import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const {
+    clearFlashMessages,
+    flashAPIErrors,
+    setSuccessMessage,
+    setErrorMessage,
+  } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
   const defaultValues = {
@@ -50,7 +54,7 @@ describe('SchemaLogic', () => {
     addFieldFormErrors: null,
     mostRecentIndexJob: {},
     fieldCoercionErrors: {},
-    newFieldType: TEXT,
+    newFieldType: SchemaType.Text,
     rawFieldName: '',
     formUnchanged: true,
     dataLoading: true,
@@ -109,7 +113,7 @@ describe('SchemaLogic', () => {
       expect(SchemaLogic.values.activeSchema).toEqual(schema);
       expect(SchemaLogic.values.serverSchema).toEqual(schema);
       expect(SchemaLogic.values.mostRecentIndexJob).toEqual(mostRecentIndexJob);
-      expect(SchemaLogic.values.newFieldType).toEqual(TEXT);
+      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Text);
       expect(SchemaLogic.values.addFieldFormErrors).toEqual(null);
       expect(SchemaLogic.values.formUnchanged).toEqual(true);
       expect(SchemaLogic.values.showAddFieldModal).toEqual(false);
@@ -124,10 +128,9 @@ describe('SchemaLogic', () => {
     });
 
     it('updateNewFieldType', () => {
-      const NUMBER = 'number';
-      SchemaLogic.actions.updateNewFieldType(NUMBER);
+      SchemaLogic.actions.updateNewFieldType(SchemaType.Number);
 
-      expect(SchemaLogic.values.newFieldType).toEqual(NUMBER);
+      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Number);
     });
 
     it('onFieldUpdate', () => {
@@ -299,32 +302,38 @@ describe('SchemaLogic', () => {
         );
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith({
-          error: 'this is an error',
-          message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
-        });
+        expect(setErrorMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       });
     });
 
-    it('addNewField', () => {
-      const setServerFieldSpy = jest.spyOn(SchemaLogic.actions, 'setServerField');
-      SchemaLogic.actions.onInitializeSchema(serverResponse);
-      const newSchema = {
-        ...schema,
-        bar: 'number',
-      };
-      SchemaLogic.actions.addNewField('bar', 'number');
+    describe('addNewField', () => {
+      it('handles happy path', () => {
+        const setServerFieldSpy = jest.spyOn(SchemaLogic.actions, 'setServerField');
+        SchemaLogic.actions.onInitializeSchema(serverResponse);
+        const newSchema = {
+          ...schema,
+          bar: SchemaType.Number,
+        };
+        SchemaLogic.actions.addNewField('bar', SchemaType.Number);
 
-      expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
+        expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
+      });
+
+      it('handles duplicate', () => {
+        SchemaLogic.actions.onInitializeSchema(serverResponse);
+        SchemaLogic.actions.addNewField('foo', SchemaType.Number);
+
+        expect(setErrorMessage).toHaveBeenCalledWith('New field already exists: foo.');
+      });
     });
 
     it('updateExistingFieldType', () => {
       const onFieldUpdateSpy = jest.spyOn(SchemaLogic.actions, 'onFieldUpdate');
       SchemaLogic.actions.onInitializeSchema(serverResponse);
       const newSchema = {
-        foo: 'number',
+        foo: SchemaType.Number,
       };
-      SchemaLogic.actions.updateExistingFieldType('foo', 'number');
+      SchemaLogic.actions.updateExistingFieldType('foo', SchemaType.Number);
 
       expect(onFieldUpdateSpy).toHaveBeenCalledWith({ schema: newSchema, formUnchanged: false });
     });
@@ -445,7 +454,7 @@ describe('SchemaLogic', () => {
       it('handles filtered response', () => {
         const newSchema = {
           ...schema,
-          bar: 'number',
+          bar: SchemaType.Number,
         };
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         SchemaLogic.actions.onFieldUpdate({ schema: newSchema, formUnchanged: false });

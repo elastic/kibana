@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiOverlayMask,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -282,30 +281,28 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         </EuiFlexGroup>
       </EuiPanel>
     ) : (
-      <EuiOverlayMask>
-        <EuiModal
-          onClose={this.closeEditor}
-          initialFocus="[name=label]"
-          style={{ width: 500 }}
-          data-test-subj="mlJobNewCustomUrlFormModal"
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
-                defaultMessage="Add custom URL"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <EuiModal
+        onClose={this.closeEditor}
+        initialFocus="[name=label]"
+        style={{ width: 500 }}
+        data-test-subj="mlJobNewCustomUrlFormModal"
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
+              defaultMessage="Add custom URL"
+            />
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody>{editor}</EuiModalBody>
+        <EuiModalBody>{editor}</EuiModalBody>
 
-          <EuiModalFooter>
-            {testButton}
-            {addButton}
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+        <EuiModalFooter>
+          {testButton}
+          {addButton}
+        </EuiModalFooter>
+      </EuiModal>
     );
   }
 

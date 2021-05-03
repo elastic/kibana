@@ -26,6 +26,7 @@ export type MapFilters = {
 };
 
 export type ESSearchSourceSyncMeta = {
+  filterByMapBounds: boolean;
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
@@ -80,6 +81,7 @@ export type VectorStyleRequestMeta = MapFilters & {
 
 export type ESSearchSourceResponseMeta = {
   areResultsTrimmed?: boolean;
+  resultsCount?: number;
 
   // top hits meta
   areEntitiesTrimmed?: boolean;

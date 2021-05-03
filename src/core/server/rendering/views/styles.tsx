@@ -8,15 +8,25 @@
 
 /* eslint-disable react/no-danger */
 
-import React, { FunctionComponent } from 'react';
-
-import { RenderingMetadata } from '../types';
+import React, { FC } from 'react';
 
 interface Props {
-  darkMode: RenderingMetadata['darkMode'];
+  darkMode: boolean;
+  stylesheetPaths: string[];
 }
 
-export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
+export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
+  return (
+    <>
+      <InlineStyles darkMode={darkMode} />
+      {stylesheetPaths.map((path) => (
+        <link key={path} rel="stylesheet" type="text/css" href={path} />
+      ))}
+    </>
+  );
+};
+
+const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -79,8 +89,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .kbnWelcomeText {
-            font-family:
-            display: inline-block;
+            display: block;
             font-size: 14px;
             font-family: sans-serif;
             line-height: 40px !important;
@@ -93,7 +102,7 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
             text-align: center;
             line-height: 1;
             text-align: center;
-            font-faimily: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial !important;
+            font-family: sans-serif;
             letter-spacing: -.005em;
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;

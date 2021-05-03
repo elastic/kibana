@@ -9,6 +9,7 @@ import { MissingMonitoringDataAlert } from './missing_monitoring_data_alert';
 import { ALERT_MISSING_MONITORING_DATA } from '../../common/constants';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const RealDate = Date;
 
@@ -87,7 +88,7 @@ describe('MissingMonitoringDataAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,

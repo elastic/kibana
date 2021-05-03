@@ -340,6 +340,60 @@ describe('last_value', () => {
     );
   });
 
+  it('should pick the previous format configuration if set', () => {
+    const indexPattern = createMockedIndexPattern();
+    expect(
+      lastValueOperation.buildColumn({
+        indexPattern,
+        layer: {
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        previousColumn: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count',
+          params: {
+            format: {
+              id: 'number',
+              params: {
+                decimals: 2,
+              },
+            },
+          },
+        },
+      }).params
+    ).toEqual(
+      expect.objectContaining({
+        format: {
+          id: 'number',
+          params: {
+            decimals: 2,
+          },
+        },
+      })
+    );
+  });
+
   describe('param editor', () => {
     it('should render current sortField', () => {
       const updateLayerSpy = jest.fn();

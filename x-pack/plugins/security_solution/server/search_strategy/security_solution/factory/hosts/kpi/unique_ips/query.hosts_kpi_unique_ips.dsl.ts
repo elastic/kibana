@@ -30,6 +30,7 @@ export const buildHostsKpiUniqueIpsQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         unique_source_ips: {
@@ -40,7 +41,7 @@ export const buildHostsKpiUniqueIpsQuery = ({
         unique_source_ips_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {
@@ -58,7 +59,7 @@ export const buildHostsKpiUniqueIpsQuery = ({
         unique_destination_ips_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {
@@ -75,7 +76,6 @@ export const buildHostsKpiUniqueIpsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

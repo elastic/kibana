@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { DocumentCreationLogic } from '../';
 
-import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';
 import { ExampleDocumentJson, MoreDocumentsText } from './summary_documents';
+import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';
 
 export const InvalidDocumentsSummary: React.FC = () => {
   const {

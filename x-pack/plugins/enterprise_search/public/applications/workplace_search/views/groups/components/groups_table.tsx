@@ -9,8 +9,6 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiSpacer,
   EuiTable,
@@ -18,14 +16,14 @@ import {
   EuiTableHeader,
   EuiTableHeaderCell,
 } from '@elastic/eui';
-
-import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
+import { i18n } from '@kbn/i18n';
 
 import { AppLogic } from '../../../app_logic';
+import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { GroupsLogic } from '../groups_logic';
-import { GroupRow } from './group_row';
 
 import { ClearFiltersLink } from './clear_filters_link';
+import { GroupRow } from './group_row';
 
 const GROUP_TABLE_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.groupTableHeader',
@@ -77,7 +75,7 @@ export const GroupsTable: React.FC<{}> = () => {
     <>
       {showPagination ? <TablePaginationBar {...paginationOptions} /> : clearFiltersLink}
       <EuiSpacer size="m" />
-      <EuiTable className="groups-table" tableLayout="auto">
+      <EuiTable tableLayout="auto">
         <EuiTableHeader>
           <EuiTableHeaderCell>{GROUP_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>

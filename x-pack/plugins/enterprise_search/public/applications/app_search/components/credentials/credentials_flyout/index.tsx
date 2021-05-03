@@ -6,14 +6,17 @@
  */
 
 import React from 'react';
+
 import { useActions } from 'kea';
+
 import { EuiPortal, EuiFlyout } from '@elastic/eui';
 
-import { CredentialsLogic } from '../credentials_logic';
 import { FLYOUT_ARIA_LABEL_ID } from '../constants';
-import { CredentialsFlyoutHeader } from './header';
+import { CredentialsLogic } from '../credentials_logic';
+
 import { CredentialsFlyoutBody } from './body';
 import { CredentialsFlyoutFooter } from './footer';
+import { CredentialsFlyoutHeader } from './header';
 
 export const CredentialsFlyout: React.FC = () => {
   const { hideCredentialsForm } = useActions(CredentialsLogic);

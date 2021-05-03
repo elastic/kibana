@@ -9,17 +9,16 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
-
+import { DEFAULT_META } from '../../../shared/constants';
 import {
   flashAPIErrors,
   setSuccessMessage,
+  setErrorMessage,
   setQueuedSuccessMessage,
   clearFlashMessages,
 } from '../../../shared/flash_messages';
-
-import { DEFAULT_META } from '../../../shared/constants';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
 import { NOT_FOUND_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
@@ -90,13 +89,14 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           ...contentSource,
           summary,
         }),
+        resetSourceState: () => ({} as ContentSourceFullData),
       },
     ],
     dataLoading: [
       true,
       {
         onInitializeSource: () => false,
-        resetSourceState: () => false,
+        resetSourceState: () => true,
       },
     ],
     buttonLoading: [
@@ -149,6 +149,11 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         if (response.isFederatedSource) {
           actions.initializeFederatedSummary(sourceId);
         }
+        if (response.errors) {
+          setErrorMessage(response.errors);
+        } else {
+          clearFlashMessages();
+        }
       } catch (e) {
         if (e.response.status === 404) {
           KibanaLogic.values.navigateToUrl(NOT_FOUND_PATH);
@@ -158,7 +163,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       }
     },
     initializeFederatedSummary: async ({ sourceId }) => {
-      const route = `/api/workplace_search/org/sources/${sourceId}/federated_summary`;
+      const route = `/api/workplace_search/account/sources/${sourceId}/federated_summary`;
       try {
         const response = await HttpLogic.values.http.get(route);
         actions.onUpdateSummary(response.summary);

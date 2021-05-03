@@ -23,9 +23,11 @@ export * from './dns';
 export * from './events';
 
 export const MatrixHistogramQuery = 'matrixHistogram';
+export const MatrixHistogramQueryEntities = 'matrixHistogramEntities';
 
 export enum MatrixHistogramType {
   authentications = 'authentications',
+  authenticationsEntities = 'authenticationsEntities',
   anomalies = 'anomalies',
   events = 'events',
   alerts = 'alerts',
@@ -36,7 +38,16 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
-  threshold?: { field: string | undefined; value: number } | undefined;
+  threshold?:
+    | {
+        field: string[];
+        value: string;
+        cardinality?: {
+          field: string[];
+          value: string;
+        };
+      }
+    | undefined;
   inspect?: Maybe<Inspect>;
   isPtrIncluded?: boolean;
 }

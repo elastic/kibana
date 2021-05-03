@@ -5,7 +5,7 @@
 
 // Initialization block
 {
-  const { errorOnLuceneSyntax, parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
+  const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
@@ -26,19 +26,20 @@ start
   }
 
 OrQuery
-  = &{ return errorOnLuceneSyntax; } LuceneQuery
-  / left:AndQuery Or right:OrQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
+  = head:AndQuery tail:(Or query:AndQuery { return query; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildFunctionNode('or', [left, right]);
+    return buildFunctionNode('or', nodes);
   }
   / AndQuery
 
 AndQuery
-  = left:NotQuery And right:AndQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
+  = head:NotQuery tail:(And query:NotQuery { return query; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildFunctionNode('and', [left, right]);
+    return buildFunctionNode('and', nodes);
   }
   / NotQuery
 
@@ -139,28 +140,30 @@ ListOfValues
   / Value
 
 OrListOfValues
-  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
-    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+  = head:AndListOfValues tail:(Or partial:AndListOfValues { return partial; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
+    return (field) => buildFunctionNode('or', nodes.map(partial => partial(field)));
   }
   / AndListOfValues
 
 AndListOfValues
-  = partialLeft:NotListOfValues And partialRight:AndListOfValues {
-    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+  = head:NotListOfValues tail:(And partial:NotListOfValues { return partial; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return (field) => buildFunctionNode('and', [partialLeft(field), partialRight(field)]);
+    return (field) => buildFunctionNode('and', nodes.map(partial => partial(field)));
   }
   / NotListOfValues
 
@@ -195,21 +198,18 @@ Value "value"
 
 Or "OR"
   = Space+ 'or'i Space+
-  / &{ return errorOnLuceneSyntax; } LuceneOr
 
 And "AND"
   = Space+ 'and'i Space+
-  / &{ return errorOnLuceneSyntax; } LuceneAnd
 
 Not "NOT"
   = 'not'i Space+
-  / &{ return errorOnLuceneSyntax; } LuceneNot
 
 Literal "literal"
   = QuotedString / UnquotedLiteral
 
 QuotedString
-  = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
+  = &{ return parseCursor; } '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -226,11 +226,12 @@ QuotedString
 
 QuotedCharacter
   = EscapedWhitespace
+  / EscapedUnicodeSequence
   / '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 
 UnquotedLiteral
-  = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+  = &{ return parseCursor; } prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -247,13 +248,13 @@ UnquotedLiteral
     if (sequence === 'true') return buildLiteralNode(true);
     if (sequence === 'false') return buildLiteralNode(false);
     if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
-    const isNumberPattern = /^(-?[1-9]+\d*([.]\d+)?)$|^(-?0[.]\d*[1-9]+)$|^0$|^0.0$|^[.]\d{1,}$/
-    return buildLiteralNode(isNumberPattern.test(sequence) ? Number(sequence) : sequence);
+    return buildLiteralNode(sequence);
   }
 
 UnquotedCharacter
   = EscapedWhitespace
   / EscapedSpecialCharacter
+  / EscapedUnicodeSequence
   / EscapedKeyword
   / Wildcard
   / !SpecialCharacter !Keyword !Cursor char:. { return char; }
@@ -262,7 +263,7 @@ Wildcard
   = '*' { return wildcardSymbol; }
 
 OptionalSpace
-  = prefix:Space* cursor:Cursor suffix:Space* {
+  = &{ return parseCursor; } prefix:Space* cursor:Cursor suffix:Space* {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -292,6 +293,17 @@ Keyword
 SpecialCharacter
   = [\\():<>"*{}]
 
+EscapedUnicodeSequence
+ = '\\' sequence:UnicodeSequence { return sequence; }
+
+UnicodeSequence
+  = "u" digits:$(HexDigit HexDigit HexDigit HexDigit) {
+      return String.fromCharCode(parseInt(digits, 16));
+    }
+
+HexDigit
+  = [0-9a-f]i
+
 RangeOperator
   = '<=' { return 'lte'; }
   / '>=' { return 'gte'; }
@@ -299,113 +311,7 @@ RangeOperator
   / '>' { return 'gt'; }
 
 Space "whitespace"
-  = [\ \t\r\n]
+  = [\ \t\r\n\u00A0]
 
 Cursor
   = &{ return parseCursor; } '@kuery-cursor@' { return cursorSymbol; }
-
-// Temporary error rules (to help users transition from Lucene... should be removed at some point)
-
-LuceneOr
-  =  Space* '||' Space* {
-    error('LuceneOr');
-  }
-
-LuceneAnd
-  = Space* '&&' Space* {
-    error('LuceneAnd');
-  }
-  / '+' {
-    error('LuceneAnd');
-  }
-
-LuceneNot
-  = '-' {
-    error('LuceneNot');
-  }
-  / '!' {
-    error('LuceneNot');
-  }
-
-LuceneQuery
-  = LuceneFieldQuery
-  / LuceneValue
-  / LuceneExists
-
-LuceneFieldQuery
-  = LuceneLiteral Space* ':' Space* LuceneValue
-
-LuceneValue
-  = LuceneRange
-  / LuceneWildcard
-  / LuceneRegex
-  / LuceneFuzzy
-  / LuceneProximity
-  / LuceneBoost
-
-LuceneExists
-  = '_exists_' Space* ':' Space* LuceneLiteral {
-    error('LuceneExists');
-  }
-
-LuceneRange
-  = RangeOperator Space* LuceneLiteral {
-    error('LuceneRange');
-  }
-  / LuceneRangeStart Space* LuceneLiteral LuceneTo LuceneLiteral LuceneRangeEnd {
-    error('LuceneRange');
-  }
-
-LuceneWildcard
-  = (LuceneUnquotedCharacter / '*')* '?' LuceneWildcard* {
-    error('LuceneWildcard');
-  }
-
-LuceneRegex
-  = '/' [^/]* '/' {
-    error('LuceneRegex');
-  }
-
-LuceneFuzzy
-  = LuceneUnquotedLiteral '~' [0-9]* {
-    error('LuceneFuzzy');
-  }
-
-LuceneProximity
-  = QuotedString '~' [0-9]* {
-    error('LuceneProximity');
-  }
-
-LuceneBoost
-  = LuceneLiteral '^' [0-9]* {
-    error('LuceneBoost');
-  }
-
-LuceneLiteral
-  = QuotedString / LuceneUnquotedLiteral
-
-LuceneUnquotedLiteral
-  = LuceneUnquotedCharacter+
-
-LuceneUnquotedCharacter
-  = EscapedWhitespace
-  / EscapedLuceneSpecialCharacter
-  / !LuceneSpecialCharacter !LuceneKeyword .
-
-LuceneKeyword
-  = Or / And / LuceneOr / LuceneAnd / LuceneNot / LuceneTo
-
-EscapedLuceneSpecialCharacter
-  = '\\' LuceneSpecialCharacter { return char; }
-
-LuceneSpecialCharacter
-  = '+' / '-' / '=' / '>' / '<' / '!' / '(' / ')' / '{' / '}' / '[' / ']' / '^' / '"' / '~' / '*' / '?' / ':' / '\\' / '/'
-
-LuceneTo
-  = Space+ 'TO' Space+
-
-LuceneRangeStart
-  = '[' / '{'
-
-LuceneRangeEnd
-  = ']' / '}'

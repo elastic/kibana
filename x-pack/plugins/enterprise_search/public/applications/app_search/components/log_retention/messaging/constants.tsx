@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
 
 import { LogRetentionOptions, LogRetentionSettings, LogRetentionPolicy } from '../types';
 

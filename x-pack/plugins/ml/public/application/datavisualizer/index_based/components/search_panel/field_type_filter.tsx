@@ -13,10 +13,11 @@ import { FieldTypeIcon } from '../../../../components/field_type_icon';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import type { MlJobFieldType } from '../../../../../../common/types/field_types';
 
-export const ML_JOB_FIELD_TYPES_OPTIONS = {
+const ML_JOB_FIELD_TYPES_OPTIONS = {
   [ML_JOB_FIELD_TYPES.BOOLEAN]: { name: 'Boolean', icon: 'tokenBoolean' },
   [ML_JOB_FIELD_TYPES.DATE]: { name: 'Date', icon: 'tokenDate' },
   [ML_JOB_FIELD_TYPES.GEO_POINT]: { name: 'Geo point', icon: 'tokenGeo' },
+  [ML_JOB_FIELD_TYPES.GEO_SHAPE]: { name: 'Geo shape', icon: 'tokenGeo' },
   [ML_JOB_FIELD_TYPES.IP]: { name: 'IP address', icon: 'tokenIP' },
   [ML_JOB_FIELD_TYPES.KEYWORD]: { name: 'Keyword', icon: 'tokenKeyword' },
   [ML_JOB_FIELD_TYPES.NUMBER]: { name: 'Number', icon: 'tokenNumber' },

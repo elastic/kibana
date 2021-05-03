@@ -7,8 +7,6 @@
 
 import React, { useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiCard,
   EuiFieldSearch,
@@ -17,6 +15,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { User } from '../../../types';
 

@@ -16,13 +16,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
   const queryBar = getService('queryBar');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
+  const find = getService('find');
 
   describe('discover tab with new fields API', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
         'discover:searchFieldsFromSource': false,
@@ -43,9 +46,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
+        await PageObjects.discover.clickFieldListItemAdd('extension');
         const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(100);
+        expect(marks.length).to.be.greaterThan(0);
         expect(marks.indexOf('php')).to.be(0);
+        await PageObjects.discover.clickFieldListItemRemove('extension');
       });
 
       it('search type:apache should show the correct hit count', async function () {
@@ -59,24 +64,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('doc view should show Time and Document columns', async function () {
-        const expectedHeader = 'Time Document';
         const Docheader = await PageObjects.discover.getDocHeader();
-        expect(Docheader).to.be(expectedHeader);
-      });
-
-      it('doc view should sort ascending', async function () {
-        const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
-        await PageObjects.discover.clickDocSortDown();
-
-        // we don't technically need this sleep here because the tryForTime will retry and the
-        // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
-        // case and it can be avoided with just a few seconds sleep.
-        await PageObjects.common.sleep(2000);
-        await retry.try(async function tryingForTime() {
-          const rowData = await PageObjects.discover.getDocTableIndex(1);
-
-          expect(rowData.startsWith(expectedTimeStamp)).to.be.ok();
-        });
+        expect(Docheader).to.contain('Time');
+        expect(Docheader).to.contain('Document');
       });
 
       it('a bad syntax query should show an error message', async function () {
@@ -88,6 +78,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const { message } = await toasts.getErrorToast();
         expect(message).to.contain(expectedError);
         await toasts.dismissToast();
+      });
+
+      it('shows top-level object keys', async function () {
+        await queryBar.setQuery('election');
+        await queryBar.submitQuery();
+        const currentUrl = await browser.getCurrentUrl();
+        const [, hash] = currentUrl.split('#/');
+        await PageObjects.common.navigateToUrl(
+          'discover',
+          hash.replace('columns:!()', 'columns:!(relatedContent)'),
+          { useActualUrl: true }
+        );
+        await retry.try(async function tryingForTime() {
+          expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
+        });
+
+        const field = await PageObjects.discover.getDocTableIndex(1);
+        expect(field).to.contain('relatedContent.url');
+
+        const marks = await PageObjects.discover.getMarks();
+        expect(marks.length).to.be.above(0);
+        expect(marks).to.contain('election');
+      });
+
+      describe('legacy table tests', async function () {
+        before(async function () {
+          await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+          await PageObjects.common.navigateToApp('discover');
+        });
+
+        after(async function () {
+          await kibanaServer.uiSettings.replace({});
+        });
+
+        it('doc view should sort ascending', async function () {
+          const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
+          await find.clickByCssSelector('.fa-sort-down');
+
+          // we don't technically need this sleep here because the tryForTime will retry and the
+          // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
+          // case and it can be avoided with just a few seconds sleep.
+          await PageObjects.common.sleep(2000);
+          await retry.try(async function tryingForTime() {
+            const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(1)`);
+            const rowData = await row.getVisibleText();
+
+            expect(rowData.startsWith(expectedTimeStamp)).to.be.ok();
+          });
+        });
       });
     });
   });

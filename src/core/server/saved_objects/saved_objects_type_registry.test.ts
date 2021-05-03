@@ -239,6 +239,7 @@ describe('SavedObjectTypeRegistry', () => {
 
     it(`returns false for other namespaceType`, () => {
       expectResult(false, { namespaceType: 'multiple' });
+      expectResult(false, { namespaceType: 'multiple-isolated' });
       expectResult(false, { namespaceType: 'single' });
       expectResult(false, { namespaceType: undefined });
     });
@@ -263,6 +264,7 @@ describe('SavedObjectTypeRegistry', () => {
     it(`returns false for other namespaceType`, () => {
       expectResult(false, { namespaceType: 'agnostic' });
       expectResult(false, { namespaceType: 'multiple' });
+      expectResult(false, { namespaceType: 'multiple-isolated' });
     });
   });
 
@@ -277,12 +279,36 @@ describe('SavedObjectTypeRegistry', () => {
       expect(registry.isMultiNamespace('unknownType')).toEqual(false);
     });
 
+    it(`returns true for namespaceType 'multiple' and 'multiple-isolated'`, () => {
+      expectResult(true, { namespaceType: 'multiple' });
+      expectResult(true, { namespaceType: 'multiple-isolated' });
+    });
+
+    it(`returns false for other namespaceType`, () => {
+      expectResult(false, { namespaceType: 'agnostic' });
+      expectResult(false, { namespaceType: 'single' });
+      expectResult(false, { namespaceType: undefined });
+    });
+  });
+
+  describe('#isShareable', () => {
+    const expectResult = (expected: boolean, schemaDefinition?: Partial<SavedObjectsType>) => {
+      registry = new SavedObjectTypeRegistry();
+      registry.registerType(createType({ name: 'foo', ...schemaDefinition }));
+      expect(registry.isShareable('foo')).toBe(expected);
+    };
+
+    it(`returns false when the type is not registered`, () => {
+      expect(registry.isShareable('unknownType')).toEqual(false);
+    });
+
     it(`returns true for namespaceType 'multiple'`, () => {
       expectResult(true, { namespaceType: 'multiple' });
     });
 
     it(`returns false for other namespaceType`, () => {
       expectResult(false, { namespaceType: 'agnostic' });
+      expectResult(false, { namespaceType: 'multiple-isolated' });
       expectResult(false, { namespaceType: 'single' });
       expectResult(false, { namespaceType: undefined });
     });

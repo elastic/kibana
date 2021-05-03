@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import {
   EuiFormRow,
   EuiRadio,
@@ -102,7 +104,7 @@ export const EngineSelection: React.FC = () => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <EuiTitle size="xs">
           <h4>
             {i18n.translate(

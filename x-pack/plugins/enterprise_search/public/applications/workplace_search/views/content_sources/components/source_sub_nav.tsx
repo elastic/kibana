@@ -6,15 +6,12 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
+import { SideNavLink } from '../../../../shared/layout';
 import { AppLogic } from '../../../app_logic';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
-
-import { SourceLogic } from '../source_logic';
-
-import { SideNavLink } from '../../../../shared/layout';
-
 import {
   getContentSourcePath,
   SOURCE_DETAILS_PATH,
@@ -23,6 +20,7 @@ import {
   SOURCE_DISPLAY_SETTINGS_PATH,
   SOURCE_SETTINGS_PATH,
 } from '../../../routes';
+import { SourceLogic } from '../source_logic';
 
 export const SourceSubNav: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);
@@ -35,7 +33,7 @@ export const SourceSubNav: React.FC = () => {
   const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
 
   return (
-    <>
+    <div className="sourcesSubNav">
       <SideNavLink to={getContentSourcePath(SOURCE_DETAILS_PATH, id, isOrganization)}>
         {NAV.OVERVIEW}
       </SideNavLink>
@@ -47,7 +45,10 @@ export const SourceSubNav: React.FC = () => {
           <SideNavLink to={getContentSourcePath(SOURCE_SCHEMAS_PATH, id, isOrganization)}>
             {NAV.SCHEMA}
           </SideNavLink>
-          <SideNavLink to={getContentSourcePath(SOURCE_DISPLAY_SETTINGS_PATH, id, isOrganization)}>
+          <SideNavLink
+            shouldShowActiveForSubroutes
+            to={getContentSourcePath(SOURCE_DISPLAY_SETTINGS_PATH, id, isOrganization)}
+          >
             {NAV.DISPLAY_SETTINGS}
           </SideNavLink>
         </>
@@ -55,6 +56,6 @@ export const SourceSubNav: React.FC = () => {
       <SideNavLink to={getContentSourcePath(SOURCE_SETTINGS_PATH, id, isOrganization)}>
         {NAV.SETTINGS}
       </SideNavLink>
-    </>
+    </div>
   );
 };

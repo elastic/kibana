@@ -13,13 +13,8 @@ import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
 import {
+  getRequestPayload,
   DropDownLabel,
-  getEsAggFromAggConfig,
-  getEsAggFromGroupByConfig,
-  GroupByConfigWithUiSupport,
-  isGroupByDateHistogram,
-  isGroupByHistogram,
-  isGroupByTerms,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -32,12 +27,6 @@ import {
 } from '../common';
 import { StepDefineFormProps } from '../step_define_form';
 import { isPivotAggsWithExtendedForm } from '../../../../../common/pivot_aggs';
-import {
-  DateHistogramAgg,
-  HistogramAgg,
-  TermsAgg,
-} from '../../../../../../../common/types/pivot_group_by';
-import { PivotTransformPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 import { TransformPivotConfig } from '../../../../../../../common/types/transform';
 
 /**
@@ -102,12 +91,6 @@ function getRootAggregation(item: PivotAggsConfig) {
   return rootItem;
 }
 
-export const getMissingBucketConfig = (
-  g: GroupByConfigWithUiSupport
-): { missing_bucket?: boolean } => {
-  return g.missing_bucket !== undefined ? { missing_bucket: g.missing_bucket } : {};
-};
-
 export const usePivotConfig = (
   defaults: StepDefineExposedState,
   indexPattern: StepDefineFormProps['searchItems']['indexPattern']
@@ -115,8 +98,8 @@ export const usePivotConfig = (
   const toastNotifications = useToastNotifications();
 
   const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData } = useMemo(
-    () => getPivotDropdownOptions(indexPattern),
-    [indexPattern]
+    () => getPivotDropdownOptions(indexPattern, defaults.runtimeMappings),
+    [defaults.runtimeMappings, indexPattern]
   );
 
   // The list of selected aggregations
@@ -315,56 +298,10 @@ export const usePivotConfig = (
   const pivotAggsArr = useMemo(() => dictionaryToArray(aggList), [aggList]);
   const pivotGroupByArr = useMemo(() => dictionaryToArray(groupByList), [groupByList]);
 
-  const requestPayload = useMemo(() => {
-    const request = {
-      pivot: {
-        group_by: {},
-        aggregations: {},
-      } as PivotTransformPreviewRequestSchema['pivot'],
-    };
-
-    pivotGroupByArr.forEach((g) => {
-      if (isGroupByTerms(g)) {
-        const termsAgg: TermsAgg = {
-          terms: {
-            field: g.field,
-          },
-          ...getMissingBucketConfig(g),
-        };
-        request.pivot.group_by[g.aggName] = termsAgg;
-      } else if (isGroupByHistogram(g)) {
-        const histogramAgg: HistogramAgg = {
-          histogram: {
-            field: g.field,
-            interval: g.interval,
-          },
-          ...getMissingBucketConfig(g),
-        };
-        request.pivot.group_by[g.aggName] = histogramAgg;
-      } else if (isGroupByDateHistogram(g)) {
-        const dateHistogramAgg: DateHistogramAgg = {
-          date_histogram: {
-            field: g.field,
-            calendar_interval: g.calendar_interval,
-          },
-          ...getMissingBucketConfig(g),
-        };
-        request.pivot.group_by[g.aggName] = dateHistogramAgg;
-      } else {
-        request.pivot.group_by[g.aggName] = getEsAggFromGroupByConfig(g);
-      }
-    });
-
-    pivotAggsArr.forEach((agg) => {
-      const result = getEsAggFromAggConfig(agg);
-      if (result === null) {
-        return;
-      }
-      request.pivot.aggregations[agg.aggName] = result;
-    });
-
-    return request;
-  }, [pivotAggsArr, pivotGroupByArr]);
+  const requestPayload = useMemo(() => getRequestPayload(pivotAggsArr, pivotGroupByArr), [
+    pivotAggsArr,
+    pivotGroupByArr,
+  ]);
 
   const validationStatus = useMemo(() => {
     return validatePivotConfig(requestPayload.pivot);

@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { Filter } from '../../../../../../src/plugins/data/public';
-import { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';
+import type { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';
 
 export interface ITooltipProperty {
   getPropertyKey(): string;
@@ -29,7 +29,7 @@ export interface FeatureGeometry {
 }
 
 export interface RenderTooltipContentParams {
-  addFilters(filter: object): void;
+  addFilters(filter: object, actionId: string): void;
   closeTooltip(): void;
   features: TooltipFeature[];
   isLocked: boolean;

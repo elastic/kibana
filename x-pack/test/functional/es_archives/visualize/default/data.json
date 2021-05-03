@@ -148,6 +148,31 @@
 {
   "type": "doc",
   "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "index-pattern:logstash-2015.09.22",
+    "index": ".kibana_1",
+    "source": {
+      "index-pattern": {
+        "timeFieldName": "@timestamp",
+        "title": "logstash-2015.09.22",
+        "fields":"[{\"name\":\"scripted_date\",\"type\":\"date\",\"count\":0,\"scripted\":true,\"script\":\"1234\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"scripted_string\",\"type\":\"string\",\"count\":0,\"scripted\":true,\"script\":\"return 'hello'\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
+        "runtimeFieldMap":"{\"runtime_string_field\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit('hello world!')\"}}}"
+      },
+      "migrationVersion": {
+        "index-pattern": "7.11.0"
+      },
+      "references": [
+      ],
+      "type": "index-pattern",
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "custom_space:index-pattern:logstash-*",
     "index": ".kibana_1",
     "source": {

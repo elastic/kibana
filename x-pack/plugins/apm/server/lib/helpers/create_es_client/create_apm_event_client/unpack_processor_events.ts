@@ -11,20 +11,20 @@ import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
   ESSearchRequest,
   ESFilter,
-} from '../../../../../../../typings/elasticsearch';
+} from '../../../../../../../../typings/elasticsearch';
 import { APMEventESSearchRequest } from '.';
 import {
   ApmIndicesConfig,
   ApmIndicesName,
 } from '../../../settings/apm_indices/get_apm_indices';
 
-export const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
+const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
   [ProcessorEvent.transaction]: 'apm_oss.transactionIndices',
   [ProcessorEvent.span]: 'apm_oss.spanIndices',
   [ProcessorEvent.metric]: 'apm_oss.metricsIndices',
   [ProcessorEvent.error]: 'apm_oss.errorIndices',
-  [ProcessorEvent.sourcemap]: 'apm_oss.sourcemapIndices',
-  [ProcessorEvent.onboarding]: 'apm_oss.onboardingIndices',
+  // TODO: should have its own config setting
+  [ProcessorEvent.profile]: 'apm_oss.transactionIndices',
 };
 
 export function unpackProcessorEvents(
@@ -32,9 +32,7 @@ export function unpackProcessorEvents(
   indices: ApmIndicesConfig
 ) {
   const { apm, ...params } = request;
-
   const events = uniq(apm.events);
-
   const index = events.map((event) => indices[processorEventIndexMap[event]]);
 
   const withFilterForProcessorEvent: ESSearchRequest & {

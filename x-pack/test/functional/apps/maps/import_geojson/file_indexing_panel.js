@@ -11,9 +11,10 @@ import uuid from 'uuid/v4';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
   const security = getService('security');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
@@ -32,6 +33,10 @@ export default function ({ getService, getPageObjects }) {
 
     const indexName = uuid();
     await PageObjects.maps.setIndexName(indexName);
+    await retry.try(async () => {
+      const importButtonActive = await PageObjects.maps.importFileButtonEnabled();
+      expect(importButtonActive).to.be(true);
+    });
     await PageObjects.maps.clickImportFileButton();
     return indexName;
   }
@@ -99,24 +104,13 @@ export default function ({ getService, getPageObjects }) {
       expect(newIndexedLayerExists).to.be(false);
     });
 
-    it('should create a link to new index in management', async () => {
-      const indexName = await indexPoint();
-
-      const layerAddReady = await PageObjects.maps.importLayerReadyForAdd();
-      expect(layerAddReady).to.be(true);
-
-      const newIndexLinkExists = await testSubjects.exists('indexManagementNewIndexLink');
-      expect(newIndexLinkExists).to.be(true);
-
-      const indexLink = await testSubjects.getAttribute('indexManagementNewIndexLink', 'href');
-      const linkDirectsToNewIndex = indexLink.endsWith(indexName);
-      expect(linkDirectsToNewIndex).to.be(true);
-    });
-
     const GEO_POINT = 'geo_point';
     const pointGeojsonFiles = ['point.json', 'multi_point.json'];
     pointGeojsonFiles.forEach(async (pointFile) => {
       it(`should index with type geo_point for file: ${pointFile}`, async () => {
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
         await loadFileAndIndex(pointFile);
         const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
         const coordinatesField = indexPatternResults.fields.find(
@@ -135,6 +129,9 @@ export default function ({ getService, getPageObjects }) {
     ];
     nonPointGeojsonFiles.forEach(async (shapeFile) => {
       it(`should index with type geo_shape for file: ${shapeFile}`, async () => {
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
         await loadFileAndIndex(shapeFile);
         const indexPatternResults = await PageObjects.maps.getIndexPatternResults();
         const coordinatesField = indexPatternResults.fields.find(

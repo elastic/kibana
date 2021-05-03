@@ -8,10 +8,11 @@
 
 import { KibanaContext } from '../../data/public';
 
-import { getTimezone, validateInterval } from './application';
+import { getTimezone } from './application/lib/get_timezone';
+import { validateInterval } from './application/lib/validate_interval';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
-import { TimeseriesVisParams } from './metrics_fn';
+import { TimeseriesVisParams } from './types';
 import { TimeseriesVisData } from '../common/types';
 
 interface MetricsRequestHandlerParams {
@@ -28,14 +29,15 @@ export const metricsRequestHandler = async ({
   searchSessionId,
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
+  const data = getDataStart();
+
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};
-  const data = getDataStart();
-  const dataSearch = getDataStart().search;
+  const dataSearch = data.search;
   const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
   if (visParams && visParams.id && !visParams.isModelInvalid) {
-    const maxBuckets = config.get(MAX_BUCKETS_SETTING);
+    const maxBuckets = config.get<number>(MAX_BUCKETS_SETTING);
 
     validateInterval(parsedTimeRange, visParams, maxBuckets);
 
@@ -48,6 +50,7 @@ export const metricsRequestHandler = async ({
       });
 
     try {
+      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
       return await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
           timerange: {
@@ -58,8 +61,8 @@ export const metricsRequestHandler = async ({
           filters: input?.filters,
           panels: [visParams],
           state: uiStateObj,
-          ...(searchSessionId && {
-            searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          ...(searchSessionOptions && {
+            searchSession: searchSessionOptions,
           }),
         }),
       });

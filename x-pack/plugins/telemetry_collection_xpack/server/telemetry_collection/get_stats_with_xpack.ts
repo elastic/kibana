@@ -9,6 +9,7 @@ import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import { TelemetryLocalStats, getLocalStats } from '../../../../../src/plugins/telemetry/server';
 import { getXPackUsage } from './get_xpack';
 import { ESLicense, getLicenseFromLocalOrMaster } from './get_license';
+import { isClusterOptedIn } from './is_cluster_opted_in';
 
 export type TelemetryAggregatedStats = TelemetryLocalStats & {
   stack_stats: { xpack?: object };
@@ -44,10 +45,16 @@ export const getStatsWithXpack: StatsGetter<TelemetryAggregatedStats> = async fu
     })
     .reduce((acc, stats) => {
       // Concatenate the telemetry reported via monitoring as additional payloads instead of reporting it inside of stack_stats.kibana.plugins.monitoringTelemetry
-      const monitoringTelemetry = stats.stack_stats.kibana?.plugins?.monitoringTelemetry;
+      const monitoringTelemetry = stats.stack_stats.kibana?.plugins?.monitoringTelemetry?.stats as
+        | TelemetryAggregatedStats[]
+        | undefined;
       if (monitoringTelemetry) {
         delete stats.stack_stats.kibana!.plugins.monitoringTelemetry;
       }
-      return [...acc, stats, ...(monitoringTelemetry || [])];
+
+      // From the monitoring-sourced telemetry, we need to filter out the clusters that are opted-out.
+      const onlyOptedInMonitoringClusters = (monitoringTelemetry || []).filter(isClusterOptedIn);
+
+      return [...acc, stats, ...onlyOptedInMonitoringClusters];
     }, [] as TelemetryAggregatedStats[]);
 };

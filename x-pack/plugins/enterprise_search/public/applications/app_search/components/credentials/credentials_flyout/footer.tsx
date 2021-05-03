@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import {
   EuiFlyoutFooter,
   EuiFlexGroup,
@@ -14,7 +16,12 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import {
+  CLOSE_BUTTON_LABEL,
+  SAVE_BUTTON_LABEL,
+  UPDATE_BUTTON_LABEL,
+} from '../../../../shared/constants';
 
 import { CredentialsLogic } from '../credentials_logic';
 
@@ -27,9 +34,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={hideCredentialsForm}>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.closeText', {
-              defaultMessage: 'Close',
-            })}
+            {CLOSE_BUTTON_LABEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -40,13 +45,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
             iconType="check"
             data-test-subj="APIKeyActionButton"
           >
-            {activeApiTokenExists
-              ? i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.updateText', {
-                  defaultMessage: 'Update',
-                })
-              : i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.saveText', {
-                  defaultMessage: 'Save',
-                })}
+            {activeApiTokenExists ? UPDATE_BUTTON_LABEL : SAVE_BUTTON_LABEL}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

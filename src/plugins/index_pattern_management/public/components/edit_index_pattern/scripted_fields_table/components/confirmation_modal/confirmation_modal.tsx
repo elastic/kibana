@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 
 import { ScriptedFieldItem } from '../../types';
 
@@ -42,15 +42,13 @@ export const DeleteScritpedFieldConfirmationModal = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={title}
-        onCancel={hideDeleteConfirmationModal}
-        onConfirm={deleteField}
-        cancelButtonText={cancelButtonText}
-        confirmButtonText={confirmButtonText}
-        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-      />
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={title}
+      onCancel={hideDeleteConfirmationModal}
+      onConfirm={deleteField}
+      cancelButtonText={cancelButtonText}
+      confirmButtonText={confirmButtonText}
+      defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+    />
   );
 };

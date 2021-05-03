@@ -52,12 +52,14 @@ async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
 
 export class VegaMapView extends VegaBaseView {
   private mapServiceSettings: MapServiceSettings = getMapServiceSettings();
-  private mapStyle = this.getMapStyle();
+  private emsTileLayer = this.getEmsTileLayer();
 
-  private getMapStyle() {
-    const { mapStyle } = this._parser.mapConfig;
+  private getEmsTileLayer() {
+    const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
 
-    return mapStyle === 'default' ? this.mapServiceSettings.defaultTmsLayer() : mapStyle;
+    if (mapStyle) {
+      return emsTileServiceId ?? this.mapServiceSettings.defaultTmsLayer();
+    }
   }
 
   private get shouldShowZoomControl() {
@@ -66,11 +68,18 @@ export class VegaMapView extends VegaBaseView {
 
   private getMapParams(defaults: { maxZoom: number; minZoom: number }): Partial<MapboxOptions> {
     const { longitude, latitude, scrollWheelZoom } = this._parser.mapConfig;
-    const zoomSettings = validateZoomSettings(this._parser.mapConfig, defaults, this.onWarn);
+    const { zoom, maxZoom, minZoom } = validateZoomSettings(
+      this._parser.mapConfig,
+      defaults,
+      this.onWarn
+    );
+    const { signals } = this._vegaStateRestorer.restore() || {};
 
     return {
-      ...zoomSettings,
-      center: [longitude, latitude],
+      maxZoom,
+      minZoom,
+      zoom: signals?.zoom ?? zoom,
+      center: [signals?.longitude ?? longitude, signals?.latitude ?? latitude],
       scrollZoom: scrollWheelZoom,
     };
   }
@@ -83,14 +92,14 @@ export class VegaMapView extends VegaBaseView {
       maxZoom: defaultMapConfig.maxZoom,
     };
 
-    if (this.mapStyle && this.mapStyle !== userConfiguredLayerId) {
-      const tmsService = await this.mapServiceSettings.getTmsService(this.mapStyle);
+    if (this.emsTileLayer && this.emsTileLayer !== userConfiguredLayerId) {
+      const tmsService = await this.mapServiceSettings.getTmsService(this.emsTileLayer);
 
       if (!tmsService) {
         this.onWarn(
           i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
             defaultMessage: '{mapStyleParam} was not found',
-            values: { mapStyleParam: `"mapStyle":${this.mapStyle}` },
+            values: { mapStyleParam: `"emsTileServiceId":${this.emsTileLayer}` },
           })
         );
         return;
@@ -135,10 +144,16 @@ export class VegaMapView extends VegaBaseView {
     if (this.shouldShowZoomControl) {
       mapBoxInstance.addControl(new NavigationControl({ showCompass: false }), 'top-left');
     }
+
+    // disable map rotation using right click + drag
+    mapBoxInstance.dragRotate.disable();
+
+    // disable map rotation using touch rotation gesture
+    mapBoxInstance.touchZoomRotate.disableRotation();
   }
 
   private initLayers(mapBoxInstance: Map, vegaView: View) {
-    const shouldShowUserConfiguredLayer = this.mapStyle === userConfiguredLayerId;
+    const shouldShowUserConfiguredLayer = this.emsTileLayer === userConfiguredLayerId;
 
     if (shouldShowUserConfiguredLayer) {
       const { url, options } = this.mapServiceSettings.config.tilemap;
@@ -160,6 +175,7 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
+        vegaControls: this._$controls.get(0),
         updateVegaView,
       },
     });

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -21,7 +22,7 @@ import {
   AlertDiskUsageNodeStats,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_DISK_USAGE,
@@ -32,7 +33,7 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -67,7 +68,7 @@ export class DiskUsageAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -77,7 +78,7 @@ export class DiskUsageAlert extends BaseAlert {
     }
     const { duration, threshold } = params;
     const stats = await fetchDiskUsageNodeStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       duration as string,

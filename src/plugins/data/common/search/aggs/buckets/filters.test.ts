@@ -153,7 +153,7 @@ describe('Filters Agg', () => {
                   "should": Array [
                     Object {
                       "match": Object {
-                        "field": 200,
+                        "field": "200",
                       },
                     },
                   ],
@@ -171,7 +171,7 @@ describe('Filters Agg', () => {
                           Object {
                             "range": Object {
                               "field": Object {
-                                "gt": 500,
+                                "gt": "500",
                               },
                             },
                           },

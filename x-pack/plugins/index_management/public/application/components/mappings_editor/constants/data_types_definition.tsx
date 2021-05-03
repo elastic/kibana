@@ -86,7 +86,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           id="xpack.idxMgmt.mappingsEditor.dataType.constantKeywordLongDescription"
           defaultMessage="Constant keyword fields are a special type of keyword fields for fields that contain the same keyword across all documents in the index. Supports the same queries and aggregations as {keyword} fields."
           values={{
-            keyword: <EuiCode inline>{'keyword'}</EuiCode>,
+            keyword: <EuiCode>{'keyword'}</EuiCode>,
           }}
         />
       </p>
@@ -836,7 +836,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           id="xpack.idxMgmt.mappingsEditor.dataType.pointLongDescription"
           defaultMessage="Point fields enable searching of {code} pairs that fall in a 2-dimensional planar coordinate system."
           values={{
-            code: <EuiCode inline>{'x,y'}</EuiCode>,
+            code: <EuiCode>{'x,y'}</EuiCode>,
           }}
         />
       </p>

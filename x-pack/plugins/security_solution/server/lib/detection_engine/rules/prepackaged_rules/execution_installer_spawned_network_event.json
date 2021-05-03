@@ -1,0 +1,79 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when the built in macOS Installer program generates a network event after attempting to install a .pkg file. This activity has been observed being leveraged by malware.",
+  "false_positives": [
+    "Custom organization-specific macOS packages that use .pkg files to run cURL could trigger this rule. If known behavior is causing false positives, it can be excluded from the rule."
+  ],
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "macOS Installer Spawns Network Event",
+  "query": "sequence by process.entity_id with maxspan=1m\n  [ process where event.type == \"start\" and host.os.family == \"macos\" and \n      process.parent.executable in (\"/usr/sbin/installer\", \"/System/Library/CoreServices/Installer.app/Contents/MacOS/Installer\") ]\n  [ network where not cidrmatch(destination.ip,\n      \"192.168.0.0/16\",\n      \"10.0.0.0/8\",\n      \"172.16.0.0/12\",\n      \"224.0.0.0/8\",\n      \"127.0.0.0/8\",\n      \"169.254.0.0/16\",\n      \"::1\",\n      \"FE80::/10\",\n      \"FF00::/8\") ]\n",
+  "references": [
+    "https://redcanary.com/blog/clipping-silver-sparrows-wings"
+  ],
+  "risk_score": 47,
+  "rule_id": "99239e7d-b0d4-46e3-8609-acafcf99f68c",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.007",
+              "name": "JavaScript/JScript",
+              "reference": "https://attack.mitre.org/techniques/T1059/007/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1071",
+          "name": "Application Layer Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1071/",
+          "subtechnique": [
+            {
+              "id": "T1071.001",
+              "name": "Web Protocols",
+              "reference": "https://attack.mitre.org/techniques/T1071/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

@@ -6,7 +6,7 @@
  */
 
 import cytoscape from 'cytoscape';
-import { HttpSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import React, { ComponentType } from 'react';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -21,19 +21,21 @@ export default {
   component: Popover,
   decorators: [
     (Story: ComponentType) => {
-      const httpMock = ({
-        get: async () => ({
-          avgCpuUsage: 0.32809666568309237,
-          avgErrorRate: 0.556068173242986,
-          avgMemoryUsage: 0.5504868173242986,
-          transactionStats: {
-            avgRequestsPerMinute: 164.47222031860858,
-            avgTransactionDuration: 61634.38905590272,
-          },
-        }),
-      } as unknown) as HttpSetup;
+      const coreMock = ({
+        http: {
+          get: async () => ({
+            avgCpuUsage: 0.32809666568309237,
+            avgErrorRate: 0.556068173242986,
+            avgMemoryUsage: 0.5504868173242986,
+            transactionStats: {
+              avgRequestsPerMinute: 164.47222031860858,
+              avgTransactionDuration: 61634.38905590272,
+            },
+          }),
+        },
+      } as unknown) as CoreStart;
 
-      createCallApmApi(httpMock);
+      createCallApmApi(coreMock);
 
       return (
         <EuiThemeProvider>

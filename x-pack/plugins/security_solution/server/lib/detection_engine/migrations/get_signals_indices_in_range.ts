@@ -42,7 +42,7 @@ export const getSignalsIndicesInRange = async ({
     return [];
   }
 
-  const response = await esClient.search<IndexesResponse>({
+  const response = await esClient.search({
     index,
     body: {
       aggs: {
@@ -60,6 +60,7 @@ export const getSignalsIndicesInRange = async ({
                 '@timestamp': {
                   gte: from,
                   lte: 'now',
+                  // @ts-expect-error format doesn't exist in RangeQuery
                   format: 'strict_date_optional_time',
                 },
               },
@@ -71,5 +72,7 @@ export const getSignalsIndicesInRange = async ({
     },
   });
 
-  return response.body.aggregations.indexes.buckets.map((bucket) => bucket.key);
+  // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+  const body = response.body as IndexesResponse;
+  return body.aggregations.indexes.buckets.map((bucket) => bucket.key);
 };

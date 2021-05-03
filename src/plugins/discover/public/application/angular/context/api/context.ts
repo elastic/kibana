@@ -87,7 +87,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
         useNewFieldsApi
       );
 
-      const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply);
+      const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply, nanos);
 
       const hits = await fetchHitsInInterval(
         searchSource,
@@ -114,7 +114,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
     const searchSource = await data.search.searchSource.create();
     if (useNewFieldsApi) {
       searchSource.removeField('fieldsFromSource');
-      searchSource.setField('fields', ['*']);
+      searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
     }
     return searchSource
       .setParent(undefined)

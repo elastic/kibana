@@ -10,9 +10,9 @@ import { each, cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
-import realHits from 'fixtures/real_hits.js';
+import realHits from '../../../__fixtures__/real_hits.js';
 // @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
@@ -46,6 +46,12 @@ const mockServices = ({
       if (key === 'fields:popularLimit') {
         return 5;
       }
+    },
+  },
+  indexPatternFieldEditor: {
+    openEditor: jest.fn(),
+    userPermissions: {
+      editIndexPattern: jest.fn(),
     },
   },
 } as unknown) as DiscoverServices;
@@ -102,6 +108,8 @@ function getCompProps(): DiscoverSidebarProps {
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
     setAppState: jest.fn(),
+    onEditRuntimeField: jest.fn(),
+    editField: jest.fn(),
   };
 }
 

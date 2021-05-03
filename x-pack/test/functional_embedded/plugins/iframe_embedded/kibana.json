@@ -1,5 +1,5 @@
 {
-  "id": "iframe_embedded",
+  "id": "iframeEmbedded",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "server": true,

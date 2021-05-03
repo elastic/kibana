@@ -514,6 +514,20 @@ export const ComponentStrings = {
         defaultMessage: 'Keyboard shortcuts',
       }),
   },
+  LabsControl: {
+    getLabsButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsButtonLabel', {
+        defaultMessage: 'Labs',
+      }),
+    getAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsAriaLabel', {
+        defaultMessage: 'View labs projects',
+      }),
+    getTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsTooltip', {
+        defaultMessage: 'View labs projects',
+      }),
+  },
   Link: {
     getErrorMessage: (message: string) =>
       i18n.translate('xpack.canvas.link.errorMessage', {
@@ -1751,6 +1765,12 @@ export const ComponentStrings = {
         defaultMessage: 'Updated',
         description:
           'This column in the table contains the date/time the workpad was last updated.',
+      }),
+    getTableActionsColumnTitle: () =>
+      i18n.translate('xpack.canvas.workpadLoader.table.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+        description:
+          'This column in the table contains the actions that can be taken on a workpad.',
       }),
   },
   WorkpadManager: {

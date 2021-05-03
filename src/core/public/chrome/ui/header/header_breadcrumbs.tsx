@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { ChromeBreadcrumb } from '../../chrome_service';
+import { ChromeBreadcrumb } from '../../types';
 
 interface Props {
   appTitle$: Observable<string>;

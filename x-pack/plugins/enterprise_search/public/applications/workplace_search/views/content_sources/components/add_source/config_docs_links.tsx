@@ -7,9 +7,8 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { DOCUMENTATION_LINK_TITLE } from '../../../../constants';
 

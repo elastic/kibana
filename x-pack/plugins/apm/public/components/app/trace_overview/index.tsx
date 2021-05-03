@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiPage, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SearchBar } from '../../shared/search_bar';
-import { Correlations } from '../Correlations';
 import { TraceList } from './TraceList';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
@@ -23,8 +22,9 @@ const DEFAULT_RESPONSE: TracesAPIResponse = {
 };
 
 export function TraceOverview() {
-  const { urlParams, uiFilters } = useUrlParams();
-  const { start, end } = urlParams;
+  const {
+    urlParams: { environment, kuery, start, end },
+  } = useUrlParams();
   const { status, data = DEFAULT_RESPONSE } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -32,15 +32,16 @@ export function TraceOverview() {
           endpoint: 'GET /api/apm/traces',
           params: {
             query: {
+              environment,
+              kuery,
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [start, end, uiFilters]
+    [environment, kuery, start, end]
   );
 
   useTrackPageview({ app: 'apm', path: 'traces_overview' });
@@ -51,11 +52,6 @@ export function TraceOverview() {
       <SearchBar />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <Correlations />
-            </EuiFlexItem>
-          </EuiFlexGroup>
           <EuiPanel>
             <TraceList
               items={data.items}

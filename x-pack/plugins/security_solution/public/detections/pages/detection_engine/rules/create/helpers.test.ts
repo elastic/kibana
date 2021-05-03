@@ -249,14 +249,14 @@ describe('helpers', () => {
         ...mockData,
         ruleType: 'machine_learning',
         anomalyThreshold: 44,
-        machineLearningJobId: 'some_jobert_id',
+        machineLearningJobId: ['some_jobert_id'],
       };
       const result = formatDefineStepData(mockStepData);
 
       const expected: DefineStepRuleJson = {
         type: 'machine_learning',
         anomaly_threshold: 44,
-        machine_learning_job_id: 'some_jobert_id',
+        machine_learning_job_id: ['some_jobert_id'],
         timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         timeline_title: 'Titled timeline',
       };
@@ -491,6 +491,15 @@ describe('helpers', () => {
     test('returns formatted object with detections exceptions_list', () => {
       const result = formatAboutStepData(mockData, [getListMock()]);
       expect(result.exceptions_list).toEqual([getListMock()]);
+    });
+
+    test('returns a threat indicator path', () => {
+      mockData = {
+        ...mockData,
+        threatIndicatorPath: 'my_custom.path',
+      };
+      const result = formatAboutStepData(mockData);
+      expect(result.threat_indicator_path).toEqual('my_custom.path');
     });
 
     test('returns formatted object with both exceptions_lists', () => {

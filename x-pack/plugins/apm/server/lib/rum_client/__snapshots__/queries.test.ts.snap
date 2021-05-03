@@ -58,11 +58,6 @@ Object {
               "transaction.type": "page-load",
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -158,11 +153,6 @@ Object {
               "service.language.name": "javascript",
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -235,11 +225,6 @@ Object {
           Object {
             "exists": Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
         ],
@@ -507,11 +492,6 @@ Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -552,11 +532,6 @@ Object {
           Object {
             "term": Object {
               "transaction.type": "page-load",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
         ],
@@ -676,11 +651,6 @@ Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -725,11 +695,6 @@ Object {
           Object {
             "exists": Object {
               "field": "transaction.marks.navigationTiming.fetchStart",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
         ],

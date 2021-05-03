@@ -7,15 +7,17 @@
 
 import { Type } from '@kbn/config-schema';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { AuthenticationResult, AuthenticationServiceStart, SAMLLogin } from '../../authentication';
-import { defineSAMLRoutes } from './saml';
-import type { RequestHandler, RouteConfig } from '../../../../../../src/core/server';
-import type { SecurityRouter } from '../../types';
+import type { RequestHandler, RouteConfig } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
+import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationResult, SAMLLogin } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
+import { defineSAMLRoutes } from './saml';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
@@ -42,7 +44,11 @@ describe('SAML authentication routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false, xsrfRequired: false });
+      expect(routeConfig.options).toEqual({
+        authRequired: false,
+        xsrfRequired: false,
+        tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+      });
       expect(routeConfig.validate).toEqual({
         body: expect.any(Type),
         query: undefined,
@@ -76,16 +82,14 @@ describe('SAML authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       authc.login.mockRejectedValue(unhandledException);
 
-      const internalServerErrorResponse = Symbol('error');
       const responseFactory = httpServerMock.createResponseFactory();
-      responseFactory.internalError.mockReturnValue(internalServerErrorResponse as any);
 
       const request = httpServerMock.createKibanaRequest({
         body: { SAMLResponse: 'saml-response' },
       });
 
-      await expect(routeHandler({} as any, request, responseFactory)).resolves.toBe(
-        internalServerErrorResponse
+      await expect(routeHandler({} as any, request, responseFactory)).rejects.toThrow(
+        unhandledException
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {

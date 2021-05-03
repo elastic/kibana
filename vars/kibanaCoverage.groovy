@@ -141,16 +141,11 @@ def collectVcsInfo(title) {
 def generateReports(title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh true
-    # bootstrap from x-pack folder
-    cd x-pack
-    yarn kbn bootstrap
-    # Return to project root
-    cd ..
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
-    . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-    # zip combined reports
-    tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
+    . src/dev/code_coverage/shell_scripts/merge_functional.sh
+    . src/dev/code_coverage/shell_scripts/copy_jest_report.sh
+    # zip functional combined report
+    tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*
   """, title)
 }
 
@@ -162,7 +157,7 @@ def uploadCombinedReports() {
 
   kibanaPipeline.uploadGcsArtifact(
     "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/combined",
-    'kibana-coverage.tar.gz'
+    'kibana-functional-coverage.tar.gz'
   )
 }
 
@@ -197,13 +192,6 @@ def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmen
 def runTests() {
   parallel([
     'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-    'x-pack-intake-agent': {
-      withEnv([
-        'NODE_ENV=test' // Needed for jest tests only
-      ]) {
-        workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-      }
-    },
     'kibana-oss-agent'   : workers.functional(
       'kibana-oss-tests',
       { kibanaPipeline.buildOss() },

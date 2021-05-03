@@ -38,7 +38,7 @@ export const registerPauseRoute = ({
           return response.customError(formatEsError(err));
         }
         // Case: default
-        return response.internalError({ body: err });
+        return response.customError({ statusCode: 500, body: err });
       };
 
       await Promise.all(

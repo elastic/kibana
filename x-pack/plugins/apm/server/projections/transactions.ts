@@ -5,32 +5,41 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../server/utils/queries';
 import {
   getProcessorEventForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
 } from '../lib/helpers/aggregated_transactions';
 
 export function getTransactionsProjection({
+  environment,
+  kuery,
   setup,
   serviceName,
   transactionName,
   transactionType,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, esFilter } = setup;
+  const { start, end } = setup;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -44,15 +53,16 @@ export function getTransactionsProjection({
 
   const bool = {
     filter: [
-      { range: rangeFilter(start, end) },
+      ...serviceNameFilter,
       ...transactionNameFilter,
       ...transactionTypeFilter,
-      ...serviceNameFilter,
-      ...esFilter,
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),
-    ],
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
+      ...kqlQuery(kuery),
+    ] as QueryContainer[],
   };
 
   return {

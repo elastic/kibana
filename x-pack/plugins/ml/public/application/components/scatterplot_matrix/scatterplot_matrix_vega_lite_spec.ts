@@ -7,7 +7,7 @@
 
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
-import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
+import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
@@ -15,11 +15,7 @@ import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@e
 
 import { i18n } from '@kbn/i18n';
 
-export const LEGEND_TYPES = {
-  NOMINAL: 'nominal',
-  QUANTITATIVE: 'quantitative',
-} as const;
-export type LegendType = typeof LEGEND_TYPES[keyof typeof LEGEND_TYPES];
+import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
 
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
@@ -32,17 +28,17 @@ export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
 export const getColorSpec = (
   euiTheme: typeof euiThemeLight,
-  outliers = true,
+  escapedOutlierScoreField?: string,
   color?: string,
   legendType?: LegendType
 ) => {
   // For outlier detection result pages coloring is done based on a threshold.
   // This returns a Vega spec using a conditional to return the color.
-  if (outliers) {
+  if (typeof escapedOutlierScoreField === 'string') {
     return {
       condition: {
         value: COLOR_OUTLIER,
-        test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
+        test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
       },
       value: euiTheme.euiColorMediumShade,
     };
@@ -52,7 +48,7 @@ export const getColorSpec = (
   // this returns either a continuous or categorical color spec.
   if (color !== undefined && legendType !== undefined) {
     return {
-      field: color,
+      field: getEscapedVegaFieldName(color),
       type: legendType,
       scale: {
         range: legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
@@ -63,8 +59,17 @@ export const getColorSpec = (
   return { value: DEFAULT_COLOR };
 };
 
+// Escapes the characters .[] in field names with double backslashes
+// since VEGA treats dots/brackets in field names as nested values.
+// See https://vega.github.io/vega-lite/docs/field.html for details.
+function getEscapedVegaFieldName(fieldName: string) {
+  return fieldName.replace(/([\.|\[|\]])/g, '\\$1');
+}
+
+type VegaValue = Record<string, string | number>;
+
 export const getScatterplotMatrixVegaLiteSpec = (
-  values: any[],
+  values: VegaValue[],
   columns: string[],
   euiTheme: typeof euiThemeLight,
   resultsField?: string,
@@ -72,20 +77,18 @@ export const getScatterplotMatrixVegaLiteSpec = (
   legendType?: LegendType,
   dynamicSize?: boolean
 ): TopLevelSpec => {
+  const vegaValues = values;
+  const vegaColumns = columns.map(getEscapedVegaFieldName);
   const outliers = resultsField !== undefined;
-  const transform = columns.map((column) => ({
-    calculate: `datum['${column}']`,
-    as: column,
-  }));
 
-  if (resultsField !== undefined) {
-    transform.push({
-      calculate: `datum['${resultsField}.${OUTLIER_SCORE_FIELD}']`,
-      as: OUTLIER_SCORE_FIELD,
-    });
-  }
+  const escapedOutlierScoreField = `${resultsField}\\.${OUTLIER_SCORE_FIELD}`;
 
-  const colorSpec = getColorSpec(euiTheme, outliers, color, legendType);
+  const colorSpec = getColorSpec(
+    euiTheme,
+    resultsField && escapedOutlierScoreField,
+    color,
+    legendType
+  );
 
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v4.17.0.json',
@@ -106,11 +109,11 @@ export const getScatterplotMatrixVegaLiteSpec = (
       },
     },
     repeat: {
-      column: columns,
-      row: columns.slice().reverse(),
+      column: vegaColumns,
+      row: vegaColumns.slice().reverse(),
     },
     spec: {
-      data: { values },
+      data: { values: [...vegaValues] },
       mark: {
         ...(outliers && dynamicSize
           ? {
@@ -129,7 +132,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
               opacity: {
                 condition: {
                   value: 1,
-                  test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
+                  test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
                 },
                 value: 0.5,
               },
@@ -137,19 +140,19 @@ export const getScatterplotMatrixVegaLiteSpec = (
           : {}),
         ...(outliers
           ? {
-              order: { field: OUTLIER_SCORE_FIELD },
+              order: { field: escapedOutlierScoreField },
               size: {
                 ...(!dynamicSize
                   ? {
                       condition: {
                         value: 40,
-                        test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
+                        test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
                       },
                       value: 8,
                     }
                   : {
                       type: LEGEND_TYPES.QUANTITATIVE,
-                      field: OUTLIER_SCORE_FIELD,
+                      field: escapedOutlierScoreField,
                       scale: {
                         type: 'linear',
                         range: [8, 200],
@@ -170,10 +173,15 @@ export const getScatterplotMatrixVegaLiteSpec = (
           scale: { zero: false },
         },
         tooltip: [
-          ...(color !== undefined ? [{ type: colorSpec.type, field: color }] : []),
-          ...columns.map((d) => ({ type: LEGEND_TYPES.QUANTITATIVE, field: d })),
+          ...(color !== undefined
+            ? [{ type: colorSpec.type, field: getEscapedVegaFieldName(color) }]
+            : []),
+          ...vegaColumns.map((d) => ({
+            type: LEGEND_TYPES.QUANTITATIVE,
+            field: d,
+          })),
           ...(outliers
-            ? [{ type: LEGEND_TYPES.QUANTITATIVE, field: OUTLIER_SCORE_FIELD, format: '.3f' }]
+            ? [{ type: LEGEND_TYPES.QUANTITATIVE, field: escapedOutlierScoreField, format: '.3f' }]
             : []),
         ],
       },
@@ -197,7 +205,6 @@ export const getScatterplotMatrixVegaLiteSpec = (
             },
           }
         : {}),
-      transform,
       width: SCATTERPLOT_SIZE,
       height: SCATTERPLOT_SIZE,
     },

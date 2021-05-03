@@ -9,12 +9,13 @@ import { useContext, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../../../common/types/fields';
+import { BucketSpanEstimatorData } from '../../../../../../../../../common/types/job_service';
 import {
   isMultiMetricJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
-import { ml, BucketSpanEstimatorData } from '../../../../../../../services/ml_api_service';
+import { ml } from '../../../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../../../contexts/ml';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
@@ -40,6 +41,9 @@ export function useEstimateBucketSpan() {
     query: mlContext.combinedQuery,
     splitField: undefined,
     timeField: mlContext.currentIndexPattern.timeFieldName,
+    runtimeMappings: jobCreator.runtimeMappings ?? undefined,
+    // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+    indicesOptions: jobCreator.datafeedConfig.indices_options,
   };
 
   if (

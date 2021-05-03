@@ -75,7 +75,7 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
             defaultMessage="Something went wrong creating the necessary ML jobs. Please ensure all selected log indices exist."
           />
           <EuiSpacer />
-          {errorMessages.map((errorMessage, i) => (
+          {setupStatus.reasons.map((errorMessage, i) => (
             <EuiCallOut key={i} color="danger" iconType="alert" title={errorCalloutTitle}>
               <EuiCode transparentBackground>{errorMessage}</EuiCode>
             </EuiCallOut>

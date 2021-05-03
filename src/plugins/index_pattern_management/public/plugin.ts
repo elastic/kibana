@@ -17,6 +17,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
+import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -25,6 +26,7 @@ export interface IndexPatternManagementSetupDependencies {
 
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;

@@ -77,6 +77,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+              await resetTaskStatus(migratedAlertId);
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
@@ -92,6 +93,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await ensureAlertIsRunning();
               break;
             case 'global_read at space1':
+              await resetTaskStatus(migratedAlertId);
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
@@ -115,6 +117,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               });
               break;
             case 'space_1_all_alerts_none_actions at space1':
+              await resetTaskStatus(migratedAlertId);
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
@@ -140,9 +143,24 @@ export default function alertTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
 
+          async function resetTaskStatus(alertId: string) {
+            // occasionally when the task manager starts running while the alert saved objects
+            // are mid-migration, the task will fail and set its status to "failed". this prevents
+            // the alert from running ever again and downstream tasks that depend on successful alert
+            // execution will fail. this ensures the task status is set to "idle" so the
+            // task manager will continue claiming and executing it.
+            await supertest
+              .put(`${getUrlPrefix(space.id)}/api/alerts_fixture/${alertId}/reset_task_status`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                status: 'idle',
+              })
+              .expect(200);
+          }
+
           async function ensureLegacyAlertHasBeenMigrated(alertId: string) {
             const getResponse = await supertestWithoutAuth
-              .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${alertId}`)
+              .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
               .auth(user.username, user.password);
             expect(getResponse.status).to.eql(200);
           }
@@ -159,12 +177,22 @@ export default function alertTests({ getService }: FtrProviderContext) {
               'pre-7.10.0'
             );
 
+            // Get scheduled task id
+            const getResponse = await supertestWithoutAuth
+              .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
+              .auth(user.username, user.password)
+              .expect(200);
+
             // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 2 seconds,
             // otherwise this test will stall for 5 minutes
             // no other attributes are touched, only runAt, so unless it would have ran when runAt expired, it
             // won't run now
             await supertest
-              .put(`${getUrlPrefix(space.id)}/api/alerts_fixture/${alertId}/reschedule_task`)
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/${
+                  getResponse.body.scheduled_task_id
+                }/reschedule_task`
+              )
               .set('kbn-xsrf', 'foo')
               .send({
                 runAt: getRunAt(2000),

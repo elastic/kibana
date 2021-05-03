@@ -7,10 +7,13 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { getServices } from '../../../kibana_services';
+import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 interface Props {
   component?: React.ComponentType<DocViewRenderProps>;
@@ -44,6 +47,7 @@ export class DocViewerTab extends React.Component<Props, State> {
     return (
       nextProps.renderProps.hit._id !== this.props.renderProps.hit._id ||
       nextProps.id !== this.props.id ||
+      !isEqual(nextProps.renderProps.columns, this.props.renderProps.columns) ||
       nextState.hasError
     );
   }
@@ -72,7 +76,9 @@ export class DocViewerTab extends React.Component<Props, State> {
     const Component = component as any;
     return (
       <I18nProvider>
-        <Component {...renderProps} />
+        <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
+          <Component {...renderProps} />
+        </KibanaContextProvider>
       </I18nProvider>
     );
   }

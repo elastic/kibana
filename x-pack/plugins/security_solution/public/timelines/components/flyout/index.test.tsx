@@ -11,13 +11,13 @@ import React from 'react';
 import '../../../common/mock/react_beautiful_dnd';
 
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
+import { TimelineId } from '../../../../common/types/timeline';
 import { createStore, State } from '../../../common/store';
 import * as timelineActions from '../../store/timeline/actions';
 
@@ -43,7 +43,7 @@ describe('Flyout', () => {
   const { storage } = createSecuritySolutionStorageMock();
   const props = {
     onAppLeave: jest.fn(),
-    timelineId: 'test',
+    timelineId: TimelineId.test,
   };
 
   beforeEach(() => {
@@ -77,7 +77,6 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(
         stateShowIsTrue,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
         kibanaObservable,
         storage
       );

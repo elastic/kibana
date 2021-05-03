@@ -10,6 +10,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
 import { DocProps } from './doc';
 import { Observable } from 'rxjs';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
 
 const mockSearchResult = new Observable();
 
@@ -22,24 +23,110 @@ jest.mock('../../../kibana_services', () => ({
         }),
       },
     },
+    uiSettings: {
+      get: (key: string) => {
+        if (key === mockSearchFieldsFromSource) {
+          return false;
+        }
+      },
+    },
   }),
 }));
 
 describe('Test of <Doc /> helper / hook', () => {
-  test('buildSearchBody', () => {
+  test('buildSearchBody given useNewFieldsApi is false', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as any;
-    const actual = buildSearchBody('1', indexPattern);
+    const actual = buildSearchBody('1', indexPattern, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "_source": true,
         "docvalue_fields": Array [],
+        "fields": undefined,
         "query": Object {
           "ids": Object {
             "values": Array [
               "1",
             ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "script_fields": Array [],
+        "stored_fields": Array [],
+      }
+    `);
+  });
+
+  test('buildSearchBody useNewFieldsApi is true', () => {
+    const indexPattern = {
+      getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
+    } as any;
+    const actual = buildSearchBody('1', indexPattern, true);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "_source": false,
+        "docvalue_fields": Array [],
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": "true",
+          },
+        ],
+        "query": Object {
+          "ids": Object {
+            "values": Array [
+              "1",
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "script_fields": Array [],
+        "stored_fields": Array [],
+      }
+    `);
+  });
+
+  test('buildSearchBody with runtime fields', () => {
+    const indexPattern = {
+      getComputedFields: () => ({
+        storedFields: [],
+        scriptFields: [],
+        docvalueFields: [],
+        runtimeFields: {
+          myRuntimeField: {
+            type: 'double',
+            script: {
+              source: 'emit(10.0)',
+            },
+          },
+        },
+      }),
+    } as any;
+    const actual = buildSearchBody('1', indexPattern, true);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "_source": false,
+        "docvalue_fields": Array [],
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": "true",
+          },
+        ],
+        "query": Object {
+          "ids": Object {
+            "values": Array [
+              "1",
+            ],
+          },
+        },
+        "runtime_mappings": Object {
+          "myRuntimeField": Object {
+            "script": Object {
+              "source": "emit(10.0)",
+            },
+            "type": "double",
           },
         },
         "script_fields": Array [],

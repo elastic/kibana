@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -14,13 +15,12 @@ import {
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
-import { KibanaLogic } from '../../../shared/kibana';
 import { HttpLogic } from '../../../shared/http';
-
-import { Connector } from '../../types';
+import { KibanaLogic } from '../../../shared/kibana';
+import { AppLogic } from '../../app_logic';
 import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
-
 import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
+import { Connector } from '../../types';
 
 interface IOauthApplication {
   name: string;
@@ -151,6 +151,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         const response = await http.put(route, { body });
         actions.setUpdatedName(response);
         setSuccessMessage(ORG_UPDATED_MESSAGE);
+        AppLogic.actions.setOrgName(name);
       } catch (e) {
         flashAPIErrors(e);
       }

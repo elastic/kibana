@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-} from '../../../security_solution/common';
+import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -22,17 +19,31 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
+
 import {
-  migrateAgentToV7100,
+  migrateAgentActionToV7100,
   migrateAgentEventToV7100,
   migrateAgentPolicyToV7100,
+  migrateAgentToV7100,
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
-  migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
-import { migrateAgentToV7120, migrateAgentPolicyToV7120 } from './migrations/to_v7_12_0';
+
+import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
+
+import {
+  migrateAgentPolicyToV7120,
+  migrateAgentToV7120,
+  migratePackagePolicyToV7120,
+} from './migrations/to_v7_12_0';
+import {
+  migratePackagePolicyToV7130,
+  migrateSettingsToV7130,
+  migrateOutputToV7130,
+} from './migrations/to_v7_13_0';
 
 /*
  * Saved object types and mappings
@@ -52,15 +63,14 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        agent_auto_upgrade: { type: 'keyword' },
-        package_auto_upgrade: { type: 'keyword' },
-        kibana_urls: { type: 'keyword' },
-        kibana_ca_sha256: { type: 'keyword' },
+        fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
+        has_seen_fleet_migration_notice: { type: 'boolean', index: false },
       },
     },
     migrations: {
       '7.10.0': migrateSettingsToV7100,
+      '7.13.0': migrateSettingsToV7130,
     },
   },
   [AGENT_SAVED_OBJECT_TYPE]: {
@@ -123,6 +133,8 @@ const getSavedObjectTypes = (
       '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
     },
   },
+  // TODO: Remove this saved object type. Core will drop any saved objects of
+  // this type during migrations. See https://github.com/elastic/kibana/issues/91869
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
     name: AGENT_EVENT_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -161,6 +173,7 @@ const getSavedObjectTypes = (
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_default_fleet_server: { type: 'boolean' },
         is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
@@ -168,6 +181,7 @@ const getSavedObjectTypes = (
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
+        is_preconfigured: { type: 'keyword' },
       },
     },
     migrations: {
@@ -213,11 +227,12 @@ const getSavedObjectTypes = (
         is_default: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
-        fleet_enroll_username: { type: 'binary' },
-        fleet_enroll_password: { type: 'binary' },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
       },
+    },
+    migrations: {
+      '7.13.0': migrateOutputToV7130,
     },
   },
   [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
@@ -280,6 +295,7 @@ const getSavedObjectTypes = (
       '7.10.0': migratePackagePolicyToV7100,
       '7.11.0': migratePackagePolicyToV7110,
       '7.12.0': migratePackagePolicyToV7120,
+      '7.13.0': migratePackagePolicyToV7130,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -346,6 +362,19 @@ const getSavedObjectTypes = (
       },
     },
   },
+  [PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE]: {
+    name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        id: { type: 'keyword' },
+      },
+    },
+  },
 });
 
 export function registerSavedObjects(
@@ -374,19 +403,6 @@ export function registerEncryptedSavedObjects(
       'updated_at',
       'expire_at',
       'active',
-    ]),
-  });
-  encryptedSavedObjects.registerType({
-    type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['fleet_enroll_username', 'fleet_enroll_password']),
-    attributesToExcludeFromAAD: new Set([
-      'name',
-      'type',
-      'is_default',
-      'hosts',
-      'ca_sha256',
-      'config',
-      'config_yaml',
     ]),
   });
   encryptedSavedObjects.registerType({

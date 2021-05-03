@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../server/utils/queries';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
@@ -31,9 +31,7 @@ export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
         },
         aggs: {
           services: {
-            filter: {
-              range: rangeFilter(start, end),
-            },
+            filter: rangeQuery(start, end)[0],
             aggs: {
               mostTraffic: {
                 terms: {
@@ -51,11 +49,16 @@ export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
 
     const response = await apmEventClient.search(params);
     return {
+      indices: setup.indices['apm_oss.transactionIndices']!,
       hasData: response.hits.total.value > 0,
       serviceName:
         response.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
     };
   } catch (e) {
-    return { hasData: false, serviceName: undefined };
+    return {
+      hasData: false,
+      serviceName: undefined,
+      indices: setup.indices['apm_oss.transactionIndices']!,
+    };
   }
 }

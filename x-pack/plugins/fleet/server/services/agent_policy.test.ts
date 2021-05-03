@@ -6,9 +6,11 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+
+import type { AgentPolicy, NewAgentPolicy, Output } from '../types';
+
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
-import type { AgentPolicy, NewAgentPolicy, Output } from '../types';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
@@ -26,7 +28,7 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
         {
           id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
           attributes: {
-            kibana_urls: ['http://localhost:5603'],
+            fleet_server_hosts: ['http://fleetserver:8220'],
           },
           type: 'ingest_manager_settings',
           score: 1,
@@ -169,10 +171,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {
@@ -204,10 +203,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {
@@ -240,10 +236,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {

@@ -926,7 +926,7 @@ describe('import rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot send in an array of threat that are missing "technique"', () => {
+  test('You can send in an array of threat that are missing "technique"', () => {
     const payload: Omit<ImportRulesSchema, 'threat'> & {
       threat: Array<Partial<Omit<ImportRulesSchema['threat'], 'technique'>>>;
     } = {
@@ -946,10 +946,21 @@ describe('import rules schema', () => {
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,technique"',
-    ]);
-    expect(message.schema).toEqual({});
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: ImportRulesSchemaDecoded = {
+      ...getImportRulesSchemaDecodedMock(),
+      threat: [
+        {
+          framework: 'fake',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+        },
+      ],
+    };
+    expect(message.schema).toEqual(expected);
   });
 
   test('You can optionally send in an array of false positives', () => {

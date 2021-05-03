@@ -32,15 +32,19 @@ import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
-type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>[0];
+type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
 
 interface Props {
   status: FETCH_STATUS;
-  data: Config[];
+  configurations: Config[];
   refetch: () => void;
 }
 
-export function AgentConfigurationList({ status, data, refetch }: Props) {
+export function AgentConfigurationList({
+  status,
+  configurations,
+  refetch,
+}: Props) {
   const { core } = useApmPluginContext();
   const canSave = core.application.capabilities.apm.save;
   const { basePath } = core.http;
@@ -60,14 +64,6 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
             { defaultMessage: 'No configurations found.' }
           )}
         </h2>
-      }
-      body={
-        <p>
-          {i18n.translate('xpack.apm.agentConfig.configTable.emptyPromptText', {
-            defaultMessage:
-              "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration.",
-          })}
-        </p>
       }
       actions={
         <EuiToolTip
@@ -121,7 +117,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
     return failurePrompt;
   }
 
-  if (status === FETCH_STATUS.SUCCESS && isEmpty(data)) {
+  if (status === FETCH_STATUS.SUCCESS && isEmpty(configurations)) {
     return emptyStatePrompt;
   }
 
@@ -239,7 +235,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
       <ManagedTable
         noItemsMessage={<LoadingStatePrompt />}
         columns={columns}
-        items={data}
+        items={configurations}
         initialSortField="service.name"
         initialSortDirection="asc"
         initialPageSize={20}

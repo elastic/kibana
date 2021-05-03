@@ -65,6 +65,30 @@ describe('ContextContainer', () => {
         `"Cannot register context for unknown plugin: Symbol(unknown)"`
       );
     });
+
+    it('reports a TS error if returned contract does not satisfy the Context interface', async () => {
+      const contextContainer = new ContextContainer(plugins, coreId);
+      await expect(() =>
+        contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+          pluginA,
+          'ctxFromA',
+          // @ts-expect-error expected string, returned number
+          async () => 1
+        )
+      ).not.toThrow();
+    });
+
+    it('reports a TS error if registers a context for unknown property name', async () => {
+      const contextContainer = new ContextContainer(plugins, coreId);
+      await expect(() =>
+        // @ts-expect-error expects ctxFromB, but given ctxFromC
+        contextContainer.registerContext<{ ctxFromB: string; core: any }, 'ctxFromC'>(
+          pluginB,
+          'ctxFromC',
+          async () => 1
+        )
+      ).not.toThrow();
+    });
   });
 
   describe('context building', () => {

@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import { RequestHandler, Logger } from 'kibana/server';
+import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { validateTree } from '../../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 
-export function handleTree(
-  log: Logger
-): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
+export function handleTree(): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
   return async (context, req, res) => {
-    try {
-      const client = context.core.elasticsearch.client;
-      const fetcher = new Fetcher(client);
-      const body = await fetcher.tree(req.body);
-      return res.ok({
-        body,
-      });
-    } catch (err) {
-      log.warn(err);
-      return res.internalError({ body: 'Error retrieving tree.' });
-    }
+    const client = context.core.elasticsearch.client;
+    const fetcher = new Fetcher(client);
+    const body = await fetcher.tree(req.body);
+    return res.ok({
+      body,
+    });
   };
 }

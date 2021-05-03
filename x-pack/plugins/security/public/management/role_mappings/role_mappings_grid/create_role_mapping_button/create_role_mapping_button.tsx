@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ScopedHistory } from 'kibana/public';
-import { EDIT_ROLE_MAPPING_PATH } from '../../../management_urls';
+import type { ScopedHistory } from 'src/core/public';
+
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { EDIT_ROLE_MAPPING_PATH } from '../../../management_urls';
 
 interface CreateRoleMappingButtonProps {
   history: ScopedHistory;

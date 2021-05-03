@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { authenticationMock } from './authentication/index.mock';
-import { createSessionTimeoutMock } from './session/session_timeout.mock';
 import { licenseMock } from '../common/licensing/index.mock';
+import type { MockAuthenticatedUserProps } from '../common/model/authenticated_user.mock';
+import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
+import { authenticationMock } from './authentication/index.mock';
 import { navControlServiceMock } from './nav_control/index.mock';
+import { createSessionTimeoutMock } from './session/session_timeout.mock';
 
 function createSetupMock() {
   return {
@@ -19,6 +21,7 @@ function createSetupMock() {
 }
 function createStartMock() {
   return {
+    authc: authenticationMock.createStart(),
     navControlService: navControlServiceMock.createStart(),
   };
 }
@@ -26,4 +29,6 @@ function createStartMock() {
 export const securityMock = {
   createSetup: createSetupMock,
   createStart: createStartMock,
+  createMockAuthenticatedUser: (props: MockAuthenticatedUserProps = {}) =>
+    mockAuthenticatedUser(props),
 };

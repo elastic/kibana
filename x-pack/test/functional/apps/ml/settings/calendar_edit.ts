@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
 
       await asyncForEach(jobConfigs, async (jobConfig) => {
+        // @ts-expect-error not full interface
         await ml.api.createAnomalyDetectionJob(jobConfig);
       });
 
@@ -34,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         job_ids: jobConfigs.map((c) => c.job_id),
         description: 'Test calendar',
       });
+      // @ts-expect-error not full interface
       await ml.api.createCalendarEvents(calendarId, testEvents);
 
       await ml.testResources.setKibanaTimeZoneToUTC();

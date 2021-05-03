@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { mergedConfiguredSources } from '../../../../__mocks__/content_sources.mock';
+
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiPanel } from '@elastic/eui';
-
-import { mergedConfiguredSources } from '../../../../__mocks__/content_sources.mock';
 
 import { ConfiguredSourcesList } from './configured_sources_list';
 

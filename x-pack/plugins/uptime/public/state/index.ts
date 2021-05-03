@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { compose, createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 import { rootEffect } from './effects';
 import { rootReducer } from './reducers';
 
 export type AppState = ReturnType<typeof rootReducer>;
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
 const sagaMW = createSagaMiddleware();
 
-export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMW)));
+export const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(sagaMW)));
 
 sagaMW.run(rootEffect);

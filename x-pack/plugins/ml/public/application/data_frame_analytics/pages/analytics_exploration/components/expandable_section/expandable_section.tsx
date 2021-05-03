@@ -7,7 +7,7 @@
 
 import './expandable_section.scss';
 
-import React, { FC, ReactNode, useCallback } from 'react';
+import React, { FC, ReactNode, useCallback, useMemo } from 'react';
 
 import {
   EuiBadge,
@@ -58,11 +58,15 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   docsLink,
   urlStateKey,
 }) => {
-  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
+  const overrides = useMemo(
+    () => (isExpandedDefault !== undefined ? { [urlStateKey]: isExpandedDefault } : undefined),
+    [urlStateKey, isExpandedDefault]
+  );
+  const [pageUrlState, setPageUrlState] = useExplorationUrlState(overrides);
 
   const isExpanded =
     isExpandedDefault !== undefined &&
-    pageUrlState[urlStateKey] === getDefaultExplorationPageUrlState()[urlStateKey]
+    pageUrlState[urlStateKey] === getDefaultExplorationPageUrlState(overrides)[urlStateKey]
       ? isExpandedDefault
       : pageUrlState[urlStateKey];
 

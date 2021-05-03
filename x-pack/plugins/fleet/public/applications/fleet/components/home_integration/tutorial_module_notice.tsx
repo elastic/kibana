@@ -8,7 +8,8 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
-import { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
+import type { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
+
 import { useGetPackages, useLink, useCapabilities } from '../../hooks';
 import { pkgKeyFromPackageInfo } from '../../services/pkg_key_from_package_info';
 
@@ -43,7 +44,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
                 ),
                 availableAsIntegrationLink: (
                   <EuiLink
-                    href={getHref('integration_details', {
+                    href={getHref('integration_details_overview', {
                       pkgkey: pkgKeyFromPackageInfo(pkgInfo),
                     })}
                   >

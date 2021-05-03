@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Execution via MSSQL xp_cmdshell Stored Procedure",
   "query": "event.category:process and event.type:(start or process_started) and process.name:cmd.exe and process.parent.name:sqlservr.exe",
   "risk_score": 73,
@@ -39,6 +40,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

@@ -7,8 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import type { Datatable, DatatableColumnMeta } from 'src/plugins/expressions';
+import {
+  EuiDataGridColumn,
+  EuiDataGridColumnCellActionProps,
+  EuiListGroupItemProps,
+} from '@elastic/eui';
+import type { Datatable, DatatableColumn, DatatableColumnMeta } from 'src/plugins/expressions';
 import type { FormatFactory } from '../../types';
 import { ColumnConfig } from './table_basic';
 
@@ -20,6 +24,10 @@ export const createGridColumns = (
     value: unknown,
     colIndex: number,
     rowIndex: number,
+    negate?: boolean
+  ) => void,
+  handleTransposedColumnClick: (
+    bucketValues: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>,
     negate?: boolean
   ) => void,
   isReadOnly: boolean,
@@ -135,9 +143,63 @@ export const createGridColumns = (
         ]
       : undefined;
 
-    const column = columnConfig.columns.find(({ columnId }) => columnId === field);
-    const initialWidth = column?.width;
-    const isHidden = column?.hidden;
+    const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
+    const isTransposed = Boolean(columnArgs?.originalColumnId);
+    const initialWidth = columnArgs?.width;
+    const isHidden = columnArgs?.hidden;
+    const originalColumnId = columnArgs?.originalColumnId;
+
+    const additionalActions: EuiListGroupItemProps[] = [];
+
+    if (!isReadOnly) {
+      additionalActions.push({
+        color: 'text',
+        size: 'xs',
+        onClick: () => onColumnResize({ columnId: originalColumnId || field, width: undefined }),
+        iconType: 'empty',
+        label: i18n.translate('xpack.lens.table.resize.reset', {
+          defaultMessage: 'Reset width',
+        }),
+        'data-test-subj': 'lensDatatableResetWidth',
+        isDisabled: initialWidth == null,
+      });
+      if (!isTransposed) {
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => onColumnHide({ columnId: originalColumnId || field }),
+          iconType: 'eyeClosed',
+          label: i18n.translate('xpack.lens.table.hide.hideLabel', {
+            defaultMessage: 'Hide',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+          isDisabled: !isHidden && visibleColumns.length <= 1,
+        });
+      } else if (columnArgs?.bucketValues) {
+        const bucketValues = columnArgs?.bucketValues;
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, false),
+          iconType: 'plusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
+            defaultMessage: 'Filter for column',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
+
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, true),
+          iconType: 'minusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
+            defaultMessage: 'Filter out column',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
+      }
+    }
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
@@ -152,42 +214,17 @@ export const createGridColumns = (
           ? false
           : {
               label: i18n.translate('xpack.lens.table.sort.ascLabel', {
-                defaultMessage: 'Sort asc',
+                defaultMessage: 'Sort ascending',
               }),
             },
         showSortDesc: isReadOnly
           ? false
           : {
               label: i18n.translate('xpack.lens.table.sort.descLabel', {
-                defaultMessage: 'Sort desc',
+                defaultMessage: 'Sort descending',
               }),
             },
-        additional: isReadOnly
-          ? undefined
-          : [
-              {
-                color: 'text',
-                size: 'xs',
-                onClick: () => onColumnResize({ columnId: field, width: undefined }),
-                iconType: 'empty',
-                label: i18n.translate('xpack.lens.table.resize.reset', {
-                  defaultMessage: 'Reset width',
-                }),
-                'data-test-subj': 'lensDatatableResetWidth',
-                isDisabled: initialWidth == null,
-              },
-              {
-                color: 'text',
-                size: 'xs',
-                onClick: () => onColumnHide({ columnId: field }),
-                iconType: 'eyeClosed',
-                label: i18n.translate('xpack.lens.table.hide.hideLabel', {
-                  defaultMessage: 'Hide',
-                }),
-                'data-test-subj': 'lensDatatableHide',
-                isDisabled: !isHidden && visibleColumns.length <= 1,
-              },
-            ],
+        additional: additionalActions,
       },
     };
 

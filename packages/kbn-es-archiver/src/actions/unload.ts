@@ -9,8 +9,9 @@
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import {
@@ -31,7 +32,7 @@ export async function unloadAction({
   kbnClient,
 }: {
   name: string;
-  client: Client;
+  client: KibanaClient;
   dataDir: string;
   log: ToolingLog;
   kbnClient: KbnClient;

@@ -71,6 +71,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const showUptimeLink =
       inventoryModel.crosslinkSupport.uptime &&
       (['pod', 'container'].includes(nodeType) || node.ip);
+    const showCreateAlertLink = uiCapabilities?.infrastructure?.save;
 
     const inventoryId = useMemo(() => {
       if (nodeType === 'host') {
@@ -155,10 +156,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
         defaultMessage: 'Create alert',
       }),
-      style: { color: theme?.eui.euiLinkColor || '#006BB4', fontWeight: 500, padding: 0 },
       onClick: () => {
         setFlyoutVisible(true);
       },
+      isDisabled: !showCreateAlertLink,
     };
 
     return (

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SpacesManager } from '.';
-import { coreMock } from 'src/core/public/mocks';
 import { nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { SpacesManager } from './spaces_manager';
 
 describe('SpacesManager', () => {
   describe('#constructor', () => {

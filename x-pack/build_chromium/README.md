@@ -12,8 +12,8 @@ which is where we have two machines provisioned for the Linux and Windows
 builds. Mac builds can be achieved locally, and are a great place to start to
 gain familiarity.
 
-**NOTE:** Linux builds should be done in Ubuntu on x86 architecture. ARM builds
-are created in x86. CentOS is not supported for building Chromium.
+**NOTE:** Linux builds should be done in Ubuntu on x64 architecture. ARM builds
+are created in x64 using cross-compiling. CentOS is not supported for building Chromium.
 
 1. Login to our GCP instance [here using your okta credentials](https://console.cloud.google.com/).
 2. Click the "Compute Engine" tab.
@@ -27,25 +27,32 @@ are created in x86. CentOS is not supported for building Chromium.
     - python2 (`python` must link to `python2`)
     - lsb_release
     - tmux is recommended in case your ssh session is interrupted
-6. Copy the entire `build_chromium` directory into a GCP storage bucket, so you can copy the scripts into the instance and run them.
+    - "Cloud API access scopes": must have **read / write** scope for the Storage API
+6. Copy the entire `build_chromium` directory from the `headless_shell_staging` bucket. To do this, use `gsutil rsync`:
+   ```sh
+   # This shows a preview of what would change by synchronizing the source scripts with the destination GCS bucket.
+   # Remove the `-n` flag to enact the changes
+   gsutil -m rsync -n -r x-pack/build_chromium gs://headless_shell_staging/build_chromium
+   ```
 
 ## Build Script Usage
 
-```
+These commands show how to set up an environment to build:
+```sh
 # Allow our scripts to use depot_tools commands
 export PATH=$HOME/chromium/depot_tools:$PATH
 
 # Create a dedicated working directory for this directory of Python scripts.
 mkdir ~/chromium && cd ~/chromium
 
-# Copy the scripts from the Kibana repo to use them conveniently in the working directory
-gsutil cp -r gs://my-bucket/build_chromium .
+# Copy the scripts from the Kibana team's GCS bucket
+gsutil cp -r gs://headless_shell_staging/build_chromium .
 
 # Install the OS packages, configure the environment, download the chromium source (25GB)
-python ./build_chromium/init.sh [arch_name]
+python ./build_chromium/init.py [arch_name]
 
-# Run the build script with the path to the chromium src directory, the git commit id
-python ./build_chromium/build.py <commit_id> x86
+# Run the build script with the path to the chromium src directory, the git commit hash
+python ./build_chromium/build.py <commit_id> x64
 
 # OR You can build for ARM
 python ./build_chromium/build.py <commit_id> arm64
@@ -55,16 +62,14 @@ python ./build_chromium/build.py <commit_id> arm64
 the Chromium repo to be cloned successfully. If checking out the Chromium fails
 with "early EOF" errors, the instance could be low on memory or disk space.
 
-## Getting the Commit ID
-The `build.py` script requires a commit ID of the Chromium repo. Getting `<commit_id>` can be tricky. The best technique seems to be:
-1. Create a temporary working directory and intialize yarn
-2. `yarn add puppeteer # install latest puppeter`
-3. Look through Puppeteer documentation and Changelogs to find information
-about where the "chromium revision" is located in the Puppeteer code. The code
-containing it might not be distributed in the node module.
-    - Example: https://github.com/puppeteer/puppeteer/blob/b549256/src/revisions.ts
-4. Use `https://crrev.com` and look up the revision and find the git commit info.
-    - Example: http://crrev.com/818858 leads to the git commit e62cb7e3fc7c40548cef66cdf19d270535d9350b
+## Getting the Commit Hash
+If you need to bump the version of Puppeteer, you need to get a new git commit hash for Chromium that corresponds to the Puppeteer version.
+```
+node x-pack/dev-tools/chromium_version.js [PuppeteerVersion]
+```
+
+When bumping the Puppeteer version, make sure you also update the `.chromium-commit` file with the commit hash
+for the current Chromium build, so we'll be able to construct a build pipeline for each OS (coming soon!).
 
 ## Build args
 
@@ -109,7 +114,7 @@ use the Kibana `build.py` script (in this directory).
 
 It's recommended that you create a working directory for the chromium source
 code and all the build tools, and run the commands from there:
-```
+```sh
 mkdir ~/chromium && cd ~/chromium
 cp -r ~/path/to/kibana/x-pack/build_chromium .
 python ./build_chromium/init.sh [arch_name]
@@ -143,7 +148,7 @@ The more cores the better, as the build makes effective use of each. For Linux, 
 
 ## Initializing each VM / environment
 
-In a VM, you'll want to use the init scripts to to initialize each environment.
+In a VM, you'll want to use the init scripts to initialize each environment.
 On Mac OS you'll need to install XCode and accept the license agreement.
 
 Create the build folder:
@@ -218,6 +223,7 @@ In the case of Windows, you can use IE to open `http://localhost:9221` and see i
 
 The following links provide helpful context about how the Chromium build works, and its prerequisites:
 
+- Tools for Chromium version information: https://omahaproxy.appspot.com/
 - https://www.chromium.org/developers/how-tos/get-the-code/working-with-release-branches
 - https://chromium.googlesource.com/chromium/src/+/HEAD/docs/windows_build_instructions.md
 - https://chromium.googlesource.com/chromium/src/+/HEAD/docs/mac_build_instructions.md

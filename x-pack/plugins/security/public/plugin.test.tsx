@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
 import BroadcastChannel from 'broadcast-channel';
-import { CoreSetup } from 'src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { mockSecurityOssPlugin } from '../../../../src/plugins/security_oss/public/mocks';
-import { SessionTimeout } from './session';
-import { PluginStartDependencies, SecurityPlugin } from './plugin';
+import { Observable } from 'rxjs';
 
-import { coreMock } from '../../../../src/core/public/mocks';
-import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
+import type { CoreSetup } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import { managementPluginMock } from 'src/plugins/management/public/mocks';
+import { mockSecurityOssPlugin } from 'src/plugins/security_oss/public/mocks';
+
+import type { FeaturesPluginStart } from '../../features/public';
 import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
-import { FeaturesPluginStart } from '../../features/public';
+import type { PluginStartDependencies } from './plugin';
+import { SecurityPlugin } from './plugin';
+import { SessionTimeout } from './session';
 
 describe('Security Plugin', () => {
   beforeAll(() => {
@@ -101,6 +103,10 @@ describe('Security Plugin', () => {
           features: {} as FeaturesPluginStart,
         })
       ).toEqual({
+        authc: {
+          getCurrentUser: expect.any(Function),
+          areAPIKeysEnabled: expect.any(Function),
+        },
         navControlService: {
           getUserMenuLinks$: expect.any(Function),
           addUserMenuLinks: expect.any(Function),

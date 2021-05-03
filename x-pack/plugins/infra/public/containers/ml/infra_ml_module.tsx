@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { DatasetFilter } from '../../../common/infra_ml';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { useModuleStatus } from './infra_ml_module_status';
@@ -52,7 +51,7 @@ export const useInfraMLModule = <JobType extends string>({
         selectedIndices: string[],
         start: number | undefined,
         end: number | undefined,
-        datasetFilter: DatasetFilter,
+        filter: string,
         partitionField?: string
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
@@ -60,7 +59,7 @@ export const useInfraMLModule = <JobType extends string>({
           {
             start,
             end,
-            datasetFilter,
+            filter,
             moduleSourceConfiguration: {
               indices: selectedIndices,
               sourceId,
@@ -114,13 +113,13 @@ export const useInfraMLModule = <JobType extends string>({
       selectedIndices: string[],
       start: number | undefined,
       end: number | undefined,
-      datasetFilter: DatasetFilter,
+      filter: string,
       partitionField?: string
     ) => {
       dispatchModuleStatus({ type: 'startedSetup' });
       cleanUpModule()
         .then(() => {
-          setUpModule(selectedIndices, start, end, datasetFilter, partitionField);
+          setUpModule(selectedIndices, start, end, filter, partitionField);
         })
         .catch(() => {
           dispatchModuleStatus({ type: 'failedSetup' });

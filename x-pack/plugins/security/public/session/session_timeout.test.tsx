@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
 import BroadcastChannel from 'broadcast-channel';
-import { SessionTimeout } from './session_timeout';
+
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
 import { createSessionExpiredMock } from './session_expired.mock';
-import { mountWithIntl } from '@kbn/test/jest';
+import { SessionTimeout } from './session_timeout';
 
 jest.useFakeTimers();
 
@@ -110,6 +112,7 @@ describe('Session Timeout', () => {
 
   afterEach(async () => {
     jest.clearAllMocks();
+    jest.unmock('broadcast-channel');
     sessionTimeout.stop();
   });
 
@@ -120,22 +123,42 @@ describe('Session Timeout', () => {
 
   describe('Lifecycle', () => {
     test(`starts and initializes on a non-anonymous path`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['channel']).not.toBeUndefined();
       expect(http.fetch).toHaveBeenCalledTimes(1);
     });
 
+    test(`starts and initializes if the broadcast channel fails to load`, async () => {
+      jest.mock('broadcast-channel', () => {
+        throw new Error('Unable to load broadcast channel!');
+      });
+      const consoleSpy = jest.spyOn(console, 'warn');
+
+      sessionTimeout.start();
+      await nextTick();
+      // eslint-disable-next-line dot-notation
+      expect(sessionTimeout['channel']).toBeUndefined();
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(consoleSpy).toHaveBeenCalledTimes(1);
+      expect(consoleSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+        `"Failed to load broadcast channel. Session management will not be kept in sync when multiple tabs are loaded."`
+      );
+    });
+
     test(`starts and does not initialize on an anonymous path`, async () => {
       http.anonymousPaths.isAnonymous.mockReturnValue(true);
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['channel']).toBeUndefined();
       expect(http.fetch).not.toHaveBeenCalled();
     });
 
     test(`stops`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       // eslint-disable-next-line dot-notation
       const close = jest.fn(sessionTimeout['channel']!.close);
       // eslint-disable-next-line dot-notation
@@ -155,7 +178,8 @@ describe('Session Timeout', () => {
         ...defaultSessionInfo,
         idleTimeoutExpiration: now + 5_000_000_000,
       });
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       // Advance timers far enough to call intermediate `setTimeout` multiple times, but before any
       // of the timers is supposed to be triggered.
@@ -182,7 +206,8 @@ describe('Session Timeout', () => {
     });
 
     test(`handles success`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       expect(http.fetch).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line dot-notation
@@ -193,7 +218,8 @@ describe('Session Timeout', () => {
     test(`handles error`, async () => {
       const mockErrorResponse = new Error('some-error');
       http.fetch.mockRejectedValue(mockErrorResponse);
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       expect(http.fetch).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line dot-notation
@@ -204,7 +230,8 @@ describe('Session Timeout', () => {
 
   describe('warning toast', () => {
     test(`shows idle timeout warning toast`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -216,7 +243,8 @@ describe('Session Timeout', () => {
         ...defaultSessionInfo,
         idleTimeoutExpiration: now + 5_000_000_000,
       });
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(5_000_000_000 - 66 * 1000);
@@ -234,7 +262,8 @@ describe('Session Timeout', () => {
         provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -248,7 +277,8 @@ describe('Session Timeout', () => {
         lifespanExpiration: now + 5_000_000_000,
       };
       http.fetch.mockResolvedValue(sessionInfo);
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(5_000_000_000 - 66 * 1000);
@@ -259,7 +289,8 @@ describe('Session Timeout', () => {
     });
 
     test(`extend only results in an HTTP call if a warning is shown`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       await sessionTimeout.extend('/foo');
@@ -285,7 +316,8 @@ describe('Session Timeout', () => {
         provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -297,7 +329,8 @@ describe('Session Timeout', () => {
     });
 
     test(`extend hides displayed warning toast`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -317,7 +350,8 @@ describe('Session Timeout', () => {
     });
 
     test(`extend does nothing for session-related routes`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -331,7 +365,8 @@ describe('Session Timeout', () => {
     });
 
     test(`checks for updated session info before the warning displays`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we check for updated session info 1 second before the warning is shown
@@ -341,7 +376,8 @@ describe('Session Timeout', () => {
     });
 
     test('clicking "extend" causes a new HTTP request (which implicitly extends the session)', async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -364,7 +400,8 @@ describe('Session Timeout', () => {
         lifespanExpiration: null,
         provider: { type: 'basic', name: 'basic1' },
       });
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       expect(http.fetch).toHaveBeenCalled();
 
       jest.advanceTimersByTime(0);
@@ -374,7 +411,8 @@ describe('Session Timeout', () => {
 
   describe('session expiration', () => {
     test(`expires the session 5 seconds before it really expires`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       jest.advanceTimersByTime(114 * 1000);
       expect(sessionExpired.logout).not.toHaveBeenCalled();
@@ -389,7 +427,8 @@ describe('Session Timeout', () => {
         idleTimeoutExpiration: now + 5_000_000_000,
       });
 
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       jest.advanceTimersByTime(5_000_000_000 - 6000);
       expect(sessionExpired.logout).not.toHaveBeenCalled();
@@ -399,7 +438,8 @@ describe('Session Timeout', () => {
     });
 
     test(`extend delays the expiration`, async () => {
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       const elapsed = 114 * 1000;
@@ -436,7 +476,8 @@ describe('Session Timeout', () => {
         lifespanExpiration: null,
         provider: { type: 'basic', name: 'basic1' },
       });
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       jest.advanceTimersByTime(0);
       expect(sessionExpired.logout).toHaveBeenCalled();
@@ -444,7 +485,8 @@ describe('Session Timeout', () => {
 
     test(`'null' sessionTimeout never logs you out`, async () => {
       http.fetch.mockResolvedValue({ now, idleTimeoutExpiration: null, lifespanExpiration: null });
-      await sessionTimeout.start();
+      sessionTimeout.start();
+      await nextTick();
 
       jest.advanceTimersByTime(Number.MAX_VALUE);
       expect(sessionExpired.logout).not.toHaveBeenCalled();

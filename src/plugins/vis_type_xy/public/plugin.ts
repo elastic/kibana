@@ -18,7 +18,6 @@ import {
   setDataActions,
   setFormatService,
   setThemeService,
-  setTimefilter,
   setUISettings,
   setDocLinks,
   setPalettesService,
@@ -80,7 +79,6 @@ export class VisTypeXyPlugin
   public start(core: CoreStart, { data }: VisTypeXyPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
-    setTimefilter(data.query.timefilter.timefilter);
     setDocLinks(core.docLinks);
 
     return {};

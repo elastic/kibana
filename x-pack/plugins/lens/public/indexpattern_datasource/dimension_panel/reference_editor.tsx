@@ -35,6 +35,7 @@ import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { VisualizationDimensionGroupConfig } from '../../types';
 
 const operationPanels = getOperationDisplay();
 
@@ -48,6 +49,7 @@ export interface ReferenceEditorProps {
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
+  dimensionGroups: VisualizationDimensionGroupConfig[];
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -68,6 +70,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     selectionStyle,
     dateRange,
     labelAppend,
+    dimensionGroups,
     ...services
   } = props;
 
@@ -168,6 +171,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
           op: operationType,
           indexPattern: currentIndexPattern,
           field: currentIndexPattern.getFieldByName(column.sourceField),
+          visualizationGroups: dimensionGroups,
         })
       );
     } else {
@@ -185,6 +189,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
           op: operationType,
           indexPattern: currentIndexPattern,
           field: possibleField,
+          visualizationGroups: dimensionGroups,
         })
       );
     }
@@ -257,7 +262,11 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                 onChange={(choices) => {
                   if (choices.length === 0) {
                     updateLayer(
-                      deleteColumn({ layer, columnId, indexPattern: currentIndexPattern })
+                      deleteColumn({
+                        layer,
+                        columnId,
+                        indexPattern: currentIndexPattern,
+                      })
                     );
                     return;
                   }
@@ -298,7 +307,13 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               incompleteOperation={incompleteOperation}
               markAllFieldsCompatible={selectionStyle === 'field'}
               onDeleteColumn={() => {
-                updateLayer(deleteColumn({ layer, columnId, indexPattern: currentIndexPattern }));
+                updateLayer(
+                  deleteColumn({
+                    layer,
+                    columnId,
+                    indexPattern: currentIndexPattern,
+                  })
+                );
               }}
               onChoose={(choice) => {
                 updateLayer(
@@ -308,6 +323,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                     indexPattern: currentIndexPattern,
                     op: choice.operationType,
                     field: currentIndexPattern.getFieldByName(choice.field),
+                    visualizationGroups: dimensionGroups,
                   })
                 );
               }}

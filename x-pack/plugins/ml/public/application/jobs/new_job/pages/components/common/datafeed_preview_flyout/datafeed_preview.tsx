@@ -21,6 +21,8 @@ import { CombinedJob } from '../../../../../../../../common/types/anomaly_detect
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { mlJobService } from '../../../../../../services/job_service';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../../common/util/job_utils';
+import { isPopulatedObject } from '../../../../../../../../common/util/object_utils';
+import { isMultiBucketAggregate } from '../../../../../../../../common/types/es_client';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
@@ -64,9 +66,12 @@ export const DatafeedPreview: FC<{
         const resp = await mlJobService.searchPreview(combinedJob);
         let data = resp.hits.hits;
         // the first item under aggregations can be any name
-        if (typeof resp.aggregations === 'object' && Object.keys(resp.aggregations).length > 0) {
+        if (isPopulatedObject(resp.aggregations)) {
           const accessor = Object.keys(resp.aggregations)[0];
-          data = resp.aggregations[accessor].buckets.slice(0, ML_DATA_PREVIEW_COUNT);
+          const aggregate = resp.aggregations[accessor];
+          if (isMultiBucketAggregate(aggregate)) {
+            data = aggregate.buckets.slice(0, ML_DATA_PREVIEW_COUNT);
+          }
         }
 
         setPreviewJsonString(JSON.stringify(data, null, 2));

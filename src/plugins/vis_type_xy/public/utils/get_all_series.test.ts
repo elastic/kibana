@@ -112,7 +112,7 @@ const myltipleYAspects = [
   },
 ];
 
-describe('getFilterClickData', () => {
+describe('getAllSeries', () => {
   it('returns empty array if splitAccessors is undefined', () => {
     const splitAccessors = undefined;
     const series = getAllSeries(rowsNoSplitSeries, splitAccessors, yAspects);

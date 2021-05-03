@@ -21,7 +21,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiSpacer,
-  EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
@@ -238,42 +237,40 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.deleteSelectedConfirmModal.title"
-              defaultMessage="Delete {itemCount} {entityName}?"
-              values={{
-                itemCount: this.state.selectedIds.length,
-                entityName:
-                  this.state.selectedIds.length === 1
-                    ? this.props.entityName
-                    : this.props.entityNamePlural,
-              }}
-            />
-          }
-          buttonColor="danger"
-          onCancel={this.closeDeleteModal}
-          onConfirm={this.deleteSelectedItems}
-          cancelButtonText={
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={deleteButton}
-          defaultFocusedButton="cancel"
-        >
-          <p>
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.deleteConfirmModalDescription"
-              defaultMessage="You can't recover deleted {entityNamePlural}."
-              values={{ entityNamePlural: this.props.entityNamePlural }}
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="kibana-react.tableListView.listing.deleteSelectedConfirmModal.title"
+            defaultMessage="Delete {itemCount} {entityName}?"
+            values={{
+              itemCount: this.state.selectedIds.length,
+              entityName:
+                this.state.selectedIds.length === 1
+                  ? this.props.entityName
+                  : this.props.entityNamePlural,
+            }}
+          />
+        }
+        buttonColor="danger"
+        onCancel={this.closeDeleteModal}
+        onConfirm={this.deleteSelectedItems}
+        cancelButtonText={
+          <FormattedMessage
+            id="kibana-react.tableListView.listing.deleteSelectedItemsConfirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={deleteButton}
+        defaultFocusedButton="cancel"
+      >
+        <p>
+          <FormattedMessage
+            id="kibana-react.tableListView.listing.deleteConfirmModalDescription"
+            defaultMessage="You can't recover deleted {entityNamePlural}."
+            values={{ entityNamePlural: this.props.entityNamePlural }}
+          />
+        </p>
+      </EuiConfirmModal>
     );
   }
 
@@ -346,20 +343,6 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
           </EuiCallOut>
           <EuiSpacer size="m" />
         </React.Fragment>
-      );
-    }
-  }
-
-  renderNoItemsMessage() {
-    if (this.props.noItemsFragment) {
-      return this.props.noItemsFragment;
-    } else {
-      return (
-        <FormattedMessage
-          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
-          defaultMessage="No {entityNamePlural} available."
-          values={{ entityNamePlural: this.props.entityNamePlural }}
-        />
       );
     }
   }
@@ -476,10 +459,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderListingOrEmptyState() {
-    if (!this.state.fetchError && this.hasNoItems()) {
-      return this.renderNoItemsMessage();
+    if (this.props.noItemsFragment && !this.state.fetchError && this.hasNoItems()) {
+      return this.props.noItemsFragment;
     }
-
     return this.renderListing();
   }
 

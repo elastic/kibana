@@ -51,10 +51,13 @@ export {
   updateExceptionListItem,
   fetchExceptionListById,
   addExceptionList,
+  ExceptionListFilter,
   ExceptionListIdentifiers,
   ExceptionList,
   Pagination,
   UseExceptionListItemsSuccess,
   addEndpointExceptionList,
   withOptionalSignal,
+  ExceptionBuilder,
+  transformNewItemOutput,
 } from '../../lists/public';

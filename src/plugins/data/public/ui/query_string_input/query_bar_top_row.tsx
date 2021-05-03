@@ -9,25 +9,21 @@
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiSuperDatePicker,
   EuiFieldText,
   prettyDuration,
+  EuiIconProps,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
-import { useKibana, toMountPoint, withKibana } from '../../../../kibana_react/public';
+import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
-import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 
@@ -57,6 +53,11 @@ export interface QueryBarTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  iconType?: EuiIconProps['type'];
+  placeholder?: string;
+  isClearable?: boolean;
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 // Needed for React.lazy
@@ -66,9 +67,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
-
-  const kueryQuerySyntaxLink: string = docLinks!.links.query.kueryQuerySyntax;
+  const { uiSettings, storage, appName } = kibana.services;
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -146,8 +145,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function onSubmit({ query, dateRange }: { query?: Query; dateRange: TimeRange }) {
-    handleLuceneSyntaxWarning();
-
     if (props.timeHistory) {
       props.timeHistory.add(dateRange);
     }
@@ -185,6 +182,11 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
+          placeholder={props.placeholder}
+          isClearable={props.isClearable}
+          iconType={props.iconType}
+          nonKqlMode={props.nonKqlMode}
+          nonKqlModeHelpText={props.nonKqlModeHelpText}
         />
       </EuiFlexItem>
     );
@@ -292,60 +294,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         />
       </EuiFlexItem>
     );
-  }
-
-  function handleLuceneSyntaxWarning() {
-    if (!props.query) return;
-    const { query, language } = props.query;
-    if (
-      language === 'kuery' &&
-      typeof query === 'string' &&
-      (!storage || !storage.get('kibana.luceneSyntaxWarningOptOut')) &&
-      doesKueryExpressionHaveLuceneSyntaxError(query)
-    ) {
-      const toast = notifications!.toasts.addWarning({
-        title: i18n.translate('data.query.queryBar.luceneSyntaxWarningTitle', {
-          defaultMessage: 'Lucene syntax warning',
-        }),
-        text: toMountPoint(
-          <div>
-            <p>
-              <FormattedMessage
-                id="data.query.queryBar.luceneSyntaxWarningMessage"
-                defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
-               have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
-                values={{
-                  link: (
-                    <EuiLink href={kueryQuerySyntaxLink} target="_blank">
-                      <FormattedMessage
-                        id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
-                        defaultMessage="here"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" onClick={() => onLuceneSyntaxWarningOptOut(toast)}>
-                  <FormattedMessage
-                    id="data.query.queryBar.luceneSyntaxWarningOptOutText"
-                    defaultMessage="Don't show again"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        ),
-      });
-    }
-  }
-
-  function onLuceneSyntaxWarningOptOut(toast: Toast) {
-    if (!storage) return;
-    storage.set('kibana.luceneSyntaxWarningOptOut', true);
-    notifications!.toasts.remove(toast);
   }
 
   const classes = classNames('kbnQueryBar', {

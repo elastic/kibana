@@ -22,7 +22,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
-import { IServiceSettings } from '../../../maps_legacy/public';
+import { IServiceSettings } from '../../../maps_ems/public';
 import {
   Bool,
   Data,
@@ -53,6 +53,7 @@ const DEFAULT_PARSER: string = 'elasticsearch';
 export class VegaParser {
   spec: VegaSpec;
   hideWarnings: boolean;
+  restoreSignalValuesOnRefresh: boolean;
   error?: string;
   warnings: string[];
   _urlParsers: UrlParserConfig | undefined;
@@ -137,6 +138,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
     this._config = this._parseConfig();
     this.hideWarnings = !!this._config.hideWarnings;
+    this._parseBool('restoreSignalValuesOnRefresh', this._config, false);
+    this.restoreSignalValuesOnRefresh = this._config.restoreSignalValuesOnRefresh;
     this.useMap = this._config.type === 'map';
     this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
     this.tooltips = this._parseTooltips();
@@ -465,21 +468,10 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     validate(`minZoom`, true);
     validate(`maxZoom`, true);
 
-    // `false` is a valid value
-    res.mapStyle = this._config?.mapStyle === undefined ? `default` : this._config.mapStyle;
-    if (res.mapStyle !== `default` && res.mapStyle !== false) {
-      this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.mapStyleValueTypeWarningMessage', {
-          defaultMessage:
-            '{mapStyleConfigName} may either be {mapStyleConfigFirstAllowedValue} or {mapStyleConfigSecondAllowedValue}',
-          values: {
-            mapStyleConfigName: 'config.kibana.mapStyle',
-            mapStyleConfigFirstAllowedValue: 'false',
-            mapStyleConfigSecondAllowedValue: '"default"',
-          },
-        })
-      );
-      res.mapStyle = `default`;
+    this._parseBool('mapStyle', res, true);
+
+    if (res.mapStyle) {
+      res.emsTileServiceId = this._config?.emsTileServiceId;
     }
 
     this._parseBool('zoomControl', res, true);

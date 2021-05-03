@@ -85,7 +85,7 @@ export const getTableColumns = (
     render: (field: string, { editApp, editUrl, title, error }: VisualizationListItem) =>
       // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
       !error ? (
-        <RedirectAppLinks application={application}>
+        <RedirectAppLinks application={application} className="visListingTable__titleLink">
           <EuiLink
             href={getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl)}
             data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}

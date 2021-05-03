@@ -8,7 +8,8 @@
 import { EuiIcon } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { Role } from '../../../../common/model';
+
+import type { Role } from '../../../../common/model';
 import { ReservedRoleBadge } from './reserved_role_badge';
 
 const reservedRole: Role = {

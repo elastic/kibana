@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
-import { EuiTextColor, EuiOverlayMask } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 
+import { EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { LogRetentionLogic, LogRetentionOptions } from '../../log_retention';
+
 import { GenericConfirmationModal } from './generic_confirmation_modal';
 
 export const LogRetentionConfirmationModal: React.FC = () => {
@@ -38,7 +40,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
   }
 
   return (
-    <EuiOverlayMask>
+    <>
       {openedModal === LogRetentionOptions.Analytics && (
         <GenericConfirmationModal
           data-test-subj="AnalyticsLogRetentionConfirmationModal"
@@ -131,6 +133,6 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           onSave={() => saveLogRetention(LogRetentionOptions.API, false)}
         />
       )}
-    </EuiOverlayMask>
+    </>
   );
 };

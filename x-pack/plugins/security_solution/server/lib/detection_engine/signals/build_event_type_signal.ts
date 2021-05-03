@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { BaseSignalHit } from './types';
 
 export const buildEventTypeSignal = (doc: BaseSignalHit): object => {
-  if (doc._source.event != null && doc._source.event instanceof Object) {
-    return { ...doc._source.event, kind: 'signal' };
+  if (doc._source?.event != null && doc._source?.event instanceof Object) {
+    return { ...doc._source!.event, kind: 'signal' };
   } else {
     return { kind: 'signal' };
   }
@@ -25,5 +24,5 @@ export const buildEventTypeSignal = (doc: BaseSignalHit): object => {
  * @param doc The document which might be a signal or it might be a regular log
  */
 export const isEventTypeSignal = (doc: BaseSignalHit): boolean => {
-  return doc._source.signal?.rule?.id != null && typeof doc._source.signal?.rule?.id === 'string';
+  return doc._source?.signal?.rule?.id != null && typeof doc._source?.signal?.rule?.id === 'string';
 };

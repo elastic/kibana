@@ -17,7 +17,12 @@ import { WorldMapLayerIcon } from '../../layers/icons/world_map_layer_icon';
 export const tmsLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
-    defaultMessage: 'Tile map service configured in interface',
+    defaultMessage: 'Raster image tile map service using {z}/{x}/{y} url pattern.',
+    values: {
+      z: '{z}',
+      x: '{x}',
+      y: '{y}',
+    },
   }),
   icon: WorldMapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {

@@ -18,12 +18,15 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { NewPackagePolicyInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
-import {
-  isAdvancedVar,
-  PackagePolicyConfigValidationResults,
-  validationHasErrors,
-} from '../services';
+
+import type {
+  NewPackagePolicyInputStream,
+  RegistryStream,
+  RegistryVarsEntry,
+} from '../../../../types';
+import type { PackagePolicyConfigValidationResults } from '../services';
+import { isAdvancedVar, validationHasErrors } from '../services';
+
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
@@ -103,12 +106,13 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
-              const value = packagePolicyInputStream.vars![varName].value;
+              const { value, frozen } = packagePolicyInputStream.vars![varName];
               return (
                 <EuiFlexItem key={varName}>
                   <PackagePolicyInputVarField
                     varDef={varDef}
                     value={value}
+                    frozen={frozen}
                     onChange={(newValue: any) => {
                       updatePackagePolicyInputStream({
                         vars: {

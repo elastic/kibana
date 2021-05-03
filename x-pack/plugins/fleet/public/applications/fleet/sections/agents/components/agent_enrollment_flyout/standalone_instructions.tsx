@@ -18,13 +18,15 @@ import {
   EuiCopy,
   EuiLink,
 } from '@elastic/eui';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
+
+import type { AgentPolicy } from '../../../../types';
 import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
-import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
+
+import { DownloadStep, AgentPolicySelectionStep } from './steps';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
@@ -74,7 +76,7 @@ export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
   const yaml = useMemo(() => fullAgentPolicyToYaml(fullAgentPolicy), [fullAgentPolicy]);
   const steps: EuiContainedStepProps[] = [
     DownloadStep(),
-    AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId }),
+    AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId, excludeFleetServer: true }),
     {
       title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigureAgentTitle', {
         defaultMessage: 'Configure the agent',

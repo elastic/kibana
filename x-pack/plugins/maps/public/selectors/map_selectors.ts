@@ -12,15 +12,17 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
-import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer';
 import { VectorStyle } from '../classes/styles/vector/vector_style';
-// @ts-ignore
-import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
+import { HeatmapLayer } from '../classes/layers/heatmap_layer';
 import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import {
+  getChartsPaletteServiceGetColor,
+  getInspectorAdapters,
+} from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
@@ -38,6 +40,7 @@ import {
   DataRequestDescriptor,
   DrawState,
   Goto,
+  HeatmapLayerDescriptor,
   LayerDescriptor,
   MapCenter,
   MapExtent,
@@ -51,11 +54,13 @@ import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
+import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { ILayer } from '../classes/layers/layer';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters?: Adapters
+  inspectorAdapters?: Adapters,
+  chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
@@ -75,15 +80,20 @@ export function createLayerInstance(
         layerDescriptor: vectorLayerDescriptor,
         source: source as IVectorSource,
         joins,
+        chartsPaletteServiceGetColor,
       });
     case VectorTileLayer.type:
       return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
     case HeatmapLayer.type:
-      return new HeatmapLayer({ layerDescriptor, source });
+      return new HeatmapLayer({
+        layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
+        source: source as ESGeoGridSource,
+      });
     case BlendedVectorLayer.type:
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        chartsPaletteServiceGetColor,
       });
     case TiledVectorLayer.type:
       return new TiledVectorLayer({
@@ -173,6 +183,9 @@ export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.fil
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
 
+export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
+  map.mapState.searchSessionMapBuffer;
+
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
@@ -225,6 +238,7 @@ export const getDataFilters = createSelector(
   getQuery,
   getFilters,
   getSearchSessionId,
+  getSearchSessionMapBuffer,
   (
     mapExtent,
     mapBuffer,
@@ -233,11 +247,12 @@ export const getDataFilters = createSelector(
     refreshTimerLastTriggeredAt,
     query,
     filters,
-    searchSessionId
+    searchSessionId,
+    searchSessionMapBuffer
   ) => {
     return {
       extent: mapExtent,
-      buffer: mapBuffer,
+      buffer: searchSessionId && searchSessionMapBuffer ? searchSessionMapBuffer : mapBuffer,
       zoom: mapZoom,
       timeFilters,
       refreshTimerLastTriggeredAt,
@@ -295,9 +310,10 @@ export const getSpatialFiltersLayer = createSelector(
 export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
-  (layerDescriptorList, inspectorAdapters) => {
+  getChartsPaletteServiceGetColor,
+  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor) => {
     return layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(layerDescriptor, inspectorAdapters)
+      createLayerInstance(layerDescriptor, inspectorAdapters, chartsPaletteServiceGetColor)
     );
   }
 );
@@ -361,16 +377,6 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
   });
 });
 
-// Get list of unique index patterns used by all layers
-export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
-  const indexPatternIds: string[] = [];
-  layerList.forEach((layer) => {
-    indexPatternIds.push(...layer.getIndexPatternIds());
-  });
-  return _.uniq(indexPatternIds).sort();
-});
-
-// Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
 export const getQueryableUniqueIndexPatternIds = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
@@ -380,11 +386,15 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
         const layer = createLayerInstance(layerDescriptor);
-        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        }
       });
     } else {
       layerList.forEach((layer) => {
-        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        }
       });
     }
     return _.uniq(indexPatternIds);
@@ -417,7 +427,12 @@ export const areLayersLoaded = createSelector(
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.isDataLoaded()) {
+      if (
+        layer.isVisible() &&
+        layer.showAtZoomLevel(zoom) &&
+        !layer.hasErrors() &&
+        !layer.isInitialDataLoadComplete()
+      ) {
         return false;
       }
     }

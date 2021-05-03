@@ -16,14 +16,13 @@ describe('dateHistogram(req, panel, series)', () => {
   let req;
   let capabilities;
   let config;
-  let indexPatternObject;
+  let indexPattern;
   let uiSettings;
 
   beforeEach(() => {
     req = {
-      payload: {
+      body: {
         timerange: {
-          timezone: 'UTC',
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
         },
@@ -39,8 +38,8 @@ describe('dateHistogram(req, panel, series)', () => {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
-    indexPatternObject = {};
-    capabilities = new DefaultSearchCapabilities(req);
+    indexPattern = {};
+    capabilities = new DefaultSearchCapabilities({ timezone: 'UTC', maxBucketsLimit: 2000 });
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
@@ -49,15 +48,9 @@ describe('dateHistogram(req, panel, series)', () => {
   test('calls next when finished', async () => {
     const next = jest.fn();
 
-    await dateHistogram(
-      req,
-      panel,
-      series,
-      config,
-      indexPatternObject,
-      capabilities,
-      uiSettings
-    )(next)({});
+    await dateHistogram(req, panel, series, config, indexPattern, capabilities, uiSettings)(next)(
+      {}
+    );
 
     expect(next.mock.calls.length).toEqual(1);
   });
@@ -69,7 +62,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -110,7 +103,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -154,7 +147,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -198,7 +191,7 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
         uiSettings
       )(next)({});
@@ -216,7 +209,7 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
         uiSettings
       )(next)({});

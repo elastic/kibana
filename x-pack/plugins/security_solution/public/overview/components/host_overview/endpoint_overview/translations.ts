@@ -17,13 +17,13 @@ export const ENDPOINT_POLICY = i18n.translate(
 export const POLICY_STATUS = i18n.translate(
   'xpack.securitySolution.host.details.endpoint.policyStatus',
   {
-    defaultMessage: 'Configuration Status',
+    defaultMessage: 'Policy Status',
   }
 );
 
 export const SENSORVERSION = i18n.translate(
   'xpack.securitySolution.host.details.endpoint.sensorversion',
   {
-    defaultMessage: 'Sensorversion',
+    defaultMessage: 'Sensor Version',
   }
 );

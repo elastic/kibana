@@ -31,8 +31,8 @@ const defaults = {
  * @param chartData {Object} Elasticsearch query results for this specific chart
  */
 export class LineChart extends PointSeries {
-  constructor(handler, chartEl, chartData, seriesConfigArgs, core) {
-    super(handler, chartEl, chartData, seriesConfigArgs, core);
+  constructor(handler, chartEl, chartData, seriesConfigArgs, uiSettings) {
+    super(handler, chartEl, chartData, seriesConfigArgs, uiSettings);
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
   }
 

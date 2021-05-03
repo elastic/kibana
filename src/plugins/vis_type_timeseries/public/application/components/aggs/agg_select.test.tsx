@@ -88,6 +88,14 @@ describe('TSVB AggSelect', () => {
           "value": "count",
         },
         Object {
+          "label": "Max",
+          "value": "max",
+        },
+        Object {
+          "label": "Min",
+          "value": "min",
+        },
+        Object {
           "label": "Sum",
           "value": "sum",
         },

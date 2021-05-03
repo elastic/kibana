@@ -23,7 +23,8 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
+
+import type { AgentPolicy } from '../../../../types';
 import { useInput, useStartServices, sendRequest } from '../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../services';
 

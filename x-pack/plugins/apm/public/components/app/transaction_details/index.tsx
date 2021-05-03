@@ -7,7 +7,6 @@
 
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiPage,
   EuiPanel,
@@ -27,7 +26,6 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { SearchBar } from '../../shared/search_bar';
-import { Correlations } from '../Correlations';
 import { TransactionDistribution } from './Distribution';
 import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
@@ -97,15 +95,9 @@ export function TransactionDetails({
           <h1>{transactionName}</h1>
         </EuiTitle>
       </ApmHeader>
-      <SearchBar showTimeComparison />
+      <SearchBar />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <Correlations />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
           <ChartPointerEventContextProvider>
             <TransactionCharts />
           </ChartPointerEventContextProvider>

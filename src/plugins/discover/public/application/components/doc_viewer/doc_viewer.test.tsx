@@ -16,6 +16,11 @@ import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 jest.mock('../../../kibana_services', () => {
   let registry: any[] = [];
   return {
+    getServices: () => ({
+      uiSettings: {
+        get: jest.fn(),
+      },
+    }),
     getDocViewsRegistry: () => ({
       addDocView(view: any) {
         registry.push(view);

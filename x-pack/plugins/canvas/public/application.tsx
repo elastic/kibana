@@ -13,6 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 
+import { includes, remove } from 'lodash';
+
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
@@ -22,7 +24,6 @@ import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/publ
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
-import { getDocumentationLinks } from './lib/documentation_links';
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
@@ -39,6 +40,11 @@ import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
 
+// @ts-expect-error Not going to convert
+import { size } from '../canvas_plugin_src/renderers/plot/plugins/size';
+// @ts-expect-error Not going to convert
+import { text } from '../canvas_plugin_src/renderers/plot/plugins/text';
+
 import './style/index.scss';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
@@ -49,17 +55,20 @@ export const renderApp = (
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
+  const { presentationUtil } = plugins;
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
 
   ReactDOM.render(
     <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
       <ServicesProvider providers={services}>
-        <I18nProvider>
-          <Provider store={canvasStore}>
-            <App />
-          </Provider>
-        </I18nProvider>
+        <presentationUtil.ContextProvider>
+          <I18nProvider>
+            <Provider store={canvasStore}>
+              <App />
+            </Provider>
+          </I18nProvider>
+        </presentationUtil.ContextProvider>
       </ServicesProvider>
     </KibanaContextProvider>,
     element
@@ -117,6 +126,8 @@ export const initializeCanvas = async (
         }
   );
 
+  // Setup documentation links
+  const { docLinks } = coreStart;
   // Set help extensions
   coreStart.chrome.setHelpExtension({
     appName: i18n.translate('xpack.canvas.helpMenu.appName', {
@@ -125,7 +136,7 @@ export const initializeCanvas = async (
     links: [
       {
         linkType: 'documentation',
-        href: getDocumentationLinks().canvas,
+        href: docLinks.links.canvas.guide,
       },
     ],
     content: (domNode) => {
@@ -146,6 +157,17 @@ export const initializeCanvas = async (
 
 export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
   destroyRegistries();
+
+  // Canvas pollutes the jQuery plot plugins collection with custom plugins that only work in Canvas.
+  // Remove them when Canvas is unmounted.
+  // see: ../canvas_plugin_src/renderers/plot/plugins/index.ts
+  if (includes($.plot.plugins, size)) {
+    remove($.plot.plugins, size);
+  }
+
+  if (includes($.plot.plugins, text)) {
+    remove($.plot.plugins, text);
+  }
 
   // TODO: Not cleaning these up temporarily.
   // We have an issue where if requests are inflight, and you navigate away,

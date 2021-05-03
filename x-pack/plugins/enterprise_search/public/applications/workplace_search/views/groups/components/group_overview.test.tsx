@@ -9,20 +9,17 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import {
-  GroupOverview,
-  EMPTY_SOURCES_DESCRIPTION,
-  EMPTY_USERS_DESCRIPTION,
-} from './group_overview';
+import { EuiFieldText, EuiEmptyPrompt } from '@elastic/eui';
 
-import { ContentSection } from '../../../components/shared/content_section';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { SourcesTable } from '../../../components/shared/sources_table';
 import { Loading } from '../../../../shared/loading';
+import { ContentSection } from '../../../components/shared/content_section';
+import { SourcesTable } from '../../../components/shared/sources_table';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
-import { EuiFieldText } from '@elastic/eui';
+import { GroupOverview } from './group_overview';
 
 const deleteGroup = jest.fn();
 const showSharedSourcesModal = jest.fn();
@@ -91,7 +88,7 @@ describe('GroupOverview', () => {
     expect(updateGroupName).toHaveBeenCalled();
   });
 
-  it('renders empty state messages', () => {
+  it('renders empty state', () => {
     setMockValues({
       ...mockValues,
       group: {
@@ -102,10 +99,7 @@ describe('GroupOverview', () => {
     });
 
     const wrapper = shallow(<GroupOverview />);
-    const sourcesSection = wrapper.find('[data-test-subj="GroupContentSourcesSection"]') as any;
-    const usersSection = wrapper.find('[data-test-subj="GroupUsersSection"]') as any;
 
-    expect(sourcesSection.prop('description')).toEqual(EMPTY_SOURCES_DESCRIPTION);
-    expect(usersSection.prop('description')).toEqual(EMPTY_USERS_DESCRIPTION);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler, SavedObjectsClientContract } from 'kibana/public';
+import { HttpHandler } from 'kibana/public';
 import _ from 'lodash';
 import {
   loadInitialState,
@@ -17,6 +17,7 @@ import {
   injectReferences,
 } from './loader';
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { HttpFetchError } from '../../../../../src/core/public';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -145,7 +146,7 @@ const indexPattern2 = ({
           agg: 'histogram',
           interval: 1000,
         },
-        avg: {
+        average: {
           agg: 'avg',
         },
         max: {
@@ -183,23 +184,28 @@ const sampleIndexPatterns = {
   '2': indexPattern2,
 };
 
-function mockClient() {
-  return ({
-    find: jest.fn(async () => ({
-      savedObjects: [
-        { id: '1', attributes: { title: sampleIndexPatterns[1].title } },
-        { id: '2', attributes: { title: sampleIndexPatterns[2].title } },
-      ],
-    })),
-  } as unknown) as Pick<SavedObjectsClientContract, 'find'>;
-}
-
 function mockIndexPatternsService() {
   return ({
     get: jest.fn(async (id: '1' | '2') => {
-      return { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      if (!result.fields) {
+        result.fields = [];
+      }
+      return result;
     }),
-  } as unknown) as Pick<IndexPatternsContract, 'get'>;
+    getIdsWithTitle: jest.fn(async () => {
+      return [
+        {
+          id: sampleIndexPatterns[1].id,
+          title: sampleIndexPatterns[1].title,
+        },
+        {
+          id: sampleIndexPatterns[2].id,
+          title: sampleIndexPatterns[2].title,
+        },
+      ];
+    }),
+  } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
 }
 
 describe('loader', () => {
@@ -212,7 +218,8 @@ describe('loader', () => {
           get: jest.fn(() =>
             Promise.reject('mockIndexPatternService.get should not have been called')
           ),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(),
+        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache).toEqual(sampleIndexPatterns);
@@ -281,7 +288,11 @@ describe('loader', () => {
               },
             ],
           })),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -333,7 +344,11 @@ describe('loader', () => {
               },
             ],
           })),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -344,7 +359,6 @@ describe('loader', () => {
     it('should load a default state', async () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -368,10 +382,9 @@ describe('loader', () => {
 
     it('should load a default state without loading the indexPatterns when embedded', async () => {
       const storage = createMockStorage();
-      const savedObjectsClient = mockClient();
+      const indexPatternsService = mockIndexPatternsService();
       const state = await loadInitialState({
-        savedObjectsClient,
-        indexPatternsService: mockIndexPatternsService(),
+        indexPatternsService,
         storage,
         options: { isFullEditor: false },
       });
@@ -384,14 +397,12 @@ describe('loader', () => {
       });
 
       expect(storage.set).not.toHaveBeenCalled();
-
-      expect(savedObjectsClient.find).not.toHaveBeenCalled();
+      expect(indexPatternsService.getIdsWithTitle).not.toHaveBeenCalled();
     });
 
     it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
       const storage = createMockStorage({ indexPatternId: 'c' });
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -415,7 +426,6 @@ describe('loader', () => {
 
     it('should load lastUsedIndexPatternId if in localStorage', async () => {
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage: createMockStorage({ indexPatternId: '2' }),
         options: { isFullEditor: true },
@@ -438,7 +448,6 @@ describe('loader', () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
         defaultIndexPatternId: '2',
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -463,7 +472,6 @@ describe('loader', () => {
     it('should use the indexPatternId of the visualize trigger field, if provided', async () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         initialContext: {
@@ -524,7 +532,6 @@ describe('loader', () => {
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -563,7 +570,7 @@ describe('loader', () => {
               dataType: 'number',
               isBucketed: false,
               label: '',
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'myfield',
             },
           },
@@ -576,7 +583,7 @@ describe('loader', () => {
               dataType: 'number',
               isBucketed: false,
               label: '',
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'myfield2',
             },
           },
@@ -681,6 +688,7 @@ describe('loader', () => {
           get: jest.fn(async () => {
             throw err;
           }),
+          getIdsWithTitle: jest.fn(),
         },
         onError,
         storage,
@@ -688,7 +696,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
@@ -808,6 +816,7 @@ describe('loader', () => {
           get: jest.fn(async () => {
             throw err;
           }),
+          getIdsWithTitle: jest.fn(),
         },
         onError,
         storage,
@@ -815,7 +824,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
@@ -869,6 +878,7 @@ describe('loader', () => {
         foo: 'bar',
         isFirstExistenceFetch: false,
         existenceFetchFailed: false,
+        existenceFetchTimeout: false,
         existingFields: {
           '1': { ip1_field_1: true, ip1_field_2: true },
           '2': { ip2_field_1: true, ip2_field_2: true },
@@ -949,6 +959,56 @@ describe('loader', () => {
       }) as IndexPatternPrivateState;
 
       expect(newState.existenceFetchFailed).toEqual(true);
+      expect(newState.existenceFetchTimeout).toEqual(false);
+      expect(newState.existingFields['1']).toEqual({
+        field1: true,
+        field2: true,
+      });
+    });
+
+    it('should set all fields to available and existence error flag if the request times out', async () => {
+      const setState = jest.fn();
+      const fetchJson = (jest.fn((path: string) => {
+        return new Promise((resolve, reject) => {
+          reject(
+            new HttpFetchError(
+              'timeout',
+              'name',
+              ({} as unknown) as Request,
+              ({ status: 408 } as unknown) as Response
+            )
+          );
+        });
+      }) as unknown) as HttpHandler;
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [
+          {
+            id: '1',
+            title: '1',
+            hasRestrictions: false,
+            fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
+          },
+        ],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      const [fn] = setState.mock.calls[0];
+      const newState = fn({
+        foo: 'bar',
+        existingFields: {},
+      }) as IndexPatternPrivateState;
+
+      expect(newState.existenceFetchFailed).toEqual(false);
+      expect(newState.existenceFetchTimeout).toEqual(true);
       expect(newState.existingFields['1']).toEqual({
         field1: true,
         field2: true,

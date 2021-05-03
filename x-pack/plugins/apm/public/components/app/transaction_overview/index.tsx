@@ -9,7 +9,6 @@ import {
   EuiCallOut,
   EuiCode,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiPage,
   EuiPanel,
   EuiSpacer,
@@ -21,7 +20,6 @@ import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
-import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -29,11 +27,8 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { SearchBar } from '../../shared/search_bar';
-import { TransactionTypeSelect } from '../../shared/transaction_type_select';
-import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
-import { UserExperienceCallout } from './user_experience_callout';
 import { useTransactionListFetcher } from './use_transaction_list';
 
 function getRedirectLocation({
@@ -85,44 +80,9 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
-      <SearchBar showTimeComparison />
-
+      <SearchBar showTransactionTypeSelector />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiSpacer size="s" />
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-              >
-                <EuiFlexItem>
-                  <EuiTitle size="s">
-                    <h2>
-                      {i18n.translate('xpack.apm.transactionOverviewTitle', {
-                        defaultMessage: 'Transactions',
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={2}>
-                  <TransactionTypeSelect />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <Correlations />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          {transactionType === TRANSACTION_PAGE_LOAD && (
-            <>
-              <UserExperienceCallout serviceName={serviceName} />
-              <EuiSpacer size="s" />
-            </>
-          )}
           <TransactionCharts />
           <EuiSpacer size="s" />
           <EuiPanel>

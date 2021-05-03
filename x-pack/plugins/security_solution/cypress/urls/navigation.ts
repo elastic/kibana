@@ -24,5 +24,6 @@ export const KIBANA_HOME = '/app/home#/';
 export const ADMINISTRATION_URL = '/app/security/administration';
 export const NETWORK_URL = '/app/security/network';
 export const OVERVIEW_URL = '/app/security/overview';
+export const RULE_CREATION = 'app/security/detections/rules/create';
 export const TIMELINES_URL = '/app/security/timelines';
 export const TIMELINE_TEMPLATES_URL = '/app/security/timelines/template';

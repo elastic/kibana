@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FindResult } from '../../../../../alerts/server';
+import { FindResult } from '../../../../../alerting/server';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { RuleTypeParams } from '../types';
+import { RuleParams } from '../schemas/rule_schemas';
 import { FindRuleOptions } from './types';
 
 export const getFilter = (filter: string | null | undefined) => {
@@ -26,7 +26,7 @@ export const findRules = async ({
   filter,
   sortField,
   sortOrder,
-}: FindRuleOptions): Promise<FindResult<RuleTypeParams>> => {
+}: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return alertsClient.find({
     options: {
       fields,

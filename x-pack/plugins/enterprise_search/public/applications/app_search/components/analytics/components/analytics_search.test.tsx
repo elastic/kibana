@@ -9,7 +9,9 @@ import { mockKibanaValues } from '../../../../__mocks__';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFieldSearch } from '@elastic/eui';
 
 import { AnalyticsSearch } from './';

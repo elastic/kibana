@@ -7,32 +7,21 @@
 
 import React from 'react';
 
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageContent, EuiPageContentBody } from '@elastic/eui';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import { LogRetentionPanel, LogRetentionConfirmationModal } from './log_retention';
+
 import { SETTINGS_TITLE } from './';
 
 export const Settings: React.FC = () => {
   return (
     <>
       <SetPageChrome trail={[SETTINGS_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{SETTINGS_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
+      <EuiPageHeader pageTitle={SETTINGS_TITLE} />
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <FlashMessages />
           <LogRetentionConfirmationModal />

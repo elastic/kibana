@@ -478,6 +478,8 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    *    return renderApp({ element, history });
    * }
    * ```
+   *
+   * @deprecated {@link ScopedHistory.block} should be used instead.
    */
   onAppLeave: (handler: AppLeaveHandler) => void;
 
@@ -517,12 +519,13 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
  * A handler that will be executed before leaving the application, either when
  * going to another application or when closing the browser tab or manually changing
  * the url.
- * Should return `confirm` to to prompt a message to the user before leaving the page, or `default`
+ * Should return `confirm` to prompt a message to the user before leaving the page, or `default`
  * to keep the default behavior (doing nothing).
  *
  * See {@link AppMountParameters} for detailed usage examples.
  *
  * @public
+ * @deprecated {@link AppMountParameters.onAppLeave} has been deprecated in favor of {@link ScopedHistory.block}
  */
 export type AppLeaveHandler = (
   factory: AppLeaveActionFactory,
@@ -590,6 +593,7 @@ export interface AppLeaveActionFactory {
    * so we can show to the user the right UX for him to saved his/her/their changes
    */
   confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
+
   /**
    * Returns a default action, resulting on executing the default behavior when
    * the user tries to leave an application
@@ -681,6 +685,11 @@ export interface NavigateToAppOptions {
    * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
    */
   replace?: boolean;
+
+  /**
+   * if true, will open the app in new tab, will share session information via window.open if base
+   */
+  openInNewTab?: boolean;
 }
 
 /** @public */

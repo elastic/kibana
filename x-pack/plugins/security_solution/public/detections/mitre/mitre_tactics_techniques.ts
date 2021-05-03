@@ -719,12 +719,6 @@ export const technique = [
     tactics: ['execution'],
   },
   {
-    name: 'Group Policy Modification',
-    id: 'T1484',
-    reference: 'https://attack.mitre.org/techniques/T1484',
-    tactics: ['defense-evasion', 'privilege-escalation'],
-  },
-  {
     name: 'Hardware Additions',
     id: 'T1200',
     reference: 'https://attack.mitre.org/techniques/T1200',
@@ -1353,6 +1347,18 @@ export const technique = [
     id: 'T1220',
     reference: 'https://attack.mitre.org/techniques/T1220',
     tactics: ['defense-evasion'],
+  },
+  {
+    name: 'Domain Policy Modification',
+    id: 'T1484',
+    reference: 'https://attack.mitre.org/techniques/T1484',
+    tactics: ['defense-evasion', 'privilege-escalation'],
+  },
+  {
+    name: 'Forge Web Credentials',
+    id: 'T1606',
+    reference: 'https://attack.mitre.org/techniques/T1606',
+    tactics: ['credential-access'],
   },
 ];
 
@@ -2258,17 +2264,6 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     reference: 'https://attack.mitre.org/techniques/T1061',
     tactics: 'execution',
     value: 'graphicalUserInterface',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.groupPolicyModificationDescription',
-      { defaultMessage: 'Group Policy Modification (T1484)' }
-    ),
-    id: 'T1484',
-    name: 'Group Policy Modification',
-    reference: 'https://attack.mitre.org/techniques/T1484',
-    tactics: 'defense-evasion,privilege-escalation',
-    value: 'groupPolicyModification',
   },
   {
     label: i18n.translate(
@@ -3425,6 +3420,28 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     tactics: 'defense-evasion',
     value: 'xslScriptProcessing',
   },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.domainPolicyModificationDescription',
+      { defaultMessage: 'Domain Policy Modification (T1484)' }
+    ),
+    id: 'T1484',
+    name: 'Domain Policy Modification',
+    reference: 'https://attack.mitre.org/techniques/T1484',
+    tactics: 'defense-evasion,privilege-escalation',
+    value: 'domainPolicyModification',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.forgeWebCredentialsDescription',
+      { defaultMessage: 'Forge Web Credentials (T1606)' }
+    ),
+    id: 'T1606',
+    name: 'Forge Web Credentials',
+    reference: 'https://attack.mitre.org/techniques/T1606',
+    tactics: 'credential-access',
+    value: 'forgeWebCredentials',
+  },
 ];
 
 export const subtechniques = [
@@ -3476,13 +3493,6 @@ export const subtechniques = [
     reference: 'https://attack.mitre.org/techniques/T1137/006',
     tactics: ['persistence'],
     techniqueId: 'T1137',
-  },
-  {
-    name: 'Additional Cloud Credentials',
-    id: 'T1098.001',
-    reference: 'https://attack.mitre.org/techniques/T1098/001',
-    tactics: ['persistence'],
-    techniqueId: 'T1098',
   },
   {
     name: 'AppCert DLLs',
@@ -5864,6 +5874,41 @@ export const subtechniques = [
     tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
   },
+  {
+    name: 'Additional Cloud Credentials',
+    id: 'T1098.001',
+    reference: 'https://attack.mitre.org/techniques/T1098/001',
+    tactics: ['persistence'],
+    techniqueId: 'T1098',
+  },
+  {
+    name: 'Group Policy Modification',
+    id: 'T1484.001',
+    reference: 'https://attack.mitre.org/techniques/T1484/001',
+    tactics: ['defense-evasion', 'privilege-escalation'],
+    techniqueId: 'T1484',
+  },
+  {
+    name: 'Domain Trust Modification',
+    id: 'T1484.002',
+    reference: 'https://attack.mitre.org/techniques/T1484/002',
+    tactics: ['defense-evasion', 'privilege-escalation'],
+    techniqueId: 'T1484',
+  },
+  {
+    name: 'Web Cookies',
+    id: 'T1606.001',
+    reference: 'https://attack.mitre.org/techniques/T1606/001',
+    tactics: ['credential-access'],
+    techniqueId: 'T1606',
+  },
+  {
+    name: 'SAML Tokens',
+    id: 'T1606.002',
+    reference: 'https://attack.mitre.org/techniques/T1606/002',
+    tactics: ['credential-access'],
+    techniqueId: 'T1606',
+  },
 ];
 
 export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
@@ -5950,18 +5995,6 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     tactics: 'persistence',
     techniqueId: 'T1137',
     value: 'addIns',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.additionalCloudCredentialsT1098Description',
-      { defaultMessage: 'Additional Cloud Credentials (T1098.001)' }
-    ),
-    id: 'T1098.001',
-    name: 'Additional Cloud Credentials',
-    reference: 'https://attack.mitre.org/techniques/T1098/001',
-    tactics: 'persistence',
-    techniqueId: 'T1098',
-    value: 'additionalCloudCredentials',
   },
   {
     label: i18n.translate(
@@ -10042,6 +10075,66 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     tactics: 'persistence,privilege-escalation',
     techniqueId: 'T1547',
     value: 'winlogonHelperDll',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.additionalCloudCredentialsT1098Description',
+      { defaultMessage: 'Additional Cloud Credentials (T1098.001)' }
+    ),
+    id: 'T1098.001',
+    name: 'Additional Cloud Credentials',
+    reference: 'https://attack.mitre.org/techniques/T1098/001',
+    tactics: 'persistence',
+    techniqueId: 'T1098',
+    value: 'additionalCloudCredentials',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.groupPolicyModificationT1484Description',
+      { defaultMessage: 'Group Policy Modification (T1484.001)' }
+    ),
+    id: 'T1484.001',
+    name: 'Group Policy Modification',
+    reference: 'https://attack.mitre.org/techniques/T1484/001',
+    tactics: 'defense-evasion,privilege-escalation',
+    techniqueId: 'T1484',
+    value: 'groupPolicyModification',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.domainTrustModificationT1484Description',
+      { defaultMessage: 'Domain Trust Modification (T1484.002)' }
+    ),
+    id: 'T1484.002',
+    name: 'Domain Trust Modification',
+    reference: 'https://attack.mitre.org/techniques/T1484/002',
+    tactics: 'defense-evasion,privilege-escalation',
+    techniqueId: 'T1484',
+    value: 'domainTrustModification',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.webCookiesT1606Description',
+      { defaultMessage: 'Web Cookies (T1606.001)' }
+    ),
+    id: 'T1606.001',
+    name: 'Web Cookies',
+    reference: 'https://attack.mitre.org/techniques/T1606/001',
+    tactics: 'credential-access',
+    techniqueId: 'T1606',
+    value: 'webCookies',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.samlTokensT1606Description',
+      { defaultMessage: 'SAML Tokens (T1606.002)' }
+    ),
+    id: 'T1606.002',
+    name: 'SAML Tokens',
+    reference: 'https://attack.mitre.org/techniques/T1606/002',
+    tactics: 'credential-access',
+    techniqueId: 'T1606',
+    value: 'samlTokens',
   },
 ];
 

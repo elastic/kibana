@@ -10,7 +10,7 @@ import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { GetAuthHeaders } from './auth_headers_storage';
-import { RequestHandler, IRouter } from './router';
+import { IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
@@ -27,7 +27,7 @@ import type { PluginOpaqueId, RequestHandlerContext } from '..';
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer = IContextContainer<RequestHandler>;
+export type RequestHandlerContextContainer = IContextContainer;
 
 /**
  * Context provider for request handler.
@@ -278,6 +278,11 @@ export interface HttpServiceSetup {
 }
 
 /** @internal */
+export interface InternalNotReadyHttpServiceSetup {
+  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+}
+
+/** @internal */
 export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
@@ -287,6 +292,7 @@ export interface InternalHttpServiceSetup
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
+  registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <
@@ -297,6 +303,7 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
+  notReadyServer?: InternalNotReadyHttpServiceSetup;
 }
 
 /** @public */

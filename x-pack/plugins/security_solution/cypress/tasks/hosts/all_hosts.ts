@@ -29,6 +29,23 @@ export const dragFirstHostToEmptyTimelineDataProviders = () => {
     .then((dataProvidersDropArea) => dragWithoutDrop(dataProvidersDropArea));
 };
 
+export const unDragFirstHostToEmptyTimelineDataProviders = () => {
+  cy.get(HOSTS_NAMES_DRAGGABLE)
+    .first()
+    .then((host) => {
+      cy.wrap(host)
+        .trigger('mousemove', {
+          button: 0,
+          clientX: host[0].getBoundingClientRect().left,
+          clientY: host[0].getBoundingClientRect().top,
+          force: true,
+        })
+        .wait(300)
+        .trigger('mouseup', { force: true })
+        .wait(300);
+    });
+};
+
 export const dragFirstHostToTimeline = () => {
   cy.get(HOSTS_NAMES_DRAGGABLE)
     .first()

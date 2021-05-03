@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Fs from 'fs';
 import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
@@ -33,6 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     elasticsearch: {
       ...xpackFunctionalConfig.get('servers.elasticsearch'),
       protocol: 'https',
+      certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
     },
   };
 
@@ -44,6 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       resolve(__dirname, './apps/triggers_actions_ui'),
       resolve(__dirname, './apps/uptime'),
+      resolve(__dirname, './apps/ml'),
     ],
     apps: {
       ...xpackFunctionalConfig.get('apps'),
@@ -63,6 +66,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+        `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
           'my-slack1': {
             actionTypeId: '.slack',

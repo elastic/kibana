@@ -19,7 +19,10 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'API Integration Tests',
     },
-    esTestCluster: commonConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
@@ -27,6 +30,9 @@ export default async function ({ readConfigFile }) {
         '--elasticsearch.healthCheck.delay=3600000',
         '--server.xsrf.disableProtection=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',
+        `--savedObjects.maxImportExportSize=10001`,
+        // for testing set buffer duration to 0 to immediately flush counters into saved objects.
+        '--usageCollection.usageCounters.bufferDuration=0',
       ],
     },
   };

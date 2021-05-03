@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
+
 import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CredentialsLogic } from '../credentials_logic';
 import { FLYOUT_ARIA_LABEL_ID } from '../constants';
+import { CredentialsLogic } from '../credentials_logic';
 
 export const CredentialsFlyoutHeader: React.FC = () => {
   const { activeApiToken } = useValues(CredentialsLogic);
