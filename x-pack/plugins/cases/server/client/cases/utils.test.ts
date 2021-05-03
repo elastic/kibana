@@ -701,6 +701,7 @@ describe('utils', () => {
             action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
             case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
             comment_id: null,
+            owner: 'securitySolution',
           },
         ]);
 

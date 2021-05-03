@@ -513,6 +513,7 @@ export const mockUserActions: Array<SavedObject<CaseUserActionAttributes>> = [
       new_value:
         '{"title":"A case","tags":["case"],"description":"Yeah!","connector":{"id":"connector-od","name":"My Connector","type":".servicenow-sir","fields":{"category":"Denial of Service","destIp":true,"malwareHash":true,"malwareUrl":true,"priority":"2","sourceIp":true,"subcategory":"45"}},"settings":{"syncAlerts":true}}',
       old_value: null,
+      owner: 'securitySolution',
     },
     version: 'WzYsMV0=',
     references: [],
@@ -532,6 +533,7 @@ export const mockUserActions: Array<SavedObject<CaseUserActionAttributes>> = [
       new_value:
         '{"type":"alert","alertId":"cec3da90fb37a44407145adf1593f3b0d5ad94c4654201f773d63b5d4706128e","index":".siem-signals-default-000008"}',
       old_value: null,
+      owner: 'securitySolution',
     },
     version: 'WzYsMV0=',
     references: [],
