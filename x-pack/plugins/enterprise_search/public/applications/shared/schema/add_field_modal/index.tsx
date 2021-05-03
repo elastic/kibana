@@ -39,14 +39,14 @@ import {
 } from './constants';
 import { formatFieldName } from './utils';
 
-interface ISchemaAddFieldModalProps {
-  disableForm?: boolean;
-  addFieldFormErrors?: string[] | null;
+interface Props {
   addNewField(fieldName: string, newFieldType: string): void;
   closeAddFieldModal(): void;
+  disableForm?: boolean;
+  addFieldFormErrors?: string[] | null;
 }
 
-export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
+export const SchemaAddFieldModal: React.FC<Props> = ({
   addNewField,
   addFieldFormErrors,
   closeAddFieldModal,
@@ -98,13 +98,13 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
               >
                 <EuiFieldText
                   placeholder={FIELD_NAME_PLACEHOLDER}
-                  type="text"
                   onChange={handleChange}
-                  required
                   value={rawFieldName}
                   fullWidth
                   autoFocus
+                  required
                   isLoading={loading}
+                  disabled={disableForm}
                   data-test-subj="SchemaAddFieldNameField"
                 />
               </EuiFormRow>
@@ -126,13 +126,12 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
       <EuiModalFooter>
         <EuiButtonEmpty onClick={closeAddFieldModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
         <EuiButton
-          color="primary"
           fill
-          disabled={disableForm}
           type="submit"
           form={FORM_ID}
           isLoading={loading}
-          data-test-subj="SchemaAddFieldAddFieldButton"
+          disabled={disableForm}
+          data-test-subj="SchemaAddFieldButton"
         >
           {ADD_FIELD_BUTTON}
         </EuiButton>

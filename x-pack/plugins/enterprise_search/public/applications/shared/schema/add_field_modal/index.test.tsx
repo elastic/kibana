@@ -54,6 +54,14 @@ describe('SchemaAddFieldModal', () => {
     expect(setState).toHaveBeenCalledWith(false);
   });
 
+  it('passes disabled state', () => {
+    const wrapper = shallow(<SchemaAddFieldModal {...props} disableForm />);
+
+    expect(wrapper.find('[data-test-subj="SchemaAddFieldNameField"]').prop('disabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="SchemaSelect"]').prop('disabled')).toBe(true);
+    expect(wrapper.find('[data-test-subj="SchemaAddFieldButton"]').prop('disabled')).toBe(true);
+  });
+
   it('handles input change - with non-formatted name', () => {
     const wrapper = shallow(<SchemaAddFieldModal {...props} />);
     const input = wrapper.find(EuiFieldText);
