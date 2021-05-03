@@ -24,8 +24,8 @@ export function checkIndexPatternValid(name: string) {
 
 export const validateIndexName = async (indexName: string) => {
   if (!indexName) {
-    return i18n.translate('xpack.fileUpload.indexNameNotProvided', {
-      defaultMessage: 'No index name provided.',
+    return i18n.translate('xpack.fileUpload.indexNameRequired', {
+      defaultMessage: 'Index name required',
     });
   }
 
