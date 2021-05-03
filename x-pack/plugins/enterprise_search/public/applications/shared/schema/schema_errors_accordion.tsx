@@ -9,6 +9,7 @@ import React from 'react';
 
 import {
   EuiAccordion,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTable,
@@ -19,9 +20,11 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 
-import { EuiLinkTo } from '../react_router_helpers';
+import { EuiButtonEmptyTo } from '../react_router_helpers';
 
 import { TruncatedContent } from '../truncate';
+
+import './schema_errors_accordion.scss';
 
 import {
   ERROR_TABLE_ID_HEADER,
@@ -29,18 +32,10 @@ import {
   ERROR_TABLE_REVIEW_CONTROL,
   ERROR_TABLE_VIEW_LINK,
 } from './constants';
-
-interface IFieldCoercionError {
-  external_id: string;
-  error: string;
-}
-
-interface IFieldCoercionErrors {
-  [key: string]: IFieldCoercionError[];
-}
+import { FieldCoercionErrors } from './types';
 
 interface ISchemaErrorsAccordionProps {
-  fieldCoercionErrors: IFieldCoercionErrors;
+  fieldCoercionErrors: FieldCoercionErrors;
   schema: { [key: string]: string };
   itemId?: string;
   getRoute?(itemId: string, externalId: string): string;
@@ -60,14 +55,19 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xl">
-              <EuiFlexItem className="field-error__field-name">
-                <TruncatedContent content={fieldName} length={32} />
+              <EuiFlexItem>
+                <strong>
+                  <TruncatedContent content={fieldName} length={32} />
+                </strong>
               </EuiFlexItem>
-              <EuiFlexItem className="field-error__field-type">{schema[fieldName]}</EuiFlexItem>
+              <EuiFlexItem>{schema[fieldName]}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <span className="field-error__control button">{ERROR_TABLE_REVIEW_CONTROL}</span>
+            {/* href is needed here because a button cannot be nested in a button or console will error and EuiAccordion uses a button to wrap this. */}
+            <EuiButton size="s" href="#">
+              {ERROR_TABLE_REVIEW_CONTROL}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -76,12 +76,12 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
         <EuiAccordion
           key={fieldNameIndex}
           id={`accordion${fieldNameIndex}`}
-          className="euiAccordionForm field-error"
+          className="schemaFieldError"
           buttonClassName="euiAccordionForm__button field-error__header"
           buttonContent={accordionHeader}
           paddingSize="xl"
         >
-          <EuiTable>
+          <EuiTable tableLayout="auto">
             <EuiTableHeader>
               <EuiTableHeaderCell>{ERROR_TABLE_ID_HEADER}</EuiTableHeaderCell>
               <EuiTableHeaderCell>{ERROR_TABLE_ERROR_HEADER}</EuiTableHeaderCell>
@@ -93,34 +93,21 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
                 const documentPath = getRoute && itemId ? getRoute(itemId, error.external_id) : '';
 
                 const viewButton = showViewButton && (
-                  <EuiTableRowCell className="field-error-document__actions">
-                    <EuiLinkTo
-                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                      to={documentPath}
-                    >
-                      <span className="euiButtonEmpty__content">
-                        <span className="euiButtonEmpty__text">{ERROR_TABLE_VIEW_LINK}</span>
-                      </span>
-                    </EuiLinkTo>
+                  <EuiTableRowCell>
+                    <EuiButtonEmptyTo to={documentPath}>{ERROR_TABLE_VIEW_LINK}</EuiButtonEmptyTo>
                   </EuiTableRowCell>
                 );
 
                 return (
-                  <EuiTableRow
-                    key={`schema-change-document-error-${fieldName}-${errorIndex} field-error-document`}
-                  >
-                    <EuiTableRowCell className="field-error-document__id">
-                      <div className="data-type--id">
-                        <TruncatedContent
-                          tooltipType="title"
-                          content={error.external_id}
-                          length={22}
-                        />
-                      </div>
+                  <EuiTableRow key={`schema-change-document-error-${fieldName}-${errorIndex}`}>
+                    <EuiTableRowCell truncateText>
+                      <TruncatedContent
+                        tooltipType="title"
+                        content={error.external_id}
+                        length={22}
+                      />
                     </EuiTableRowCell>
-                    <EuiTableRowCell className="field-error-document__field-content">
-                      {error.error}
-                    </EuiTableRowCell>
+                    <EuiTableRowCell>{error.error}</EuiTableRowCell>
                     {showViewButton ? viewButton : <EuiTableRowCell />}
                   </EuiTableRow>
                 );

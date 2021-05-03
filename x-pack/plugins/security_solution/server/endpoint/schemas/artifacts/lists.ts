@@ -30,6 +30,24 @@ export const translatedEntryMatchMatcher = t.keyof({
 });
 export type TranslatedEntryMatchMatcher = t.TypeOf<typeof translatedEntryMatchMatcher>;
 
+export const translatedEntryMatchWildcardMatcher = t.keyof({
+  wildcard_cased: null,
+  wildcard_caseless: null,
+});
+export type TranslatedEntryMatchWildcardMatcher = t.TypeOf<
+  typeof translatedEntryMatchWildcardMatcher
+>;
+
+export const translatedEntryMatchWildcard = t.exact(
+  t.type({
+    field: t.string,
+    operator,
+    type: translatedEntryMatchWildcardMatcher,
+    value: t.string,
+  })
+);
+export type TranslatedEntryMatchWildcard = t.TypeOf<typeof translatedEntryMatchWildcard>;
+
 export const translatedEntryMatch = t.exact(
   t.type({
     field: t.string,
@@ -61,6 +79,7 @@ export type TranslatedEntryNested = t.TypeOf<typeof translatedEntryNested>;
 export const translatedEntry = t.union([
   translatedEntryNested,
   translatedEntryMatch,
+  translatedEntryMatchWildcard,
   translatedEntryMatchAny,
 ]);
 export type TranslatedEntry = t.TypeOf<typeof translatedEntry>;

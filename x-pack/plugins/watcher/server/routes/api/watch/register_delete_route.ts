@@ -6,20 +6,26 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
 });
 
-function deleteWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
-  return dataClient.callAsCurrentUser('watcher.deleteWatch', {
-    id: watchId,
-  });
+function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {
+  return dataClient.asCurrentUser.watcher
+    .deleteWatch({
+      id: watchId,
+    })
+    .then(({ body }) => body);
 }
 
-export function registerDeleteRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerDeleteRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.delete(
     {
       path: '/api/watcher/watch/{watchId}',
@@ -32,17 +38,13 @@ export function registerDeleteRoute({ router, license, lib: { isEsError } }: Rou
 
       try {
         return response.ok({
-          body: await deleteWatch(ctx.watcher!.client, watchId),
+          body: await deleteWatch(ctx.core.elasticsearch.client, watchId),
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          const body = e.statusCode === 404 ? `Watch with id = ${watchId} not found` : e;
-          return response.customError({ statusCode: e.statusCode, body });
+        if (e?.statusCode === 404 && e.meta?.body?.error) {
+          e.meta.body.error.reason = `Watch with id = ${watchId} not found`;
         }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );
