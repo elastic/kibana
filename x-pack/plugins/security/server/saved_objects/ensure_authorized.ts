@@ -31,11 +31,20 @@ export interface EnsureAuthorizedActionResult {
   isGloballyAuthorized?: boolean;
 }
 
+/**
+ * Checks to ensure a user is authorized to access object types in given spaces.
+ *
+ * @param {EnsureAuthorizedDependencies} deps the dependencies needed to make the privilege checks.
+ * @param {string[]} types the type(s) to check privileges for.
+ * @param {T[]} actions the action(s) to check privileges for.
+ * @param {string[]} spaceIds the id(s) of spaces to check privileges for.
+ * @param {EnsureAuthorizedOptions} options the options to use.
+ */
 export async function ensureAuthorized<T extends string>(
   deps: EnsureAuthorizedDependencies,
   types: string[],
-  actions: string[],
-  namespaces: string[],
+  actions: T[],
+  spaceIds: string[],
   options: EnsureAuthorizedOptions = {}
 ): Promise<EnsureAuthorizedResult<T>> {
   const { requireFullAuthorization = true } = options;
@@ -45,52 +54,85 @@ export async function ensureAuthorized<T extends string>(
     )
   );
   const privilegeActions = Array.from(privilegeActionsMap.keys());
-  const { hasAllRequested, privileges } = await checkPrivileges(deps, privilegeActions, namespaces);
+  const { hasAllRequested, privileges } = await checkPrivileges(deps, privilegeActions, spaceIds);
 
   const missingPrivileges = getMissingPrivileges(privileges);
   const typeActionMap = privileges.kibana.reduce<
     Map<string, Record<T, EnsureAuthorizedActionResult>>
   >((acc, { resource, privilege }) => {
-    if (
+    const missingPrivilegesAtResource =
       (resource && missingPrivileges.get(resource)?.has(privilege)) ||
-      (!resource && missingPrivileges.get(undefined)?.has(privilege))
-    ) {
+      (!resource && missingPrivileges.get(undefined)?.has(privilege));
+
+    if (missingPrivilegesAtResource) {
       return acc;
     }
     const { type, action } = privilegeActionsMap.get(privilege)!; // always defined
-    const value = acc.get(type) ?? ({} as Record<T, EnsureAuthorizedActionResult>);
-    const record: EnsureAuthorizedActionResult = value[action as T] ?? { authorizedSpaces: [] };
+    const actionAuthorizations = acc.get(type) ?? ({} as Record<T, EnsureAuthorizedActionResult>);
+    const authorization: EnsureAuthorizedActionResult = actionAuthorizations[action] ?? {
+      authorizedSpaces: [],
+    };
+
     if (resource === undefined) {
-      return acc.set(type, { ...value, [action]: { ...record, isGloballyAuthorized: true } });
+      return acc.set(type, {
+        ...actionAuthorizations,
+        [action]: { ...authorization, isGloballyAuthorized: true },
+      });
     }
-    const authorizedSpaces = record.authorizedSpaces.concat(resource);
-    return acc.set(type, { ...value, [action]: { ...record, authorizedSpaces } });
+
+    return acc.set(type, {
+      ...actionAuthorizations,
+      [action]: {
+        ...authorization,
+        authorizedSpaces: authorization.authorizedSpaces.concat(resource),
+      },
+    });
   }, new Map());
 
   if (hasAllRequested) {
     return { typeActionMap, status: 'fully_authorized' };
-  } else if (!requireFullAuthorization) {
+  }
+
+  if (!requireFullAuthorization) {
     const isPartiallyAuthorized = typeActionMap.size > 0;
     if (isPartiallyAuthorized) {
       return { typeActionMap, status: 'partially_authorized' };
     } else {
       return { typeActionMap, status: 'unauthorized' };
     }
-  } else {
-    const uniqueUnauthorizedPrivileges = [...missingPrivileges.entries()].reduce(
-      (acc, [, privilegeSet]) => new Set([...acc, ...privilegeSet]),
-      new Set<string>()
-    );
-    const targetTypesAndActions = [...uniqueUnauthorizedPrivileges]
-      .map((privilege) => {
-        const { type, action } = privilegeActionsMap.get(privilege)!;
-        return `(${action} ${type})`;
-      })
-      .sort()
-      .join(',');
-    const msg = `Unable to ${targetTypesAndActions}`;
-    throw deps.errors.decorateForbiddenError(new Error(msg));
   }
+
+  // Neither fully nor partially authorized. Bail with error.
+  const uniqueUnauthorizedPrivileges = [...missingPrivileges.entries()].reduce(
+    (acc, [, privilegeSet]) => new Set([...acc, ...privilegeSet]),
+    new Set<string>()
+  );
+  const targetTypesAndActions = [...uniqueUnauthorizedPrivileges]
+    .map((privilege) => {
+      const { type, action } = privilegeActionsMap.get(privilege)!;
+      return `(${action} ${type})`;
+    })
+    .sort()
+    .join(',');
+  const msg = `Unable to ${targetTypesAndActions}`;
+  throw deps.errors.decorateForbiddenError(new Error(msg));
+}
+
+/**
+ * Helper function that, given an `EnsureAuthorizedResult`, checks to see what spaces the user is authorized to perform a given action for
+ * the given object type.
+ *
+ * @param {string} objectType the object type to check.
+ * @param {T} action the action to check.
+ * @param {EnsureAuthorizedResult<T>['typeActionMap']} typeActionMap the typeActionMap from an EnsureAuthorizedResult.
+ */
+export function getEnsureAuthorizedActionResult<T extends string>(
+  objectType: string,
+  action: T,
+  typeActionMap: EnsureAuthorizedResult<T>['typeActionMap']
+): EnsureAuthorizedActionResult {
+  const record = typeActionMap.get(objectType) ?? ({} as Record<T, EnsureAuthorizedActionResult>);
+  return record[action] ?? { authorizedSpaces: [] };
 }
 
 async function checkPrivileges(

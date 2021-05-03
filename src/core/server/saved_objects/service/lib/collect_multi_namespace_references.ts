@@ -13,7 +13,6 @@ import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
 import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
-import { SavedObjectsFindResult } from '../saved_objects_client';
 import { getRootFields } from './included_fields';
 import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';
 import type {
@@ -38,8 +37,6 @@ const ALIAS_SEARCH_PER_PAGE = 100;
  *
  * Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with
  * the `namespaceType: 'multi'`).
- *
- * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesObject {
   id: string;
@@ -48,8 +45,6 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject {
 
 /**
  * Options for collecting references.
- *
- * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesOptions
   extends SavedObjectsBaseOptions {
@@ -63,8 +58,6 @@ export interface SavedObjectsCollectMultiNamespaceReferencesOptions
 
 /**
  * A returned input object or one of its references, with additional context.
- *
- * @public
  */
 export interface SavedObjectReferenceWithContext {
   /** The type of the referenced object */
@@ -93,13 +86,14 @@ export interface SavedObjectReferenceWithContext {
 
 /**
  * The response when object references are collected.
- *
- * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
   objects: SavedObjectReferenceWithContext[];
 }
 
+/**
+ * Parameters for the collectMultiNamespaceReferences function.
+ */
 export interface CollectMultiNamespaceReferencesParams {
   registry: ISavedObjectTypeRegistry;
   allowedTypes: string[];
@@ -256,16 +250,14 @@ async function checkLegacyUrlAliases(
   const aliasesMap = new Map<string, Set<string>>();
   let error: Error | undefined;
   try {
-    const responses: Array<SavedObjectsFindResult<LegacyUrlAlias>> = [];
-    for await (const response of finder.find()) {
-      responses.push(...response.saved_objects);
-    }
-    for (const alias of responses) {
-      const { sourceId, targetType, targetNamespace } = alias.attributes;
-      const key = getKey({ type: targetType, id: sourceId });
-      const val = aliasesMap.get(key) ?? new Set<string>();
-      val.add(targetNamespace);
-      aliasesMap.set(key, val);
+    for await (const { saved_objects: savedObjects } of finder.find()) {
+      for (const alias of savedObjects) {
+        const { sourceId, targetType, targetNamespace } = alias.attributes;
+        const key = getKey({ type: targetType, id: sourceId });
+        const val = aliasesMap.get(key) ?? new Set<string>();
+        val.add(targetNamespace);
+        aliasesMap.set(key, val);
+      }
     }
   } catch (e) {
     error = e;

@@ -10,5 +10,8 @@ import type { ensureAuthorized } from './ensure_authorized';
 export const mockEnsureAuthorized = jest.fn() as jest.MockedFunction<typeof ensureAuthorized>;
 
 jest.mock('./ensure_authorized', () => {
-  return { ensureAuthorized: mockEnsureAuthorized };
+  return {
+    ...jest.requireActual('./ensure_authorized'),
+    ensureAuthorized: mockEnsureAuthorized,
+  };
 });

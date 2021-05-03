@@ -39,12 +39,11 @@ import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
 import type { SpacesService } from '../plugin';
 import type {
-  EnsureAuthorizedActionResult,
   EnsureAuthorizedDependencies,
   EnsureAuthorizedOptions,
   EnsureAuthorizedResult,
 } from './ensure_authorized';
-import { ensureAuthorized } from './ensure_authorized';
+import { ensureAuthorized, getEnsureAuthorizedActionResult } from './ensure_authorized';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -668,7 +667,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       )
     );
 
-    const { typeActionMap } = await this.ensureAuthorized<'bulk_get' | 'share_to_space'>(
+    const { typeActionMap } = await this.ensureAuthorized(
       uniqueTypes,
       options.purpose === 'updateObjectsSpaces' ? ['bulk_get', 'share_to_space'] : ['bulk_get'],
       uniqueSpaces,
@@ -706,12 +705,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       const found = filteredObjectsMap.get(`${inbound.type}:${inbound.id}`);
       return found && !found.isMissing; // If true, this object can be linked back to one of the requested objects
     };
-    const loopCount = 0;
-    const recursiveLoop = (objs: SavedObjectReferenceWithContext[]) => {
-      if (!objs.length) {
-        return;
-      }
-      const obj = objs.shift()!;
+    let loopCount = 0;
+    let objectsToProcess = [...response.objects];
+    while (++loopCount && objectsToProcess.length > 0) {
+      const obj = objectsToProcess.shift()!;
       const { type, id, spaces, inboundReferences } = obj;
       const objKey = `${type}:${id}`;
       traversedObjects.add(objKey);
@@ -752,15 +749,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         isAuthorizedForObject &&
         !isAuthorizedForGraph &&
         inboundReferences.some((x) => !traversedObjects.has(`${x.type}:${x.id}`)) &&
-        loopCount < response.objects.length // circuit-breaker to prevent infinite loops
+        loopCount <= response.objects.length // circuit-breaker to prevent infinite loops
       ) {
         // this object has inbound reference(s) that we haven't traversed yet; bump it to the back of the list
-        recursiveLoop([...objs, obj]);
-        return;
+        objectsToProcess = [...objectsToProcess, obj];
       }
-      recursiveLoop(objs);
-    };
-    recursiveLoop(response.objects);
+    }
 
     const filteredAndRedactedObjects = [...filteredObjectsMap.values()].map((obj) => {
       const { type, id, spaces, spacesWithMatchingAliases, inboundReferences } = obj;
@@ -813,7 +807,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     });
 
     const uniqueTypes = this.getUniqueObjectTypes(objects);
-    const { typeActionMap } = await this.ensureAuthorized<'bulk_get' | 'share_to_space'>(
+    const { typeActionMap } = await this.ensureAuthorized(
       uniqueTypes,
       ['bulk_get', 'share_to_space'],
       Array.from(allSpacesSet),
@@ -963,7 +957,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   /** Unlike `legacyEnsureAuthorized`, this accepts multiple actions, and it does not utilize legacy audit logging */
   private async ensureAuthorized<T extends string>(
     types: string[],
-    actions: string[],
+    actions: T[],
     namespaces: string[],
     options?: EnsureAuthorizedOptions
   ) {
@@ -972,7 +966,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       errors: this.errors,
       checkSavedObjectsPrivilegesAsCurrentUser: this.checkSavedObjectsPrivilegesAsCurrentUser,
     };
-    return ensureAuthorized<T>(ensureAuthorizedDependencies, types, actions, namespaces, options);
+    return ensureAuthorized(ensureAuthorizedDependencies, types, actions, namespaces, options);
   }
 
   /**
@@ -1146,7 +1140,7 @@ function isAuthorizedForObjectInAllSpaces<T extends string>(
   typeActionMap: EnsureAuthorizedResult<T>['typeActionMap'],
   spacesToAuthorizeFor: string[]
 ) {
-  const actionResult = getEnsureAuthorizedV2ActionResult(objectType, action, typeActionMap);
+  const actionResult = getEnsureAuthorizedActionResult(objectType, action, typeActionMap);
   const { authorizedSpaces, isGloballyAuthorized } = actionResult;
   const authorizedSpacesSet = new Set(authorizedSpaces);
   return (
@@ -1160,7 +1154,7 @@ function getRedactedSpaces<T extends string>(
   typeActionMap: EnsureAuthorizedResult<T>['typeActionMap'],
   spacesToRedact: string[]
 ) {
-  const actionResult = getEnsureAuthorizedV2ActionResult(objectType, action, typeActionMap);
+  const actionResult = getEnsureAuthorizedActionResult(objectType, action, typeActionMap);
   const { authorizedSpaces, isGloballyAuthorized } = actionResult;
   const authorizedSpacesSet = new Set(authorizedSpaces);
   return spacesToRedact
@@ -1168,13 +1162,4 @@ function getRedactedSpaces<T extends string>(
       isGloballyAuthorized || x === ALL_SPACES_ID || authorizedSpacesSet.has(x) ? x : UNKNOWN_SPACE
     )
     .sort(namespaceComparator);
-}
-
-function getEnsureAuthorizedV2ActionResult<T extends string>(
-  objectType: string,
-  action: T,
-  typeActionMap: EnsureAuthorizedResult<T>['typeActionMap']
-): EnsureAuthorizedActionResult {
-  const record = typeActionMap.get(objectType) ?? ({} as Record<T, EnsureAuthorizedActionResult>);
-  return record[action] ?? { authorizedSpaces: [] };
 }

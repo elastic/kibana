@@ -10,7 +10,8 @@ import type { SavedObjectsClientContract } from 'src/core/server';
 import type { CheckSavedObjectsPrivileges } from '../authorization';
 import { Actions } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
-import { ensureAuthorized } from './ensure_authorized';
+import type { EnsureAuthorizedResult } from './ensure_authorized';
+import { ensureAuthorized, getEnsureAuthorizedActionResult } from './ensure_authorized';
 
 describe('ensureAuthorized', () => {
   function setupDependencies() {
@@ -205,5 +206,21 @@ describe('ensureAuthorized', () => {
       const result = await ensureAuthorized(deps, types, actions, namespaces, options);
       expect(result).toEqual({ status: 'unauthorized', typeActionMap: new Map() });
     });
+  });
+});
+
+describe('getEnsureAuthorizedActionResult', () => {
+  const typeActionMap: EnsureAuthorizedResult<'action'>['typeActionMap'] = new Map([
+    ['type', { action: { authorizedSpaces: ['space-id'] } }],
+  ]);
+
+  test('returns the appropriate result if it is in the typeActionMap', () => {
+    const result = getEnsureAuthorizedActionResult('type', 'action', typeActionMap);
+    expect(result).toEqual({ authorizedSpaces: ['space-id'] });
+  });
+
+  test('returns an unauthorized result if it is not in the typeActionMap', () => {
+    const result = getEnsureAuthorizedActionResult('other-type', 'action', typeActionMap);
+    expect(result).toEqual({ authorizedSpaces: [] });
   });
 });
