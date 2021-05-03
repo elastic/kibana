@@ -261,7 +261,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 })
               }
               timeBuckets={timeBuckets}
-              showLegend={false}
+              showLegend={true}
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}

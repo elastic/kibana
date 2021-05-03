@@ -5314,7 +5314,10 @@
             "deprecation_logging": {
               "properties": {
                 "enabled": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Whether user has enabled Elasticsearch deprecation logging"
+                  }
                 }
               }
             }
@@ -5323,13 +5326,28 @@
         "ui_open": {
           "properties": {
             "cluster": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
+              }
             },
             "indices": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
+              }
             },
             "overview": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the Overview page."
+              }
+            },
+            "kibana": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times a user viewed the list of Kibana deprecations"
+              }
             }
           }
         },

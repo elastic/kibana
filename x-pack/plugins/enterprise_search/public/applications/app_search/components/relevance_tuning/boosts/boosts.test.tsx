@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaType } from '../../../../shared/schema/types';
 
 import { BoostType } from '../types';
 
@@ -35,7 +35,7 @@ describe('Boosts', () => {
 
   const props = {
     name: 'foo',
-    type: 'number' as SchemaTypes,
+    type: SchemaType.Number,
   };
 
   it('renders a select box that allows users to create boosts of various types', () => {
@@ -55,7 +55,7 @@ describe('Boosts', () => {
       <Boosts
         {...{
           ...props,
-          type: 'text' as SchemaTypes,
+          type: SchemaType.Text,
         }}
       />
     );
@@ -69,7 +69,7 @@ describe('Boosts', () => {
       <Boosts
         {...{
           ...props,
-          type: 'geolocation' as SchemaTypes,
+          type: SchemaType.Geolocation,
         }}
       />
     );
@@ -83,7 +83,7 @@ describe('Boosts', () => {
       <Boosts
         {...{
           ...props,
-          type: 'date' as SchemaTypes,
+          type: SchemaType.Date,
         }}
       />
     );
