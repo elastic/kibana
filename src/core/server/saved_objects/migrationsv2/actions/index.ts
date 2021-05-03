@@ -559,7 +559,7 @@ export const refreshIndex = (
     .refresh({
       index: targetIndex,
     })
-    .then((res) => {
+    .then(() => {
       return Either.right({ refreshed: true });
     })
     .catch(catchRetryableEsClientErrors);

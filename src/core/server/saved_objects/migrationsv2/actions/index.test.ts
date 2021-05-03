@@ -263,4 +263,17 @@ describe('actions', () => {
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
     });
   });
+
+  describe('refreshIndex', () => {
+    it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
+      const task = Actions.refreshIndex(client, 'target_index');
+      try {
+        await task();
+      } catch (e) {
+        /** ignore */
+      }
+
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+  });
 });
