@@ -21,14 +21,13 @@ import { TrialCallout } from '../trial_callout';
 import { ProductSelector } from './';
 
 describe('ProductSelector', () => {
-  it('renders the overview page, product cards, setup guide CTAs, & callouts with no host set', () => {
+  it('renders the overview page, product cards, & setup guide CTAs with no host set', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<ProductSelector access={{}} />);
 
     expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
     expect(wrapper.find(ProductCard)).toHaveLength(2);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
-    expect(wrapper.find(TrialCallout)).toHaveLength(1);
     expect(wrapper.find(LicenseCallout)).toHaveLength(0);
   });
 
@@ -61,9 +60,10 @@ describe('ProductSelector', () => {
       expect(wrapper.find(ProductCard)).toHaveLength(0);
     });
 
-    it('renders the license callout', () => {
+    it('renders the license and trial callouts', () => {
       const wrapper = shallow(<ProductSelector access={{}} />);
 
+      expect(wrapper.find(TrialCallout)).toHaveLength(1);
       expect(wrapper.find(LicenseCallout)).toHaveLength(1);
     });
   });
