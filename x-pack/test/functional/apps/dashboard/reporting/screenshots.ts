@@ -184,9 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Preserve Layout', () => {
-      it('downloads a PDF file', async function () {
-        // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-        // function is taking about 15 seconds per comparison in jenkins.
+      it('downloads a PDF file: small dashboard', async function () {
         this.timeout(300000);
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
@@ -200,10 +198,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(res.get('content-type')).to.equal('application/pdf');
       });
 
+      it('downloads a PDF file: large dashboard', async function () {
+        this.timeout(300000);
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard('Large Dashboard');
+        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.clickGenerateReportButton();
+
+        const url = await PageObjects.reporting.getReportURL(60000);
+        const res = await PageObjects.reporting.getResponse(url);
+
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('application/pdf');
+      });
+
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
         await kibanaServer.uiSettings.replace({ 'doc_table:legacy': false });
-        // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-        // function is taking about 15 seconds per comparison in jenkins.
         this.timeout(300000);
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
