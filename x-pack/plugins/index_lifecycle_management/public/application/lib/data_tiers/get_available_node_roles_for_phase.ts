@@ -13,6 +13,8 @@ import {
 
 import { phaseToNodePreferenceMap } from '../../../../common/constants';
 
+export type AllocationNodeRole = DataTierRole | 'none';
+
 /**
  * Given a phase and current cluster node roles, determine which nodes the phase
  * will allocate data to. For instance, for the warm phase, with warm
@@ -24,7 +26,7 @@ import { phaseToNodePreferenceMap } from '../../../../common/constants';
 export const getAvailableNodeRoleForPhase = (
   phase: PhaseWithAllocation,
   nodesByRoles: ListNodesRouteResponse['nodesByRoles']
-): DataTierRole | undefined => {
+): AllocationNodeRole => {
   const preferredNodeRoles = phaseToNodePreferenceMap[phase];
 
   // The 'data' role covers all node roles, so if we have at least one node with the data role
@@ -33,5 +35,5 @@ export const getAvailableNodeRoleForPhase = (
     return preferredNodeRoles[0];
   }
 
-  return preferredNodeRoles.find((role) => Boolean(nodesByRoles[role]?.length));
+  return preferredNodeRoles.find((role) => Boolean(nodesByRoles[role]?.length)) ?? 'none';
 };

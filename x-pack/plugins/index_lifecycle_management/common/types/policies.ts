@@ -7,7 +7,7 @@
 
 import { Index as IndexInterface } from '../../../index_management/common/types';
 
-export type PhaseWithAllocation = 'warm' | 'cold';
+export type PhaseWithAllocation = 'warm' | 'cold' | 'frozen';
 
 export interface SerializedPolicy {
   name: string;
