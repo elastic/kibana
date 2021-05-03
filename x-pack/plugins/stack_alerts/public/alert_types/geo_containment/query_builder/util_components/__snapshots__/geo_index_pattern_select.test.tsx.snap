@@ -31,37 +31,6 @@ exports[`should render with error when index pattern does not have geo_point fie
 </Fragment>
 `;
 
-exports[`should render without error after  1`] = `
-<Fragment>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    error=""
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    isInvalid={false}
-    label="Index pattern"
-    labelType="label"
-  >
-    <MockIndexPatternSelectComponent
-      fieldTypes={
-        Array [
-          "geo_point",
-        ]
-      }
-      indexPatternId="foobar_with_geopoint"
-      isClearable={false}
-      isDisabled={false}
-      isInvalid={false}
-      onChange={[Function]}
-      onNoIndexPatterns={[Function]}
-      placeholder="Select index pattern"
-    />
-  </EuiFormRow>
-</Fragment>
-`;
-
 exports[`should render without error after mounting 1`] = `
 <Fragment>
   <EuiFormRow

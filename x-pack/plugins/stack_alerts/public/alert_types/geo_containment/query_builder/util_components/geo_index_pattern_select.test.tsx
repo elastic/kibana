@@ -65,11 +65,9 @@ test('should render with error when index pattern does not have geo_point field'
     />
   );
 
-  // componentDidMount has async check
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      expect(component).toMatchSnapshot();
-      resolve(true);
-    }, 1);
-  });
+  // Ensure all promises resolve
+  await new Promise((resolve) => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
+  expect(component).toMatchSnapshot();
 });
