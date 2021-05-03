@@ -6,7 +6,7 @@ kibanaLibrary.load()
 kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
   slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
     githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
+      ciStats.trackBuild(requireSuccess: githubPr.isPr()) {
         catchError {
           retryable.enable()
           kibanaPipeline.allCiTasks()
