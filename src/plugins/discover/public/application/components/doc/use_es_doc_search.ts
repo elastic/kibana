@@ -49,7 +49,7 @@ export function buildSearchBody(
     return undefined;
   }
   if (useNewFieldsApi) {
-    // @ts-ignore
+    // @ts-expect-error
     request.body.fields = [{ field: '*', include_unmapped: 'true' }];
     request.body.runtime_mappings = runtimeFields ? runtimeFields : {};
   } else {
