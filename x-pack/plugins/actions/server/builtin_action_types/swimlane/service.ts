@@ -52,6 +52,7 @@ export const createExternalService = (
     try {
       const mappingConfig = mappings as MappingConfigType;
       const data = getBodyForEventAction(appId, mappingConfig, params);
+      console.log('data', JSON.stringify(data));
       const res = await request({
         axios: axiosInstance,
         url: getPostRecordUrl(appId),
@@ -61,6 +62,7 @@ export const createExternalService = (
         method: 'post',
         data,
       });
+      // console.log('res', res);
       return { id: res.data.id };
     } catch (error) {
       throw new Error(

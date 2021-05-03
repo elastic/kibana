@@ -84,8 +84,14 @@ export interface ExternalServiceApi {
 }
 
 export type SwimlaneExecutorResultData = CreateRecordResponse;
+export type SwimlaneDataValues = Record<string, string | number>;
+export type SwimlaneDataComments = Record<
+  string,
+  Array<{ fieldId: string; message: string | number; createdDate: string; isRichText: boolean }>
+>;
 
 export interface SwimlaneRecordPayload {
   applicationId: string;
-  values?: Record<string, string | number>;
+  values?: SwimlaneDataValues;
+  comments?: SwimlaneDataComments;
 }

@@ -21,7 +21,7 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
   const { mappings } = action.config;
 
   const options = fields
-    .filter((f) => f.fieldType === 'text')
+    .filter((f) => f.fieldType === 'text' || f.fieldType === 'comments')
     .map((f) => ({ label: `${f.name} (${f.key})`, value: f.id }))
     .sort((a, b) => (a.label?.toLowerCase() > b.label?.toLowerCase() ? 1 : -1));
 

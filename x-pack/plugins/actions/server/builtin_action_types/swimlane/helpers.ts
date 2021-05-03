@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { CreateRecordParams, MappingConfigType, SwimlaneRecordPayload } from './types';
+import {
+  CreateRecordParams,
+  MappingConfigType,
+  SwimlaneRecordPayload,
+  SwimlaneDataComments,
+  SwimlaneDataValues,
+} from './types';
 
 export const getBodyForEventAction = (
   applicationId: string,
@@ -16,7 +22,8 @@ export const getBodyForEventAction = (
     applicationId,
   };
 
-  const values: Record<string, string | number> = {};
+  const values: SwimlaneDataValues = {};
+  const comments: SwimlaneDataComments = {};
 
   for (const mappingsKey in mappingConfig) {
     if (!Object.hasOwnProperty.call(mappingConfig, mappingsKey)) {
@@ -29,12 +36,24 @@ export const getBodyForEventAction = (
       continue;
     }
 
+    const createdDate = new Date().toISOString();
     const { id, fieldType } = fieldMap;
     const paramName = mappingsKey.replace('Config', '');
     if (params[paramName]) {
       const value = params[paramName];
       if (value) {
         switch (fieldType) {
+          case 'comments': {
+            if (comments[id] != null) {
+              comments[id] = [
+                ...comments[id],
+                { fieldId: id, message: value, createdDate, isRichText: true },
+              ];
+            } else {
+              comments[id] = [{ fieldId: id, message: value, createdDate, isRichText: true }];
+            }
+            break;
+          }
           case 'numeric': {
             values[id] = +value;
             break;
@@ -49,6 +68,9 @@ export const getBodyForEventAction = (
   }
 
   data.values = values;
+  if (Object.keys(comments).length) {
+    data.comments = comments;
+  }
 
   return data;
 };

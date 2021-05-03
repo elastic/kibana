@@ -17,12 +17,12 @@ export const ConfigMap = {
 export const ConfigMapSchema = schema.object(ConfigMap);
 
 export const ConfigMapping = {
-  alertSourceConfig: ConfigMapSchema,
-  severityConfig: ConfigMapSchema,
-  caseNameConfig: schema.nullable(ConfigMapSchema),
-  caseIdConfig: ConfigMapSchema,
   alertNameConfig: ConfigMapSchema,
+  alertSourceConfig: ConfigMapSchema,
+  caseIdConfig: ConfigMapSchema,
+  caseNameConfig: schema.nullable(ConfigMapSchema),
   commentsConfig: schema.nullable(ConfigMapSchema),
+  severityConfig: ConfigMapSchema,
 };
 
 export const ConfigMappingSchema = schema.object(ConfigMapping);
@@ -49,11 +49,11 @@ export const ExecutorSubActionSchema = schema.oneOf([
 
 export const ExecutorSubActionCreateRecordParamsSchema = schema.object({
   alertName: schema.nullable(schema.string()),
-  severity: schema.nullable(schema.string()),
   alertSource: schema.nullable(schema.string()),
-  caseName: schema.nullable(schema.string()),
   caseId: schema.nullable(schema.string()),
+  caseName: schema.nullable(schema.string()),
   comments: schema.nullable(schema.string()),
+  severity: schema.nullable(schema.string()),
 });
 
 export const ExecutorSubActionGetApplicationParamsSchema = schema.object({ id: schema.string() });
