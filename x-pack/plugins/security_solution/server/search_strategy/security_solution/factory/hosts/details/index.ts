@@ -49,6 +49,9 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
           ? formattedHostItem.endpoint.id[0]
           : formattedHostItem.endpoint.id
         : null;
+    if (deps == null) {
+      return { ...response, inspect, hostDetails: { ...formattedHostItem } };
+    }
     const endpoint: EndpointFields | null = await getHostEndpoint(ident, deps);
     return { ...response, inspect, hostDetails: { ...formattedHostItem, endpoint } };
   },
