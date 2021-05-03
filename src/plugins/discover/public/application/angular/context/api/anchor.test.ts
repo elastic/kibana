@@ -147,7 +147,9 @@ describe('context app', function () {
 
   describe('useNewFields API', () => {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }]);
+      searchSourceStub = createSearchSourceStub([
+        { _id: 'hit1', fields: [], sort: [], _source: {} },
+      ]);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub, true);
     });
 

@@ -10,7 +10,13 @@ import sinon from 'sinon';
 import moment from 'moment';
 
 import { IndexPatternsContract } from '../../../../../../data/public';
-import { EsHitRecord, EsHitRecordList } from './context';
+import { EsHitRecordList } from './context';
+
+type SortHit = {
+  [key in string]: number; // timeField name
+} & {
+  sort: [number, number];
+};
 
 export function createIndexPatternsStub() {
   return ({
@@ -27,7 +33,7 @@ export function createIndexPatternsStub() {
 /**
  * A stubbed search source with a `fetch` method that returns all of `_stubHits`.
  */
-export function createSearchSourceStub(hits: Array<Partial<EsHitRecord>>, timeField?: string) {
+export function createSearchSourceStub(hits: EsHitRecordList, timeField?: string) {
   const searchSourceStub: any = {
     _stubHits: hits,
     _stubTimeField: timeField,
@@ -57,22 +63,22 @@ export function createSearchSourceStub(hits: Array<Partial<EsHitRecord>>, timeFi
 /**
  * A stubbed search source with a `fetch` method that returns a filtered set of `_stubHits`.
  */
-export function createContextSearchSourceStub(hits: EsHitRecordList, timeFieldName = '@timestamp') {
-  const searchSourceStub = createSearchSourceStub(hits, timeFieldName);
+export function createContextSearchSourceStub(timeFieldName: string) {
+  const searchSourceStub = createSearchSourceStub([], timeFieldName);
 
   searchSourceStub.fetch = sinon.spy(() => {
-    const timeField: keyof EsHitRecord = searchSourceStub._stubTimeField;
+    const timeField: keyof SortHit = searchSourceStub._stubTimeField;
     const lastQuery = searchSourceStub.setField.withArgs('query').lastCall.args[1];
     const timeRange = lastQuery.query.bool.must.constant_score.filter.range[timeField];
     const lastSort = searchSourceStub.setField.withArgs('sort').lastCall.args[1];
     const sortDirection = lastSort[0][timeField].order;
     const sortFunction =
       sortDirection === 'asc'
-        ? (first: any, second: any) => first[timeField] - second[timeField]
-        : (first: any, second: any) => second[timeField] - first[timeField];
+        ? (first: SortHit, second: SortHit) => first[timeField] - second[timeField]
+        : (first: SortHit, second: SortHit) => second[timeField] - first[timeField];
     const filteredHits = searchSourceStub._stubHits
       .filter(
-        (hit: EsHitRecord) =>
+        (hit: SortHit) =>
           moment(hit[timeField]).isSameOrAfter(timeRange.gte) &&
           moment(hit[timeField]).isSameOrBefore(timeRange.lte)
       )

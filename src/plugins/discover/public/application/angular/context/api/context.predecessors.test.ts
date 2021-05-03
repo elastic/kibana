@@ -41,7 +41,7 @@ describe('context app', function () {
 
   describe('function fetchPredecessors', function () {
     beforeEach(() => {
-      mockSearchSource = createContextSearchSourceStub([], '@timestamp');
+      mockSearchSource = createContextSearchSourceStub('@timestamp');
 
       setServices({
         data: {
@@ -233,7 +233,7 @@ describe('context app', function () {
 
   describe('function fetchPredecessors with useNewFieldsApi set', function () {
     beforeEach(() => {
-      mockSearchSource = createContextSearchSourceStub([], '@timestamp');
+      mockSearchSource = createContextSearchSourceStub('@timestamp');
 
       setServices({
         data: {
