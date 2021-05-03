@@ -113,7 +113,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     dropOntoWorkspace,
     editField,
     removeField,
-    uiActions,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);

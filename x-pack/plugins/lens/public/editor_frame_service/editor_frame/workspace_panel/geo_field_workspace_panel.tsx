@@ -8,7 +8,11 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { i18n } from '@kbn/i18n';
+import {
+  UiActionsStart,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+} from '../../../../../../../src/plugins/ui_actions/public';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { DragDrop } from '../../../drag_drop';
 import './geo_field_workspace_panel.scss';
@@ -20,9 +24,23 @@ interface Props {
   uiActions: UiActionsStart;
 }
 
+const dragDropIdentifier = {
+  id: 'lnsGeoFieldWorkspace',
+  humanData: {
+    label: i18n.translate('xpack.lens.geoFieldWorkspace.workspaceLabel', {
+      defaultMessage: 'Geo field workspace',
+    }),
+  },
+};
+
+const dragDropOrder = [1, 0, 0, 0];
+
 export function GeoFieldWorkspacePanel(props: Props) {
-  async function onDrop() {
-    console.log('onDrop');
+  function onDrop() {
+    props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
+      indexPatternId: props.indexPatternId,
+      fieldName: props.fieldName,
+    });
   }
 
   return (
@@ -37,9 +55,12 @@ export function GeoFieldWorkspacePanel(props: Props) {
       </h2>
       <DragDrop
         className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
+        dataTestSubj="lnsGeoFieldWorkspace"
         draggable={false}
+        dropTypes={['field_add']}
+        order={dragDropOrder}
+        value={dragDropIdentifier}
         onDrop={onDrop}
-        value={props.fieldName}
       >
         <div>
           <FormattedMessage

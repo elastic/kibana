@@ -45,7 +45,7 @@ import {
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
-import { IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
@@ -55,6 +55,7 @@ import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
+import { DraggingIdentifier } from '../drag_drop';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -325,9 +326,17 @@ export function getIndexPatternDatasource({
     getDropProps,
     onDrop,
 
-    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, draggedField: unknown) => {
+    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
+      if (dragging.field === undefined || dragging.indexPatternId === undefined) {
+        return undefined;
+      }
+
+      const draggedField = dragging as DraggingIdentifier & {
+        field: IndexPatternField;
+        indexPatternId: string;
+      };
       const geoFieldType =
-        draggedField.field &&
+        draggedField.field.esTypes &&
         draggedField.field.esTypes.find((esType) => {
           return ['geo_point', 'geo_shape'].includes(esType);
         });

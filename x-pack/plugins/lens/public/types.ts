@@ -216,8 +216,8 @@ export interface Datasource<T = unknown, P = unknown> {
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   getCustomWorkspaceRenderer?: (
     state: T,
-    draggedField: unknown
-  ) => undefined | React.ComponentType<{}>;
+    dragging: DraggingIdentifier
+  ) => undefined | (() => JSX.Element);
   updateStateOnCloseDimension?: (props: {
     layerId: string;
     columnId: string;

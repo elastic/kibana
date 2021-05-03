@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, MouseEvent } from 'react';
+import React, { Component } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -22,14 +22,13 @@ interface Props {
 
 interface State {
   hasLoadedHref: boolean;
-  href: string | null;
+  href?: string;
 }
 
 export class VisualizeGeoFieldButton extends Component<Props, State> {
   private _isMounted = false;
   state: State = {
     hasLoadedHref: false,
-    href: null,
   };
 
   componentWillUnmount() {
@@ -49,26 +48,23 @@ export class VisualizeGeoFieldButton extends Component<Props, State> {
         fieldName: this.props.fieldName,
       }
     );
-    if (!this._isMounted) {
-      return;
+    const triggerOptions = {
+      indexPatternId: this.props.indexPatternId,
+      fieldName: this.props.fieldName,
+      trigger: visualizeGeoFieldTrigger,
+    };
+    const href = actions.length ? await actions[0].getHref?.(triggerOptions) : undefined;
+
+    if (this._isMounted) {
+      this.setState({
+        hasLoadedHref: true,
+        href,
+      });
     }
-
-    const href = actions.length
-      ? await actions[0].getHref?.({
-          indexPatternId: this.props.indexPatternId,
-          fieldName: this.props.fieldName,
-          trigger: visualizeGeoFieldTrigger,
-        })
-      : null;
-
-    this.setState({
-      hasLoadedHref: true,
-      href,
-    });
   }
 
-  onClick = (event: MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    this.props.uiActions.getTrigger(visualizeGeoFieldTrigger).exec({
+  onClick = (event: unknown) => {
+    this.props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
       indexPatternId: this.props.indexPatternId,
       fieldName: this.props.fieldName,
     });
@@ -82,8 +78,6 @@ export class VisualizeGeoFieldButton extends Component<Props, State> {
           onClick={this.onClick}
           href={this.state.href}
           size="s"
-          isLoading={!this.state.hasLoadedHref}
-          isDisabled={this.state.href === null}
           data-test-subj={`lensGeoFieldVisualize-${this.props.fieldName}`}
         >
           <FormattedMessage

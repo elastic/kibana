@@ -342,8 +342,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const renderDragDrop = () => {
     const customWorkspaceRenderer =
-      activeDatasourceId && dragDropContext.dragging
-        ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer(
+      activeDatasourceId &&
+      datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer &&
+      dragDropContext.dragging
+        ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
             datasourceStates[activeDatasourceId].state,
             dragDropContext.dragging
           )
