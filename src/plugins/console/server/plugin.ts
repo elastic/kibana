@@ -18,9 +18,7 @@ import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 
 export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
   log: Logger;
-
   specDefinitionsService = new SpecDefinitionsService();
-
   esLegacyConfigService = new EsLegacyConfigService();
 
   constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
@@ -49,6 +47,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       services: {
         esLegacyConfigService: this.esLegacyConfigService,
         specDefinitionService: this.specDefinitionsService,
+        http,
       },
       proxy: {
         proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),

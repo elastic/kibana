@@ -22,18 +22,19 @@ function toURL(base: string, path: string) {
   return urlResult;
 }
 
-export const handleKibanaRequest = async (
+export const handleKibanaRequest = async ({
   method,
-  path,
+  serverUri,
+  apiPath,
   body,
   query,
   headers,
   proxyHeaders,
   response,
   log,
-  requestHeaders
-) => {
-  const uri = toURL('http://localhost:5601/ltx', path);
+  requestHeaders,
+}) => {
+  const uri = toURL(serverUri, apiPath);
   const kibanaIncomingMessage = await proxyRequest({
     method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
     headers: requestHeaders,

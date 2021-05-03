@@ -72,6 +72,7 @@ function getRequestConfigHeaders(
 export const registerProxyRoute = ({
   router,
   log,
+  services: { http },
   proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
 }: RouteDependencies) => {
   router.post(
@@ -101,18 +102,23 @@ export const registerProxyRoute = ({
       const KIBANA_API_KEYWORD = 'kbn:';
       const isKibanaApiRequest = path.indexOf(KIBANA_API_KEYWORD) === 0;
       if (isKibanaApiRequest) {
-        const kibanaApiPath = path.split(KIBANA_API_KEYWORD)[1];
-        return await handleKibanaRequest(
+        const { protocol, hostname, port } = http.getServerInfo();
+        const basePath = http.basePath.serverBasePath;
+        const serverUri = `${protocol}://${hostname}:${port}${basePath}`;
+        const apiPath = path.split(KIBANA_API_KEYWORD)[1];
+
+        return await handleKibanaRequest({
           method,
-          kibanaApiPath,
+          serverUri,
+          apiPath,
           body,
           query,
           headers,
           proxyHeaders,
           response,
           log,
-          requestHeaders
-        );
+          requestHeaders,
+        });
       }
 
       return await handleEsRequest(
