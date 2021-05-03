@@ -13,8 +13,9 @@ import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/93705
-  describe.skip('monitor state scoping', async () => {
+  const retry = getService('retry');
+
+  describe('monitor state scoping', async () => {
     const numIps = 4; // Must be > 2 for IP uniqueness checks
 
     let dateRangeStart: string;
@@ -194,13 +195,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not return a monitor with mix state if check status filter is up', async () => {
-        const apiResponse = await supertest.get(
-          getBaseUrl(dateRangeStart, dateRangeEnd) + '&statusFilter=up'
-        );
-        const { summaries } = apiResponse.body;
+        await retry.try(async () => {
+          const apiResponse = await supertest.get(
+            getBaseUrl(dateRangeStart, dateRangeEnd) + '&statusFilter=up'
+          );
+          const { summaries } = apiResponse.body;
 
-        expect(summaries.length).to.eql(1);
-        expect(summaries[0].monitor_id).to.eql(upMonitorId);
+          expect(summaries.length).to.eql(1);
+          expect(summaries[0].monitor_id).to.eql(upMonitorId);
+        });
       });
     });
   });
