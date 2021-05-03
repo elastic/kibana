@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, htmlIdGenerator } from '@elastic/eui';
 import { VectorLayerDescriptor } from '../../../../maps/common/descriptor_types';
 import {
@@ -65,7 +66,10 @@ export const getChoroplethAnomaliesLayer = (
 ): VectorLayerDescriptor => {
   return {
     id: htmlIdGenerator()(),
-    label: `Anomalies count: ${jobId}`,
+    label: i18n.translate('xpack.ml.anomalyDetectionAlert.actionGroupName', {
+      defaultMessage: 'Anomalies count: {jobId}',
+      values: { jobId },
+    }),
     joins: [
       {
         // Left join is the id from the type of field (e.g. world_countries)
@@ -118,7 +122,7 @@ export const getChoroplethAnomaliesLayer = (
         },
         lineColor: {
           type: STYLE_TYPE.DYNAMIC,
-          options: { color: '#3d3d3d', fieldMetaOptions: { isEnabled: true } },
+          options: { fieldMetaOptions: { isEnabled: true } },
         },
         lineWidth: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       },
@@ -139,7 +143,6 @@ interface MLEMSTermJoinConfig extends EMSTermJoinConfig {
 }
 
 export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
-  const [layerList, setLayerList] = useState<VectorLayerDescriptor[]>([]);
   const [EMSSuggestions, setEMSSuggestions] = useState<
     Array<MLEMSTermJoinConfig | null> | undefined
   >();
@@ -148,41 +151,47 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
   } = useMlKibana();
 
   const getEMSTermSuggestions = useCallback(async (): Promise<void> => {
-    if (mapsPlugin) {
-      const suggestions = await Promise.all(
-        jobIds.map(async (jobId) => {
-          const entityValues = new Set<string>();
-          let entityName;
-          for (let i = 0; i < anomalies.length; i++) {
-            if (jobId === anomalies[i].jobId && anomalies[i].entityValue !== '') {
-              entityValues.add(anomalies[i].entityValue);
+    if (!mapsPlugin) return;
 
-              if (!entityName) {
-                entityName = anomalies[i].entityName;
-              }
+    const suggestions = await Promise.all(
+      jobIds.map(async (jobId) => {
+        const entityValues = new Set<string>();
+        let entityName;
+        for (let i = 0; i < anomalies.length; i++) {
+          if (
+            jobId === anomalies[i].jobId &&
+            anomalies[i].entityValue !== '' &&
+            anomalies[i].entityValue !== undefined &&
+            anomalies[i].entityName !== '' &&
+            anomalies[i].entityName !== undefined
+          ) {
+            entityValues.add(anomalies[i].entityValue);
+
+            if (!entityName) {
+              entityName = anomalies[i].entityName;
             }
-            if (
-              // convert to set so it's unique values
-              entityValues.size === MAX_ENTITY_VALUES ||
-              (anomalies.length > MAX_ENTITY_VALUES && i > Math.floor(anomalies.length / 3))
-            )
-              break;
           }
 
-          const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
-            emsLayerIds: COMMON_EMS_LAYER_IDS,
-            sampleValues: Array.from(entityValues),
-            sampleValuesColumnName: entityName || '',
-          });
-          if (suggestion) {
-            return { jobId, ...suggestion };
-          }
-          return suggestion;
-        })
-      );
+          if (
+            // convert to set so it's unique values
+            entityValues.size === MAX_ENTITY_VALUES
+          )
+            break;
+        }
 
-      setEMSSuggestions(suggestions.filter((s) => s !== null));
-    }
+        const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
+          emsLayerIds: COMMON_EMS_LAYER_IDS,
+          sampleValues: Array.from(entityValues),
+          sampleValuesColumnName: entityName || '',
+        });
+        if (suggestion) {
+          return { jobId, ...suggestion };
+        }
+        return suggestion;
+      })
+    );
+
+    setEMSSuggestions(suggestions.filter((s) => s !== null));
   }, [...jobIds]);
 
   useEffect(
@@ -194,25 +203,22 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
     [...jobIds]
   );
 
-  useEffect(
-    function setupMapLayers() {
-      // Loop through suggestions list and make a layer for each
-      if (EMSSuggestions?.length) {
-        let count = 0;
-        const layers = EMSSuggestions.reduce(function (result, suggestion) {
-          if (suggestion) {
-            const visible = count === 0;
-            result.push(getChoroplethAnomaliesLayer(anomalies, suggestion, visible));
-            count++;
-          }
-          return result;
-        }, [] as VectorLayerDescriptor[]);
-
-        setLayerList(layers);
-      }
-    },
-    [EMSSuggestions, anomalies.length]
-  );
+  const layerList = useMemo(() => {
+    let layers: VectorLayerDescriptor[] = [];
+    // Loop through suggestions list and make a layer for each
+    if (EMSSuggestions?.length) {
+      let count = 0;
+      layers = EMSSuggestions.reduce(function (result, suggestion) {
+        if (suggestion) {
+          const visible = count === 0;
+          result.push(getChoroplethAnomaliesLayer(anomalies, suggestion, visible));
+          count++;
+        }
+        return result;
+      }, [] as VectorLayerDescriptor[]);
+    }
+    return layers;
+  }, [EMSSuggestions, anomalies.length]);
 
   if (EMSSuggestions?.length === 0) {
     return null;
@@ -220,7 +226,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   return (
     <>
-      <EuiPanel data-test-subj="mlAnomalyExplorerAnomaliesMap">
+      <EuiPanel>
         <EuiAccordion
           id="mlAnomalyExplorerAnomaliesMapAccordionId"
           initialIsOpen={true}
@@ -233,7 +239,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
           }
         >
           <div
-            data-test-subj="xpack.ml.explorer.anomaliesMap"
+            data-test-subj="mlAnomalyExplorerAnomaliesMap"
             style={{ width: '100%', height: 300 }}
           >
             <MlEmbeddedMapComponent layerList={layerList} />
