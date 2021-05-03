@@ -69,6 +69,8 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     description,
   } = item;
 
+  const { analytics_config: analyticsConfig, ...restMetaData } = metadata;
+
   const details = {
     description,
     tags,
@@ -149,6 +151,26 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 />
               </EuiPanel>
             </EuiFlexItem>
+            {restMetaData ? (
+              <EuiFlexItem>
+                <EuiPanel>
+                  <EuiTitle size={'xs'}>
+                    <h5>
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.expandedRow.metadataTitle"
+                        defaultMessage="Metadata"
+                      />
+                    </h5>
+                  </EuiTitle>
+                  <EuiSpacer size={'m'} />
+                  <EuiDescriptionList
+                    compressed={true}
+                    type="column"
+                    listItems={formatToListItems(restMetaData)}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGrid>
         </>
       ),
@@ -187,7 +209,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       />
                     </EuiPanel>
                   </EuiFlexItem>
-                  {metadata?.analytics_config && (
+                  {analyticsConfig && (
                     <EuiFlexItem>
                       <EuiPanel>
                         <EuiTitle size={'xs'}>
@@ -202,7 +224,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         <EuiDescriptionList
                           compressed={true}
                           type="column"
-                          listItems={formatToListItems(metadata.analytics_config)}
+                          listItems={formatToListItems(analyticsConfig)}
                         />
                       </EuiPanel>
                     </EuiFlexItem>
