@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isObject } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
 
@@ -119,11 +120,11 @@ export const createSavedQueryService = (
     id: string;
     attributes: SerializedSavedQueryAttributes;
   }) => {
-    let queryString = savedQuery.attributes.query.query;
+    let queryString: string | object = savedQuery.attributes.query.query;
 
     try {
-      const parsedQueryString = JSON.parse(savedQuery.attributes.query.query);
-      if (typeof parsedQueryString === 'object') {
+      const parsedQueryString: object = JSON.parse(savedQuery.attributes.query.query);
+      if (isObject(parsedQueryString)) {
         queryString = parsedQueryString;
       }
     } catch (e) {} // eslint-disable-line no-empty

@@ -296,6 +296,40 @@ describe('saved query service', () => {
       expect(response.attributes.query.query).toEqual({ x: 'y' });
     });
 
+    it('should handle null string', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'food',
+        attributes: {
+          title: 'food',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: 'null',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('food');
+      expect(response.attributes.query.query).toEqual('null');
+    });
+
+    it('should handle null quoted string', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'food',
+        attributes: {
+          title: 'food',
+          description: 'bar',
+          query: {
+            language: 'kuery',
+            query: '"null"',
+          },
+        },
+      });
+
+      const response = await getSavedQuery('food');
+      expect(response.attributes.query.query).toEqual('"null"');
+    });
+
     it('should not lose quotes', async () => {
       mockSavedObjectsClient.get.mockReturnValue({
         id: 'food',
