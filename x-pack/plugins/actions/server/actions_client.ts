@@ -462,7 +462,7 @@ export class ActionsClient {
       })
     );
 
-    return await this.unsecuredSavedObjectsClient.delete('action', id);
+    return await this.unsecuredSavedObjectsClient.delete('action', id, { refresh: false });
   }
 
   public async execute({
