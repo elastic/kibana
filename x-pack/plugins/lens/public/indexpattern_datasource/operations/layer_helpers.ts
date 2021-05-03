@@ -30,6 +30,86 @@ interface ColumnChange {
   shouldResetLabel?: boolean;
 }
 
+interface ColumnCopy {
+  layer: IndexPatternLayer;
+  columnId: string;
+  sourceColumn: IndexPatternColumn;
+  sourceColumnId: string;
+  indexPattern: IndexPattern;
+  shouldDeleteSource?: boolean;
+}
+
+export function copyColumn({
+  layer,
+  columnId,
+  sourceColumn,
+  shouldDeleteSource,
+  indexPattern,
+  sourceColumnId,
+}: ColumnCopy): IndexPatternLayer {
+  let modifiedLayer = {
+    ...layer,
+    columns: copyReferencesRecursively(layer.columns, sourceColumn, columnId),
+  };
+
+  if (shouldDeleteSource) {
+    modifiedLayer = deleteColumn({
+      layer: modifiedLayer,
+      columnId: sourceColumnId,
+      indexPattern,
+    });
+  }
+
+  return modifiedLayer;
+}
+
+function copyReferencesRecursively(
+  columns: Record<string, IndexPatternColumn>,
+  sourceColumn: IndexPatternColumn,
+  columnId: string
+) {
+  if ('references' in sourceColumn) {
+    if (columns[columnId]) {
+      return columns;
+    }
+    sourceColumn?.references.forEach((ref, index) => {
+      // TODO: Add an option to assign IDs without generating the new one
+      const newId = generateId();
+      const refColumn = { ...columns[ref] };
+
+      // TODO: For fullReference types, now all references are hidden columns,
+      // but in the future we will have references to visible columns
+      // and visible columns shouldn't be copied
+      const refColumnWithInnerRefs =
+        'references' in refColumn
+          ? copyReferencesRecursively(columns, refColumn, newId) // if a column has references, copy them too
+          : { [newId]: refColumn };
+
+      const newColumn = columns[columnId];
+      let references = [newId];
+      if (newColumn && 'references' in newColumn) {
+        references = newColumn.references;
+        references[index] = newId;
+      }
+
+      columns = {
+        ...columns,
+        ...refColumnWithInnerRefs,
+        [columnId]: {
+          ...sourceColumn,
+          references,
+        },
+      };
+    });
+  } else {
+    columns = {
+      ...columns,
+      [columnId]: sourceColumn,
+    };
+  }
+  return columns;
+}
+
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
   if (args.layer.columns[args.columnId]) {
     return replaceColumn(args);

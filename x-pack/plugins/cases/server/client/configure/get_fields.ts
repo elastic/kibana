@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import { GetFieldsResponse } from '../../../common/api';
+import { GetFieldsResponse } from '../../../common';
 import { ConfigureFields } from '../types';
 import { createDefaultMapping, formatFields } from './utils';
 
