@@ -20,12 +20,10 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { CANCEL_BUTTON_LABEL } from '../constants';
-import { TEXT, fieldTypeSelectOptions } from '../constants/field_types';
 
 import {
   FIELD_NAME_CORRECT_NOTE,
@@ -34,6 +32,9 @@ import {
   FIELD_NAME_MODAL_DESCRIPTION,
   FIELD_NAME_MODAL_ADD_FIELD,
 } from './constants';
+import { SchemaType } from './types';
+
+import { SchemaFieldTypeSelect } from './';
 
 interface ISchemaAddFieldModalProps {
   disableForm?: boolean;
@@ -49,7 +50,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
   disableForm,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [newFieldType, updateNewFieldType] = useState(TEXT);
+  const [newFieldType, updateNewFieldType] = useState(SchemaType.Text);
   const [formattedFieldName, setFormattedFieldName] = useState('');
   const [rawFieldName, setRawFieldName] = useState('');
 
@@ -112,13 +113,11 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormRow label="Field type" data-test-subj="SchemaAddFieldTypeRow">
-                  <EuiSelect
-                    name="select-add"
-                    required
-                    value={newFieldType}
-                    options={fieldTypeSelectOptions}
+                  <SchemaFieldTypeSelect
+                    fieldName=""
+                    fieldType={newFieldType}
+                    updateExistingFieldType={(_, type: SchemaType) => updateNewFieldType(type)}
                     disabled={disableForm}
-                    onChange={(e) => updateNewFieldType(e.target.value)}
                     data-test-subj="SchemaSelect"
                   />
                 </EuiFormRow>
