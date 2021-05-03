@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Agent,
-  AgentAction,
-  NewAgentAction,
-  NewAgentEvent,
-  AgentEvent,
-  AgentStatus,
-  AgentType,
-} from '../models';
+import type { Agent, AgentAction, NewAgentAction } from '../models';
 
 export interface GetAgentsRequest {
   query: {
@@ -41,52 +33,6 @@ export interface GetOneAgentRequest {
 
 export interface GetOneAgentResponse {
   item: Agent;
-}
-
-export interface PostAgentCheckinRequest {
-  params: {
-    agentId: string;
-  };
-  body: {
-    status?: 'online' | 'error' | 'degraded';
-    local_metadata?: Record<string, any>;
-    events?: NewAgentEvent[];
-  };
-}
-
-export interface PostAgentCheckinResponse {
-  action: string;
-
-  actions: AgentAction[];
-}
-
-export interface PostAgentEnrollRequest {
-  body: {
-    type: AgentType;
-    metadata: {
-      local: Record<string, any>;
-      user_provided: Record<string, any>;
-    };
-  };
-}
-
-export interface PostAgentEnrollResponse {
-  action: string;
-
-  item: Agent & { status: AgentStatus };
-}
-
-export interface PostAgentAcksRequest {
-  body: {
-    events: AgentEvent[];
-  };
-  params: {
-    agentId: string;
-  };
-}
-
-export interface PostAgentAcksResponse {
-  action: string;
 }
 
 export interface PostNewAgentActionRequest {
@@ -184,24 +130,6 @@ export type PostBulkAgentReassignResponse = Record<
     error?: string;
   }
 >;
-
-export interface GetOneAgentEventsRequest {
-  params: {
-    agentId: string;
-  };
-  query: {
-    page: number;
-    perPage: number;
-    kuery?: string;
-  };
-}
-
-export interface GetOneAgentEventsResponse {
-  list: AgentEvent[];
-  total: number;
-  page: number;
-  perPage: number;
-}
 
 export interface DeleteAgentRequest {
   params: {
