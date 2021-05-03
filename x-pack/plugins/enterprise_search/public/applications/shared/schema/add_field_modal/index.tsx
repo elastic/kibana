@@ -24,17 +24,18 @@ import {
 } from '@elastic/eui';
 
 import { CANCEL_BUTTON_LABEL } from '../../constants';
-
-import {
-  FIELD_NAME_CORRECT_NOTE,
-  FIELD_NAME_CORRECTED_PREFIX,
-  FIELD_NAME_MODAL_TITLE,
-  FIELD_NAME_MODAL_DESCRIPTION,
-  FIELD_NAME_MODAL_ADD_FIELD,
-} from '../constants';
+import { FIELD_NAME, FIELD_TYPE } from '../constants';
+import { SchemaFieldTypeSelect } from '../index';
 import { SchemaType } from '../types';
 
-import { SchemaFieldTypeSelect } from '../';
+import {
+  ADD_FIELD_MODAL_TITLE,
+  ADD_FIELD_MODAL_DESCRIPTION,
+  ADD_FIELD_BUTTON,
+  FIELD_NAME_PLACEHOLDER,
+  FIELD_NAME_CORRECT_NOTE,
+  FIELD_NAME_CORRECTED_NOTE,
+} from './constants';
 
 interface ISchemaAddFieldModalProps {
   disableForm?: boolean;
@@ -70,28 +71,24 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
   };
 
   const fieldNameNote =
-    rawFieldName !== formattedFieldName ? (
-      <>
-        {FIELD_NAME_CORRECTED_PREFIX} <strong>{formattedFieldName}</strong>
-      </>
-    ) : (
-      FIELD_NAME_CORRECT_NOTE
-    );
+    rawFieldName !== formattedFieldName
+      ? FIELD_NAME_CORRECTED_NOTE(formattedFieldName)
+      : FIELD_NAME_CORRECT_NOTE;
 
   return (
     <EuiModal onClose={closeAddFieldModal} maxWidth={500}>
       <form onSubmit={submitForm}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{FIELD_NAME_MODAL_TITLE}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{ADD_FIELD_MODAL_TITLE}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <p>{FIELD_NAME_MODAL_DESCRIPTION}</p>
+          <p>{ADD_FIELD_MODAL_DESCRIPTION}</p>
           <EuiForm>
             <EuiSpacer />
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <EuiFormRow
-                  label="Field name"
+                  label={FIELD_NAME}
                   helpText={fieldNameNote}
                   fullWidth
                   data-test-subj="SchemaAddFieldNameRow"
@@ -99,7 +96,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
                   isInvalid={!!addFieldFormErrors}
                 >
                   <EuiFieldText
-                    placeholder="name"
+                    placeholder={FIELD_NAME_PLACEHOLDER}
                     type="text"
                     onChange={handleChange}
                     required
@@ -112,7 +109,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormRow label="Field type" data-test-subj="SchemaAddFieldTypeRow">
+                <EuiFormRow label={FIELD_TYPE} data-test-subj="SchemaAddFieldTypeRow">
                   <SchemaFieldTypeSelect
                     fieldName=""
                     fieldType={newFieldType}
@@ -135,7 +132,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
             isLoading={loading}
             data-test-subj="SchemaAddFieldAddFieldButton"
           >
-            {FIELD_NAME_MODAL_ADD_FIELD}
+            {ADD_FIELD_BUTTON}
           </EuiButton>
         </EuiModalFooter>
       </form>

@@ -10,8 +10,8 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { EuiFieldText, EuiModal } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FIELD_NAME_CORRECTED_PREFIX } from '../constants';
 import { SchemaFieldTypeSelect } from '../index';
 import { SchemaType } from '../types';
 
@@ -69,11 +69,10 @@ describe('SchemaAddFieldModal', () => {
     const input = wrapper.find(EuiFieldText);
     input.simulate('change', { currentTarget: { value: 'foo-bar' } });
 
-    expect(wrapper.find('[data-test-subj="SchemaAddFieldNameRow"]').prop('helpText')).toEqual(
-      <React.Fragment>
-        {FIELD_NAME_CORRECTED_PREFIX} <strong>foo_bar</strong>
-      </React.Fragment>
-    );
+    const helpText = wrapper
+      .find('[data-test-subj="SchemaAddFieldNameRow"]')
+      .prop('helpText') as React.ReactElement;
+    expect(helpText.type).toEqual(FormattedMessage);
   });
 
   it('handles field type select change', () => {
