@@ -14,7 +14,7 @@ import {
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-export const NoTiersAvailableUsingNodeAttrsNotice: FunctionComponent = () => {
+export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () => {
   return (
     <EuiCallOut
       data-test-subj="noTiersAvailableUsingNodeAttributesNotice"

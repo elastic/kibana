@@ -40,7 +40,7 @@ interface Props {
   targetNodeRole: DataTierRole;
 }
 
-export const FallbackTierNotice: FunctionComponent<Props> = ({ phase, targetNodeRole }) => {
+export const WillUseFallbackTierNotice: FunctionComponent<Props> = ({ phase, targetNodeRole }) => {
   return (
     <EuiCallOut data-test-subj="willUseFallbackTierNotice" title={i18nTexts[phase].title}>
       {i18nTexts[phase].body(targetNodeRole)}

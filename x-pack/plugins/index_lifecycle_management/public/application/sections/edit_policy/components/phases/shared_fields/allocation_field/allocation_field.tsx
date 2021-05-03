@@ -17,10 +17,10 @@ import { useLoadNodes } from '../../../../../../services/api';
 import { DataTierAllocationType } from '../../../../types';
 
 import { AllocationSelect } from './allocation_select';
-import { FallbackTierNotice } from './fallback_tier_notice';
-import { FallbackTierUsingNodeAttrsNotice } from './fallback_tier_using_node_attrs_notice';
+import { WillUseFallbackTierNotice } from './will_use_fallback_tier_notice';
+import { WillUseFallbackTierUsingNodeAttributesNotice } from './will_use_fallback_tier_using_node_attributes_notice';
 import { NoTiersAvailableNotice } from './no_tiers_available_notice';
-import { NoTiersAvailableUsingNodeAttrsNotice } from './no_tiers_available_using_node_attrs_notice';
+import { NoTiersAvailableUsingNodeAttributesNotice } from './no_tiers_available_using_node_attributes_notice';
 import { DefaultToDataNodesNotice } from './default_to_data_nodes_notice';
 import { DefaultToDataTiersNotice } from './default_to_data_tiers_notice';
 import { CloudDataTierCallout } from './cloud_data_tier_callout';
@@ -98,7 +98,7 @@ export const AllocationField: FunctionComponent<Props> = ({ phase, description }
           return (
             <>
               <EuiSpacer size="s" />
-              <FallbackTierNotice
+              <WillUseFallbackTierNotice
                 phase={phase}
                 targetNodeRole={allocationNodeRoleForPhase as DataTierRole}
               />
@@ -133,7 +133,7 @@ export const AllocationField: FunctionComponent<Props> = ({ phase, description }
             return (
               <>
                 <EuiSpacer size="s" />
-                <NoTiersAvailableUsingNodeAttrsNotice />
+                <NoTiersAvailableUsingNodeAttributesNotice />
               </>
             );
           }
@@ -146,7 +146,7 @@ export const AllocationField: FunctionComponent<Props> = ({ phase, description }
             return (
               <>
                 <EuiSpacer size="s" />
-                <FallbackTierUsingNodeAttrsNotice
+                <WillUseFallbackTierUsingNodeAttributesNotice
                   phase={phase}
                   targetNodeRole={allocationNodeRoleForPhase as DataTierRole}
                 />
