@@ -85,7 +85,7 @@ Query for a list of rule ids, bucketed by their execution times:
 
 [source,console]
 --------------------------------------------------
-$ GET /.kibana-event-log*/_search
+GET /.kibana-event-log*/_search
 {
   "size": 0,
   "query": {
