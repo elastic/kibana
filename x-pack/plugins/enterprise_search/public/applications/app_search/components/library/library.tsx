@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Schema } from '../../../shared/types';
+import { Schema, SchemaType } from '../../../shared/schema/types';
 import { Result } from '../result';
 
 export const Library: React.FC = () => {
@@ -63,14 +63,14 @@ export const Library: React.FC = () => {
   };
 
   const schema: Schema = {
-    title: 'text',
-    description: 'text',
-    date_established: 'date',
-    location: 'geolocation',
-    states: 'text',
-    visitors: 'number',
-    size: 'number',
-    length: 'number',
+    title: SchemaType.Text,
+    description: SchemaType.Text,
+    date_established: SchemaType.Date,
+    location: SchemaType.Geolocation,
+    states: SchemaType.Text,
+    visitors: SchemaType.Number,
+    size: SchemaType.Number,
+    length: SchemaType.Number,
   };
 
   const [isActionButtonFilled, setIsActionButtonFilled] = useState(false);
