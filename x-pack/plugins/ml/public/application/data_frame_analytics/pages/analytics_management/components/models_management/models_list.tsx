@@ -91,12 +91,6 @@ export const ModelsList: FC = () => {
   );
 
   const searchQueryText = pageState.queryText ?? '';
-  const setSearchQueryText = useCallback(
-    (value) => {
-      updatePageState({ queryText: value });
-    },
-    [updatePageState]
-  );
 
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
@@ -534,9 +528,7 @@ export const ModelsList: FC = () => {
       if (searchChange.error !== null) {
         return false;
       }
-      setSearchQueryText(searchChange.queryText);
-      // Reset pagination
-      updatePageState({ pageIndex: 0 });
+      updatePageState({ queryText: searchChange.queryText, pageIndex: 0 });
       return true;
     },
     box: {
