@@ -8,17 +8,26 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { getServices } from '../../../../kibana_services';
 
-import { fetchAnchorProvider } from '../api/anchor';
-import { fetchContextProvider } from '../api/context';
+import { AnchorHitRecord, fetchAnchorProvider } from '../api/anchor';
+import { EsHitRecord, EsHitRecordList, fetchContextProvider, SurrDocType } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
-import { FAILURE_REASONS, LOADING_STATUS } from './index';
-import { MarkdownSimple } from '../../../../../../kibana_react/public';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
+import {
+  ContextAppState,
+  FailureReason,
+  LoadingStatus,
+  LoadingStatusEntry,
+  LoadingStatusState,
+  QueryParameters,
+} from '../../context_app_state';
 
-export function QueryActionsProvider(Promise) {
+interface DiscoverPromise extends PromiseConstructor {
+  try: <T>(fn: () => Promise<T>) => Promise<T>;
+}
+
+export function QueryActionsProvider(Promise: DiscoverPromise) {
   const { filterManager, indexPatterns, data, uiSettings } = getServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const fetchAnchor = fetchAnchorProvider(
@@ -32,24 +41,27 @@ export function QueryActionsProvider(Promise) {
     indexPatterns
   );
 
-  const setFailedStatus = (state) => (subject, details = {}) =>
+  const setFailedStatus = (state: ContextAppState) => (
+    subject: keyof LoadingStatusState,
+    details: LoadingStatusEntry = {}
+  ) =>
     (state.loadingStatus[subject] = {
-      status: LOADING_STATUS.FAILED,
-      reason: FAILURE_REASONS.UNKNOWN,
+      status: LoadingStatus.FAILED,
+      reason: FailureReason.UNKNOWN,
       ...details,
     });
 
-  const setLoadedStatus = (state) => (subject) =>
+  const setLoadedStatus = (state: ContextAppState) => (subject: keyof LoadingStatusState) =>
     (state.loadingStatus[subject] = {
-      status: LOADING_STATUS.LOADED,
+      status: LoadingStatus.LOADED,
     });
 
-  const setLoadingStatus = (state) => (subject) =>
+  const setLoadingStatus = (state: ContextAppState) => (subject: keyof LoadingStatusState) =>
     (state.loadingStatus[subject] = {
-      status: LOADING_STATUS.LOADING,
+      status: LoadingStatus.LOADING,
     });
 
-  const fetchAnchorRow = (state) => () => {
+  const fetchAnchorRow = (state: ContextAppState) => () => {
     const {
       queryParameters: { indexPatternId, anchorId, sort, tieBreakerField },
     } = state;
@@ -57,7 +69,7 @@ export function QueryActionsProvider(Promise) {
     if (!tieBreakerField) {
       return Promise.reject(
         setFailedStatus(state)('anchor', {
-          reason: FAILURE_REASONS.INVALID_TIEBREAKER,
+          reason: FailureReason.INVALID_TIEBREAKER,
         })
       );
     }
@@ -67,25 +79,25 @@ export function QueryActionsProvider(Promise) {
     return Promise.try(() =>
       fetchAnchor(indexPatternId, anchorId, [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }])
     ).then(
-      (anchorDocument) => {
+      (anchorDocument: AnchorHitRecord) => {
         setLoadedStatus(state)('anchor');
         state.rows.anchor = anchorDocument;
         return anchorDocument;
       },
-      (error) => {
+      (error: Error) => {
         setFailedStatus(state)('anchor', { error });
         getServices().toastNotifications.addDanger({
           title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
             defaultMessage: 'Unable to load the anchor document',
           }),
-          text: <MarkdownSimple>{error.message}</MarkdownSimple>,
+          text: error.message,
         });
         throw error;
       }
     );
   };
 
-  const fetchSurroundingRows = (type, state) => {
+  const fetchSurroundingRows = (type: SurrDocType, state: ContextAppState) => {
     const {
       queryParameters: { indexPatternId, sort, tieBreakerField },
       rows: { anchor },
@@ -100,7 +112,7 @@ export function QueryActionsProvider(Promise) {
     if (!tieBreakerField) {
       return Promise.reject(
         setFailedStatus(state)(type, {
-          reason: FAILURE_REASONS.INVALID_TIEBREAKER,
+          reason: FailureReason.INVALID_TIEBREAKER,
         })
       );
     }
@@ -120,54 +132,62 @@ export function QueryActionsProvider(Promise) {
         filters
       )
     ).then(
-      (documents) => {
+      (documents: EsHitRecordList) => {
         setLoadedStatus(state)(type);
         state.rows[type] = documents;
         return documents;
       },
-      (error) => {
+      (error: Error) => {
         setFailedStatus(state)(type, { error });
         getServices().toastNotifications.addDanger({
           title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
             defaultMessage: 'Unable to load documents',
           }),
-          text: <MarkdownSimple>{error.message}</MarkdownSimple>,
+          text: error.message,
         });
         throw error;
       }
     );
   };
 
-  const fetchContextRows = (state) => () =>
+  const fetchContextRows = (state: ContextAppState) => () =>
     Promise.all([
       fetchSurroundingRows('predecessors', state),
       fetchSurroundingRows('successors', state),
     ]);
 
-  const fetchAllRows = (state) => () =>
+  const fetchAllRows = (state: ContextAppState) => () =>
     Promise.try(fetchAnchorRow(state)).then(fetchContextRows(state));
 
-  const fetchContextRowsWithNewQueryParameters = (state) => (queryParameters) => {
+  const fetchContextRowsWithNewQueryParameters = (state: ContextAppState) => (
+    queryParameters: QueryParameters
+  ) => {
     setQueryParameters(state)(queryParameters);
     return fetchContextRows(state)();
   };
 
-  const fetchAllRowsWithNewQueryParameters = (state) => (queryParameters) => {
+  const fetchAllRowsWithNewQueryParameters = (state: ContextAppState) => (
+    queryParameters: QueryParameters
+  ) => {
     setQueryParameters(state)(queryParameters);
     return fetchAllRows(state)();
   };
 
-  const fetchGivenPredecessorRows = (state) => (count) => {
+  const fetchGivenPredecessorRows = (state: ContextAppState) => (count: number) => {
     setPredecessorCount(state)(count);
     return fetchSurroundingRows('predecessors', state);
   };
 
-  const fetchGivenSuccessorRows = (state) => (count) => {
+  const fetchGivenSuccessorRows = (state: ContextAppState) => (count: number) => {
     setSuccessorCount(state)(count);
     return fetchSurroundingRows('successors', state);
   };
 
-  const setAllRows = (state) => (predecessorRows, anchorRow, successorRows) =>
+  const setAllRows = (state: ContextAppState) => (
+    predecessorRows: EsHitRecordList,
+    anchorRow: EsHitRecord,
+    successorRows: EsHitRecordList
+  ) =>
     (state.rows.all = [
       ...(predecessorRows || []),
       ...(anchorRow ? [anchorRow] : []),

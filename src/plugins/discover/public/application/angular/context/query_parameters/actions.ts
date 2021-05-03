@@ -7,34 +7,46 @@
  */
 
 import _ from 'lodash';
-import { esFilters } from '../../../../../../data/public';
+import { esFilters, Filter, IFieldType } from '../../../../../../data/public';
+import { FilterManager, IndexPatternsContract } from '../../../../../../data/public';
 import { popularizeField } from '../../../helpers/popularize_field';
+import { ContextAppState, QueryParameters } from '../../context_app_state';
 
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './constants';
 
-export function getQueryParameterActions(filterManager, indexPatterns) {
-  const setPredecessorCount = (state) => (predecessorCount) =>
-    (state.queryParameters.predecessorCount = clamp(
+export function getQueryParameterActions(
+  filterManager: FilterManager,
+  indexPatterns?: IndexPatternsContract
+) {
+  const setPredecessorCount = (state: ContextAppState) => (predecessorCount: number) => {
+    return (state.queryParameters.predecessorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
       predecessorCount
     ));
+  };
 
-  const setSuccessorCount = (state) => (successorCount) =>
-    (state.queryParameters.successorCount = clamp(
+  const setSuccessorCount = (state: ContextAppState) => (successorCount: number) => {
+    return (state.queryParameters.successorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
       successorCount
     ));
+  };
 
-  const setQueryParameters = (state) => (queryParameters) =>
-    Object.assign(state.queryParameters, _.pick(queryParameters, QUERY_PARAMETER_KEYS));
+  const setQueryParameters = (state: ContextAppState) => (queryParameters: QueryParameters) => {
+    return Object.assign(state.queryParameters, _.pick(queryParameters, QUERY_PARAMETER_KEYS));
+  };
 
-  const updateFilters = () => (filters) => {
+  const updateFilters = () => (filters: Filter[]) => {
     filterManager.setFilters(filters);
   };
 
-  const addFilter = (state) => async (field, values, operation) => {
+  const addFilter = (state: ContextAppState) => async (
+    field: string | IFieldType,
+    values: any,
+    operation: string
+  ) => {
     const indexPatternId = state.queryParameters.indexPatternId;
     const newFilters = esFilters.generateFilters(
       filterManager,
@@ -46,7 +58,7 @@ export function getQueryParameterActions(filterManager, indexPatterns) {
     filterManager.addFilters(newFilters);
     if (indexPatterns) {
       const indexPattern = await indexPatterns.get(indexPatternId);
-      await popularizeField(indexPattern, field.name, indexPatterns);
+      await popularizeField(indexPattern, (field as IFieldType).name, indexPatterns);
     }
   };
 
@@ -59,6 +71,6 @@ export function getQueryParameterActions(filterManager, indexPatterns) {
   };
 }
 
-function clamp(minimum, maximum, value) {
+function clamp(minimum: number, maximum: number, value: number) {
   return Math.max(Math.min(maximum, value), minimum);
 }

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { LOADING_STATUS } from './index';
+import { LoadingStatus, LoadingStatusState } from '../../context_app_state';
 
-export function createInitialLoadingStatusState() {
+export function createInitialLoadingStatusState(): LoadingStatusState {
   return {
-    anchor: LOADING_STATUS.UNINITIALIZED,
-    predecessors: LOADING_STATUS.UNINITIALIZED,
-    successors: LOADING_STATUS.UNINITIALIZED,
+    anchor: LoadingStatus.UNINITIALIZED,
+    predecessors: LoadingStatus.UNINITIALIZED,
+    successors: LoadingStatus.UNINITIALIZED,
   };
 }

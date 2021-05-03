@@ -9,8 +9,10 @@
 import moment from 'moment';
 import { get, last } from 'lodash';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
-import { fetchContextProvider } from './context';
-import { setServices } from '../../../../kibana_services';
+import { EsHitRecordList, fetchContextProvider } from './context';
+import { setServices, SortDirection } from '../../../../kibana_services';
+import { AnchorHitRecord } from './anchor';
+import { Query } from '../../../../../../data/public';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -18,13 +20,28 @@ const ANCHOR_TIMESTAMP_3 = new Date(MS_PER_DAY * 3).toJSON();
 const ANCHOR_TIMESTAMP_1000 = new Date(MS_PER_DAY * 1000).toJSON();
 const ANCHOR_TIMESTAMP_3000 = new Date(MS_PER_DAY * 3000).toJSON();
 
-describe('context app', function () {
-  describe('function fetchPredecessors', function () {
-    let fetchPredecessors;
-    let mockSearchSource;
+interface Timestamp {
+  format: string;
+  gte?: string;
+  lte?: string;
+}
 
+describe('context app', function () {
+  let fetchPredecessors: (
+    indexPatternId: string,
+    timeField: string,
+    sortDir: SortDirection,
+    timeValIso: string,
+    timeValNr: number,
+    tieBreakerField: string,
+    tieBreakerValue: number,
+    size: number
+  ) => Promise<EsHitRecordList>;
+  let mockSearchSource: any;
+
+  describe('function fetchPredecessors', function () {
     beforeEach(() => {
-      mockSearchSource = createContextSearchSourceStub([], '@timestamp', MS_PER_DAY * 8);
+      mockSearchSource = createContextSearchSourceStub([], '@timestamp');
 
       setServices({
         data: {
@@ -44,7 +61,7 @@ describe('context app', function () {
         timeValNr,
         tieBreakerField,
         tieBreakerValue,
-        size
+        size = 10
       ) => {
         const anchor = {
           _source: {
@@ -56,7 +73,7 @@ describe('context app', function () {
         return fetchContextProvider(createIndexPatternsStub()).fetchSurroundingDocs(
           'predecessors',
           indexPatternId,
-          anchor,
+          anchor as AnchorHitRecord,
           timeField,
           tieBreakerField,
           sortDir,
@@ -78,14 +95,13 @@ describe('context app', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
-        'desc',
+        SortDirection.desc,
         ANCHOR_TIMESTAMP_3000,
         MS_PER_DAY * 3000,
         '_doc',
         0,
-        3,
-        []
-      ).then((hits) => {
+        3
+      ).then((hits: EsHitRecordList) => {
         expect(mockSearchSource.fetch.calledOnce).toBe(true);
         expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
       });
@@ -103,17 +119,16 @@ describe('context app', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
-        'desc',
+        SortDirection.desc,
         ANCHOR_TIMESTAMP_3000,
         MS_PER_DAY * 3000,
         '_doc',
         0,
-        6,
-        []
-      ).then((hits) => {
-        const intervals = mockSearchSource.setField.args
-          .filter(([property]) => property === 'query')
-          .map(([, { query }]) =>
+        6
+      ).then((hits: EsHitRecordList) => {
+        const intervals: Timestamp[] = mockSearchSource.setField.args
+          .filter(([property]: string) => property === 'query')
+          .map(([, { query }]: [string, { query: Query }]) =>
             get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp'])
           );
 
@@ -123,7 +138,7 @@ describe('context app', function () {
         // should have started at the given time
         expect(intervals[0].gte).toEqual(moment(MS_PER_DAY * 3000).toISOString());
         // should have ended with a half-open interval
-        expect(Object.keys(last(intervals))).toEqual(['format', 'gte']);
+        expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
         expect(intervals.length).toBeGreaterThan(1);
 
         expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
@@ -141,24 +156,23 @@ describe('context app', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
-        'desc',
+        SortDirection.desc,
         ANCHOR_TIMESTAMP_1000,
         MS_PER_DAY * 1000,
         '_doc',
         0,
-        3,
-        []
-      ).then((hits) => {
-        const intervals = mockSearchSource.setField.args
-          .filter(([property]) => property === 'query')
-          .map(([, { query }]) =>
-            get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp'])
-          );
+        3
+      ).then((hits: EsHitRecordList) => {
+        const intervals: Timestamp[] = mockSearchSource.setField.args
+          .filter(([property]: string) => property === 'query')
+          .map(([, { query }]: [string, { query: Query }]) => {
+            return get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp']);
+          });
 
         // should have started at the given time
         expect(intervals[0].gte).toEqual(moment(MS_PER_DAY * 1000).toISOString());
         // should have stopped before reaching MS_PER_DAY * 1700
-        expect(moment(last(intervals).lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
+        expect(moment(last(intervals)?.lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
         expect(intervals.length).toBeGreaterThan(1);
         expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
       });
@@ -168,14 +182,13 @@ describe('context app', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
-        'desc',
+        SortDirection.desc,
         ANCHOR_TIMESTAMP_3,
         MS_PER_DAY * 3,
         '_doc',
         0,
-        3,
-        []
-      ).then((hits) => {
+        3
+      ).then((hits: EsHitRecordList) => {
         expect(hits).toEqual([]);
       });
     });
@@ -184,13 +197,12 @@ describe('context app', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
-        'desc',
+        SortDirection.desc,
         ANCHOR_TIMESTAMP_3,
         MS_PER_DAY * 3,
         '_doc',
         0,
-        3,
-        []
+        3
       ).then(() => {
         const setParentSpy = mockSearchSource.setParent;
         expect(setParentSpy.alwaysCalledWith(undefined)).toBe(true);
@@ -202,13 +214,12 @@ describe('context app', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
-        'desc',
+        SortDirection.desc,
         ANCHOR_TIMESTAMP,
         MS_PER_DAY,
         '_doc',
         0,
-        3,
-        []
+        3
       ).then(() => {
         expect(
           mockSearchSource.setField.calledWith('sort', [
@@ -221,11 +232,8 @@ describe('context app', function () {
   });
 
   describe('function fetchPredecessors with useNewFieldsApi set', function () {
-    let fetchPredecessors;
-    let mockSearchSource;
-
     beforeEach(() => {
-      mockSearchSource = createContextSearchSourceStub([], '@timestamp', MS_PER_DAY * 8);
+      mockSearchSource = createContextSearchSourceStub([], '@timestamp');
 
       setServices({
         data: {
@@ -245,7 +253,7 @@ describe('context app', function () {
         timeValNr,
         tieBreakerField,
         tieBreakerValue,
-        size
+        size = 10
       ) => {
         const anchor = {
           _source: {
@@ -257,7 +265,7 @@ describe('context app', function () {
         return fetchContextProvider(createIndexPatternsStub(), true).fetchSurroundingDocs(
           'predecessors',
           indexPatternId,
-          anchor,
+          anchor as AnchorHitRecord,
           timeField,
           tieBreakerField,
           sortDir,
@@ -279,14 +287,13 @@ describe('context app', function () {
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
-        'desc',
+        SortDirection.desc,
         ANCHOR_TIMESTAMP_3000,
         MS_PER_DAY * 3000,
         '_doc',
         0,
-        3,
-        []
-      ).then((hits) => {
+        3
+      ).then((hits: EsHitRecordList) => {
         const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
         const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
         expect(mockSearchSource.fetch.calledOnce).toBe(true);

@@ -14,6 +14,7 @@ import { generateIntervals } from './utils/generate_intervals';
 import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
 import { getEsQuerySort } from './utils/get_es_query_sort';
 import { getServices } from '../../../../kibana_services';
+import { AnchorHitRecord } from './anchor';
 
 export type SurrDocType = 'successors' | 'predecessors';
 export interface EsHitRecord {
@@ -39,7 +40,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
    *
    * @param {SurrDocType} type - `successors` or `predecessors`
    * @param {string} indexPatternId
-   * @param {EsHitRecord} anchor - anchor record
+   * @param {AnchorHitRecord} anchor - anchor record
    * @param {string} timeField - name of the timefield, that's sorted on
    * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
    * @param {SortDirection} sortDir - direction of sorting
@@ -50,13 +51,13 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
   async function fetchSurroundingDocs(
     type: SurrDocType,
     indexPatternId: string,
-    anchor: EsHitRecord,
+    anchor: AnchorHitRecord,
     timeField: string,
     tieBreakerField: string,
     sortDir: SortDirection,
     size: number,
     filters: Filter[]
-  ) {
+  ): Promise<EsHitRecordList> {
     if (typeof anchor !== 'object' || anchor === null || !size) {
       return [];
     }

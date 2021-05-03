@@ -6,24 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
+import { Dictionary } from 'lodash';
 
-import { fetchAnchorProvider } from './anchor';
+import { SortDirection } from '../../../../../../data/public';
+import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
+import { AnchorHitRecord, fetchAnchorProvider } from './anchor';
 
 describe('context app', function () {
-  describe('function fetchAnchor', function () {
-    let fetchAnchor;
-    let searchSourceStub;
+  let fetchAnchor: (
+    indexPatternId: string,
+    anchorId: string,
+    sort: [Dictionary<SortDirection>, { [key: string]: SortDirection }]
+  ) => Promise<AnchorHitRecord>;
+  let searchSourceStub: any;
 
+  describe('function fetchAnchor', function () {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }]);
+      searchSourceStub = createSearchSourceStub([
+        { _id: 'hit1', fields: [], sort: [], _source: {} },
+      ]);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
     });
 
     it('should use the `fetch` method of the SearchSource', function () {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(() => {
         expect(searchSourceStub.fetch.calledOnce).toBe(true);
       });
@@ -31,8 +39,8 @@ describe('context app', function () {
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(() => {
         const setParentSpy = searchSourceStub.setParent;
         expect(setParentSpy.calledOnce).toBe(true);
@@ -42,8 +50,8 @@ describe('context app', function () {
 
     it('should set the SearchSource index pattern', function () {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(() => {
         const setFieldSpy = searchSourceStub.setField;
         expect(setFieldSpy.firstCall.args[1].id).toEqual('INDEX_PATTERN_ID');
@@ -52,8 +60,8 @@ describe('context app', function () {
 
     it('should set the SearchSource version flag to true', function () {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(() => {
         const setVersionSpy = searchSourceStub.setField.withArgs('version');
         expect(setVersionSpy.calledOnce).toBe(true);
@@ -63,8 +71,8 @@ describe('context app', function () {
 
     it('should set the SearchSource size to 1', function () {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(() => {
         const setSizeSpy = searchSourceStub.setField.withArgs('size');
         expect(setSizeSpy.calledOnce).toBe(true);
@@ -74,8 +82,8 @@ describe('context app', function () {
 
     it('should set the SearchSource query to an ids query', function () {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(() => {
         const setQuerySpy = searchSourceStub.setField.withArgs('query');
         expect(setQuerySpy.calledOnce).toBe(true);
@@ -96,12 +104,15 @@ describe('context app', function () {
 
     it('should set the SearchSource sort order', function () {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(() => {
         const setSortSpy = searchSourceStub.setField.withArgs('sort');
         expect(setSortSpy.calledOnce).toBe(true);
-        expect(setSortSpy.firstCall.args[1]).toEqual([{ '@timestamp': 'desc' }, { _doc: 'desc' }]);
+        expect(setSortSpy.firstCall.args[1]).toEqual([
+          { '@timestamp': SortDirection.desc },
+          { _doc: SortDirection.desc },
+        ]);
       });
     });
 
@@ -109,11 +120,11 @@ describe('context app', function () {
       searchSourceStub._stubHits = [];
 
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(
         () => {
-          expect().fail('expected the promise to be rejected');
+          fail('expected the promise to be rejected');
         },
         (error) => {
           expect(error).toBeInstanceOf(Error);
@@ -125,8 +136,8 @@ describe('context app', function () {
       searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
 
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then((anchorDocument) => {
         expect(anchorDocument).toHaveProperty('property1', 'value1');
         expect(anchorDocument).toHaveProperty('$$_isAnchor', true);
@@ -135,9 +146,6 @@ describe('context app', function () {
   });
 
   describe('useNewFields API', () => {
-    let fetchAnchor;
-    let searchSourceStub;
-
     beforeEach(() => {
       searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }]);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub, true);
@@ -147,8 +155,8 @@ describe('context app', function () {
       searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
 
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
-        { '@timestamp': 'desc' },
-        { _doc: 'desc' },
+        { '@timestamp': SortDirection.desc },
+        { _doc: SortDirection.desc },
       ]).then(() => {
         const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
         const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
