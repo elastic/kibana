@@ -6,10 +6,15 @@
  */
 
 import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from 'src/core/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from 'src/plugins/data/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { ESSQL_SEARCH_STRATEGY } from '../common/lib/constants';
 import { ReportingSetup } from '../../reporting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { getCanvasFeature } from './feature';
@@ -19,14 +24,21 @@ import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadType, workpadTemplateType } from './saved_objects';
 import { initializeTemplates } from './templates';
+import { essqlSearchStrategyProvider } from './lib/essql_strategy';
+import { getUISettings } from './ui_settings';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   bfetch: BfetchServerSetup;
+  data: DataPluginSetup;
   reporting?: ReportingSetup;
   usageCollection?: UsageCollectionSetup;
+}
+
+interface PluginsStart {
+  data: DataPluginStart;
 }
 
 export class CanvasPlugin implements Plugin {
@@ -35,7 +47,8 @@ export class CanvasPlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+  public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
+    coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType);
     coreSetup.savedObjects.registerType(workpadType);
     coreSetup.savedObjects.registerType(workpadTemplateType);
@@ -62,6 +75,11 @@ export class CanvasPlugin implements Plugin {
     registerCanvasUsageCollector(plugins.usageCollection, globalConfig.kibana.index);
 
     setupInterpreter(plugins.expressions);
+
+    coreSetup.getStartServices().then(([_, depsStart]) => {
+      const strategy = essqlSearchStrategyProvider(depsStart.data);
+      plugins.data.search.registerSearchStrategy(ESSQL_SEARCH_STRATEGY, strategy);
+    });
   }
 
   public start(coreStart: CoreStart) {

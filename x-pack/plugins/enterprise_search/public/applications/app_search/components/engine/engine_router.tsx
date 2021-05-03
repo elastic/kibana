@@ -17,20 +17,19 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 
-// TODO: Uncomment and add more routes as we migrate them
 import {
   ENGINES_PATH,
   ENGINE_ANALYTICS_PATH,
   ENGINE_DOCUMENTS_PATH,
   ENGINE_DOCUMENT_DETAIL_PATH,
-  // ENGINE_SCHEMA_PATH,
+  ENGINE_SCHEMA_PATH,
   // ENGINE_CRAWLER_PATH,
-  // META_ENGINE_SOURCE_ENGINES_PATH,
+  META_ENGINE_SOURCE_ENGINES_PATH,
   ENGINE_RELEVANCE_TUNING_PATH,
   ENGINE_SYNONYMS_PATH,
   ENGINE_CURATIONS_PATH,
   ENGINE_RESULT_SETTINGS_PATH,
-  // ENGINE_SEARCH_UI_PATH,
+  ENGINE_SEARCH_UI_PATH,
   ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { AnalyticsRouter } from '../analytics';
@@ -40,6 +39,9 @@ import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
+import { SchemaRouter } from '../schema';
+import { SearchUI } from '../search_ui';
+import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
 import { EngineLogic, getEngineBreadcrumbs } from './';
@@ -48,15 +50,15 @@ export const EngineRouter: React.FC = () => {
   const {
     myRole: {
       canViewEngineAnalytics,
-      // canViewEngineDocuments,
-      // canViewEngineSchema,
+      canViewEngineDocuments,
+      canViewEngineSchema,
       // canViewEngineCrawler,
-      // canViewMetaEngineSourceEngines,
+      canViewMetaEngineSourceEngines,
       canManageEngineRelevanceTuning,
       canManageEngineSynonyms,
       canManageEngineCurations,
       canManageEngineResultSettings,
-      // canManageEngineSearchUi,
+      canManageEngineSearchUi,
       canViewEngineApiLogs,
     },
   } = useValues(AppLogic);
@@ -91,12 +93,21 @@ export const EngineRouter: React.FC = () => {
           <AnalyticsRouter />
         </Route>
       )}
-      <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
-        <DocumentDetail />
-      </Route>
-      <Route path={ENGINE_DOCUMENTS_PATH}>
-        <Documents />
-      </Route>
+      {canViewEngineDocuments && (
+        <Route path={ENGINE_DOCUMENT_DETAIL_PATH}>
+          <DocumentDetail />
+        </Route>
+      )}
+      {canViewEngineDocuments && (
+        <Route path={ENGINE_DOCUMENTS_PATH}>
+          <Documents />
+        </Route>
+      )}
+      {canViewEngineSchema && (
+        <Route path={ENGINE_SCHEMA_PATH}>
+          <SchemaRouter />
+        </Route>
+      )}
       {canManageEngineCurations && (
         <Route path={ENGINE_CURATIONS_PATH}>
           <CurationsRouter />
@@ -120,6 +131,16 @@ export const EngineRouter: React.FC = () => {
       {canViewEngineApiLogs && (
         <Route path={ENGINE_API_LOGS_PATH}>
           <ApiLogs />
+        </Route>
+      )}
+      {canManageEngineSearchUi && (
+        <Route path={ENGINE_SEARCH_UI_PATH}>
+          <SearchUI />
+        </Route>
+      )}
+      {canViewMetaEngineSourceEngines && (
+        <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
+          <SourceEngines />
         </Route>
       )}
       <Route>

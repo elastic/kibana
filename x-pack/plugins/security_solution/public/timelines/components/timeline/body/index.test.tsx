@@ -17,14 +17,11 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
+import { defaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-jest.mock('../../../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockSort: Sort[] = [
   {
@@ -90,9 +87,9 @@ describe('Body', () => {
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
+    leadingControlColumns: [defaultControlColumn],
+    trailingControlColumns: [],
   };
-
-  useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
   describe('rendering', () => {
     test('it renders the column headers', () => {

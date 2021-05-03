@@ -6,9 +6,9 @@
  */
 
 import { map, zipObject } from 'lodash';
-import { buildBoolArray } from './build_bool_array';
-import { sanitizeName } from './sanitize_name';
-import { normalizeType } from './normalize_type';
+import { buildBoolArray } from '../../common/lib/request/build_bool_array';
+import { sanitizeName } from '../../common/lib/request/sanitize_name';
+import { normalizeType } from '../../common/lib/request/normalize_type';
 import { LegacyAPICaller } from '../../../../../src/core/server';
 import { ExpressionValueFilter } from '../../types';
 

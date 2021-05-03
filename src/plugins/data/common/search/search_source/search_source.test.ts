@@ -352,6 +352,13 @@ describe('SearchSource', () => {
         const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['*']);
       });
+
+      test('_source is not set when using the fields API', async () => {
+        searchSource.setField('fields', ['*']);
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['*']);
+        expect(request._source).toEqual(false);
+      });
     });
 
     describe('source filters handling', () => {
@@ -903,18 +910,26 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
         expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Object {
+        Array [
+          Object {
+            "isPartial": true,
+            "isRunning": true,
+            "rawResponse": Object {
               "test": 1,
             },
-          ]
+          },
+        ]
         `);
         expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-          Array [
-            Object {
+        Array [
+          Object {
+            "isPartial": false,
+            "isRunning": false,
+            "rawResponse": Object {
               "test": 2,
             },
-          ]
+          },
+        ]
         `);
       });
 
@@ -958,13 +973,9 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(1);
         expect(error).toBeCalledTimes(1);
         expect(complete).toBeCalledTimes(0);
-        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "test": 1,
-            },
-          ]
-        `);
+        expect(next.mock.calls[0][0].rawResponse).toStrictEqual({
+          test: 1,
+        });
         expect(error.mock.calls[0][0]).toBe(undefined);
       });
     });
@@ -1174,7 +1185,7 @@ describe('SearchSource', () => {
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
-        expect(resp).toStrictEqual({ other: 5 });
+        expect(resp.rawResponse).toStrictEqual({ other: 5 });
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(3);
       });
 
