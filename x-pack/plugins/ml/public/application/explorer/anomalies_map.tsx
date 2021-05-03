@@ -66,7 +66,7 @@ export const getChoroplethAnomaliesLayer = (
 ): VectorLayerDescriptor => {
   return {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.ml.anomalyDetectionAlert.actionGroupName', {
+    label: i18n.translate('xpack.ml.explorer.anomaliesMap.anomaliesCount', {
       defaultMessage: 'Anomalies count: {jobId}',
       values: { jobId },
     }),
