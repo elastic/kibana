@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { isValidPath, isWindowsWildcardPathValid, isMacWildcardPathValid } from './validations';
+import {
+  isValidPath,
+  isWindowsWildcardPathValid,
+  isLinuxMacWildcardPathValid,
+} from './validations';
 import { OperatingSystem } from '../../types';
 
 describe('Validate Windows paths', () => {
@@ -45,9 +49,9 @@ describe('Validate Linux/Mac paths', () => {
   });
 
   it('should validate wildcard paths', () => {
-    expect(isMacWildcardPathValid('/opt/*')).toEqual(true);
-    expect(isMacWildcardPathValid('/opt/*.dmg')).toEqual(true);
-    expect(isMacWildcardPathValid('/opt/bin/*')).toEqual(true);
-    expect(isMacWildcardPathValid('/opt/bin/*.txt')).toEqual(true);
+    expect(isLinuxMacWildcardPathValid('/opt/*')).toEqual(true);
+    expect(isLinuxMacWildcardPathValid('/opt/*.dmg')).toEqual(true);
+    expect(isLinuxMacWildcardPathValid('/opt/bin/*')).toEqual(true);
+    expect(isLinuxMacWildcardPathValid('/opt/bin/*.txt')).toEqual(true);
   });
 });

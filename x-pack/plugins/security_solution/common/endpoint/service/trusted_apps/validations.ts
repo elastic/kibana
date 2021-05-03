@@ -58,7 +58,7 @@ export const isWindowsWildcardPathValid = (path: string) => {
 };
 
 // based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L167
-export const isMacWildcardPathValid = (path: string) => {
+export const isLinuxMacWildcardPathValid = (path: string) => {
   const firstCharacter = path[0];
   const lastCharacter = path.slice(-1);
   const trimmedValue = path.trim();

@@ -29,7 +29,7 @@ import {
   isValidHash,
   isValidPath,
   isWindowsWildcardPathValid,
-  isMacWildcardPathValid,
+  isLinuxMacWildcardPathValid,
 } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -138,7 +138,7 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
         entry.type === 'wildcard'
           ? values.os === OperatingSystem.WINDOWS
             ? isWindowsWildcardPathValid(entry.value)
-            : isMacWildcardPathValid(entry.value)
+            : isLinuxMacWildcardPathValid(entry.value)
           : isValidPath({ value: entry.value, os: values.os });
 
       if (!entry.field || !entry.value.trim()) {
