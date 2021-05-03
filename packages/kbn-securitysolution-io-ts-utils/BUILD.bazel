@@ -28,7 +28,9 @@ NPM_MODULE_EXTRA_FILES = [
 SRC_DEPS = [
   "@npm//io-ts",
   "@npm//lodash",
-  "@npm//tslib"
+  "@npm//tslib",
+  "@npm//fp-ts",
+  "@npm//uuid"
 ]
 
 TYPES_DEPS = [
@@ -36,6 +38,7 @@ TYPES_DEPS = [
   "@npm//@types/flot",
   "@npm//@types/lodash",
   "@npm//@types/node",
+  "@npm//@types/uuid"
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
