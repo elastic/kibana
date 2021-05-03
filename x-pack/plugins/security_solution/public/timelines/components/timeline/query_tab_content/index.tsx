@@ -199,7 +199,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     query: string;
     language: KueryFilterQueryKind;
   } = { query: kqlQueryExpression, language: 'kuery' };
-  const { addError } = useAppToasts();
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -209,7 +208,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     filters,
     kqlQuery,
     kqlMode,
-    addError,
   });
 
   const isBlankTimeline: boolean =

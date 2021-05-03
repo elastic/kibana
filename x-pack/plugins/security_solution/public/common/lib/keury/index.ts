@@ -70,18 +70,19 @@ const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); //
 
 export const escapeKuery = flow(escapeSpecialCharacters, escapeWhitespace);
 
+/**
+ * Deprecated in leiu of `convertToBuildEsQueryOrError`
+ */
 export const convertToBuildEsQuery = ({
   config,
   indexPattern,
   queries,
   filters,
-  handleError,
 }: {
   config: EsQueryConfig;
   indexPattern: IIndexPattern;
   queries: Query[];
   filters: Filter[];
-  handleError: (error: Error) => void;
 }) => {
   try {
     return JSON.stringify(
@@ -95,7 +96,35 @@ export const convertToBuildEsQuery = ({
         }
       )
     );
+  } catch (exp) {
+    return '';
+  }
+};
+
+export const convertToBuildEsQueryOrError = ({
+  config,
+  indexPattern,
+  queries,
+  filters,
+}: {
+  config: EsQueryConfig;
+  indexPattern: IIndexPattern;
+  queries: Query[];
+  filters: Filter[];
+}): string | Error => {
+  try {
+    return JSON.stringify(
+      esQuery.buildEsQuery(
+        indexPattern,
+        queries,
+        filters.filter((f) => f.meta.disabled === false),
+        {
+          ...config,
+          dateFormatTZ: undefined,
+        }
+      )
+    );
   } catch (error) {
-    handleError(error);
+    return error;
   }
 };

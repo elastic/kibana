@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -178,6 +178,13 @@ const EventsViewerComponent: React.FC<Props> = ({
   const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
   const { addError } = useAppToasts();
 
+  const handleQueryError = useCallback(
+    (error: Error) => {
+      addError(error, { title: error.name });
+    },
+    [addError]
+  );
+
   useEffect(() => {
     dispatch(timelineActions.updateIsLoading({ id, isLoading: isQueryLoading }));
   }, [dispatch, id, isQueryLoading]);
@@ -209,7 +216,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     kqlQuery: query,
     kqlMode,
     isEventViewer: true,
-    addError,
+    handleError: handleQueryError,
   });
 
   const canQueryTimeline = useMemo(

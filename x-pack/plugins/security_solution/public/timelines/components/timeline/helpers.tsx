@@ -15,7 +15,7 @@ import {
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
 } from '../../../../../timelines/public';
-import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
+import { escapeQueryValue, convertToBuildEsQueryOrError } from '../../../common/lib/keury';
 
 import {
   DataProvider,
@@ -32,7 +32,6 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
-import { UseAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const isNumber = (value: string | number) => !isNaN(Number(value));
 
@@ -144,6 +143,26 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
       return !index ? `(${queryMatch})` : `${globalQuery} or (${queryMatch})`;
     }, '');
 
+/**
+ * Abstracted out due to complexity issues in `combineQueries`
+ * Returns the query object or handles the Error and returns `null`
+ */
+const narrowQueryOrError = (
+  query: string | Error,
+  handleError?: (error: Error) => void
+): { filterQuery: string } | null => {
+  if (typeof query === 'string') {
+    return {
+      filterQuery: query,
+    };
+  }
+  if (handleError) {
+    handleError(query);
+  }
+  return null;
+};
+
+// TODO: doc comment this
 export const combineQueries = ({
   config,
   dataProviders,
@@ -153,7 +172,7 @@ export const combineQueries = ({
   kqlQuery,
   kqlMode,
   isEventViewer,
-  addError,
+  handleError,
 }: {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
@@ -163,73 +182,54 @@ export const combineQueries = ({
   kqlQuery: Query;
   kqlMode: string;
   isEventViewer?: boolean;
-  addError: UseAppToasts['addError'];
+  handleError?: (error: Error) => void;
 }): { filterQuery: string } | null => {
-  const handleError = (error: Error) => {
-    addError(error, { title: error.name });
-  };
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
-    return {
-      filterQuery:
-        convertToBuildEsQuery({
-          config,
-          queries: [kuery],
-          indexPattern,
-          filters,
-          handleError,
-        }) || '',
-    };
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    return {
-      filterQuery: convertToBuildEsQuery({
-        config,
-        queries: [kuery],
-        indexPattern,
-        filters,
-        handleError,
-      }),
-    };
+  } else if (
+    isEmpty(dataProviders) &&
+    isEmpty(kqlQuery.query) &&
+    (isEventViewer || !isEmpty(filters))
+  ) {
+    const query = convertToBuildEsQueryOrError({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
+    return narrowQueryOrError(query, handleError);
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
     kuery.query = `(${kqlQuery.query})`;
-    return {
-      filterQuery: convertToBuildEsQuery({
-        config,
-        queries: [kuery],
-        indexPattern,
-        filters,
-        handleError,
-      }),
-    };
+    const query = convertToBuildEsQueryOrError({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
+    return narrowQueryOrError(query, handleError);
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
-    return {
-      filterQuery:
-        convertToBuildEsQuery({
-          config,
-          queries: [kuery],
-          indexPattern,
-          filters,
-          handleError,
-        }) || '',
-    };
+    const query = convertToBuildEsQueryOrError({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
+    return narrowQueryOrError(query, handleError);
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
   kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery.query as string
   )})`;
-  return {
-    filterQuery: convertToBuildEsQuery({
-      config,
-      queries: [kuery],
-      indexPattern,
-      filters,
-      handleError,
-    }),
-  };
+  const query = convertToBuildEsQueryOrError({
+    config,
+    queries: [kuery],
+    indexPattern,
+    filters,
+  });
+  return narrowQueryOrError(query, handleError);
 };
 
 /**
