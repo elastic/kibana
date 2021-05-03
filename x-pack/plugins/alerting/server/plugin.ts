@@ -347,8 +347,8 @@ export class AlertingPlugin {
       return alertsClientFactory!.create(request, core.savedObjects);
     };
 
-    const getAlertingAuthorizationWithRequest = (request: KibanaRequest) => {
-      return alertingAuthorizationClientFactory!.create(request);
+    const getAlertingAuthorizationWithRequest = (request: KibanaRequest, privilegeName: string) => {
+      return alertingAuthorizationClientFactory!.create(request, privilegeName);
     };
 
     taskRunnerFactory.initialize({
