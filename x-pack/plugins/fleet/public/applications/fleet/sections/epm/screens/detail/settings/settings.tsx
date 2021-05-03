@@ -31,10 +31,12 @@ const UpdatesAvailableMsgContainer = styled.span`
 `;
 
 const NoteLabel = () => (
-  <FormattedMessage
-    id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel"
-    defaultMessage="Note:"
-  />
+  <strong>
+    <FormattedMessage
+      id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel"
+      defaultMessage="Note:"
+    />
+  </strong>
 );
 const UpdatesAvailableMsg = () => (
   <UpdatesAvailableMsgContainer>
@@ -171,69 +173,64 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   </p>
                 </div>
               ) : (
-                <div>
-                  <EuiTitle>
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.fleet.integrations.settings.packageUninstallTitle"
-                        defaultMessage="Uninstall {title}"
-                        values={{
-                          title,
-                        }}
-                      />
-                    </h4>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
-                  <p>
-                    <FormattedMessage
-                      id="xpack.fleet.integrations.settings.packageUninstallDescription"
-                      defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
-                    />
-                  </p>
-                </div>
+                removable && (
+                  <>
+                    <div>
+                      <EuiTitle>
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageUninstallTitle"
+                            defaultMessage="Uninstall"
+                          />
+                        </h4>
+                      </EuiTitle>
+                      <EuiSpacer size="s" />
+                      <p>
+                        <FormattedMessage
+                          id="xpack.fleet.integrations.settings.packageUninstallDescription"
+                          defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
+                        />
+                      </p>
+                    </div>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <p>
+                          <InstallationButton
+                            {...packageInfo}
+                            disabled={!packagePoliciesData || packageHasUsages}
+                          />
+                        </p>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                )
               )}
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <p>
-                    <InstallationButton
-                      {...packageInfo}
-                      disabled={
-                        !packagePoliciesData || removable === false ? true : packageHasUsages
-                      }
-                    />
-                  </p>
-                </EuiFlexItem>
-              </EuiFlexGroup>
               {packageHasUsages && removable === true && (
                 <p>
-                  <FormattedMessage
-                    id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
-                    defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
-                    values={{
-                      title,
-                      strongNote: (
-                        <strong>
-                          <NoteLabel />
-                        </strong>
-                      ),
-                    }}
-                  />
+                  <EuiText color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
+                      defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
+                      values={{
+                        title,
+                        strongNote: <NoteLabel />,
+                      }}
+                    />
+                  </EuiText>
                 </p>
               )}
               {removable === false && (
                 <p>
-                  <FormattedMessage
-                    id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
-                    defaultMessage="{strongNote} The {title} integration is installed by default and cannot be removed."
-                    values={{
-                      title,
-                      strongNote: (
-                        <strong>
-                          <NoteLabel />
-                        </strong>
-                      ),
-                    }}
-                  />
+                  <EuiText color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
+                      defaultMessage="{strongNote} The {title} integration is installed by default and cannot be removed."
+                      values={{
+                        title,
+                        strongNote: <NoteLabel />,
+                      }}
+                    />
+                  </EuiText>
                 </p>
               )}
             </div>

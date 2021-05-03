@@ -61,6 +61,13 @@ export const OPERATING_SYSTEM = i18n.translate(
   }
 );
 
+export const OPERATING_SYSTEM_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.operatingSystemFullLabel',
+  {
+    defaultMessage: 'Operating System',
+  }
+);
+
 export const SEARCH_DEFAULT = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.searchDefaultPlaceholder',
   {
@@ -238,5 +245,26 @@ export const DISSASOCIATE_EXCEPTION_LIST_ERROR = i18n.translate(
   'xpack.securitySolution.exceptions.dissasociateExceptionListError',
   {
     defaultMessage: 'Failed to remove exception list',
+  }
+);
+
+export const OPERATING_SYSTEM_WINDOWS = i18n.translate(
+  'xpack.securitySolution.exceptions.operatingSystemWindows',
+  {
+    defaultMessage: 'Windows',
+  }
+);
+
+export const OPERATING_SYSTEM_MAC = i18n.translate(
+  'xpack.securitySolution.exceptions.operatingSystemMac',
+  {
+    defaultMessage: 'macOS',
+  }
+);
+
+export const OPERATING_SYSTEM_LINUX = i18n.translate(
+  'xpack.securitySolution.exceptions.operatingSystemLinux',
+  {
+    defaultMessage: 'Linux',
   }
 );
