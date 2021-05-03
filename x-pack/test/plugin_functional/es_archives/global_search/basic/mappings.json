@@ -161,7 +161,7 @@
         },
         "map" : {
           "properties" : {
-            "bounds" : {
+            "bounds": {
               "dynamic": false,
               "properties": {}
             },

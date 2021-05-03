@@ -97,7 +97,7 @@
         "mapStateJSON" : "{\"zoom\":0.8,\"center\":{\"lon\":0,\"lat\":0},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"}}",
         "layerListJSON" : "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"id\":\"c7bdee60-5267-459e-83d6-b53acf1b9e67\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"applyGlobalQuery\":true,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\"}]",
         "uiStateJSON" : "{\"isLayerTOCOpen\":true}",
-        "bounds" : {
+        "bounds": {
           "type" : "polygon",
           "coordinates" : [
             [
