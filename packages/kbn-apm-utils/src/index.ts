@@ -16,6 +16,8 @@ export interface SpanOptions {
   labels?: Record<string, string>;
 }
 
+type Span = Exclude<typeof agent.currentSpan, undefined | null>;
+
 export function parseSpanOptions(optionsOrName: SpanOptions | string) {
   const options = typeof optionsOrName === 'string' ? { name: optionsOrName } : optionsOrName;
 
@@ -30,7 +32,7 @@ const runInNewContext = <T extends (...args: any[]) => any>(cb: T): ReturnType<T
 
 export async function withSpan<T>(
   optionsOrName: SpanOptions | string,
-  cb: () => Promise<T>
+  cb: (span?: Span) => Promise<T>
 ): Promise<T> {
   const options = parseSpanOptions(optionsOrName);
 
@@ -71,13 +73,17 @@ export async function withSpan<T>(
       span.addLabels(labels);
     }
 
-    return cb()
+    return cb(span)
       .then((res) => {
-        span.outcome = 'success';
+        if (!span.outcome || span.outcome === 'unknown') {
+          span.outcome = 'success';
+        }
         return res;
       })
       .catch((err) => {
-        span.outcome = 'failure';
+        if (!span.outcome || span.outcome === 'unknown') {
+          span.outcome = 'failure';
+        }
         throw err;
       })
       .finally(() => {

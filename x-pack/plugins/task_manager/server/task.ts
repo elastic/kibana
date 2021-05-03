@@ -257,6 +257,8 @@ export interface TaskInstance {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
 
+  traceparent?: string;
+
   /**
    * The id of the user who scheduled this task.
    */
@@ -364,6 +366,7 @@ export type SerializedConcreteTaskInstance = Omit<
 > & {
   state: string;
   params: string;
+  traceparent: string;
   scheduledAt: string;
   startedAt: string | null;
   retryAt: string | null;
