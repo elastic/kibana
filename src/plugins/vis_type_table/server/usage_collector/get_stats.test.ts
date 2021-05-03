@@ -43,6 +43,7 @@ const mockVisualizations = {
 describe('vis_type_table getStats', () => {
   const mockSoClient = ({
     createPointInTimeFinder: jest.fn().mockResolvedValue({
+      close: jest.fn(),
       find: function* asyncGenerator() {
         yield mockVisualizations;
       },
