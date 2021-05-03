@@ -137,7 +137,12 @@ describe('enable()', () => {
     test('ensures user is authorised to enable this type of alert under the consumer', async () => {
       await alertsClient.enable({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'enable');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'enable',
+        ruleTypeId: 'myType',
+      });
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
@@ -150,7 +155,12 @@ describe('enable()', () => {
         `[Error: Unauthorized to enable a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'enable');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'enable',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

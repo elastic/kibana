@@ -126,7 +126,12 @@ describe('unmuteAll()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       await alertsClient.unmuteAll({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'unmuteAll');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'unmuteAll',
+        ruleTypeId: 'myType',
+      });
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
@@ -140,7 +145,12 @@ describe('unmuteAll()', () => {
         `[Error: Unauthorized to unmuteAll a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'unmuteAll');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'unmuteAll',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

@@ -268,11 +268,12 @@ describe('updateApiKey()', () => {
       await alertsClient.updateApiKey({ id: '1' });
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'updateApiKey'
-      );
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'updateApiKey',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to updateApiKey this type of alert', async () => {
@@ -284,11 +285,12 @@ describe('updateApiKey()', () => {
         `[Error: Unauthorized to updateApiKey a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'updateApiKey'
-      );
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'updateApiKey',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

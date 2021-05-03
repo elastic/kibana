@@ -159,11 +159,12 @@ describe('muteInstance()', () => {
       await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'muteInstance'
-      );
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'muteInstance',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to muteInstance this type of alert', async () => {
@@ -178,11 +179,12 @@ describe('muteInstance()', () => {
         `[Error: Unauthorized to muteInstance a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'muteInstance'
-      );
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'muteInstance',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

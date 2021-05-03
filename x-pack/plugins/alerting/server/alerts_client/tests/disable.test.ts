@@ -99,7 +99,12 @@ describe('disable()', () => {
     test('ensures user is authorised to disable this type of alert under the consumer', async () => {
       await alertsClient.disable({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'disable');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'disable',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to disable this type of alert', async () => {
@@ -111,7 +116,12 @@ describe('disable()', () => {
         `[Error: Unauthorized to disable a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'disable');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'disable',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

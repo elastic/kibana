@@ -182,7 +182,12 @@ describe('get()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       await alertsClient.get({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'get',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to get this type of alert', async () => {
@@ -195,7 +200,12 @@ describe('get()', () => {
         `[Error: Unauthorized to get a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'get');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'get',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

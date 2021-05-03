@@ -231,7 +231,12 @@ describe('delete()', () => {
     test('ensures user is authorised to delete this type of alert under the consumer', async () => {
       await alertsClient.delete({ id: '1' });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'delete');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'delete',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to delete this type of alert', async () => {
@@ -243,7 +248,12 @@ describe('delete()', () => {
         `[Error: Unauthorized to delete a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'delete');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'delete',
+        ruleTypeId: 'myType',
+      });
     });
   });
 

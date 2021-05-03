@@ -186,7 +186,12 @@ describe('create()', () => {
 
       await tryToExecuteOperation({ data });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'create');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'create',
+        ruleTypeId: 'myType',
+      });
     });
 
     test('throws when user is not authorised to create this type of alert', async () => {
@@ -203,7 +208,12 @@ describe('create()', () => {
         `[Error: Unauthorized to create a "myType" alert for "myApp"]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'create');
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        authorizationType: 'rule',
+        consumer: 'myApp',
+        operation: 'create',
+        ruleTypeId: 'myType',
+      });
     });
   });
 
@@ -330,7 +340,12 @@ describe('create()', () => {
       ],
     });
     const result = await alertsClient.create({ data });
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('123', 'bar', 'create');
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+      authorizationType: 'rule',
+      consumer: 'bar',
+      operation: 'create',
+      ruleTypeId: '123',
+    });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
