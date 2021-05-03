@@ -37,6 +37,7 @@ describe('config schema', () => {
             "enabled": true,
           },
           "enabled": true,
+          "allowedSpaces": ["default"]
         },
         "enabled": true,
         "kibana": Object {
