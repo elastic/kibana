@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { first } from 'rxjs/operators';
 import { getStats, VegaUsage } from './get_usage_collector';
-import { ConfigObservable, VisTypeVegaPluginSetupDependencies } from '../types';
+import type { UsageCollectionSetup } from '../../../usage_collection/server';
+import type { ConfigObservable, VisTypeVegaPluginSetupDependencies } from '../types';
 
 export function registerVegaUsageCollector(
   collectorSet: UsageCollectionSetup,
@@ -24,11 +23,7 @@ export function registerVegaUsageCollector(
       vega_lite_lib_specs_total: { type: 'long' },
       vega_use_map_total: { type: 'long' },
     },
-    fetch: async ({ esClient }) => {
-      const { index } = (await config.pipe(first()).toPromise()).kibana;
-
-      return await getStats(esClient, index, dependencies);
-    },
+    fetch: async ({ soClient }) => await getStats(soClient, dependencies),
   });
 
   collectorSet.registerCollector(collector);
