@@ -34,6 +34,8 @@ export enum ViewResultsActionButtonType {
 interface ViewResultsInDiscoverActionProps {
   actionId: string;
   buttonType: ViewResultsActionButtonType;
+  endDate?: string;
+  startDate?: string;
 }
 
 function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'] {
@@ -122,14 +124,14 @@ function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'
             alias: null,
             disabled: false,
             params: {
-              query: '98258de2-7b82-4cc7-90b2-01bc3a815fbb',
+              query: actionId,
             },
             type: 'phrase',
             key: 'action_id',
           },
           query: {
             match_phrase: {
-              action_id: '98258de2-7b82-4cc7-90b2-01bc3a815fbb',
+              action_id: actionId,
             },
           },
         },
@@ -143,6 +145,8 @@ function getLensAttributes(actionId: string): TypedLensByValueInput['attributes'
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
   buttonType,
+  endDate,
+  startDate,
 }) => {
   const lensService = useKibana().services.lens;
 
@@ -156,15 +160,16 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         {
           id: '',
           timeRange: {
-            from: 'now-7d',
-            to: 'now',
+            from: startDate ?? 'now-1d',
+            to: endDate ?? 'now',
+            mode: startDate || endDate ? 'absolute' : 'relative',
           },
           attributes: getLensAttributes(actionId),
         },
         openInNewWindow
       );
     },
-    [actionId, lensService]
+    [actionId, endDate, lensService, startDate]
   );
 
   if (buttonType === ViewResultsActionButtonType.button) {
@@ -212,6 +217,8 @@ export const ViewResultsInLensAction = React.memo(ViewResultsInLensActionCompone
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
   buttonType,
+  endDate,
+  startDate,
 }) => {
   const urlGenerator = useKibana().services.discover?.urlGenerator;
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
@@ -237,11 +244,27 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             $state: { store: FilterStateStore.APP_STATE },
           },
         ],
+        refreshInterval: {
+          pause: true,
+          value: 0,
+        },
+        timeRange:
+          startDate && endDate
+            ? {
+                to: endDate,
+                from: startDate,
+                mode: 'absolute',
+              }
+            : {
+                to: 'now',
+                from: 'now-15m',
+                mode: 'relative',
+              },
       });
       setDiscoverUrl(newUrl);
     };
     getDiscoverUrl();
-  }, [actionId, urlGenerator]);
+  }, [actionId, endDate, startDate, urlGenerator]);
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (

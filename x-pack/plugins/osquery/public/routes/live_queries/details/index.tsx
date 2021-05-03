@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiTextColor,
@@ -130,7 +131,12 @@ const LiveQueryDetailsPageComponent = () => {
         {data?.actionDetails._source?.data?.query}
       </EuiCodeBlock>
       <EuiSpacer />
-      <ResultTabs actionId={actionId} agentIds={data?.actionDetails?.fields?.agents} />
+      <ResultTabs
+        actionId={actionId}
+        agentIds={data?.actionDetails?.fields?.agents}
+        startDate={get(data, ['actionDetails', 'fields', '@timestamp', '0'])}
+        endDate={get(data, 'actionDetails.fields.expiration[0]')}
+      />
     </WithHeaderLayout>
   );
 };

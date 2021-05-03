@@ -7,6 +7,7 @@
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
 import {
+  EuiCallOut,
   EuiDataGrid,
   EuiDataGridSorting,
   EuiDataGridProps,
@@ -34,13 +35,17 @@ interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];
+  endDate?: string;
   isLive?: boolean;
+  startDate?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   actionId,
   agentIds,
   isLive,
+  startDate,
+  endDate,
 }) => {
   const {
     // @ts-expect-error update types
@@ -80,17 +85,23 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [setPagination]
   );
 
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
+    {
+      id: 'agent.name',
+      direction: Direction.asc,
+    },
+  ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-
-  const { data: allResultsData } = useAllResults({
+  const { data: allResultsData, isSuccess } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
-    direction: Direction.asc,
-    sortField: '@timestamp',
     isLive,
+    sort: sortingColumns.map((sortedColumn) => ({
+      field: sortedColumn.id,
+      direction: sortedColumn.direction as Direction,
+    })),
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -182,40 +193,46 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     }
   }, [columns, allResultsData?.edges]);
 
+  const toolbarVisibility = useMemo(
+    () => ({
+      additionalControls: (
+        <>
+          <ViewResultsInDiscoverAction
+            actionId={actionId}
+            buttonType={ViewResultsActionButtonType.button}
+            endDate={endDate}
+            startDate={startDate}
+          />
+          <ViewResultsInLensAction
+            actionId={actionId}
+            buttonType={ViewResultsActionButtonType.button}
+            endDate={endDate}
+            startDate={startDate}
+          />
+        </>
+      ),
+    }),
+    [actionId, endDate, startDate]
+  );
+
+  if (isSuccess && !columns.length) {
+    return <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />;
+  }
+
   return (
     // @ts-expect-error update types
     <DataContext.Provider value={allResultsData?.edges}>
-      {columns.length > 0 ? (
-        <EuiDataGrid
-          aria-label="Osquery results"
-          columns={columns}
-          columnVisibility={columnVisibility}
-          rowCount={allResultsData?.totalCount ?? 0}
-          renderCellValue={renderCellValue}
-          sorting={tableSorting}
-          pagination={tablePagination}
-          height="500px"
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          toolbarVisibility={{
-            additionalControls: (
-              <>
-                <ViewResultsInDiscoverAction
-                  actionId={actionId}
-                  buttonType={ViewResultsActionButtonType.button}
-                />
-                <ViewResultsInLensAction
-                  actionId={actionId}
-                  buttonType={ViewResultsActionButtonType.button}
-                />
-              </>
-            ),
-          }}
-        />
-      ) : (
-        <div className={'eui-textCenter'}>
-          {generateEmptyDataMessage(aggregations.totalResponded)}
-        </div>
-      )}
+      <EuiDataGrid
+        aria-label="Osquery results"
+        columns={columns}
+        columnVisibility={columnVisibility}
+        rowCount={allResultsData?.totalCount ?? 0}
+        renderCellValue={renderCellValue}
+        sorting={tableSorting}
+        pagination={tablePagination}
+        height="500px"
+        toolbarVisibility={toolbarVisibility}
+      />
     </DataContext.Provider>
   );
 };

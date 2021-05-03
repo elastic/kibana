@@ -66,8 +66,12 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     actionId,
     activePage: pageIndex,
     limit: pageSize,
-    direction: Direction.asc,
-    sortField: '@timestamp',
+    sort: [
+      {
+        field: '@timestamp',
+        direction: Direction.asc,
+      },
+    ],
     isLive,
   });
 
