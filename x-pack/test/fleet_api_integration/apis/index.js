@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export default function({ loadTestFile }) {
-  describe('Fleet Endpoints', function() {
+export default function ({ loadTestFile }) {
+  describe('Fleet Endpoints', function () {
     this.tags('ciGroupDocker');
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup'));
