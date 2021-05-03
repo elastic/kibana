@@ -31,7 +31,7 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
   parse: async (
     options: HostDetailsRequestOptions,
     response: IEsSearchResponse<HostAggEsData>,
-    deps: {
+    deps?: {
       esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
