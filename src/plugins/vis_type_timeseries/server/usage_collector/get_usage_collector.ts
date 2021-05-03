@@ -40,11 +40,8 @@ const doTelemetryFoVisualizations = async (
         }
       }
     });
-
-    if (!response.saved_objects.length || response.total === response.saved_objects.length) {
-      await finder.close();
-    }
   }
+  await finder.close();
 };
 
 const doTelemetryForByValueVisualizations = async (
