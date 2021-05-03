@@ -416,7 +416,7 @@ export type PolicyInfo = Immutable<{
 
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
-  host_status: HostStatus;
+  host_status?: HostStatus;
   policy_info?: {
     agent: {
       /**

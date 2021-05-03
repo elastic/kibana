@@ -152,7 +152,8 @@ export const getMetadataRequestHandler = function (
       const doc = await getHostData(
         metadataRequestContext,
         request?.params?.id,
-        queryStrategyVersion
+        queryStrategyVersion,
+        true
       );
       if (doc) {
         return response.ok({ body: doc });
@@ -174,7 +175,8 @@ export const getMetadataRequestHandler = function (
 export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string,
-  queryStrategyVersion?: MetadataQueryStrategyVersions
+  queryStrategyVersion?: MetadataQueryStrategyVersions,
+  includeAgentData?: boolean
 ): Promise<HostInfo | undefined> {
   if (!metadataRequestContext.savedObjectsClient) {
     return undefined;
@@ -190,32 +192,31 @@ export async function getHostData(
 
   const hostResult = queryStrategy!.queryResponseToHostResult(response.body);
 
-  console.log('--hostResult--', JSON.stringify(hostResult));
-
   const hostMetadata = hostResult.result;
   if (!hostMetadata) {
     return undefined;
   }
-  console.log('--hostMetadata--', JSON.stringify(hostMetadata));
+  if (includeAgentData) {
+    const agent = await findAgent(metadataRequestContext, hostMetadata);
 
-  const agent = await findAgent(metadataRequestContext, hostMetadata);
-  console.log('--agent--', JSON.stringify(agent));
+    if (agent && !agent.active) {
+      throw Boom.badRequest('the requested endpoint is unenrolled');
+    }
 
-  if (agent && !agent.active) {
-    throw Boom.badRequest('the requested endpoint is unenrolled');
+    const metadata = await enrichHostMetadata(
+      hostMetadata,
+      metadataRequestContext,
+      hostResult.queryStrategyVersion
+    );
+    return { ...metadata, query_strategy_version: hostResult.queryStrategyVersion };
   }
-
-  const metadata = await enrichHostMetadata(
-    hostMetadata,
-    metadataRequestContext,
-    hostResult.queryStrategyVersion
-  );
-  return { ...metadata, query_strategy_version: hostResult.queryStrategyVersion };
+  return { metadata: hostMetadata, query_strategy_version: hostResult.queryStrategyVersion };
 }
 
 async function findAgent(
   metadataRequestContext: MetadataRequestContext,
-  hostMetadata: HostMetadata
+  hostMetadata: HostMetadata,
+  includeAgentData?: boolean
 ): Promise<Agent | undefined> {
   try {
     if (metadataRequestContext.esClient == null) {
@@ -226,7 +227,6 @@ async function findAgent(
       ?.getAgentService()
       ?.getAgent(metadataRequestContext.esClient.asCurrentUser, hostMetadata.elastic.agent.id);
   } catch (e) {
-    console.log('----error------');
     if (e instanceof AgentNotFoundError) {
       metadataRequestContext.logger.warn(
         `agent with id ${hostMetadata.elastic.agent.id} not found`
