@@ -25,7 +25,7 @@ export function initGetCaseIdsByAlertIdApi({ caseService, router, logger }: Rout
     async (context, request, response) => {
       try {
         const alertId = request.params.alert_id;
-        if (alertId == null || (alertId != null && alertId === '')) {
+        if (alertId == null || alertId === '') {
           throw Boom.badRequest('The `alertId` is not valid');
         }
         const client = context.core.savedObjects.client;
