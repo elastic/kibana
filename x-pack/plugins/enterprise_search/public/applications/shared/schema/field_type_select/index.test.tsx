@@ -11,9 +11,9 @@ import { shallow } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { SchemaExistingField } from './';
+import { SchemaFieldTypeSelect } from './';
 
-describe('SchemaExistingField', () => {
+describe('SchemaFieldTypeSelect', () => {
   const updateExistingFieldType = jest.fn();
   const props = {
     fieldName: 'foo',
@@ -22,33 +22,21 @@ describe('SchemaExistingField', () => {
   };
 
   it('renders', () => {
-    const wrapper = shallow(<SchemaExistingField {...props} />);
+    const wrapper = shallow(<SchemaFieldTypeSelect {...props} />);
 
     expect(wrapper.find(EuiSelect)).toHaveLength(1);
   });
 
-  it('renders no EuiSelect without props', () => {
-    const wrapper = shallow(<SchemaExistingField fieldName="foo" />);
-
-    expect(wrapper.find(EuiSelect)).toHaveLength(0);
-  });
-
   it('calls updateExistingFieldType when the select value is changed', () => {
-    const wrapper = shallow(<SchemaExistingField {...props} />);
+    const wrapper = shallow(<SchemaFieldTypeSelect {...props} />);
     wrapper.find(EuiSelect).simulate('change', { target: { value: 'bar' } });
 
     expect(updateExistingFieldType).toHaveBeenCalledWith(props.fieldName, 'bar');
   });
 
-  it('doesn`t render fieldName when hidden', () => {
-    const wrapper = shallow(<SchemaExistingField {...props} hideName />);
+  it('passes disabled state', () => {
+    const wrapper = shallow(<SchemaFieldTypeSelect {...props} disabled />);
 
-    expect(wrapper.find('.c-stui-engine-schema-field__name').contains(props.fieldName)).toBeFalsy();
-  });
-
-  it('renders unconfirmed message', () => {
-    const wrapper = shallow(<SchemaExistingField {...props} unconfirmed />);
-
-    expect(wrapper.find('.c-stui-engine-schema-field__status').exists()).toBeTruthy();
+    expect(wrapper.find(EuiSelect).prop('disabled')).toEqual(true);
   });
 });

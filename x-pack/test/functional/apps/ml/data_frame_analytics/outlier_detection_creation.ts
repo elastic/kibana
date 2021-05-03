@@ -100,14 +100,6 @@ export default function ({ getService }: FtrProviderContext) {
               },
               { section: 'progress', expectedEntries: { Phase: '4/4' } },
             ],
-            jobStats: [
-              {
-                section: 'stats',
-                expectedEntries: {
-                  version: '8.0.0',
-                },
-              },
-            ],
           } as AnalyticsTableRowDetails,
         },
       },

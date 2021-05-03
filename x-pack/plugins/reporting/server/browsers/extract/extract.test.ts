@@ -7,17 +7,17 @@
 
 import fs from 'fs';
 import crypto from 'crypto';
-import { resolve } from 'path';
+import { resolve as pathResolve } from 'path';
 
 import { extract } from './extract';
 import { ExtractError } from './extract_error';
 import { promisify } from 'util';
 
-const FIXTURES_FOLDER = resolve(__dirname, '__fixtures__');
-const SRC_FILE_UNCOMPRESSED = resolve(FIXTURES_FOLDER, 'file.md');
+const FIXTURES_FOLDER = pathResolve(__dirname, '__fixtures__');
+const SRC_FILE_UNCOMPRESSED = pathResolve(FIXTURES_FOLDER, 'file.md');
 const SRC_FILE_COMPRESSED_ZIP = `${SRC_FILE_UNCOMPRESSED}.zip`;
-const EXTRACT_TARGET_FOLDER = resolve(FIXTURES_FOLDER, 'extract_target');
-const EXTRACT_TARGET_FILE = resolve(EXTRACT_TARGET_FOLDER, 'file.md');
+const EXTRACT_TARGET_FOLDER = pathResolve(FIXTURES_FOLDER, 'extract_target');
+const EXTRACT_TARGET_FILE = pathResolve(EXTRACT_TARGET_FOLDER, 'file.md');
 
 const fsp = {
   mkdir: promisify(fs.mkdir),
@@ -25,7 +25,7 @@ const fsp = {
   unlink: promisify(fs.unlink),
 };
 
-const ignoreErrorCodes = async (codes, promise) => {
+const ignoreErrorCodes = async (codes: string[], promise: Promise<void>) => {
   try {
     await promise;
   } catch (err) {
@@ -40,7 +40,7 @@ async function cleanup() {
   await ignoreErrorCodes(['ENOENT'], fsp.rmdir(EXTRACT_TARGET_FOLDER));
 }
 
-function fileHash(filepath) {
+function fileHash(filepath: string) {
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash('sha256');
     const input = fs.createReadStream(filepath);
