@@ -110,6 +110,38 @@ image:images/document-table.png[Document table with fields for manufacturer, geo
 . To rearrange the table columns, hover the mouse over a
 column header, and then use the move and sort controls.
 
+[float]
+[[add-field-in-discover]]
+=== Add a field
+
+What happens if you forgot to define an important value as a separate field? Or, what if you
+want to combine two fields and treat them as one? This is where runtime fields come into play.
+You can add a runtime field to your index pattern from inside of **Discover**,
+and then use that field for analysis and visualizations,
+the same way you do with other fields.
+
+. Click the ellipsis icon (...), and then click *Add field to index pattern*.
++
+[role="screenshot"]
+image:images/add-field-to-pattern.png[Dropdown menu located next to index pattern field with item for adding a field to an index pattern, width=50%]
+
+. In *Create field*, enter `hello` for the name.
+
+. Turn on *Set value*.
+
+. Define the field with the Painless scripting language:
++
+```ts
+emit("Hello World!");
+```
+
+. Click *Save*.
+
+. In the fields list, search for the *hello* field, and then click it.
++
+[role="screenshot"]
+image:images/hello-field.png[Top values for the hello field, width=50%]
+
 
 [float]
 [[search-in-discover]]
