@@ -120,19 +120,27 @@ describe('Service overview - header filters', () => {
   });
 
   describe('Filtering by kuerybar', () => {
-    it.only('filters by transaction.name', () => {
-      cy.visit(url.format({
-        pathname: '/app/apm/services/opbeans-java/overview',
-        query: { rangeFrom: start, rangeTo: end },
-      }));
+    it('filters by transaction.name', () => {
+      cy.visit(
+        url.format({
+          pathname: '/app/apm/services/opbeans-java/overview',
+          query: { rangeFrom: start, rangeTo: end },
+        })
+      );
       cy.contains('opbeans-java');
       cy.get('[data-test-subj="headerFilterKuerybar"]').type('transaction.n');
       cy.contains('transaction.name');
-      cy.get('[data-test-subj="suggestionContainer"]').find('li').first().click();
+      cy.get('[data-test-subj="suggestionContainer"]')
+        .find('li')
+        .first()
+        .click();
       cy.get('[data-test-subj="headerFilterKuerybar"]').type(':');
-      cy.get('[data-test-subj="suggestionContainer"]').find('li').first().click();
-      cy.get('[data-test-subj="suggestionContainer"]').realPress('{enter}')
-      cy.url().should('include', '&kuery=transaction.name')
+      cy.get('[data-test-subj="suggestionContainer"]')
+        .find('li')
+        .first()
+        .click();
+      cy.get('[data-test-subj="suggestionContainer"]').realPress('{enter}');
+      cy.url().should('include', '&kuery=transaction.name');
     });
   });
 });
