@@ -202,7 +202,7 @@ describe('execute()', () => {
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action because the referenced connector is incorrectly configured. Please review the configuration for the \\"mock-action\\" connector."`
+      `"Unable to execute action because no secrets are defined for the \\"mock-action\\" connector."`
     );
   });
 

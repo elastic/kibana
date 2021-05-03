@@ -54,7 +54,7 @@ export function createExecutionEnqueuerFunction({
 
     if (isMissingSecrets) {
       throw new Error(
-        `Unable to execute action because the referenced connector is incorrectly configured. Please review the configuration for the "${name}" connector.`
+        `Unable to execute action because no secrets are defined for the "${name}" connector.`
       );
     }
 
