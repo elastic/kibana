@@ -25,7 +25,12 @@ import {
   NewTrustedApp,
   OperatingSystem,
 } from '../../../../../../common/endpoint/types';
-import { isValidHash } from '../../../../../../common/endpoint/service/trusted_apps/validations';
+import {
+  isValidHash,
+  isValidPath,
+  isWindowsWildcardPathValid,
+  isMacWildcardPathValid,
+} from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
@@ -129,6 +134,13 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
     );
   } else {
     values.entries.forEach((entry, index) => {
+      const isPathValid =
+        entry.type === 'wildcard'
+          ? values.os === OperatingSystem.LINUX
+            ? isWindowsWildcardPathValid(entry.value)
+            : isMacWildcardPathValid(entry.value)
+          : isValidPath({ value: entry.value, os: values.os });
+
       if (!entry.field || !entry.value.trim()) {
         isValid = false;
         addResultToValidation(
@@ -151,6 +163,18 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
           'errors',
           i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidHashMsg', {
             defaultMessage: '[{row}] Invalid hash value',
+            values: { row: index + 1 },
+          })
+        );
+      } else if (entry.field === ConditionEntryField.PATH && !isPathValid) {
+        // show soft warnings and thus allow entry
+        isValid = true;
+        addResultToValidation(
+          validation,
+          'entries',
+          'warnings',
+          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidPathMsg', {
+            defaultMessage: '[{row}] Invalid path value',
             values: { row: index + 1 },
           })
         );
@@ -468,6 +492,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           data-test-subj={getTestId('conditionsRow')}
           isInvalid={wasVisited?.entries && validationResult.result.entries?.isInvalid}
           error={validationResult.result.entries?.errors}
+          helpText={validationResult.result.entries?.warnings}
         >
           <LogicalConditionBuilder
             entries={trustedApp.entries}
