@@ -10,17 +10,17 @@ import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
 import { EuiText, EuiSpacer, EuiSuperSelectOption } from '@elastic/eui';
 
-import { SuperSelectField, useFormData } from '../../../../../../../shared_imports';
-import { PhaseWithAllocation } from '../../../../../../../../common/types';
+import { SuperSelectField, useFormData } from '../../../../../../../../shared_imports';
+import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 
-import { DataTierAllocationType } from '../../../../types';
+import { DataTierAllocationType } from '../../../../../types';
 
-import { UseField } from '../../../../form';
+import { UseField } from '../../../../../form';
 
 import { NodeAllocation } from './node_allocation';
 import { SharedProps } from './types';
 
-import './_allocation_select.scss';
+import './data_tier_allocation.scss';
 
 type SelectOptions = EuiSuperSelectOption<DataTierAllocationType>;
 
@@ -160,7 +160,7 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
     },
   ].filter(Boolean) as SelectOptions[];
 
-export const AllocationSelect: FunctionComponent<SharedProps> = (props) => {
+export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
   const {
     phase,
     hasNodeAttributes,

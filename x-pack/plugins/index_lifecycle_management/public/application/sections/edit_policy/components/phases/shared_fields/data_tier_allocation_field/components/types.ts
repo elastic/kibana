@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ListNodesRouteResponse, PhaseWithAllocation } from '../../../../../../../../common/types';
+import {
+  ListNodesRouteResponse,
+  PhaseWithAllocation,
+} from '../../../../../../../../../common/types';
 
 export interface SharedProps {
   phase: PhaseWithAllocation;

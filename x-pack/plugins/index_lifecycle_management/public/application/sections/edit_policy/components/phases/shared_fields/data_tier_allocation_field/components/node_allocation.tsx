@@ -11,11 +11,11 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { SelectField, useFormData } from '../../../../../../../shared_imports';
+import { SelectField, useFormData } from '../../../../../../../../shared_imports';
 
-import { UseField } from '../../../../form';
+import { UseField } from '../../../../../form';
 
-import { LearnMoreLink } from '../../../learn_more_link';
+import { LearnMoreLink } from '../../../../learn_more_link';
 
 import { NodeAttrsDetails } from './node_attrs_details';
 

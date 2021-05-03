@@ -16,17 +16,19 @@ import { getAvailableNodeRoleForPhase, isNodeRoleFirstPreference } from '../../.
 import { useLoadNodes } from '../../../../../../services/api';
 import { DataTierAllocationType } from '../../../../types';
 
-import { AllocationSelect } from './allocation_select';
-import { WillUseFallbackTierNotice } from './will_use_fallback_tier_notice';
-import { WillUseFallbackTierUsingNodeAttributesNotice } from './will_use_fallback_tier_using_node_attributes_notice';
-import { NoTiersAvailableNotice } from './no_tiers_available_notice';
-import { NoTiersAvailableUsingNodeAttributesNotice } from './no_tiers_available_using_node_attributes_notice';
-import { DefaultToDataNodesNotice } from './default_to_data_nodes_notice';
-import { DefaultToDataTiersNotice } from './default_to_data_tiers_notice';
-import { CloudDataTierCallout } from './cloud_data_tier_callout';
-import { LoadingError } from './loading_error';
+import {
+  DataTierAllocation,
+  WillUseFallbackTierNotice,
+  WillUseFallbackTierUsingNodeAttributesNotice,
+  NoTiersAvailableNotice,
+  NoTiersAvailableUsingNodeAttributesNotice,
+  DefaultToDataNodesNotice,
+  DefaultToDataTiersNotice,
+  CloudDataTierCallout,
+  LoadingError,
+} from './components';
 
-import './_allocation.scss';
+import './_data_tier_allocation.scss';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
@@ -42,7 +44,7 @@ interface Props {
 /**
  * Top-level layout control for the data tier allocation field.
  */
-export const AllocationField: FunctionComponent<Props> = ({ phase, description }) => {
+export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, description }) => {
   const {
     services: { cloud },
   } = useKibana();
@@ -208,8 +210,8 @@ export const AllocationField: FunctionComponent<Props> = ({ phase, description }
       }
       fullWidth
     >
-      <div className="ilmAllocationField">
-        <AllocationSelect
+      <div className="ilmDataTierAllocationField">
+        <DataTierAllocation
           hasNodeAttributes={hasNodeAttributes}
           phase={phase}
           nodes={nodesByAttributes}

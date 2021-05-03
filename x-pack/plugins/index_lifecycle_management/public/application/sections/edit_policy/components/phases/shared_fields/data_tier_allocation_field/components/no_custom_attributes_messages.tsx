@@ -10,7 +10,7 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { getNodeAllocationMigrationLink } from '../../../../../../services/documentation';
+import { getNodeAllocationMigrationLink } from '../../../../../../../services/documentation';
 
 export const noCustomAttributesTitle = i18n.translate(
   'xpack.indexLifecycleMgmt.editPolicy.noCustomAttributesTitle',
