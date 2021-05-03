@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
+import {
+  createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
+} from '../../../usage_collection/server/mocks';
+import { registerVisTypeTableUsageCollector } from './register_usage_collector';
+import { getStats } from './get_stats';
+
 jest.mock('./get_stats', () => ({
   getStats: jest.fn().mockResolvedValue({ somestat: 1 }),
 }));
 
-import {
-  createUsageCollectionSetupMock,
-  createCollectorFetchContextMock,
-} from 'src/plugins/usage_collection/server/mocks';
-
-import { registerVisTypeTableUsageCollector } from './register_usage_collector';
-import { getStats } from './get_stats';
-
 describe('registerVisTypeTableUsageCollector', () => {
-  it('Usage collector configs fit the shape', () => {
+  test('Usage collector configs fit the shape', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
     registerVisTypeTableUsageCollector(mockCollectorSet);
     expect(mockCollectorSet.makeUsageCollector).toBeCalledTimes(1);
@@ -45,7 +44,7 @@ describe('registerVisTypeTableUsageCollector', () => {
     expect(usageCollectorConfig.isReady()).toBe(true);
   });
 
-  it('Usage collector config.fetch calls getStats', async () => {
+  test('Usage collector config.fetch calls getStats', async () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
     registerVisTypeTableUsageCollector(mockCollectorSet);
     const usageCollector = mockCollectorSet.makeUsageCollector.mock.results[0].value;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
 import { getStats } from './get_stats';
+import type { SavedObjectsClientContract } from '../../../../core/server';
 
 const mockVisualizations = {
   saved_objects: [
@@ -52,10 +52,12 @@ describe('vis_type_table getStats', () => {
 
   test('Returns stats from saved objects for table vis only', async () => {
     const result = await getStats(mockSoClient);
+
     expect(mockSoClient.createPointInTimeFinder).toHaveBeenCalledWith({
       type: 'visualization',
       perPage: 1000,
     });
+
     expect(result).toEqual({
       total: 4,
       total_split: 3,

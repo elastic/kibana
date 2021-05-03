@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
+import { VIS_TYPE_TABLE } from '../../common';
+
+import type {
   ISavedObjectsRepository,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
-} from 'kibana/server';
-import { SavedVisState } from 'src/plugins/visualizations/common';
-import { VIS_TYPE_TABLE } from '../../common';
+} from '../../../../core/server';
+import type { SavedVisState } from '../../../visualizations/common';
 
 export interface VisTypeTableUsage {
   /**
@@ -73,8 +74,8 @@ export async function getStats(
 
       const isSplitRow = params.row;
       const isSplitEnabled = hasSplitAgg.enabled;
-
       const container = isSplitRow ? stats.split_rows : stats.split_columns;
+
       container.total += 1;
       container.enabled = isSplitEnabled ? container.enabled + 1 : container.enabled;
     }
