@@ -6,13 +6,45 @@
  */
 
 import _ from 'lodash';
-import sampleJsonResponse from './es_sample_response.json';
-import sampleJsonResponseWithNesting from './es_sample_response_with_nesting.json';
-import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_containment';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { AlertServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
+import sampleAggsJsonResponse from './es_sample_response.json';
+import sampleShapesJsonResponse from './es_sample_response_shapes.json';
+import sampleAggsJsonResponseWithNesting from './es_sample_response_with_nesting.json';
+import {
+  getActiveEntriesAndGenerateAlerts,
+  transformResults,
+  getGeoContainmentExecutor,
+} from '../geo_containment';
 import { OTHER_CATEGORY } from '../es_query_builder';
-import { alertsMock } from '../../../../../alerting/server/mocks';
-import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
+import {
+  GeoContainmentInstanceContext,
+  GeoContainmentInstanceState,
+  GeoContainmentParams,
+} from '../alert_type';
 import { SearchResponse } from 'elasticsearch';
+
+const alertInstanceFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => (
+  instanceId: string
+) => {
+  const alertInstance = alertsMock.createAlertInstanceFactory<
+    GeoContainmentInstanceState,
+    GeoContainmentInstanceContext
+  >();
+  alertInstance.scheduleActions.mockImplementation(
+    (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
+      // Check subset of alert for comparison to expected results
+      // @ts-ignore
+      const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
+      testAlertActionArr.push({
+        actionGroupId,
+        instanceId,
+        context: contextSubset,
+      });
+    }
+  );
+  return alertInstance;
+};
 
 describe('geo_containment', () => {
   describe('transformResults', () => {
@@ -20,53 +52,55 @@ describe('geo_containment', () => {
     const geoField = 'location';
     it('should correctly transform expected results', async () => {
       const transformedResults = transformResults(
-        (sampleJsonResponse as unknown) as SearchResponse<unknown>,
+        // @ts-ignore
+        (sampleAggsJsonResponse.body as unknown) as SearchResponse<unknown>,
         dateField,
         geoField
       );
       expect(transformedResults).toEqual(
         new Map([
           [
-            '936',
+            '0',
             [
               {
-                dateInShape: '2020-09-28T18:01:41.190Z',
-                docId: 'N-ng1XQB6yyY-xQxnGSM',
-                location: [-82.8814151789993, 40.62806099653244],
-                shapeLocationId: '0DrJu3QB6yyY-xQxv6Ip',
+                dateInShape: '2021-04-28T16:56:11.923Z',
+                docId: 'ZVBoGXkBsFLYN2Tj1wmV',
+                location: [-73.99018926545978, 40.751759740523994],
+                shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
+              },
+              {
+                dateInShape: '2021-04-28T16:56:01.896Z',
+                docId: 'YlBoGXkBsFLYN2TjsAlp',
+                location: [-73.98968475870788, 40.7506317878142],
+                shapeLocationId: 'other',
               },
             ],
           ],
           [
-            'AAL2019',
+            '1',
             [
               {
-                dateInShape: '2020-09-28T18:01:41.191Z',
-                docId: 'iOng1XQB6yyY-xQxnGSM',
-                location: [-82.22068064846098, 39.006176185794175],
-                shapeLocationId: '0DrJu3QB6yyY-xQxv6Ip',
+                dateInShape: '2021-04-28T16:56:11.923Z',
+                docId: 'ZlBoGXkBsFLYN2Tj1wmV',
+                location: [-73.99561604484916, 40.75449890457094],
+                shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
+              },
+              {
+                dateInShape: '2021-04-28T16:56:01.896Z',
+                docId: 'Y1BoGXkBsFLYN2TjsAlp',
+                location: [-73.99459345266223, 40.755913141183555],
+                shapeLocationId: 'other',
               },
             ],
           ],
           [
-            'AAL2323',
+            '2',
             [
               {
-                dateInShape: '2020-09-28T18:01:41.191Z',
-                docId: 'n-ng1XQB6yyY-xQxnGSM',
-                location: [-84.71324851736426, 41.6677269525826],
-                shapeLocationId: '0DrJu3QB6yyY-xQxv6Ip',
-              },
-            ],
-          ],
-          [
-            'ABD5250',
-            [
-              {
-                dateInShape: '2020-09-28T18:01:41.192Z',
-                docId: 'GOng1XQB6yyY-xQxnGWM',
-                location: [6.073727197945118, 39.07997465226799],
-                shapeLocationId: '0DrJu3QB6yyY-xQxv6Ip',
+                dateInShape: '2021-04-28T16:56:11.923Z',
+                docId: 'Z1BoGXkBsFLYN2Tj1wmV',
+                location: [-73.98662586696446, 40.7667087810114],
+                shapeLocationId: 'other',
               },
             ],
           ],
@@ -78,7 +112,8 @@ describe('geo_containment', () => {
     const nestedGeoField = 'geo.coords.location';
     it('should correctly transform expected results if fields are nested', async () => {
       const transformedResults = transformResults(
-        (sampleJsonResponseWithNesting as unknown) as SearchResponse<unknown>,
+        // @ts-ignore
+        (sampleAggsJsonResponseWithNesting.body as unknown) as SearchResponse<unknown>,
         nestedDateField,
         nestedGeoField
       );
@@ -181,7 +216,7 @@ describe('geo_containment', () => {
       ],
     ]);
 
-    const expectedContext = [
+    const expectedAlertResults = [
       {
         actionGroupId: 'Tracked entity contained',
         context: {
@@ -213,27 +248,8 @@ describe('geo_containment', () => {
         instanceId: 'c-789',
       },
     ];
+    const contextKeys = Object.keys(expectedAlertResults[0].context);
     const emptyShapesIdsNamesMap = {};
-
-    const alertInstanceFactory = (instanceId: string) => {
-      const alertInstance = alertsMock.createAlertInstanceFactory<
-        GeoContainmentInstanceState,
-        GeoContainmentInstanceContext
-      >();
-      alertInstance.scheduleActions.mockImplementation(
-        (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
-          const contextKeys = Object.keys(expectedContext[0].context);
-          const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
-          testAlertActionArr.push({
-            actionGroupId,
-            instanceId,
-            context: contextSubset,
-          });
-          return alertInstance;
-        }
-      );
-      return alertInstance;
-    };
 
     const currentDateTime = new Date();
 
@@ -242,13 +258,14 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMap,
-        alertInstanceFactory,
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(testAlertActionArr).toMatchObject(expectedContext);
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
+
     it('should overwrite older identical entity entries', () => {
       const prevLocationMapWithIdenticalEntityEntry = new Map([
         [
@@ -266,13 +283,14 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory,
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(testAlertActionArr).toMatchObject(expectedContext);
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
+
     it('should preserve older non-identical entity entries', () => {
       const prevLocationMapWithNonIdenticalEntityEntry = new Map([
         [
@@ -287,7 +305,7 @@ describe('geo_containment', () => {
           ],
         ],
       ]);
-      const expectedContextPlusD = [
+      const expectedAlertResultsPlusD = [
         {
           actionGroupId: 'Tracked entity contained',
           context: {
@@ -298,19 +316,19 @@ describe('geo_containment', () => {
           },
           instanceId: 'd-999',
         },
-        ...expectedContext,
+        ...expectedAlertResults,
       ];
 
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithNonIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory,
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
       expect(allActiveEntriesMap).not.toEqual(currLocationMap);
       expect(allActiveEntriesMap.has('d')).toBeTruthy();
-      expect(testAlertActionArr).toMatchObject(expectedContextPlusD);
+      expect(testAlertActionArr).toMatchObject(expectedAlertResultsPlusD);
     });
 
     it('should remove "other" entries and schedule the expected number of actions', () => {
@@ -327,12 +345,12 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory,
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
       expect(allActiveEntriesMap).toEqual(currLocationMap);
-      expect(testAlertActionArr).toMatchObject(expectedContext);
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
 
     it('should generate multiple alerts per entity if found in multiple shapes in interval', () => {
@@ -360,7 +378,7 @@ describe('geo_containment', () => {
       getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithThreeMore,
-        alertInstanceFactory,
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -397,7 +415,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory,
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -429,7 +447,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory,
+        alertInstanceFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -443,6 +461,173 @@ describe('geo_containment', () => {
           },
         ])
       );
+    });
+  });
+
+  describe('getGeoContainmentExecutor', () => {
+    // Params needed for all tests
+    const expectedAlertResults = [
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: 'kFATGXkBsFLYN2Tj6AAk',
+          entityDocumentId: 'ZVBoGXkBsFLYN2Tj1wmV',
+          entityId: '0',
+          entityLocation: 'POINT (-73.99018926545978 40.751759740523994)',
+        },
+        instanceId: '0-kFATGXkBsFLYN2Tj6AAk',
+      },
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: 'kFATGXkBsFLYN2Tj6AAk',
+          entityDocumentId: 'ZlBoGXkBsFLYN2Tj1wmV',
+          entityId: '1',
+          entityLocation: 'POINT (-73.99561604484916 40.75449890457094)',
+        },
+        instanceId: '1-kFATGXkBsFLYN2Tj6AAk',
+      },
+    ];
+    const testAlertActionArr: unknown[] = [];
+    const mockLogger = loggingSystemMock.createLogger();
+    const previousStartedAt = new Date('2021-04-27T16:56:11.923Z');
+    const startedAt = new Date('2021-04-29T16:56:11.923Z');
+    const geoContainmentParams: GeoContainmentParams = {
+      index: 'testIndex',
+      indexId: 'testIndexId',
+      geoField: 'location',
+      entity: 'testEntity',
+      dateField: '@timestamp',
+      boundaryType: 'testBoundaryType',
+      boundaryIndexTitle: 'testBoundaryIndexTitle',
+      boundaryIndexId: 'testBoundaryIndexId',
+      boundaryGeoField: 'testBoundaryGeoField',
+    };
+    const alertId = 'testAlertId';
+    const geoContainmentState = {
+      shapesFilters: {
+        testShape: 'thisIsAShape',
+      },
+      shapesIdsNamesMap: {},
+      prevLocationMap: {},
+    };
+
+    // Boundary test mocks
+    const boundaryCall = jest.fn();
+    const esAggCall = jest.fn();
+    const contextKeys = Object.keys(expectedAlertResults[0].context);
+    const alertServicesWithSearchMock: AlertServicesMock = {
+      ...alertsMock.createAlertServices(),
+      // @ts-ignore
+      alertInstanceFactory: alertInstanceFactory(contextKeys, testAlertActionArr),
+      scopedClusterClient: {
+        asCurrentUser: {
+          // @ts-ignore
+          search: jest.fn(({ index }: { index: string }) => {
+            if (index === geoContainmentParams.boundaryIndexTitle) {
+              boundaryCall();
+              return sampleShapesJsonResponse;
+            } else {
+              esAggCall();
+              return sampleAggsJsonResponse;
+            }
+          }),
+        },
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      testAlertActionArr.length = 0;
+    });
+
+    it('should query for shapes if state does not contain shapes', async () => {
+      const executor = await getGeoContainmentExecutor(mockLogger);
+      const executionResult = await executor({
+        previousStartedAt,
+        startedAt,
+        // @ts-ignore
+        services: alertServicesWithSearchMock,
+        params: geoContainmentParams,
+        alertId,
+        // @ts-ignore
+        state: {},
+      });
+      if (executionResult && executionResult.shapesFilters) {
+        expect(boundaryCall.mock.calls.length).toBe(1);
+        expect(esAggCall.mock.calls.length).toBe(1);
+      }
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    });
+
+    it('should not query for shapes if state contains shapes', async () => {
+      const executor = await getGeoContainmentExecutor(mockLogger);
+      const executionResult = await executor({
+        previousStartedAt,
+        startedAt,
+        // @ts-ignore
+        services: alertServicesWithSearchMock,
+        params: geoContainmentParams,
+        alertId,
+        state: geoContainmentState,
+      });
+      if (executionResult && executionResult.shapesFilters) {
+        expect(boundaryCall.mock.calls.length).toBe(0);
+        expect(esAggCall.mock.calls.length).toBe(1);
+      }
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    });
+
+    it('should carry through shapes filters in state to next call unmodified', async () => {
+      const executor = await getGeoContainmentExecutor(mockLogger);
+      const executionResult = await executor({
+        previousStartedAt,
+        startedAt,
+        // @ts-ignore
+        services: alertServicesWithSearchMock,
+        params: geoContainmentParams,
+        alertId,
+        state: geoContainmentState,
+      });
+      if (executionResult && executionResult.shapesFilters) {
+        expect(executionResult.shapesFilters).toEqual(geoContainmentState.shapesFilters);
+      }
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    });
+
+    it('should return previous locations map', async () => {
+      const expectedPrevLocationMap = {
+        '0': [
+          {
+            dateInShape: '2021-04-28T16:56:11.923Z',
+            docId: 'ZVBoGXkBsFLYN2Tj1wmV',
+            location: [-73.99018926545978, 40.751759740523994],
+            shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
+          },
+        ],
+        '1': [
+          {
+            dateInShape: '2021-04-28T16:56:11.923Z',
+            docId: 'ZlBoGXkBsFLYN2Tj1wmV',
+            location: [-73.99561604484916, 40.75449890457094],
+            shapeLocationId: 'kFATGXkBsFLYN2Tj6AAk',
+          },
+        ],
+      };
+      const executor = await getGeoContainmentExecutor(mockLogger);
+      const executionResult = await executor({
+        previousStartedAt,
+        startedAt,
+        // @ts-ignore
+        services: alertServicesWithSearchMock,
+        params: geoContainmentParams,
+        alertId,
+        state: geoContainmentState,
+      });
+      if (executionResult && executionResult.prevLocationMap) {
+        expect(executionResult.prevLocationMap).toEqual(expectedPrevLocationMap);
+      }
+      expect(testAlertActionArr).toMatchObject(expectedAlertResults);
     });
   });
 });

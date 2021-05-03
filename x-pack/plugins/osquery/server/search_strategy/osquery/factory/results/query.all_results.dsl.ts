@@ -53,13 +53,12 @@ export const buildResultsQuery = ({
       size: querySize,
       track_total_hits: true,
       fields: agentId ? ['osquery.*'] : ['agent.*', 'osquery.*'],
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.direction,
+      sort:
+        sort?.map((sortConfig) => ({
+          [sortConfig.field]: {
+            order: sortConfig.direction,
           },
-        },
-      ],
+        })) ?? [],
     },
   };
 
