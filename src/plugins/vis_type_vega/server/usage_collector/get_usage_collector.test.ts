@@ -9,7 +9,7 @@
 import { getStats } from './get_usage_collector';
 import { createCollectorFetchContextMock } from '../../../usage_collection/server/mocks';
 import type { HomeServerPluginSetup } from '../../../home/server';
-import type { SavedObjectsClientContract } from '../../../../core/server/types';
+import type { SavedObjectsClientContract } from '../../../../core/server';
 
 const mockedSavedObjects = [
   // vega-lite lib spec
