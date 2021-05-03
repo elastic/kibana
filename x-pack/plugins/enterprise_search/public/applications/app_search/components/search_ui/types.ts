@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import extractZip from 'extract-zip';
-import { ExtractError } from './extract_error';
-
-export async function unzip(filepath, target) {
-  try {
-    await extractZip(filepath, { dir: target });
-  } catch (err) {
-    throw new ExtractError(err);
-  }
+export enum ActiveField {
+  Title,
+  Filter,
+  Sort,
+  Url,
+  None,
 }
