@@ -394,7 +394,7 @@ export function Discover({
 
                     <EuiFlexItem className="eui-yScroll">
                       <section
-                        className="dscTable eui-yScroll"
+                        className="dscTable eui-yScroll eui-xScroll"
                         aria-labelledby="documentsAriaLabel"
                         ref={scrollableDesktop}
                         tabIndex={-1}
