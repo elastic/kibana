@@ -8,7 +8,7 @@
 import type { BroadcastChannel as BroadcastChannelType } from 'broadcast-channel';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { delayWhen, skip, tap, throttleTime } from 'rxjs/operators';
+import { skip, tap, throttleTime } from 'rxjs/operators';
 
 import type {
   HttpFetchOptionsWithPath,
