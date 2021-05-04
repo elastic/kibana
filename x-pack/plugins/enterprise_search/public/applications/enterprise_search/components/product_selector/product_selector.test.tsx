@@ -32,6 +32,7 @@ describe('ProductSelector', () => {
   });
 
   it('renders the license and trial callouts', () => {
+    setMockValues({ config: { host: 'localhost' } });
     const wrapper = shallow(<ProductSelector access={{}} />);
 
     expect(wrapper.find(TrialCallout)).toHaveLength(1);

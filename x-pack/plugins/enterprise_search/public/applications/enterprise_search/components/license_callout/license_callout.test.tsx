@@ -26,7 +26,7 @@ describe('LicenseCallout', () => {
     const wrapper = shallow(<LicenseCallout />);
 
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find(EuiText)).toHaveLength(2);
     expect(wrapper.find(EuiButtonTo).prop('to')).toEqual(
       '/app/management/stack/license_management'
     );
