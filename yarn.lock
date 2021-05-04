@@ -2587,7 +2587,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics@link:packages/kbn-analytics":
+"@kbn/analytics@link:bazel-bin/packages/kbn-analytics/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2639,11 +2639,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-import-resolver-kibana@link:packages/kbn-eslint-import-resolver-kibana":
+"@kbn/eslint-import-resolver-kibana@link:bazel-bin/packages/kbn-eslint-import-resolver-kibana/npm_module":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-eslint@link:packages/kbn-eslint-plugin-eslint":
+"@kbn/eslint-plugin-eslint@link:bazel-bin/packages/kbn-eslint-plugin-eslint/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2663,7 +2663,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/legacy-logging@link:packages/kbn-legacy-logging":
+"@kbn/legacy-logging@link:bazel-bin/packages/kbn-legacy-logging/npm_module":
   version "0.0.0"
   uid ""
 
@@ -10676,6 +10676,11 @@ cypress-promise@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/cypress-promise/-/cypress-promise-1.1.0.tgz#f2d66965945fe198431aaf692d5157cea9d47b25"
   integrity sha512-DhIf5PJ/a0iY+Yii6n7Rbwq+9TJxU4pupXYzf9mZd8nPG0AzQrj9i+pqINv4xbI2EV1p+PKW3maCkR7oPG4GrA==
+
+cypress-real-events@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.4.0.tgz#39575031a4020581e0bbf105d7a306ee57d94f48"
+  integrity sha512-1s4BQN1D++vFSuaad0qKsWcoApM5tQqPBFyDJEa6JeCZIsAdgMdGLuKi5QNIdl5KTJix0jxglzFJAThyz3borQ==
 
 cypress@^6.8.0:
   version "6.8.0"

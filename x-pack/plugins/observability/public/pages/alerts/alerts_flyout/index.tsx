@@ -16,7 +16,6 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutProps,
   EuiSpacer,
-  EuiTabbedContent,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -31,10 +30,10 @@ import {
   RULE_CATEGORY,
   RULE_NAME,
 } from '../../../../../rule_registry/common/technical_rule_data_field_names';
+import { TopAlert } from '../';
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { TopAlert } from '../';
 import { SeverityBadge } from '../severity_badge';
 
 type AlertsFlyoutProps = { alert: TopAlert } & EuiFlyoutProps;
@@ -91,23 +90,8 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
     },
   ];
 
-  const tabs = [
-    {
-      id: 'overview',
-      name: i18n.translate('xpack.observability.alerts.flyoutOverviewTabTitle', {
-        defaultMessage: 'Overview',
-      }),
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiDescriptionList type="responsiveColumn" listItems={overviewListItems} />
-        </>
-      ),
-    },
-  ];
-
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>{alert.fields[RULE_NAME]}</h2>
@@ -116,7 +100,12 @@ export function AlertsFlyout({ onClose, alert }: AlertsFlyoutProps) {
         <EuiText size="s">{alert.reason}</EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiTabbedContent size="s" tabs={tabs} />
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          compressed={true}
+          type="responsiveColumn"
+          listItems={overviewListItems}
+        />
       </EuiFlyoutBody>
       {alert.link && (
         <EuiFlyoutFooter>

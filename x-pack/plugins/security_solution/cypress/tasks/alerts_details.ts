@@ -14,4 +14,5 @@ export const openJsonView = () => {
 export const scrollJsonViewToBottom = () => {
   cy.get(JSON_CONTENT).click({ force: true });
   cy.get(JSON_CONTENT).type('{pagedown}{pagedown}{pagedown}');
+  cy.get(JSON_CONTENT).should('be.visible');
 };
