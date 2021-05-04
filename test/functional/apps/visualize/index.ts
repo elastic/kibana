@@ -33,9 +33,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('new charts library', function () {
       this.tags('ciGroup7');
 
-      before(() => update(false));
+      before(async () => await update(false));
 
-      after(() => update(true));
+      after(async () => await update(true));
 
       [
         // Test replaced vislib chart types
