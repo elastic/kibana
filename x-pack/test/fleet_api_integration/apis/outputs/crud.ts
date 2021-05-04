@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENT_POLICY_INDEX } from '../../../../plugins/fleet/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -14,8 +13,6 @@ import { setupFleetAndAgents } from '../agents/services';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
-  const esClient = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('fleet_output_crud', async function () {
@@ -30,7 +27,7 @@ export default function (providerContext: FtrProviderContext) {
     before(async function () {
       const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
-      const defaultOutput = getOutputsRes.items.find((item) => item.is_default);
+      const defaultOutput = getOutputsRes.items.find((item: any) => item.is_default);
       if (!defaultOutput) {
         throw new Error('default output not set');
       }
