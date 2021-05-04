@@ -92,7 +92,7 @@ describe('actions', () => {
 
   describe('readWithPit', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.readWithPit(client, 'pitId', undefined, 10_000);
+      const task = Actions.readWithPit(client, 'pitId', { match_all: {} }, 10_000);
       try {
         await task();
       } catch (e) {
