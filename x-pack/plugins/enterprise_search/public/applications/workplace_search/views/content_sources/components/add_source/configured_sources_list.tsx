@@ -30,8 +30,8 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   sources,
   isOrganization,
 }) => {
-  const sourcesPrivate = sources.filter((i) => i.privateSourcesEnabled);
-  const sourcesShared = sources.filter((i) => !i.privateSourcesEnabled);
+  const sourcesPrivate = sources.filter((i) => i.accountContextOnly);
+  const sourcesShared = sources.filter((i) => !i.accountContextOnly);
 
   const visibleSources = (
     <>
