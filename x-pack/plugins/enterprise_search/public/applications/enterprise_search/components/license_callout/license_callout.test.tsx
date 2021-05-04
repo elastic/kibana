@@ -37,6 +37,6 @@ describe('LicenseCallout', () => {
     });
     const wrapper = shallow(<LicenseCallout />);
 
-    expect(wrapper.find(EuiPanel)).toHaveLength(0);
+    expect(wrapper.isEmptyRender()).toBe(true);
   });
 });
