@@ -43,7 +43,7 @@ export const GroupOfNodes: React.FC<Props> = ({
     <GroupOfNodesContainer style={{ width }}>
       <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
       <Nodes>
-        {!isNaN(group.squareSize) &&
+        {group.width &&
           group.nodes.map((node) => (
             <Node
               key={`${node.pathId}:${node.name}`}
