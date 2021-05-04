@@ -7,7 +7,7 @@
 
 import React, { ReactNode } from 'react';
 import {
-  EuiIcon,
+  EuiButtonIcon,
   EuiLink,
   EuiLinkButtonProps,
   EuiPopover,
@@ -19,11 +19,12 @@ import './help_popover.scss';
 
 export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['onClick'] }) => {
   return (
-    <EuiText size="xs">
-      <EuiLink onClick={onClick}>
-        <EuiIcon className="mlHelpPopover__buttonIcon" size="s" type="help" />
-      </EuiLink>
-    </EuiText>
+    <EuiButtonIcon
+      className="mlHelpPopover__buttonIcon"
+      size="s"
+      iconType="help"
+      onClick={onClick}
+    />
   );
 };
 
