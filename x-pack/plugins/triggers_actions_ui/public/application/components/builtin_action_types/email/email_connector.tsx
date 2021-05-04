@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -25,6 +25,7 @@ import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEncryptedFieldNotifyLabel } from '../../missing_secrets_callout';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
@@ -40,7 +41,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   }, []);
 
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -204,7 +205,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<
       </EuiFlexGroup>
       {hasAuth ? (
         <>
-          {getEncryptedFieldNotifyLabel(!action.id)}
+          {getEncryptedFieldNotifyLabel(
+            !action.id,
+            action.isMissingSecrets ?? false,
+            'Username and password are encrypted. Please reenter values for these fields.'
+          )}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiFormRow
@@ -271,7 +276,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           </EuiFlexGroup>
         </>
       ) : null}
-    </Fragment>
+    </>
   );
 };
 
@@ -279,41 +284,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<
 function nullableString(str: string | null | undefined) {
   if (str == null || str.trim() === '') return null;
   return str;
-}
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <EuiText size="s" data-test-subj="rememberValuesMessage">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.rememberValuesLabel"
-            defaultMessage="Remember these values. You must reenter them each time you edit the connector."
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
-  return (
-    <Fragment>
-      <EuiSpacer size="m" />
-      <EuiCallOut
-        size="s"
-        iconType="iInCircle"
-        data-test-subj="reenterValuesMessage"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.reenterValuesLabel',
-          {
-            defaultMessage:
-              'Username and password are encrypted. Please reenter values for these fields.',
-          }
-        )}
-      />
-      <EuiSpacer size="m" />
-    </Fragment>
-  );
 }
 
 // eslint-disable-next-line import/no-default-export

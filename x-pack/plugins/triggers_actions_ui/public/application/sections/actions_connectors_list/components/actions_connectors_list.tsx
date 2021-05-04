@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiInMemoryTable,
   EuiSpacer,
@@ -64,9 +64,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [editConnectorProps, setEditConnectorProps] = useState<{
     initialConnector?: ActionConnector;
     tab?: EditConectorTabs;
+    isFix?: boolean;
   }>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
-
   useEffect(() => {
     loadActions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,8 +140,12 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(actionConnector: ActionConnector, tab: EditConectorTabs) {
-    setEditConnectorProps({ initialConnector: actionConnector, tab });
+  async function editItem(
+    actionConnector: ActionConnector,
+    tab: EditConectorTabs,
+    isFix?: boolean
+  ) {
+    setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
 
   const actionsTableColumns = [
@@ -162,27 +166,41 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         );
 
         const link = (
-          <EuiLink
-            data-test-subj={`edit${item.id}`}
-            onClick={() => editItem(item, EditConectorTabs.Configuration)}
-            key={item.id}
-            disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
-          >
-            {value}
-          </EuiLink>
+          <>
+            <EuiLink
+              data-test-subj={`edit${item.id}`}
+              onClick={() => editItem(item, EditConectorTabs.Configuration)}
+              key={item.id}
+              disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
+            >
+              {value}
+            </EuiLink>
+            {item.isMissingSecrets ? (
+              <EuiIconTip
+                iconProps={{ 'data-test-subj': `missingSecrets_${item.id}` }}
+                type="alert"
+                color="warning"
+                content={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
+                  { defaultMessage: 'Sensitive information is not imported' }
+                )}
+                position="right"
+              />
+            ) : null}
+          </>
         );
 
         return checkEnabledResult.isEnabled ? (
           link
         ) : (
-          <Fragment>
+          <>
             {link}
             <EuiIconTip
               type="questionInCircle"
               content={checkEnabledResult.message}
               position="right"
             />
-          </Fragment>
+          </>
         );
       },
     },
@@ -203,32 +221,40 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       render: (item: ActionConnectorTableItem) => {
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
-            {item.isMissingSecrets ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  data-test-subj="fixConnectorButton"
-                  onClick={() => editItem(item, EditConectorTabs.Configuration)}
-                >
-                  {i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
-                    {
-                      defaultMessage: 'Fix',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
             <DeleteOperation
               canDelete={canDelete}
               item={item}
               onDelete={() => setConnectorsToDelete([item.id])}
             />
-            <RunOperation
-              canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
-              item={item}
-              onRun={() => editItem(item, EditConectorTabs.Test)}
-            />
+            {item.isMissingSecrets ? (
+              <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
+                    { defaultMessage: 'Fix connector configuration' }
+                  )}
+                >
+                  <EuiButtonEmpty
+                    size="xs"
+                    data-test-subj="fixConnectorButton"
+                    onClick={() => editItem(item, EditConectorTabs.Configuration, true)}
+                  >
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
+                      {
+                        defaultMessage: 'Fix',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : (
+              <RunOperation
+                canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
+                item={item}
+                onRun={() => editItem(item, EditConectorTabs.Test)}
+              />
+            )}
           </EuiFlexGroup>
         );
       },
