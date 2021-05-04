@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { merge } from 'lodash';
+import { union } from 'lodash';
 import { EuiComboBox, EuiFormControlLayout, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -31,11 +31,11 @@ export function FieldValueCombobox({
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<ValueOption[]>(
-    formatOptions(merge(values ?? [], selectedValue ?? []))
+    formatOptions(union(values ?? [], selectedValue ?? []))
   );
 
   useEffect(() => {
-    setOptions(formatOptions(merge(values ?? [], selectedValue ?? [])));
+    setOptions(formatOptions(union(values ?? [], selectedValue ?? [])));
   }, [selectedValue, values]);
 
   const onChange = (selectedValuesN: ValueOption[]) => {

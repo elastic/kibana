@@ -136,4 +136,34 @@ describe('updateSearchSource', () => {
     ]);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });
+
+  test('does not explicitly request fieldsFromSource when not using fields API', async () => {
+    const persistentSearchSourceMock = createSearchSourceMock({});
+    const volatileSearchSourceMock = createSearchSourceMock({});
+    const sampleSize = 250;
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
+      indexPattern: indexPatternMock,
+      services: ({
+        data: dataPluginMock.createStartContract(),
+        uiSettings: ({
+          get: (key: string) => {
+            if (key === SAMPLE_SIZE_SETTING) {
+              return sampleSize;
+            }
+            return false;
+          },
+        } as unknown) as IUiSettingsClient,
+      } as unknown) as DiscoverServices,
+      sort: [] as SortOrder[],
+      columns: [],
+      useNewFieldsApi: false,
+      showUnmappedFields: false,
+    });
+    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
+    expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);
+    expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
+  });
 });

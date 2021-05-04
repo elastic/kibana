@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { UsersRt } from '../../../../../common/api';
+import { UsersRt } from '../../../../../common';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_REPORTERS_URL } from '../../../../../common/constants';
+import { CASE_REPORTERS_URL } from '../../../../../common';
 
 export function initGetReportersApi({ caseService, router, logger }: RouteDeps) {
   router.get(
