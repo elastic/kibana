@@ -5,244 +5,186 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import React, { Fragment, ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
 
-import { EuiButton, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { DocLinksStart, HttpSetup } from 'src/core/public';
-import { API_BASE_PATH } from '../../../../../../common/constants';
-import {
-  EnrichedDeprecationInfo,
-  ReindexStatus,
-  UIReindexOption,
-} from '../../../../../../common/types';
+import { ButtonSize, EuiButton, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
+
+import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../common/types';
 import { LoadingState } from '../../../types';
 import { ReindexFlyout } from './flyout';
-import { ReindexPollingService, ReindexState } from './polling_service';
+import { useReindexStatus } from './use_reindex_status';
+import { useAppContext } from '../../../../app_context';
+
+const i18nTexts = {
+  reindexButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.reindexing.reindexButtonLabel',
+    {
+      defaultMessage: 'Reindex',
+    }
+  ),
+  loadingButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.checkupTab.reindexing.loadingButtonLabel',
+    {
+      defaultMessage: 'Loading…',
+    }
+  ),
+  reindexingButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.checkupTab.reindexing.reindexingButtonLabel',
+    {
+      defaultMessage: 'Reindexing…',
+    }
+  ),
+  doneButtonLabel: i18n.translate('xpack.upgradeAssistant.checkupTab.reindexing.doneButtonLabel', {
+    defaultMessage: 'Done',
+  }),
+  failedButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.checkupTab.reindexing.failedButtonLabel',
+    {
+      defaultMessage: 'Failed',
+    }
+  ),
+  pausedButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.checkupTab.reindexing.pausedButtonLabel',
+    {
+      defaultMessage: 'Paused',
+    }
+  ),
+  canceledButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.checkupTab.reindexing.canceledButtonLabel',
+    {
+      defaultMessage: 'Canceled',
+    }
+  ),
+  getTooltipLabel: (indexName: string) =>
+    i18n.translate(
+      'xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.indexClosedToolTipDetails',
+      {
+        defaultMessage:
+          '"{indexName}" needs to be reindexed, but it is currently closed. The Upgrade Assistant will open, reindex and then close the index. Reindexing may take longer than usual.',
+        values: { indexName },
+      }
+    ),
+};
 
 interface ReindexButtonProps {
   indexName: string;
-  http: HttpSetup;
-  docLinks: DocLinksStart;
   reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
 }
 
-interface ReindexButtonState {
-  flyoutVisible: boolean;
-  reindexState: ReindexState;
-}
+export const ReindexButton: React.FunctionComponent<ReindexButtonProps> = ({
+  indexName,
+  reindexBlocker,
+}) => {
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const { api, docLinks } = useAppContext();
+  const { reindexState, startReindex, cancelReindex, updateStatus } = useReindexStatus({
+    indexName,
+    api,
+  });
 
-/**
- * Displays a button that will display a flyout when clicked with the reindexing status for
- * the given `indexName`.
- */
-export class ReindexButton extends React.Component<ReindexButtonProps, ReindexButtonState> {
-  private service: ReindexPollingService;
-  private subscription?: Subscription;
+  useEffect(() => {
+    updateStatus();
+    // Get reindex initial status on component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  constructor(props: ReindexButtonProps) {
-    super(props);
+  const handleStartReindex = () => {
+    api.sendReindexTelemetryInfo({ start: true });
+    startReindex();
+  };
 
-    this.service = this.newService();
-    this.state = {
-      flyoutVisible: false,
-      reindexState: this.service.status$.value,
-    };
-  }
+  const handleCancelReindex = () => {
+    api.sendReindexTelemetryInfo({ cancel: true });
+    cancelReindex();
+  };
 
-  public async componentDidMount() {
-    this.subscribeToUpdates();
-  }
+  const showFlyout = () => {
+    api.sendReindexTelemetryInfo({ open: true });
+    setIsFlyoutVisible(true);
+  };
 
-  public async componentWillUnmount() {
-    this.unsubscribeToUpdates();
-  }
+  const closeFlyout = () => {
+    api.sendReindexTelemetryInfo({ close: true });
+    setIsFlyoutVisible(false);
+  };
 
-  public componentDidUpdate(prevProps: ReindexButtonProps) {
-    if (prevProps.indexName !== this.props.indexName) {
-      this.unsubscribeToUpdates();
-      this.service = this.newService();
-      this.subscribeToUpdates();
-    }
-  }
+  const commonButtonProps = { size: 's' as ButtonSize, onClick: showFlyout };
+  const isIndexClosed =
+    reindexBlocker === 'index-closed' && reindexState.status !== ReindexStatus.completed;
 
-  public render() {
-    const { indexName, reindexBlocker, docLinks } = this.props;
-    const { flyoutVisible, reindexState } = this.state;
+  let button = <EuiButton {...commonButtonProps}>{i18nTexts.reindexButtonLabel}</EuiButton>;
 
-    const buttonProps: any = { size: 's', onClick: this.showFlyout };
-    let buttonContent: ReactNode = (
-      <FormattedMessage
-        id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.reindexLabel"
-        defaultMessage="Reindex"
-      />
+  if (reindexState.loadingState === LoadingState.Loading) {
+    button = (
+      <EuiButton disabled {...commonButtonProps}>
+        {i18nTexts.loadingButtonLabel}
+      </EuiButton>
     );
-
-    if (reindexState.loadingState === LoadingState.Loading) {
-      buttonProps.disabled = true;
-      buttonContent = (
-        <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.loadingLabel"
-          defaultMessage="Loading…"
-        />
-      );
-    } else {
-      switch (reindexState.status) {
-        case ReindexStatus.inProgress:
-          buttonContent = (
+  } else {
+    switch (reindexState.status) {
+      case ReindexStatus.inProgress:
+        button = (
+          <EuiButton {...commonButtonProps}>
+            {/* The isLoading prop doesn't work in this case, because we want the button to remain enabled */}
             <span>
-              <EuiLoadingSpinner className="upgReindexButton__spinner" size="m" /> Reindexing…
+              <EuiLoadingSpinner className="upgReindexButton__spinner" size="m" />
+              {i18nTexts.reindexingButtonLabel}
             </span>
-          );
-          break;
-        case ReindexStatus.completed:
-          buttonProps.color = 'secondary';
-          buttonProps.iconSide = 'left';
-          buttonProps.iconType = 'check';
-          buttonContent = (
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.doneLabel"
-              defaultMessage="Done"
-            />
-          );
-          break;
-        case ReindexStatus.failed:
-          buttonProps.color = 'danger';
-          buttonProps.iconSide = 'left';
-          buttonProps.iconType = 'cross';
-          buttonContent = (
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.failedLabel"
-              defaultMessage="Failed"
-            />
-          );
-          break;
-        case ReindexStatus.paused:
-          buttonProps.color = 'warning';
-          buttonProps.iconSide = 'left';
-          buttonProps.iconType = 'pause';
-          buttonContent = (
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.pausedLabel"
-              defaultMessage="Paused"
-            />
-          );
-        case ReindexStatus.cancelled:
-          buttonProps.color = 'danger';
-          buttonProps.iconSide = 'left';
-          buttonProps.iconType = 'cross';
-          buttonContent = (
-            <FormattedMessage
-              id="xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.cancelledLabel"
-              defaultMessage="Cancelled"
-            />
-          );
-          break;
-      }
-    }
-
-    const showIndexedClosedWarning =
-      reindexBlocker === 'index-closed' && reindexState.status !== ReindexStatus.completed;
-
-    if (showIndexedClosedWarning) {
-      buttonProps.color = 'warning';
-      buttonProps.iconType = 'alert';
-    }
-
-    const button = <EuiButton {...buttonProps}>{buttonContent}</EuiButton>;
-
-    return (
-      <Fragment>
-        {showIndexedClosedWarning ? (
-          <EuiToolTip
-            position="top"
-            content={
-              <EuiText size="s">
-                {i18n.translate(
-                  'xpack.upgradeAssistant.checkupTab.reindexing.reindexButton.indexClosedToolTipDetails',
-                  {
-                    defaultMessage:
-                      '"{indexName}" needs to be reindexed, but it is currently closed. The Upgrade Assistant will open, reindex and then close the index. Reindexing may take longer than usual.',
-                    values: { indexName },
-                  }
-                )}
-              </EuiText>
-            }
-          >
-            {button}
-          </EuiToolTip>
-        ) : (
-          button
-        )}
-
-        {flyoutVisible && (
-          <ReindexFlyout
-            reindexBlocker={reindexBlocker}
-            docLinks={docLinks}
-            indexName={indexName}
-            closeFlyout={this.closeFlyout}
-            reindexState={reindexState}
-            startReindex={this.startReindex}
-            cancelReindex={this.cancelReindex}
-          />
-        )}
-      </Fragment>
-    );
-  }
-
-  private newService() {
-    const { indexName, http } = this.props;
-    return new ReindexPollingService(indexName, http);
-  }
-
-  private subscribeToUpdates() {
-    this.service.updateStatus();
-    this.subscription = this.service!.status$.subscribe((reindexState) =>
-      this.setState({ reindexState })
-    );
-  }
-
-  private unsubscribeToUpdates() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      delete this.subscription;
-    }
-
-    if (this.service) {
-      this.service.stopPolling();
+          </EuiButton>
+        );
+        break;
+      case ReindexStatus.completed:
+        button = (
+          <EuiButton color="secondary" iconType="check" {...commonButtonProps}>
+            {i18nTexts.doneButtonLabel}
+          </EuiButton>
+        );
+        break;
+      case ReindexStatus.cancelled:
+      case ReindexStatus.failed:
+        button = (
+          <EuiButton color="danger" iconType="cross" {...commonButtonProps}>
+            {ReindexStatus.failed ? i18nTexts.failedButtonLabel : i18nTexts.canceledButtonLabel}
+          </EuiButton>
+        );
+        break;
+      case ReindexStatus.paused:
+        button = (
+          <EuiButton color="warning" iconType="pause" {...commonButtonProps}>
+            {i18nTexts.doneButtonLabel}
+          </EuiButton>
+        );
+        break;
     }
   }
 
-  private startReindex = async () => {
-    if (!this.state.reindexState.status) {
-      // if status didn't exist we are starting a reindex action
-      this.sendUIReindexTelemetryInfo('start');
-    }
+  return (
+    <>
+      {isIndexClosed ? (
+        <EuiToolTip
+          position="top"
+          content={<EuiText size="s">{i18nTexts.getTooltipLabel(indexName)}</EuiText>}
+        >
+          <EuiButton {...commonButtonProps} color="warning" iconType="alert">
+            {i18nTexts.reindexButtonLabel}
+          </EuiButton>
+        </EuiToolTip>
+      ) : (
+        button
+      )}
 
-    await this.service.startReindex();
-  };
-
-  private cancelReindex = async () => {
-    this.sendUIReindexTelemetryInfo('stop');
-    await this.service.cancelReindex();
-  };
-
-  private showFlyout = () => {
-    this.sendUIReindexTelemetryInfo('open');
-    this.setState({ flyoutVisible: true });
-  };
-
-  private closeFlyout = () => {
-    this.sendUIReindexTelemetryInfo('close');
-    this.setState({ flyoutVisible: false });
-  };
-
-  private async sendUIReindexTelemetryInfo(uiReindexAction: UIReindexOption) {
-    await this.props.http.put(`${API_BASE_PATH}/stats/ui_reindex`, {
-      body: JSON.stringify(set({}, uiReindexAction, true)),
-    });
-  }
-}
+      {isFlyoutVisible && (
+        <ReindexFlyout
+          reindexBlocker={reindexBlocker}
+          docLinks={docLinks}
+          indexName={indexName}
+          closeFlyout={closeFlyout}
+          reindexState={reindexState}
+          startReindex={handleStartReindex}
+          cancelReindex={handleCancelReindex}
+        />
+      )}
+    </>
+  );
+};

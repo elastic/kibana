@@ -11,7 +11,6 @@ import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EnrichedDeprecationInfo } from '../../../../../common/types';
-import { AppContext } from '../../../app_context';
 import { ReindexButton } from './reindex';
 import { FixIndexSettingsButton } from './index_settings';
 
@@ -167,18 +166,10 @@ export class IndexDeprecationTable extends React.Component<
           render(indexDep: IndexDeprecationDetails) {
             if (showReindexButton) {
               return (
-                <AppContext.Consumer>
-                  {({ http, docLinks }) => {
-                    return (
-                      <ReindexButton
-                        docLinks={docLinks}
-                        reindexBlocker={indexDep.blockerForReindexing}
-                        indexName={indexDep.index!}
-                        http={http}
-                      />
-                    );
-                  }}
-                </AppContext.Consumer>
+                <ReindexButton
+                  reindexBlocker={indexDep.blockerForReindexing}
+                  indexName={indexDep.index!}
+                />
               );
             }
 

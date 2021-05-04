@@ -118,7 +118,7 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
 
   useEffect(() => {
     async function sendTelemetryData() {
-      await api.sendTelemetryData({
+      await api.sendPageTelemetryInfo({
         kibana: true,
       });
     }

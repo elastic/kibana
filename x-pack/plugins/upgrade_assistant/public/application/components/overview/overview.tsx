@@ -78,7 +78,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
   useEffect(() => {
     async function sendTelemetryData() {
-      await api.sendTelemetryData({
+      await api.sendPageTelemetryInfo({
         overview: true,
       });
     }

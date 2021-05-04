@@ -59,7 +59,7 @@ const buttonLabel = (status?: ReindexStatus) => {
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
-          defaultMessage="Run reindex"
+          defaultMessage="Start reindex"
         />
       );
   }

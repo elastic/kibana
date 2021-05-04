@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EnrichedDeprecationInfo } from '../../../../../common/types';
-import { AppContext } from '../../../app_context';
 import { ReindexButton } from './reindex';
 import { FixIndexSettingsButton } from './index_settings';
 
@@ -84,16 +83,7 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
 
       {reindexIndexName && (
         <EuiFlexItem grow={false}>
-          <AppContext.Consumer>
-            {({ http, docLinks }) => (
-              <ReindexButton
-                docLinks={docLinks}
-                reindexBlocker={reindexBlocker}
-                indexName={reindexIndexName}
-                http={http}
-              />
-            )}
-          </AppContext.Consumer>
+          <ReindexButton reindexBlocker={reindexBlocker} indexName={reindexIndexName} />
         </EuiFlexItem>
       )}
 
