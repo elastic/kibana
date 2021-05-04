@@ -41,6 +41,11 @@ interface RoleMappingServerDetails {
   roleMapping?: WSRoleMapping;
 }
 
+const getFirstAttributeName = (roleMapping: WSRoleMapping): AttributeName =>
+  Object.entries(roleMapping.rules)[0][0] as AttributeName;
+const getFirstAttributeValue = (roleMapping: WSRoleMapping): string =>
+  Object.entries(roleMapping.rules)[0][1] as string;
+
 interface RoleMappingsActions {
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   setRoleMappingData(data: RoleMappingServerDetails): RoleMappingServerDetails;
@@ -79,11 +84,6 @@ interface RoleMappingsValues {
   includeInAllGroups: boolean;
   selectedAuthProviders: string[];
 }
-
-const getFirstAttributeName = (roleMapping: WSRoleMapping): AttributeName =>
-  Object.entries(roleMapping.rules)[0][0] as AttributeName;
-const getFirstAttributeValue = (roleMapping: WSRoleMapping): string =>
-  Object.entries(roleMapping.rules)[0][1] as string;
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
   actions: {
