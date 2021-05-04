@@ -110,7 +110,7 @@ image::images/connector-select-type.png[Connector select type]
 [[importing-and-exporting-connectors]]
 === Importing and exporting connectors
 
-Use the <<managing-saved-objects, Saved Objects Management UI>> to import and export connectors.
+To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
 
 [float]
 [[create-connectors]]

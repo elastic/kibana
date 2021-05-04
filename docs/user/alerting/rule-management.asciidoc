@@ -61,7 +61,7 @@ image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute,
 [[importing-and-exporting-rules]]
 === Importing and exporting rules
 
-Use the <<managing-saved-objects, Saved Objects Management UI>> to import and export rules.
+To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
 
 [float]
 === Required permissions
