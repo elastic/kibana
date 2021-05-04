@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LICENSE_CALLOUT_HEADING = i18n.translate(
-  'xpack.enterpriseSearch.licenseCalloutHeading',
-  {
-    defaultMessage: 'Enterprise-grade functionality for teams big and small',
-  }
-);
-
 export const LICENSE_CALLOUT_BODY = i18n.translate('xpack.enterpriseSearch.licenseCalloutBody', {
   defaultMessage:
     'Enterprise authentication via SAML, document-level permission and authorization support, custom search experiences and more are available with a valid Platinum license.',

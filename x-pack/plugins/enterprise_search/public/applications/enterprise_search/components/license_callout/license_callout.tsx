@@ -13,7 +13,9 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText } from '@elasti
 
 import { LicensingLogic } from '../../../shared/licensing';
 
-import { LICENSE_CALLOUT_HEADING, LICENSE_CALLOUT_BODY, LICENSE_CALLOUT_BUTTON } from './constants';
+import { PRODUCT_SELECTOR_CALLOUT_HEADING } from '../../constants';
+
+import { LICENSE_CALLOUT_BODY, LICENSE_CALLOUT_BUTTON } from './constants';
 
 export const LicenseCallout: React.FC = () => {
   const { hasPlatinumLicense, isTrial } = useValues(LicensingLogic);
@@ -25,7 +27,7 @@ export const LicenseCallout: React.FC = () => {
       <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={7}>
           <EuiText>
-            <h3>{LICENSE_CALLOUT_HEADING}</h3>
+            <h3>{PRODUCT_SELECTOR_CALLOUT_HEADING}</h3>
           </EuiText>
           <EuiText size="s">{LICENSE_CALLOUT_BODY}</EuiText>
         </EuiFlexItem>
