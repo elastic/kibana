@@ -80,7 +80,6 @@ export const find = async (
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
-    // TODO: Make sure we do not leak information when authorization is on
     const [openCases, inProgressCases, closedCases] = await Promise.all([
       ...caseStatuses.map((status) => {
         const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
@@ -88,6 +87,7 @@ export const find = async (
           soClient: savedObjectsClient,
           caseOptions: statusQuery.case,
           subCaseOptions: statusQuery.subCase,
+          ensureSavedObjectsAreAuthorized,
         });
       }),
     ]);

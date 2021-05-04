@@ -99,14 +99,17 @@ export default ({ getService }: FtrProviderContext): void => {
       it('filters by status', async () => {
         await createCase(supertest, postCaseReq);
         const toCloseCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await updateCase(supertest, {
-          cases: [
-            {
-              id: toCloseCase.id,
-              version: toCloseCase.version,
-              status: CaseStatuses.closed,
-            },
-          ],
+        const patchedCase = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: toCloseCase.id,
+                version: toCloseCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
         });
 
         const cases = await findCases({ supertest, query: { status: CaseStatuses.closed } });
@@ -164,24 +167,30 @@ export default ({ getService }: FtrProviderContext): void => {
         const inProgressCase = await createCase(supertest, postCaseReq);
         const postedCase = await createCase(supertest, postCaseReq);
 
-        await updateCase(supertest, {
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: CaseStatuses.closed,
-            },
-          ],
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
         });
 
-        await updateCase(supertest, {
-          cases: [
-            {
-              id: inProgressCase.id,
-              version: inProgressCase.version,
-              status: CaseStatuses['in-progress'],
-            },
-          ],
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: inProgressCase.id,
+                version: inProgressCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
         });
 
         const cases = await findCases({ supertest });

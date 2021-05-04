@@ -38,7 +38,6 @@ const CaseBasicRt = rt.type({
   [caseTypeField]: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
-  // TODO: should a user be able to update the owner?
   owner: rt.string,
 });
 

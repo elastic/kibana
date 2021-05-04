@@ -37,6 +37,8 @@ export const globalRead: Role = {
         feature: {
           securitySolutionFixture: ['read'],
           observabilityFixture: ['read'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
         },
         spaces: ['*'],
       },
@@ -59,6 +61,8 @@ export const securitySolutionOnlyAll: Role = {
       {
         feature: {
           securitySolutionFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
         },
         spaces: ['space1'],
       },
@@ -81,6 +85,8 @@ export const securitySolutionOnlyRead: Role = {
       {
         feature: {
           securitySolutionFixture: ['read'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
         },
         spaces: ['space1'],
       },
@@ -103,6 +109,8 @@ export const observabilityOnlyAll: Role = {
       {
         feature: {
           observabilityFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
         },
         spaces: ['space1'],
       },
@@ -125,6 +133,8 @@ export const observabilityOnlyRead: Role = {
       {
         feature: {
           observabilityFixture: ['read'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
         },
         spaces: ['space1'],
       },

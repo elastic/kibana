@@ -21,10 +21,14 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     after(async () => {
       await deleteSpacesAndUsers(getService);
     });
-    // Common
-    loadTestFile(require.resolve('../common'));
 
     // Basic
     loadTestFile(require.resolve('./cases/push_case'));
+
+    // Common
+    loadTestFile(require.resolve('../common'));
+
+    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
+    loadTestFile(require.resolve('../common/migrations'));
   });
 };

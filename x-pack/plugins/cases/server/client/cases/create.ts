@@ -20,6 +20,7 @@ import {
   CasesClientPostRequestRt,
   CasePostRequest,
   CaseType,
+  OWNER_FIELD,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { ensureAuthorized, getConnectorFromConfiguration } from '../utils';
@@ -108,8 +109,9 @@ export const create = async (
           actionAt: createdDate,
           actionBy: { username, full_name, email },
           caseId: newCase.id,
-          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', 'owner'],
+          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
           newValue: JSON.stringify(query),
+          owner: newCase.attributes.owner,
         }),
       ],
     });

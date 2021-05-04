@@ -7,7 +7,7 @@
 
 import { FtrProviderContext as CommonFtrProviderContext } from '../../../common/ftr_provider_context';
 import { Role, User, UserInfo } from './types';
-import { users } from './users';
+import { superUser, users } from './users';
 import { roles } from './roles';
 import { spaces } from './spaces';
 
@@ -90,3 +90,5 @@ export const deleteSpacesAndUsers = async (getService: CommonFtrProviderContext[
   await deleteSpaces(getService);
   await deleteUsersAndRoles(getService);
 };
+
+export const superUserSpace1Auth = { user: superUser, space: 'space1' };

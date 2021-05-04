@@ -61,6 +61,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -151,6 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
           case_id: `${postedCase.id}`,
           comment_id: `${patchedCase.comments![0].id}`,
           sub_case_id: '',
+          owner: 'securitySolutionFixture',
         });
       });
     });
@@ -533,7 +535,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           200,
-          { user: superUser, space: 'space1' }
+          superUserSpace1Auth
         );
 
         await createComment({
@@ -569,7 +571,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertestWithoutAuth,
             getPostCaseRequest({ owner: 'securitySolutionFixture' }),
             200,
-            { user: superUser, space: 'space1' }
+            superUserSpace1Auth
           );
 
           await createComment({

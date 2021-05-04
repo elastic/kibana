@@ -17,12 +17,14 @@ const readOperations: string[] = [
   'getComment',
   'getTags',
   'getReporters',
+  'getUserActions',
   'findConfigurations',
 ];
 const writeOperations: string[] = [
   'createCase',
   'deleteCase',
   'updateCase',
+  'pushCase',
   'createComment',
   'deleteComment',
   'updateComment',

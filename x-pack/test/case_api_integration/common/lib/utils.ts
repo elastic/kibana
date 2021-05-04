@@ -43,9 +43,10 @@ import {
   CasesConfigurePatch,
   CasesStatusResponse,
   CasesConfigurationsResponse,
+  CaseUserActionsResponse,
 } from '../../../../plugins/cases/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
+import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
@@ -634,18 +635,43 @@ export const getAllUserAction = async (
   return userActions;
 };
 
-export const updateCase = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  params: CasesPatchRequest,
-  expectedHttpCode: number = 200
-): Promise<CaseResponse[]> => {
+export const updateCase = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  params: CasesPatchRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse[]> => {
   const { body: cases } = await supertest
-    .patch(CASES_URL)
+    .patch(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(params)
     .expect(expectedHttpCode);
 
   return cases;
+};
+
+export const getCaseUserActions = async ({
+  supertest,
+  caseID,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseID: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseUserActionsResponse> => {
+  const { body: userActions } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionUrl(caseID)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+  return userActions;
 };
 
 export const deleteComment = async ({
@@ -796,13 +822,20 @@ export type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & {
   connector_type_id: string;
 };
 
-export const createConnector = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  req: Record<string, unknown>,
-  expectedHttpCode: number = 200
-): Promise<CreateConnectorResponse> => {
+export const createConnector = async ({
+  supertest,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  req: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CreateConnectorResponse> => {
   const { body: connector } = await supertest
-    .post('/api/actions/connector')
+    .post(`${getSpaceUrlPrefix(auth.space)}/api/actions/connector`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(req)
     .expect(expectedHttpCode);
@@ -839,12 +872,18 @@ export const updateConfiguration = async (
   return configuration;
 };
 
-export const getAllCasesStatuses = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  expectedHttpCode: number = 200
-): Promise<CasesStatusResponse> => {
+export const getAllCasesStatuses = async ({
+  supertest,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesStatusResponse> => {
   const { body: statuses } = await supertest
-    .get(CASE_STATUS_URL)
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_STATUS_URL}`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .expect(expectedHttpCode);
 
@@ -939,14 +978,22 @@ export const getReporters = async ({
   return res;
 };
 
-export const pushCase = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  connectorId: string,
-  expectedHttpCode: number = 200
-): Promise<CaseResponse> => {
+export const pushCase = async ({
+  supertest,
+  caseId,
+  connectorId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  connectorId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseResponse> => {
   const { body: res } = await supertest
-    .post(`${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`)
+    .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send({})
     .expect(expectedHttpCode);

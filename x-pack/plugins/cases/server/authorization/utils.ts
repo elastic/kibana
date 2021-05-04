@@ -7,12 +7,13 @@
 
 import { remove, uniq } from 'lodash';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
+import { OWNER_FIELD } from '../../common/api';
 
 export const getOwnersFilter = (savedObjectType: string, owners: string[]): KueryNode => {
   return nodeBuilder.or(
     owners.reduce<KueryNode[]>((query, owner) => {
-      ensureFieldIsSafeForQuery('owner', owner);
-      query.push(nodeBuilder.is(`${savedObjectType}.attributes.owner`, owner));
+      ensureFieldIsSafeForQuery(OWNER_FIELD, owner);
+      query.push(nodeBuilder.is(`${savedObjectType}.attributes.${OWNER_FIELD}`, owner));
       return query;
     }, [])
   );
@@ -53,5 +54,5 @@ export const includeFieldsRequiredForAuthentication = (fields?: string[]): strin
   if (fields === undefined) {
     return;
   }
-  return uniq([...fields, 'owner']);
+  return uniq([...fields, OWNER_FIELD]);
 };

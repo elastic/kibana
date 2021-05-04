@@ -36,7 +36,7 @@ import {
   CommentAttributes,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
-import { getCaseToUpdate } from '../utils';
+import { ensureAuthorized, getCaseToUpdate } from '../utils';
 
 import { CaseService } from '../../services';
 import {
@@ -55,6 +55,7 @@ import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { UpdateAlertRequest } from '../alerts/client';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
+import { Operations } from '../../authorization';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -110,6 +111,18 @@ function throwIfUpdateType(requests: ESCasePatchRequest[]) {
         ', '
       )}]`
     );
+  }
+}
+
+/**
+ * Throws an error if any of the requests attempt to update the owner of a case.
+ */
+function throwIfUpdateOwner(requests: ESCasePatchRequest[]) {
+  const requestsUpdatingOwner = requests.filter((req) => req.owner !== undefined);
+
+  if (requestsUpdatingOwner.length > 0) {
+    const ids = requestsUpdatingOwner.map((req) => req.id);
+    throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
   }
 }
 
@@ -337,12 +350,53 @@ async function updateAlerts({
   await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
 }
 
+function partitionPatchRequest(
+  casesMap: Map<string, SavedObject<ESCaseAttributes>>,
+  patchReqCases: CasePatchRequest[]
+): {
+  nonExistingCases: CasePatchRequest[];
+  conflictedCases: CasePatchRequest[];
+  casesToAuthorize: Array<SavedObject<ESCaseAttributes>>;
+} {
+  const nonExistingCases: CasePatchRequest[] = [];
+  const conflictedCases: CasePatchRequest[] = [];
+  const casesToAuthorize: Array<SavedObject<ESCaseAttributes>> = [];
+
+  for (const reqCase of patchReqCases) {
+    const foundCase = casesMap.get(reqCase.id);
+
+    if (!foundCase || foundCase.error) {
+      nonExistingCases.push(reqCase);
+    } else if (foundCase.version !== reqCase.version) {
+      conflictedCases.push(reqCase);
+      // let's try to authorize the conflicted case even though we'll fail after afterwards just in case
+      casesToAuthorize.push(foundCase);
+    } else {
+      casesToAuthorize.push(foundCase);
+    }
+  }
+
+  return {
+    nonExistingCases,
+    conflictedCases,
+    casesToAuthorize,
+  };
+}
+
 export const update = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesResponse> => {
-  const { savedObjectsClient, caseService, userActionService, user, logger } = clientArgs;
+  const {
+    savedObjectsClient,
+    caseService,
+    userActionService,
+    user,
+    logger,
+    authorization,
+    auditLogger,
+  } = clientArgs;
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
@@ -354,15 +408,22 @@ export const update = async (
       caseIds: query.cases.map((q) => q.id),
     });
 
-    let nonExistingCases: CasePatchRequest[] = [];
-    const conflictedCases = query.cases.filter((q) => {
-      const myCase = myCases.saved_objects.find((c) => c.id === q.id);
+    const casesMap = myCases.saved_objects.reduce((acc, so) => {
+      acc.set(so.id, so);
+      return acc;
+    }, new Map<string, SavedObject<ESCaseAttributes>>());
 
-      if (myCase && myCase.error) {
-        nonExistingCases = [...nonExistingCases, q];
-        return false;
-      }
-      return myCase == null || myCase?.version !== q.version;
+    const { nonExistingCases, conflictedCases, casesToAuthorize } = partitionPatchRequest(
+      casesMap,
+      query.cases
+    );
+
+    await ensureAuthorized({
+      authorization,
+      auditLogger,
+      owners: casesToAuthorize.map((caseInfo) => caseInfo.attributes.owner),
+      operation: Operations.updateCase,
+      savedObjectIDs: casesToAuthorize.map((caseInfo) => caseInfo.id),
     });
 
     if (nonExistingCases.length > 0) {
@@ -403,15 +464,11 @@ export const update = async (
       throw Boom.notAcceptable('All update fields are identical to current version.');
     }
 
-    const casesMap = myCases.saved_objects.reduce((acc, so) => {
-      acc.set(so.id, so);
-      return acc;
-    }, new Map<string, SavedObject<ESCaseAttributes>>());
-
     if (!ENABLE_CASE_CONNECTOR) {
       throwIfUpdateType(updateFilterCases);
     }
 
+    throwIfUpdateOwner(updateFilterCases);
     throwIfUpdateStatusOfCollection(updateFilterCases, casesMap);
     throwIfUpdateTypeCollectionToIndividual(updateFilterCases, casesMap);
     await throwIfInvalidUpdateOfTypeWithAlerts({

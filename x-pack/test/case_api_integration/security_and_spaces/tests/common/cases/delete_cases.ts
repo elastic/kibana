@@ -39,6 +39,8 @@ import {
   superUser,
 } from '../../../../common/lib/authentication/users';
 
+import { superUserSpace1Auth } from '../../../../common/lib/authentication';
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -108,6 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
         case_id: `${postedCase.id}`,
         comment_id: null,
         sub_case_id: '',
+        owner: 'securitySolutionFixture',
       });
     });
 
@@ -237,14 +240,14 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: caseSec.id,
           expectedHttpCode: 200,
-          auth: { user: superUser, space: 'space1' },
+          auth: superUserSpace1Auth,
         });
 
         await getCase({
           supertest: supertestWithoutAuth,
           caseId: caseObs.id,
           expectedHttpCode: 200,
-          auth: { user: superUser, space: 'space1' },
+          auth: superUserSpace1Auth,
         });
       });
 

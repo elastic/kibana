@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get 403 when trying to create a connector', async () => {
-      await createConnector(supertest, getServiceNowConnector(), 403);
+      await createConnector({ supertest, req: getServiceNowConnector(), expectedHttpCode: 403 });
     });
 
     it('should get 404 when trying to push to a case without a valid connector id', async () => {
@@ -65,7 +65,12 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      await pushCase(supertest, postedCase.id, 'not-exist', 404);
+      await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: 'not-exist',
+        expectedHttpCode: 404,
+      });
     });
   });
 };

@@ -31,6 +31,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -141,21 +142,21 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           200,
-          { user: superUser, space: 'space1' }
+          superUserSpace1Auth
         );
 
         await createComment({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
           params: postCommentUserReq,
-          auth: { user: superUser, space: 'space1' },
+          auth: superUserSpace1Auth,
         });
 
         await createComment({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
           params: postCommentUserReq,
-          auth: { user: superUser, space: 'space1' },
+          auth: superUserSpace1Auth,
         });
 
         for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
@@ -174,14 +175,14 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           200,
-          { user: superUser, space: 'space1' }
+          superUserSpace1Auth
         );
 
         await createComment({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
           params: postCommentUserReq,
-          auth: { user: superUser, space: 'space1' },
+          auth: superUserSpace1Auth,
         });
 
         for (const scenario of [

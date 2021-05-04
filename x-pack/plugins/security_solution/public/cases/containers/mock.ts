@@ -185,6 +185,7 @@ const basicAction = {
   newValue: 'what a cool value',
   caseId: basicCaseId,
   commentId: null,
+  owner: 'securitySolution',
 };
 
 export const cases: Case[] = [
@@ -317,6 +318,7 @@ const basicActionSnake = {
   new_value: 'what a cool value',
   case_id: basicCaseId,
   comment_id: null,
+  owner: 'securitySolution',
 };
 export const getUserActionSnake = (af: UserActionField, a: UserAction) => ({
   ...basicActionSnake,

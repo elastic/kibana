@@ -10,6 +10,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
@@ -97,6 +98,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     type: EVENT_TYPES.change,
     name: WriteOperations.UpdateCase,
     action: 'update-case',
+    verbs: updateVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [WriteOperations.PushCase]: {
+    type: EVENT_TYPES.change,
+    name: WriteOperations.PushCase,
+    action: 'push-case',
     verbs: updateVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
@@ -213,5 +222,23 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
+  // stats operations
+  [ReadOperations.GetCaseStatuses]: {
+    type: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'find-case-statuses',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  // user actions operations
+  [ReadOperations.GetUserActions]: {
+    type: EVENT_TYPES.access,
+    name: ReadOperations.GetUserActions,
+    action: 'get-user-actions',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
   },
 };

@@ -14,6 +14,7 @@ import { AttachmentService, CaseService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations } from '../../authorization';
 import { ensureAuthorized } from '../utils';
+import { OWNER_FIELD } from '../../../common/api';
 
 async function deleteSubCases({
   attachmentService,
@@ -133,12 +134,12 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
 
     await userActionService.bulkCreate({
       soClient,
-      actions: ids.map((id) =>
+      actions: cases.saved_objects.map((caseInfo) =>
         buildCaseUserActionItem({
           action: 'delete',
           actionAt: deleteDate,
           actionBy: user,
-          caseId: id,
+          caseId: caseInfo.id,
           fields: [
             'description',
             'status',
@@ -146,10 +147,11 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
             'title',
             'connector',
             'settings',
-            'owner',
+            OWNER_FIELD,
             'comment',
             ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
           ],
+          owner: caseInfo.attributes.owner,
         })
       ),
     });

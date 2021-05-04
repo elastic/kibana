@@ -29,12 +29,14 @@ export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 export enum ReadOperations {
   GetCase = 'getCase',
   FindCases = 'findCases',
+  GetCaseStatuses = 'getCaseStatuses',
   GetComment = 'getComment',
   GetAllComments = 'getAllComments',
   FindComments = 'findComments',
   GetTags = 'getTags',
   GetReporters = 'getReporters',
   FindConfigurations = 'findConfigurations',
+  GetUserActions = 'getUserActions',
 }
 
 /**
@@ -47,6 +49,7 @@ export enum WriteOperations {
   CreateCase = 'createCase',
   DeleteCase = 'deleteCase',
   UpdateCase = 'updateCase',
+  PushCase = 'pushCase',
   CreateComment = 'createComment',
   DeleteAllComments = 'deleteAllComments',
   DeleteComment = 'deleteComment',

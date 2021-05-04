@@ -32,6 +32,7 @@ import {
   caseTypeField,
   CasesFindRequest,
   CaseStatuses,
+  OWNER_FIELD,
 } from '../../../common/api';
 import {
   defaultSortField,
@@ -48,6 +49,8 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { ClientArgs } from '..';
+import { EnsureSOAuthCallback } from '../../client/utils';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
 interface PushedArgs {
   pushed_at: string;
@@ -183,9 +186,11 @@ interface GetReportersArgs {
 const transformNewSubCase = ({
   createdAt,
   createdBy,
+  owner,
 }: {
   createdAt: string;
   createdBy: User;
+  owner: string;
 }): SubCaseAttributes => {
   return {
     closed_at: null,
@@ -195,6 +200,7 @@ const transformNewSubCase = ({
     status: CaseStatuses.open,
     updated_at: null,
     updated_by: null,
+    owner,
   };
 };
 
@@ -298,9 +304,11 @@ export class CaseService {
     soClient,
     caseOptions,
     subCaseOptions,
+    ensureSavedObjectsAreAuthorized,
   }: {
     soClient: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptionsKueryNode;
+    ensureSavedObjectsAreAuthorized: EnsureSOAuthCallback;
     subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<number> {
     const casesStats = await this.findCases({
@@ -337,11 +345,16 @@ export class CaseService {
       soClient,
       options: {
         ...caseOptions,
-        fields: [caseTypeField],
+        fields: includeFieldsRequiredForAuthentication([caseTypeField]),
         page: 1,
         perPage: casesStats.total,
       },
     });
+
+    // make sure that the retrieved cases were correctly filtered by owner
+    ensureSavedObjectsAreAuthorized(
+      cases.saved_objects.map((caseInfo) => ({ id: caseInfo.id, owner: caseInfo.attributes.owner }))
+    );
 
     const caseIds = cases.saved_objects
       .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
@@ -575,7 +588,8 @@ export class CaseService {
       this.log.debug(`Attempting to POST a new sub case`);
       return soClient.create<SubCaseAttributes>(
         SUB_CASE_SAVED_OBJECT,
-        transformNewSubCase({ createdAt, createdBy }),
+        // ENABLE_CASE_CONNECTOR: populate the owner field correctly
+        transformNewSubCase({ createdAt, createdBy, owner: '' }),
         {
           references: [
             {
@@ -922,7 +936,7 @@ export class CaseService {
       this.log.debug(`Attempting to GET all reporters`);
       const firstReporters = await soClient.find({
         type: CASE_SAVED_OBJECT,
-        fields: ['created_by', 'owner'],
+        fields: ['created_by', OWNER_FIELD],
         page: 1,
         perPage: 1,
         filter: cloneDeep(filter),
@@ -930,7 +944,7 @@ export class CaseService {
 
       return await soClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
-        fields: ['created_by', 'owner'],
+        fields: ['created_by', OWNER_FIELD],
         page: 1,
         perPage: firstReporters.total,
         filter: cloneDeep(filter),
@@ -949,7 +963,7 @@ export class CaseService {
       this.log.debug(`Attempting to GET all cases`);
       const firstTags = await soClient.find({
         type: CASE_SAVED_OBJECT,
-        fields: ['tags', 'owner'],
+        fields: ['tags', OWNER_FIELD],
         page: 1,
         perPage: 1,
         filter: cloneDeep(filter),
@@ -957,7 +971,7 @@ export class CaseService {
 
       return await soClient.find<ESCaseAttributes>({
         type: CASE_SAVED_OBJECT,
-        fields: ['tags', 'owner'],
+        fields: ['tags', OWNER_FIELD],
         page: 1,
         perPage: firstTags.total,
         filter: cloneDeep(filter),

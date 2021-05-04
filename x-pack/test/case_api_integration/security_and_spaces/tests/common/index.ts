@@ -35,9 +35,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./sub_cases/get_sub_case'));
     loadTestFile(require.resolve('./sub_cases/find_sub_cases'));
 
-    // Migrations
-    loadTestFile(require.resolve('./cases/migrations'));
-    loadTestFile(require.resolve('./configure/migrations'));
-    loadTestFile(require.resolve('./user_actions/migrations'));
+    // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
+    // which causes errors in any tests after them that relies on those
   });
 };

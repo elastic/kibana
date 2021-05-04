@@ -135,6 +135,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: 'fd830c60-6646-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: null,
+    owner: 'securitySolution',
   },
   {
     action_field: ['pushed'],
@@ -151,6 +152,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '0a801750-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: null,
+    owner: 'securitySolution',
   },
   {
     action_field: ['comment'],
@@ -166,6 +168,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '7373eb60-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: 'comment-alert-1',
+    owner: 'securitySolution',
   },
   {
     action_field: ['comment'],
@@ -181,6 +184,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '7abc6410-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: 'comment-alert-2',
+    owner: 'securitySolution',
   },
   {
     action_field: ['pushed'],
@@ -197,6 +201,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: null,
+    owner: 'securitySolution',
   },
   {
     action_field: ['comment'],
@@ -212,5 +217,6 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '0818e5e0-6648-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: 'comment-user-1',
+    owner: 'securitySolution',
   },
 ];
