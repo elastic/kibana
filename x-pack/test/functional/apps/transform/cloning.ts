@@ -28,7 +28,7 @@ function getTransformConfig(): TransformPivotConfig {
     id: `ec_cloning_1_${date}`,
     source: { index: ['ft_ecommerce'] },
     pivot: {
-      group_by: { category: { terms: { field: 'category' } } },
+      group_by: { category: { terms: { field: 'category.keyword' } } },
       aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
     },
     description:
