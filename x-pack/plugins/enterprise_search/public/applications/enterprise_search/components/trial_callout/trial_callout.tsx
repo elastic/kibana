@@ -42,7 +42,7 @@ export const TrialCallout: React.FC = () => {
 
   return (
     <>
-      <EuiCallOut size="s" title={title} iconType="iInCircle" />
+      <EuiCallOut size="s" title={title} iconType="iInCircle" style={{ margin: '0 auto' }} />
       <EuiSpacer size="xxl" />
     </>
   );
