@@ -31,6 +31,13 @@ describe('ProductSelector', () => {
     expect(wrapper.find(LicenseCallout)).toHaveLength(0);
   });
 
+  it('renders the license and trial callouts', () => {
+    const wrapper = shallow(<ProductSelector access={{}} />);
+
+    expect(wrapper.find(TrialCallout)).toHaveLength(1);
+    expect(wrapper.find(LicenseCallout)).toHaveLength(1);
+  });
+
   describe('access checks when host is set', () => {
     beforeEach(() => {
       setMockValues({ config: { host: 'localhost' } });
@@ -58,13 +65,6 @@ describe('ProductSelector', () => {
       const wrapper = shallow(<ProductSelector access={{}} />);
 
       expect(wrapper.find(ProductCard)).toHaveLength(0);
-    });
-
-    it('renders the license and trial callouts', () => {
-      const wrapper = shallow(<ProductSelector access={{}} />);
-
-      expect(wrapper.find(TrialCallout)).toHaveLength(1);
-      expect(wrapper.find(LicenseCallout)).toHaveLength(1);
     });
   });
 });
