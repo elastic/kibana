@@ -134,6 +134,7 @@
     "@kbn/legacy-logging": "link:bazel-bin/packages/kbn-legacy-logging/npm_module",
     "@kbn/logging": "link:bazel-bin/packages/kbn-logging/npm_module",
     "@kbn/monaco": "link:packages/kbn-monaco",
+    "@kbn/securitysolution-utils": "link:bazel-bin/packages/kbn-securitysolution-utils/npm_module",
     "@kbn/server-http-tools": "link:packages/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:packages/kbn-server-route-repository",
     "@kbn/std": "link:bazel-bin/packages/kbn-std/npm_module",
