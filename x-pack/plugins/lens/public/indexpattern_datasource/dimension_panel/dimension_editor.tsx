@@ -28,7 +28,6 @@ import {
   getOperationDisplay,
   insertOrReplaceColumn,
   replaceColumn,
-  deleteColumn,
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
@@ -438,15 +437,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   : (selectedColumn as FieldBasedIndexPatternColumn)?.sourceField
               }
               incompleteOperation={incompleteOperation}
-              onDeleteColumn={() => {
-                setStateWrapper(
-                  deleteColumn({
-                    layer: state.layers[layerId],
-                    columnId,
-                    indexPattern: currentIndexPattern,
-                  })
-                );
-              }}
               onChoose={(choice) => {
                 setStateWrapper(
                   insertOrReplaceColumn({

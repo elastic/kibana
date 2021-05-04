@@ -77,18 +77,18 @@ export const EMPTY_LABEL = i18n.translate('xpack.observability.expView.seriesBui
 export const CHOOSE_REPORT_DEFINITION = i18n.translate(
   'xpack.observability.expView.seriesBuilder.emptyReportDefinition',
   {
-    defaultMessage: 'Please choose a report definition below to visualize.',
+    defaultMessage: 'Select a report type to create a visualization.',
   }
 );
 
 export const SELECT_REPORT_TYPE_BELOW = i18n.translate(
   'xpack.observability.expView.seriesBuilder.selectReportType.empty',
   {
-    defaultMessage: 'Please Select a report type below to define visualization.',
+    defaultMessage: 'Select a report type to create a visualization.',
   }
 );
 
 const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
   'xpack.observability.expView.reportType.selectDataType',
-  { defaultMessage: 'Please Select a data type below to start building a series.' }
+  { defaultMessage: 'Select a data type to create a visualization.' }
 );

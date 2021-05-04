@@ -15,13 +15,13 @@ import {
   ScaleType,
   Settings,
   SettingsSpec,
-  TooltipValue,
+  TooltipInfo,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { isEmpty } from 'lodash';
+import { isEmpty, keyBy } from 'lodash';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -32,12 +32,13 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { CustomTooltip } from './custom_tooltip';
 
 type TransactionDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/distribution'>;
 
 type DistributionBucket = TransactionDistributionAPIResponse['buckets'][0];
 
-interface IChartPoint {
+export interface IChartPoint {
   x0: number;
   x: number;
   y: number;
@@ -78,7 +79,7 @@ const formatYShort = (t: number) => {
   );
 };
 
-const formatYLong = (t: number) => {
+export const formatYLong = (t: number) => {
   return i18n.translate(
     'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
     {
@@ -133,15 +134,22 @@ export function TransactionDistribution({
   const xMax = d3.max(buckets, (d) => d.x0) || 0;
   const timeFormatter = getDurationFormatter(xMax);
 
-  const tooltipProps: SettingsSpec['tooltip'] = {
-    headerFormatter: (tooltip: TooltipValue) => {
-      const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
-      if (serie) {
-        const xFormatted = timeFormatter(serie.x);
-        const x0Formatted = timeFormatter(serie.x0);
-        return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
-      }
-      return `${timeFormatter(tooltip.value)}`;
+  const distributionMap = keyBy(distribution?.buckets, 'key');
+  const bucketsMap = keyBy(buckets, 'x0');
+
+  const tooltip: SettingsSpec['tooltip'] = {
+    customTooltip: (props: TooltipInfo) => {
+      const datum = props.header?.datum as IChartPoint;
+      const selectedDistribution = distributionMap[datum?.x0];
+      const serie = bucketsMap[datum?.x0];
+      return (
+        <CustomTooltip
+          {...props}
+          isSamplesEmpty={isEmpty(selectedDistribution?.samples)}
+          serie={serie}
+          timeFormatter={timeFormatter}
+        />
+      );
     },
   };
 
@@ -192,7 +200,7 @@ export function TransactionDistribution({
         <Chart>
           <Settings
             xDomain={{ min: xMin, max: xMax }}
-            tooltip={tooltipProps}
+            tooltip={tooltip}
             onProjectionClick={onBarClick}
           />
           {selectedBucket && (

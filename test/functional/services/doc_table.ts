@@ -106,6 +106,10 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
         .map((field: any) => $(field).text().trim());
     }
 
+    public async getHeaders(selector?: string): Promise<string[]> {
+      return this.getHeaderFields(selector);
+    }
+
     public async getTableDocViewRow(
       detailsRow: WebElementWrapper,
       fieldName: string
