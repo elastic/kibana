@@ -17,7 +17,12 @@ export enum AlertingAuthorizationFilterType {
   ESDSL = 'dsl',
 }
 
-export interface FilterFieldNames {
+export interface AlertingAuthorizationFilterOpts {
+  type: AlertingAuthorizationFilterType;
+  fieldNames: AlertingAuthorizationFilterFieldNames;
+}
+
+interface AlertingAuthorizationFilterFieldNames {
   ruleTypeId: string;
   consumer: string;
 }
@@ -29,22 +34,20 @@ const esQueryConfig: EsQueryConfig = {
   queryStringOptions: { analyze_wildcard: true },
 };
 
-// pass in the field name instead of hardcoding `alert.attributes.alertTypeId` and `alertTypeId`
 export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
-  filterFieldNames: FilterFieldNames,
-  filterType: AlertingAuthorizationFilterType
+  opts: AlertingAuthorizationFilterOpts
 ): KueryNode | JsonObject {
   const kueryNode = nodeBuilder.or(
     Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('ruleTypeId', id);
       filters.push(
         nodeBuilder.and([
-          nodeBuilder.is(filterFieldNames.ruleTypeId, id),
+          nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
           nodeBuilder.or(
             Object.keys(authorizedConsumers).map((consumer) => {
               ensureFieldIsSafeForQuery('consumer', consumer);
-              return nodeBuilder.is(filterFieldNames.consumer, consumer);
+              return nodeBuilder.is(opts.fieldNames.consumer, consumer);
             })
           ),
         ])
@@ -53,33 +56,11 @@ export function asFiltersByRuleTypeAndConsumer(
     }, [])
   );
 
-  if (filterType === AlertingAuthorizationFilterType.ESDSL) {
+  if (opts.type === AlertingAuthorizationFilterType.ESDSL) {
     return toElasticsearchQuery(kueryNode, undefined, esQueryConfig);
   }
 
   return kueryNode;
-}
-
-export function asKqlFiltersByRuleTypeAndConsumer(
-  ruleTypes: Set<RegistryAlertTypeWithAuth>,
-  filterFieldNames: FilterFieldNames
-): KueryNode {
-  return asFiltersByRuleTypeAndConsumer(
-    ruleTypes,
-    filterFieldNames,
-    AlertingAuthorizationFilterType.KQL
-  ) as KueryNode;
-}
-
-export function asEsDslFiltersByRuleTypeAndConsumer(
-  ruleTypes: Set<RegistryAlertTypeWithAuth>,
-  filterFieldNames: FilterFieldNames
-): JsonObject {
-  return asFiltersByRuleTypeAndConsumer(
-    ruleTypes,
-    filterFieldNames,
-    AlertingAuthorizationFilterType.ESDSL
-  ) as JsonObject;
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {

@@ -7,8 +7,8 @@
 
 import { RecoveredActionGroup } from '../../common';
 import {
-  asKqlFiltersByRuleTypeAndConsumer,
-  asEsDslFiltersByRuleTypeAndConsumer,
+  AlertingAuthorizationFilterType,
+  asFiltersByRuleTypeAndConsumer,
   ensureFieldIsSafeForQuery,
 } from './alerts_authorization_kuery';
 import { esKuery } from '../../../../../src/plugins/data/server';
@@ -16,7 +16,7 @@ import { esKuery } from '../../../../../src/plugins/data/server';
 describe('asKqlFiltersByRuleTypeAndConsumer', () => {
   test('constructs KQL filter for single rule type with single authorized consumer', async () => {
     expect(
-      asKqlFiltersByRuleTypeAndConsumer(
+      asFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -33,8 +33,11 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
           },
         ]),
         {
-          ruleTypeId: 'path.to.rule.id',
-          consumer: 'consumer-field',
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+          },
         }
       )
     ).toEqual(
@@ -44,7 +47,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
 
   test('constructs KQL filter for single rule type with multiple authorized consumers', async () => {
     expect(
-      asKqlFiltersByRuleTypeAndConsumer(
+      asFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -63,8 +66,11 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
           },
         ]),
         {
-          ruleTypeId: 'path.to.rule.id',
-          consumer: 'consumer-field',
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+          },
         }
       )
     ).toEqual(
@@ -76,7 +82,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
 
   test('constructs KQL filter for multiple rule types across authorized consumer', async () => {
     expect(
-      asKqlFiltersByRuleTypeAndConsumer(
+      asFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -128,8 +134,11 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
           },
         ]),
         {
-          ruleTypeId: 'path.to.rule.id',
-          consumer: 'consumer-field',
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+          },
         }
       )
     ).toEqual(
@@ -143,7 +152,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
 describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
   test('constructs ES DSL filter for single rule type with single authorized consumer', async () => {
     expect(
-      asEsDslFiltersByRuleTypeAndConsumer(
+      asFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -160,8 +169,11 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
           },
         ]),
         {
-          ruleTypeId: 'path.to.rule.id',
-          consumer: 'consumer-field',
+          type: AlertingAuthorizationFilterType.ESDSL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+          },
         }
       )
     ).toEqual({
@@ -198,7 +210,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
 
   test('constructs ES DSL filter for single rule type with multiple authorized consumers', async () => {
     expect(
-      asEsDslFiltersByRuleTypeAndConsumer(
+      asFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -217,8 +229,11 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
           },
         ]),
         {
-          ruleTypeId: 'path.to.rule.id',
-          consumer: 'consumer-field',
+          type: AlertingAuthorizationFilterType.ESDSL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+          },
         }
       )
     ).toEqual({
@@ -262,7 +277,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
 
   test('constructs ES DSL filter for multiple rule types across authorized consumer', async () => {
     expect(
-      asEsDslFiltersByRuleTypeAndConsumer(
+      asFiltersByRuleTypeAndConsumer(
         new Set([
           {
             actionGroups: [],
@@ -314,8 +329,11 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
           },
         ]),
         {
-          ruleTypeId: 'path.to.rule.id',
-          consumer: 'consumer-field',
+          type: AlertingAuthorizationFilterType.ESDSL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule.id',
+            consumer: 'consumer-field',
+          },
         }
       )
     ).toEqual({

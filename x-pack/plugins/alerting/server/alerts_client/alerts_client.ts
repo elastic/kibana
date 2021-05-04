@@ -52,6 +52,7 @@ import {
   ReadOperations,
   AlertingAuthorizationTypes,
   AlertingAuthorizationFilterType,
+  AlertingAuthorizationFilterOpts,
 } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
@@ -181,6 +182,10 @@ export interface GetAlertInstanceSummaryParams {
   dateStart?: string;
 }
 
+const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
+  type: AlertingAuthorizationFilterType.KQL,
+  fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
+};
 export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
@@ -461,8 +466,7 @@ export class AlertsClient {
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
         AlertingAuthorizationTypes.Rule,
-        AlertingAuthorizationFilterType.KQL,
-        { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' }
+        alertingAuthorizationFilterOpts
       );
     } catch (error) {
       this.auditLogger?.log(
@@ -552,11 +556,7 @@ export class AlertsClient {
           logSuccessfulAuthorization,
         } = await this.authorization.getFindAuthorizationFilter(
           AlertingAuthorizationTypes.Rule,
-          AlertingAuthorizationFilterType.KQL,
-          {
-            ruleTypeId: 'alert.attributes.alertTypeId',
-            consumer: 'alert.attributes.consumer',
-          }
+          alertingAuthorizationFilterOpts
         );
         const filter = options.filter
           ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`

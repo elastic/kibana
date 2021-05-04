@@ -16,8 +16,7 @@ import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
 import {
   asFiltersByRuleTypeAndConsumer,
-  FilterFieldNames,
-  AlertingAuthorizationFilterType,
+  AlertingAuthorizationFilterOpts,
 } from './alerts_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
@@ -256,8 +255,7 @@ export class AlertsAuthorization {
 
   public async getFindAuthorizationFilter(
     authorizationType: AlertingAuthorizationTypes,
-    filterType: AlertingAuthorizationFilterType,
-    filterFieldNames: FilterFieldNames
+    filterOpts: AlertingAuthorizationFilterOpts
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
@@ -287,7 +285,7 @@ export class AlertsAuthorization {
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
-        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterFieldNames, filterType),
+        filter: asFiltersByRuleTypeAndConsumer(authorizedRuleTypes, filterOpts),
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
