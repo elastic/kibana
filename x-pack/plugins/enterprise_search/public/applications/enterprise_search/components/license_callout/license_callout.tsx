@@ -9,9 +9,10 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { LicensingLogic } from '../../../shared/licensing';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 
 import { PRODUCT_SELECTOR_CALLOUT_HEADING } from '../../constants';
 
@@ -36,9 +37,9 @@ export const LicenseCallout: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <div>
-            <EuiButton href="/app/management/stack/license_management">
+            <EuiButtonTo to="/app/management/stack/license_management" shouldNotCreateHref>
               <EuiText size="s">{LICENSE_CALLOUT_BUTTON}</EuiText>
-            </EuiButton>
+            </EuiButtonTo>
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

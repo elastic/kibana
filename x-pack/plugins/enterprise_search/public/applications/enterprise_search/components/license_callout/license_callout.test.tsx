@@ -11,7 +11,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPanel, EuiButton, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
+
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 
 import { LicenseCallout } from './';
 
@@ -25,7 +27,7 @@ describe('LicenseCallout', () => {
 
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
     expect(wrapper.find(EuiText)).toHaveLength(3);
-    expect(wrapper.find(EuiButton).prop('href')).toEqual(
+    expect(wrapper.find(EuiButtonTo).prop('to')).toEqual(
       '/app/management/stack/license_management'
     );
   });
