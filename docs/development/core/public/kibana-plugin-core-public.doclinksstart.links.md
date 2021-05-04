@@ -98,6 +98,9 @@ readonly links: {
             readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
+        readonly search: {
+            readonly sessions: string;
+        };
         readonly indexPatterns: {
             readonly loadingData: string;
             readonly introduction: string;

@@ -57,9 +57,11 @@ describe('Background Search Session Management Main', () => {
 
   describe('renders', () => {
     const docLinks: DocLinksStart = {
-      ELASTIC_WEBSITE_URL: 'boo/',
-      DOC_LINK_VERSION: '#foo',
-      links: {} as any,
+      ELASTIC_WEBSITE_URL: `boo/`,
+      DOC_LINK_VERSION: `#foo`,
+      links: {
+        search: { sessions: `mock-url` } as any,
+      } as any,
     };
 
     let main: ReactWrapper;
@@ -93,9 +95,7 @@ describe('Background Search Session Management Main', () => {
     test('documentation link', () => {
       const docLink = main.find('a[href]').first();
       expect(docLink.text()).toBe('Documentation');
-      expect(docLink.prop('href')).toBe(
-        'boo/guide/en/elasticsearch/reference/#foo/async-search-intro.html'
-      );
+      expect(docLink.prop('href')).toBe('mock-url');
     });
 
     test('table is present', () => {
