@@ -47,25 +47,25 @@ const getFirstAttributeValue = (roleMapping: WSRoleMapping): string =>
   Object.entries(roleMapping.rules)[0][1] as string;
 
 interface RoleMappingsActions {
-  setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
-  setRoleMappingData(data: RoleMappingServerDetails): RoleMappingServerDetails;
-  handleRoleChange(roleType: Role): { roleType: Role };
   handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
+  handleAuthProviderChange(value: string[]): { value: string[] };
   handleAttributeSelectorChange(
     value: AttributeName,
     firstElasticsearchRole: string
   ): { value: AttributeName; firstElasticsearchRole: string };
   handleAttributeValueChange(value: string): { value: string };
+  handleDeleteMapping(): void;
   handleGroupSelectionChange(
     groupId: string,
     selected: boolean
   ): { groupId: string; selected: boolean };
-  handleAuthProviderChange(value: string[]): { value: string[] };
-  resetState(): void;
-  initializeRoleMapping(roleId?: string): { roleId?: string };
+  handleRoleChange(roleType: Role): { roleType: Role };
   handleSaveMapping(): void;
-  handleDeleteMapping(): void;
+  initializeRoleMapping(roleId?: string): { roleId?: string };
   initializeRoleMappings(): void;
+  resetState(): void;
+  setRoleMappingData(data: RoleMappingServerDetails): RoleMappingServerDetails;
+  setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
 }
 
 interface RoleMappingsValues {
