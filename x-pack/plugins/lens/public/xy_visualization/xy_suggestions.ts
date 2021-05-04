@@ -27,6 +27,8 @@ const columnSortOrder = {
   boolean: 4,
   number: 5,
   histogram: 6,
+  geo_point: 7,
+  geo_shape: 8,
 };
 
 /**

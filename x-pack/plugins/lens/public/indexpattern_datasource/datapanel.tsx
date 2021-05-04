@@ -63,6 +63,33 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
 }
 
+const supportedFieldTypes = new Set([
+  'string',
+  'number',
+  'boolean',
+  'date',
+  'ip',
+  'number_range',
+  'date_range',
+  'ip_range',
+  'histogram',
+  'document',
+  'geo_point',
+  'geo_shape',
+]);
+
+const fieldTypeNames: Record<DataType, string> = {
+  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
+  string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
+  number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
+  boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
+  date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
+  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
+  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
+  geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', { defaultMessage: 'geo_point' }),
+  geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', { defaultMessage: 'geo_shape' }),
+};
+
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything
 function buildSafeEsQuery(
@@ -290,28 +317,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     isEmptyAccordionOpen: false,
     isMetaAccordionOpen: false,
   });
-
-  const fieldTypeNames: Record<DataType, string> = {
-    document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'record' }),
-    string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'string' }),
-    number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'number' }),
-    boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'boolean' }),
-    date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
-    ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
-    histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
-  };
-  const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
-  if (visualizeGeoFieldTrigger) {
-    fieldTypeNames.geo_point = i18n.translate('xpack.lens.datatypes.geoPoint', {
-      defaultMessage: 'geo_point',
-    });
-    fieldTypeNames.geo_shape = i18n.translate('xpack.lens.datatypes.geoShape', {
-      defaultMessage: 'geo_shape',
-    });
-  }
-
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
-  const allFields = currentIndexPattern.fields;
+  const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
+  const allFields = visualizeGeoFieldTrigger
+    ? currentIndexPattern.fields
+    : currentIndexPattern.fields.filter(({ type }) => type !== 'geo_point' && type !== 'geo_shape');
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
   const hasSyncedExistingFields = existingFields[currentIndexPattern.title];
   const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
@@ -324,23 +334,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const editPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
 
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
-    const supportedFieldTypes = new Set([
-      'string',
-      'number',
-      'boolean',
-      'date',
-      'ip',
-      'number_range',
-      'date_range',
-      'ip_range',
-      'histogram',
-      'document',
-    ]);
-    if (visualizeGeoFieldTrigger) {
-      supportedFieldTypes.add('geo_point');
-      supportedFieldTypes.add('geo_shape');
-    }
-
     const containsData = (field: IndexPatternField) => {
       const overallField = currentIndexPattern.getFieldByName(field.name);
 
@@ -467,7 +460,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     existenceFetchTimeout,
     currentIndexPattern,
     existingFields,
-    visualizeGeoFieldTrigger,
   ]);
 
   const fieldGroups: FieldGroups = useMemo(() => {
