@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { escape } from 'lodash/fp';
-
 export const parseQueryFilterToKQL = (filter: string): string => {
   if (!filter) return '';
   const kuery = [`name`, `description`, `entries.value`, `entries.entries.value`]
     .map(
       (field) =>
-        `exception-list-agnostic.attributes.${field}:*${escape(
-          filter.trim().replace(/\s/gm, '*').replace(/\\/gm, '\\\\').replace(/:/gm, '\\:')
-        )}*`
+        `exception-list-agnostic.attributes.${field}:*${filter
+          .trim()
+          .replace(/([^a-zA-Z0-9])/gm, '\\$&')
+          .replace(/\s/gm, '*')}*`
     )
     .join(' OR ');
 
