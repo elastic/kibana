@@ -32,15 +32,11 @@ export const LicenseCallout: React.FC = () => {
           </EuiText>
           <EuiText size="s">{LICENSE_CALLOUT_BODY}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <div />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <div>
-            <EuiButtonTo to="/app/management/stack/license_management" shouldNotCreateHref>
-              {LICENSE_CALLOUT_BUTTON}
-            </EuiButtonTo>
-          </div>
+        <EuiFlexItem grow={1} />
+        <EuiFlexItem grow={false}>
+          <EuiButtonTo to="/app/management/stack/license_management" shouldNotCreateHref>
+            {LICENSE_CALLOUT_BUTTON}
+          </EuiButtonTo>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
