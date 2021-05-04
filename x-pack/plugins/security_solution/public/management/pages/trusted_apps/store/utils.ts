@@ -12,7 +12,7 @@ export const parseQueryFilterToKQL = (filter: string): string => {
       (field) =>
         `exception-list-agnostic.attributes.${field}:*${filter
           .trim()
-          .replace(/([^a-zA-Z0-9])/gm, '\\$&')
+          .replace(/([^a-zA-Z0-9\s])/gm, '\\$&')
           .replace(/\s/gm, '*')}*`
     )
     .join(' OR ');
