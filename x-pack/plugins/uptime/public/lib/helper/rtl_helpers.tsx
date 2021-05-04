@@ -18,6 +18,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { configure } from '@testing-library/dom';
 import { mockState } from '../__mocks__/uptime_store.mock';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   KibanaContextProvider,
   KibanaServices,
@@ -67,10 +68,20 @@ function setSetting$<T = any>(key: string): T {
   return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
 }
 
+const createMockStore = () => {
+  let store: Record<string, any> = {};
+  return {
+    get: jest.fn().mockImplementation((key) => store[key]),
+    set: jest.fn().mockImplementation((key, value) => (store[key] = value)),
+    remove: jest.fn().mockImplementation((key: string) => delete store[key]),
+    clear: jest.fn().mockImplementation(() => (store = {})),
+  };
+};
+
 /* default mock core */
 const defaultCore = coreMock.createStart();
 const mockCore: () => Partial<CoreStart> = () => {
-  const core: Partial<CoreStart & ClientPluginsStart> = {
+  const core: Partial<CoreStart & ClientPluginsStart & { storage: IStorageWrapper }> = {
     ...defaultCore,
     application: {
       ...defaultCore.application,
@@ -92,6 +103,7 @@ const mockCore: () => Partial<CoreStart> = () => {
       get$: setSetting$,
     },
     triggersActionsUi: triggersActionsUiMock.createStart(),
+    storage: createMockStore(),
   };
 
   return core;
