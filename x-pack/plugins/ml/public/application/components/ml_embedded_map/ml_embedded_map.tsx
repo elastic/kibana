@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
 import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
-import { INITIAL_LOCATION } from '../../../../../maps/common';
+import { INITIAL_LOCATION } from '../../../../../maps/common/constants';
 import type {
   MapEmbeddable,
   MapEmbeddableInput,
