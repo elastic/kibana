@@ -38,7 +38,7 @@ export const LicenseCallout: React.FC = () => {
         <EuiFlexItem>
           <div>
             <EuiButtonTo to="/app/management/stack/license_management" shouldNotCreateHref>
-              <EuiText size="s">{LICENSE_CALLOUT_BUTTON}</EuiText>
+              {LICENSE_CALLOUT_BUTTON}
             </EuiButtonTo>
           </div>
         </EuiFlexItem>
