@@ -131,6 +131,7 @@
     "@kbn/i18n": "link:packages/kbn-i18n",
     "@kbn/interpreter": "link:packages/kbn-interpreter",
     "@kbn/io-ts-utils": "link:packages/kbn-io-ts-utils",
+    "@kbn/list-constants": "link:bazel-bin/packages/kbn-list-constants/npm_module",
     "@kbn/legacy-logging": "link:bazel-bin/packages/kbn-legacy-logging/npm_module",
     "@kbn/logging": "link:bazel-bin/packages/kbn-logging/npm_module",
     "@kbn/monaco": "link:packages/kbn-monaco",
