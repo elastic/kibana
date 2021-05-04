@@ -12,7 +12,7 @@ import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
 
 const initialState = initialEventFiltersPageState();
 
-describe('reducer', () => {
+describe('event filters reducer', () => {
   describe('EventFiltersForm', () => {
     it('sets the initial form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
@@ -110,23 +110,31 @@ describe('reducer', () => {
     });
   });
   describe('UserChangedUrl', () => {
-    it('receives a url change with show=create', () => {
-      const result = eventFiltersPageReducer(initialState, {
-        type: 'userChangedUrl',
-        payload: { search: '?show=create', pathname: '/event_filters', hash: '' },
-      });
+    describe('When url is the Event List page', () => {
+      it.todo('should mark page active when on the list url');
 
-      expect(result).toStrictEqual({
-        ...initialState,
-        location: {
-          ...initialState.location,
-          id: undefined,
-          show: 'create',
-        },
-        listPage: {
-          ...initialState.listPage,
-          active: true,
-        },
+      it.todo('should mark page not active when not on the list url');
+    });
+
+    describe('When `show=create`', () => {
+      it('receives a url change with show=create', () => {
+        const result = eventFiltersPageReducer(initialState, {
+          type: 'userChangedUrl',
+          payload: { search: '?show=create', pathname: '/event_filters', hash: '' },
+        });
+
+        expect(result).toStrictEqual({
+          ...initialState,
+          location: {
+            ...initialState.location,
+            id: undefined,
+            show: 'create',
+          },
+          listPage: {
+            ...initialState.listPage,
+            active: true,
+          },
+        });
       });
     });
   });
