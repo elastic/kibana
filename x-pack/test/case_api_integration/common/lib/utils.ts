@@ -539,6 +539,16 @@ export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   });
 };
 
+/**
+ * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
+ * functions.
+ */
+export function getAuthWithSuperUser(
+  space: string = 'space1'
+): { user: User; space: string | null } {
+  return { user: superUser, space };
+}
+
 export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
