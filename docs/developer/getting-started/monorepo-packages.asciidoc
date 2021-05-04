@@ -64,13 +64,17 @@ yarn kbn watch-bazel
 - @elastic/datemath
 - @elastic/eslint-config-kibana
 - @elastic/safer-lodash-set
+- @kbn/analytics
 - @kbn/apm-config-loader
 - @kbn/apm-utils
 - @kbn/babel-code-parser
 - @kbn/babel-preset
 - @kbn/config-schema
 - @kbn/dev-utils
+- @kbn/eslint-import-resolver-kibana
+- @kbn/eslint-plugin-eslint
 - @kbn/expect
+- @kbn/legacy-logging
 - @kbn/logging
 - @kbn/std
 - @kbn/tinymath
