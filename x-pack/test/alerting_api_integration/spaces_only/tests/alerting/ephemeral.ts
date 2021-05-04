@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { flatten } from 'lodash';
 import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
@@ -30,15 +31,14 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
   describe('ephemeral', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    before(async () => {
+    beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
     });
+    afterEach(async () => await esTestIndexTool.destroy());
     after(async () => {
-      await esTestIndexTool.destroy();
+      await objectRemover.removeAll();
     });
-
-    afterEach(async () => await objectRemover.removeAll());
 
     it('should execute all requests, when some will be ephemeral and some not', async () => {
       const nonEphemeralTasks = 3;
@@ -72,7 +72,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       const alertData = getTestAlertData({
         rule_type_id: 'test.patternFiring',
         params: { pattern },
-        schedule: { interval: '1s' },
+        schedule: { interval: '1m' },
         throttle: null,
         notify_when: 'onActiveAlert',
         actions: createdActions.map((createdAction) => {
@@ -94,20 +94,24 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-      const events = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: createdAlert.id,
-          provider: 'alerting',
-          actions: new Map([
-            ['execute-action', { gte: nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE }],
-          ]),
-        });
-      });
+      const events = flatten(
+        await Promise.all(
+          createdActions.map(async (createdAction) => {
+            return await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: Spaces.space1.id,
+                type: 'action',
+                id: createdAction.body.id,
+                provider: 'actions',
+                actions: new Map([['execute', { gte: 1 }]]),
+              });
+            });
+          })
+        )
+      );
 
-      const executeActionsEvents = getEventsByAction(events, 'execute-action');
+      const executeActionsEvents = getEventsByAction(events, 'execute');
       expect(executeActionsEvents.length).equal(
         nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
       );
@@ -154,7 +158,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           getTestAlertData({
             rule_type_id: 'test.patternFiring',
             params: { pattern },
-            schedule: { interval: '1s' },
+            schedule: { interval: '1m' },
             throttle: null,
             notify_when: 'onActiveAlert',
             actions: createdActions.map((createdAction) => {
@@ -179,7 +183,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           getTestAlertData({
             rule_type_id: 'test.patternFiring',
             params: { pattern },
-            schedule: { interval: '1s' },
+            schedule: { interval: '1m' },
             throttle: null,
             notify_when: 'onActiveAlert',
             actions: [
@@ -198,43 +202,34 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert2.id, 'rule', 'alerting');
 
-      const events1 = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: createdAlert1.id,
-          provider: 'alerting',
-          actions: new Map([
-            ['execute-action', { gte: nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE }],
-          ]),
-        });
-      });
-
-      const events2 = await retry.try(async () => {
-        return await getEventLog({
-          getService,
-          spaceId: Spaces.space1.id,
-          type: 'alert',
-          id: createdAlert2.id,
-          provider: 'alerting',
-          actions: new Map([['execute-action', { gte: 2 }]]),
-        });
-      });
-
-      const executeActionsEvents1 = getEventsByAction(events1, 'execute-action');
-      const executeActionsEvents2 = getEventsByAction(events2, 'execute-action');
-      expect(executeActionsEvents1.length).equal(
-        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
+      const events = flatten(
+        await Promise.all(
+          createdActions.map(async (createdAction, index) => {
+            return await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: Spaces.space1.id,
+                type: 'action',
+                id: createdAction.body.id,
+                provider: 'actions',
+                actions: new Map([['execute', { gte: index === 0 ? 2 : 1 }]]),
+              });
+            });
+          })
+        )
       );
-      expect(executeActionsEvents2.length).equal(2);
+
+      const executeActionsEvents = getEventsByAction(events, 'execute');
+      expect(executeActionsEvents.length).equal(
+        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + 1
+      );
 
       const searchResult1 = await esTestIndexTool.search('action:test.index-record', 'one');
       const searchResult2 = await esTestIndexTool.search('action:test.index-record', 'two');
-      expect(searchResult1.hits.total.value).greaterThan(
+      expect(searchResult1.hits.total.value).equal(
         nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
       );
-      expect(searchResult2.hits.total.value).equal(2);
+      expect(searchResult2.hits.total.value).equal(1);
     });
   });
 }
