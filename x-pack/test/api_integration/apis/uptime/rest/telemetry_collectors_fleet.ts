@@ -13,10 +13,11 @@ import { makeChecksWithStatus } from './helper/make_checks';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
+  const client = getService('es');
 
-  describe('telemetry collectors heartbeat', () => {
+  describe('telemetry collectors fleet', () => {
     before('generating data', async () => {
-      await getService('esArchiver').load('uptime/blank');
+      await getService('esArchiver').load('uptime/blank_data_stream');
 
       const observer = {
         geo: {
@@ -42,9 +43,13 @@ export default function ({ getService }: FtrProviderContext) {
           observer: {},
           monitor: {
             name: 'Elastic',
+            fleet_managed: true,
           },
         },
-        'up'
+        'up',
+        undefined,
+        undefined,
+        true
       );
 
       await makeChecksWithStatus(
@@ -57,12 +62,32 @@ export default function ({ getService }: FtrProviderContext) {
           observer,
           monitor: {
             name: 'Long Name with 22 Char',
+            fleet_managed: true,
           },
         },
-        'down'
+        'down',
+        undefined,
+        undefined,
+        true
       );
 
-      await makeChecksWithStatus(es, 'noGeoNameMonitor', 1, 1, 60 * 1000, { observer: {} }, 'down');
+      await makeChecksWithStatus(
+        es,
+        'noGeoNameMonitor',
+        1,
+        1,
+        60 * 1000,
+        {
+          observer: {},
+          monitor: {
+            fleet_managed: true,
+          },
+        },
+        'down',
+        undefined,
+        undefined,
+        true
+      );
       await makeChecksWithStatus(
         es,
         'downMonitorId',
@@ -73,24 +98,48 @@ export default function ({ getService }: FtrProviderContext) {
           observer,
           monitor: {
             name: 'Elastic',
+            fleet_managed: true,
           },
         },
-        'down'
+        'down',
+        undefined,
+        undefined,
+        true
       );
 
-      await makeChecksWithStatus(es, 'mixMonitorId', 1, 1, 1, { observer: observer2 }, 'down');
+      await makeChecksWithStatus(
+        es,
+        'mixMonitorId',
+        1,
+        1,
+        1,
+        { observer: observer2, monitor: { fleet_managed: true } },
+        'down',
+        undefined,
+        undefined,
+        true
+      );
       await es.indices.refresh();
     });
 
     after('unload heartbeat index', () => {
-      getService('esArchiver').unload('uptime/blank');
+      getService('esArchiver').unload('uptime/blank_data_stream');
+      /**
+       * Data streams aren't included in the javascript elasticsearch client in kibana yet so we
+       * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
+       * is why we're using _data_stream here.
+       */
+      client.transport.request({
+        method: 'DELETE',
+        path: `_data_stream/synthetics-http-default`,
+      });
     });
 
     beforeEach(async () => {
       await es.indices.refresh();
     });
 
-    it('should receive expected results after calling monitor logging', async () => {
+    it('should receive expected results for fleet managed monitors after calling monitor logging', async () => {
       // call monitor page
       const { body: result } = await supertest
         .post(API_URLS.LOG_PAGE_VIEW)
@@ -118,13 +167,9 @@ export default function ({ getService }: FtrProviderContext) {
         dateRangeEnd: ['now/d'],
         autoRefreshEnabled: true,
         autorefreshInterval: [100],
-        fleet_monitor_frequency: [],
-        fleet_monitor_name_stats: {
-          avg_length: 0,
-          max_length: 0,
-          min_length: 0,
-        },
-        fleet_no_of_unique_monitors: 0,
+        fleet_monitor_frequency: [120, 0.001, 60, 60],
+        fleet_monitor_name_stats: { min_length: 7, max_length: 22, avg_length: 12 },
+        fleet_no_of_unique_monitors: 4,
       });
     });
 
