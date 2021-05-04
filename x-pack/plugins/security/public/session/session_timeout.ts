@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { BroadcastChannel } from 'broadcast-channel';
+import type { BroadcastChannel as BroadcastChannelType } from 'broadcast-channel';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { skip, tap, throttleTime } from 'rxjs/operators';
+import { delayWhen, skip, tap, throttleTime } from 'rxjs/operators';
 
 import type {
   HttpFetchOptionsWithPath,
@@ -34,7 +34,7 @@ export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeEx
 }
 
 export class SessionTimeout {
-  private channel?: BroadcastChannel<SessionState>;
+  private channel?: BroadcastChannelType<SessionState>;
 
   private isVisible = document.visibilityState !== 'hidden';
   private isFetchingSessionInfo = false;
@@ -63,7 +63,7 @@ export class SessionTimeout {
     private tenant: string
   ) {}
 
-  public start() {
+  public async start() {
     if (this.http.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
@@ -71,6 +71,22 @@ export class SessionTimeout {
     this.subscription = this.sessionState$
       .pipe(skip(1), throttleTime(1000), tap(this.toggleEventHandlers))
       .subscribe(this.resetTimers);
+
+    // Subscribe to a broadcast channel for session timeout messages.
+    // This allows us to synchronize the UX across tabs and avoid repetitive API calls.
+    try {
+      const { BroadcastChannel } = await import('broadcast-channel');
+      this.channel = new BroadcastChannel(`${this.tenant}/session_timeout`, {
+        webWorkerSupport: false,
+      });
+      this.channel.onmessage = this.handleChannelMessage;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Failed to load broadcast channel. Session management will not be kept in sync when multiple tabs are loaded.`,
+        error
+      );
+    }
 
     return this.fetchSessionInfo();
   }
@@ -84,6 +100,7 @@ export class SessionTimeout {
     this.toggleEventHandlers(nextState);
     this.resetTimers(nextState);
     this.subscription?.unsubscribe();
+    this.channel?.close();
   }
 
   /**
@@ -175,17 +192,8 @@ export class SessionTimeout {
     }
   };
 
-  private toggleEventHandlers = ({ expiresInMs, canBeExtended }: SessionState) => {
+  private toggleEventHandlers = async ({ expiresInMs, canBeExtended }: SessionState) => {
     if (expiresInMs !== null) {
-      if (!this.channel) {
-        // Subscribe to a broadcast channel for session timeout messages.
-        // This allows us to synchronize the UX across tabs and avoid repetitive API calls.
-        this.channel = new BroadcastChannel(`${this.tenant}/session_timeout`, {
-          webWorkerSupport: false,
-        });
-        this.channel.onmessage = this.handleChannelMessage;
-      }
-
       // Monitor activity if session can be extended. No need to do it if idleTimeout hasn't been
       // configured.
       if (canBeExtended && !this.stopActivityMonitor) {
@@ -204,10 +212,6 @@ export class SessionTimeout {
         this.stopVisibilityMonitor = monitorVisibility(this.handleVisibilityChange);
       }
     } else {
-      if (this.channel) {
-        this.channel.close();
-        this.channel = undefined;
-      }
       this.removeHttpInterceptor = this.removeHttpInterceptor?.();
       this.stopActivityMonitor = this.stopActivityMonitor?.();
       this.stopVisibilityMonitor = this.stopVisibilityMonitor?.();

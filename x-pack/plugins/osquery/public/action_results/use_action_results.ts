@@ -15,8 +15,8 @@ import {
   ResultEdges,
   PageInfoPaginated,
   OsqueryQueries,
-  ResultsRequestOptions,
-  ResultsStrategyResponse,
+  ActionResultsRequestOptions,
+  ActionResultsStrategyResponse,
   Direction,
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
@@ -65,7 +65,7 @@ export const useActionResults = ({
     ['actionResults', { actionId }],
     async () => {
       const responseData = await data.search
-        .search<ResultsRequestOptions, ResultsStrategyResponse>(
+        .search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
           {
             actionId,
             factoryQueryType: OsqueryQueries.actionResults,
