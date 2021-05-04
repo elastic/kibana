@@ -88,6 +88,7 @@ export interface IVectorLayer extends ILayer {
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
+  canShowTooltip(): boolean;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -1033,9 +1034,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   canShowTooltip() {
-    return (
-      this.isVisible() && (this.getSource().hasTooltipProperties() || this.getJoins().length > 0)
-    );
+    return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
   }
 
   getFeatureById(id: string | number) {

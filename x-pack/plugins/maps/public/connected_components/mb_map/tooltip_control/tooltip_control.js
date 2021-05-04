@@ -113,13 +113,16 @@ export class TooltipControl extends React.Component {
             })
           : [];
 
-        //This keeps track of first feature (assuming these will be identical for features in different tiles)
-        uniqueFeatures.push({
-          id: featureId,
-          layerId: layerId,
-          mbProperties,
-          actions,
-        });
+        const hasActions = isLocked && actions.length;
+        if (hasActions || layer.canShowTooltip()) {
+          //This keeps track of first feature (assuming these will be identical for features in different tiles)
+          uniqueFeatures.push({
+            id: featureId,
+            layerId: layerId,
+            mbProperties,
+            actions,
+          });
+        }
       }
     }
     return uniqueFeatures;
@@ -143,6 +146,9 @@ export class TooltipControl extends React.Component {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const features = this._getTooltipFeatures(mbFeatures, true);
+    if (features.length === 0) {
+      return;
+    }
     this.props.openOnClickTooltip({
       features,
       location: popupAnchorLocation,
@@ -164,7 +170,10 @@ export class TooltipControl extends React.Component {
     const targetMbFeature = mbFeatures[0];
     if (this.props.openTooltips[0]) {
       const firstFeature = this.props.openTooltips[0].features[0];
-      if (targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME] === firstFeature.id) {
+      if (
+        firstFeature &&
+        targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME] === firstFeature.id
+      ) {
         // ignore hover events when hover tooltip is all ready opened for feature
         return;
       }
@@ -172,6 +181,9 @@ export class TooltipControl extends React.Component {
 
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
     const features = this._getTooltipFeatures(mbFeatures, false);
+    if (features.length === 0) {
+      return;
+    }
     this.props.openOnHoverTooltip({
       features: features,
       location: popupAnchorLocation,
@@ -180,7 +192,9 @@ export class TooltipControl extends React.Component {
 
   _getMbLayerIdsForTooltips() {
     const mbLayerIds = this.props.layerList.reduce((mbLayerIds, layer) => {
-      return layer.canShowTooltip() ? mbLayerIds.concat(layer.getMbLayerIds()) : mbLayerIds;
+      return layer.isVisible() && layer.canShowTooltip !== undefined
+        ? mbLayerIds.concat(layer.getMbLayerIds())
+        : mbLayerIds;
     }, []);
 
     //Ensure that all layers are actually on the map.
