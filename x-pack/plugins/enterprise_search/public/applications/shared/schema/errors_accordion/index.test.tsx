@@ -9,11 +9,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiAccordion, EuiTableRow } from '@elastic/eui';
+import { EuiAccordion, EuiTableRow, EuiTableHeaderCell } from '@elastic/eui';
 
-import { EuiButtonEmptyTo } from '../react_router_helpers';
+import { EuiLinkTo } from '../../react_router_helpers';
 
-import { SchemaErrorsAccordion } from './schema_errors_accordion';
+import { SchemaType } from '../types';
+
+import { SchemaErrorsAccordion } from './';
 
 describe('SchemaErrorsAccordion', () => {
   const props = {
@@ -30,8 +32,7 @@ describe('SchemaErrorsAccordion', () => {
       ],
     },
     schema: {
-      id: 'string',
-      name: 'boolean',
+      id: SchemaType.Text,
     },
   };
 
@@ -40,12 +41,16 @@ describe('SchemaErrorsAccordion', () => {
 
     expect(wrapper.find(EuiAccordion)).toHaveLength(1);
     expect(wrapper.find(EuiTableRow)).toHaveLength(2);
-    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(0);
   });
 
-  it('renders document buttons', () => {
-    const wrapper = shallow(<SchemaErrorsAccordion {...props} itemId="123" getRoute={jest.fn()} />);
+  it('conditionally renders a view column', () => {
+    const generateViewPath = jest.fn((id: string) => `/documents/${id}`);
+    const wrapper = shallow(
+      <SchemaErrorsAccordion {...props} generateViewPath={generateViewPath} />
+    );
 
-    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(2);
+    expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(3);
+    expect(wrapper.find(EuiLinkTo)).toHaveLength(2);
+    expect(wrapper.find(EuiLinkTo).first().prop('to')).toEqual('/documents/foo');
   });
 });
