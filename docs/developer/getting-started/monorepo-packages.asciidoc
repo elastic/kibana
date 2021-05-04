@@ -76,6 +76,7 @@ yarn kbn watch-bazel
 - @kbn/expect
 - @kbn/legacy-logging
 - @kbn/logging
+- @kbn/securitysolution-utils
 - @kbn/securitysolution-io-ts-utils
 - @kbn/std
 - @kbn/tinymath
