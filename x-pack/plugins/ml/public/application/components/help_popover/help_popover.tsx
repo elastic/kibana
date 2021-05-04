@@ -8,7 +8,6 @@
 import React, { ReactNode } from 'react';
 import {
   EuiButtonIcon,
-  EuiLink,
   EuiLinkButtonProps,
   EuiPopover,
   EuiPopoverProps,
