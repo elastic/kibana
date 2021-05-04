@@ -25,7 +25,7 @@ export class TransformSavedObjectDocumentError extends Error {
     public readonly namespace: string | undefined,
     public readonly failedTransform: string, // created by document_migrator wrapWithTry as `${type.name}:${version}`;
     public readonly failedDoc: string,
-    public readonly originalError: Error // public readonly namespace?: string--> part of the stringified failedDoc
+    public readonly originalError: Error
   ) {
     super(`Failed to transform document ${id}. Transform: ${failedTransform}\nDoc: ${failedDoc}`);
     this.id = id;

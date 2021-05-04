@@ -525,26 +525,13 @@ export const closePit = (
 };
 
 /*
- * Transform outdated docs and write them to the index.
+ * Transform outdated docs
  * */
 export const transformDocs = (
-  // move the commented out params to bulkOverwriteTransformedDocuments
-  // client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
   outdatedDocuments: SavedObjectsRawDoc[]
-  // index: string,
-  // refresh: estypes.Refresh
 ): TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> =>
   transformRawDocs(outdatedDocuments);
-// pipe(
-//   TaskEither.tryCatch(
-//     () => transformRawDocs(outdatedDocuments),
-//     (e) => {
-//       throw e;
-//     }
-//   ),
-//   TaskEither.chain((docs) => bulkOverwriteTransformedDocuments(client, index, docs, refresh))
-// );
 
 /** @internal */
 export interface ReindexResponse {

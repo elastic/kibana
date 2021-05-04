@@ -84,13 +84,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     REINDEX_SOURCE_TO_TEMP_CLOSE_PIT: (state: ReindexSourceToTempClosePit) =>
       Actions.closePit(client, state.sourceIndexPitId),
     REINDEX_SOURCE_TO_TEMP_INDEX: (state: ReindexSourceToTempIndex) =>
-      Actions.transformDocs(
-        // client,
-        transformRawDocs,
-        state.outdatedDocuments
-        // state.tempIndex,
-        // false
-      ),
+      Actions.transformDocs(transformRawDocs, state.outdatedDocuments),
     REINDEX_SOURCE_TO_TEMP_INDEX_BULK: (state: ReindexSourceToTempIndexBulk) =>
       Actions.bulkOverwriteTransformedDocuments(
         client,

@@ -30,7 +30,7 @@ export interface DocumentsTransformSuccess {
 }
 export interface TransformErrorObjects {
   rawId: string;
-  err: TransformSavedObjectDocumentError | Error; // do we want the full error here or just the stack trace?
+  err: TransformSavedObjectDocumentError | Error;
 }
 type MigrateMethod = (
   doc: SavedObjectUnsanitizedDoc<unknown>
@@ -112,8 +112,8 @@ export function migrateRawDocsNonThrowing(
           );
         } catch (err) {
           if (err instanceof TransformSavedObjectDocumentError) {
-            // the doc id we get from the error is only the uuid part of the saved object
-            // we want to transform the id to a raw saved object id.
+            // the doc id we get from the error is only the uuid part
+            // we transform the id to a raw saved object id.
             transformErrors.push({
               rawId: serializer.generateRawId(err.namespace, err.type, err.id),
               err,

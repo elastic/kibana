@@ -546,7 +546,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
-    // TINA We used to transform and index documents in one action.
+    // We used to transform and index documents in one action.
     // This is not split into two steps: One for transforms, the next for the bulk index
     // We follow a similar control flow as for
     // outdated document search -> outdated document transform -> transform documents bulk index
@@ -561,10 +561,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           transformedDocs: [...res.right.processedDocs],
         };
       } else {
-        // we don't have any transform issues with the current batch of outdated docs BUT
+        // we don't have any transform issues with the current batch of outdated docs but
         // we have carried through previous transformation issues.
-        // The migration will ultimately fail BUT
-        // search throught remaining docs for more issues and pass the previous failures along on state
+        // The migration will ultimately fail but before we do that, continue to
+        // search through remaining docs for more issues and pass the previous failures along on state
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
