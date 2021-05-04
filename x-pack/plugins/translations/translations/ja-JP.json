@@ -7620,6 +7620,7 @@
     "xpack.enterpriseSearch.overview.setupHeading": "セットアップする製品を選択し、開始してください。",
     "xpack.enterpriseSearch.overview.subheading": "開始する製品を選択します。",
     "xpack.enterpriseSearch.productName": "エンタープライズサーチ",
+    "xpack.enterpriseSearch.productSelectorCalloutTitle": "あらゆる規模のチームに対応するエンタープライズ級の機能",
     "xpack.enterpriseSearch.readOnlyMode.warning": "エンタープライズ サーチは読み取り専用モードです。作成、編集、削除などの変更を実行できません。",
     "xpack.enterpriseSearch.schema.addFieldModal.fieldNameNote.addField": "フィールドの追加",
     "xpack.enterpriseSearch.schema.addFieldModal.fieldNameNote.correct": "フィールド名には、小文字、数字、アンダースコアのみを使用できます。",
