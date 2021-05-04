@@ -7,9 +7,9 @@
  */
 
 import * as t from 'io-ts';
-import { namespaceType } from '../default_namespace';
 import { exceptionListType } from '../exception_list';
-import { NonEmptyString } from '../non_empty_string';
+import { namespaceType } from '../default_namespace';
+import { NonEmptyString } from '../../non_empty_string';
 
 export const list = t.exact(
   t.type({

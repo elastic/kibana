@@ -10,6 +10,7 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
 /**
+ * TODO: Move this to kbn-securitysolution-utils
  * @deprecated Use the parseScheduleDates from the kbn-securitysolution-utils.
  */
 export const parseScheduleDates = (time: string): moment.Moment | null => {

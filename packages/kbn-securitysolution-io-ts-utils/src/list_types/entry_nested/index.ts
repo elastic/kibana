@@ -7,13 +7,14 @@
  */
 
 import * as t from 'io-ts';
+import { NonEmptyString } from '../../non_empty_string';
+import { nonEmptyNestedEntriesArray } from '../non_empty_nested_entries_array';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
-});
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+export const entriesNested = t.exact(
+  t.type({
+    entries: nonEmptyNestedEntriesArray,
+    field: NonEmptyString,
+    type: t.keyof({ nested: null }),
+  })
+);
+export type EntryNested = t.TypeOf<typeof entriesNested>;

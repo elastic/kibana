@@ -9,7 +9,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { DefaultListArray } from '.';
-import { foldLeftRight, getPaths } from '../test_utils';
+import { foldLeftRight, getPaths } from '../../test_utils';
 import { getListArrayMock } from '../lists/index.mock';
 
 describe('lists_default_array', () => {

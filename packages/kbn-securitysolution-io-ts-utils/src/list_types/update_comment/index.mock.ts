@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
+import { UpdateComment, UpdateCommentsArray } from '.';
+import { ID } from '../../constants/index.mock';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
+export const getUpdateCommentMock = (): UpdateComment => ({
+  comment: 'some comment',
+  id: ID,
 });
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+
+export const getUpdateCommentsArrayMock = (): UpdateCommentsArray => [
+  getUpdateCommentMock(),
+  getUpdateCommentMock(),
+];

@@ -8,12 +8,9 @@
 
 import * as t from 'io-ts';
 
-export const operatorIncluded = t.keyof({ included: null });
+import { DefaultStringArray } from '../default_string_array';
 
-export const operator = t.keyof({
-  equals: null,
-});
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+export const tags = DefaultStringArray;
+export type Tags = t.TypeOf<typeof tags>;
+export const tagsOrUndefined = t.union([tags, t.undefined]);
+export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;

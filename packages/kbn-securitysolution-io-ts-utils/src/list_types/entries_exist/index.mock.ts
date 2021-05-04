@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
+import { EntryExists } from '.';
+import { EXISTS, FIELD, OPERATOR } from '../../constants/index.mock';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
+export const getEntryExistsMock = (): EntryExists => ({
+  field: FIELD,
+  operator: OPERATOR,
+  type: EXISTS,
 });
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+
+export const getEntryExistsExcludedMock = (): EntryExists => ({
+  ...getEntryExistsMock(),
+  operator: 'excluded',
+});

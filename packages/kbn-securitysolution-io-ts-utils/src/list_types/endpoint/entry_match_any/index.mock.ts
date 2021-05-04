@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
+import { ENTRY_VALUE, FIELD, MATCH_ANY, OPERATOR } from '../../../constants/index.mock';
+import { EndpointEntryMatchAny } from '.';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
+export const getEndpointEntryMatchAnyMock = (): EndpointEntryMatchAny => ({
+  field: FIELD,
+  operator: OPERATOR,
+  type: MATCH_ANY,
+  value: [ENTRY_VALUE],
 });
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}

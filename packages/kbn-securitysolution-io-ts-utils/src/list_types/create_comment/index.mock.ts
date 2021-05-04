@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
+import { CreateComment, CreateCommentsArray } from '.';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
+export const getCreateCommentsMock = (): CreateComment => ({
+  comment: 'some comments',
 });
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+
+export const getCreateCommentsArrayMock = (): CreateCommentsArray => [getCreateCommentsMock()];

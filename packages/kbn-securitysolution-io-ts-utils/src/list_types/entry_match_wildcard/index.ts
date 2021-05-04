@@ -7,13 +7,15 @@
  */
 
 import * as t from 'io-ts';
+import { NonEmptyString } from '../../non_empty_string';
+import { operator } from '../operator';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
-});
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+export const entriesMatchWildcard = t.exact(
+  t.type({
+    field: NonEmptyString,
+    operator,
+    type: t.keyof({ wildcard: null }),
+    value: NonEmptyString,
+  })
+);
+export type EntryMatchWildcard = t.TypeOf<typeof entriesMatchWildcard>;

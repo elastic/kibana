@@ -7,13 +7,9 @@
  */
 
 import * as t from 'io-ts';
+import { NonEmptyString } from '../non_empty_string';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
-});
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+export const id = NonEmptyString;
+export type Id = t.TypeOf<typeof id>;
+export const idOrUndefined = t.union([id, t.undefined]);
+export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;

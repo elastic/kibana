@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getEndpointListMock, getListArrayMock, getListMock } from './index.mock';
 import { List, list, ListArray, listArray, ListArrayOrUndefined, listArrayOrUndefined } from '.';
-import { foldLeftRight, getPaths } from '../test_utils';
+import { foldLeftRight, getPaths } from '../../test_utils';
 
 describe('Lists', () => {
   describe('list', () => {

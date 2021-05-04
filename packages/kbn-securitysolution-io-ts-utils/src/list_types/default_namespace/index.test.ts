@@ -9,7 +9,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { DefaultNamespace } from '.';
-import { foldLeftRight, getPaths } from '../test_utils';
+import { foldLeftRight, getPaths } from '../../test_utils';
 
 describe('default_namespace', () => {
   test('it should validate "single"', () => {

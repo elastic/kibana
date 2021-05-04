@@ -6,14 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import * as t from 'io-ts';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
-});
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+export const updated_at = t.string; // TODO: Make this into an ISO Date string check

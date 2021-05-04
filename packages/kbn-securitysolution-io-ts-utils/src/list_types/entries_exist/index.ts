@@ -8,12 +8,14 @@
 
 import * as t from 'io-ts';
 
-export const operatorIncluded = t.keyof({ included: null });
+import { operator } from '../operator';
+import { NonEmptyString } from '../../non_empty_string';
 
-export const operator = t.keyof({
-  equals: null,
-});
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+export const entriesExists = t.exact(
+  t.type({
+    field: NonEmptyString,
+    operator,
+    type: t.keyof({ exists: null }),
+  })
+);
+export type EntryExists = t.TypeOf<typeof entriesExists>;

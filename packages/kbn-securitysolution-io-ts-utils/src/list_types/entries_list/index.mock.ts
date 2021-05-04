@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
+import { EntryList } from '.';
+import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../../constants/index.mock';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
+export const getEntryListMock = (): EntryList => ({
+  field: FIELD,
+  list: { id: LIST_ID, type: TYPE },
+  operator: OPERATOR,
+  type: LIST,
 });
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}

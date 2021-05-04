@@ -8,12 +8,7 @@
 
 import * as t from 'io-ts';
 
-export const operatorIncluded = t.keyof({ included: null });
-
-export const operator = t.keyof({
-  equals: null,
-});
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
+export const exceptionListItemType = t.keyof({ simple: null });
+export const exceptionListItemTypeOrUndefined = t.union([exceptionListItemType, t.undefined]);
+export type ExceptionListItemType = t.TypeOf<typeof exceptionListItemType>;
+export type ExceptionListItemTypeOrUndefined = t.TypeOf<typeof exceptionListItemTypeOrUndefined>;
