@@ -180,11 +180,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   );
 
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
-  const rowItems = enrollmentAPIKeysRequest?.data?.list.filter((enrollmentKey) => {
-    if (!agentPolicies.length) return false;
-    const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
-    return !agentPolicy?.is_managed;
-  });
+  const rowItems =
+    enrollmentAPIKeysRequest?.data?.list.filter((enrollmentKey) => {
+      if (!agentPolicies.length || !enrollmentKey.policy_id) return false;
+      const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
+      return !agentPolicy?.is_managed;
+    }) || [];
 
   const columns = [
     {
