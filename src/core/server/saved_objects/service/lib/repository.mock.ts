@@ -24,8 +24,6 @@ const create = () => {
     openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
     resolve: jest.fn(),
     update: jest.fn(),
-    addToNamespaces: jest.fn(),
-    deleteFromNamespaces: jest.fn(),
     deleteByNamespace: jest.fn(),
     incrementCounter: jest.fn(),
     removeReferencesTo: jest.fn(),

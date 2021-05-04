@@ -8,7 +8,6 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   SavedObjectReferenceWithContext,
-  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -22,7 +21,6 @@ import type {
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
@@ -421,90 +419,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const savedObject = await this.baseClient.update(type, id, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject, [options.namespace]);
-  }
-
-  public async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsAddToNamespacesOptions = {}
-  ) {
-    const { namespace } = options;
-    try {
-      const args = { type, id, namespaces, options };
-      // To share an object, the user must have the "share_to_space" permission in each of the destination namespaces.
-      await this.legacyEnsureAuthorized(type, 'share_to_space', namespaces, {
-        args,
-        auditAction: 'addToNamespacesCreate',
-      });
-
-      // To share an object, the user must also have the "share_to_space" permission in one or more of the source namespaces. Because the
-      // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "share_to_space" permission in
-      // the current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation
-      // will result in a 404 error.
-      await this.legacyEnsureAuthorized(type, 'share_to_space', namespace, {
-        args,
-        auditAction: 'addToNamespacesUpdate',
-      });
-    } catch (error) {
-      this.auditLogger.log(
-        savedObjectEvent({
-          action: SavedObjectAction.ADD_TO_SPACES,
-          savedObject: { type, id },
-          addToSpaces: namespaces,
-          error,
-        })
-      );
-      throw error;
-    }
-    this.auditLogger.log(
-      savedObjectEvent({
-        action: SavedObjectAction.ADD_TO_SPACES,
-        outcome: 'unknown',
-        savedObject: { type, id },
-        addToSpaces: namespaces,
-      })
-    );
-
-    const response = await this.baseClient.addToNamespaces(type, id, namespaces, options);
-    return await this.redactSavedObjectNamespaces(response, [namespace, ...namespaces]);
-  }
-
-  public async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ) {
-    try {
-      const args = { type, id, namespaces, options };
-      // To un-share an object, the user must have the "share_to_space" permission in each of the target namespaces.
-      await this.legacyEnsureAuthorized(type, 'share_to_space', namespaces, {
-        args,
-        auditAction: 'deleteFromNamespaces',
-      });
-    } catch (error) {
-      this.auditLogger.log(
-        savedObjectEvent({
-          action: SavedObjectAction.DELETE_FROM_SPACES,
-          savedObject: { type, id },
-          deleteFromSpaces: namespaces,
-          error,
-        })
-      );
-      throw error;
-    }
-    this.auditLogger.log(
-      savedObjectEvent({
-        action: SavedObjectAction.DELETE_FROM_SPACES,
-        outcome: 'unknown',
-        savedObject: { type, id },
-        deleteFromSpaces: namespaces,
-      })
-    );
-
-    const response = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
-    return await this.redactSavedObjectNamespaces(response, namespaces);
   }
 
   public async bulkUpdate<T = unknown>(

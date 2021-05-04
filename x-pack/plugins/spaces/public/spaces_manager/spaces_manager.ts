@@ -140,18 +140,6 @@ export class SpacesManager {
       });
   }
 
-  public async shareSavedObjectAdd(object: SavedObjectTarget, spaces: string[]): Promise<void> {
-    return this.http.post(`/api/spaces/_share_saved_object_add`, {
-      body: JSON.stringify({ object, spaces }),
-    });
-  }
-
-  public async shareSavedObjectRemove(object: SavedObjectTarget, spaces: string[]): Promise<void> {
-    return this.http.post(`/api/spaces/_share_saved_object_remove`, {
-      body: JSON.stringify({ object, spaces }),
-    });
-  }
-
   public async getShareableReferences(
     objects: SavedObjectTarget[]
   ): Promise<GetShareableReferencesResponse> {

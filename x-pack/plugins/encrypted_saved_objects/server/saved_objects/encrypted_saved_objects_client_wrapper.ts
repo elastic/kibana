@@ -8,7 +8,6 @@
 import type {
   ISavedObjectTypeRegistry,
   SavedObject,
-  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -24,7 +23,6 @@ import type {
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsOpenPointInTimeOptions,
@@ -231,24 +229,6 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       attributes,
       namespace
     );
-  }
-
-  public async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options?: SavedObjectsAddToNamespacesOptions
-  ) {
-    return await this.options.baseClient.addToNamespaces(type, id, namespaces, options);
-  }
-
-  public async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options?: SavedObjectsDeleteFromNamespacesOptions
-  ) {
-    return await this.options.baseClient.deleteFromNamespaces(type, id, namespaces, options);
   }
 
   public async removeReferencesTo(

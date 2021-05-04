@@ -227,44 +227,6 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
  *
  * @public
  */
-export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
-  version?: string;
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsAddToNamespacesResponse {
-  /** The namespaces the object exists in after this operation is complete. */
-  namespaces: string[];
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsDeleteFromNamespacesResponse {
-  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
-  namespaces: string[];
-}
-
-/**
- *
- * @public
- */
 export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation. Defaults to `true` */
   refresh?: boolean;
@@ -539,40 +501,6 @@ export class SavedObjectsClient {
     options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
-  }
-
-  /**
-   * Adds namespaces to a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<SavedObjectsAddToNamespacesResponse> {
-    return await this._repository.addToNamespaces(type, id, namespaces, options);
-  }
-
-  /**
-   * Removes namespaces from a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
-    return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
 
   /**
