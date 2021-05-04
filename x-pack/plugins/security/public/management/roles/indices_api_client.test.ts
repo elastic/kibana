@@ -91,16 +91,14 @@ describe('getFields', () => {
     expect(fields2).toEqual([]);
   });
 
-  it('returns an empty result in the case of an unexpected error', async () => {
+  it('throws unexpected errors', async () => {
     const { http } = coreMock.createSetup();
     http.get.mockRejectedValue(new Error('AHHHH'));
 
     const client = new IndicesAPIClient(http);
 
-    const fields = await client.getFields('foo');
-
-    expect(http.get).toHaveBeenCalledTimes(1);
-    expect(http.get).toHaveBeenCalledWith(`/internal/security/fields/${encodeURIComponent('foo')}`);
-    expect(fields).toEqual([]);
+    await expect(() => client.getFields('foo')).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"AHHHH"`
+    );
   });
 });

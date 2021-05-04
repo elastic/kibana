@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';

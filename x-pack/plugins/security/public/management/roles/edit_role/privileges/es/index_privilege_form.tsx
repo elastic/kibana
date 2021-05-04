@@ -78,6 +78,12 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     };
   }
 
+  public componentDidMount() {
+    if (this.state.fieldSecurityExpanded && this.props.allowFieldLevelSecurity) {
+      this.loadFLSOptions(this.props.indexPrivilege.names);
+    }
+  }
+
   public render() {
     return (
       <Fragment>
@@ -247,7 +253,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         isDisabled={this.props.isRoleReadOnly}
                         async={true}
                         isLoading={this.state.isFieldListLoading}
-                        onFocus={() => this.loadFLSOptions(this.props.indexPrivilege.names)}
                       />
                     </Fragment>
                   </EuiFormRow>
@@ -273,7 +278,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                         isDisabled={isRoleReadOnly}
                         async={true}
                         isLoading={this.state.isFieldListLoading}
-                        onFocus={() => this.loadFLSOptions(this.props.indexPrivilege.names)}
                       />
                     </Fragment>
                   </EuiFormRow>

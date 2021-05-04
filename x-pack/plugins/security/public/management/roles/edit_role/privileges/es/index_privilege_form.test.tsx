@@ -276,7 +276,7 @@ describe('field level security', () => {
     await nextTick();
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
-    expect(testProps.indicesAPIClient.getFields).not.toHaveBeenCalled();
+    expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
 
     findTestSubject(wrapper, 'fieldInput0').simulate('focus');
     jest.advanceTimersByTime(2000);
@@ -287,7 +287,7 @@ describe('field level security', () => {
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
   });
 
-  test('queries for available fields when focusing the granted fields control', async () => {
+  test('queries for available fields when mounted, and FLS is available', async () => {
     const testProps = {
       ...props,
       indexPrivilege: {
@@ -303,14 +303,10 @@ describe('field level security', () => {
     await nextTick();
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
-    expect(testProps.indicesAPIClient.getFields).not.toHaveBeenCalled();
-
-    findTestSubject(wrapper, 'fieldInput0').simulate('focus');
-    await nextTick();
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
   });
 
-  test('queries for available fields when focusing the denied fields control', async () => {
+  test('does not query for available fields when mounted, and FLS is unavailable', async () => {
     const testProps = {
       ...props,
       indexPrivilege: {
@@ -318,19 +314,16 @@ describe('field level security', () => {
         names: ['foo', 'bar-*'],
       },
       indicesAPIClient: indicesAPIClientMock.create(),
+      allowFieldLevelSecurity: false,
     };
 
     testProps.indicesAPIClient.getFields.mockResolvedValue(['a', 'b', 'c']);
 
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     await nextTick();
-    expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
-    expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
+    expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(0);
+    expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(0);
     expect(testProps.indicesAPIClient.getFields).not.toHaveBeenCalled();
-
-    findTestSubject(wrapper, 'deniedFieldInput0').simulate('focus');
-    await nextTick();
-    expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
   });
 
   test('queries for available fields when the set of index patterns change', async () => {
@@ -350,7 +343,7 @@ describe('field level security', () => {
     await nextTick();
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('div.indexPrivilegeForm__deniedFieldsRow')).toHaveLength(1);
-    expect(testProps.indicesAPIClient.getFields).not.toHaveBeenCalled();
+    expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
 
     wrapper
       .find(EuiComboBox)
@@ -358,7 +351,7 @@ describe('field level security', () => {
       .props().onChange!([{ label: 'newPattern', value: 'newPattern' }]);
 
     await nextTick();
-    expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(1);
+    expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledTimes(2);
     expect(testProps.indicesAPIClient.getFields).toHaveBeenCalledWith('newPattern');
   });
 
