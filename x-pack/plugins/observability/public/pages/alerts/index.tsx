@@ -12,9 +12,10 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { format, parse } from 'url';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
@@ -25,6 +26,7 @@ import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { getAbsoluteDateRange } from '../../utils/date';
+import { StatusFilter, Status } from './status_filter';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTable } from './alerts_table';
 
@@ -105,6 +107,8 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     [kuery, observabilityRuleRegistry, rangeFrom, rangeTo]
   );
 
+  const [statusFilter, setStatusFilter] = useState<Status>('all');
+
   return (
     <EuiPageTemplate
       pageHeader={{
@@ -167,9 +171,19 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <AlertsTable items={topAlerts ?? []} />
-        </EuiFlexItem>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <StatusFilter status={statusFilter} onChange={setStatusFilter} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AlertsTable items={topAlerts ?? []} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPageTemplate>
   );
