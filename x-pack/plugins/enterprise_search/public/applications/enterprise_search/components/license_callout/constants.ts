@@ -15,6 +15,6 @@ export const LICENSE_CALLOUT_BODY = i18n.translate('xpack.enterpriseSearch.licen
 export const LICENSE_CALLOUT_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.licenseCalloutButton',
   {
-    defaultMessage: 'License management',
+    defaultMessage: 'Manage your license',
   }
 );
