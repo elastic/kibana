@@ -7,7 +7,6 @@
 
 import {
   IClusterClient,
-  IScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
