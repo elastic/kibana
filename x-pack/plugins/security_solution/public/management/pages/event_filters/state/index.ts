@@ -19,6 +19,13 @@ export interface EventFiltersPageLocation {
   filter: string;
 }
 
+export interface EventFiltersListPageData {
+  /** The query that was used to retrieve the data */
+  query: EventFiltersServiceGetListOptions;
+  /** The data retrieved from the API */
+  content: FoundExceptionListItemSchema;
+}
+
 export interface EventFiltersListPageState {
   entries: ExceptionListItemSchema[];
   form: {
@@ -33,12 +40,7 @@ export interface EventFiltersListPageState {
   listPage: {
     active: boolean;
     forceRefresh: boolean;
-    data: AsyncResourceState<{
-      /** The query that was used to retrieve the data */
-      query: EventFiltersServiceGetListOptions;
-      /** The data retrieved from the API */
-      content: FoundExceptionListItemSchema;
-    }>;
+    data: AsyncResourceState<EventFiltersListPageData>;
     /** tracks if the overall list (not filtered or with invalid page numbers) contains data */
     dataExist: AsyncResourceState<boolean>;
   };

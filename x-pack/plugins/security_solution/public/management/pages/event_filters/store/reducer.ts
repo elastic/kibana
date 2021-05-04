@@ -20,7 +20,6 @@ import {
   EventFiltersChangeForm,
   EventFiltersFormStateChanged,
   EventFiltersCreateSuccess,
-  EventFiltersListPageStateChanged,
   EventFiltersListPageDataChanged,
   EventFiltersListPageDataExistsChanged,
 } from './action';
