@@ -81,7 +81,7 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
     status === FETCH_STATUS.NOT_INITIATED
   ) {
     return (
-      <div style={{ width: pct(50) }}>
+      <div style={{ width: pct(50) }} data-test-subj="loadingSpinner">
         <EuiLoadingContent data-test-subj="loadingSpinner" />
       </div>
     );

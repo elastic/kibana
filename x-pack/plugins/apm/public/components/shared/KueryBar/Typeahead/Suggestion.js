@@ -61,9 +61,9 @@ const ListItem = euiStyled.li`
   ${Description} {
     p span {
       background: ${({ selected, theme }) =>
-    selected
-      ? theme.eui.euiColorEmptyShade
-      : theme.eui.euiColorLightestShade};
+        selected
+          ? theme.eui.euiColorEmptyShade
+          : theme.eui.euiColorLightestShade};
     }
   }
 `;

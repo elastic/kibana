@@ -5,6 +5,7 @@
  * 2.0.
  */
 import 'cypress-real-events/support';
+import { Interception } from 'cypress/types/net-stubbing';
 
 Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
@@ -50,9 +51,13 @@ Cypress.Commands.add(
     value: string;
   }) => {
     cy.wait(apisIntercepted).then((interceptions) => {
-      interceptions.map((interception) => {
-        expect(interception.request.url).include(value);
-      });
+      if (Array.isArray(interceptions)) {
+        interceptions.map((interception) => {
+          expect(interception.request.url).include(value);
+        });
+      } else {
+        expect((interceptions as Interception).request.url).include(value);
+      }
     });
   }
 );

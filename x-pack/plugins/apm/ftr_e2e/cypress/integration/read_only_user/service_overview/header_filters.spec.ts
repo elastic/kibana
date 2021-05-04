@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { includes } from 'lodash';
 import url from 'url';
 import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
 import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
