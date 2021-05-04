@@ -18,7 +18,6 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}>
   implements ICollector<TFetchReturn, ExtraOptions> {
   public readonly extendFetchContext: CollectorOptionsFetchExtendedContext<boolean>;
   public readonly type: CollectorOptions<TFetchReturn, boolean>['type'];
-  public readonly init?: CollectorOptions<TFetchReturn, boolean>['init'];
   public readonly fetch: CollectorFetchMethod<boolean, TFetchReturn, ExtraOptions>;
   public readonly isReady: CollectorOptions<TFetchReturn, boolean>['isReady'];
   /**
@@ -30,7 +29,6 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}>
     public readonly log: Logger,
     {
       type,
-      init,
       fetch,
       isReady,
       extendFetchContext = {},
@@ -42,11 +40,6 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}>
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
     }
-    if (typeof init !== 'undefined' && typeof init !== 'function') {
-      throw new Error(
-        'If init property is passed, Collector must be instantiated with a options.init as a function property'
-      );
-    }
     if (typeof fetch !== 'function') {
       throw new Error('Collector must be instantiated with a options.fetch function property');
     }
@@ -54,7 +47,6 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}>
     Object.assign(this, options); // spread in other properties and mutate "this"
 
     this.type = type;
-    this.init = init;
     this.fetch = fetch;
     this.isReady = typeof isReady === 'function' ? isReady : () => true;
     this.extendFetchContext = extendFetchContext;

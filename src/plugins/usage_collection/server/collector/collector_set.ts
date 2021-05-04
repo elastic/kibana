@@ -86,11 +86,6 @@ export class CollectorSet {
     }
 
     this.collectors.set(collector.type, collector);
-
-    if (collector.init) {
-      this.logger.debug(`Initializing ${collector.type} collector`);
-      collector.init();
-    }
   };
 
   public getCollectorByType = (type: string) => {

@@ -113,7 +113,7 @@ export type CollectorFetchMethod<
 export interface ICollectorOptionsFetchExtendedContext<WithKibanaRequest extends boolean> {
   /**
    * Set to `true` if your `fetch` method requires the `KibanaRequest` object to be added in its context {@link CollectorFetchContextWithRequest}.
-   * @remark You should fully understand acknowledge that by using the `KibanaRequest` in your collector, you need to ensure it should specially work without it because it won't be provided when building the telemetry payload actually sent to the remote telemetry service.
+   * @remark You should fully acknowledge that by using the `KibanaRequest` in your collector, you need to ensure it should specially work without it because it won't be provided when building the telemetry payload actually sent to the remote telemetry service.
    */
   kibanaRequest?: WithKibanaRequest;
 }
@@ -141,7 +141,6 @@ export type CollectorOptions<
    * Unique string identifier for the collector
    */
   type: string;
-  init?: Function;
   /**
    * Method to return `true`/`false` or Promise(`true`/`false`) to confirm if the collector is ready for the `fetch` method to be called.
    */
@@ -179,11 +178,6 @@ export interface ICollector<TFetchReturn, ExtraOptions extends object = {}> {
   readonly extendFetchContext: CollectorOptionsFetchExtendedContext<boolean>;
   /** The registered type (aka name) of the collector **/
   readonly type: CollectorOptions<TFetchReturn, boolean>['type'];
-  /**
-   * If any preparation logic needs to be while setting up the collector
-   * @deprecated execute the logic in your plugin's own execution thread
-   */
-  readonly init?: CollectorOptions<TFetchReturn, boolean>['init'];
   /**
    * The actual logic that reports the Usage collection.
    * It will be called on every collection request.
