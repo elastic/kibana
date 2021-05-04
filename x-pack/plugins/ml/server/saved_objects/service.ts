@@ -311,36 +311,49 @@ export function jobSavedObjectServiceFactory(
     const jobs = await _getJobObjects(jobType);
     const jobObjectIdMap = new Map<string, string>();
     const objectsToUpdate: Array<{ type: string; id: string }> = [];
-    for (const id of jobIds) {
-      const job = jobs.find((j) => j.attributes.job_id === id);
+    for (const jobId of jobIds) {
+      const job = jobs.find((j) => j.attributes.job_id === jobId);
       if (job === undefined) {
-        results[id] = {
+        results[jobId] = {
           success: false,
-          error: createError(id, 'job_id'),
+          error: createError(jobId, 'job_id'),
         };
       } else {
-        jobObjectIdMap.set(job.id, id);
+        jobObjectIdMap.set(job.id, jobId);
         objectsToUpdate.push({ type: ML_SAVED_OBJECT_TYPE, id: job.id });
       }
     }
 
-    const updateResult = await savedObjectsClient.updateObjectsSpaces(
-      objectsToUpdate,
-      spacesToAdd,
-      spacesToRemove
-    );
-    updateResult.objects.forEach(({ id, error }) => {
-      if (error) {
-        results[id] = {
+    try {
+      const updateResult = await savedObjectsClient.updateObjectsSpaces(
+        objectsToUpdate,
+        spacesToAdd,
+        spacesToRemove
+      );
+      updateResult.objects.forEach(({ id: objectId, error }) => {
+        const jobId = jobObjectIdMap.get(objectId)!;
+        if (error) {
+          results[jobId] = {
+            success: false,
+            error: getSavedObjectClientError(error),
+          };
+        } else {
+          results[jobId] = {
+            success: true,
+          };
+        }
+      });
+    } catch (error) {
+      // If the entire operation failed, return success: false for each job
+      const clientError = getSavedObjectClientError(error);
+      objectsToUpdate.forEach(({ id: objectId }) => {
+        const jobId = jobObjectIdMap.get(objectId)!;
+        results[jobId] = {
           success: false,
-          error: getSavedObjectClientError(error),
+          error: clientError,
         };
-      } else {
-        results[id] = {
-          success: true,
-        };
-      }
-    });
+      });
+    }
 
     return results;
   }

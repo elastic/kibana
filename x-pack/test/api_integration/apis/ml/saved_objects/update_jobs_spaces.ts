@@ -27,13 +27,14 @@ export default ({ getService }: FtrProviderContext) => {
     requestBody: {
       jobType: JobType;
       jobIds: string[];
-      spaces: string[];
+      spacesToAdd: string[];
+      spacesToRemove: string[];
     },
     expectedStatusCode: number,
     user: USER
   ) {
     const { body } = await supertest
-      .post(`/api/ml/saved_objects/assign_job_to_space`)
+      .post(`/api/ml/saved_objects/update_jobs_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody)
@@ -42,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('POST saved_objects/assign_job_to_space', () => {
+  describe('POST saved_objects/update_jobs_spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ihp_outlier');
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
@@ -74,14 +75,15 @@ export default ({ getService }: FtrProviderContext) => {
         {
           jobType: 'anomaly-detector',
           jobIds: [adJobId],
-          spaces: [idSpace1],
+          spacesToAdd: [idSpace1],
+          spacesToRemove: [defaultSpaceId],
         },
         200,
         USER.ML_POWERUSER_SPACE1
       );
 
       expect(body).to.eql({ [adJobId]: { success: true } });
-      await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [defaultSpaceId, idSpace1]);
+      await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [idSpace1]);
     });
 
     it('should assign DFA job to space for user with access to that space', async () => {
@@ -90,23 +92,25 @@ export default ({ getService }: FtrProviderContext) => {
         {
           jobType: 'data-frame-analytics',
           jobIds: [dfaJobId],
-          spaces: [idSpace1],
+          spacesToAdd: [idSpace1],
+          spacesToRemove: [defaultSpaceId],
         },
         200,
         USER.ML_POWERUSER_SPACE1
       );
 
       expect(body).to.eql({ [dfaJobId]: { success: true } });
-      await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', [defaultSpaceId, idSpace1]);
+      await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', [idSpace1]);
     });
 
-    it('should fail to assign AD job to space the user has no access to', async () => {
+    it('should fail to update AD job spaces for space the user has no access to', async () => {
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [defaultSpaceId]);
       const body = await runRequest(
         {
           jobType: 'anomaly-detector',
           jobIds: [adJobId],
-          spaces: [idSpace2],
+          spacesToAdd: [idSpace2],
+          spacesToRemove: [],
         },
         200,
         USER.ML_POWERUSER_SPACE1
@@ -116,13 +120,14 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [defaultSpaceId]);
     });
 
-    it('should fail to assign DFA job to space the user has no access to', async () => {
+    it('should fail to update DFA job spaces for space the user has no access to', async () => {
       await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', [defaultSpaceId]);
       const body = await runRequest(
         {
           jobType: 'data-frame-analytics',
           jobIds: [dfaJobId],
-          spaces: [idSpace2],
+          spacesToAdd: [idSpace2],
+          spacesToRemove: [],
         },
         200,
         USER.ML_POWERUSER_SPACE1

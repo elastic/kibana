@@ -69,23 +69,11 @@ describe('share to space', () => {
       usageStatsServicePromise,
     });
 
-    const [
-      [shareAdd, shareAddRouteHandler],
-      [shareRemove, shareRemoveRouteHandler],
-      [updateObjectsSpaces, updateObjectsSpacesRouteHandler],
-    ] = router.post.mock.calls;
+    const [[updateObjectsSpaces, updateObjectsSpacesRouteHandler]] = router.post.mock.calls;
 
     return {
       coreStart,
       savedObjectsClient,
-      shareAdd: {
-        routeValidation: shareAdd.validate as RouteValidatorConfig<{}, {}, {}>,
-        routeHandler: shareAddRouteHandler,
-      },
-      shareRemove: {
-        routeValidation: shareRemove.validate as RouteValidatorConfig<{}, {}, {}>,
-        routeHandler: shareRemoveRouteHandler,
-      },
       updateObjectsSpaces: {
         routeValidation: updateObjectsSpaces.validate as RouteValidatorConfig<{}, {}, {}>,
         routeHandler: updateObjectsSpacesRouteHandler,

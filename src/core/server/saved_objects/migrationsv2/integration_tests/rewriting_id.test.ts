@@ -194,6 +194,7 @@ describe('migration v2', () => {
           id: 'legacy-url-alias:spacex:foo:1',
           type: 'legacy-url-alias',
           'legacy-url-alias': {
+            sourceId: '1',
             targetId: newFooId,
             targetNamespace: 'spacex',
             targetType: 'foo',
@@ -226,6 +227,7 @@ describe('migration v2', () => {
           id: 'legacy-url-alias:spacex:bar:1',
           type: 'legacy-url-alias',
           'legacy-url-alias': {
+            sourceId: '1',
             targetId: newBarId,
             targetNamespace: 'spacex',
             targetType: 'bar',
