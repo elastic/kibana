@@ -49,17 +49,24 @@ const complete = jest.fn();
 
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
-  fetchMock.mockImplementation((r) => {
+  fetchMock.mockImplementation((r, abortSignal) => {
     if (!r.request.id) i = 0;
     const { time = 0, value = {}, isError = false } = responses[i++];
     value.meta = {
       size: 10,
     };
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
         return (isError ? reject : resolve)(value);
-      }, time)
-    );
+      }, time);
+
+      if (abortSignal) {
+        if (abortSignal.aborted) reject(new AbortError());
+        abortSignal.addEventListener('abort', () => {
+          reject(new AbortError());
+        });
+      }
+    });
   });
 }
 
@@ -144,7 +151,7 @@ describe('SearchInterceptor', () => {
 
   describe('search', () => {
     test('Observable should resolve if fetch is successful', async () => {
-      const mockResponse: any = { result: 200 };
+      const mockResponse: any = { rawResponse: {} };
       fetchMock.mockResolvedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
@@ -233,6 +240,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -255,6 +263,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -281,6 +290,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -289,6 +299,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -325,6 +336,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -349,6 +361,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -357,6 +370,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -389,6 +403,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -433,6 +448,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: true,
             isRunning: true,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -441,6 +457,7 @@ describe('SearchInterceptor', () => {
           value: {
             isPartial: false,
             isRunning: false,
+            rawResponse: {},
             id: 1,
           },
         },
@@ -511,7 +528,10 @@ describe('SearchInterceptor', () => {
           sessionId,
         });
 
-        await searchInterceptor.search(mockRequest, { sessionId }).toPromise();
+        await searchInterceptor
+          .search(mockRequest, { sessionId })
+          .toPromise()
+          .catch(() => {});
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.objectContaining({
             options: { sessionId, isStored: true, isRestore: true, strategy: 'ese' },
@@ -527,7 +547,10 @@ describe('SearchInterceptor', () => {
         const sessionId = 'sid';
         setup(null);
 
-        await searchInterceptor.search(mockRequest, { sessionId }).toPromise();
+        await searchInterceptor
+          .search(mockRequest, { sessionId })
+          .toPromise()
+          .catch(() => {});
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.not.objectContaining({
             options: { sessionId },
@@ -548,6 +571,7 @@ describe('SearchInterceptor', () => {
             value: {
               isPartial: true,
               isRunning: true,
+              rawResponse: {},
               id: 1,
             },
           },
@@ -556,6 +580,7 @@ describe('SearchInterceptor', () => {
             value: {
               isPartial: false,
               isRunning: false,
+              rawResponse: {},
               id: 1,
             },
           },
@@ -792,6 +817,7 @@ describe('SearchInterceptor', () => {
             value: {
               isPartial: true,
               isRunning: true,
+              rawResponse: {},
               id: 1,
             },
           },
@@ -838,6 +864,7 @@ describe('SearchInterceptor', () => {
             value: {
               isPartial: true,
               isRunning: false,
+              rawResponse: {},
               id: 1,
             },
           },

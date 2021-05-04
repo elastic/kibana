@@ -287,6 +287,7 @@ export enum OperatorTypeEnum {
   NESTED = 'nested',
   MATCH = 'match',
   MATCH_ANY = 'match_any',
+  WILDCARD = 'wildcard',
   EXISTS = 'exists',
   LIST = 'list',
 }

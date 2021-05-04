@@ -25,7 +25,7 @@ import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import isEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { METRIC_TYPE } from '../../../../../../src/plugins/usage_collection/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,

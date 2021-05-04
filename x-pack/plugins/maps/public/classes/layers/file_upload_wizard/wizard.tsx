@@ -26,14 +26,14 @@ export enum UPLOAD_STEPS {
 }
 
 enum INDEXING_STAGE {
-  READY = 'READY',
+  CONFIGURE = 'CONFIGURE',
   TRIGGERED = 'TRIGGERED',
   SUCCESS = 'SUCCESS',
   ERROR = 'ERROR',
 }
 
 interface State {
-  indexingStage: INDEXING_STAGE | null;
+  indexingStage: INDEXING_STAGE;
   fileUploadComponent: React.ComponentType<FileUploadComponentProps> | null;
   results?: FileUploadGeoResults;
 }
@@ -42,7 +42,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   private _isMounted: boolean = false;
 
   state: State = {
-    indexingStage: null,
+    indexingStage: INDEXING_STAGE.CONFIGURE,
     fileUploadComponent: null,
   };
 
@@ -58,7 +58,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   componentDidUpdate() {
     if (
       this.props.currentStepId === UPLOAD_STEPS.UPLOAD &&
-      this.state.indexingStage === INDEXING_STAGE.READY
+      this.state.indexingStage === INDEXING_STAGE.CONFIGURE
     ) {
       this.setState({ indexingStage: INDEXING_STAGE.TRIGGERED });
       this.props.startStepLoading();
@@ -156,19 +156,6 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     this.setState({ indexingStage: INDEXING_STAGE.ERROR });
   };
 
-  // Called on file upload screen when UI state changes
-  _onIndexReady = (indexReady: boolean) => {
-    if (!this._isMounted) {
-      return;
-    }
-    this.setState({ indexingStage: indexReady ? INDEXING_STAGE.READY : null });
-    if (indexReady) {
-      this.props.enableNextBtn();
-    } else {
-      this.props.disableNextBtn();
-    }
-  };
-
   render() {
     if (!this.state.fileUploadComponent) {
       return null;
@@ -181,7 +168,8 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
           isIndexingTriggered={this.state.indexingStage === INDEXING_STAGE.TRIGGERED}
           onFileSelect={this._onFileSelect}
           onFileClear={this._onFileClear}
-          onIndexReady={this._onIndexReady}
+          enableImportBtn={this.props.enableNextBtn}
+          disableImportBtn={this.props.disableNextBtn}
           onUploadComplete={this._onUploadComplete}
           onUploadError={this._onUploadError}
         />
