@@ -121,16 +121,72 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         resetState: () => [],
       },
     ],
-    attributes: [
-      [],
+    multipleAuthProvidersConfig: [
+      false,
       {
-        setRoleMappingData: (_, { attributes }) => attributes,
+        setRoleMappingsData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
+        setRoleMappingData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
+        resetState: () => false,
       },
     ],
     availableGroups: [
       [],
       {
         setRoleMappingData: (_, { availableGroups }) => availableGroups,
+      },
+    ],
+    attributes: [
+      [],
+      {
+        setRoleMappingData: (_, { attributes }) => attributes,
+      },
+    ],
+    elasticsearchRoles: [
+      [],
+      {
+        setRoleMappingData: (_, { elasticsearchRoles }) => elasticsearchRoles,
+      },
+    ],
+    roleMapping: [
+      null,
+      {
+        setRoleMappingData: (_, { roleMapping }) => roleMapping || null,
+        resetState: () => null,
+      },
+    ],
+    roleType: [
+      'admin',
+      {
+        setRoleMappingData: (_, { roleMapping }) =>
+          roleMapping ? (roleMapping.roleType as Role) : 'admin',
+        handleRoleChange: (_, { roleType }) => roleType,
+      },
+    ],
+    includeInAllGroups: [
+      false,
+      {
+        setRoleMappingData: (_, { roleMapping }) => (roleMapping ? roleMapping.allGroups : false),
+        handleAllGroupsSelectionChange: (_, { selected }) => selected,
+      },
+    ],
+    attributeValue: [
+      '',
+      {
+        setRoleMappingData: (_, { roleMapping }) =>
+          roleMapping ? getFirstAttributeValue(roleMapping) : '',
+        handleAttributeSelectorChange: (_, { value, firstElasticsearchRole }) =>
+          value === 'role' ? firstElasticsearchRole : '',
+        handleAttributeValueChange: (_, { value }) => value,
+        resetState: () => '',
+      },
+    ],
+    attributeName: [
+      'username',
+      {
+        setRoleMappingData: (_, { roleMapping }) =>
+          roleMapping ? getFirstAttributeName(roleMapping) : 'username',
+        handleAttributeSelectorChange: (_, { value }) => value,
+        resetState: () => 'username',
       },
     ],
     selectedGroups: [
@@ -155,66 +211,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         },
       },
     ],
-    includeInAllGroups: [
-      false,
-      {
-        setRoleMappingData: (_, { roleMapping }) => (roleMapping ? roleMapping.allGroups : false),
-        handleAllGroupsSelectionChange: (_, { selected }) => selected,
-      },
-    ],
-    elasticsearchRoles: [
-      [],
-      {
-        setRoleMappingData: (_, { elasticsearchRoles }) => elasticsearchRoles,
-      },
-    ],
-    roleMapping: [
-      null,
-      {
-        setRoleMappingData: (_, { roleMapping }) => roleMapping || null,
-        resetState: () => null,
-      },
-    ],
-    roleType: [
-      'admin',
-      {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? (roleMapping.roleType as Role) : 'admin',
-        handleRoleChange: (_, { roleType }) => roleType,
-      },
-    ],
-    attributeValue: [
-      '',
-      {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? getFirstAttributeValue(roleMapping) : '',
-        handleAttributeSelectorChange: (_, { value, firstElasticsearchRole }) =>
-          value === 'role' ? firstElasticsearchRole : '',
-        handleAttributeValueChange: (_, { value }) => value,
-        resetState: () => '',
-      },
-    ],
-    attributeName: [
-      'username',
-      {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? getFirstAttributeName(roleMapping) : 'username',
-        handleAttributeSelectorChange: (_, { value }) => value,
-        resetState: () => 'username',
-      },
-    ],
     availableAuthProviders: [
       [],
       {
         setRoleMappingData: (_, { authProviders }) => authProviders,
-      },
-    ],
-    multipleAuthProvidersConfig: [
-      false,
-      {
-        setRoleMappingsData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
-        setRoleMappingData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
-        resetState: () => false,
       },
     ],
     selectedAuthProviders: [
