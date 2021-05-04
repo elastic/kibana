@@ -7,6 +7,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
+import grps from './groups';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -14,7 +15,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const deployment = getService('deployment');
-
   let isOss = true;
 
   describe('visualize app', () => {
@@ -34,29 +34,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup7');
 
       before(async () => await update(false));
-
       after(async () => await update(true));
 
-      [
-        // Test replaced vislib chart types
-        './_line_chart_split_chart',
-        './_point_series_options',
-        './_vertical_bar_chart',
-        './_vertical_bar_chart_nontimeindex',
-        './_line_chart_split_series',
-      ].forEach(load);
+      grps().get('7').forEach(load);
     });
 
     describe('visualize ciGroup9', function () {
       this.tags('ciGroup9');
 
-      [
-        './_embedding_chart',
-        './_area_chart',
-        './_data_table',
-        './_data_table_nontimeindex',
-        './_data_table_notimeindex_filters',
-      ].forEach(load);
+      grps().get('9').forEach(load);
 
       // this check is not needed when the CI doesn't run anymore for the OSS
       if (!isOss) load('./_chart_types');
@@ -65,30 +51,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('visualize ciGroup10', function () {
       this.tags('ciGroup10');
 
-      [
-        './_inspector',
-        './_experimental_vis',
-        './_gauge_chart',
-        './_heatmap_chart',
-        './input_control_vis',
-        './_histogram_request_start',
-        './_metric_chart',
-      ].forEach(load);
+      grps().get('10').forEach(load);
     });
 
     describe('visualize ciGroup4', function () {
       this.tags('ciGroup4');
 
-      [
-        './_pie_chart',
-        './_point_series_options',
-        './_markdown_vis',
-        './_shared_item',
-        './_lab_mode',
-        './_linked_saved_searches',
-        './_visualize_listing',
-        './_add_to_dashboard.ts',
-      ].forEach(load);
+      grps().get('4').forEach(load);
 
       if (isOss) ['./_tile_map', './_region_map'].forEach(load);
     });
@@ -96,16 +65,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('visualize ciGroup12', function () {
       this.tags('ciGroup12');
 
-      [
-        './_tag_cloud',
-        './_vertical_bar_chart',
-        './_vertical_bar_chart_nontimeindex',
-        './_tsvb_chart',
-        './_tsvb_time_series',
-        './_tsvb_markdown',
-        './_tsvb_table',
-        './_vega_chart',
-      ].forEach(load);
+      grps().get('12').forEach(load);
     });
   });
 
