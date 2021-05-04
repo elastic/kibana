@@ -16,7 +16,6 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-// import { tagSavedObjectTypeName } from '../../../../../saved_objects_tagging/common';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -30,9 +29,7 @@ import {
 } from '../__fixtures__';
 import { initGetShareableReferencesApi } from './get_shareable_references';
 
-const tagSavedObjectTypeName = 'tag'; // TODO: import this from saved_objects_tagging plugin (cannot import directly, generates TS circular graph error)
-
-describe('share to space', () => {
+describe('get shareable references', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
@@ -106,24 +103,24 @@ describe('share to space', () => {
 
     it('passes arguments to the saved objects client and returns the result', async () => {
       const { getShareableReferences, savedObjectsClient } = await setup();
-      const objects = [
-        // 2 requested objects
-        { type: tagSavedObjectTypeName, id: 'id-1' },
-        { type: 'foo-type', id: 'id-2' },
-      ];
-      const payload = { objects };
+      const reqObj1 = { type: 'a', id: 'id-1' };
+      const reqObjects = [reqObj1];
+      const payload = { objects: reqObjects };
       const collectedObjects = [
-        // When mocking these results, they must have the 'spaces' and 'inboundReferences' fields, but the 'inboundReferences' fields can be empty arrays for this unit test
-        ...objects.map((x) => ({ ...x, spaces: ['space-1'], inboundReferences: [] })),
-        // the return value of collectMultiNamespaceReferences includes the 2 requested objects, along with the 3 related tags/references
+        // the return value of collectMultiNamespaceReferences includes the 1 requested object, along with the 2 references
+        { ...reqObj1, spaces: ['space-1'], inboundReferences: [] },
         {
-          type: tagSavedObjectTypeName,
-          id: 'id-3',
-          spaces: ['space-1', '?'],
-          inboundReferences: [],
+          type: 'b',
+          id: 'id-4',
+          spaces: ['space-1', '?', '?'],
+          inboundReferences: [{ ...reqObj1, name: 'ref-a:1' }],
         },
-        { type: 'bar-type', id: 'id-4', spaces: ['space-1', '?', '?'], inboundReferences: [] },
-        { type: 'baz-type', id: 'id-5', spaces: ['space-1', 'space-2'], inboundReferences: [] },
+        {
+          type: 'c',
+          id: 'id-5',
+          spaces: ['space-1', 'space-2'],
+          inboundReferences: [{ ...reqObj1, name: 'ref-a:1' }],
+        },
       ];
       savedObjectsClient.collectMultiNamespaceReferences.mockResolvedValue({
         objects: collectedObjects,
@@ -137,16 +134,9 @@ describe('share to space', () => {
       );
 
       expect(response.status).toEqual(200);
-      expect(response.payload).toEqual({
-        tagsCount: 1, // consumers wouldn't realistically include any tags in the request, but if they did, those tags (id-1) are omitted from this count
-        relativesCount: 2, // the requested object (id-2) is omitted from this count
-        selectedSpaces: ['space-1'], // every object is in 'space-1', so that is included in selectedSpaces
-        partiallySelectedSpaces: ['space-2'], // some but not all objects are in 'space-2', so that is included in partiallySelectedSpaces
-        unknownSpacesCount: 2, // this is derived from the max unknown spaces count of any individual object (in this case, id-4 is in 2 unknown spaces)
-        objects: collectedObjects,
-      });
+      expect(response.payload).toEqual({ objects: collectedObjects });
       expect(savedObjectsClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects, {
+      expect(savedObjectsClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(reqObjects, {
         purpose: 'updateObjectsSpaces',
       });
     });
