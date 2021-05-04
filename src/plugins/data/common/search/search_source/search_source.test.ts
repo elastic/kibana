@@ -612,6 +612,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
+        expect(request.hasOwnProperty('docvalue_fields')).toBe(false);
         expect(request.fields).toEqual([
           { field: 'foo-bar' },
           { field: 'field1' },
