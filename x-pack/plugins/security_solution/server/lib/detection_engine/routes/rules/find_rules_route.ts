@@ -61,52 +61,11 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
         });
         const alertIds = rules.data.map((rule) => rule.id);
         console.log(`${new Date().toISOString()} found rules`);
-        // if any rules attempted to execute but failed before the rule executor is called,
-        // an execution status will be written directly onto the rule via the kibana alerting framework,
-        // which we are filtering on and will write a failure status
-        // for any rules found to be in a failing state into our rule status saved objects
-        /*const failingRules = rules.data.filter(
-          (rule) => rule.executionStatus != null && rule.executionStatus.status === 'error'
-        );
-
-        const ruleStatuses = await Promise.all(
-          rules.data.map(async (rule) => {
-            const results = await ruleStatusClient.find({
-              perPage: 1,
-              sortField: 'statusDate',
-              sortOrder: 'desc',
-              search: rule.id,
-              searchFields: ['alertId'],
-            });
-            const failingRule = failingRules.find((badRule) => badRule.id === rule.id);
-            if (failingRule != null) {
-              if (results.saved_objects.length > 0) {
-                results.saved_objects[0].attributes.status = 'failed';
-                results.saved_objects[0].attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
-              }
-            }
-            return results;
-          })
-        );*/
         const [ruleStatuses, ruleActions] = await Promise.all([
           ruleStatusClient.findBulk(alertIds),
           getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
-        //const ruleStatuses = await ruleStatusClient.findBulk(alertIds);
-
-        console.log(`${new Date().toISOString()} found rule statuses`);
-        //const ruleActions = await getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient });
-        /*const ruleActions = await Promise.all(
-          rules.data.map(async (rule) => {
-            const results = await getRuleActionsSavedObject({
-              savedObjectsClient,
-              ruleAlertId: rule.id,
-            });
-
-            return results;
-          })
-        );*/
-        console.log(`${new Date().toISOString()} found rule actions`);
+        console.log(`${new Date().toISOString()} found rule statuses and actions`);
         const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
         console.log(`${new Date().toISOString()} finishing _find handler`);
         if (transformed == null) {

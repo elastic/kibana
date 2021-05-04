@@ -274,6 +274,7 @@ export const internalRuleToAPIResponse = (
   ruleActions?: RuleActions | null,
   ruleStatus?: IRuleStatusSOAttributes
 ): FullResponseSchema => {
+  const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
   return {
     // Alerting framework params
     id: rule.id,
@@ -293,11 +294,30 @@ export const internalRuleToAPIResponse = (
     throttle: ruleActions?.ruleThrottle || 'no_actions',
     actions: ruleActions?.actions ?? [],
     // Rule status
-    status: ruleStatus?.status ?? undefined,
-    status_date: ruleStatus?.statusDate ?? undefined,
-    last_failure_at: ruleStatus?.lastFailureAt ?? undefined,
-    last_success_at: ruleStatus?.lastSuccessAt ?? undefined,
-    last_failure_message: ruleStatus?.lastFailureMessage ?? undefined,
-    last_success_message: ruleStatus?.lastSuccessMessage ?? undefined,
+    status: mergedStatus?.status ?? undefined,
+    status_date: mergedStatus?.statusDate ?? undefined,
+    last_failure_at: mergedStatus?.lastFailureAt ?? undefined,
+    last_success_at: mergedStatus?.lastSuccessAt ?? undefined,
+    last_failure_message: mergedStatus?.lastFailureMessage ?? undefined,
+    last_success_message: mergedStatus?.lastSuccessMessage ?? undefined,
   };
+};
+
+export const mergeAlertWithSidecarStatus = (
+  alert: SanitizedAlert<RuleParams>,
+  status: IRuleStatusSOAttributes
+): IRuleStatusSOAttributes => {
+  if (
+    new Date(alert.executionStatus.lastExecutionDate) > new Date(status.statusDate) &&
+    alert.executionStatus.status === 'error'
+  ) {
+    return {
+      ...status,
+      lastFailureMessage: `Reason: ${alert.executionStatus.error?.reason} Message: ${alert.executionStatus.error?.message}`,
+      lastFailureAt: alert.executionStatus.lastExecutionDate.toISOString(),
+      statusDate: alert.executionStatus.lastExecutionDate.toISOString(),
+      status: 'failed',
+    };
+  }
+  return status;
 };

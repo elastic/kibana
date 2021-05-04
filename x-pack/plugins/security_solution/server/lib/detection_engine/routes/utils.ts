@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import Joi from 'joi';
 import { errors } from '@elastic/elasticsearch';
+import { chunk } from 'lodash';
 import { has, snakeCase } from 'lodash/fp';
 import { SanitizedAlert } from '../../../../../alerting/common';
 
@@ -15,13 +16,11 @@ import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
-  SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
 import { AlertsClient } from '../../../../../alerting/server';
 import { BadRequestError } from '../errors/bad_request_error';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
-import { chunk } from 'lodash';
-import { findRules } from '../rules/find_rules';
+
 import { RuleParams } from '../schemas/rule_schemas';
 
 export interface OutputError {
@@ -347,13 +346,11 @@ export const getFailingRules = async (
     return errorRules
       .filter((rule) => rule.executionStatus.status === 'error')
       .reduce<GetFailingRulesResult>((acc, failingRule) => {
-        const accum = acc;
-        const theRule = failingRule;
         return {
-          [theRule.id]: {
-            ...theRule,
+          [failingRule.id]: {
+            ...failingRule,
           },
-          ...accum,
+          ...acc,
         };
       }, {});
   } catch (exc) {

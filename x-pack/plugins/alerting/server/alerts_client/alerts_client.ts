@@ -393,8 +393,9 @@ export class AlertsClient {
       type: 'alert',
     }));
     const results = await this.unsecuredSavedObjectsClient.bulkGet<RawAlert>(objects);
+    const validResults = results.saved_objects.filter((result) => result.error == null);
     const authorizations: string[] = [];
-    for (const result of results.saved_objects) {
+    for (const result of validResults) {
       const hash = createHash('sha256')
         .update(result.attributes.alertTypeId)
         .update(result.attributes.consumer)
@@ -420,15 +421,15 @@ export class AlertsClient {
       }
     }
 
-    /*this.auditLogger?.log(
-      alertAuditEvent({
-        action: AlertAuditAction.GET,
-        savedObject: { type: 'alert', id },
-      })
-    );*/
-    return results.saved_objects.map((result) =>
-      this.getAlertFromRaw<Params>(result.id, result.attributes, result.references)
-    );
+    return validResults.map((result) => {
+      this.auditLogger?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.GET,
+          savedObject: { type: 'alert', id: result.id },
+        })
+      );
+      return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
+    });
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
