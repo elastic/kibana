@@ -30,7 +30,7 @@ describe('SearchUIForm', () => {
     onFacetFieldsChange: jest.fn(),
     onSortFieldsChange: jest.fn(),
     onTitleFieldChange: jest.fn(),
-    onURLFieldChange: jest.fn(),
+    onUrlFieldChange: jest.fn(),
   };
 
   beforeAll(() => {
@@ -92,7 +92,7 @@ describe('SearchUIForm', () => {
 
     it('updates state with new value when changed', () => {
       subject().simulate('change', { target: { value: 'foo' } });
-      expect(actions.onURLFieldChange).toHaveBeenCalledWith('foo');
+      expect(actions.onUrlFieldChange).toHaveBeenCalledWith('foo');
     });
 
     it('updates active field in state on focus', () => {

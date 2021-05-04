@@ -94,7 +94,7 @@ export const SearchUIForm: React.FC = () => {
     onFacetFieldsChange,
     onSortFieldsChange,
     onTitleFieldChange,
-    onURLFieldChange,
+    onUrlFieldChange,
   } = useActions(SearchUILogic);
 
   // TODO
@@ -169,7 +169,7 @@ export const SearchUIForm: React.FC = () => {
             name="url-field"
             options={optionFields}
             value={selectedURLOption && selectedURLOption.value}
-            onChange={(e) => onURLFieldChange(e.target.value)}
+            onChange={(e) => onUrlFieldChange(e.target.value)}
             fullWidth
             placeholder={URL_FIELD_PLACEHOLDER}
             onFocus={() => onActiveFieldChange(ActiveField.Url)}
