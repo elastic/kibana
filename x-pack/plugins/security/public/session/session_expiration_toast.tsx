@@ -16,8 +16,8 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import type { ToastInput } from 'src/core/public';
 
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
 import type { SessionState } from './session_timeout';
-import { GRACE_PERIOD_MS } from './session_timeout';
 
 export interface SessionExpirationTitleProps {
   sessionState$: Observable<SessionState>;
@@ -35,11 +35,11 @@ export const SessionExpirationTitle: FunctionComponent<SessionExpirationTitlePro
   return (
     <FormattedMessage
       id="xpack.security.sessionExpirationToast.title"
-      defaultMessage="Session ends {timeout}"
+      defaultMessage="Session expires {timeout}"
       values={{
         timeout: (
           <FormattedRelative
-            value={Math.max(state.expiresInMs - GRACE_PERIOD_MS, 0) + Date.now()}
+            value={Math.max(state.expiresInMs - SESSION_GRACE_PERIOD_MS, 0) + Date.now()}
             updateInterval={1000}
           />
         ),
@@ -71,7 +71,7 @@ export const SessionExpirationBody: FunctionComponent<SessionExpirationBodyProps
           <EuiButton size="s" color="warning" isLoading={loading} onClick={extend}>
             <FormattedMessage
               id="xpack.security.sessionExpirationToast.extendButton"
-              defaultMessage="Stay logged in"
+              defaultMessage="Keep me logged in"
             />
           </EuiButton>
         </EuiFlexItem>
@@ -82,7 +82,7 @@ export const SessionExpirationBody: FunctionComponent<SessionExpirationBodyProps
   return (
     <FormattedMessage
       id="xpack.security.components.sessionExpirationToast.endOfLifeWarning"
-      defaultMessage="You will need to log in again."
+      defaultMessage="Any unsaved changes will be lost."
     />
   );
 };

@@ -10,6 +10,7 @@ import type { RequestHandler, RouteConfig } from 'src/core/server';
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
+import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
@@ -71,10 +72,20 @@ describe('Info session routes', () => {
         [
           {
             idleTimeoutExpiration: 100 + now,
-            lifespanExpiration: 200 + now,
+            lifespanExpiration: 200 + SESSION_EXPIRATION_WARNING_MS + now,
           },
           {
             canBeExtended: true,
+            expiresInMs: 100,
+          },
+        ],
+        [
+          {
+            idleTimeoutExpiration: 100 + now,
+            lifespanExpiration: 200 + now,
+          },
+          {
+            canBeExtended: false,
             expiresInMs: 100,
           },
         ],

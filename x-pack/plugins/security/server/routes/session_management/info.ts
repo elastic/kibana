@@ -6,6 +6,7 @@
  */
 
 import type { RouteDefinitionParams } from '../';
+import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { SessionInfo } from '../../../common/types';
 
 /**
@@ -27,7 +28,9 @@ export function defineSessionInfoRoutes({ router, getSession, config }: RouteDef
             expiresInMs: expirationTime ? expirationTime - Date.now() : null,
             canBeExtended:
               sessionValue.idleTimeoutExpiration !== null &&
-              expirationTime !== sessionValue.lifespanExpiration,
+              expirationTime !== null &&
+              (sessionValue.lifespanExpiration === null ||
+                expirationTime + SESSION_EXPIRATION_WARNING_MS < sessionValue.lifespanExpiration),
             provider: sessionValue.provider,
           } as SessionInfo,
         });

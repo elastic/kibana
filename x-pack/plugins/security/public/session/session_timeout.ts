@@ -18,37 +18,16 @@ import type {
   Toast,
 } from 'src/core/public';
 
+import {
+  SESSION_CHECK_MS,
+  SESSION_EXPIRATION_WARNING_MS,
+  SESSION_EXTENSION_THROTTLE_MS,
+  SESSION_GRACE_PERIOD_MS,
+  SESSION_ROUTE,
+} from '../../common/constants';
 import type { SessionInfo } from '../../common/types';
 import { createSessionExpirationToast } from './session_expiration_toast';
 import type { ISessionExpired } from './session_expired';
-
-/**
- * Client session timeout is decreased by this number so that Kibana server can still access session
- * content during logout request to properly clean user session up (invalidate access tokens,
- * redirect to logout portal etc.).
- */
-export const GRACE_PERIOD_MS = 5 * 1000;
-
-/**
- * Duration we'll normally display the warning toast
- */
-export const WARNING_MS = 5 * 60 * 1000;
-
-/**
- * Current session info is checked this number of milliseconds before the warning toast shows. This
- * will prevent the toast from being shown if the session has already been extended.
- */
-export const SESSION_CHECK_MS = 1000;
-
-/**
- * Session will be extended at most once this number of milliseconds while user activity is detected.
- */
-export const EXTENSION_THROTTLE_MS = 60 * 1000;
-
-/**
- * Route to get session info and extend session expiration
- */
-export const SESSION_ROUTE = '/internal/security/session';
 
 export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended'> {
   lastExtensionTime: number;
@@ -58,7 +37,7 @@ export class SessionTimeout {
   private channel?: BroadcastChannel<SessionState>;
 
   private isVisible = document.visibilityState !== 'hidden';
-  private isExtending = false;
+  private isFetchingSessionInfo = false;
 
   private sessionState$ = new BehaviorSubject<SessionState>({
     lastExtensionTime: 0,
@@ -125,7 +104,7 @@ export class SessionTimeout {
     }
 
     if (fetchOptions.asSystemRequest === undefined) {
-      return { asSystemRequest: !this.isVisible };
+      return { ...fetchOptions, asSystemRequest: !this.isVisible };
     }
   };
 
@@ -172,9 +151,13 @@ export class SessionTimeout {
     this.stopLogoutTimer = this.stopLogoutTimer?.();
 
     if (expiresInMs !== null) {
-      const refreshTimeout = expiresInMs - GRACE_PERIOD_MS - WARNING_MS - SESSION_CHECK_MS;
-      const warningTimeout = Math.max(expiresInMs - GRACE_PERIOD_MS - WARNING_MS, 0);
-      const logoutTimeout = Math.max(expiresInMs - GRACE_PERIOD_MS, 0);
+      const refreshTimeout =
+        expiresInMs - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS - SESSION_CHECK_MS;
+      const warningTimeout = Math.max(
+        expiresInMs - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS,
+        0
+      );
+      const logoutTimeout = Math.max(expiresInMs - SESSION_GRACE_PERIOD_MS, 0);
 
       // 1. Refresh session info before displaying any warnings
       if (refreshTimeout > 0) {
@@ -234,14 +217,14 @@ export class SessionTimeout {
   private shouldExtend() {
     const { lastExtensionTime } = this.sessionState$.getValue();
     return (
-      !this.isExtending &&
+      !this.isFetchingSessionInfo &&
       !this.warningToast &&
-      Date.now() > lastExtensionTime + EXTENSION_THROTTLE_MS
+      Date.now() > lastExtensionTime + SESSION_EXTENSION_THROTTLE_MS
     );
   }
 
   private fetchSessionInfo = async (extend = false) => {
-    this.isExtending = true;
+    this.isFetchingSessionInfo = true;
     try {
       const { expiresInMs, canBeExtended } = await this.http.fetch<SessionInfo>(SESSION_ROUTE, {
         method: extend ? 'POST' : 'GET',
@@ -260,7 +243,7 @@ export class SessionTimeout {
     } catch (error) {
       // ignore
     } finally {
-      this.isExtending = false;
+      this.isFetchingSessionInfo = false;
     }
   };
 

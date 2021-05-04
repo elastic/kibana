@@ -54,7 +54,7 @@ describe('SessionExpirationTitle', () => {
         <SessionExpirationTitle sessionState$={sessionState$} />
       </I18nProvider>
     );
-    getByText(/Session ends in [0-9]+ seconds/);
+    getByText(/Session expires in [0-9]+ seconds/);
   });
 });
 
@@ -72,7 +72,7 @@ describe('SessionExpirationBody', () => {
         <SessionExpirationBody sessionState$={sessionState$} onExtend={onExtend} />
       </I18nProvider>
     );
-    fireEvent.click(getByRole('button', { name: 'Stay logged in' }));
+    fireEvent.click(getByRole('button', { name: 'Keep me logged in' }));
 
     expect(onExtend).toHaveBeenCalled();
   });
@@ -90,6 +90,6 @@ describe('SessionExpirationBody', () => {
         <SessionExpirationBody sessionState$={sessionState$} onExtend={onExtend} />
       </I18nProvider>
     );
-    expect(queryByRole('button', { name: 'Stay logged in' })).toBeNull();
+    expect(queryByRole('button', { name: 'Keep me logged in' })).toBeNull();
   });
 });

@@ -7,17 +7,16 @@
 
 import { coreMock } from 'src/core/public/mocks';
 
+import {
+  SESSION_CHECK_MS,
+  SESSION_EXPIRATION_WARNING_MS,
+  SESSION_EXTENSION_THROTTLE_MS,
+  SESSION_GRACE_PERIOD_MS,
+  SESSION_ROUTE,
+} from '../../common/constants';
 import type { SessionInfo } from '../../common/types';
 import { createSessionExpiredMock } from './session_expired.mock';
-import {
-  EXTENSION_THROTTLE_MS,
-  GRACE_PERIOD_MS,
-  SESSION_CHECK_MS,
-  SESSION_ROUTE,
-  SessionTimeout,
-  startTimer,
-  WARNING_MS,
-} from './session_timeout';
+import { SessionTimeout, startTimer } from './session_timeout';
 
 jest.mock('broadcast-channel');
 
@@ -48,6 +47,7 @@ function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBe
 
   return { sessionTimeout, sessionExpired, notifications, http };
 }
+
 describe('SessionTimeout', () => {
   afterEach(async () => {
     jest.clearAllMocks();
@@ -110,30 +110,38 @@ describe('SessionTimeout', () => {
     expect(sessionExpired.logout).not.toHaveBeenCalled();
   });
 
-  it('refetches session info when detecting user activity', async () => {
+  it('extends session when detecting user activity', async () => {
     const { sessionTimeout, http } = createSessionTimeout();
     await sessionTimeout.start();
     expect(http.fetch).toHaveBeenCalledTimes(1);
 
     // Increment system time enough so that session extension gets triggered
-    nowMock.mockReturnValue(Date.now() + EXTENSION_THROTTLE_MS + 10);
+    nowMock.mockReturnValue(Date.now() + SESSION_EXTENSION_THROTTLE_MS + 10);
     window.dispatchEvent(new Event('mousemove'));
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
+    expect(http.fetch).toHaveBeenLastCalledWith(
+      SESSION_ROUTE,
+      expect.objectContaining({ asSystemRequest: false })
+    );
     nowMock.mockClear();
   });
 
-  it('refetches session info when receiving HTTP response', async () => {
+  it('extends session when receiving HTTP response', async () => {
     const { sessionTimeout, http } = createSessionTimeout();
     await sessionTimeout.start();
     expect(http.fetch).toHaveBeenCalledTimes(1);
 
     // Increment system time enough so that session extension gets triggered
-    nowMock.mockReturnValue(Date.now() + EXTENSION_THROTTLE_MS + 10);
+    nowMock.mockReturnValue(Date.now() + SESSION_EXTENSION_THROTTLE_MS + 10);
     const [{ response: handleHttpResponse }] = http.intercept.mock.calls[0];
     handleHttpResponse!({ fetchOptions: { asSystemRequest: false } } as any, {} as any);
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
+    expect(http.fetch).toHaveBeenLastCalledWith(
+      SESSION_ROUTE,
+      expect.objectContaining({ asSystemRequest: false })
+    );
     nowMock.mockClear();
   });
 
@@ -142,12 +150,14 @@ describe('SessionTimeout', () => {
     await sessionTimeout.start();
     expect(http.fetch).toHaveBeenCalledTimes(1);
 
-    jest.advanceTimersByTime(60 * 60 * 1000 - GRACE_PERIOD_MS - WARNING_MS - SESSION_CHECK_MS);
+    jest.advanceTimersByTime(
+      60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS - SESSION_CHECK_MS
+    );
 
     expect(http.fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('does not refetch session info if already recently updated', async () => {
+  it('does not extend session if recently extended', async () => {
     const { sessionTimeout, http } = createSessionTimeout();
     await sessionTimeout.start();
 
@@ -167,7 +177,7 @@ describe('SessionTimeout', () => {
 
     const [{ request: handleHttpRequest }] = http.intercept.mock.calls[0];
     const fetchOptions = handleHttpRequest!({ path: '/test' }, {} as any);
-    expect(fetchOptions).toEqual({ asSystemRequest: true });
+    expect(fetchOptions).toEqual({ path: '/test', asSystemRequest: true });
 
     visibilityStateMock.mockClear();
   });
@@ -195,7 +205,7 @@ describe('SessionTimeout', () => {
 
     const [{ request: handleHttpRequest }] = http.intercept.mock.calls[0];
     const fetchOptions = handleHttpRequest!({ path: '/test' }, {} as any);
-    expect(fetchOptions).toEqual({ asSystemRequest: false });
+    expect(fetchOptions).toEqual({ path: '/test', asSystemRequest: false });
 
     visibilityStateMock.mockClear();
   });
@@ -222,7 +232,9 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, notifications } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(60 * 60 * 1000 - GRACE_PERIOD_MS - WARNING_MS);
+    jest.advanceTimersByTime(
+      60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS
+    );
 
     expect(notifications.toasts.add).toHaveBeenCalledWith(
       expect.objectContaining({ color: 'warning', iconType: 'clock' })
@@ -233,7 +245,9 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, notifications } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(60 * 60 * 1000 - GRACE_PERIOD_MS - WARNING_MS);
+    jest.advanceTimersByTime(
+      60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS
+    );
 
     expect(notifications.toasts.add).toHaveBeenCalled();
 
@@ -247,13 +261,13 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, sessionExpired } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
 
-    jest.advanceTimersByTime(60 * 60 * 1000 - GRACE_PERIOD_MS);
+    jest.advanceTimersByTime(60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS);
 
     expect(sessionExpired.logout).toHaveBeenCalled();
   });
 
   it('logs user out immediately if session expiration is imminent', async () => {
-    const { sessionTimeout, sessionExpired } = createSessionTimeout(GRACE_PERIOD_MS / 2);
+    const { sessionTimeout, sessionExpired } = createSessionTimeout(SESSION_GRACE_PERIOD_MS / 2);
     await sessionTimeout.start();
 
     jest.advanceTimersByTime(0);
