@@ -110,9 +110,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               value.toString()
             ),
         };
-      })
-      .filter(({ description: d }) => {
-        return d !== undefined;
       });
   }
 
