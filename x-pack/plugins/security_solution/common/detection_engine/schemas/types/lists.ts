@@ -11,6 +11,9 @@ import { exceptionListType, namespaceType } from '../../../shared_imports';
 
 import { NonEmptyString } from './non_empty_string';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const list = t.exact(
   t.type({
     id: NonEmptyString,
