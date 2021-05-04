@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 
-export const rangeRt = t.type({
+export const rangeRt = t.partial({
   start: isoToEpochRt,
   end: isoToEpochRt,
 });

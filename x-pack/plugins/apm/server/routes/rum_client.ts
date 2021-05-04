@@ -38,7 +38,7 @@ export const percentileRangeRt = t.partial({
   maxPercentile: t.string,
 });
 
-const uiFiltersRt = t.type({ uiFilters: t.string });
+const uiFiltersRt = t.partial({ uiFilters: t.string });
 
 const uxQueryRt = t.intersection([
   uiFiltersRt,
