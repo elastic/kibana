@@ -43,12 +43,12 @@ describe('search strategy timeline helpers', () => {
               value: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
             },
             {
-              field: 'threat.indicator.matched.field',
-              value: ['matched_field', 'other_matched_field', 'matched_field_2'],
+              field: 'source.geo.location',
+              value: ['{"lon":118.7778,"lat":32.0617}'],
             },
             {
-              field: 'source.geo.location',
-              value: [`{"lon":118.7778,"lat":32.0617}`],
+              field: 'threat.indicator.matched.field',
+              value: ['matched_field', 'matched_field_2'],
             },
           ],
           ecs: {
@@ -94,34 +94,6 @@ describe('search strategy timeline helpers', () => {
             timestamp: '2020-11-17T14:48:08.922Z',
             user: {
               name: ['jenkins'],
-            },
-            threat: {
-              indicator: [
-                {
-                  event: {
-                    dataset: [],
-                    reference: [],
-                  },
-                  matched: {
-                    atomic: ['matched_atomic'],
-                    field: ['matched_field', 'other_matched_field'],
-                    type: [],
-                  },
-                  provider: ['yourself'],
-                },
-                {
-                  event: {
-                    dataset: [],
-                    reference: [],
-                  },
-                  matched: {
-                    atomic: ['matched_atomic_2'],
-                    field: ['matched_field_2'],
-                    type: [],
-                  },
-                  provider: ['other_you'],
-                },
-              ],
             },
           },
         },
@@ -1303,26 +1275,6 @@ describe('search strategy timeline helpers', () => {
         },
         {
           field: 'zeek.ssl.version',
-          include_unmapped: true,
-        },
-        {
-          field: 'threat.indicator.matched.atomic',
-          include_unmapped: true,
-        },
-        {
-          field: 'threat.indicator.matched.type',
-          include_unmapped: true,
-        },
-        {
-          field: 'threat.indicator.event.dataset',
-          include_unmapped: true,
-        },
-        {
-          field: 'threat.indicator.event.reference',
-          include_unmapped: true,
-        },
-        {
-          field: 'threat.indicator.provider',
           include_unmapped: true,
         },
       ]);
