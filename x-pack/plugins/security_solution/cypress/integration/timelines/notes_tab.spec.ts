@@ -26,12 +26,22 @@ describe('Timeline notes tab', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
-    createTimeline(timeline).then((response) => {
-      timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
-      waitForTimelinesPanelToBeLoaded();
-      openTimelineById(timelineId!);
-      addNotesToTimeline(timeline.notes);
-    });
+    createTimeline(timeline)
+      .then((response) => {
+        if (response.body.data.persistTimeline.timeline.savedObjectId == null) {
+          cy.log('"createTimeline" did not return expected response');
+        }
+        timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
+        waitForTimelinesPanelToBeLoaded();
+      })
+      .then(() => {
+        // TODO: It would be great to add response validation to avoid such things like
+        // the bang below and to more easily understand where failures are coming from -
+        // client vs server side
+        openTimelineById(timelineId!).then(() => {
+          addNotesToTimeline(timeline.notes);
+        });
+      });
   });
 
   after(() => {
