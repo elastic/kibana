@@ -74,8 +74,10 @@ export const getStats = async (
     }
   }
 
-  await doTelemetryFoVisualizations(soClient, telemetryUseLastValueMode);
-  await doTelemetryForByValueVisualizations(soClient, telemetryUseLastValueMode);
+  await Promise.all([
+    doTelemetryFoVisualizations(soClient, telemetryUseLastValueMode),
+    doTelemetryForByValueVisualizations(soClient, telemetryUseLastValueMode),
+  ]);
 
   return timeseriesUsage.timeseries_use_last_value_mode_total ? timeseriesUsage : undefined;
 };
