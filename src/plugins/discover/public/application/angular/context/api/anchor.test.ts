@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Dictionary } from 'lodash';
-
-import { SortDirection } from '../../../../../../data/public';
+import { EsQuerySortValue, SortDirection } from '../../../../../../data/public';
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 import { AnchorHitRecord, fetchAnchorProvider } from './anchor';
 
@@ -16,7 +14,7 @@ describe('context app', function () {
   let fetchAnchor: (
     indexPatternId: string,
     anchorId: string,
-    sort: [Dictionary<SortDirection>, { [key: string]: SortDirection }]
+    sort: EsQuerySortValue[]
   ) => Promise<AnchorHitRecord>;
   let searchSourceStub: any;
 

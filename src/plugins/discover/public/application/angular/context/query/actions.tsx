@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import React from 'react';
+import { fromPairs } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getServices } from '../../../../kibana_services';
 
+import { getServices } from '../../../../kibana_services';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
+import { MarkdownSimple, toMountPoint } from '../../../../../../kibana_react/public';
 import { AnchorHitRecord, fetchAnchorProvider } from '../api/anchor';
 import { EsHitRecord, EsHitRecordList, fetchContextProvider, SurrDocType } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import {
   ContextAppState,
   FailureReason,
@@ -77,7 +79,7 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() =>
-      fetchAnchor(indexPatternId, anchorId, [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor(indexPatternId, anchorId, [fromPairs([sort]), { [tieBreakerField]: sort[1] }])
     ).then(
       (anchorDocument: AnchorHitRecord) => {
         setLoadedStatus(state)('anchor');
@@ -90,7 +92,7 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
           title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
             defaultMessage: 'Unable to load the anchor document',
           }),
-          text: error.message,
+          text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
         });
         throw error;
       }
@@ -143,7 +145,7 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
           title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
             defaultMessage: 'Unable to load documents',
           }),
-          text: error.message,
+          text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
         });
         throw error;
       }

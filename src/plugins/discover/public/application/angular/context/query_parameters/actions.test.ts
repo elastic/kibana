@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
 import { getQueryParameterActions } from './actions';
 import { FilterManager, SortDirection } from '../../../../../../data/public';
 import { coreMock } from '../../../../../../../core/public/mocks';

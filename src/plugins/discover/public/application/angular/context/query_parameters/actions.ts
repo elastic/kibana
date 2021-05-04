@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { pick } from 'lodash';
+
 import { esFilters, Filter, IFieldType } from '../../../../../../data/public';
 import { FilterManager, IndexPatternsContract } from '../../../../../../data/public';
 import { popularizeField } from '../../../helpers/popularize_field';
 import { ContextAppState, QueryParameters } from '../../context_app_state';
-
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './constants';
 
 export function getQueryParameterActions(
@@ -35,7 +35,7 @@ export function getQueryParameterActions(
   };
 
   const setQueryParameters = (state: ContextAppState) => (queryParameters: QueryParameters) => {
-    return Object.assign(state.queryParameters, _.pick(queryParameters, QUERY_PARAMETER_KEYS));
+    return Object.assign(state.queryParameters, pick(queryParameters, QUERY_PARAMETER_KEYS));
   };
 
   const updateFilters = () => (filters: Filter[]) => {

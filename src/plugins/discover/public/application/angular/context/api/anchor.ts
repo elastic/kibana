@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import _, { Dictionary } from 'lodash';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { ISearchSource, IndexPatternsContract, SortDirection } from '../../../../../../data/public';
+import {
+  ISearchSource,
+  IndexPatternsContract,
+  EsQuerySortValue,
+} from '../../../../../../data/public';
 import { EsHitRecord } from './context';
 
 export interface AnchorHitRecord extends EsHitRecord {
@@ -25,7 +29,7 @@ export function fetchAnchorProvider(
   return async function fetchAnchor(
     indexPatternId: string,
     anchorId: string,
-    sort: [Dictionary<SortDirection>, { [key: string]: SortDirection }]
+    sort: EsQuerySortValue[]
   ): Promise<AnchorHitRecord> {
     const indexPattern = await indexPatterns.get(indexPatternId);
     searchSource
@@ -52,7 +56,7 @@ export function fetchAnchorProvider(
     }
     const response = await searchSource.fetch();
 
-    if (_.get(response, ['hits', 'total'], 0) < 1) {
+    if (get(response, ['hits', 'total'], 0) < 1) {
       throw new Error(
         i18n.translate('discover.context.failedToLoadAnchorDocumentErrorDescription', {
           defaultMessage: 'Failed to load anchor document.',
@@ -61,7 +65,7 @@ export function fetchAnchorProvider(
     }
 
     return {
-      ..._.get(response, ['hits', 'hits', 0]),
+      ...get(response, ['hits', 'hits', 0]),
       // eslint-disable-next-line @typescript-eslint/naming-convention
       $$_isAnchor: true,
     } as AnchorHitRecord;
