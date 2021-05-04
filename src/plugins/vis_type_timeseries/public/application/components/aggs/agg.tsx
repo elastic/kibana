@@ -48,9 +48,9 @@ export function Agg(props: AggProps) {
     ...props.style,
   };
 
-  const indexPattern =
-    (props.series.override_index_pattern && props.series.series_index_pattern) ||
-    props.panel.index_pattern;
+  const indexPattern = props.series.override_index_pattern
+    ? props.series.series_index_pattern
+    : props.panel.index_pattern;
 
   return (
     <div className={props.className} style={style}>

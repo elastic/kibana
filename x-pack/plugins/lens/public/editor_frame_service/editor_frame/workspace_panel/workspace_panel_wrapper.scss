@@ -12,6 +12,9 @@
   overflow: visible;
   border: none;
   height: 100%;
+  @include kbnThemeStyle('v7') {
+    border: none !important; // sass-lint:disable-line no-important
+  }
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
@@ -34,7 +37,7 @@
   width: 100%;
   height: 100%;
   border: $euiBorderThin;
-  border-radius: $euiBorderRadius;
+  border-radius: $euiBorderRadiusSmall;
 
   &.lnsDragDrop-isDropTarget {
     @include lnsDroppable;

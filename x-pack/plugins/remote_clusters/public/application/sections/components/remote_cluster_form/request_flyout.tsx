@@ -24,13 +24,13 @@ import { Cluster, serializeCluster } from '../../../../../common/lib';
 
 interface Props {
   close: () => void;
-  name: string;
   cluster: Cluster;
 }
 
 export class RequestFlyout extends PureComponent<Props> {
   render() {
-    const { name, close, cluster } = this.props;
+    const { close, cluster } = this.props;
+    const { name } = cluster;
     const endpoint = 'PUT _cluster/settings';
     const payload = JSON.stringify(serializeCluster(cluster), null, 2);
     const request = `${endpoint}\n${payload}`;
@@ -38,7 +38,7 @@ export class RequestFlyout extends PureComponent<Props> {
     return (
       <EuiFlyout maxWidth={480} onClose={close}>
         <EuiFlyoutHeader>
-          <EuiTitle>
+          <EuiTitle data-test-subj="remoteClusterRequestFlyoutTitle">
             <h2>
               {name ? (
                 <FormattedMessage

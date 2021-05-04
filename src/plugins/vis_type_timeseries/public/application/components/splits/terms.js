@@ -110,8 +110,7 @@ export const SplitByTermsUI = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('by')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.splits.terms.byLabel"
@@ -119,17 +118,14 @@ export const SplitByTermsUI = ({
                 description="This labels a field selector allowing the user to chose 'by' which field to group."
               />
             }
-          >
-            <FieldSelect
-              data-test-subj="groupByField"
-              indexPattern={indexPattern}
-              onChange={handleSelectChange('terms_field')}
-              value={model.terms_field}
-              fields={fields}
-              uiRestrictions={uiRestrictions}
-              type={'terms'}
-            />
-          </EuiFormRow>
+            data-test-subj="groupByField"
+            indexPattern={indexPattern}
+            onChange={handleSelectChange('terms_field')}
+            value={model.terms_field}
+            fields={fields}
+            uiRestrictions={uiRestrictions}
+            type={'terms'}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -237,7 +233,7 @@ SplitByTermsUI.propTypes = {
   intl: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  indexPattern: PropTypes.string,
+  indexPattern: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   fields: PropTypes.object,
   uiRestrictions: PropTypes.object,
   seriesQuantity: PropTypes.object,

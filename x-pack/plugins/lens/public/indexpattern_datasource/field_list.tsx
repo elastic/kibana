@@ -45,6 +45,7 @@ export const FieldList = React.memo(function FieldList({
   exists,
   fieldGroups,
   existenceFetchFailed,
+  existenceFetchTimeout,
   fieldProps,
   hasSyncedExistingFields,
   filter,
@@ -60,6 +61,7 @@ export const FieldList = React.memo(function FieldList({
   fieldProps: FieldItemSharedProps;
   hasSyncedExistingFields: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
   filter: {
     nameFilter: string;
     typeFilter: string[];
@@ -194,6 +196,7 @@ export const FieldList = React.memo(function FieldList({
                   );
                 }}
                 showExistenceFetchError={existenceFetchFailed}
+                showExistenceFetchTimeout={existenceFetchTimeout}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}

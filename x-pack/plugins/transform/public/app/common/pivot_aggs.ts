@@ -14,7 +14,7 @@ import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
 import type { PivotAgg, PivotSupportedAggs } from '../../../common/types/pivot_aggs';
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
-import { isPopulatedObject } from '../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../common/shared_imports';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
@@ -166,11 +166,7 @@ export type PivotAggsConfigWithUiSupport =
 
 export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiSupport {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('aggName') &&
-    arg.hasOwnProperty('dropDownName') &&
-    arg.hasOwnProperty('field') &&
+    isPopulatedObject(arg, ['agg', 'aggName', 'dropDownName', 'field']) &&
     isPivotSupportedAggs(arg.agg)
   );
 }
@@ -181,15 +177,12 @@ export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsCo
 type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter;
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
-  return isPopulatedObject(arg) && arg.hasOwnProperty('AggFormComponent');
+  return isPopulatedObject(arg, ['AggFormComponent']);
 }
 
 export function isPivotAggsConfigPercentiles(arg: unknown): arg is PivotAggsConfigPercentiles {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('field') &&
-    arg.hasOwnProperty('percents') &&
+    isPopulatedObject(arg, ['agg', 'field', 'percents']) &&
     arg.agg === PIVOT_SUPPORTED_AGGS.PERCENTILES
   );
 }

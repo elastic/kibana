@@ -5,15 +5,27 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
+
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { addIdToItem } from '../../../../common/shared_imports';
+import { addIdToItem, removeIdFromItem, validate } from '../../../../common/shared_imports';
 import {
+  CreateExceptionListItemSchema,
+  EntriesArray,
   Entry,
   EntryNested,
+  ExceptionListItemSchema,
   ExceptionListType,
   ListSchema,
+  NamespaceType,
+  OperatorEnum,
   OperatorTypeEnum,
+  createExceptionListItemSchema,
   entriesList,
+  entriesNested,
+  entry,
+  exceptionListItemSchema,
+  nestedEntryItem,
 } from '../../../../common';
 import {
   EXCEPTION_OPERATORS,
@@ -25,9 +37,12 @@ import {
   isOperator,
 } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
+import { OsTypeArray } from '../../../../common/schemas';
 
 import {
   BuilderEntry,
+  CreateExceptionListItemBuilderSchema,
+  EmptyEntry,
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
@@ -35,6 +50,105 @@ import {
 
 export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
   return (item as EntryNested).entries != null;
+};
+
+export const filterExceptionItems = (
+  exceptions: ExceptionsBuilderExceptionItem[]
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
+    (acc, exception) => {
+      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+        const strippedSingleEntry = removeIdFromItem(singleEntry);
+
+        if (entriesNested.is(strippedSingleEntry)) {
+          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
+            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
+            return validatedNestedEntry != null;
+          });
+          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+            removeIdFromItem(singleNestedEntry)
+          );
+
+          const [validatedNestedEntry] = validate(
+            { ...strippedSingleEntry, entries: noIdNestedEntries },
+            entriesNested
+          );
+
+          if (validatedNestedEntry != null) {
+            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
+          }
+          return nestedAcc;
+        } else {
+          const [validatedEntry] = validate(strippedSingleEntry, entry);
+
+          if (validatedEntry != null) {
+            return [...nestedAcc, singleEntry];
+          }
+          return nestedAcc;
+        }
+      }, []);
+
+      const item = { ...exception, entries };
+
+      if (exceptionListItemSchema.is(item)) {
+        return [...acc, item];
+      } else if (createExceptionListItemSchema.is(item)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { meta: _, ...rest } = item;
+        const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
+        return [...acc, itemSansMetaId];
+      } else {
+        return acc;
+      }
+    },
+    []
+  );
+};
+
+export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
+  return entries.map((singleEntry) => {
+    if (singleEntry.type === 'nested') {
+      return addIdToItem({
+        ...singleEntry,
+        entries: singleEntry.entries.map((nestedEntry) => addIdToItem(nestedEntry)),
+      });
+    } else {
+      return addIdToItem(singleEntry);
+    }
+  });
+};
+
+export const getNewExceptionItem = ({
+  listId,
+  namespaceType,
+  ruleName,
+}: {
+  listId: string;
+  namespaceType: NamespaceType;
+  ruleName: string;
+}): CreateExceptionListItemBuilderSchema => {
+  return {
+    comments: [],
+    description: `${ruleName} - exception list item`,
+    entries: addIdToEntries([
+      {
+        field: '',
+        operator: 'included',
+        type: 'match',
+        value: '',
+      },
+    ]),
+    item_id: undefined,
+    list_id: listId,
+    meta: {
+      temporaryUuid: uuid.v4(),
+    },
+    name: `${ruleName} - exception list item`,
+    namespace_type: namespaceType,
+    tags: [],
+    type: 'simple',
+  };
 };
 
 /**
@@ -166,9 +280,10 @@ export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IIndexPattern, t: ExceptionListType) => IIndexPattern
+  preFilter?: (i: IIndexPattern, t: ExceptionListType, o?: OsTypeArray) => IIndexPattern,
+  osTypes?: OsTypeArray
 ): IIndexPattern => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type) : patterns;
+  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
@@ -665,3 +780,21 @@ export const getFormattedBuilderEntries = (
     }
   }, []);
 };
+
+export const getDefaultEmptyEntry = (): EmptyEntry => ({
+  field: '',
+  id: uuid.v4(),
+  operator: OperatorEnum.INCLUDED,
+  type: OperatorTypeEnum.MATCH,
+  value: '',
+});
+
+export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
+  entries: [],
+  field: '',
+  id: uuid.v4(),
+  type: OperatorTypeEnum.NESTED,
+});
+
+export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
+  items.some((item) => item.entries.some(({ type }) => type === OperatorTypeEnum.LIST));

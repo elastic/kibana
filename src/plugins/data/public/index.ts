@@ -314,8 +314,6 @@ import {
   boundsDescendingRaw,
   getNumberHistogramIntervalByDatatableColumn,
   getDateHistogramMetaDataByDatatableColumn,
-  // expressions utils
-  getRequestInspectorStats,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
@@ -382,12 +380,17 @@ export {
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
   // errors
+  IEsError,
   SearchError,
   SearchTimeoutError,
   TimeoutErrorMode,
   PainlessError,
+  Reason,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  WaitUntilNextSessionCompletesOptions,
+  isEsError,
 } from './search';
 
 export type {
@@ -426,7 +429,6 @@ export const search = {
     getNumberHistogramIntervalByDatatableColumn,
     getDateHistogramMetaDataByDatatableColumn,
   },
-  getRequestInspectorStats,
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
@@ -467,6 +469,7 @@ export {
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  AutoRefreshDoneFn,
 } from './query';
 
 export { AggsStart } from './search/aggs';

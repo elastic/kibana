@@ -8,7 +8,7 @@
 import './xy_config_panel.scss';
 import React, { useMemo, useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -37,7 +37,7 @@ import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
 import { PalettePicker } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
-import { getSortedAccessors } from './to_expression';
+import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -98,10 +98,13 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
           defaultMessage: 'Chart type',
         })}
         name="chartType"
-        className="eui-displayInlineBlock"
+        className="eui-displayInlineBlock lnsLayerChartSwitch"
         options={visualizationTypes
           .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
           .map((t) => ({
+            className: `lnsLayerChartSwitch__item ${
+              layer.seriesType === t.id ? 'lnsLayerChartSwitch__item-isSelected' : ''
+            }`,
             id: t.id,
             label: t.label,
             iconType: t.icon || 'empty',
@@ -184,6 +187,23 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
+  const onChangeEndzoneVisiblity = state?.layers.every(
+    (layer) =>
+      layer.xAccessor &&
+      getScaleType(
+        props.frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor),
+        ScaleType.Linear
+      ) === 'time'
+  )
+    ? (checked: boolean): void => {
+        setState({
+          ...state,
+          hideEndzones: !checked,
+        });
+      }
+    : undefined;
+
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -192,7 +212,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       : 'show';
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <VisualOptionsPopover
@@ -275,6 +295,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+            endzonesVisible={!state?.hideEndzones}
+            setEndzoneVisibility={onChangeEndzoneVisiblity}
           />
           <TooltipWrapper
             tooltipContent={

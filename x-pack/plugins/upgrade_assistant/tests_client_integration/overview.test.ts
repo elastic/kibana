@@ -5,112 +5,182 @@
  * 2.0.
  */
 
+import type { DomainDeprecationDetails } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
+import { deprecationsServiceMock } from 'src/core/public/mocks';
+import { UpgradeAssistantStatus } from '../common/types';
 
 import { OverviewTestBed, setupOverviewPage, setupEnvironment } from './helpers';
 
 describe('Overview page', () => {
   let testBed: OverviewTestBed;
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
-    await act(async () => {
-      testBed = await setupOverviewPage();
-    });
-  });
-
-  describe('Coming soon prompt', () => {
-    // Default behavior up until the last minor before the next major release
-    test('renders the coming soon prompt by default', () => {
-      const { exists } = testBed;
-
-      expect(exists('comingSoonPrompt')).toBe(true);
-    });
-  });
-
-  describe('Overview content', () => {
-    const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-    const upgradeStatusMockResponse = {
+    const esDeprecationsMockResponse: UpgradeAssistantStatus = {
       readyForUpgrade: false,
-      cluster: [],
-      indices: [],
+      cluster: [
+        {
+          level: 'critical',
+          message: 'Index Lifecycle Management poll interval is set too low',
+          url:
+            'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html#ilm-poll-interval-limit',
+          details:
+            'The Index Lifecycle Management poll interval setting [indices.lifecycle.poll_interval] is currently set to [500ms], but must be 1s or greater',
+        },
+      ],
+      indices: [
+        {
+          level: 'warning',
+          message: 'translog retention settings are ignored',
+          url:
+            'https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html',
+          details:
+            'translog retention settings [index.translog.retention.size] and [index.translog.retention.age] are ignored because translog is no longer used in peer recoveries with soft-deletes enabled (default in 7.0 or later)',
+          index: 'settings',
+          reindex: false,
+        },
+      ],
     };
 
-    httpRequestsMockHelpers.setLoadStatusResponse(upgradeStatusMockResponse);
+    const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
+      {
+        correctiveActions: {},
+        domainId: 'xpack.spaces',
+        level: 'critical',
+        message:
+          'Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)',
+      },
+    ];
+
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
     httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
 
-    beforeEach(async () => {
+    await act(async () => {
+      const deprecationService = deprecationsServiceMock.createStartContract();
+      deprecationService.getAllDeprecations = jest
+        .fn()
+        .mockReturnValue(kibanaDeprecationsMockResponse);
+
+      testBed = await setupOverviewPage({
+        deprecations: deprecationService,
+      });
+    });
+
+    const { component } = testBed;
+    component.update();
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
+
+  test('renders the overview page', () => {
+    const { exists, find } = testBed;
+
+    expect(exists('overviewPageContent')).toBe(true);
+
+    // Verify ES stats
+    expect(exists('esStatsPanel')).toBe(true);
+    expect(find('esStatsPanel.totalDeprecations').text()).toContain('2');
+    expect(find('esStatsPanel.criticalDeprecations').text()).toContain('1');
+
+    // Verify Kibana stats
+    expect(exists('kibanaStatsPanel')).toBe(true);
+    expect(find('kibanaStatsPanel.totalDeprecations').text()).toContain('1');
+    expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
+  });
+
+  describe('Deprecation logging', () => {
+    test('toggles deprecation logging', async () => {
+      const { find, actions } = testBed;
+
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse({ isEnabled: false });
+
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
+      );
+
+      await actions.clickDeprecationToggle();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({ isEnabled: false });
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Enable deprecation logging'
+      );
+    });
+
+    test('handles network error when updating logging state', async () => {
+      const error = {
+        statusCode: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
+      };
+
+      const { actions, find, exists } = testBed;
+
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(undefined, error);
+
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
+      );
+
+      await actions.clickDeprecationToggle();
+
+      // Logging state should not change since there was an error
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Disable deprecation logging'
+      );
+      expect(exists('updateLoggingError')).toBe(true);
+    });
+
+    test('handles network error when fetching logging state', async () => {
+      const error = {
+        statusCode: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
+      };
+
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, error);
+
       await act(async () => {
-        // Override the default context value to verify tab content renders as expected
-        // This will be the default behavior on the last minor before the next major release (e.g., v7.15)
-        testBed = await setupOverviewPage({ isReadOnlyMode: false });
+        testBed = await setupOverviewPage();
       });
 
-      testBed.component.update();
+      const { component, exists, find } = testBed;
+
+      component.update();
+
+      expect(find('upgradeAssistantDeprecationToggle').text()).toEqual(
+        'Deprecation logging unavailable'
+      );
+      expect(exists('fetchLoggingError')).toBe(true);
     });
+  });
 
-    afterAll(() => {
-      server.restore();
-    });
-
-    test('renders the overview tab', () => {
-      const { exists } = testBed;
-
-      expect(exists('comingSoonPrompt')).toBe(false);
-      expect(exists('upgradeAssistantPageContent')).toBe(true);
-    });
-
-    describe('Deprecation logging', () => {
-      test('toggles deprecation logging', async () => {
-        const { form, find, component } = testBed;
-
-        httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse({ isEnabled: false });
-
-        expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
-        expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
-        expect(find('deprecationLoggingStep').find('.euiSwitch__label').text()).toContain('On');
-
+  describe('Error handling', () => {
+    describe('Kibana deprecations', () => {
+      test('handles network failure', async () => {
         await act(async () => {
-          form.toggleEuiSwitch('upgradeAssistantDeprecationToggle');
+          const deprecationService = deprecationsServiceMock.createStartContract();
+          deprecationService.getAllDeprecations = jest
+            .fn()
+            .mockRejectedValue(new Error('Internal Server Error'));
+
+          testBed = await setupOverviewPage({
+            deprecations: deprecationService,
+          });
         });
+
+        const { component, exists } = testBed;
 
         component.update();
 
-        expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(false);
-        expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
-        expect(find('deprecationLoggingStep').find('.euiSwitch__label').text()).toContain('Off');
-      });
-
-      test('handles network error', async () => {
-        const error = {
-          statusCode: 500,
-          error: 'Internal server error',
-          message: 'Internal server error',
-        };
-
-        const { form, find, component } = testBed;
-
-        httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(undefined, error);
-
-        expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
-        expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
-        expect(find('deprecationLoggingStep').find('.euiSwitch__label').text()).toContain('On');
-
-        await act(async () => {
-          form.toggleEuiSwitch('upgradeAssistantDeprecationToggle');
-        });
-
-        component.update();
-
-        expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
-        expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(true);
-        expect(find('deprecationLoggingStep').find('.euiSwitch__label').text()).toContain(
-          'Could not load logging state'
-        );
+        expect(exists('requestErrorIconTip')).toBe(true);
       });
     });
 
-    describe('Error handling', () => {
+    describe('Elasticsearch deprecations', () => {
       test('handles network failure', async () => {
         const error = {
           statusCode: 500,
@@ -118,20 +188,37 @@ describe('Overview page', () => {
           message: 'Internal server error',
         };
 
-        httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
         await act(async () => {
-          testBed = await setupOverviewPage({ isReadOnlyMode: false });
+          testBed = await setupOverviewPage();
         });
 
-        const { component, exists, find } = testBed;
+        const { component, exists } = testBed;
 
         component.update();
 
-        expect(exists('upgradeStatusError')).toBe(true);
-        expect(find('upgradeStatusError').text()).toContain(
-          'An error occurred while retrieving the checkup results.'
-        );
+        expect(exists('requestErrorIconTip')).toBe(true);
+      });
+
+      test('handles unauthorized error', async () => {
+        const error = {
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Forbidden',
+        };
+
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+
+        await act(async () => {
+          testBed = await setupOverviewPage();
+        });
+
+        const { component, exists } = testBed;
+
+        component.update();
+
+        expect(exists('unauthorizedErrorIconTip')).toBe(true);
       });
 
       test('handles partially upgraded error', async () => {
@@ -144,18 +231,17 @@ describe('Overview page', () => {
           },
         };
 
-        httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
         await act(async () => {
           testBed = await setupOverviewPage({ isReadOnlyMode: false });
         });
 
-        const { component, exists, find } = testBed;
+        const { component, exists } = testBed;
 
         component.update();
 
-        expect(exists('partiallyUpgradedPrompt')).toBe(true);
-        expect(find('partiallyUpgradedPrompt').text()).toContain('Your cluster is upgrading');
+        expect(exists('partiallyUpgradedErrorIconTip')).toBe(true);
       });
 
       test('handles upgrade error', async () => {
@@ -168,18 +254,17 @@ describe('Overview page', () => {
           },
         };
 
-        httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
         await act(async () => {
           testBed = await setupOverviewPage({ isReadOnlyMode: false });
         });
 
-        const { component, exists, find } = testBed;
+        const { component, exists } = testBed;
 
         component.update();
 
-        expect(exists('upgradedPrompt')).toBe(true);
-        expect(find('upgradedPrompt').text()).toContain('Your cluster has been upgraded');
+        expect(exists('upgradedErrorIconTip')).toBe(true);
       });
     });
   });

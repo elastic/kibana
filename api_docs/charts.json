@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.ColorPicker.$1",
             "type": "Object",
             "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
             "isRequired": true,
@@ -46,6 +47,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createColorPalette.$1",
             "type": "number",
             "label": "num",
             "isRequired": true,
@@ -72,6 +74,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.CurrentTime.$1",
             "type": "CompoundType",
             "label": "{ isDarkMode, domainEnd }",
             "isRequired": true,
@@ -105,6 +108,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.Endzones.$1",
             "type": "CompoundType",
             "label": "{\n  isDarkMode,\n  domainStart,\n  domainEnd,\n  interval,\n  domainMin,\n  domainMax,\n  hideTooltips = true,\n  isFullBin = false,\n}",
             "isRequired": true,
@@ -136,6 +140,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getAdjustedInterval.$1",
             "type": "Array",
             "label": "xValues",
             "isRequired": true,
@@ -149,6 +154,7 @@
             }
           },
           {
+            "id": "def-public.getAdjustedInterval.$2",
             "type": "number",
             "label": "esValue",
             "isRequired": true,
@@ -162,6 +168,7 @@
             }
           },
           {
+            "id": "def-public.getAdjustedInterval.$3",
             "type": "CompoundType",
             "label": "esUnit",
             "isRequired": true,
@@ -175,6 +182,7 @@
             }
           },
           {
+            "id": "def-public.getAdjustedInterval.$4",
             "type": "string",
             "label": "timeZone",
             "isRequired": true,
@@ -208,6 +216,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getBrushFromChartBrushEventFn.$1",
             "type": "Object",
             "label": "table",
             "isRequired": true,
@@ -227,6 +236,7 @@
             }
           },
           {
+            "id": "def-public.getBrushFromChartBrushEventFn.$2",
             "type": "CompoundType",
             "label": "xAccessor",
             "isRequired": true,
@@ -280,6 +290,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getFilterFromChartClickEventFn.$1",
             "type": "Object",
             "label": "table",
             "isRequired": true,
@@ -299,6 +310,7 @@
             }
           },
           {
+            "id": "def-public.getFilterFromChartClickEventFn.$2",
             "type": "CompoundType",
             "label": "xAccessor",
             "isRequired": true,
@@ -313,6 +325,7 @@
             }
           },
           {
+            "id": "def-public.getFilterFromChartClickEventFn.$3",
             "type": "Object",
             "label": "splitSeriesAccessorFnMap",
             "isRequired": false,
@@ -328,6 +341,7 @@
             }
           },
           {
+            "id": "def-public.getFilterFromChartClickEventFn.$4",
             "type": "CompoundType",
             "label": "splitChartAccessor",
             "isRequired": false,
@@ -343,6 +357,7 @@
             }
           },
           {
+            "id": "def-public.getFilterFromChartClickEventFn.$5",
             "type": "boolean",
             "label": "negate",
             "isRequired": true,
@@ -391,6 +406,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getFilterFromSeriesFn.$1",
             "type": "Object",
             "label": "table",
             "isRequired": true,
@@ -456,6 +472,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getHeatmapColors.$1",
             "type": "Any",
             "label": "value",
             "isRequired": true,
@@ -469,6 +486,7 @@
             }
           },
           {
+            "id": "def-public.getHeatmapColors.$2",
             "type": "string",
             "label": "colorSchemaName",
             "isRequired": true,
@@ -510,6 +528,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.renderEndzoneTooltip.$1",
             "type": "number",
             "label": "xInterval",
             "isRequired": false,
@@ -523,6 +542,7 @@
             }
           },
           {
+            "id": "def-public.renderEndzoneTooltip.$2",
             "type": "number",
             "label": "domainStart",
             "isRequired": false,
@@ -536,6 +556,7 @@
             }
           },
           {
+            "id": "def-public.renderEndzoneTooltip.$3",
             "type": "number",
             "label": "domainEnd",
             "isRequired": false,
@@ -549,6 +570,7 @@
             }
           },
           {
+            "id": "def-public.renderEndzoneTooltip.$4",
             "type": "Function",
             "label": "formatter",
             "isRequired": false,
@@ -562,6 +584,7 @@
             }
           },
           {
+            "id": "def-public.renderEndzoneTooltip.$5",
             "type": "boolean",
             "label": "renderValue",
             "isRequired": true,
@@ -1743,13 +1766,13 @@
         "tags": [],
         "children": [
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.Blues]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.Blues",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Blues.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -1770,7 +1793,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Blues.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -1781,7 +1804,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Blues.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -1804,13 +1827,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.Greens]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.Greens",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greens.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -1831,7 +1854,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greens.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -1842,7 +1865,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greens.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -1863,13 +1886,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.Greys]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.Greys",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greys.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -1890,7 +1913,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greys.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -1901,7 +1924,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greys.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -1922,13 +1945,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.Reds]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.Reds",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Reds.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -1949,7 +1972,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Reds.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -1960,7 +1983,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Reds.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -1981,13 +2004,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -2008,7 +2031,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -2019,7 +2042,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -2040,13 +2063,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -2067,7 +2090,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -2078,7 +2101,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],

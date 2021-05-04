@@ -18,7 +18,9 @@ import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -38,6 +40,8 @@ const testProps = {
   end: to,
   indexNames: [],
   id: TimelineId.test,
+  renderCellValue: DefaultCellRenderer,
+  rowRenderers: defaultRowRenderers,
   scopeId: SourcererScopeName.default,
   start: from,
 };

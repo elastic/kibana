@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTextAlign,
@@ -51,116 +52,122 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
   <>
     {header}
     <EuiSpacer size="xxl" />
-    <EuiFlexGroup
-      justifyContent="center"
-      alignItems="stretch"
-      direction="column"
-      responsive={false}
-    >
-      <EuiFlexItem>
-        <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiIcon type="checkInCircleFilled" color="#42CC89" size="xxl" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <EuiTextAlign textAlign="center">
-                <h1>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.heading',
-                    {
-                      defaultMessage: '{name} Configured',
-                      values: { name },
-                    }
-                  )}
-                </h1>
-              </EuiTextAlign>
-            </EuiText>
-            <EuiText>
-              <EuiTextAlign textAlign="center">
-                {!accountContextOnly ? (
-                  <p data-test-subj="OrgCanConnectMessage">
+    <EuiPanel color="subdued" paddingSize="l">
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="stretch"
+        direction="column"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiIcon type="checkInCircleFilled" color="#42CC89" size="xxl" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText>
+                <EuiTextAlign textAlign="center">
+                  <h1>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.orgCanConnect.message',
+                      'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.heading',
                       {
-                        defaultMessage: '{name} can now be connected to Workplace Search',
+                        defaultMessage: '{name} Configured',
                         values: { name },
                       }
                     )}
-                  </p>
-                ) : (
-                  <EuiText color="subdued" grow={false} data-test-subj="PersonalConnectLinkMessage">
-                    <p>
+                  </h1>
+                </EuiTextAlign>
+              </EuiText>
+              <EuiText>
+                <EuiTextAlign textAlign="center">
+                  {!accountContextOnly ? (
+                    <p data-test-subj="OrgCanConnectMessage">
                       {i18n.translate(
-                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.personalConnectLink.message',
+                        'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.orgCanConnect.message',
                         {
-                          defaultMessage:
-                            'Users can now link their {name} accounts from their personal dashboards.',
+                          defaultMessage: '{name} can now be connected to Workplace Search',
                           values: { name },
                         }
                       )}
                     </p>
-                    {!privateSourcesEnabled && (
-                      <p data-test-subj="PrivateDisabledMessage">
-                        <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.privateDisabled.message"
-                          defaultMessage="Remember to {securityLink} in Security settings."
-                          values={{
-                            securityLink: (
-                              <EuiLinkTo to={SECURITY_PATH}>
-                                enable private source connection
-                              </EuiLinkTo>
-                            ),
-                          }}
-                        />
+                  ) : (
+                    <EuiText
+                      color="subdued"
+                      grow={false}
+                      data-test-subj="PersonalConnectLinkMessage"
+                    >
+                      <p>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.personalConnectLink.message',
+                          {
+                            defaultMessage:
+                              'Users can now link their {name} accounts from their personal dashboards.',
+                            values: { name },
+                          }
+                        )}
                       </p>
-                    )}
-                    <p>
-                      <EuiLink
-                        target="_blank"
-                        data-test-subj="ConfigCompletedPrivateSourcesDocsLink"
-                        href={PRIVATE_SOURCES_DOCS_URL}
-                      >
-                        {CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK}
-                      </EuiLink>
-                    </p>
-                  </EuiText>
-                )}
-              </EuiTextAlign>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-    <EuiFlexGroup justifyContent="center" alignItems="center" direction="row" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonTo
-          to={getSourcesPath(ADD_SOURCE_PATH, true)}
-          fill={accountContextOnly}
-          color={accountContextOnly ? 'primary' : undefined}
-        >
-          {CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON}
-        </EuiButtonTo>
-      </EuiFlexItem>
-      {!accountContextOnly && (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            fill
-            onClick={advanceStep}
-            data-test-subj="ConfigCompletedConnectButton"
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.connect.button',
-              {
-                defaultMessage: 'Connect {name}',
-                values: { name },
-              }
-            )}
-          </EuiButton>
+                      {!privateSourcesEnabled && (
+                        <p data-test-subj="PrivateDisabledMessage">
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.privateDisabled.message"
+                            defaultMessage="Remember to {securityLink} in Security settings."
+                            values={{
+                              securityLink: (
+                                <EuiLinkTo to={SECURITY_PATH}>
+                                  enable private source connection
+                                </EuiLinkTo>
+                              ),
+                            }}
+                          />
+                        </p>
+                      )}
+                      <p>
+                        <EuiLink
+                          target="_blank"
+                          data-test-subj="ConfigCompletedPrivateSourcesDocsLink"
+                          href={PRIVATE_SOURCES_DOCS_URL}
+                        >
+                          {CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK}
+                        </EuiLink>
+                      </p>
+                    </EuiText>
+                  )}
+                </EuiTextAlign>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup justifyContent="center" alignItems="center" direction="row" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonTo
+            to={getSourcesPath(ADD_SOURCE_PATH, true)}
+            fill={accountContextOnly}
+            color={accountContextOnly ? 'primary' : undefined}
+          >
+            {CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON}
+          </EuiButtonTo>
+        </EuiFlexItem>
+        {!accountContextOnly && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="primary"
+              fill
+              onClick={advanceStep}
+              data-test-subj="ConfigCompletedConnectButton"
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.connect.button',
+                {
+                  defaultMessage: 'Connect {name}',
+                  values: { name },
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPanel>
   </>
 );

@@ -42,7 +42,7 @@ export enum AddSourceSteps {
   ConfigureCustomStep = 'Configure Custom',
   ConfigureOauthStep = 'Configure Oauth',
   SaveCustomStep = 'Save Custom',
-  ReAuthenticateStep = 'ReAuthenticate',
+  ReauthenticateStep = 'Reauthenticate',
 }
 
 export interface OauthParams {
@@ -577,6 +577,6 @@ const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
   if (isCustom) return AddSourceSteps.ConfigureCustomStep;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
-  if (reAuthenticate) return AddSourceSteps.ReAuthenticateStep;
+  if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
   return AddSourceSteps.ConfigIntroStep;
 };

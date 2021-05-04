@@ -9,6 +9,7 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { AlertType } from '../../../../../common/alert_types';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -62,12 +63,13 @@ export function TransactionErrorRateChart({
       comparisonType,
     },
   } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, alerts } = useApmServiceContext();
   const comparisonChartThem = getComparisonChartTheme(theme);
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -121,7 +123,7 @@ export function TransactionErrorRateChart({
           {
             data: data.previousPeriod.transactionErrorRate,
             type: 'area',
-            color: theme.eui.euiColorLightestShade,
+            color: theme.eui.euiColorMediumShade,
             title: i18n.translate(
               'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
               { defaultMessage: 'Previous period' }
@@ -149,6 +151,9 @@ export function TransactionErrorRateChart({
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartThem}
+        alerts={alerts.filter(
+          (alert) => alert['rule.id'] === AlertType.TransactionErrorRate
+        )}
       />
     </EuiPanel>
   );

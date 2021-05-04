@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { RenderTooltipContentParams } from '../../../../../maps/public/classes/tooltips/tooltip_property';
+import type { RenderTooltipContentParams } from '../../../../../maps/public';
 
 export interface IndexPatternMapping {
   title: string;

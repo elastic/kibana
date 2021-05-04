@@ -289,6 +289,11 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
         match_all: {},
       },
     },
+    runtime_mappings: {
+      optional: true,
+      formKey: 'runtimeMappings',
+      defaultValue: undefined,
+    },
     _source: {
       optional: true,
     },

@@ -22,8 +22,10 @@ interface Response {
 
 export function filterRuntimeMappings(job: Job, datafeed: Datafeed): Response {
   if (
-    datafeed.runtime_mappings === undefined ||
-    isPopulatedObject(datafeed.runtime_mappings) === false
+    !(
+      isPopulatedObject(datafeed, ['runtime_mappings']) &&
+      isPopulatedObject(datafeed.runtime_mappings)
+    )
   ) {
     return {
       runtime_mappings: {},
@@ -83,7 +85,7 @@ function findFieldsInJob(job: Job, datafeed: Datafeed) {
   return [...usedFields];
 }
 
-function findFieldsInAgg(obj: Record<string, object>) {
+function findFieldsInAgg(obj: Record<string, unknown>) {
   const fields: string[] = [];
   Object.entries(obj).forEach(([key, val]) => {
     if (isPopulatedObject(val)) {
@@ -104,6 +106,8 @@ function findFieldsInQuery(obj: object) {
     if (isPopulatedObject(val)) {
       fields.push(key);
       fields.push(...findFieldsInQuery(val));
+    } else if (typeof val === 'string') {
+      fields.push(val);
     } else {
       fields.push(key);
     }

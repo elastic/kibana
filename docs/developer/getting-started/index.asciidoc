@@ -4,6 +4,21 @@
 Get started building your own plugins, or contributing directly to the {kib} repo.
 
 [discrete]
+[[developing-on-windows]]
+=== Developing on Windows
+
+In order to support Windows development we currently require you to use one of the following:
+
+- https://git-scm.com/download/win[Git bash] (other bash emulators like https://cmder.net/[Cmder] could work but we did not test them)
+- https://docs.microsoft.com/en-us/windows/wsl/about[WSL]
+
+As well as installing https://www.microsoft.com/en-us/download/details.aspx?id=48145[Visual C++ Redistributable for Visual Studio 2015].
+
+Before running the steps listed below, please make sure you have installed everything 
+that we require and listed above and that you are running the mentioned commands 
+through Git bash or WSL.
+
+[discrete]
 [[get-kibana-code]]
 === Get the code
 
@@ -66,7 +81,8 @@ yarn kbn bootstrap --force-install
 
 (You can also run `yarn kbn` to see the other available commands. For
 more info about this tool, see
-{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}/packages/kbn-pm].)
+{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}/packages/kbn-pm]. If you want more 
+information about how to actively develop over packages please read <<monorepo-packages>>)
 
 When switching branches which use different versions of npm packages you
 may need to run:
@@ -169,3 +185,5 @@ include::debugging.asciidoc[leveloffset=+1]
 include::building-kibana.asciidoc[leveloffset=+1]
 
 include::development-plugin-resources.asciidoc[leveloffset=+1]
+
+include::monorepo-packages.asciidoc[leveloffset=+1]

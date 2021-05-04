@@ -5,48 +5,19 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import * as Rx from 'rxjs';
-import { toArray, map } from 'rxjs/operators';
-import { AlertingPlugin } from '../../../../alerting/server';
-import { APMConfig } from '../..';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-
-type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
-const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
-  return (source: Rx.Observable<T1>) => {
-    return Rx.defer(() => fn(source));
-  };
-};
-const mockedConfig$ = (Rx.of('apm_oss.errorIndices').pipe(
-  pipeClosure((source$) => {
-    return source$.pipe(map((i) => i));
-  }),
-  toArray()
-) as unknown) as Observable<APMConfig>;
+import { createRuleTypeMocks } from './test_utils';
 
 describe('Transaction error rate alert', () => {
   it("doesn't send an alert when rate is less than threshold", async () => {
-    let alertExecutor: any;
-    const alerting = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as AlertingPlugin['setup'];
+    const { services, dependencies, executor } = createRuleTypeMocks();
 
     registerTransactionErrorRateAlertType({
-      alerting,
-      config$: mockedConfig$,
+      ...dependencies,
     });
-    expect(alertExecutor).toBeDefined();
 
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      alertInstanceFactory: jest.fn(),
-    };
     const params = { threshold: 1 };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
@@ -60,6 +31,11 @@ describe('Transaction error rate alert', () => {
         },
         took: 0,
         timed_out: false,
+        aggregations: {
+          series: {
+            buckets: [],
+          },
+        },
         _shards: {
           failed: 0,
           skipped: 0,
@@ -69,30 +45,21 @@ describe('Transaction error rate alert', () => {
       })
     );
 
-    await alertExecutor!({ services, params });
+    await executor({ params });
     expect(services.alertInstanceFactory).not.toBeCalled();
   });
 
-  it('sends alerts with service name, transaction type and environment', async () => {
-    let alertExecutor: any;
-    const alerting = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as AlertingPlugin['setup'];
+  it('sends alerts for services that exceeded the threshold', async () => {
+    const {
+      services,
+      dependencies,
+      executor,
+      scheduleActions,
+    } = createRuleTypeMocks();
 
     registerTransactionErrorRateAlertType({
-      alerting,
-      config$: mockedConfig$,
+      ...dependencies,
     });
-    expect(alertExecutor).toBeDefined();
-
-    const scheduleActions = jest.fn();
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -100,37 +67,38 @@ describe('Transaction error rate alert', () => {
           hits: [],
           total: {
             relation: 'eq',
-            value: 4,
+            value: 0,
           },
         },
         aggregations: {
-          failed_transactions: {
-            doc_count: 2,
-          },
-          services: {
+          series: {
             buckets: [
               {
-                key: 'foo',
-                transaction_types: {
+                key: ['foo', 'env-foo', 'type-foo'],
+                outcomes: {
                   buckets: [
                     {
-                      key: 'type-foo',
-                      environments: {
-                        buckets: [{ key: 'env-foo' }, { key: 'env-foo-2' }],
-                      },
+                      key: 'success',
+                      doc_count: 90,
+                    },
+                    {
+                      key: 'failure',
+                      doc_count: 10,
                     },
                   ],
                 },
               },
               {
-                key: 'bar',
-                transaction_types: {
+                key: ['bar', 'env-bar', 'type-bar'],
+                outcomes: {
                   buckets: [
                     {
-                      key: 'type-bar',
-                      environments: {
-                        buckets: [{ key: 'env-bar' }, { key: 'env-bar-2' }],
-                      },
+                      key: 'success',
+                      doc_count: 90,
+                    },
+                    {
+                      key: 'failure',
+                      doc_count: 1,
                     },
                   ],
                 },
@@ -149,14 +117,17 @@ describe('Transaction error rate alert', () => {
       })
     );
 
-    await alertExecutor!({ services, params });
-    [
-      'apm.transaction_error_rate_foo_type-foo_env-foo',
-      'apm.transaction_error_rate_foo_type-foo_env-foo-2',
-      'apm.transaction_error_rate_bar_type-bar_env-bar',
-      'apm.transaction_error_rate_bar_type-bar_env-bar-2',
-    ].forEach((instanceName) =>
-      expect(services.alertInstanceFactory).toHaveBeenCalledWith(instanceName)
+    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+
+    await executor({ params });
+
+    expect(services.alertInstanceFactory).toHaveBeenCalledTimes(1);
+
+    expect(services.alertInstanceFactory).toHaveBeenCalledWith(
+      'apm.transaction_error_rate_foo_type-foo_env-foo'
+    );
+    expect(services.alertInstanceFactory).not.toHaveBeenCalledWith(
+      'apm.transaction_error_rate_bar_type-bar_env-bar'
     );
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -164,193 +135,7 @@ describe('Transaction error rate alert', () => {
       transactionType: 'type-foo',
       environment: 'env-foo',
       threshold: 10,
-      triggerValue: '50',
-      interval: '5m',
-    });
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'foo',
-      transactionType: 'type-foo',
-      environment: 'env-foo-2',
-      threshold: 10,
-      triggerValue: '50',
-      interval: '5m',
-    });
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'bar',
-      transactionType: 'type-bar',
-      environment: 'env-bar',
-      threshold: 10,
-      triggerValue: '50',
-      interval: '5m',
-    });
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'bar',
-      transactionType: 'type-bar',
-      environment: 'env-bar-2',
-      threshold: 10,
-      triggerValue: '50',
-      interval: '5m',
-    });
-  });
-  it('sends alerts with service name and transaction type', async () => {
-    let alertExecutor: any;
-    const alerting = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as AlertingPlugin['setup'];
-
-    registerTransactionErrorRateAlertType({
-      alerting,
-      config$: mockedConfig$,
-    });
-    expect(alertExecutor).toBeDefined();
-
-    const scheduleActions = jest.fn();
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
-
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          total: {
-            relation: 'eq',
-            value: 4,
-          },
-        },
-        aggregations: {
-          failed_transactions: {
-            doc_count: 2,
-          },
-          services: {
-            buckets: [
-              {
-                key: 'foo',
-                transaction_types: {
-                  buckets: [{ key: 'type-foo' }],
-                },
-              },
-              {
-                key: 'bar',
-                transaction_types: {
-                  buckets: [{ key: 'type-bar' }],
-                },
-              },
-            ],
-          },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
-
-    await alertExecutor!({ services, params });
-    [
-      'apm.transaction_error_rate_foo_type-foo',
-      'apm.transaction_error_rate_bar_type-bar',
-    ].forEach((instanceName) =>
-      expect(services.alertInstanceFactory).toHaveBeenCalledWith(instanceName)
-    );
-
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'foo',
-      transactionType: 'type-foo',
-      environment: undefined,
-      threshold: 10,
-      triggerValue: '50',
-      interval: '5m',
-    });
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'bar',
-      transactionType: 'type-bar',
-      environment: undefined,
-      threshold: 10,
-      triggerValue: '50',
-      interval: '5m',
-    });
-  });
-
-  it('sends alerts with service name', async () => {
-    let alertExecutor: any;
-    const alerting = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as AlertingPlugin['setup'];
-
-    registerTransactionErrorRateAlertType({
-      alerting,
-      config$: mockedConfig$,
-    });
-    expect(alertExecutor).toBeDefined();
-
-    const scheduleActions = jest.fn();
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
-
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          total: {
-            value: 4,
-            relation: 'eq',
-          },
-        },
-        aggregations: {
-          failed_transactions: {
-            doc_count: 2,
-          },
-          services: {
-            buckets: [{ key: 'foo' }, { key: 'bar' }],
-          },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
-
-    await alertExecutor!({ services, params });
-    [
-      'apm.transaction_error_rate_foo',
-      'apm.transaction_error_rate_bar',
-    ].forEach((instanceName) =>
-      expect(services.alertInstanceFactory).toHaveBeenCalledWith(instanceName)
-    );
-
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'foo',
-      transactionType: undefined,
-      environment: undefined,
-      threshold: 10,
-      triggerValue: '50',
-      interval: '5m',
-    });
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'bar',
-      transactionType: undefined,
-      environment: undefined,
-      threshold: 10,
-      triggerValue: '50',
+      triggerValue: '10',
       interval: '5m',
     });
   });

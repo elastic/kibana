@@ -410,11 +410,7 @@ module.exports = {
                 errorMessage: `Common code can not import from server or public, use a common directory.`,
               },
               {
-                target: [
-                  'src/legacy/**/*',
-                  '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'examples/**/*',
-                ],
+                target: ['(src|x-pack)/plugins/**/(public|server)/**/*', 'examples/**/*'],
                 from: [
                   'src/core/public/**/*',
                   '!src/core/public/index.ts', // relative import
@@ -428,8 +424,6 @@ module.exports = {
                   '!src/core/server/mocks{,.ts}',
                   '!src/core/server/types{,.ts}',
                   '!src/core/server/test_utils{,.ts}',
-                  '!src/core/server/utils', // ts alias
-                  '!src/core/server/utils/**/*',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
@@ -442,7 +436,6 @@ module.exports = {
               },
               {
                 target: [
-                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
@@ -482,26 +475,13 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
-                from: ['plugins/**/*', 'src/plugins/**/*', 'src/legacy/ui/**/*'],
+                from: ['plugins/**/*', 'src/plugins/**/*'],
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
                 from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
-              },
-              {
-                from: ['src/legacy/ui/**/*', 'ui/**/*'],
-                target: [
-                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
-                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
-                ],
-                allowSameFolder: true,
-                errorMessage:
-                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
-                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
-                  'import those things once at the top level of your plugin and pass those down, just ' +
-                  'like you pass down `core` and `plugins` objects.',
               },
             ],
           },
@@ -1135,6 +1115,118 @@ module.exports = {
       },
     },
     /**
+     * Metrics entities overrides
+     */
+    {
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/metrics_entities/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/metrics_entities/common/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
+          },
+        ],
+      },
+    },
+    {
+      // typescript and javascript for front and back end
+      files: ['x-pack/plugins/metrics_entities/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['eslint-plugin-node'],
+      env: {
+        jest: true,
+      },
+      rules: {
+        'accessor-pairs': 'error',
+        'array-callback-return': 'error',
+        'no-array-constructor': 'error',
+        complexity: 'error',
+        'consistent-return': 'error',
+        'func-style': ['error', 'expression'],
+        'import/order': [
+          'error',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            'newlines-between': 'always',
+          },
+        ],
+        'sort-imports': [
+          'error',
+          {
+            ignoreDeclarationSort: true,
+          },
+        ],
+        'node/no-deprecated-api': 'error',
+        'no-bitwise': 'error',
+        'no-continue': 'error',
+        'no-dupe-keys': 'error',
+        'no-duplicate-case': 'error',
+        'no-duplicate-imports': 'error',
+        'no-empty-character-class': 'error',
+        'no-empty-pattern': 'error',
+        'no-ex-assign': 'error',
+        'no-extend-native': 'error',
+        'no-extra-bind': 'error',
+        'no-extra-boolean-cast': 'error',
+        'no-extra-label': 'error',
+        'no-func-assign': 'error',
+        'no-implicit-globals': 'error',
+        'no-implied-eval': 'error',
+        'no-invalid-regexp': 'error',
+        'no-inner-declarations': 'error',
+        'no-lone-blocks': 'error',
+        'no-multi-assign': 'error',
+        'no-misleading-character-class': 'error',
+        'no-new-symbol': 'error',
+        'no-obj-calls': 'error',
+        'no-param-reassign': ['error', { props: true }],
+        'no-process-exit': 'error',
+        'no-prototype-builtins': 'error',
+        'no-return-await': 'error',
+        'no-self-compare': 'error',
+        'no-shadow-restricted-names': 'error',
+        'no-sparse-arrays': 'error',
+        'no-this-before-super': 'error',
+        // rely on typescript
+        'no-undef': 'off',
+        'no-unreachable': 'error',
+        'no-unsafe-finally': 'error',
+        'no-useless-call': 'error',
+        'no-useless-catch': 'error',
+        'no-useless-concat': 'error',
+        'no-useless-computed-key': 'error',
+        'no-useless-escape': 'error',
+        'no-useless-rename': 'error',
+        'no-useless-return': 'error',
+        'no-void': 'error',
+        'one-var-declaration-per-line': 'error',
+        'prefer-object-spread': 'error',
+        'prefer-promise-reject-errors': 'error',
+        'prefer-rest-params': 'error',
+        'prefer-spread': 'error',
+        'prefer-template': 'error',
+        'require-atomic-updates': 'error',
+        'symbol-description': 'error',
+        'vars-on-top': 'error',
+        '@typescript-eslint/explicit-member-accessibility': 'error',
+        '@typescript-eslint/no-this-alias': 'error',
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/no-useless-constructor': 'error',
+        '@typescript-eslint/unified-signatures': 'error',
+        '@typescript-eslint/explicit-function-return-type': 'error',
+        '@typescript-eslint/no-non-null-assertion': 'error',
+        '@typescript-eslint/no-unused-vars': 'error',
+        'no-template-curly-in-string': 'error',
+        'sort-keys': 'error',
+        'prefer-destructuring': 'error',
+      },
+    },
+    /**
      * Alerting Services overrides
      */
     {
@@ -1180,7 +1272,7 @@ module.exports = {
             pathGroups: [
               {
                 pattern:
-                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../}{common/,*}__mocks__{*,/**}',
+                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../,./}{common/,*}__mocks__{*,/**}',
                 group: 'unknown',
               },
               {
@@ -1398,6 +1490,10 @@ module.exports = {
             ],
             pathGroups: [
               {
+                pattern: '{**,.}/*.test.mocks',
+                group: 'unknown',
+              },
+              {
                 pattern: '{@kbn/**,src/**,kibana{,/**}}',
                 group: 'internal',
               },
@@ -1422,6 +1518,24 @@ module.exports = {
       },
     },
 
+    /**
+     * Do not allow `any`
+     */
+    {
+      files: [
+        'packages/kbn-analytics/**',
+        // 'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
     {
       files: [
         // core-team owned code

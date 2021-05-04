@@ -22,6 +22,8 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { RowRenderer } from '../body/renderers/row_renderer';
+import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -56,6 +58,7 @@ import { activeTimeline } from '../../../containers/active_timeline_context';
 import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
+import { defaultControlColumn, ControlColumnProps } from '../body/control_columns';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -142,6 +145,8 @@ const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   deepEqual(prevProps.filters, nextProps.filters);
 
 interface OwnProps {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   timelineId: string;
 }
 
@@ -164,6 +169,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   kqlMode,
   kqlQueryExpression,
   onEventClosed,
+  renderCellValue,
+  rowRenderers,
   show,
   showCallOutUnauthorizedMsg,
   showExpandedDetails,
@@ -266,6 +273,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
 
+  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
+  const trailingControlColumns: ControlColumnProps[] = [];
+
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
@@ -330,12 +340,16 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 data={isBlankTimeline ? EMPTY_EVENTS : events}
                 id={timelineId}
                 refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
                 sort={sort}
                 tabType={TimelineTabs.query}
                 totalPages={calculateTotalPages({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
 

@@ -35,7 +35,12 @@ exports[`Must zoom tools and draw filter tools 1`] = `
     <Connect(ToolsControl)
       geoFields={
         Array [
-          "coordinates",
+          Object {
+            "geoFieldName": "myGeoFieldName",
+            "geoFieldType": "geo_point",
+            "indexPatternId": "1",
+            "indexPatternTitle": "myIndex",
+          },
         ]
       }
     />

@@ -11,6 +11,7 @@ import { InvalidNodeError } from './invalid_node';
 import { DocumentTitle } from '../../../../components/document_title';
 import { ErrorPageBody } from '../../../error';
 import { InfraHttpError } from '../../../../types';
+
 interface Props {
   name: string;
   error: InfraHttpError;

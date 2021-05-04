@@ -98,7 +98,7 @@ describe('GroupOverview', () => {
       messages: [mockSuccessMessage],
     });
     const wrapper = shallow(<Groups />);
-    const flashMessages = wrapper.find(FlashMessages).dive().shallow();
+    const flashMessages = wrapper.find(FlashMessages).dive().childAt(0).dive();
 
     expect(flashMessages.find('[data-test-subj="NewGroupManageButton"]')).toHaveLength(1);
   });

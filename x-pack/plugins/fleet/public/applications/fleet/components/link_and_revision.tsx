@@ -5,43 +5,54 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
-import type { EuiLinkProps } from '@elastic/eui/src/components/link/link';
 
+import type { AgentPolicy } from '../../../../common/types';
+import { useLink } from '../hooks';
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };
 
-export type LinkAndRevisionProps = EuiLinkProps & {
-  revision?: string | number;
-};
-
-/**
- * Components shows a link for a given value along with a revision number to its right. The display
- * value is truncated if it is longer than the width of where it is displayed, while the revision
- * always remain visible
- */
-export const LinkAndRevision = memo<LinkAndRevisionProps>(
-  ({ revision, className, ...euiLinkProps }) => {
-    return (
-      <EuiFlexGroup gutterSize="s" alignItems="baseline" style={MIN_WIDTH} responsive={false}>
-        <EuiFlexItem grow={false} className="eui-textTruncate">
-          <EuiLink className={`eui-textTruncate ${className ?? ''}`} {...euiLinkProps} />
+export const AgentPolicySummaryLine = memo<{ policy: AgentPolicy }>(({ policy }) => {
+  const { getHref } = useLink();
+  const { name, id, revision, is_managed: isManaged } = policy;
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="baseline" style={MIN_WIDTH} responsive={false}>
+      <EuiFlexItem grow={false} className="eui-textTruncate">
+        <EuiLink
+          className={`eui-textTruncate`}
+          href={getHref('policy_details', { policyId: id })}
+          title={name || id}
+        >
+          {name || id}
+        </EuiLink>
+      </EuiFlexItem>
+      {isManaged && (
+        <EuiIconTip
+          title="Hosted agent policy"
+          content={i18n.translate('xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip', {
+            defaultMessage:
+              'This policy is managed outside of Fleet. Most actions related to this policy are unavailable.',
+          })}
+          type="lock"
+          size="m"
+          color="subdued"
+        />
+      )}
+      {revision && (
+        <EuiFlexItem grow={true}>
+          <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicySummaryLine.revisionNumber"
+              defaultMessage="rev. {revNumber}"
+              values={{ revNumber: revision }}
+            />
+          </EuiText>
         </EuiFlexItem>
-        {revision && (
-          <EuiFlexItem grow={true}>
-            <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
-              <FormattedMessage
-                id="xpack.fleet.policyNameLink.revisionNumber"
-                defaultMessage="rev. {revNumber}"
-                values={{ revNumber: revision }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  }
-);
+      )}
+    </EuiFlexGroup>
+  );
+});

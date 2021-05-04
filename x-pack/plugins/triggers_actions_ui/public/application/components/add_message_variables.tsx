@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
@@ -61,13 +61,16 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     }
   );
 
+  if ((messageVariables?.length ?? 0) === 0) {
+    return <Fragment />;
+  }
+
   return (
     <EuiPopover
       button={
         <EuiButtonIcon
           id={`${paramsProperty}AddVariableButton`}
           data-test-subj={`${paramsProperty}AddVariableButton`}
-          isDisabled={(messageVariables?.length ?? 0) === 0}
           title={addVariableButtonTitle}
           onClick={() => setIsVariablesPopoverOpen(true)}
           iconType="indexOpen"

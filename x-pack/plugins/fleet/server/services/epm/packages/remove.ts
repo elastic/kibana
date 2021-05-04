@@ -79,6 +79,7 @@ export async function removeInstallation(options: {
   return installedAssets;
 }
 
+// TODO: this is very much like deleteKibanaSavedObjectsAssets below
 function deleteKibanaAssets(
   installedObjects: KibanaAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
@@ -136,6 +137,7 @@ async function deleteTemplate(esClient: ElasticsearchClient, name: string): Prom
   }
 }
 
+// TODO: this is very much like deleteKibanaAssets above
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
   installedRefs: AssetReference[]
@@ -153,6 +155,9 @@ export async function deleteKibanaSavedObjectsAssets(
   try {
     await Promise.all(deletePromises);
   } catch (err) {
-    logger.warn(err);
+    // in the rollback case, partial installs are likely, so missing assets are not an error
+    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+      logger.error(err);
+    }
   }
 }

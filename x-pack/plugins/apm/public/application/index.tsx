@@ -30,7 +30,11 @@ import {
 import { LicenseProvider } from '../context/license/license_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import {
+  ApmPluginSetupDeps,
+  ApmPluginStartDeps,
+  ApmRuleRegistry,
+} from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
@@ -102,25 +106,34 @@ export function ApmAppRoot({
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export const renderApp = (
-  core: CoreStart,
-  setupDeps: ApmPluginSetupDeps,
-  appMountParameters: AppMountParameters,
-  config: ConfigSchema,
-  startDeps: ApmPluginStartDeps
-) => {
+export const renderApp = ({
+  coreStart,
+  pluginsSetup,
+  appMountParameters,
+  config,
+  pluginsStart,
+  apmRuleRegistry,
+}: {
+  coreStart: CoreStart;
+  pluginsSetup: ApmPluginSetupDeps;
+  appMountParameters: AppMountParameters;
+  config: ConfigSchema;
+  pluginsStart: ApmPluginStartDeps;
+  apmRuleRegistry: ApmRuleRegistry;
+}) => {
   const { element } = appMountParameters;
   const apmPluginContextValue = {
     appMountParameters,
     config,
-    core,
-    plugins: setupDeps,
+    core: coreStart,
+    plugins: pluginsSetup,
+    apmRuleRegistry,
   };
 
   // render APM feedback link in global help menu
-  setHelpExtension(core);
-  setReadonlyBadge(core);
-  createCallApmApi(core);
+  setHelpExtension(coreStart);
+  setReadonlyBadge(coreStart);
+  createCallApmApi(coreStart);
 
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {
@@ -131,7 +144,7 @@ export const renderApp = (
   ReactDOM.render(
     <ApmAppRoot
       apmPluginContextValue={apmPluginContextValue}
-      startDeps={startDeps}
+      startDeps={pluginsStart}
     />,
     element
   );

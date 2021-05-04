@@ -862,32 +862,26 @@ describe('When on the Trusted Apps Page', () => {
   });
 
   describe('and the search is dispatched', () => {
-    const renderWithListData = async () => {
-      const result = render();
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+    beforeEach(async () => {
+      mockListApis(coreStart.http);
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps?filter=test');
+      });
+      renderResult = render();
       await act(async () => {
         await waitForAction('trustedAppsListResourceStateChanged');
       });
-      return result;
-    };
+    });
 
-    beforeEach(() => mockListApis(coreStart.http));
-
-    it('search bar is filled with query params', async () => {
-      reactTestingLibrary.act(() => {
-        history.push('/trusted_apps?filter=test');
-      });
-      const result = await renderWithListData();
-      expect(result.getByDisplayValue('test')).not.toBeNull();
+    it('search bar is filled with query params', () => {
+      expect(renderResult.getByDisplayValue('test')).not.toBeNull();
     });
 
     it('search action is dispatched', async () => {
-      reactTestingLibrary.act(() => {
-        history.push('/trusted_apps?filter=test');
-      });
-      const result = await renderWithListData();
       await act(async () => {
-        fireEvent.click(result.getByTestId('trustedAppSearchButton'));
-        await waitForAction('userChangedUrl');
+        fireEvent.click(renderResult.getByTestId('trustedAppSearchButton'));
+        expect(await waitForAction('userChangedUrl')).not.toBeNull();
       });
     });
   });

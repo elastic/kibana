@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { TSVB_EDITOR_NAME } from './application';
+import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES } from '../common/panel_types';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
 import { toExpressionAst } from './to_ast';
@@ -62,6 +62,7 @@ export const metricsVisDefinition = {
       show_legend: 1,
       show_grid: 1,
       tooltip_mode: 'show_all',
+      drop_last_bucket: 0,
     },
   },
   editorConfig: {
@@ -74,7 +75,7 @@ export const metricsVisDefinition = {
   },
   toExpressionAst,
   getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.applyFilter];
+    return [VIS_EVENT_TO_TRIGGER.brush];
   },
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {

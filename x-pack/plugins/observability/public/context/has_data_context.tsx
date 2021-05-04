@@ -7,6 +7,7 @@
 
 import { uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import { Alert } from '../../../alerting/common';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
@@ -32,7 +33,7 @@ export interface HasDataContextValue {
 
 export const HasDataContext = createContext({} as HasDataContextValue);
 
-const apps: DataContextApps[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
+const apps: DataContextApps[] = ['apm', 'synthetics', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
   const { core } = usePluginContext();
@@ -41,38 +42,41 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   const [hasData, setHasData] = useState<HasDataContextValue['hasData']>({});
 
+  const isExploratoryView = useRouteMatch('/exploratory-view');
+
   useEffect(
     () => {
-      apps.forEach(async (app) => {
-        try {
-          if (app !== 'alert') {
-            const params =
-              app === 'ux'
-                ? { absoluteTime: { start: absoluteStart, end: absoluteEnd } }
-                : undefined;
+      if (!isExploratoryView)
+        apps.forEach(async (app) => {
+          try {
+            if (app !== 'alert') {
+              const params =
+                app === 'ux'
+                  ? { absoluteTime: { start: absoluteStart, end: absoluteEnd } }
+                  : undefined;
 
-            const result = await getDataHandler(app)?.hasData(params);
+              const result = await getDataHandler(app)?.hasData(params);
+              setHasData((prevState) => ({
+                ...prevState,
+                [app]: {
+                  hasData: result,
+                  status: FETCH_STATUS.SUCCESS,
+                },
+              }));
+            }
+          } catch (e) {
             setHasData((prevState) => ({
               ...prevState,
               [app]: {
-                hasData: result,
-                status: FETCH_STATUS.SUCCESS,
+                hasData: undefined,
+                status: FETCH_STATUS.FAILURE,
               },
             }));
           }
-        } catch (e) {
-          setHasData((prevState) => ({
-            ...prevState,
-            [app]: {
-              hasData: undefined,
-              status: FETCH_STATUS.FAILURE,
-            },
-          }));
-        }
-      });
+        });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [isExploratoryView]
   );
 
   useEffect(() => {

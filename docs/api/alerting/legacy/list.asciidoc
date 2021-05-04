@@ -4,7 +4,7 @@
 <titleabbrev>Legacy list all alert types</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<list-rule-types-api>> instead.
+deprecated::[7.13.0,Use <<list-rule-types-api>> instead.]
 
 Retrieve a list of all alert types.
 

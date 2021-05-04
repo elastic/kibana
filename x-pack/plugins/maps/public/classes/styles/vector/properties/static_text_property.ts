@@ -18,7 +18,9 @@ export class StaticTextProperty extends StaticStyleProperty<LabelStaticOptions> 
     if (this.getOptions().value.length) {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', this.getOptions().value);
     } else {
-      mbMap.setLayoutProperty(mbLayerId, 'text-field', null);
+      if (typeof mbMap.getLayoutProperty(mbLayerId, 'text-field') !== 'undefined') {
+        mbMap.setLayoutProperty(mbLayerId, 'text-field', undefined);
+      }
     }
   }
 }

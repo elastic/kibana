@@ -80,7 +80,14 @@ export class KbnClientImportExport {
     if (resp.data.success) {
       this.log.success('import success');
     } else {
-      throw createFailError(`failed to import all saved objects: ${inspect(resp.data)}`);
+      throw createFailError(
+        `failed to import all saved objects: ${inspect(resp.data, {
+          compact: false,
+          depth: 99,
+          breakLength: 80,
+          sorted: true,
+        })}`
+      );
     }
   }
 
@@ -115,6 +122,7 @@ export class KbnClientImportExport {
         excludeExportDetails: true,
         includeReferencesDeep: true,
       },
+      responseType: 'text',
     });
 
     if (typeof resp.data !== 'string') {

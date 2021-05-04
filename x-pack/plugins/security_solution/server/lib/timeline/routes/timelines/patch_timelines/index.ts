@@ -20,7 +20,7 @@ import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/com
 import { createTimelines } from '../create_timelines';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
 
-export const updateTimelinesRoute = (
+export const patchTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']

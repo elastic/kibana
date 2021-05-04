@@ -8,7 +8,7 @@
 
 import { uniq } from 'lodash';
 import { PanelSchema, IndexPatternValue, FetchedIndexPattern } from '../common/types';
-import { IndexPatternsService } from '../../data/common';
+import { IIndexPattern, IndexPatternsService } from '../../data/common';
 
 export const isStringTypeIndexPattern = (
   indexPatternValue: IndexPatternValue
@@ -19,7 +19,7 @@ export const getIndexPatternKey = (indexPatternValue: IndexPatternValue) =>
 
 export const extractIndexPatternValues = (
   panel: PanelSchema,
-  defaultIndex?: PanelSchema['default_index_pattern']
+  defaultIndex: IIndexPattern | null
 ) => {
   const patterns: IndexPatternValue[] = [];
 
@@ -43,8 +43,8 @@ export const extractIndexPatternValues = (
     });
   }
 
-  if (patterns.length === 0 && defaultIndex) {
-    patterns.push(defaultIndex);
+  if (patterns.length === 0 && defaultIndex?.id) {
+    patterns.push({ id: defaultIndex.id });
   }
 
   return uniq<IndexPatternValue>(patterns).sort();
@@ -52,7 +52,12 @@ export const extractIndexPatternValues = (
 
 export const fetchIndexPattern = async (
   indexPatternValue: IndexPatternValue | undefined,
-  indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>
+  indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>,
+  options: {
+    fetchKibabaIndexForStringIndexes: boolean;
+  } = {
+    fetchKibabaIndexForStringIndexes: false,
+  }
 ): Promise<FetchedIndexPattern> => {
   let indexPattern: FetchedIndexPattern['indexPattern'];
   let indexPatternString: string = '';
@@ -61,13 +66,16 @@ export const fetchIndexPattern = async (
     indexPattern = await indexPatternsService.getDefault();
   } else {
     if (isStringTypeIndexPattern(indexPatternValue)) {
-      indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
-        (index) => index.title === indexPatternValue
-      );
-
+      if (options.fetchKibabaIndexForStringIndexes) {
+        indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
+          (index) => index.title === indexPatternValue
+        );
+      }
       if (!indexPattern) {
         indexPatternString = indexPatternValue;
       }
+
+      indexPatternString = indexPatternValue;
     } else if (indexPatternValue.id) {
       indexPattern = await indexPatternsService.get(indexPatternValue.id);
     }

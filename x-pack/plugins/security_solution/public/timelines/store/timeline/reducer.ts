@@ -526,6 +526,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         activeTab,
+        prevActiveTab: state.timelineById[id].activeTab,
       },
     },
   }))

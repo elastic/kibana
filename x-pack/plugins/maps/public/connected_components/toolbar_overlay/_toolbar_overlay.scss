@@ -1,0 +1,49 @@
+.mapToolbarOverlay {
+  position: absolute;
+  top: ($euiSizeM + $euiSizeS) + ($euiSizeXL * 2); // Position and height of mapbox controls plus margin
+  left: $euiSizeM;
+  z-index: 2; // Sit on top of mapbox controls shadow
+}
+
+.mapToolbarOverlay__button,
+.mapToolbarOverlay__buttonGroup {
+  position: relative;
+  transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
+
+  @include kbnThemeStyle($theme: 'v7') {
+    // Overrides the .euiPanel default border
+    // sass-lint:disable-block no-important
+    border: none !important;
+
+    // Overrides the .euiPanel--hasShadow
+    &.euiPanel.euiPanel--hasShadow {
+      @include euiBottomShadowLarge;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  // Removes the hover effect from the .euiButtonIcon because it would create a 1px bottom gap
+  // So we put this hover effect into the panel that wraps the button or buttons
+  .euiButtonIcon:hover {
+    transform: translateY(0);
+  }
+
+  // Removes the focus background state because it can induce users to think these buttons are "enabled".
+  // The buttons functionality are just applied once, so they shouldn't stay highlighted.
+  .euiButtonIcon:focus:not(:hover) {
+    background: none;
+  }
+}
+
+.mapToolbarOverlay__buttonGroup {
+  @include mapToolbarButtonGroupBorderRadius;
+  display: flex;
+  flex-direction: column;
+
+  .euiButtonIcon {
+    border-radius: 0;
+  }
+}

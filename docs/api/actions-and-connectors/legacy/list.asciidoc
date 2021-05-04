@@ -4,7 +4,7 @@
 <titleabbrev>Legacy List all connector types</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<list-connector-types-api>> instead.
+deprecated::[7.13.0,Use <<list-connector-types-api>> instead.]
 
 Retrieves a list of all connector types.
 

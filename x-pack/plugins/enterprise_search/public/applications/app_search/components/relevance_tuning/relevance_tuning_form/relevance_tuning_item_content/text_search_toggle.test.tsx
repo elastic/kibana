@@ -13,7 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiSwitch } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../../../shared/types';
+import { SchemaType } from '../../../../../shared/schema/types';
 
 import { TextSearchToggle } from './text_search_toggle';
 
@@ -35,7 +35,7 @@ describe('TextSearchToggle', () => {
 
     const props = {
       name: 'foo',
-      type: 'text' as SchemaTypes,
+      type: SchemaType.Text,
       field: {
         weight: 1,
       },
@@ -72,7 +72,7 @@ describe('TextSearchToggle', () => {
 
     const props = {
       name: 'foo',
-      type: 'number' as SchemaTypes,
+      type: SchemaType.Number,
       field: {
         weight: 1,
       },
@@ -103,7 +103,7 @@ describe('TextSearchToggle', () => {
 
     const props = {
       name: 'foo',
-      type: 'text' as SchemaTypes,
+      type: SchemaType.Text,
     };
 
     beforeAll(() => {

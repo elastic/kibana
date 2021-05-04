@@ -87,7 +87,7 @@ export const MetaEngineCreation: React.FC = () => {
         }
       />
       <FlashMessages />
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <EuiForm
           component="form"
           data-test-subj="MetaEngineCreationForm"

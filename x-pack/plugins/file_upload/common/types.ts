@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '../../../../src/plugins/data/common';
-
-export interface HasImportPermission {
-  hasImportPermission: boolean;
-}
+import type { estypes } from '@elastic/elasticsearch';
+import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 
 export interface InputOverrides {
   [key: string]: string | undefined;
@@ -74,6 +71,28 @@ export interface FindFileStructureResponse {
   should_trim_fields?: boolean;
 }
 
+export interface FindFileStructureErrorResponse {
+  body: {
+    statusCode: number;
+    error: string;
+    message: string;
+    attributes?: ErrorAttribute;
+  };
+  name: string;
+}
+
+interface ErrorAttribute {
+  body: {
+    error: {
+      suppressed: Array<{ reason: string }>;
+    };
+  };
+}
+
+export interface HasImportPermission {
+  hasImportPermission: boolean;
+}
+
 export type InputData = any[];
 
 export interface ImportResponse {
@@ -83,7 +102,9 @@ export interface ImportResponse {
   pipelineId?: string;
   docCount: number;
   failures: ImportFailure[];
-  error?: any;
+  error?: {
+    error: estypes.ErrorCause;
+  };
   ingestError?: boolean;
 }
 

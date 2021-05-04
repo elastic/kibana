@@ -4,7 +4,7 @@
 <titleabbrev>Legacy unmute alert instance</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<unmute-alert-api>> instead.
+deprecated::[7.13.0,Use <<unmute-alert-api>> instead.]
 
 Unmute an alert instance.
 

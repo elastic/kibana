@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 
-  describe('test large number of fields in sidebar', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/96113
+  describe.skip('test large number of fields in sidebar', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], false);
       await esArchiver.loadIfNeeded('large_fields');
