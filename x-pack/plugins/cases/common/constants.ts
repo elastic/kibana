@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export const DEFAULT_DATE_FORMAT = 'dateFormat';
+export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
 
 export const APP_ID = 'cases';
 
@@ -50,11 +52,8 @@ export const SUPPORTED_CONNECTORS = [
 /**
  * Alerts
  */
-
-// this value is from x-pack/plugins/security_solution/common/constants.ts
-const DEFAULT_MAX_SIGNALS = 100;
 export const MAX_ALERTS_PER_SUB_CASE = 5000;
-export const MAX_GENERATED_ALERTS_PER_SUB_CASE = MAX_ALERTS_PER_SUB_CASE / DEFAULT_MAX_SIGNALS;
+export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
 
 /**
  * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.
