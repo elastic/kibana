@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient, SavedObject } from 'kibana/public';
+import { SavedObject } from 'kibana/public';
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
-import {
-  DataPublicPluginStart,
-  FilterManager,
-  IndexPatternAttributes,
-  ISearchSource,
-} from '../../../../data/public';
+import { IndexPatternAttributes, ISearchSource } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
 
 import { DiscoverServices } from '../../build_services';
@@ -26,21 +21,9 @@ export interface DiscoverProps {
 
   opts: {
     /**
-     * Client of uiSettings
-     */
-    config: IUiSettingsClient;
-    /**
      * Use angular router for navigation
      */
     navigateTo: () => void;
-    /**
-     * Data plugin
-     */
-    data: DataPublicPluginStart;
-    /**
-     * Data plugin filter manager
-     */
-    filterManager: FilterManager;
     /**
      * List of available index patterns
      */
@@ -54,17 +37,9 @@ export interface DiscoverProps {
      */
     services: DiscoverServices;
     /**
-     * The number of documents that can be displayed in the table/grid
-     */
-    sampleSize: number;
-    /**
      * Current instance of SavedSearch
      */
     savedSearch: SavedSearch;
-    /**
-     * Timefield of the currently used index pattern
-     */
-    timefield: string;
   };
   /**
    * Function to reset the current query

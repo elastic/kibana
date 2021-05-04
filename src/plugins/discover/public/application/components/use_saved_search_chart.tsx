@@ -10,11 +10,10 @@ import { useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { TimechartBucketInterval } from './timechart_header/timechart_header';
 import { AggConfigs } from '../../../../data/common/search/aggs';
-import { SearchSource } from '../../../../data/common/search/search_source';
+import { SearchSource, tabifyAggResponse } from '../../../../data/common';
 import { applyAggsToSearchSource, getDimensions } from './histogram';
 import { SavedSearch } from '../../saved_searches';
 import { discoverResponseHandler } from '../angular/response_handler';
-import { tabifyAggResponse } from '../../../../data/common/search/tabify';
 import { DataPublicPluginStart, search } from '../../../../data/public';
 
 export type ChartSubject = BehaviorSubject<{

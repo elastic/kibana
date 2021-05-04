@@ -34,7 +34,7 @@ import {
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import { SAMPLE_SIZE_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { popularizeField } from '../helpers/popularize_field';
 import { getStateColumnActions } from '../angular/doc_table/actions/columns';
 import { DocViewFilterFn } from '../doc_views/doc_views_types';
@@ -65,14 +65,20 @@ export function Discover({
   useSavedSearch,
 }: DiscoverProps & {
   searchSessionManager: DiscoverSearchSessionManager;
-  shouldSearchOnPageLoad: () => boolean;
   state: AppState;
-  useSavedSearch: UseSavedSearch;
   stateContainer: GetStateReturn;
+  useSavedSearch: UseSavedSearch;
 }) {
-  const { savedSearch, indexPatternList, config, services } = opts;
-  const { trackUiMetric, capabilities, indexPatterns, data } = services;
-
+  const { savedSearch, indexPatternList, services } = opts;
+  const {
+    trackUiMetric,
+    capabilities,
+    indexPatterns,
+    data,
+    uiSettings: config,
+    filterManager,
+  } = services;
+  const sampleSize = useMemo(() => config.get(SAMPLE_SIZE_SETTING), [config]);
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
@@ -157,7 +163,7 @@ export function Discover({
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns);
       const newFilters = esFilters.generateFilters(
-        opts.filterManager,
+        filterManager,
         field,
         values,
         operation,
@@ -166,9 +172,9 @@ export function Discover({
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
-      return opts.filterManager.addFilters(newFilters);
+      return filterManager.addFilters(newFilters);
     },
-    [opts, indexPattern, indexPatterns, trackUiMetric]
+    [filterManager, indexPattern, indexPatterns, trackUiMetric]
   );
   /**
    * Legacy function, remove once legacy grid is removed
@@ -283,7 +289,7 @@ export function Discover({
                   <DiscoverNoResults
                     timeFieldName={timeField}
                     queryLanguage={state.query?.language || ''}
-                    data={opts.data}
+                    data={data}
                     error={fetchError}
                   />
                 )}
@@ -343,7 +349,7 @@ export function Discover({
                             onMoveColumn={onMoveColumn}
                             onRemoveColumn={onRemoveColumn}
                             onSort={onSort}
-                            sampleSize={opts.sampleSize}
+                            sampleSize={sampleSize}
                             useNewFieldsApi={useNewFieldsApi}
                           />
                         )}
@@ -357,7 +363,7 @@ export function Discover({
                               isLoading={fetchStatus === 'loading'}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
-                              sampleSize={opts.sampleSize}
+                              sampleSize={sampleSize}
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}
                               setExpandedDoc={setExpandedDoc}

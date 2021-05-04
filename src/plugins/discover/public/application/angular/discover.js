@@ -27,7 +27,6 @@ const {
   chrome,
   data,
   history: getHistory,
-  filterManager,
   toastNotifications,
   uiSettings: config,
 } = getServices();
@@ -132,9 +131,6 @@ function discoverController($route, $scope) {
     savedSearch: savedSearch,
     services,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
-    config: config,
-    filterManager,
-    data,
     routeReload: () => {
       $scope.$evalAsync(() => {
         $route.reload();

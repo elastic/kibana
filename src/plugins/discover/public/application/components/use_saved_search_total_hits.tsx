@@ -7,8 +7,8 @@
  */
 import { useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { DataPublicPluginStart } from '../../../../../data/public';
-import { SavedSearch } from '../../../saved_searches';
+import { SavedSearch } from '../../saved_searches';
+import { DataPublicPluginStart } from '../../../../data/public';
 
 export type TotalHitsSubject = BehaviorSubject<{ state: string; total?: number }>;
 

@@ -6,24 +6,20 @@
  * Side Public License, v 1.
  */
 import React, { useMemo, useCallback, useEffect } from 'react';
-
 import { DiscoverProps } from './types';
 import { Discover } from './discover';
-import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
-
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../common';
-import { createSearchSessionRestorationDataProvider } from '../angular/discover_state';
-import { noSearchSessionStorageCapabilityMessage } from '../../../../data/public';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { useDiscoverState } from './use_discover_state';
+import { useSearchSession } from './use_search_session';
 
 const DiscoverMemoized = React.memo(Discover);
 
 export function DiscoverWrapper(props: DiscoverProps) {
   const { services } = props.opts;
-  const { capabilities, data, chrome, docLinks, uiSettings: config } = services;
+  const { chrome, docLinks, uiSettings: config } = services;
 
   const history = useMemo(() => services.history(), [services]);
 
@@ -60,46 +56,11 @@ export function DiscoverWrapper(props: DiscoverProps) {
     return () => unlistenHistoryBasePath();
   }, [history, resetSavedSearch]);
 
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = useMemo(
-    () =>
-      new DiscoverSearchSessionManager({
-        history,
-        session: data.search.session,
-      }),
-    [data.search.session, history]
-  );
-
-  useEffect(() => {
-    data.search.session.enableStorage(
-      createSearchSessionRestorationDataProvider({
-        appStateContainer: stateContainer.appStateContainer,
-        data,
-        getSavedSearch: () => savedSearch,
-      }),
-      {
-        isDisabled: () =>
-          capabilities.discover.storeSearchSession
-            ? { disabled: false }
-            : {
-                disabled: true,
-                reasonText: noSearchSessionStorageCapabilityMessage,
-              },
-      }
-    );
-  }, [
-    capabilities.discover.storeSearchSession,
-    data,
-    savedSearch,
-    stateContainer.appStateContainer,
-  ]);
+  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
 
   /**
    * Data fetching logic
    */
-
   const shouldSearchOnPageLoad = useCallback(() => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
@@ -126,7 +87,6 @@ export function DiscoverWrapper(props: DiscoverProps) {
   /**
    * Initializing
    */
-
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
@@ -157,7 +117,6 @@ export function DiscoverWrapper(props: DiscoverProps) {
       state={state}
       stateContainer={stateContainer}
       searchSessionManager={searchSessionManager}
-      shouldSearchOnPageLoad={shouldSearchOnPageLoad}
       useSavedSearch={useSavedSearch}
       searchSource={searchSource}
     />
