@@ -1123,7 +1123,7 @@ describe('migrations v2 model', () => {
             outdatedDocumentsTransformStateWithFailedDocuments,
             res
           ) as OutdatedDocumentsSearchRead;
-          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
           expect(newState.corruptDocumentIds).toEqual(corruptDocumentIds);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -1139,7 +1139,7 @@ describe('migrations v2 model', () => {
             outdatedDocumentsTransformStateWithFailedDocuments,
             res
           ) as OutdatedDocumentsSearchRead;
-          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
           expect(newState.corruptDocumentIds.length).toEqual(0);
           expect(newState.transformErrors.length).toEqual(1);
           expect(newState.retryCount).toEqual(0);
@@ -1158,7 +1158,7 @@ describe('migrations v2 model', () => {
             outdatedDocumentsTransformState,
             res
           ) as OutdatedDocumentsSearchRead;
-          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
           expect(newState.corruptDocumentIds).toEqual(corruptDocumentIds);
         });
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ combines newly failed documents with those already on state if documents failed the transform', () => {
@@ -1186,7 +1186,7 @@ describe('migrations v2 model', () => {
             outdatedDocumentsTransformStateWithFailedDocuments,
             res
           ) as OutdatedDocumentsSearchRead;
-          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
           expect(newState.corruptDocumentIds).toEqual([
             ...corruptDocumentIds,
             ...newFailedTransformDocumentIds,
