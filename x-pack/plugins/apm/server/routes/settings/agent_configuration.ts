@@ -25,6 +25,12 @@ import {
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import {
+  createApmAgentFleetSyncAlert,
+  getApmAgentFleetSyncAlert,
+  runTaskForApmAgentFleetSyncAlert,
+} from '../../lib/fleet/agent_config_fleet_sync_alert';
+import { getAgentConfigsFromApmPackagePolicy } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
@@ -114,7 +120,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   ]),
   handler: async (resources) => {
     const setup = await setupRequest(resources);
-    const { params, logger } = resources;
+    const { params, logger, plugins } = resources;
     const { body, query } = params;
 
     // if the config already exists, it is fetched and updated
@@ -142,6 +148,22 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
       configurationIntake: body,
       setup,
     });
+
+    try {
+      const alertingPluginStart = await plugins.alerting?.start();
+      const alertsClient = alertingPluginStart?.getAlertsClientWithRequest(
+        resources.request
+      );
+      const taskManagerPluginStart = await resources.plugins.taskManager?.start();
+      if (alertsClient && taskManagerPluginStart) {
+        await runTaskForApmAgentFleetSyncAlert({
+          alertsClient,
+          taskManagerPluginStart,
+        });
+      }
+    } catch (error) {
+      logger.warn(`There was an error running fleet sync task: ${error}`);
+    }
   },
 });
 
@@ -262,6 +284,57 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   },
 });
 
+// enables syncing with fleet-managed apm package policy
+const agentConfigurationFleetSync = createApmServerRoute({
+  endpoint: 'POST /api/apm/settings/agent-configuration/fleet_sync',
+  options: { tags: ['access:apm', 'access:apm_write'] },
+  handler: async (resources) => {
+    const { plugins } = resources;
+    const alertingPluginStart = await plugins.alerting?.start();
+    const alertsClient = alertingPluginStart?.getAlertsClientWithRequest(
+      resources.request
+    );
+    if (!alertsClient) {
+      throw Boom.serverUnavailable();
+    }
+    return createApmAgentFleetSyncAlert({ alertsClient });
+  },
+});
+
+// returns agent config data from apm package policy
+const agentConfigurationFleetSyncPackagePolicyInput = createApmServerRoute({
+  endpoint:
+    'GET /api/apm/settings/agent-configuration/fleet-sync/package-policy-input',
+  options: { tags: ['access:apm', 'access:apm_write'] },
+  handler: async (resources) => {
+    const { plugins, context } = resources;
+    const alertingPluginStart = await plugins.alerting?.start();
+    const alertsClient = alertingPluginStart?.getAlertsClientWithRequest(
+      resources.request
+    );
+
+    if (!alertsClient) {
+      throw Boom.serverUnavailable();
+    }
+    const alert = await getApmAgentFleetSyncAlert({ alertsClient });
+    const fleetPluginStart = await plugins.fleet?.start();
+    if (!fleetPluginStart) {
+      throw Boom.serverUnavailable();
+    }
+    const agent_config = await getAgentConfigsFromApmPackagePolicy({
+      fleetPluginStart,
+      savedObjectsClient: context.core.savedObjects.client,
+    });
+    if (!agent_config) {
+      throw Boom.notFound();
+    }
+    return {
+      alert,
+      agent_config,
+    };
+  },
+});
+
 export const agentConfigurationRouteRepository = createApmServerRouteRepository()
   .add(agentConfigurationRoute)
   .add(getSingleAgentConfigurationRoute)
@@ -270,4 +343,6 @@ export const agentConfigurationRouteRepository = createApmServerRouteRepository(
   .add(agentConfigurationSearchRoute)
   .add(listAgentConfigurationServicesRoute)
   .add(listAgentConfigurationEnvironmentsRoute)
-  .add(agentConfigurationAgentNameRoute);
+  .add(agentConfigurationAgentNameRoute)
+  .add(agentConfigurationFleetSync)
+  .add(agentConfigurationFleetSyncPackagePolicyInput);

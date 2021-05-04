@@ -14,12 +14,15 @@ import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
 import { APMRuleRegistry } from '../../plugin';
+import { registerAgentConfigFleetSyncAlertType } from './register_agent_config_fleet_sync_alert_type';
+import { APMPluginStartDependencies } from '../../types';
 
 export interface RegisterRuleDependencies {
   registry: APMRuleRegistry;
   ml?: MlPluginSetup;
   config$: Observable<APMConfig>;
   logger: Logger;
+  getFleetPluginStart: () => Promise<APMPluginStartDependencies['fleet']>;
 }
 
 export function registerApmAlerts(dependencies: RegisterRuleDependencies) {
@@ -27,4 +30,5 @@ export function registerApmAlerts(dependencies: RegisterRuleDependencies) {
   registerTransactionDurationAnomalyAlertType(dependencies);
   registerErrorCountAlertType(dependencies);
   registerTransactionErrorRateAlertType(dependencies);
+  registerAgentConfigFleetSyncAlertType(dependencies);
 }

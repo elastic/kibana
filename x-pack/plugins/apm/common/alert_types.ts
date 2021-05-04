@@ -15,6 +15,7 @@ export enum AlertType {
   TransactionErrorRate = 'apm.transaction_error_rate',
   TransactionDuration = 'apm.transaction_duration',
   TransactionDurationAnomaly = 'apm.transaction_duration_anomaly',
+  AgentConfigFleetSync = 'apm.agent_config_fleet_sync',
 }
 
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
@@ -66,6 +67,15 @@ export const ALERT_TYPES_CONFIG: Record<
   [AlertType.TransactionErrorRate]: {
     name: i18n.translate('xpack.apm.transactionErrorRateAlert.name', {
       defaultMessage: 'Transaction error rate threshold',
+    }),
+    actionGroups: [THRESHOLD_MET_GROUP],
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
+    minimumLicenseRequired: 'basic',
+    producer: 'apm',
+  },
+  [AlertType.AgentConfigFleetSync]: {
+    name: i18n.translate('xpack.apm.agentConfigFleetSyncAlert.name', {
+      defaultMessage: 'Central agent configuration updates',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
