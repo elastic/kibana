@@ -5,43 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { cloneDeep } from 'lodash';
+import React, { useMemo, useCallback, useEffect } from 'react';
+
 import { DiscoverProps } from './types';
 import { Discover } from './discover';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../common';
-import { createSearchSessionRestorationDataProvider, getState } from '../angular/discover_state';
-import {
-  connectToQueryState,
-  esFilters,
-  noSearchSessionStorageCapabilityMessage,
-  syncQueryStateWithUrl,
-} from '../../../../data/public';
+import { createSearchSessionRestorationDataProvider } from '../angular/discover_state';
+import { noSearchSessionStorageCapabilityMessage } from '../../../../data/public';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { getStateDefaults } from '../helpers/get_state_defaults';
-import { loadIndexPattern } from '../helpers/resolve_index_pattern';
+import { useDiscoverState } from './use_discover_state';
 
 const DiscoverMemoized = React.memo(Discover);
 
 export function DiscoverWrapper(props: DiscoverProps) {
-  const [indexPattern, setIndexPattern] = useState(props.indexPattern);
-  const [savedSearch, setSavedSearch] = useState(props.opts.savedSearch);
-  const { config, services } = props.opts;
-  const { capabilities, data, chrome, docLinks } = services;
-
-  const persistentSearchSource = useMemo(() => {
-    savedSearch.searchSource.setField('index', indexPattern);
-    // searchSource which applies time range
-    return savedSearch.searchSource;
-  }, [indexPattern, savedSearch.searchSource]);
-
-  const searchSource = useMemo(() => savedSearch.searchSource.createChild(), [
-    savedSearch.searchSource,
-  ]);
+  const { services } = props.opts;
+  const { capabilities, data, chrome, docLinks, uiSettings: config } = services;
 
   const history = useMemo(() => services.history(), [services]);
 
@@ -49,104 +31,19 @@ export function DiscoverWrapper(props: DiscoverProps) {
     services,
   ]);
 
-  /**
-   * State logic
-   */
-
-  const stateContainer = useMemo(
-    () =>
-      getState({
-        getStateDefaults: () =>
-          getStateDefaults({
-            config,
-            data,
-            indexPattern,
-            savedSearch,
-            searchSource: persistentSearchSource,
-          }),
-        storeInSessionStorage: config.get('state:storeInSessionStorage'),
-        history,
-        toasts: services.core.notifications.toasts,
-        uiSettings: config,
-      }),
-    [
-      config,
-      data,
-      history,
-      indexPattern,
-      persistentSearchSource,
-      savedSearch,
-      services.core.notifications.toasts,
-    ]
-  );
-  // temporary hack, to be removed
-  const { appStateContainer, getPreviousAppState, stopSync } = stateContainer;
-
-  const [state, setState] = useState(stateContainer.appStateContainer.getState());
-
-  useEffect(() => {
-    /**
-    if (stateContainer.appStateContainer.getState().index !== indexPattern.id) {
-      // used index pattern is different than the given by url/state which is invalid
-      stateContainer.setAppState({ index: indexPattern.id });
-    }**/
-    // sync initial app filters from state to filterManager
-    const filters = stateContainer.appStateContainer.getState().filters;
-    if (filters) {
-      services.filterManager.setAppFilters(cloneDeep(filters));
-    }
-    const query = stateContainer.appStateContainer.getState().query;
-    if (query) {
-      data.query.queryString.setQuery(query);
-    }
-
-    const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-      data.query,
-      stateContainer.appStateContainer,
-      {
-        filters: esFilters.FilterStateStore.APP_STATE,
-        query: true,
-      }
-    );
-
-    // syncs `_g` portion of url with query services
-    const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(
-      data.query,
-      stateContainer.kbnUrlStateStorage
-    );
-    return () => {
-      stopSyncingQueryAppStateWithStateContainer();
-      stopSyncingGlobalStateWithUrl();
-      stopSync();
-    };
-  }, [
-    appStateContainer,
-    config,
-    data.query,
-    data.search.session,
-    getPreviousAppState,
-    indexPattern.id,
-    props.opts,
-    services.filterManager,
-    services.indexPatterns,
+  const {
     stateContainer,
-    stopSync,
-  ]);
-
-  const resetSavedSearch = useCallback(async () => {
-    const newSavedSearch = await services.getSavedSearchById();
-    newSavedSearch.searchSource.setField('index', indexPattern);
-    stateContainer.setAppState(
-      getStateDefaults({
-        config,
-        data,
-        indexPattern,
-        savedSearch,
-        searchSource: newSavedSearch.searchSource,
-      })
-    );
-    setSavedSearch(newSavedSearch);
-  }, [config, data, indexPattern, savedSearch, services, stateContainer]);
+    state,
+    indexPattern,
+    searchSource,
+    savedSearch,
+    resetSavedSearch,
+  } = useDiscoverState({
+    services,
+    history,
+    initialIndexPattern: props.indexPattern,
+    initialSavedSearch: props.opts.savedSearch,
+  });
 
   /**
    * Url / Routing logic
@@ -161,22 +58,11 @@ export function DiscoverWrapper(props: DiscoverProps) {
       }
     });
     return () => unlistenHistoryBasePath();
-  }, [
-    config,
-    data,
-    history,
-    indexPattern,
-    persistentSearchSource,
-    props.opts,
-    savedSearch,
-    stateContainer,
-    resetSavedSearch,
-  ]);
+  }, [history, resetSavedSearch]);
 
   /**
    * Search session logic
    */
-
   const searchSessionManager = useMemo(
     () =>
       new DiscoverSearchSessionManager({
@@ -236,29 +122,6 @@ export function DiscoverWrapper(props: DiscoverProps) {
     useNewFieldsApi,
     shouldSearchOnPageLoad,
   });
-
-  useEffect(() => {
-    const unsubsribe = stateContainer.appStateContainer.subscribe(async (newState) => {
-      // NOTE: this is also called when navigating from discover app to context app
-      if (newState.index && state.index !== newState.index) {
-        // in case of index pattern switch the route has currently to be reloaded, legacy
-        const ip = await loadIndexPattern(newState.index, services.indexPatterns, config);
-
-        if (ip) {
-          setIndexPattern(ip.loaded);
-        }
-      }
-      setState(newState);
-    });
-    return () => unsubsribe();
-  }, [
-    config,
-    services.indexPatterns,
-    state.hideChart,
-    state.index,
-    stateContainer.appStateContainer,
-    useSavedSearch.refetch$,
-  ]);
 
   /**
    * Initializing

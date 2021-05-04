@@ -11,15 +11,15 @@ import { debounceTime, tap, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../build_services';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
-import { ChartSubject, useChartData } from './histogram/use_chart_data';
 import { IndexPattern, ISearchSource } from '../../../../data/common';
 import { SavedSearch } from '../../saved_searches';
-import { TotalHitsSubject, useTotalHits } from './histogram/use_total_hits';
-import { useDocuments } from './use_documents';
 import { GetStateReturn } from '../angular/discover_state';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../inspector/common/adapters/request';
 import { fetchStatuses } from './constants';
+import { ChartSubject, useSavedSearchChart } from './use_saved_search_chart';
+import { TotalHitsSubject, useSavedSearchTotalHits } from './use_saved_search_total_hits';
+import { useSavedSearchDocuments } from './use_saved_search_documents';
 
 export interface UseSavedSearch {
   chart$: ChartSubject;
@@ -62,13 +62,13 @@ export const useSavedSearch = ({
   // to notify when data completed loading and to start a new autorefresh loop
   const autoRefreshDoneCb = useRef<undefined | any>(undefined);
 
-  const { fetch$: chart$, fetch: fetchChart } = useChartData({
+  const { fetch$: chart$, fetch: fetchChart } = useSavedSearchChart({
     data,
     interval: state.interval!,
     savedSearch,
   });
 
-  const { fetch$: hits$, fetch: fetchHits } = useTotalHits({
+  const { fetch$: hits$, fetch: fetchHits } = useSavedSearchTotalHits({
     data,
     savedSearch,
   });
@@ -81,7 +81,7 @@ export const useSavedSearch = ({
     inspectorAdapters,
     fetch,
     reset,
-  } = useDocuments({
+  } = useSavedSearchDocuments({
     services,
     indexPattern,
     useNewFieldsApi,

@@ -12,7 +12,7 @@ import { SavedSearch } from '../../../saved_searches';
 
 export type TotalHitsSubject = BehaviorSubject<{ state: string; total?: number }>;
 
-export function useTotalHits({
+export function useSavedSearchTotalHits({
   savedSearch,
   data,
 }: {

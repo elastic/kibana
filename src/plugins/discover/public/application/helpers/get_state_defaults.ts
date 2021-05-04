@@ -12,8 +12,7 @@ import { DEFAULT_COLUMNS_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../co
 import { getSortArray } from '../angular/doc_table';
 import { getDefaultSort } from '../angular/doc_table/lib/get_default_sort';
 import { SavedSearch } from '../../saved_searches';
-import { SearchSource } from '../../../../data/common/search/search_source';
-import { DataPublicPluginStart, IndexPattern } from '../../../../data/public';
+import { DataPublicPluginStart } from '../../../../data/public';
 
 import { AppState } from '../angular/discover_state';
 
@@ -27,18 +26,16 @@ function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) 
 export function getStateDefaults({
   config,
   data,
-  indexPattern,
   savedSearch,
-  searchSource,
 }: {
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
-  indexPattern: IndexPattern;
   savedSearch: SavedSearch;
-  searchSource: SearchSource;
 }) {
+  const searchSource = savedSearch.searchSource;
+  const indexPattern = savedSearch.searchSource.getField('index');
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-  const sort = getSortArray(savedSearch.sort, indexPattern);
+  const sort = getSortArray(savedSearch.sort, indexPattern!);
   const columns = getDefaultColumns(savedSearch, config);
 
   const defaultState = {
@@ -47,7 +44,7 @@ export function getStateDefaults({
       ? getDefaultSort(indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
       : sort,
     columns,
-    index: indexPattern.id,
+    index: indexPattern!.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')),
   } as AppState;

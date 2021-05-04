@@ -17,7 +17,7 @@ import { GetStateReturn } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 
-export function useDocuments({
+export function useSavedSearchDocuments({
   indexPattern,
   services,
   showUnmappedFields,
