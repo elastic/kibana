@@ -522,7 +522,7 @@ platform, these were referred to as `hidden` applications and were set
 via the `hidden` property in a {kib} plugin. Chromeless applications
 are also not displayed in the left navbar.
 
-To mark an application as chromeless, specify `chromeless: false` when
+To mark an application as chromeless, specify `chromeless: true` when
 registering your application to hide the chrome UI when the application
 is mounted:
 
@@ -530,7 +530,7 @@ is mounted:
 ----
 application.register({
   id: 'chromeless',
-  chromeless: false,
+  chromeless: true,
   async mount(context, params) {
     /* ... */
   },
@@ -548,7 +548,7 @@ bundle.
 application.register({
   id: 'chromeless',
   appRoute: '/chromeless',
-  chromeless: false,
+  chromeless: true,
   async mount(context, params) {
     /* ... */
   },
