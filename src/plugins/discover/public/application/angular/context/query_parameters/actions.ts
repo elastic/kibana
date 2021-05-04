@@ -8,8 +8,13 @@
 
 import { pick } from 'lodash';
 
-import { esFilters, Filter, IFieldType } from '../../../../../../data/public';
-import { FilterManager, IndexPatternsContract } from '../../../../../../data/public';
+import {
+  IndexPatternsContract,
+  FilterManager,
+  esFilters,
+  Filter,
+  IndexPatternField,
+} from '../../../../../../data/public';
 import { popularizeField } from '../../../helpers/popularize_field';
 import { ContextAppState, QueryParameters } from '../../context_app_state';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './constants';
@@ -43,8 +48,8 @@ export function getQueryParameterActions(
   };
 
   const addFilter = (state: ContextAppState) => async (
-    field: string | IFieldType,
-    values: any,
+    field: IndexPatternField | string,
+    values: unknown,
     operation: string
   ) => {
     const indexPatternId = state.queryParameters.indexPatternId;
@@ -58,7 +63,8 @@ export function getQueryParameterActions(
     filterManager.addFilters(newFilters);
     if (indexPatterns) {
       const indexPattern = await indexPatterns.get(indexPatternId);
-      await popularizeField(indexPattern, (field as IFieldType).name, indexPatterns);
+      const fieldName = typeof field === 'string' ? field : field.name;
+      await popularizeField(indexPattern, fieldName, indexPatterns);
     }
   };
 
