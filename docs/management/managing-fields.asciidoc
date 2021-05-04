@@ -118,7 +118,7 @@ Set the value of a field by emitting a single value from a Painless script.
 
 For example, to emit a single value from a Painless script:
 ----
-emit(doc['bytes'].value * 10)
+emit(doc['bytes'].value / 1024)
 ----
 
 For example, to calculate the day of the week based on the value of the `@timestamp` field:
