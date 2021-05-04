@@ -76,6 +76,8 @@ describe('ConfigPanel', () => {
       framePublicAPI: frame,
       dispatch: jest.fn(),
       core: coreMock.createStart(),
+      isFullscreen: false,
+      toggleFullscreen: jest.fn(),
     };
   }
 

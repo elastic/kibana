@@ -32,8 +32,6 @@ import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
-import { DimensionEditor } from './dimension_editor';
-import { AdvancedOptions } from './advanced_options';
 import { Filtering } from './filtering';
 
 jest.mock('../loader');
@@ -205,6 +203,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       core: {} as CoreSetup,
       dimensionGroups: [],
       groupId: 'a',
+      isFullscreen: false,
+      toggleFullscreen: jest.fn(),
     };
 
     jest.clearAllMocks();
@@ -1082,21 +1082,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })}
         />
       );
+      wrapper
+        .find('[data-test-subj="indexPattern-advanced-popover"]')
+        .hostNodes()
+        .simulate('click');
       expect(
-        wrapper
-          .find(DimensionEditor)
-          .find(AdvancedOptions)
-          .find('[data-test-subj="indexPattern-time-scaling-enable"]')
+        wrapper.find('[data-test-subj="indexPattern-time-scaling-enable"]').hostNodes()
       ).toHaveLength(0);
     });
 
     it('should show custom options if time scaling is available', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-advanced-popover"]')
+        .hostNodes()
+        .simulate('click');
       expect(
-        wrapper
-          .find(DimensionEditor)
-          .find(AdvancedOptions)
-          .find('[data-test-subj="indexPattern-time-scaling-enable"]')
+        wrapper.find('[data-test-subj="indexPattern-time-scaling-enable"]').hostNodes()
       ).toHaveLength(1);
     });
 
@@ -1114,10 +1116,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const props = getProps({});
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper
-        .find(DimensionEditor)
-        .find(AdvancedOptions)
+        .find('[data-test-subj="indexPattern-advanced-popover"]')
+        .hostNodes()
+        .simulate('click');
+      wrapper
         .find('[data-test-subj="indexPattern-time-scaling-enable"]')
-        .prop('onClick')!({} as MouseEvent);
+        .hostNodes()
+        .simulate('click');
       expect(props.setState).toHaveBeenCalledWith(
         {
           ...props.state,
@@ -1201,6 +1206,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to change time scaling', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-advanced-popover"]')
+        .hostNodes()
+        .simulate('click');
       wrapper
         .find('[data-test-subj="indexPattern-time-scaling-unit"]')
         .find(EuiSelect)
@@ -1322,24 +1331,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
           {...getProps({
             operationType: 'terms',
             sourceField: 'bytes',
+            params: {
+              orderDirection: 'asc',
+              orderBy: { type: 'alphabetical' },
+              size: 5,
+            },
           })}
         />
       );
       expect(
-        wrapper
-          .find(DimensionEditor)
-          .find(AdvancedOptions)
-          .find('[data-test-subj="indexPattern-filter-by-enable"]')
+        wrapper.find('[data-test-subj="indexPattern-advanced-popover"]').hostNodes()
       ).toHaveLength(0);
     });
 
     it('should show custom options if filtering is available', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-advanced-popover"]')
+        .hostNodes()
+        .simulate('click');
       expect(
-        wrapper
-          .find(DimensionEditor)
-          .find(AdvancedOptions)
-          .find('[data-test-subj="indexPattern-filter-by-enable"]')
+        wrapper.find('[data-test-subj="indexPattern-filter-by-enable"]').hostNodes()
       ).toHaveLength(1);
     });
 
@@ -1358,10 +1370,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const props = getProps({});
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper
-        .find(DimensionEditor)
-        .find(AdvancedOptions)
+        .find('[data-test-subj="indexPattern-advanced-popover"]')
+        .hostNodes()
+        .simulate('click');
+      wrapper
         .find('[data-test-subj="indexPattern-filter-by-enable"]')
-        .prop('onClick')!({} as MouseEvent);
+        .hostNodes()
+        .simulate('click');
       expect(props.setState).toHaveBeenCalledWith(
         {
           ...props.state,

@@ -21,11 +21,8 @@ import {
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import {
-  CodeEditor,
-  CodeEditorProps,
-  Markdown,
-} from '../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor, Markdown } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { CodeEditorProps } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   OperationDefinition,
   GenericOperationDefinition,

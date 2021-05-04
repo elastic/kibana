@@ -91,6 +91,8 @@ const defaultOptions = {
     ]),
   },
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
 };
 
 describe('ranges', () => {

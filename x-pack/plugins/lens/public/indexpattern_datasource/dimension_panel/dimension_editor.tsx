@@ -391,6 +391,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     currentColumn: state.layers[layerId].columns[columnId],
                   })}
                   dimensionGroups={dimensionGroups}
+                  isFullscreen={isFullscreen}
                   toggleFullscreen={toggleFullscreen}
                   {...services}
                 />
@@ -548,7 +549,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       name: i18n.translate('xpack.lens.indexPattern.formulaLabel', {
         defaultMessage: 'Formula',
       }),
-      content: ParamEditor && (
+      content: ParamEditor ? (
         <>
           <ParamEditor
             layer={state.layers[layerId]}
@@ -563,6 +564,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
             {...services}
           />
         </>
+      ) : (
+        <></>
       ),
     },
   ];

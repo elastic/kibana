@@ -98,6 +98,8 @@ const defaultOptions = {
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
 };
 
 describe('date_histogram', () => {

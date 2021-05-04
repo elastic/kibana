@@ -32,6 +32,8 @@ const defaultProps = {
     hasRestrictions: false,
   } as IndexPattern,
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
 };
 
 describe('percentile', () => {

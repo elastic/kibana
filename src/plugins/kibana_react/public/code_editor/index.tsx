@@ -16,7 +16,7 @@ import {
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { useUiSetting } from '../ui_settings';
-import type { Props } from './code_editor';
+import { Props } from './code_editor';
 
 const LazyBaseEditor = React.lazy(() => import('./code_editor'));
 

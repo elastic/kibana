@@ -50,6 +50,7 @@ export interface ReferenceEditorProps {
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
   dimensionGroups: VisualizationDimensionGroupConfig[];
+  isFullscreen: boolean;
   toggleFullscreen: () => void;
 
   // Services
@@ -72,6 +73,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     dateRange,
     labelAppend,
     dimensionGroups,
+    isFullscreen,
     toggleFullscreen,
     ...services
   } = props;
@@ -347,6 +349,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               indexPattern={currentIndexPattern}
               dateRange={dateRange}
               operationDefinitionMap={operationDefinitionMap}
+              isFullscreen={isFullscreen}
               toggleFullscreen={toggleFullscreen}
               {...services}
             />

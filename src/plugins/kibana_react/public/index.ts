@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { CodeEditor, CodeEditorProps } from './code_editor';
+export * from './code_editor';
 export * from './url_template_editor';
 export * from './exit_full_screen_button';
 export * from './context';

@@ -29,6 +29,8 @@ const defaultProps = {
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
 };
 
 describe('terms', () => {

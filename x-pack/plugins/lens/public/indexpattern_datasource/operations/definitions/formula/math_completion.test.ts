@@ -196,7 +196,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 1, endColumn: 1 },
       });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
@@ -218,7 +217,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 15, endColumn: 15 },
       });
       expect(results.list).toHaveLength(2);
       ['sum', 'last_value'].forEach((key) => {
@@ -237,7 +235,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 23, endColumn: 23 },
       });
       expect(results.list).toEqual(['window']);
     });
@@ -253,7 +250,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 34, endColumn: 34 },
       });
       expect(results.list).toEqual([]);
     });
@@ -269,7 +265,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 16, endColumn: 16 },
       });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
@@ -291,7 +286,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 10, endColumn: 10 },
       });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
@@ -313,7 +307,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 6, endColumn: 6 },
       });
       expect(results.list).toHaveLength(0);
     });
@@ -329,7 +322,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 4, endColumn: 4 },
       });
       expect(results.list).toEqual(['bytes', 'memory']);
     });
@@ -345,7 +337,6 @@ describe('math completion', () => {
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
         data: dataPluginMock.createStartContract(),
-        word: { word: '', startColumn: 11, endColumn: 11 },
       });
       expect(results.list).toEqual(['bytes', 'memory']);
     });
