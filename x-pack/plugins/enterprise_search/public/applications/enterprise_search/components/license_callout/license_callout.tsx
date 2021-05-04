@@ -34,7 +34,7 @@ export const LicenseCallout: React.FC = () => {
         <EuiFlexItem grow={1}>
           <div />
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem>
           <div>
             <EuiButton href="/app/management/stack/license_management">
               <EuiText size="s">{LICENSE_CALLOUT_BUTTON}</EuiText>
