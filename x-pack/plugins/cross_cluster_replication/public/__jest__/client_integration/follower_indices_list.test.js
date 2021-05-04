@@ -108,7 +108,7 @@ describe('<FollowerIndicesList />', () => {
     });
 
     test('search works', () => {
-      form.setSearchBarValue('followerIndexSearch', 'unique');
+      form.setInputValue('followerIndexSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('followerIndexListTable');
       expect(tableCellsValues.length).toBe(1);
     });

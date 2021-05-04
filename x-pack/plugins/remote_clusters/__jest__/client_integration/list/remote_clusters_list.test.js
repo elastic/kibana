@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { getRouter } from '../../../public/application/services';
@@ -15,6 +16,19 @@ import { PROXY_MODE } from '../../../common/constants';
 import { setupEnvironment, getRandomString, findTestSubject } from '../helpers';
 
 import { setup } from './remote_clusters_list.helpers';
+
+jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+  return {
+    EuiSearchBox: (props) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
+        onChange={(event) => {
+          props.onSearch(event.target.value);
+        }}
+      />
+    ),
+  };
+});
 
 describe('<RemoteClusterList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -103,7 +117,7 @@ describe('<RemoteClusterList />', () => {
     });
 
     test('search works', () => {
-      form.setSearchBarValue('remoteClusterSearch', 'unique');
+      form.setInputValue('remoteClusterSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
       expect(tableCellsValues.length).toBe(1);
     });

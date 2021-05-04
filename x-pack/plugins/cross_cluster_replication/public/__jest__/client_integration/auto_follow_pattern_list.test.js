@@ -98,7 +98,7 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     test('search works', () => {
-      form.setSearchBarValue('autoFollowPatternSearch', 'unique');
+      form.setInputValue('autoFollowPatternSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
       expect(tableCellsValues.length).toBe(1);
     });
