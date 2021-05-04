@@ -10,16 +10,17 @@ import { spawn } from 'child_process';
 import del from 'del';
 import { mkdtempSync } from 'fs';
 import { uniq } from 'lodash';
-import { tmpdir } from 'os';
+import os, { tmpdir } from 'os';
 import { join } from 'path';
 import { createInterface } from 'readline';
-import { fromEvent, timer, merge, of } from 'rxjs';
-import { takeUntil, map, reduce, tap, catchError } from 'rxjs/operators';
-import { ReportingCore } from '../../..';
+import { fromEvent, merge, of, timer } from 'rxjs';
+import { catchError, map, reduce, takeUntil, tap } from 'rxjs/operators';
+import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
-import { getBinaryPath } from '../../install';
+import { ChromiumArchivePaths } from '../paths';
 import { args } from './args';
 
+const paths = new ChromiumArchivePaths();
 const browserLaunchTimeToWait = 5 * 1000;
 
 // Default args used by pptr
@@ -61,7 +62,15 @@ export const browserStartLogs = (
   const proxy = config.get('capture', 'browser', 'chromium', 'proxy');
   const disableSandbox = config.get('capture', 'browser', 'chromium', 'disableSandbox');
   const userDataDir = mkdtempSync(join(tmpdir(), 'chromium-'));
-  const binaryPath = getBinaryPath();
+
+  const platform = process.platform;
+  const architecture = os.arch();
+  const pkg = paths.find(platform, architecture);
+  if (!pkg) {
+    throw new Error(`Unsupported platform: ${platform}-${architecture}`);
+  }
+  const binaryPath = paths.getBinaryPath(pkg);
+
   const kbnArgs = args({
     userDataDir,
     viewport: { width: 800, height: 600 },
