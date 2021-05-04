@@ -15,6 +15,7 @@ import {
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { DragDrop } from '../../../drag_drop';
+import { GlobeIllustration } from '../../../assets/globe_illustration';
 import './geo_field_workspace_panel.scss';
 
 interface Props {
@@ -54,6 +55,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
         <h2>
           <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
         </h2>
+        <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
         <DragDrop
           className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
           dataTestSubj="lnsGeoFieldWorkspace"
