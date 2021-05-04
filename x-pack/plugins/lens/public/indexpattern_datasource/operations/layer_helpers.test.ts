@@ -195,7 +195,7 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
 
-    it('should insert a metric after buckets, but before references', () => {
+    it('should insert a metric after references', () => {
       const layer: IndexPatternLayer = {
         indexPatternId: '1',
         columnOrder: ['col1'],
@@ -231,7 +231,7 @@ describe('state_helpers', () => {
           field: documentField,
           visualizationGroups: [],
         })
-      ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
+      ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col3', 'col2'] }));
     });
 
     it('should insert new buckets at the end of previous buckets', () => {
@@ -1074,7 +1074,7 @@ describe('state_helpers', () => {
             referenceIds: ['id1'],
           })
         );
-        expect(result.columnOrder).toEqual(['id1', 'col1']);
+        expect(result.columnOrder).toEqual(['col1', 'id1']);
         expect(result.columns).toEqual(
           expect.objectContaining({
             id1: expectedColumn,
@@ -1196,7 +1196,7 @@ describe('state_helpers', () => {
           op: 'testReference',
         });
 
-        expect(result.columnOrder).toEqual(['id1', 'col1']);
+        expect(result.columnOrder).toEqual(['col1', 'id1']);
         expect(result.columns).toEqual({
           id1: expect.objectContaining({
             operationType: 'average',
@@ -1459,7 +1459,7 @@ describe('state_helpers', () => {
           })
         ).toEqual(
           expect.objectContaining({
-            columnOrder: ['id1', 'output'],
+            columnOrder: ['output', 'id1'],
             columns: {
               id1: expect.objectContaining({
                 sourceField: 'timestamp',
@@ -2051,58 +2051,78 @@ describe('state_helpers', () => {
       ).toEqual(['col1', 'col3', 'col2']);
     });
 
-    it('should correctly sort references to other references', () => {
+    it('does not topologically sort formulas, but keeps the relative order', () => {
       expect(
         getColumnOrder({
-          columnOrder: [],
           indexPatternId: '',
+          columnOrder: [],
           columns: {
-            bucket: {
-              label: 'Top values of category',
-              dataType: 'string',
+            count: {
+              label: 'count',
+              dataType: 'number',
+              operationType: 'count',
+              isBucketed: false,
+              scale: 'ratio',
+              sourceField: 'Records',
+              customLabel: true,
+            },
+            date: {
+              label: 'timestamp',
+              dataType: 'date',
+              operationType: 'date_histogram',
+              sourceField: 'timestamp',
               isBucketed: true,
-
-              // Private
-              operationType: 'terms',
-              sourceField: 'category',
+              scale: 'interval',
               params: {
-                size: 5,
-                orderBy: {
-                  type: 'alphabetical',
-                },
-                orderDirection: 'asc',
+                interval: 'auto',
               },
             },
-            metric: {
-              label: 'Average of bytes',
+            formula: {
+              label: 'Formula',
               dataType: 'number',
+              operationType: 'formula',
               isBucketed: false,
-
-              // Private
-              operationType: 'average',
-              sourceField: 'bytes',
+              scale: 'ratio',
+              params: {
+                formula: 'count() + count()',
+                isFormulaBroken: false,
+              },
+              references: ['math'],
             },
-            ref2: {
-              label: 'Ref2',
+            countX0: {
+              label: 'countX0',
               dataType: 'number',
+              operationType: 'count',
               isBucketed: false,
-
-              // @ts-expect-error only for testing
-              operationType: 'testReference',
-              references: ['ref1'],
+              scale: 'ratio',
+              sourceField: 'Records',
+              customLabel: true,
             },
-            ref1: {
-              label: 'Ref',
+            math: {
+              label: 'math',
               dataType: 'number',
+              operationType: 'math',
               isBucketed: false,
-
-              // @ts-expect-error only for testing
-              operationType: 'testReference',
-              references: ['bucket'],
+              scale: 'ratio',
+              params: {
+                tinymathAst: {
+                  type: 'function',
+                  name: 'add',
+                  // @ts-expect-error String args are not valid tinymath, but signals something unique to Lens
+                  args: ['countX0', 'count'],
+                  location: {
+                    min: 0,
+                    max: 17,
+                  },
+                  text: 'count() + count()',
+                },
+              },
+              references: ['countX0', 'count'],
+              customLabel: true,
             },
           },
         })
-      ).toEqual(['bucket', 'metric', 'ref1', 'ref2']);
+      ).toEqual(['date', 'count', 'formula', 'countX0', 'math']);
     });
   });
 

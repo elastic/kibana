@@ -1029,8 +1029,12 @@ export function deleteColumn({
   );
 }
 
-// Derives column order from column object, respects existing columnOrder
-// when possible, but also allows new columns to be added to the order
+// Column order mostly affects the visual order in the UI. It is derived
+// from the columns objects, respecting any existing columnOrder relationships,
+// but allowing new columns to be inserted
+//
+// This does NOT topologically sort references, as this would cause the order in the UI
+// to change. Reference order is determined before creating the pipeline in to_expression
 export function getColumnOrder(layer: IndexPatternLayer): string[] {
   const entries = Object.entries(layer.columns);
   entries.sort(([idA], [idB]) => {
@@ -1045,16 +1049,6 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
   });
 
-  // If a reference has another reference as input, put it last in sort order
-  entries.sort(([idA, a], [idB, b]) => {
-    if ('references' in a && a.references.includes(idB)) {
-      return 1;
-    }
-    if ('references' in b && b.references.includes(idA)) {
-      return -1;
-    }
-    return 0;
-  });
   const [aggregations, metrics] = _.partition(entries, ([, col]) => col.isBucketed);
 
   return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
@@ -1258,30 +1252,4 @@ export function getManagedColumnsFrom(
     queue.push(...allNodes[nextId]);
   }
   return store.filter(([, column]) => column);
-}
-
-function topologicalSort(columns: Array<[string, IndexPatternColumn]>) {
-  const allNodes: Record<string, string[]> = {};
-  columns.forEach(([id, col]) => {
-    allNodes[id] = 'references' in col ? col.references : [];
-  });
-  // remove real metric references
-  columns.forEach(([id]) => {
-    allNodes[id] = allNodes[id].filter((refId) => !!allNodes[refId]);
-  });
-  const ordered: string[] = [];
-
-  while (ordered.length < columns.length) {
-    Object.keys(allNodes).forEach((id) => {
-      if (allNodes[id].length === 0) {
-        ordered.push(id);
-        delete allNodes[id];
-        Object.keys(allNodes).forEach((k) => {
-          allNodes[k] = allNodes[k].filter((i) => i !== id);
-        });
-      }
-    });
-  }
-
-  return ordered;
 }

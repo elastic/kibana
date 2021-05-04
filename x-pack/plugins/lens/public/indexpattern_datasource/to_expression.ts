@@ -68,7 +68,9 @@ function getExpressionForLayer(
   if (referenceEntries.length || esAggEntries.length) {
     const aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
-    referenceEntries.forEach(([colId, col]) => {
+
+    sortedReferences(referenceEntries).forEach((colId) => {
+      const col = columns[colId];
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference' || def.input === 'managedReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
@@ -253,6 +255,33 @@ function getExpressionForLayer(
   }
 
   return null;
+}
+
+// Topologically sorts references so that we can execute them in sequence
+function sortedReferences(columns: Array<readonly [string, IndexPatternColumn]>) {
+  const allNodes: Record<string, string[]> = {};
+  columns.forEach(([id, col]) => {
+    allNodes[id] = 'references' in col ? col.references : [];
+  });
+  // remove real metric references
+  columns.forEach(([id]) => {
+    allNodes[id] = allNodes[id].filter((refId) => !!allNodes[refId]);
+  });
+  const ordered: string[] = [];
+
+  while (ordered.length < columns.length) {
+    Object.keys(allNodes).forEach((id) => {
+      if (allNodes[id].length === 0) {
+        ordered.push(id);
+        delete allNodes[id];
+        Object.keys(allNodes).forEach((k) => {
+          allNodes[k] = allNodes[k].filter((i) => i !== id);
+        });
+      }
+    });
+  }
+
+  return ordered;
 }
 
 export function toExpression(

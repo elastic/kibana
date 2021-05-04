@@ -922,6 +922,91 @@ describe('IndexPattern Data Source', () => {
           }),
         });
       });
+
+      it('should topologically sort references', () => {
+        // This is a real example of count() + count()
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['date', 'count', 'formula', 'countX0', 'math'],
+              columns: {
+                count: {
+                  label: 'count',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: 'Records',
+                  customLabel: true,
+                },
+                date: {
+                  label: 'timestamp',
+                  dataType: 'date',
+                  operationType: 'date_histogram',
+                  sourceField: 'timestamp',
+                  isBucketed: true,
+                  scale: 'interval',
+                  params: {
+                    interval: 'auto',
+                  },
+                },
+                formula: {
+                  label: 'Formula',
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    formula: 'count() + count()',
+                    isFormulaBroken: false,
+                  },
+                  references: ['math'],
+                },
+                countX0: {
+                  label: 'countX0',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: 'Records',
+                  customLabel: true,
+                },
+                math: {
+                  label: 'math',
+                  dataType: 'number',
+                  operationType: 'math',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: {
+                    tinymathAst: {
+                      type: 'function',
+                      name: 'add',
+                      // @ts-expect-error String args are not valid tinymath, but signals something unique to Lens
+                      args: ['countX0', 'count'],
+                      location: {
+                        min: 0,
+                        max: 17,
+                      },
+                      text: 'count() + count()',
+                    },
+                  },
+                  references: ['countX0', 'count'],
+                  customLabel: true,
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const chainLength = ast.chain.length;
+        expect(ast.chain[chainLength - 2].arguments.name).toEqual(['math']);
+        expect(ast.chain[chainLength - 1].arguments.id).toEqual(['formula']);
+      });
     });
   });
 
