@@ -20,11 +20,11 @@ function getPortForURL(url: URL) {
 }
 
 export function normalizeHostsForAgents(host: string) {
-  // Fleet server is not using default port for http|https https://github.com/elastic/beats/issues/25420
-  const fleetServerURL = new URL(host);
+  // Elastic Agent is not using default port for http|https for Fleet server and ES https://github.com/elastic/beats/issues/25420
+  const hostURL = new URL(host);
 
   // We are building the URL manualy as url format will not include the port if the port is 80 or 443
-  return `${fleetServerURL.protocol}//${fleetServerURL.hostname}:${getPortForURL(fleetServerURL)}${
-    fleetServerURL.pathname === '/' ? '' : fleetServerURL.pathname
+  return `${hostURL.protocol}//${hostURL.hostname}:${getPortForURL(hostURL)}${
+    hostURL.pathname === '/' ? '' : hostURL.pathname
   }`;
 }
