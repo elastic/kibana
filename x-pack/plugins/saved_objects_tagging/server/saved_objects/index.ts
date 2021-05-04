@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { setupSavedObjects } from './setup';
+export { tagType } from './tag';

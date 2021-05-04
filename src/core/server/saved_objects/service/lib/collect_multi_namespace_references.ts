@@ -48,10 +48,6 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject {
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesOptions
   extends SavedObjectsBaseOptions {
-  /** Whether or not to include tags when collecting references */
-  excludeTags?: boolean;
-  /** Any types that should be excluded when collecting references */
-  typesToExclude?: string[];
   /** Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' */
   purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
 }
@@ -158,7 +154,7 @@ async function getObjectsAndReferences({
   objects,
   options = {},
 }: CollectMultiNamespaceReferencesParams) {
-  const { namespace, purpose, typesToExclude = [] } = options;
+  const { namespace, purpose } = options;
   const inboundReferencesMap = objects.reduce(
     // Add the input objects to the references map so they are returned with the results, even if they have no inbound references
     (acc, cur) => acc.set(getKey(cur), new Map()),
@@ -177,8 +173,7 @@ async function getObjectsAndReferences({
     allowedTypes.includes(type) &&
     (purpose === 'updateObjectsSpaces'
       ? registry.isShareable(type)
-      : registry.isMultiNamespace(type)) &&
-    !typesToExclude.includes(type);
+      : registry.isMultiNamespace(type));
 
   let bulkGetObjects = objects.filter(validObjectTypesFilter);
   let count = 0; // this is a circuit-breaker to ensure we don't hog too many resources; we should never have an object graph this deep

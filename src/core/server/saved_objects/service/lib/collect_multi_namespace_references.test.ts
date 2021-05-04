@@ -300,25 +300,6 @@ describe('collectMultiNamespaceReferences', () => {
     ]);
   });
 
-  it('handles the typesToExclude option', async () => {
-    const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
-    const obj2 = { type: MULTI_NAMESPACE_OBJ_TYPE_2, id: 'id-2' };
-    const obj3 = { type: MULTI_NAMESPACE_OBJ_TYPE_2, id: 'id-3' };
-    const params = setup([obj1, obj2], { typesToExclude: [MULTI_NAMESPACE_OBJ_TYPE_2] });
-    mockMgetResults({ found: true, references: [obj3] }); // results for obj1
-
-    const result = await collectMultiNamespaceReferences(params);
-    expect(client.mget).toHaveBeenCalledTimes(1);
-    expectMgetArgs(1, obj1); // obj2 is excluded
-    // obj3 is not retrieved in a second cluster call
-    expect(result.objects).toEqual([
-      { ...obj1, spaces: SPACES, inboundReferences: [] },
-      // even though it is excluded from the cluster call, obj2 is included in the results
-      { ...obj2, spaces: [], inboundReferences: [] },
-      // obj3 is excluded from the results
-    ]);
-  });
-
   it('handles the purpose="updateObjectsSpaces" option', async () => {
     const obj1 = { type: MULTI_NAMESPACE_OBJ_TYPE_1, id: 'id-1' };
     const obj2 = { type: MULTI_NAMESPACE_OBJ_TYPE_2, id: 'id-2' };

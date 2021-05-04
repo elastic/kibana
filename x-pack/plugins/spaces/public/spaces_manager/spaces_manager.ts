@@ -163,12 +163,10 @@ export class SpacesManager {
   public async updateSavedObjectsSpaces(
     objects: SavedObjectTarget[],
     spacesToAdd: string[],
-    spacesToRemove: string[],
-    options: { excludeTags?: boolean } = {}
+    spacesToRemove: string[]
   ): Promise<void> {
-    const { excludeTags } = options;
     return this.http.post(`/api/spaces/_update_objects_spaces`, {
-      body: JSON.stringify({ objects, spacesToAdd, spacesToRemove, excludeTags }),
+      body: JSON.stringify({ objects, spacesToAdd, spacesToRemove }),
     });
   }
 

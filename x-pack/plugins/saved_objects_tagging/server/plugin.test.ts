@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  registerRoutesMock,
-  createTagUsageCollectorMock,
-  setupSavedObjectsMock,
-} from './plugin.test.mocks';
+import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.mocks';
 
 import { coreMock } from '../../../../src/core/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
@@ -38,12 +34,6 @@ describe('SavedObjectTaggingPlugin', () => {
   });
 
   describe('#setup', () => {
-    it('sets up saved objects', async () => {
-      const coreSetup = coreMock.createSetup();
-      await plugin.setup(coreSetup, { features: featuresPluginSetup });
-      expect(setupSavedObjectsMock).toHaveBeenCalledTimes(1);
-    });
-
     it('registers routes', async () => {
       await plugin.setup(coreMock.createSetup(), { features: featuresPluginSetup });
       expect(registerRoutesMock).toHaveBeenCalledTimes(1);

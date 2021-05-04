@@ -7,14 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-// import { tagSavedObjectTypeName } from '../../../../../saved_objects_tagging/common';
 import type { GetShareableReferencesResponse } from '../../../../common';
 import { UNKNOWN_SPACE } from '../../../../common/constants';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 import type { ExternalRouteDeps } from './';
 
-const tagSavedObjectTypeName = 'tag'; // TODO: import this from saved_objects_tagging plugin (cannot import directly, generates TS circular graph error)
+const tagSavedObjectTypeName = 'tag';
 
 export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getStartServices } = deps;
