@@ -16,10 +16,10 @@ import { TimechartHeader } from './timechart_header';
 import { DiscoverHistogram } from '../angular/directives';
 import { SavedSearch } from '../../saved_searches';
 import { AppState, GetStateReturn } from '../angular/discover_state';
-import { TotalHitsSubject } from './histogram/use_total_hits';
-import { ChartSubject } from './histogram/use_chart_data';
 import { TimechartBucketInterval } from './timechart_header/timechart_header';
 import { Chart as IChart } from '../angular/helpers/point_series';
+import { ChartSubject } from './use_saved_search_chart';
+import { TotalHitsSubject } from './use_saved_search_total_hits';
 
 const TimechartHeaderMemoized = React.memo(TimechartHeader);
 const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);

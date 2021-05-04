@@ -26,6 +26,9 @@ describe('updateSearchSource', () => {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
+        timefilter: {
+          createFilter: jest.fn(),
+        },
         uiSettings: ({
           get: (key: string) => {
             if (key === SAMPLE_SIZE_SETTING) {
@@ -53,6 +56,9 @@ describe('updateSearchSource', () => {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
+        timefilter: {
+          createFilter: jest.fn(),
+        },
         uiSettings: ({
           get: (key: string) => {
             if (key === SAMPLE_SIZE_SETTING) {
@@ -81,6 +87,9 @@ describe('updateSearchSource', () => {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
+        timefilter: {
+          createFilter: jest.fn(),
+        },
         uiSettings: ({
           get: (key: string) => {
             if (key === SAMPLE_SIZE_SETTING) {
@@ -112,6 +121,9 @@ describe('updateSearchSource', () => {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
+        timefilter: {
+          createFilter: jest.fn(),
+        },
         uiSettings: ({
           get: (key: string) => {
             if (key === SAMPLE_SIZE_SETTING) {
@@ -143,6 +155,9 @@ describe('updateSearchSource', () => {
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
+        timefilter: {
+          createFilter: jest.fn(),
+        },
         uiSettings: ({
           get: (key: string) => {
             if (key === SAMPLE_SIZE_SETTING) {
@@ -153,7 +168,6 @@ describe('updateSearchSource', () => {
         } as unknown) as IUiSettingsClient,
       } as unknown) as DiscoverServices,
       sort: [] as SortOrder[],
-      columns: [],
       useNewFieldsApi: false,
       showUnmappedFields: false,
     });
