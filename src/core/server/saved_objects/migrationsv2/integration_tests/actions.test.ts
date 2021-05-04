@@ -41,7 +41,6 @@ import {
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { excludeUnusedTypesQuery } from '../../migrations/core';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -409,7 +408,7 @@ describe('migration actions', () => {
         'reindex_target',
         Option.none,
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -478,7 +477,7 @@ describe('migration actions', () => {
         'reindex_target_2',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -511,7 +510,7 @@ describe('migration actions', () => {
         'reindex_target_3',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -528,7 +527,7 @@ describe('migration actions', () => {
         'reindex_target_3',
         Option.none,
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -578,7 +577,7 @@ describe('migration actions', () => {
         'reindex_target_4',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -628,7 +627,7 @@ describe('migration actions', () => {
         'reindex_target_5',
         Option.none,
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
@@ -663,7 +662,7 @@ describe('migration actions', () => {
         'reindex_target_6',
         Option.none,
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
@@ -678,14 +677,9 @@ describe('migration actions', () => {
     });
     it('resolves left index_not_found_exception if source index does not exist', async () => {
       expect.assertions(1);
-      const res = (await reindex(
-        client,
-        'no_such_index',
-        'reindex_target',
-        Option.none,
-        false,
-        excludeUnusedTypesQuery
-      )()) as Either.Right<ReindexResponse>;
+      const res = (await reindex(client, 'no_such_index', 'reindex_target', Option.none, false, {
+        match_all: {},
+      })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
                             Object {
@@ -705,7 +699,7 @@ describe('migration actions', () => {
         'existing_index_with_write_block',
         Option.none,
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '10s');
@@ -727,7 +721,7 @@ describe('migration actions', () => {
         'existing_index_with_write_block',
         Option.none,
         true,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '10s');
@@ -749,7 +743,7 @@ describe('migration actions', () => {
         'reindex_target',
         Option.none,
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '0s');
@@ -776,7 +770,7 @@ describe('migration actions', () => {
         'reindex_target_7',
         Option.none,
         false,
-        excludeUnusedTypesQuery
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       await waitForReindexTask(client, res.right.taskId, '10s')();
 
@@ -841,7 +835,7 @@ describe('migration actions', () => {
       const readWithPitTask = readWithPit(
         client,
         pitResponse.right.pitId,
-        undefined,
+        { match_all: {} },
         1000,
         undefined
       );
@@ -854,7 +848,13 @@ describe('migration actions', () => {
       const openPitTask = openPit(client, 'existing_index_with_docs');
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
-      const readWithPitTask = readWithPit(client, pitResponse.right.pitId, undefined, 3, undefined);
+      const readWithPitTask = readWithPit(
+        client,
+        pitResponse.right.pitId,
+        { match_all: {} },
+        3,
+        undefined
+      );
       const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
 
       await expect(docsResponse.right.outdatedDocuments.length).toBe(3);
@@ -952,7 +952,7 @@ describe('migration actions', () => {
       );
     });
 
-    it('doesn not return docs with _seq_no and _primary_term if not specified', async () => {
+    it('does not return docs with _seq_no and _primary_term if not specified', async () => {
       const openPitTask = openPit(client, 'existing_index_with_docs');
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
@@ -979,7 +979,13 @@ describe('migration actions', () => {
     });
 
     it('rejects if PIT does not exist', async () => {
-      const readWithPitTask = readWithPit(client, 'no_such_pit', undefined, 1000, undefined);
+      const readWithPitTask = readWithPit(
+        client,
+        'no_such_pit',
+        { match_all: {} },
+        1000,
+        undefined
+      );
       await expect(readWithPitTask()).rejects.toThrow('illegal_argument_exception');
     });
   });

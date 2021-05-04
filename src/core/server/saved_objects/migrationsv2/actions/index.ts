@@ -456,7 +456,7 @@ export interface ReadWithPit {
 export const readWithPit = (
   client: ElasticsearchClient,
   pitId: string,
-  query: estypes.QueryContainer | undefined,
+  query: estypes.QueryContainer,
   batchSize: number,
   searchAfter?: number[],
   seqNoPrimaryTerm?: boolean
