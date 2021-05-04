@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { v4 } from 'uuid';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
-// import { sequenceResponse } from '../../../search_strategy/timeline/eql/__mocks__';
+import { sampleDocNoSortId } from '../signals/__mocks__/es_results';
 
 import { queryAlertType } from './query';
 import { createRuleTypeMocks } from './__mocks__/rule_type';
@@ -24,7 +26,7 @@ describe('Custom query alerts', () => {
       indexPatterns: ['*'],
     };
 
-    services.scopedClusterClient.asCurrentUser.transport.request.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [],
@@ -56,17 +58,17 @@ describe('Custom query alerts', () => {
     dependencies.registry.registerType(queryAlertType);
 
     const params = {
-      eqlQuery: '*:*',
+      customQuery: '*:*',
       indexPatterns: ['*'],
     };
 
-    services.scopedClusterClient.asCurrentUser.transport.request.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
-          hits: ['TODO'],
+          hits: [sampleDocNoSortId(v4()), sampleDocNoSortId(v4()), sampleDocNoSortId(v4())],
           total: {
             relation: 'eq',
-            value: 0, // TODO
+            value: 3,
           },
         },
         took: 0,
