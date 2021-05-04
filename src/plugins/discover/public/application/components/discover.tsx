@@ -272,19 +272,22 @@ export function Discover({
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="s"
-                  onClick={() => setIsSidebarClosed(!isSidebarClosed)}
-                  data-test-subj="collapseSideBarButton"
-                  aria-controls="discover-sidebar"
-                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
-                    defaultMessage: 'Toggle sidebar',
-                  })}
-                  buttonRef={collapseIcon}
-                />
+                <div>
+                  <EuiSpacer size="s" />
+                  <EuiButtonIcon
+                    iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                    iconSize="m"
+                    size="xs"
+                    onClick={() => setIsSidebarClosed(!isSidebarClosed)}
+                    data-test-subj="collapseSideBarButton"
+                    aria-controls="discover-sidebar"
+                    aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                    aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
+                      defaultMessage: 'Toggle sidebar',
+                    })}
+                    buttonRef={collapseIcon}
+                  />
+                </div>
               </EuiFlexItem>
             </EuiHideFor>
             <EuiFlexItem className="dscPageContent__wrapper">
@@ -391,7 +394,7 @@ export function Discover({
 
                     <EuiFlexItem className="eui-yScroll">
                       <section
-                        className="dscTable eui-yScroll"
+                        className="dscTable eui-yScroll eui-xScroll"
                         aria-labelledby="documentsAriaLabel"
                         ref={scrollableDesktop}
                         tabIndex={-1}

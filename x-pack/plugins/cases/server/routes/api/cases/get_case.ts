@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASE_DETAILS_URL, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
+import { CASE_DETAILS_URL, ENABLE_CASE_CONNECTOR } from '../../../../common';
 
 export function initGetCaseApi({ router, logger }: RouteDeps) {
   router.get(

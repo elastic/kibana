@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Executable File Creation by a System Critical Process",
-  "query": "event.category:file and not event.type:deletion and file.extension:(exe or dll) and process.name:(smss.exe or autochk.exe or csrss.exe or wininit.exe or services.exe or lsass.exe or winlogon.exe or userinit.exe or LogonUI.exe)",
+  "query": "file where event.type != \"deletion\" and\n  file.extension : (\"exe\", \"dll\") and\n  process.name : (\"smss.exe\",\n                  \"autochk.exe\",\n                  \"csrss.exe\",\n                  \"wininit.exe\",\n                  \"services.exe\",\n                  \"lsass.exe\",\n                  \"winlogon.exe\",\n                  \"userinit.exe\",\n                  \"LogonUI.exe\")\n",
   "risk_score": 73,
   "rule_id": "e94262f2-c1e9-4d3f-a907-aeab16712e1a",
   "severity": "high",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 4
 }
