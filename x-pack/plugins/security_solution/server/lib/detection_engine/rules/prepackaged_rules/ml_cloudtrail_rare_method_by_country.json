@@ -7,7 +7,7 @@
   "false_positives": [
     "New or unusual command and user geolocation activity can be due to manual troubleshooting or reconfiguration; changes in cloud automation scripts or workflows; adoption of new services; expansion into new regions; increased adoption of work from home policies; or users who travel frequently."
   ],
-  "from": "now-60m",
+  "from": "now-2h",
   "interval": "15m",
   "license": "Elastic License v2",
   "machine_learning_job_id": "rare_method_for_a_country",
@@ -26,5 +26,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 3
+  "version": 4
 }
