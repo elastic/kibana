@@ -9,6 +9,8 @@ def label(size) {
       return 'docker && linux && immutable'
     case 's-highmem':
       return 'docker && tests-s'
+    case 'm':
+      return 'docker && linux && immutable && gobld/machineType:n2-standard-8'
     case 'm-highmem':
       return 'docker && linux && immutable && gobld/machineType:n1-highmem-8'
     case 'l':
