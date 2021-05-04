@@ -28,22 +28,19 @@ export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) 
       <EuiFlexItem>
         <EuiFieldSearch
           defaultValue={query}
-          placeholder={i18n.translate(
-            'xpack.securitySolution.trustedapps.list.search.placeholder',
-            {
-              defaultMessage: 'Search',
-            }
-          )}
+          placeholder={i18n.translate('xpack.securitySolution.list.search.placeholder', {
+            defaultMessage: 'Search',
+          })}
           onChange={handleOnChangeSearchField}
           onSearch={onSearch}
           isClearable
           fullWidth
-          data-test-subj="trustedAppSearchField"
+          data-test-subj="searchField"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="trustedAppSearchButton">
+      <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="searchButton">
         <EuiButton iconType="refresh">
-          {i18n.translate('xpack.securitySolution.trustedapps.list.search.button', {
+          {i18n.translate('xpack.securitySolution.list.search.button', {
             defaultMessage: 'Refresh',
           })}
         </EuiButton>
