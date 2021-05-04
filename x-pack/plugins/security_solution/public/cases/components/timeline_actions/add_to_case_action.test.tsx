@@ -116,6 +116,7 @@ describe('AddToCaseAction', () => {
       alertId: 'test-id',
       index: 'test-index',
       rule: { id: 'rule-id', name: 'rule-name' },
+      owner: 'securitySolution',
     });
   });
 
@@ -138,16 +139,11 @@ describe('AddToCaseAction', () => {
     expect(mockAllCasesModal.mock.calls[0][0].alertData).toEqual({
       alertId: 'test-id',
       index: 'test-index',
-<<<<<<< HEAD
       rule: {
         id: 'rule-id',
         name: null,
       },
-      type: 'alert',
       owner: 'securitySolution',
-=======
-      rule: { id: 'rule-id', name: null },
->>>>>>> 9e2e8b9f19793ad658dc0ccea9acd27dbc1bf766
     });
   });
 

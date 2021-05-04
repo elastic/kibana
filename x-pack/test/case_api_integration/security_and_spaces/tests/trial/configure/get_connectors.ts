@@ -120,6 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
           name: 'ServiceNow Connector',
           config: { apiUrl: 'http://some.non.existent.com' },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
       ]);

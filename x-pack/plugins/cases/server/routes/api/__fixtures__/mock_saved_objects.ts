@@ -503,6 +503,7 @@ export const mockCaseMappingsResilient: Array<SavedObject<ConnectorMappings>> = 
     id: 'mock-mappings-1',
     attributes: {
       mappings: mappings[ConnectorTypes.resilient],
+      owner: 'securitySolution',
     },
     references: [],
   },

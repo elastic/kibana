@@ -59,6 +59,7 @@ describe('AllCasesSelectorModal', () => {
         },
         index: 'index-id',
         alertId: 'alert-id',
+        owner: 'securitySolution',
       },
       disabledStatuses: [],
       updateCase,

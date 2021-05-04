@@ -28,6 +28,7 @@ const comments: Comment[] = [
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
+    owner: 'securitySolution',
   },
   {
     associationType: AssociationType.case,
@@ -46,6 +47,7 @@ const comments: Comment[] = [
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
+    owner: 'securitySolution',
   },
 ];
 

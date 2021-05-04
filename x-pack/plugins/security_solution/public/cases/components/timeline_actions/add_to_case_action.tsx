@@ -49,7 +49,6 @@ interface PostCommentArg {
   };
   updateCase?: (newCase: Case) => void;
   subCaseId?: string;
-  // TODO: refactor
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({

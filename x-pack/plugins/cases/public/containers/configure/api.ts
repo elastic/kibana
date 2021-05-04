@@ -16,6 +16,7 @@ import {
   CasesConfigureRequest,
   CasesConfigureResponse,
   CasesConfigurationsResponse,
+  getCaseConfigurationDetailsUrl,
 } from '../../../common';
 import { KibanaServices } from '../../common/lib/kibana';
 
@@ -26,7 +27,6 @@ import {
   decodeCaseConfigureResponse,
 } from '../utils';
 import { CaseConfigure } from './types';
-import { getCaseConfigurationDetailsUrl } from '../../../../../cases/common/api/helpers';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
   const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
