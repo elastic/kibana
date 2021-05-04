@@ -211,6 +211,54 @@ export const axisTitlesVisibilityConfig: ExpressionFunctionDefinition<
   },
 };
 
+export interface AxisExtentConfig {
+  mode: 'full' | 'dataBounds' | 'custom';
+  lowerBound?: number;
+  upperBound?: number;
+}
+
+export const axisExtentConfig: ExpressionFunctionDefinition<
+  'lens_xy_axisExtentConfig',
+  null,
+  AxisExtentConfig,
+  AxisExtentConfigResult
+> = {
+  name: 'lens_xy_axisExtentConfig',
+  aliases: [],
+  type: 'lens_xy_axisExtentConfig',
+  help: `Configure the xy chart's axis extents`,
+  inputTypes: ['null'],
+  args: {
+    mode: {
+      types: ['string'],
+      options: ['full', 'dataBounds', 'custom'],
+      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
+        defaultMessage: 'The extent mode',
+      }),
+    },
+    lowerBound: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
+        defaultMessage: 'The extent mode',
+      }),
+    },
+    upperBound: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.extentMode.help', {
+        defaultMessage: 'The extent mode',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: AxisExtentConfig) {
+    return {
+      type: 'lens_xy_axisExtentConfig',
+      ...args,
+    };
+  },
+};
+
+export type AxisExtentConfigResult = AxisExtentConfig & { type: 'lens_xy_axisExtentConfig' };
+
 interface AxisConfig {
   title: string;
   hide?: boolean;
@@ -404,6 +452,8 @@ export interface XYArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
+  yLeftExtent: AxisExtentConfigResult;
+  yRightExtent: AxisExtentConfigResult;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   valueLabels: ValueLabelConfig;
   layers: LayerArgs[];
@@ -425,6 +475,8 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
+  yLeftExtent?: AxisExtentConfig;
+  yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];
   xTitle?: string;
   yTitle?: string;

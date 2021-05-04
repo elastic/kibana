@@ -15,7 +15,7 @@ interface FormattedMetric {
   fieldFormat: SerializedFieldFormat;
 }
 
-type GroupsConfiguration = Array<{
+export type GroupsConfiguration = Array<{
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;

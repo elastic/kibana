@@ -14,9 +14,13 @@ import {
   EuiSpacer,
   EuiFieldText,
   IconType,
+  EuiFormRow,
+  EuiButtonGroup,
+  htmlIdGenerator,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { XYLayerConfig, AxesSettingsConfig } from './types';
+import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from './types';
 import { ToolbarPopover } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
@@ -79,6 +83,15 @@ export interface AxisSettingsPopoverProps {
    * Flag whether endzones are visible
    */
   endzonesVisible?: boolean;
+  /**
+   *  axis extent
+   */
+  extent?: AxisExtentConfig;
+  /**
+   * set axis extent
+   */
+  setExtent?: (extent: AxisExtentConfig) => void;
+  hasBarOnAxis: boolean;
 }
 const popoverConfig = (
   axis: AxesSettingsConfigKeys,
@@ -134,6 +147,7 @@ const popoverConfig = (
   }
 };
 
+const idPrefix = htmlIdGenerator()();
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
   axis,
@@ -148,6 +162,9 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   toggleAxisTitleVisibility,
   setEndzoneVisibility,
   endzonesVisible,
+  extent,
+  setExtent,
+  hasBarOnAxis,
 }) => {
   const [title, setTitle] = useState<string | undefined>(axisTitle);
 
@@ -234,6 +251,132 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
           />
+        </>
+      )}
+      {extent && setExtent && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            display="rowCompressed"
+            fullWidth
+            label={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
+              defaultMessage: 'Bounds',
+            })}
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
+                defaultMessage: 'Bounds',
+              })}
+              data-test-subj="lnsXY_axisBounds_groups"
+              name="axisBounds"
+              buttonSize="compressed"
+              options={[
+                {
+                  id: `${idPrefix}full`,
+                  label: i18n.translate('xpack.lens.xyChart.axisExtent.full', {
+                    defaultMessage: 'Full',
+                  }),
+                  'data-test-subj': 'lnsXY_axisExtent_groups_full',
+                },
+                {
+                  id: `${idPrefix}dataBounds`,
+                  label: i18n.translate('xpack.lens.xyChart.axisExtent.dataBounds', {
+                    defaultMessage: 'Data bounds',
+                  }),
+                  'data-test-subj': 'lnsXY_axisExtent_groups_DataBounds',
+                  isDisabled: hasBarOnAxis,
+                },
+                {
+                  id: `${idPrefix}custom`,
+                  label: i18n.translate('xpack.lens.xyChart.axisExtent.custom', {
+                    defaultMessage: 'Custom',
+                  }),
+                  'data-test-subj': 'lnsXY_axisExtent_groups_custom',
+                },
+              ]}
+              idSelected={`${idPrefix}${extent.mode}`}
+              onChange={(id) => {
+                const newMode = id.replace(idPrefix, '') as AxisExtentConfig['mode'];
+                setExtent({ ...extent, mode: newMode });
+              }}
+            />
+          </EuiFormRow>
+          {extent.mode === 'custom' && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    display="rowCompressed"
+                    fullWidth
+                    label={i18n.translate('xpack.lens.xyChart.lowerBoundLabel', {
+                      defaultMessage: 'Lower bound',
+                    })}
+                    isInvalid={
+                      hasBarOnAxis && extent.lowerBound !== undefined && extent.lowerBound > 0
+                    }
+                    error={
+                      hasBarOnAxis &&
+                      extent.lowerBound !== undefined &&
+                      extent.lowerBound > 0 &&
+                      i18n.translate('xpack.lens.xyChart.lowerBoundError', {
+                        defaultMessage: "Lower bound can't be above zero for bar series",
+                      })
+                    }
+                  >
+                    <EuiFieldNumber
+                      value={extent.lowerBound || ''}
+                      isInvalid={
+                        hasBarOnAxis && extent.lowerBound !== undefined && extent.lowerBound > 0
+                      }
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (Number.isNaN(Number(val))) {
+                          setExtent({
+                            ...extent,
+                            lowerBound: undefined,
+                          });
+                        } else {
+                          setExtent({
+                            ...extent,
+                            lowerBound: val,
+                          });
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    display="rowCompressed"
+                    fullWidth
+                    label={i18n.translate('xpack.lens.xyChart.upperBoundLabel', {
+                      defaultMessage: 'Upper bound',
+                    })}
+                  >
+                    <EuiFieldNumber
+                      value={extent.upperBound || ''}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        if (Number.isNaN(Number(val))) {
+                          setExtent({
+                            ...extent,
+                            upperBound: undefined,
+                          });
+                        } else {
+                          setExtent({
+                            ...extent,
+                            upperBound: val,
+                          });
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </>
       )}
     </ToolbarPopover>

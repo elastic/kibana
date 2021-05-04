@@ -135,6 +135,18 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Y right axis title',
       }),
     },
+    yLeftExtent: {
+      types: ['lens_xy_axisExtentConfig'],
+      help: i18n.translate('xpack.lens.xyChart.yLeftExtent.help', {
+        defaultMessage: 'Y left axis extents',
+      }),
+    },
+    yRightExtent: {
+      types: ['lens_xy_axisExtentConfig'],
+      help: i18n.translate('xpack.lens.xyChart.yRightExtent.help', {
+        defaultMessage: 'Y right axis extents',
+      }),
+    },
     legend: {
       types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
@@ -345,6 +357,8 @@ export function XYChart({
     gridlinesVisibilitySettings,
     valueLabels,
     hideEndzones,
+    yLeftExtent,
+    yRightExtent,
   } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -597,24 +611,42 @@ export function XYChart({
         }}
       />
 
-      {yAxesConfiguration.map((axis) => (
-        <Axis
-          key={axis.groupId}
-          id={axis.groupId}
-          groupId={axis.groupId}
-          position={axis.position}
-          title={getYAxesTitles(axis.series, axis.groupId)}
-          gridLine={{
-            visible:
-              axis.groupId === 'right'
-                ? gridlinesVisibilitySettings?.yRight
-                : gridlinesVisibilitySettings?.yLeft,
-          }}
-          hide={filteredLayers[0].hide}
-          tickFormat={(d) => axis.formatter?.convert(d) || ''}
-          style={getYAxesStyle(axis.groupId)}
-        />
-      ))}
+      {yAxesConfiguration.map((axis) => {
+        const hasBars = Boolean(
+          axis.series.some((series) =>
+            filteredLayers.find((l) => l.layerId === series.layer)?.seriesType.includes('bar')
+          )
+        );
+        const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
+        return (
+          <Axis
+            key={axis.groupId}
+            id={axis.groupId}
+            groupId={axis.groupId}
+            position={axis.position}
+            title={getYAxesTitles(axis.series, axis.groupId)}
+            gridLine={{
+              visible:
+                axis.groupId === 'right'
+                  ? gridlinesVisibilitySettings?.yRight
+                  : gridlinesVisibilitySettings?.yLeft,
+            }}
+            hide={filteredLayers[0].hide}
+            tickFormat={(d) => axis.formatter?.convert(d) || ''}
+            style={getYAxesStyle(axis.groupId)}
+            domain={{
+              fit: !hasBars && extent.mode === 'dataBounds',
+              min:
+                extent.mode === 'custom' &&
+                extent.lowerBound &&
+                (!hasBars || extent.lowerBound <= 0)
+                  ? extent.lowerBound
+                  : undefined,
+              max: extent.mode === 'custom' && extent.upperBound ? extent.upperBound : undefined,
+            }}
+          />
+        );
+      })}
 
       {!hideEndzones && (
         <XyEndzones

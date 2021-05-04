@@ -210,6 +210,20 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       : !state?.legend.isVisible
       ? 'hide'
       : 'show';
+  const hasBarOnLeftAxis = Boolean(
+    axisGroups
+      .find((group) => group.groupId === 'left')
+      ?.series?.some((series) =>
+        state.layers.find((l) => l.layerId === series.layer)?.seriesType.includes('bar')
+      )
+  );
+  const hasBarOnRightAxis = Boolean(
+    axisGroups
+      .find((group) => group.groupId === 'left')
+      ?.series?.some((series) =>
+        state.layers.find((l) => l.layerId === series.layer)?.seriesType.includes('bar')
+      )
+  );
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
@@ -282,6 +296,14 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               }
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+              extent={state?.yLeftExtent || { mode: 'full' }}
+              setExtent={(extent) => {
+                setState({
+                  ...state,
+                  yLeftExtent: extent,
+                });
+              }}
+              hasBarOnAxis={hasBarOnLeftAxis}
             />
           </TooltipWrapper>
           <AxisSettingsPopover
@@ -297,6 +319,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
+            hasBarOnAxis={false}
           />
           <TooltipWrapper
             tooltipContent={
@@ -327,6 +350,14 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               }
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+              extent={state?.yRightExtent || { mode: 'full' }}
+              setExtent={(extent) => {
+                setState({
+                  ...state,
+                  yRightExtent: extent,
+                });
+              }}
+              hasBarOnAxis={hasBarOnRightAxis}
             />
           </TooltipWrapper>
         </EuiFlexGroup>
