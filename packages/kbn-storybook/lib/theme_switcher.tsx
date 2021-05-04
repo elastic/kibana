@@ -21,36 +21,41 @@ export function ThemeSwitcher() {
     updateGlobals({ euiTheme: defaultTheme });
   }
 
-  const links: Link[] = [
-    {
-      id: 'v8.light',
-      title: 'Amsterdam: Light',
-    },
-    {
-      id: 'v8.dark',
-      title: 'Amsterdam: Dark',
-    },
-    { id: 'v7.light', title: 'Light' },
-    { id: 'v7.dark', title: 'Dark' },
-  ].map((link) => ({
-    ...link,
-    onClick: (_event, item) => {
-      if (item.id !== selectedTheme) {
-        updateGlobals({ euiTheme: item.id });
-      }
-    },
-    active: selectedTheme === link.id,
-  }));
+  function Menu({ onHide }: { onHide: () => void }) {
+    const links: Link[] = [
+      {
+        id: 'v8.light',
+        title: 'Amsterdam: Light',
+      },
+      {
+        id: 'v8.dark',
+        title: 'Amsterdam: Dark',
+      },
+      { id: 'v7.light', title: 'Light' },
+      { id: 'v7.dark', title: 'Dark' },
+    ].map((link) => ({
+      ...link,
+      onClick: (_event, item) => {
+        if (item.id !== selectedTheme) {
+          updateGlobals({ euiTheme: item.id });
+        }
+        onHide();
+      },
+      active: selectedTheme === link.id,
+    }));
+
+    return <TooltipLinkList links={links} />;
+  }
 
   return (
     <WithTooltip
       placement="top"
       trigger="click"
       closeOnClick
-      tooltip={() => <TooltipLinkList links={links} />}
+      tooltip={({ onHide }) => <Menu onHide={onHide} />}
     >
       <IconButton key="eui-theme" title="Change the EUI theme">
-        <Icons icon="hearthollow" />
+        <Icons icon={selectedTheme?.includes('dark') ? 'heart' : 'hearthollow'} />
       </IconButton>
     </WithTooltip>
   );
