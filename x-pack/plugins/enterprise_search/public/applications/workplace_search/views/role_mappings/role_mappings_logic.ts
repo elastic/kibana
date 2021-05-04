@@ -69,20 +69,20 @@ interface RoleMappingsActions {
 }
 
 interface RoleMappingsValues {
+  includeInAllGroups: boolean;
+  attributeName: AttributeName;
+  attributeValue: string;
   attributes: string[];
   availableAuthProviders: string[];
+  availableGroups: RoleGroup[];
+  dataLoading: boolean;
   elasticsearchRoles: string[];
+  multipleAuthProvidersConfig: boolean;
   roleMapping: WSRoleMapping | null;
   roleMappings: WSRoleMapping[];
   roleType: Role;
-  attributeValue: string;
-  attributeName: AttributeName;
-  dataLoading: boolean;
-  multipleAuthProvidersConfig: boolean;
-  availableGroups: RoleGroup[];
-  selectedGroups: Set<string>;
-  includeInAllGroups: boolean;
   selectedAuthProviders: string[];
+  selectedGroups: Set<string>;
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
