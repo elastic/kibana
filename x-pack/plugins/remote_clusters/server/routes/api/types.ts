@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+
+export type ScopedClusterClientMock = ReturnType<
+  typeof elasticsearchServiceMock.createScopedClusterClient
+>;
