@@ -82,9 +82,11 @@ export const getMetadataListRequestHandler = function (
     }
 
     const metadataRequestContext: MetadataRequestContext = {
+      esClient: context.core.elasticsearch.client,
       endpointAppContextService: endpointAppContext.service,
       logger,
       requestHandlerContext: context,
+      savedObjectsClient: context.core.savedObjects.client,
     };
 
     const unenrolledAgentIds = await findAllUnenrolledAgentIds(
@@ -117,9 +119,8 @@ export const getMetadataListRequestHandler = function (
       }
     );
 
-    const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(
-      await context.core.elasticsearch.legacy.client.callAsCurrentUser('search', queryParams)
-    );
+    const result = await context.core.elasticsearch.client.asCurrentUser.search(queryParams);
+    const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(result.body);
     return response.ok({
       body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),
     });
@@ -143,9 +144,11 @@ export const getMetadataRequestHandler = function (
     }
 
     const metadataRequestContext: MetadataRequestContext = {
+      esClient: context.core.elasticsearch.client,
       endpointAppContextService: endpointAppContext.service,
       logger,
       requestHandlerContext: context,
+      savedObjectsClient: context.core.savedObjects.client,
     };
 
     try {
