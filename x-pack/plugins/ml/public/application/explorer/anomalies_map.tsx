@@ -25,10 +25,7 @@ import {
 } from '../../../../maps/common/constants';
 import { useMlKibana } from '../contexts/kibana';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
-import {
-  EMSTermJoinConfig,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../maps/public/ems_autosuggest';
+import { EMSTermJoinConfig } from '../../../../maps/public';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 
 const MAX_ENTITY_VALUES = 3;
