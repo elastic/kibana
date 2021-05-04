@@ -14,6 +14,7 @@ import {
   isLoadingResourceState,
   isLoadedResourceState,
   isFailedResourceState,
+  getLastLoadedResourceState,
 } from '../../../state/async_resource_state';
 import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import {
@@ -46,15 +47,7 @@ export const getCurrentListPageDataState: EventFiltersSelector<StoreState['listP
 export const getListApiSuccessResponse: EventFiltersSelector<
   Immutable<FoundExceptionListItemSchema> | undefined
 > = createSelector(getCurrentListPageDataState, (listPageData) => {
-  if (isLoadedResourceState(listPageData)) {
-    return listPageData.data.content;
-  } else if (
-    isLoadingResourceState(listPageData) &&
-    isLoadedResourceState(listPageData.previousState)
-  ) {
-    return listPageData.previousState.data.content;
-  }
-  return undefined;
+  return getLastLoadedResourceState(listPageData)?.data.content;
 });
 
 export const getListItems: EventFiltersSelector<
@@ -71,13 +64,7 @@ export const getListItems: EventFiltersSelector<
 export const getCurrentListItemsQuery: EventFiltersSelector<EventFiltersServiceGetListOptions> = createSelector(
   getCurrentListPageDataState,
   (pageDataState) => {
-    return (
-      (isLoadedResourceState(pageDataState) && pageDataState.data.query) ||
-      (isLoadingResourceState(pageDataState) &&
-        isLoadedResourceState(pageDataState.previousState) &&
-        pageDataState.previousState.data.query) ||
-      {}
-    );
+    return getLastLoadedResourceState(pageDataState)?.data.query ?? {};
   }
 );
 
