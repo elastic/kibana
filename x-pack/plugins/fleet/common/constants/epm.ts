@@ -16,7 +16,6 @@ export const requiredPackages = {
   Endpoint: 'endpoint',
   ElasticAgent: 'elastic_agent',
   FleetServer: FLEET_SERVER_PACKAGE,
-  SecurityDetectionEngine: 'security_detection_engine',
 } as const;
 
 // these are currently identical. we can separate if they later diverge

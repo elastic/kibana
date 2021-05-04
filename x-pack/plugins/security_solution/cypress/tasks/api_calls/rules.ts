@@ -85,7 +85,7 @@ export const createCustomRuleActivated = (
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
       from: 'now-17520h',
-      index: ['auditbeat-*'],
+      index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
       enabled: true,
