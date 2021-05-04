@@ -37,7 +37,6 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       },
     },
     async (context, request, response) => {
-      console.log(`${new Date().toISOString()} finding statuses bulk`);
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
       const alertsClient = context.alerting?.getAlertsClient();
@@ -71,7 +70,6 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
           }
           return mergeStatuses(id, [...lastFiveErrorsForId], acc);
         }, {});
-        console.log(`${new Date().toISOString()} finished finding statuses bulk`);
         return response.ok({ body: statuses });
       } catch (err) {
         const error = transformError(err);

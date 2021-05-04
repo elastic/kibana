@@ -15,6 +15,7 @@ import {
 } from '../../../../../../../src/core/server';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleStatusSOAttributes } from '../rules/types';
+import { buildChunkedOrFilter } from './utils';
 
 export interface RuleStatusSavedObjectsClient {
   find: (
@@ -42,12 +43,16 @@ export const ruleStatusSavedObjectsClientFactory = (
       type: ruleStatusSavedObjectType,
     }),
   findBulk: async (ids) => {
-    const filter = `${ruleStatusSavedObjectType}.attributes.alertId: (${ids.join(' OR ')})`;
+    if (ids.length === 0) {
+      return {};
+    }
+    const filter = buildChunkedOrFilter(`${ruleStatusSavedObjectType}.attributes.alertId`, ids);
     const order: 'desc' = 'desc';
     const aggs = {
       alertIds: {
         terms: {
           field: `${ruleStatusSavedObjectType}.attributes.alertId`,
+          size: ids.length,
         },
         aggs: {
           most_recent_statuses: {

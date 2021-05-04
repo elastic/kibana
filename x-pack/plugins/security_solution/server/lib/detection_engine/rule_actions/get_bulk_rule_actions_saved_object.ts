@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import { AlertServices } from '../../../../../alerting/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 import { getRuleActionsFromSavedObject } from './utils';
 import { RulesActionsSavedObject } from './get_rule_actions_saved_object';
+import { buildChunkedOrFilter } from '../signals/utils';
 
 interface GetBulkRuleActionsSavedObject {
   alertIds: string[];
@@ -21,13 +21,10 @@ export const getBulkRuleActionsSavedObject = async ({
   alertIds,
   savedObjectsClient,
 }: GetBulkRuleActionsSavedObject): Promise<Record<string, RulesActionsSavedObject>> => {
-  const chunkedIdArrays = chunk(alertIds, 1024);
-  const filter = chunkedIdArrays
-    .map((chunkedArray) => {
-      const joinedIds = chunkedArray.join(' OR ');
-      return `${ruleActionsSavedObjectType}.attributes.ruleAlertId: (${joinedIds})`;
-    })
-    .join(' OR ');
+  const filter = buildChunkedOrFilter(
+    `${ruleActionsSavedObjectType}.attributes.ruleAlertId`,
+    alertIds
+  );
   const {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     saved_objects,

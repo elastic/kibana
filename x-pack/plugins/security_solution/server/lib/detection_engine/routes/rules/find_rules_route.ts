@@ -33,7 +33,6 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
       },
     },
     async (context, request, response) => {
-      console.log(`${new Date().toISOString()} starting _find handler`);
       const siemResponse = buildSiemResponse(response);
       const validationErrors = findRuleValidateTypeDependents(request.query);
       if (validationErrors.length) {
@@ -60,14 +59,11 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
           fields: query.fields,
         });
         const alertIds = rules.data.map((rule) => rule.id);
-        console.log(`${new Date().toISOString()} found rules`);
         const [ruleStatuses, ruleActions] = await Promise.all([
           ruleStatusClient.findBulk(alertIds),
           getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
-        console.log(`${new Date().toISOString()} found rule statuses and actions`);
         const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
-        console.log(`${new Date().toISOString()} finishing _find handler`);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {
