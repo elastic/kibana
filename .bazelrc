@@ -2,15 +2,18 @@
 # Import shared settings first so we can override below
 import %workspace%/.bazelrc.common
 
-## Disabled for now
 # Remote cache settings for local env
-# build --remote_cache=https://storage.googleapis.com/kibana-bazel-cache
-# build --incompatible_remote_results_ignore_disk=true
-# build --remote_accept_cached=true
-# build --remote_upload_local_results=false
+build --bes_results_url=https://app.buildbuddy.io/invocation/
+build --bes_backend=grpcs://cloud.buildbuddy.io
+build --remote_cache=grpcs://cloud.buildbuddy.io
+build --noremote_upload_local_results # Uploads logs & artifacts without writing to cache
+build --remote_timeout=3600
+build --remote_header=x-buildbuddy-api-key=3EYk49W2NefOx2n3yMze
+build --remote_accept_cached=true
+build --remote_upload_local_results=false
+build --incompatible_remote_results_ignore_disk=true
 
-# BuildBuddy
-## Metadata settings
+# BuildBuddy metadata settings
 build --workspace_status_command="node ./src/dev/bazel_workspace_status.js"
 # Enable this in case you want to share your build info
 # build --build_metadata=VISIBILITY=PUBLIC
