@@ -7,7 +7,7 @@
  */
 
 /**
- * A Kibana Space.
+ * A Space.
  */
 export interface Space {
   /**
