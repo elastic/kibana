@@ -28,9 +28,9 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initShareToSpacesApi } from './share_to_space';
+import { initUpdateObjectsSpacesApi } from './update_objects_spaces';
 
-describe('share to space', () => {
+describe('update_objects_spaces', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
@@ -61,7 +61,7 @@ describe('share to space', () => {
       basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
-    initShareToSpacesApi({
+    initUpdateObjectsSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
       log,

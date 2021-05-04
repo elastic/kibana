@@ -15,7 +15,7 @@ import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 import type { ExternalRouteDeps } from './';
 
-export function initShareToSpacesApi(deps: ExternalRouteDeps) {
+export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getStartServices } = deps;
 
   const spacesSchema = schema.arrayOf(
