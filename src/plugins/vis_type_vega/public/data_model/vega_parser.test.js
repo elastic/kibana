@@ -11,11 +11,7 @@ import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
-jest.mock('../services', () => ({
-  getData: jest.fn(() => ({
-    indexPatterns: { find: jest.fn(() => []) },
-  })),
-}));
+jest.mock('../services');
 
 describe(`VegaParser.parseAsync`, () => {
   test(`should throw an error in case of $spec is not defined`, async () => {

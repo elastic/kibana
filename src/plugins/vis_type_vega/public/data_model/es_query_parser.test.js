@@ -36,11 +36,7 @@ function create(min, max, dashboardCtx) {
   return inst;
 }
 
-jest.mock('../services', () => ({
-  getData: jest.fn(() => ({
-    indexPatterns: { find: jest.fn(() => []) },
-  })),
-}));
+jest.mock('../services');
 
 describe(`EsQueryParser time`, () => {
   test(`roundInterval(4s)`, () => {

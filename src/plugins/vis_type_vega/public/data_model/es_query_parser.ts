@@ -10,7 +10,6 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { getData } from '../services';
 import { TimeCache } from './time_cache';
 import { SearchAPI } from './search_api';
 import {
@@ -203,21 +202,10 @@ export class EsQueryParser {
    * @returns {Promise<void>}
    */
   async populateData(requests: EsQueryRequest[]) {
-    const { indexPatterns } = getData();
-    const esSearches = [];
-
-    for (const [requestIndex, request] of requests.entries()) {
-      const indexPatternTitle = request.url.index;
-      const indexPattern = (await indexPatterns.find(indexPatternTitle)).find(
-        (index) => index.title === indexPatternTitle
-      );
-
-      esSearches.push({
-        ...request.url,
-        name: getRequestName(request, requestIndex),
-        runtimeFields: indexPattern?.getComputedFields().runtimeFields,
-      });
-    }
+    const esSearches = requests.map((r: EsQueryRequest, index: number) => ({
+      ...r.url,
+      name: getRequestName(r, index),
+    }));
 
     const data$ = this._searchAPI.search(esSearches);
 
