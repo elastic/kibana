@@ -17,4 +17,4 @@ export const isKeywordDuplicate = (fieldName: string, fieldNamesSet: Set<string>
 
 // removes the `.keyword` postfix form a field name if applicable
 export const removeKeywordPostfix = (fieldName: string): string =>
-  fieldName.endsWith(KEYWORD_POSTFIX) ? fieldName.split('.').slice(0, -1).join('.') : fieldName;
+  fieldName.replace(new RegExp(`${KEYWORD_POSTFIX}$`), '');
