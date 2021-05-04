@@ -28,8 +28,8 @@ import {
 } from './constants';
 
 interface RoleMappingsServerDetails {
-  multipleAuthProvidersConfig: boolean;
   roleMappings: WSRoleMapping[];
+  multipleAuthProvidersConfig: boolean;
 }
 
 interface RoleMappingServerDetails {
