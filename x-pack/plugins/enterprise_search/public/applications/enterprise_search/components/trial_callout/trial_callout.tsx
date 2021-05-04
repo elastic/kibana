@@ -21,18 +21,23 @@ export const TrialCallout: React.FC = () => {
   if (!isTrial) return null;
 
   const title = (
-    <FormattedMessage
-      id="xpack.enterpriseSearch.trialCalloutTitle"
-      defaultMessage="Your Elastic Stack Trial license, which enables Platinum features, expires in {days, plural, one {# day} other {# days}}. {link}"
-      values={{
-        days: moment(license?.expiryDateInMillis).diff(moment({ hours: 0 }), 'days'),
-        link: (
-          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
-            <strong>Learn more about Elastic Stack licenses.</strong>
-          </EuiLink>
-        ),
-      }}
-    />
+    <>
+      <FormattedMessage
+        id="xpack.enterpriseSearch.trialCalloutTitle"
+        defaultMessage="Your Elastic Stack Trial license, which enables Platinum features, expires in {days, plural, one {# day} other {# days}}."
+        values={{
+          days: moment(license?.expiryDateInMillis).diff(moment({ hours: 0 }), 'days'),
+        }}
+      />{' '}
+      <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+        <u>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.trialCalloutLink"
+            defaultMessage="Learn more about Elastic Stack licenses."
+          />
+        </u>
+      </EuiLink>
+    </>
   );
 
   return (
