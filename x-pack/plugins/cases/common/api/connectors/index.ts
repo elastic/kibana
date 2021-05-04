@@ -12,7 +12,7 @@ import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
 import { ServiceNowSIRFieldsRT } from './servicenow_sir';
-import { SwimlaneFieldsRT } from './swimlane';
+import { SwimlaneUnmappedFieldsRT } from './swimlane';
 
 export * from './jira';
 export * from './servicenow_itsm';
@@ -58,7 +58,7 @@ const ConnectorServiceNowITSMTypeFieldsRt = rt.type({
 
 const ConnectorSwimlaneTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.swimlane),
-  fields: rt.union([SwimlaneFieldsRT, rt.null]),
+  fields: rt.union([SwimlaneUnmappedFieldsRT, rt.null]),
 });
 
 const ConnectorServiceNowSIRTypeFieldsRt = rt.type({

@@ -25,7 +25,6 @@ export const ConfigMapping = {
   severityConfig: ConfigMapSchema,
 };
 
-export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 export const ConfigMappingSchema = schema.object(ConfigMapping);
 
 export const SwimlaneServiceConfiguration = {
