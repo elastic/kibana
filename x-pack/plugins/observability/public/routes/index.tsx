@@ -105,6 +105,7 @@ export const routes = {
         rangeFrom: t.string,
         rangeTo: t.string,
         kuery: t.string,
+        status: t.union([t.literal('all'), t.literal('open'), t.literal('closed')]),
         refreshPaused: jsonRt.pipe(t.boolean),
         refreshInterval: jsonRt.pipe(t.number),
       }),

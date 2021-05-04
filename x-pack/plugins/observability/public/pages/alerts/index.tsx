@@ -48,7 +48,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const {
-    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '' },
+    query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'all' },
   } = routeParams;
 
   // In a future milestone we'll have a page dedicated to rule management in
@@ -107,7 +107,14 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     [kuery, observabilityRuleRegistry, rangeFrom, rangeTo]
   );
 
-  const [statusFilter, setStatusFilter] = useState<Status>('all');
+  function setStatusFilter(value: Status) {
+    const nextSearchParams = new URLSearchParams(history.location.search);
+    nextSearchParams.set('status', value);
+    history.push({
+      ...history.location,
+      search: nextSearchParams.toString(),
+    });
+  }
 
   return (
     <EuiPageTemplate
@@ -176,7 +183,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <StatusFilter status={statusFilter} onChange={setStatusFilter} />
+                <StatusFilter status={status} onChange={setStatusFilter} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
