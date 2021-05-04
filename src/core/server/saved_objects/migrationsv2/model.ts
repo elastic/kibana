@@ -599,8 +599,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
       };
+    } else {
+      throwBadResponse(stateP, res);
     }
-    throwBadResponse(stateP, res);
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
@@ -624,11 +625,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           outdatedDocuments: res.right.outdatedDocuments,
           lastHitSortValue: res.right.lastHitSortValue,
         };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+        };
       }
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
-      };
     } else {
       throwBadResponse(stateP, res);
     }

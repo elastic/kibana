@@ -452,7 +452,6 @@ export interface ReadWithPit {
 
 /*
  * Requests documents from the index using PIT mechanism.
- * Filter unusedTypesToExclude documents out to exclude them from being migrated.
  * */
 export const readWithPit = (
   client: ElasticsearchClient,

@@ -111,6 +111,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.readWithPit(
         client,
         state.pitId,
+        // search for outdated documents only
         state.outdatedDocumentsQuery,
         state.batchSize,
         state.lastHitSortValue
