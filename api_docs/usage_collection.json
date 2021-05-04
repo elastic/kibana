@@ -232,7 +232,7 @@
             ],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 174
+              "lineNumber": 173
             },
             "signature": [
               "Logger"
@@ -248,7 +248,7 @@
             ],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 179
+              "lineNumber": 178
             },
             "signature": [
               {
@@ -271,26 +271,8 @@
             ],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 181
+              "lineNumber": 180
             }
-          },
-          {
-            "tags": [
-              "deprecated"
-            ],
-            "id": "def-server.ICollector.init",
-            "type": "Object",
-            "label": "init",
-            "description": [
-              "\nIf any preparation logic needs to be while setting up the collector"
-            ],
-            "source": {
-              "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 186
-            },
-            "signature": [
-              "Function | undefined"
-            ]
           },
           {
             "tags": [],
@@ -302,7 +284,7 @@
             ],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 198
+              "lineNumber": 192
             },
             "signature": [
               {
@@ -325,7 +307,7 @@
             ],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/types.ts",
-              "lineNumber": 202
+              "lineNumber": 196
             },
             "signature": [
               "() => boolean | Promise<boolean>"
@@ -334,7 +316,7 @@
         ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/types.ts",
-          "lineNumber": 172
+          "lineNumber": 171
         },
         "initialIsOpen": false
       },
@@ -593,7 +575,7 @@
           "lineNumber": 135
         },
         "signature": [
-          "{ type: string; init?: Function | undefined; isReady: () => Promise<boolean> | boolean; schema?: MakeSchemaFrom<TFetchReturn> | undefined; fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>; } : { extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest> | undefined; })"
+          "{ type: string; isReady: () => Promise<boolean> | boolean; schema?: MakeSchemaFrom<TFetchReturn> | undefined; fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>; } : { extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest> | undefined; })"
         ],
         "initialIsOpen": false
       },
@@ -661,7 +643,7 @@
           "lineNumber": 16
         },
         "signature": [
-          "{ type: string; init?: Function | undefined; isReady: () => boolean | Promise<boolean>; schema?: ",
+          "{ type: string; isReady: () => boolean | Promise<boolean>; schema?: ",
           {
             "pluginId": "usageCollection",
             "scope": "server",
