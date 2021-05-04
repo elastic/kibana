@@ -90,20 +90,20 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMappingData: (data: RoleMappingServerDetails) => data,
+    handleAuthProviderChange: (value: string[]) => ({ value }),
     handleRoleChange: (roleType: Role) => ({ roleType }),
     handleGroupSelectionChange: (groupId: string, selected: boolean) => ({ groupId, selected }),
-    handleAllGroupsSelectionChange: (selected: boolean) => ({ selected }),
     handleAttributeSelectorChange: (value: string, firstElasticsearchRole: string) => ({
       value,
       firstElasticsearchRole,
     }),
     handleAttributeValueChange: (value: string) => ({ value }),
-    handleAuthProviderChange: (value: string[]) => ({ value }),
-    resetState: () => true,
+    handleAllGroupsSelectionChange: (selected: boolean) => ({ selected }),
+    resetState: true,
+    initializeRoleMappings: true,
     initializeRoleMapping: (roleId?: string) => ({ roleId }),
-    handleSaveMapping: () => true,
-    handleDeleteMapping: () => true,
-    initializeRoleMappings: () => true,
+    handleDeleteMapping: true,
+    handleSaveMapping: true,
   },
   reducers: {
     dataLoading: [
