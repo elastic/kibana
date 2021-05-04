@@ -296,13 +296,13 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       } = values;
 
       const body = JSON.stringify({
+        roleType,
+        allGroups: includeInAllGroups,
+        authProvider: selectedAuthProviders,
         rules: {
           [attributeName]: attributeValue,
         },
-        roleType,
         groups: includeInAllGroups ? [] : Array.from(selectedGroups),
-        allGroups: includeInAllGroups,
-        authProvider: selectedAuthProviders,
       });
 
       const request = !roleMapping
