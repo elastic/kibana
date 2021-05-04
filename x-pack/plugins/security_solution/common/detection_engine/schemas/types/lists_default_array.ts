@@ -13,6 +13,7 @@ import { ListArray, list } from './lists';
 /**
  * Types the DefaultListArray as:
  *   - If null or undefined, then a default array of type list will be set
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultListArray = new t.Type<ListArray, ListArray | undefined, unknown>(
   'DefaultListArray',

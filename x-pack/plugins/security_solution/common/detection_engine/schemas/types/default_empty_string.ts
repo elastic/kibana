@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the DefaultEmptyString as:
  *   - If null or undefined, then a default of an empty string "" will be used
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultEmptyString = new t.Type<string, string | undefined, unknown>(
   'DefaultEmptyString',
