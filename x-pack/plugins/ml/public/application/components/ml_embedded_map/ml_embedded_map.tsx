@@ -14,9 +14,10 @@ import type {
   MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
-  MAP_SAVED_OBJECT_TYPE,
   RenderTooltipContentParams,
 } from '../../../../../maps/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
+
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
