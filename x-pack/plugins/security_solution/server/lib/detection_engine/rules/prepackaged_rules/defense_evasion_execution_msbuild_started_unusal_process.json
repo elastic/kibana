@@ -12,10 +12,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started an Unusual Process",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:MSBuild.exe and process.name:(csc.exe or iexplore.exe or powershell.exe)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"MSBuild.exe\" and\n  process.name : (\"csc.exe\", \"iexplore.exe\", \"powershell.exe\")\n",
   "references": [
     "https://blog.talosintelligence.com/2020/02/building-bypass-with-msbuild.html"
   ],
@@ -54,6 +54,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 7
+  "type": "eql",
+  "version": 8
 }
