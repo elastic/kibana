@@ -9,26 +9,26 @@ import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
   ActionConnector,
-  CaseResponse,
   CaseFullExternalService,
+  CaseResponse,
   CaseUserActionsResponse,
+  CommentAttributes,
+  CommentRequestAlertType,
+  CommentRequestUserType,
   CommentResponse,
   CommentResponseAlertsType,
   CommentType,
   ConnectorMappingsAttributes,
   ConnectorTypes,
-  CommentAttributes,
-  CommentRequestUserType,
-  CommentRequestAlertType,
-} from '../../../common/api';
+} from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
 import {
   BasicParams,
   EntityInformation,
-  ExternalServiceParams,
   ExternalServiceComment,
+  ExternalServiceParams,
   Incident,
   MapIncident,
   PipedField,
@@ -184,7 +184,7 @@ export const createIncident = async ({
 
   if (totalAlerts > 0) {
     comments.push({
-      comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
+      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
       commentId: `${theCase.id}-total-alerts`,
     });
   }

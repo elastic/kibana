@@ -58,6 +58,7 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
+import { registerHostIsolationRoutes } from './endpoint/routes/actions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
@@ -161,13 +162,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const config = this.config;
     const globalConfig = this.context.config.legacy.get();
 
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
     initSavedObjects(core.savedObjects);
-    initUiSettings(core.uiSettings);
+    initUiSettings(core.uiSettings, experimentalFeatures);
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
-      experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
+      experimentalFeatures,
     };
 
     initUsageCollectors({
@@ -205,6 +207,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
+    registerHostIsolationRoutes(router, endpointContext);
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,

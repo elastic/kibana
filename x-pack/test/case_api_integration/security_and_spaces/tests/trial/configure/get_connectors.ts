@@ -88,6 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
             projectKey: 'pkey',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
         {
@@ -99,6 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
             orgId: 'pkey',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
         {
@@ -109,6 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
             apiUrl: 'http://some.non.existent.com',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
         {

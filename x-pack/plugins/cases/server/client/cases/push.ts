@@ -17,7 +17,7 @@ import {
   ESCaseAttributes,
   ESCasesConfigureAttributes,
   CaseType,
-} from '../../../common/api';
+} from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';

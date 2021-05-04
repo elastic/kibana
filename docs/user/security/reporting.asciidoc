@@ -17,7 +17,7 @@ For more information, see
 
 [[reporting-app-users]]
 Access to reporting features is limited to privileged users. In older versions of Kibana, you could only grant
-users the privilege by assigning them the `reporting_user` role in Elasticsearch. In 7.13 and above, you have
+users the privilege by assigning them the `reporting_user` role in Elasticsearch. In 7.14 and above, you have
 the option to create your own roles that grant access to reporting features using <<kibana-privileges, {kib} privileges>>.
 
 It is recommended that you set `xpack.reporting.roles.enabled: false` in your kibana.yml to begin using Kibana

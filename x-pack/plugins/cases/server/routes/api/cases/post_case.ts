@@ -8,8 +8,8 @@
 import { wrapError, escapeHatch } from '../utils';
 
 import { RouteDeps } from '../types';
-import { CASES_URL } from '../../../../common/constants';
-import { CasePostRequest } from '../../../../common/api';
+import { CASES_URL } from '../../../../common';
+import { CasePostRequest } from '../../../../common';
 
 export function initPostCaseApi({ router, logger }: RouteDeps) {
   router.post(

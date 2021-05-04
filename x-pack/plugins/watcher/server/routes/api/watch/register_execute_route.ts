@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 
 import { RouteDependencies } from '../../../types';
@@ -22,16 +22,22 @@ const bodySchema = schema.object({
   watch: schema.object({}, { unknowns: 'allow' }),
 });
 
-function executeWatch(dataClient: ILegacyScopedClusterClient, executeDetails: any, watchJson: any) {
+function executeWatch(dataClient: IScopedClusterClient, executeDetails: any, watchJson: any) {
   const body = executeDetails;
   body.watch = watchJson;
 
-  return dataClient.callAsCurrentUser('watcher.executeWatch', {
-    body,
-  });
+  return dataClient.asCurrentUser.watcher
+    .executeWatch({
+      body,
+    })
+    .then(({ body: returnValue }) => returnValue);
 }
 
-export function registerExecuteRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerExecuteRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.put(
     {
       path: '/api/watcher/watch/execute',
@@ -45,7 +51,7 @@ export function registerExecuteRoute({ router, license, lib: { isEsError } }: Ro
 
       try {
         const hit = await executeWatch(
-          ctx.watcher!.client,
+          ctx.core.elasticsearch.client,
           executeDetails.upstreamJson,
           watch.watchJson
         );
@@ -66,13 +72,7 @@ export function registerExecuteRoute({ router, license, lib: { isEsError } }: Ro
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

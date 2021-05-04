@@ -21,7 +21,7 @@ import {
   CasePostRequest,
   CaseType,
   OWNER_FIELD,
-} from '../../../common/api';
+} from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { ensureAuthorized, getConnectorFromConfiguration } from '../utils';
 

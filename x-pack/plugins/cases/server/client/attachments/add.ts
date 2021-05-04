@@ -29,7 +29,7 @@ import {
   User,
   AlertCommentRequestRt,
   CommentRequest,
-} from '../../../common/api';
+} from '../../../common';
 import {
   buildCaseUserActionItem,
   buildCommentUserActionItem,
@@ -44,10 +44,10 @@ import {
 import { CasesClientArgs, CasesClientInternal } from '..';
 import { createCaseError } from '../../common/error';
 import {
+  ENABLE_CASE_CONNECTOR,
   MAX_GENERATED_ALERTS_PER_SUB_CASE,
   CASE_COMMENT_SAVED_OBJECT,
-  ENABLE_CASE_CONNECTOR,
-} from '../../../common/constants';
+} from '../../../common';
 
 import { decodeCommentRequest, ensureAuthorized } from '../utils';
 import { Operations } from '../../authorization';
