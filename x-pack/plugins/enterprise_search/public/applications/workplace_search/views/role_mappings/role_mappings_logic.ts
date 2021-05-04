@@ -265,13 +265,13 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       }
     },
     handleDeleteMapping: async () => {
+      const { roleMapping } = values;
+      if (!roleMapping) return;
+
       const { http } = HttpLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
-      const { roleMapping } = values;
-      if (!roleMapping) {
-        return;
-      }
       const route = `/api/workplace_search/org/role_mappings/${roleMapping.id}`;
+
       if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
         try {
           await http.delete(route);
