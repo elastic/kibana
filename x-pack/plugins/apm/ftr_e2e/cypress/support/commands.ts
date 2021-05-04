@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import 'cypress-real-events/support';
 
 Cypress.Commands.add('loginAsReadOnlyUser', () => {
   cy.loginAs({ username: 'apm_read_user', password: 'changeme' });
@@ -33,3 +34,8 @@ Cypress.Commands.add(
     });
   }
 );
+
+Cypress.Commands.add('changeTimeRange', (value: string) => {
+  cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
+  cy.contains(value).click();
+});
