@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React from 'react';
 import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../common/constants';
 import { TooltipPopover } from './tooltip_popover';
+import { getFeatureActions } from '../features_tooltip';
 import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {
@@ -48,6 +49,28 @@ export class TooltipControl extends React.Component {
     }
   };
 
+  _findLayerById = (layerId) => {
+    return this.props.layerList.find((layer) => {
+      return layer.getId() === layerId;
+    });
+  };
+
+  // Must load original geometry instead of using geometry from mapbox feature.
+  // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
+  _getFeatureGeometry = ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer || featureId === undefined) {
+      return null;
+    }
+
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return targetFeature.geometry;
+  };
+
   _getLayerByMbLayerId(mbLayerId) {
     return this.props.layerList.find((layer) => {
       const mbLayerIds = layer.getMbLayerIds();
@@ -55,7 +78,7 @@ export class TooltipControl extends React.Component {
     });
   }
 
-  _getTooltipFeatures(mbFeatures) {
+  _getTooltipFeatures(mbFeatures, isLocked) {
     const uniqueFeatures = [];
     //there may be duplicates in the results from mapbox
     //this is because mapbox returns the results per tile
@@ -81,11 +104,17 @@ export class TooltipControl extends React.Component {
         // - As empty object literal
         // To avoid ambiguity, normalize properties to empty object literal.
         const mbProperties = mbFeature.properties ? mbFeature.properties : {};
-        //This keeps track of first properties (assuming these will be identical for features in different tiles)
+        const geometry = this._getFeatureGeometry({ layerId, featureId });
+        const actions = isLocked
+          ? getFeatureActions({ layerId, featureId, geometry, geoFields: this.props.geoFields })
+          : [];
+
+        //This keeps track of first feature (assuming these will be identical for features in different tiles)
         uniqueFeatures.push({
           id: featureId,
           layerId: layerId,
           mbProperties,
+          actions,
         });
       }
     }
@@ -109,7 +138,7 @@ export class TooltipControl extends React.Component {
     const targetMbFeataure = mbFeatures[0];
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
-    const features = this._getTooltipFeatures(mbFeatures);
+    const features = this._getTooltipFeatures(mbFeatures, true);
     this.props.openOnClickTooltip({
       features,
       location: popupAnchorLocation,
@@ -138,7 +167,7 @@ export class TooltipControl extends React.Component {
     }
 
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
-    const features = this._getTooltipFeatures(mbFeatures);
+    const features = this._getTooltipFeatures(mbFeatures, false);
     this.props.openOnHoverTooltip({
       features: features,
       location: popupAnchorLocation,
@@ -198,13 +227,12 @@ export class TooltipControl extends React.Component {
         <TooltipPopover
           key={id}
           mbMap={this.props.mbMap}
-          layerList={this.props.layerList}
+          findLayerById={this._findLayerById}
           addFilters={this.props.addFilters}
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
           onSingleValueTrigger={this.props.onSingleValueTrigger}
           renderTooltipContent={this.props.renderTooltipContent}
-          geoFields={this.props.geoFields}
           features={features}
           location={location}
           closeTooltip={closeTooltip}

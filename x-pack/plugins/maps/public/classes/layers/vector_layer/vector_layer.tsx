@@ -1034,8 +1034,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   canShowTooltip() {
     return (
-      this.isVisible() &&
-      (this.getSource().canFormatFeatureProperties() || this.getJoins().length > 0)
+      this.isVisible() && (this.getSource().hasTooltipProperties() || this.getJoins().length > 0)
     );
   }
 
