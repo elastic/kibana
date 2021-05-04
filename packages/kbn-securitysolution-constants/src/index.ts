@@ -70,3 +70,6 @@ export const ENDPOINT_EVENT_FILTERS_LIST_NAME = 'Endpoint Security Event Filters
 
 /** Description of event filters agnostic list */
 export const ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION = 'Endpoint Security Event Filters List';
+
+/** The default max signals without any additional configuration */
+export const DEFAULT_MAX_SIGNALS = 100;

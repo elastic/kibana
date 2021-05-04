@@ -2667,10 +2667,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/list-constants@link:bazel-bin/packages/kbn-list-constants/npm_module":
-  version "0.0.0"
-  uid ""
-
 "@kbn/logging@link:bazel-bin/packages/kbn-logging/npm_module":
   version "0.0.0"
   uid ""
@@ -2692,6 +2688,10 @@
   uid ""
 
 "@kbn/pm@link:packages/kbn-pm":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-constants@link:bazel-bin/packages/kbn-securitysolution-constants/npm_module":
   version "0.0.0"
   uid ""
 
