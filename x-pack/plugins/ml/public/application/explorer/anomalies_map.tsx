@@ -8,7 +8,14 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { VectorLayerDescriptor } from '../../../../maps/common/descriptor_types';
 import {
   FIELD_ORIGIN,
@@ -218,7 +225,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
       }, [] as VectorLayerDescriptor[]);
     }
     return layers;
-  }, [EMSSuggestions, anomalies.length]);
+  }, [EMSSuggestions, anomalies]);
 
   if (EMSSuggestions?.length === 0) {
     return null;
@@ -233,7 +240,19 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
           buttonContent={
             <EuiTitle className="panel-title">
               <h2>
-                <FormattedMessage id="xpack.ml.explorer.mapTitle" defaultMessage="Anomaly Map" />
+                <FormattedMessage
+                  id="xpack.ml.explorer.mapTitle"
+                  defaultMessage="Anomaly count by location {infoTooltip}"
+                  values={{
+                    infoTooltip: (
+                      <EuiIconTip
+                        content="Map colors indicate the number of anomalies in each area."
+                        position="top"
+                        type="iInCircle"
+                      />
+                    ),
+                  }}
+                />
               </h2>
             </EuiTitle>
           }
