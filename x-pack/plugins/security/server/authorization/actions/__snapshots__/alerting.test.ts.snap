@@ -1,17 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#get alertType of "" throws error 1`] = `"alertTypeId is required and must be a string"`;
-
-exports[`#get alertType of {} throws error 1`] = `"alertTypeId is required and must be a string"`;
-
-exports[`#get alertType of 1 throws error 1`] = `"alertTypeId is required and must be a string"`;
-
-exports[`#get alertType of null throws error 1`] = `"alertTypeId is required and must be a string"`;
-
-exports[`#get alertType of true throws error 1`] = `"alertTypeId is required and must be a string"`;
-
-exports[`#get alertType of undefined throws error 1`] = `"alertTypeId is required and must be a string"`;
-
 exports[`#get alertingType of "" throws error 1`] = `"alertingType is required and must be a string"`;
 
 exports[`#get alertingType of {} throws error 1`] = `"alertingType is required and must be a string"`;

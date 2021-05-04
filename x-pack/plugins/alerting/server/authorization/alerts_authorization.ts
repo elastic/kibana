@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { map, mapValues, fromPairs, has, get } from 'lodash';
+import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';

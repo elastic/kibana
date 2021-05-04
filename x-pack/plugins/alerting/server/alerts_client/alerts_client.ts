@@ -489,7 +489,10 @@ export class AlertsClient {
       sortField: mapSortField(options.sortField),
       filter:
         (authorizationFilter && options.filter
-          ? nodeBuilder.and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
+          ? nodeBuilder.and([
+              esKuery.fromKueryExpression(options.filter),
+              authorizationFilter as KueryNode,
+            ])
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
