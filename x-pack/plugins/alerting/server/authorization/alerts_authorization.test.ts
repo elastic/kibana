@@ -25,6 +25,7 @@ import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryAlertType } from '../alert_type_registry';
 import { esKuery } from '../../../../../src/plugins/data/server';
+import { AlertingAuthorizationFilterType } from './alerts_authorization_kuery';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -676,8 +677,11 @@ describe('AlertsAuthorization', () => {
         filter,
         ensureRuleTypeIsAuthorized,
       } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
-        ruleTypeId: 'ruleId',
-        consumer: 'consumer',
+        type: AlertingAuthorizationFilterType.KQL,
+        fieldNames: {
+          ruleTypeId: 'ruleId',
+          consumer: 'consumer',
+        },
       });
 
       expect(() => ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule')).not.toThrow();
@@ -698,8 +702,11 @@ describe('AlertsAuthorization', () => {
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
         AlertingAuthorizationTypes.Rule,
         {
-          ruleTypeId: 'ruleId',
-          consumer: 'consumer',
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'ruleId',
+            consumer: 'consumer',
+          },
         }
       );
 
@@ -735,8 +742,11 @@ describe('AlertsAuthorization', () => {
       expect(
         (
           await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
-            ruleTypeId: 'path.to.rule.id',
-            consumer: 'consumer-field',
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule.id',
+              consumer: 'consumer-field',
+            },
           })
         ).filter
       ).toEqual(
@@ -798,8 +808,11 @@ describe('AlertsAuthorization', () => {
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
         AlertingAuthorizationTypes.Alert,
         {
-          ruleTypeId: 'ruleId',
-          consumer: 'consumer',
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'ruleId',
+            consumer: 'consumer',
+          },
         }
       );
       expect(() => {
@@ -872,8 +885,11 @@ describe('AlertsAuthorization', () => {
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
         AlertingAuthorizationTypes.Rule,
         {
-          ruleTypeId: 'ruleId',
-          consumer: 'consumer',
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'ruleId',
+            consumer: 'consumer',
+          },
         }
       );
       expect(() => {
@@ -948,8 +964,11 @@ describe('AlertsAuthorization', () => {
         ensureRuleTypeIsAuthorized,
         logSuccessfulAuthorization,
       } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
-        ruleTypeId: 'ruleId',
-        consumer: 'consumer',
+        type: AlertingAuthorizationFilterType.KQL,
+        fieldNames: {
+          ruleTypeId: 'ruleId',
+          consumer: 'consumer',
+        },
       });
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');

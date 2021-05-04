@@ -371,12 +371,11 @@ export class AlertsAuthorization {
         [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
       >();
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
-      // and alertType in the system whether this user has this privilege
+      // and ruleType in the system whether this user has this privilege
       for (const ruleType of ruleTypesWithAuthorization) {
         for (const feature of featuresIds) {
           for (const operation of operations) {
             privilegeToRuleType.set(
-              // this function needs to be swappable
               this.authorization!.actions.alerting.get(
                 ruleType.id,
                 feature,
