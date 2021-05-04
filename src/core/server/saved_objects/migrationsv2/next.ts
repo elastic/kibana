@@ -20,7 +20,6 @@ import type {
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacySetWriteBlockState,
-  OutdatedDocumentsSearch,
   OutdatedDocumentsTransform,
   SetSourceWriteBlockState,
   State,
@@ -33,6 +32,11 @@ import type {
   SetTempWriteBlock,
   WaitForYellowSourceState,
   TransformRawDocs,
+  OutdatedDocumentsSearchOpenPit,
+  OutdatedDocumentsSearchRead,
+  OutdatedDocumentsSearchClosePit,
+  RefreshTarget,
+  OutdatedDocumentsRefresh,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
@@ -67,6 +71,10 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.readWithPit(
         client,
         state.sourceIndexPitId,
+        /* When reading we use a source query to exclude saved objects types which
+         * are no longer used. These saved objects will still be kept in the outdated
+         * index for backup purposes, but won't be available in the upgraded index.
+         */
         state.unusedTypesQuery,
         state.batchSize,
         state.lastHitSortValue
@@ -83,9 +91,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
          * Although any further step must run "refresh" for the target index
-         * before we reach out to the OUTDATED_DOCUMENTS_SEARCH step.
-         * Right now, we rely on UPDATE_TARGET_MAPPINGS + UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK
-         * to perform refresh.
+         * before we reach out to the OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT step.
+         * Right now, it's performed during REFRESH_TARGET step.
          */
         false
       ),
@@ -93,31 +100,40 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.setWriteBlock(client, state.tempIndex),
     CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
       Actions.cloneIndex(client, state.tempIndex, state.targetIndex),
+    REFRESH_TARGET: (state: RefreshTarget) => Actions.refreshIndex(client, state.targetIndex),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.targetIndex, state.targetIndexMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask(client, state.updateTargetMappingsTaskId, '60s'),
-    OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
-      Actions.searchForOutdatedDocuments(client, {
-        batchSize: state.batchSize,
-        targetIndex: state.targetIndex,
-        outdatedDocumentsQuery: state.outdatedDocumentsQuery,
-      }),
+    OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
+      Actions.openPit(client, state.targetIndex),
+    OUTDATED_DOCUMENTS_SEARCH_READ: (state: OutdatedDocumentsSearchRead) =>
+      Actions.readWithPit(
+        client,
+        state.pitId,
+        // search for outdated documents only
+        state.outdatedDocumentsQuery,
+        state.batchSize,
+        state.lastHitSortValue
+      ),
+    OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
+      Actions.closePit(client, state.pitId),
+    OUTDATED_DOCUMENTS_REFRESH: (state: OutdatedDocumentsRefresh) =>
+      Actions.refreshIndex(client, state.targetIndex),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
-      // Wait for a refresh to happen before returning. This ensures that when
-      // this Kibana instance searches for outdated documents, it won't find
-      // documents that were already transformed by itself or another Kibana
-      // instance. However, this causes each OUTDATED_DOCUMENTS_SEARCH ->
-      // OUTDATED_DOCUMENTS_TRANSFORM cycle to take 1s so when batches are
-      // small performance will become a lot worse.
-      // The alternative is to use a search_after with either a tie_breaker
-      // field or using a Point In Time as a cursor to go through all documents.
       Actions.transformDocs(
         client,
         transformRawDocs,
         state.outdatedDocuments,
         state.targetIndex,
-        'wait_for'
+        /**
+         * Since we don't run a search against the target index, we disable "refresh" to speed up
+         * the migration process.
+         * Although any further step must run "refresh" for the target index
+         * before we reach out to the MARK_VERSION_INDEX_READY step.
+         * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
+         */
+        false
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
