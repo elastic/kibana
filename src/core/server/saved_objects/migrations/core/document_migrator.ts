@@ -170,7 +170,7 @@ export class DocumentMigrator implements VersionedTransformer {
   }
 
   /**
-   * Gets the latest version of each migratable property.
+   * Gets the latest version of each migrate-able property.
    *
    * @readonly
    * @type {SavedObjectsMigrationVersion}

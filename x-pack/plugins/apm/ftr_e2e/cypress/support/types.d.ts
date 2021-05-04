@@ -11,5 +11,9 @@ declare namespace Cypress {
     loginAsSuperUser(): void;
     loginAs(params: { username: string; password: string }): void;
     changeTimeRange(value: string): void;
+    expectAPIsToHaveBeenCalledWith(params: {
+      apisIntercepted: string[];
+      value: string;
+    }): void;
   }
 }

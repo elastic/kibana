@@ -22,4 +22,11 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
   },
+  listPage: {
+    active: false,
+    forceRefresh: false,
+    data: { type: 'UninitialisedResourceState' },
+    /** We started off assuming data exists, until we can confirm othewise */
+    dataExist: { type: 'LoadedResourceState', data: true },
+  },
 });
