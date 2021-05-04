@@ -248,11 +248,9 @@ export class TaskManagerRunner implements TaskRunner {
       childOf: this.instance.task.traceparent,
     });
 
-    const modifiedContext = await withSpan({ name: 'before run', type: 'task manager' }, () =>
-      this.beforeRun({
-        taskInstance: this.instance.task,
-      })
-    );
+    const modifiedContext = await this.beforeRun({
+      taskInstance: this.instance.task,
+    });
 
     const stopTaskTimer = startTaskTimer();
 

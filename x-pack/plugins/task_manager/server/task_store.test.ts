@@ -413,7 +413,7 @@ describe('TaskStore', () => {
       const id = randomId();
       const result = await store.remove(id);
       expect(result).toBeUndefined();
-      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
     });
 
     test('pushes error from saved objects client to errors$', async () => {
