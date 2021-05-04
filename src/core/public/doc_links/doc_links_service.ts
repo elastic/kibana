@@ -144,6 +144,9 @@ export class DocLinksService {
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
           kueryQuerySyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
         },
+        search: {
+          sessions: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/search-sessions.html`,
+        },
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
         },
@@ -355,6 +358,9 @@ export interface DocLinksStart {
       readonly painlessSyntax: string;
       readonly painlessWalkthrough: string;
       readonly luceneExpressions: string;
+    };
+    readonly search: {
+      readonly sessions: string;
     };
     readonly indexPatterns: {
       readonly loadingData: string;
