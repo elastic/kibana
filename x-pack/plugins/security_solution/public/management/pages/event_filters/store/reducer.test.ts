@@ -123,6 +123,10 @@ describe('reducer', () => {
           id: undefined,
           show: 'create',
         },
+        listPage: {
+          ...initialState.listPage,
+          active: true,
+        },
       });
     });
   });

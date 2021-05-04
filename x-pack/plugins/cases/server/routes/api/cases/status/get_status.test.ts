@@ -15,8 +15,8 @@ import {
   mockCases,
 } from '../../__fixtures__';
 import { initGetCasesStatusApi } from './get_status';
-import { CASE_STATUS_URL } from '../../../../../common/constants';
-import { CaseType } from '../../../../../common/api';
+import { CASE_STATUS_URL } from '../../../../../common';
+import { CaseType } from '../../../../../common';
 
 describe('GET status', () => {
   let routeHandler: RequestHandler<any, any, any>;
