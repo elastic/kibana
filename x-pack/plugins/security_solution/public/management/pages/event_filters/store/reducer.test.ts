@@ -9,10 +9,17 @@ import { initialEventFiltersPageState } from './builders';
 import { eventFiltersPageReducer } from './reducer';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
-
-const initialState = initialEventFiltersPageState();
+import { EventFiltersListPageState } from '../state';
+import { UserChangedUrl } from '../../../../common/store/routing/action';
+import { getListPageIsActive } from './selector';
 
 describe('event filters reducer', () => {
+  let initialState: EventFiltersListPageState;
+
+  beforeEach(() => {
+    initialState = initialEventFiltersPageState();
+  });
+
   describe('EventFiltersForm', () => {
     it('sets the initial form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
@@ -110,18 +117,32 @@ describe('event filters reducer', () => {
     });
   });
   describe('UserChangedUrl', () => {
-    describe('When url is the Event List page', () => {
-      it.todo('should mark page active when on the list url');
+    const userChangedUrlAction = (
+      search: string = '',
+      pathname = '/event_filters'
+    ): UserChangedUrl => ({
+      type: 'userChangedUrl',
+      payload: { search, pathname, hash: '' },
+    });
 
-      it.todo('should mark page not active when not on the list url');
+    describe('When url is the Event List page', () => {
+      it('should mark page active when on the list url', () => {
+        const result = eventFiltersPageReducer(initialState, userChangedUrlAction());
+        expect(getListPageIsActive(result)).toBe(true);
+      });
+
+      it('should mark page not active when not on the list url', () => {
+        const result = eventFiltersPageReducer(
+          initialState,
+          userChangedUrlAction('', '/some-other-page')
+        );
+        expect(getListPageIsActive(result)).toBe(false);
+      });
     });
 
     describe('When `show=create`', () => {
       it('receives a url change with show=create', () => {
-        const result = eventFiltersPageReducer(initialState, {
-          type: 'userChangedUrl',
-          payload: { search: '?show=create', pathname: '/event_filters', hash: '' },
-        });
+        const result = eventFiltersPageReducer(initialState, userChangedUrlAction('?show=create'));
 
         expect(result).toStrictEqual({
           ...initialState,
