@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await PageObjects.visualize.initTests();
-      initBarChart();
+      await initBarChart();
     });
 
     it('should save and load', async function () {
