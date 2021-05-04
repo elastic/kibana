@@ -596,28 +596,27 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         transformErrors: [],
       };
     } else {
-      /** TINA: when the indexing was done in the same control flow state as document transformations,
-       we used to have these left conditions that were treated as right conditions.
-       If this is still required, work the logic in somehow.
+      const left = Either.left;
       if (
         isLeftTypeof(left, 'target_index_had_write_block') ||
         (isLeftTypeof(left, 'index_not_found_exception') && left.index === stateP.tempIndex)
       ) {
-      index_not_found_exception:
-        another instance completed the MARK_VERSION_INDEX_READY and
-        removed the temp index.
-      target_index_had_write_block
-        another instance completed the SET_TEMP_WRITE_BLOCK step adding a
-        write block to the temp index.
+        // index_not_found_exception:
+        //   another instance completed the MARK_VERSION_INDEX_READY and
+        //   removed the temp index.
+        // target_index_had_write_block
+        //   another instance completed the SET_TEMP_WRITE_BLOCK step adding a
+        //   write block to the temp index.
 
-      For simplicity we continue linearly through the next steps even if
-      we know another instance already completed these.
-      return {
-        ...stateP,
-        controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-      };
+        // For simplicity we continue linearly through the next steps even if
+        // we know another instance already completed these.
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
+          corruptDocumentIds: [],
+          transformErrors: [],
+        };
       }
-      */
       throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
