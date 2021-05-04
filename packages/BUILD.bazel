@@ -12,6 +12,7 @@ filegroup(
       "//packages/kbn-babel-code-parser:build",
       "//packages/kbn-babel-preset:build",
       "//packages/kbn-config-schema:build",
+      "//packages/kbn-crypto:build",
       "//packages/kbn-dev-utils:build",
       "//packages/kbn-eslint-import-resolver-kibana:build",
       "//packages/kbn-eslint-plugin-eslint:build",
