@@ -10,11 +10,7 @@ import { of } from 'rxjs';
 
 import { I18nProvider } from '@kbn/i18n/react';
 
-import {
-  createSessionExpirationToast,
-  SessionExpirationBody,
-  SessionExpirationTitle,
-} from './session_expiration_toast';
+import { createSessionExpirationToast, SessionExpirationToast } from './session_expiration_toast';
 import type { SessionState } from './session_timeout';
 
 describe('createSessionExpirationToast', () => {
@@ -34,14 +30,14 @@ describe('createSessionExpirationToast', () => {
         iconType: 'clock',
         onClose: expect.any(Function),
         text: expect.any(Function),
-        title: expect.any(Function),
+        title: expect.any(String),
         toastLifeTimeMs: 2147483647,
       })
     );
   });
 });
 
-describe('SessionExpirationTitle', () => {
+describe('SessionExpirationToast', () => {
   it('renders session expiration time', () => {
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
@@ -51,14 +47,12 @@ describe('SessionExpirationTitle', () => {
 
     const { getByText } = render(
       <I18nProvider>
-        <SessionExpirationTitle sessionState$={sessionState$} />
+        <SessionExpirationToast sessionState$={sessionState$} onExtend={jest.fn()} />
       </I18nProvider>
     );
-    getByText(/Session expires in [0-9]+ seconds/);
+    getByText(/You will be logged out in [0-9]+ seconds/);
   });
-});
 
-describe('SessionExpirationBody', () => {
   it('renders extend button if session can be extended', () => {
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
@@ -69,10 +63,10 @@ describe('SessionExpirationBody', () => {
 
     const { getByRole } = render(
       <I18nProvider>
-        <SessionExpirationBody sessionState$={sessionState$} onExtend={onExtend} />
+        <SessionExpirationToast sessionState$={sessionState$} onExtend={onExtend} />
       </I18nProvider>
     );
-    fireEvent.click(getByRole('button', { name: 'Keep me logged in' }));
+    fireEvent.click(getByRole('button', { name: 'Stay logged in' }));
 
     expect(onExtend).toHaveBeenCalled();
   });
@@ -87,9 +81,9 @@ describe('SessionExpirationBody', () => {
 
     const { queryByRole } = render(
       <I18nProvider>
-        <SessionExpirationBody sessionState$={sessionState$} onExtend={onExtend} />
+        <SessionExpirationToast sessionState$={sessionState$} onExtend={onExtend} />
       </I18nProvider>
     );
-    expect(queryByRole('button', { name: 'Keep me logged in' })).toBeNull();
+    expect(queryByRole('button', { name: 'Stay logged in' })).toBeNull();
   });
 });

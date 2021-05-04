@@ -127,24 +127,6 @@ describe('SessionTimeout', () => {
     nowMock.mockClear();
   });
 
-  it('extends session when receiving HTTP response', async () => {
-    const { sessionTimeout, http } = createSessionTimeout();
-    await sessionTimeout.start();
-    expect(http.fetch).toHaveBeenCalledTimes(1);
-
-    // Increment system time enough so that session extension gets triggered
-    nowMock.mockReturnValue(Date.now() + SESSION_EXTENSION_THROTTLE_MS + 10);
-    const [{ response: handleHttpResponse }] = http.intercept.mock.calls[0];
-    handleHttpResponse!({ fetchOptions: { asSystemRequest: false } } as any, {} as any);
-
-    expect(http.fetch).toHaveBeenCalledTimes(2);
-    expect(http.fetch).toHaveBeenLastCalledWith(
-      SESSION_ROUTE,
-      expect.objectContaining({ asSystemRequest: false })
-    );
-    nowMock.mockClear();
-  });
-
   it('refetches session info before warning is displayed', async () => {
     const { sessionTimeout, http } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();

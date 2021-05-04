@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import type { ToastInput } from 'src/core/public';
 
@@ -19,23 +20,26 @@ import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
 import type { SessionState } from './session_timeout';
 
-export interface SessionExpirationTitleProps {
+export interface SessionExpirationToastProps {
   sessionState$: Observable<SessionState>;
+  onExtend: () => Promise<any>;
 }
 
-export const SessionExpirationTitle: FunctionComponent<SessionExpirationTitleProps> = ({
+export const SessionExpirationToast: FunctionComponent<SessionExpirationToastProps> = ({
   sessionState$,
+  onExtend,
 }) => {
   const state = useObservable(sessionState$);
+  const [{ loading }, extend] = useAsyncFn(onExtend);
 
   if (!state || !state.expiresInMs) {
     return null;
   }
 
-  return (
+  const expirationWarning = (
     <FormattedMessage
-      id="xpack.security.sessionExpirationToast.title"
-      defaultMessage="Session expires {timeout}"
+      id="xpack.security.sessionExpirationToast.body"
+      defaultMessage="You will be logged out {timeout}."
       values={{
         timeout: (
           <FormattedRelative
@@ -46,45 +50,27 @@ export const SessionExpirationTitle: FunctionComponent<SessionExpirationTitlePro
       }}
     />
   );
-};
-
-export interface SessionExpirationBodyProps {
-  sessionState$: Observable<SessionState>;
-  onExtend: () => Promise<any>;
-}
-
-export const SessionExpirationBody: FunctionComponent<SessionExpirationBodyProps> = ({
-  sessionState$,
-  onExtend,
-}) => {
-  const state = useObservable(sessionState$);
-  const [{ loading }, extend] = useAsyncFn(onExtend);
-
-  if (!state) {
-    return null;
-  }
 
   if (state.canBeExtended) {
     return (
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton size="s" color="warning" isLoading={loading} onClick={extend}>
-            <FormattedMessage
-              id="xpack.security.sessionExpirationToast.extendButton"
-              defaultMessage="Keep me logged in"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        {expirationWarning}
+        <EuiSpacer size="m" />
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" color="warning" isLoading={loading} onClick={extend}>
+              <FormattedMessage
+                id="xpack.security.sessionExpirationToast.extendButton"
+                defaultMessage="Stay logged in"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     );
   }
 
-  return (
-    <FormattedMessage
-      id="xpack.security.components.sessionExpirationToast.endOfLifeWarning"
-      defaultMessage="Any unsaved changes will be lost."
-    />
-  );
+  return expirationWarning;
 };
 
 export const createSessionExpirationToast = (
@@ -95,8 +81,12 @@ export const createSessionExpirationToast = (
   return {
     color: 'warning',
     iconType: 'clock',
-    title: toMountPoint(<SessionExpirationTitle sessionState$={sessionState$} />),
-    text: toMountPoint(<SessionExpirationBody sessionState$={sessionState$} onExtend={onExtend} />),
+    title: i18n.translate('xpack.security.sessionExpirationToast.title', {
+      defaultMessage: 'Session timeout',
+    }),
+    text: toMountPoint(
+      <SessionExpirationToast sessionState$={sessionState$} onExtend={onExtend} />
+    ),
     onClose,
     toastLifeTimeMs: 0x7fffffff, // Toast is hidden based on observable so using maximum possible timeout
   };

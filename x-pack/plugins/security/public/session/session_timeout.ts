@@ -12,7 +12,6 @@ import { skip, tap, throttleTime } from 'rxjs/operators';
 
 import type {
   HttpFetchOptionsWithPath,
-  HttpResponse,
   HttpSetup,
   NotificationsSetup,
   Toast,
@@ -126,24 +125,6 @@ export class SessionTimeout {
   };
 
   /**
-   * HTTP response interceptor which allows us to prevent extending the session manually if it has
-   * already been extended as part of an API call.
-   */
-  private handleHttpResponse = (httpResponse: HttpResponse) => {
-    // Ignore session endpoint which is already handled by fetch callback
-    if (httpResponse.fetchOptions.path === SESSION_ROUTE) {
-      return;
-    }
-
-    // Extend session unless we're dealing with a system request
-    if (httpResponse.fetchOptions.asSystemRequest === false) {
-      if (this.shouldExtend()) {
-        this.fetchSessionInfo(true);
-      }
-    }
-  };
-
-  /**
    * Event handler that tracks user activity and extends the session if needed.
    */
   private handleUserActivity = () => {
@@ -202,10 +183,7 @@ export class SessionTimeout {
 
       // Intercept HTTP requests if session can expire
       if (!this.removeHttpInterceptor) {
-        this.removeHttpInterceptor = this.http.intercept({
-          request: this.handleHttpRequest,
-          response: this.handleHttpResponse,
-        });
+        this.removeHttpInterceptor = this.http.intercept({ request: this.handleHttpRequest });
       }
 
       if (!this.stopVisibilityMonitor) {
