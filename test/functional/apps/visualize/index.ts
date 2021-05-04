@@ -30,7 +30,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     // TODO: Remove when vislib is removed
-    describe('new charts library', function () {
+    describe('new charts library visualize ciGroup7', function () {
       this.tags('ciGroup7');
 
       before(async () => await update(false));
@@ -47,7 +47,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       ].forEach(load);
     });
 
-    describe('', function () {
+    describe('visualize ciGroup9', function () {
       this.tags('ciGroup9');
 
       [
@@ -62,7 +62,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       if (!isOss) load('./_chart_types');
     });
 
-    describe('', function () {
+    describe('visualize ciGroup10', function () {
       this.tags('ciGroup10');
 
       [
@@ -76,7 +76,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       ].forEach(load);
     });
 
-    describe('', function () {
+    describe('visualize ciGroup4', function () {
       this.tags('ciGroup4');
 
       [
@@ -93,7 +93,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       if (isOss) ['./_tile_map', './_region_map'].forEach(load);
     });
 
-    describe('', function () {
+    describe('visualize ciGroup12', function () {
       this.tags('ciGroup12');
 
       [
