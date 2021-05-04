@@ -47,7 +47,7 @@ jest.mock('../../policy/store/services/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
-describe('when on the list page', () => {
+describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
