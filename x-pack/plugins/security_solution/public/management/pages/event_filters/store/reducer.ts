@@ -44,17 +44,6 @@ const isEventFiltersPageLocation = (location: Immutable<AppLocation>) => {
   );
 };
 
-// FIXME:PT might not need this. maybe delete
-const handleEventFiltersListPageChanges: CaseReducer<EventFiltersListPageStateChanged> = (
-  state,
-  action
-) => {
-  return {
-    ...state,
-    listPage: action.payload,
-  };
-};
-
 const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDataChanged> = (
   state,
   action
@@ -187,8 +176,6 @@ export const eventFiltersPageReducer: StateReducer = (
   // actions only handled if we're on the List Page
   if (getListPageIsActive(state)) {
     switch (action.type) {
-      case 'eventFiltersListPageStateChanged':
-        return handleEventFiltersListPageChanges(state, action);
       case 'eventFiltersListPageDataChanged':
         return handleEventFiltersListPageDataChanges(state, action);
       case 'eventFiltersListPageDataExistsChanged':
