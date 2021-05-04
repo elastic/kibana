@@ -8,24 +8,17 @@ import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { durationRt } from './duration_rt';
 
-const groupsRt = t.intersection([
-  t.partial({
-    limit: t.number,
-  }),
-  t.type({
-    sources: t.record(
-      t.string,
-      t.intersection([
-        t.type({
-          field: t.string,
-        }),
-        t.partial({
-          missing: t.boolean,
-        }),
-      ])
-    ),
-  }),
-]);
+const sourceRt = t.record(
+  t.string,
+  t.intersection([
+    t.type({
+      field: t.string,
+    }),
+    t.partial({
+      missing: t.boolean,
+    }),
+  ])
+);
 
 const indexRt = t.union([t.string, t.array(t.string)]);
 
@@ -107,6 +100,7 @@ const passRt = t.intersection([
   }),
   t.partial({
     filter: kqlRt,
+    ignoring: t.string,
   }),
 ]);
 
@@ -116,11 +110,12 @@ const metricConfigRt = t.intersection([
   t.type({
     step: durationRt,
     query_delay: durationRt,
-    passes: jsonRt.pipe(passesRt),
+    passes: passesRt,
   }),
   t.partial({
-    groups: groupsRt,
+    by: sourceRt,
     alert: alertRt,
+    limit: t.number,
   }),
 ]);
 
@@ -135,11 +130,10 @@ export {
   compositeAlertRt,
   metricExpressionRt,
   metricAggregationRt,
-  groupsRt,
   passRt,
 };
 
 export type MetricAggregationConfig = t.TypeOf<typeof metricAggregationRt>;
 export type MetricExpressionConfig = t.TypeOf<typeof metricExpressionRt>;
 export type Pass = t.TypeOf<typeof passRt>;
-export type Groups = t.TypeOf<typeof groupsRt>;
+export type Config = t.TypeOf<typeof metricConfigRt>;

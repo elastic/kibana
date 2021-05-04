@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
-import { isLeft } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import * as t from 'io-ts';
+import { propsToSchema } from '@kbn/io-ts-utils/target/props_to_schema';
 import moment from 'moment';
 import { ValuesType } from 'utility-types';
 import { parseInterval } from '../../../../../../../src/plugins/data/common';
@@ -40,12 +39,11 @@ export function registerMetricRuleType({
     createLifecycleRuleType({
       ...type,
       validate: {
-        params: schema.object({
-          step: schema.any(),
-          query_delay: schema.any(),
-          passes: schema.any(),
-          groups: schema.any(),
-        }),
+        params: propsToSchema(
+          t.type({
+            config: metricConfigRt,
+          })
+        ),
       },
       executor: async (options) => {
         const {
@@ -55,13 +53,7 @@ export function registerMetricRuleType({
         const ruleDataWriter = ruleDataClient.getWriter();
         const ruleExecutorData = getRuleExecutorData(type, options);
 
-        const decoded = metricConfigRt.decode(options.params);
-
-        if (isLeft(decoded)) {
-          throw new Error(PathReporter.report(decoded).join('\n'));
-        }
-
-        const config = decoded.right;
+        const { config } = options.params;
 
         const until = moment(
           options.startedAt.getTime() -
@@ -74,7 +66,7 @@ export function registerMetricRuleType({
         for (const pass of config.passes) {
           series.push(
             ...(await resolvePass({
-              groups: config.groups,
+              by: config.by,
               pass,
               ruleDataWriter,
               scopedClusterClient,

@@ -7,7 +7,7 @@
 
 import { EuiCodeEditor } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface Props {
   setAlertParams: (key: string, value: any) => void;
@@ -22,59 +22,18 @@ export function MetricRuleTrigger(props: Props) {
   const { setAlertParams, alertParams } = props;
 
   const defaults: Record<string, any> = {
-    query_delay: '5s',
-    step: '1m',
-    passes: `[{
-        "index": [
-          "traces-apm*",
-          "apm-*"
-        ],
-        "filter": "processor.event:transaction and not (event.outcome:failure)",
-        "metrics": {
-          "latency_target_5m": {
-            "count_over_time": {
-              "range": "5m"
-            },
-            "filter": "transaction.duration.us<100000"
-          },
-          "total_requests_5m": {
-            "count_over_time": {
-              "range": "5m"
-            }
-          },
-          "latency_target_1h": {
-            "count_over_time": {
-              "range": "1h"
-            },
-            "filter": "transaction.duration.us<100000"
-          },
-          "total_requests_1h": {
-            "count_over_time": {
-              "range": "1h"
-            }
-          },
-          "latency_budget_burn_5m": {
-            "expression": "1 - (latency_target_5m / total_requests_5m)"
-          },
-          "latency_budget_burn_1h": {
-            "expression": "1 - (latency_target_1h / total_requests_1h)"
-          }
-        }
-      }]`,
-    groups: {
-      sources: {
-        'service.name': { field: 'service.name' },
-        'service.environment': { field: 'service.environment', missing: true },
-      },
-    },
-    ...alertParams,
+    config: alertParams.config ?? '',
   };
+
+  const [configText, setConfigText] = useState('');
 
   useEffect(() => {
     // we only want to run this on mount to set default values
-    Object.keys(defaults).forEach((key) => {
+    Object.keys({ ...alertParams, ...defaults }).forEach((key) => {
       setAlertParams(key, defaults[key]);
     });
+
+    setConfigText(JSON.stringify(alertParams.config, null, 2));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -83,9 +42,14 @@ export function MetricRuleTrigger(props: Props) {
     <>
       <EuiSpacer size="l" />
       <EuiCodeEditor
-        value={alertParams?.passes ?? ''}
+        value={configText}
         onChange={(value) => {
-          setAlertParams('passes', value);
+          setConfigText(value);
+          try {
+            setAlertParams('config', JSON.parse(value));
+          } catch (err) {
+            // who cares
+          }
         }}
       />
       <EuiSpacer size="m" />

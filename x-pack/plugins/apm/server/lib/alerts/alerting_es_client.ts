@@ -18,6 +18,8 @@ export async function alertingEsClient<TParams extends ESSearchRequest>({
   scopedClusterClient: AlertingScopedClusterClient;
   params: TParams;
 }): Promise<ESSearchResponse<unknown, TParams>> {
+  console.log(JSON.stringify(params, null, 2));
+
   const response = await scopedClusterClient.asCurrentUser.search({
     ...params,
     ignore_unavailable: true,

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import util from 'util';
 import {
   AverageAggregation,
   MaxAggregation,
@@ -29,7 +28,10 @@ import {
 } from '../../../../../rule_registry/common/technical_rule_data_field_names';
 import { parseInterval } from '../../../../../../../src/plugins/data/common';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { RuleDataWriter } from '../../../../../rule_registry/server/';
+import {
+  RuleDataWriter,
+  RuleExecutorData,
+} from '../../../../../rule_registry/server/';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { arrayUnionToCallable } from '../../../../common/utils/array_union_to_callable';
 import {
@@ -38,12 +40,12 @@ import {
   metricExpressionRt,
   metricAggregationRt,
   Pass,
-  Groups,
   MetricExpressionConfig,
   sumOverTimeRt,
   minOverTimeRt,
   maxOverTimeRt,
   avgOverTimeRt,
+  Config,
 } from '../../../../common/rules/metric_config_rt';
 import { kqlQuery, rangeQuery } from '../../../utils/queries';
 import {
@@ -132,14 +134,16 @@ function getResolver(name: string, metric: MetricAggregationConfig) {
 }
 
 export async function resolvePass({
-  groups,
+  by,
+  limit,
   scopedClusterClient,
   ruleDataWriter,
   ruleExecutorData,
   pass,
   until,
 }: {
-  groups?: Groups;
+  by?: Config['by'];
+  limit?: number;
   until: number;
   scopedClusterClient: AlertingScopedClusterClient;
   ruleDataWriter: RuleDataWriter;
@@ -207,14 +211,12 @@ export async function resolvePass({
         ? undefined
         : nonUndefinedMetricAggs;
 
-      const sourcesAsList = Object.entries(groups?.sources ?? []).map(
-        ([name, source]) => {
-          return {
-            name,
-            source,
-          };
-        }
-      );
+      const sourcesAsList = Object.entries(by ?? []).map(([name, source]) => {
+        return {
+          name,
+          source,
+        };
+      });
 
       const sources = sourcesAsList.map((source) => source.source);
 
@@ -230,18 +232,30 @@ export async function resolvePass({
               },
             },
             aggs: {
-              ...(groups
+              ...(by
                 ? {
                     groups: {
-                      multi_terms: {
-                        terms: sources.map((source) => {
-                          return {
-                            field: source.field,
-                            ...(source.missing ? ({ missing: '' } as {}) : {}),
-                          };
-                        }),
-                        ...({ size: groups.limit ?? 25000 } as {}),
-                      },
+                      ...(sources.length === 1
+                        ? {
+                            terms: {
+                              field: sources[0].field,
+                              size: limit ?? 25000,
+                              ...(sources[0].missing ? { missing: '' } : {}),
+                            },
+                          }
+                        : {
+                            multi_terms: {
+                              terms: sources.map((source) => {
+                                return {
+                                  field: source.field,
+                                  ...(source.missing
+                                    ? ({ missing: '' } as {})
+                                    : {}),
+                                };
+                              }),
+                              ...({ size: limit ?? 25000 } as {}),
+                            },
+                          }),
                       ...(metricAggs ? { aggs: metricAggs } : {}),
                     },
                   }
@@ -254,7 +268,7 @@ export async function resolvePass({
 
       const { aggregations } = response;
 
-      if (!aggregations && groups) {
+      if (!aggregations) {
         return undefined;
       }
 
@@ -287,7 +301,7 @@ export async function resolvePass({
             ? Object.fromEntries(
                 sourcesAsList.map((source, index) => [
                   source.name,
-                  bucket.key[index],
+                  Array.isArray(bucket.key) ? bucket.key[index] : bucket.key,
                 ])
               )
             : {};
@@ -320,7 +334,7 @@ export async function resolvePass({
     // eslint-disable-next-line guard-for-in
     for (const name in measurement.metrics) {
       const value = measurement.metrics[name];
-      if (isFiniteNumber(value) && metricsToRecord.has(name)) {
+      if (metricsToRecord.has(name)) {
         recorded[name] = value;
       }
     }
