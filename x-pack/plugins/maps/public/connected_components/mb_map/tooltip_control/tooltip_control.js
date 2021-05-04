@@ -104,9 +104,13 @@ export class TooltipControl extends React.Component {
         // - As empty object literal
         // To avoid ambiguity, normalize properties to empty object literal.
         const mbProperties = mbFeature.properties ? mbFeature.properties : {};
-        const geometry = this._getFeatureGeometry({ layerId, featureId });
         const actions = isLocked
-          ? getFeatureActions({ layerId, featureId, geometry, geoFields: this.props.geoFields })
+          ? getFeatureActions({
+              layerId,
+              featureId,
+              geometry: this._getFeatureGeometry({ layerId, featureId }),
+              geoFields: this.props.geoFields,
+            })
           : [];
 
         //This keeps track of first feature (assuming these will be identical for features in different tiles)
