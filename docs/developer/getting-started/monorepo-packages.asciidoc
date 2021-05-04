@@ -64,6 +64,7 @@ yarn kbn watch-bazel
 - @elastic/datemath
 - @elastic/eslint-config-kibana
 - @elastic/safer-lodash-set
+- @kbn/analytics
 - @kbn/apm-config-loader
 - @kbn/apm-utils
 - @kbn/babel-code-parser
@@ -75,6 +76,7 @@ yarn kbn watch-bazel
 - @kbn/expect
 - @kbn/legacy-logging
 - @kbn/logging
+- @kbn/securitysolution-io-ts-utils
 - @kbn/std
 - @kbn/tinymath
 - @kbn/utility-types

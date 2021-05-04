@@ -89,13 +89,14 @@ export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
-export const goToNotesTab = () => {
+export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.root()
     .pipe(($el) => {
       $el.find(NOTES_TAB_BUTTON).trigger('click');
       return $el.find(NOTES_TEXT_AREA);
     })
     .should('be.visible');
+  return cy.root().find(NOTES_TAB_BUTTON);
 };
 
 export const getNotePreviewByNoteId = (noteId: string) => {
@@ -112,15 +113,16 @@ export const goToQueryTab = () => {
 };
 
 export const addNotesToTimeline = (notes: string) => {
-  cy.wait(150);
-  goToNotesTab();
-  cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_NOTE_BUTTON).trigger('click');
-      return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
-    })
-    .should('have.text', '1');
+  goToNotesTab().then(() => {
+    cy.get(NOTES_TEXT_AREA).type(notes);
+    cy.root()
+      .pipe(($el) => {
+        $el.find(ADD_NOTE_BUTTON).trigger('click');
+        return $el.find(NOTES_TAB_BUTTON).find('.euiBadge');
+      })
+      .should('have.text', '1');
+  });
+
   goToQueryTab();
   goToNotesTab();
 };
@@ -136,7 +138,7 @@ export const addFilter = (filter: TimelineFilter) => {
   cy.get(SAVE_FILTER_BTN).click();
 };
 
-export const addDataProvider = (filter: TimelineFilter) => {
+export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(TIMELINE_DATA_PROVIDER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).type(filter.operator);
@@ -231,13 +233,22 @@ export const openTimelineTemplateFromSettings = (id: string) => {
   cy.get(TIMELINE_TITLE_BY_ID(id)).click({ force: true });
 };
 
-export const openTimelineById = (timelineId: string) => {
+export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<HTMLElement>> => {
+  // Why are we checking for null if it is typed to 'string'? We don't currently validate the timeline response
+  // so technically we cannot guarantee that we will have the id. Changing the type to 'string | null' results in
+  // a lot of other changes being needed that would be best as part of a cleanup. Added a log, to give a dev a clue
+  // as to whether it's failing client or server side.
+  if (timelineId == null) {
+    cy.log('"timelineId" is null or undefined');
+  }
+
   cy.root()
     .pipe(($el) => {
       $el.find(TIMELINE_TITLE_BY_ID(timelineId)).trigger('click');
       return $el.find(QUERY_TAB_BUTTON).find('.euiBadge');
     })
     .should('be.visible');
+  return cy.root().find(TIMELINE_TITLE_BY_ID(timelineId));
 };
 
 export const pinFirstEvent = () => {

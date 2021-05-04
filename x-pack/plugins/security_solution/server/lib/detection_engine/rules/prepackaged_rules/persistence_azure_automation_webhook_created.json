@@ -31,7 +31,6 @@
     "Configuration Audit"
   ],
   "timestamp_override": "event.ingested",
-  "to": "now-25m",
   "type": "query",
-  "version": 4
+  "version": 5
 }
