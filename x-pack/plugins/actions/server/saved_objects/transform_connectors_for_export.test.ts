@@ -6,8 +6,32 @@
  */
 
 import { transformConnectorsForExport } from './transform_connectors_for_export';
+import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../actions_config.mock';
+import { licensingMock } from '../../../licensing/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { taskManagerMock } from '../../../task_manager/server/mocks';
+import { ActionExecutor, TaskRunnerFactory } from '../lib';
+import { registerBuiltInActionTypes } from '../builtin_action_types';
 
 describe('transform connector for export', () => {
+  const actionTypeRegistryParams: ActionTypeRegistryOpts = {
+    licensing: licensingMock.createSetup(),
+    taskManager: taskManagerMock.createSetup(),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
+    actionsConfigUtils: actionsConfigMock.create(),
+    licenseState: licenseStateMock.create(),
+    preconfiguredActions: [],
+  };
+  const actionTypeRegistry: ActionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+  registerBuiltInActionTypes({
+    logger: loggingSystemMock.create().get(),
+    actionTypeRegistry,
+    actionsConfigUtils: actionsConfigMock.create(),
+  });
+
   const connectorsWithNoSecrets = [
     {
       id: '1',
@@ -210,11 +234,13 @@ describe('transform connector for export', () => {
   ];
 
   it('should not change connectors without secrets', () => {
-    expect(transformConnectorsForExport(connectorsWithNoSecrets)).toEqual(connectorsWithNoSecrets);
+    expect(transformConnectorsForExport(connectorsWithNoSecrets, actionTypeRegistry)).toEqual(
+      connectorsWithNoSecrets
+    );
   });
 
   it('should remove secrets for connectors with secrets', () => {
-    expect(transformConnectorsForExport(connectorsWithSecrets)).toEqual(
+    expect(transformConnectorsForExport(connectorsWithSecrets, actionTypeRegistry)).toEqual(
       connectorsWithSecrets.map((connector) => ({
         ...connector,
         attributes: {

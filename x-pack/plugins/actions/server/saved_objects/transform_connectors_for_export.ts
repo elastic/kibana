@@ -6,35 +6,36 @@
  */
 
 import { SavedObject } from 'kibana/server';
-import { RawAction } from '../types';
-
-const CONNECTORS_WITHOUT_SECRETS = ['.index', '.server-log'];
-const CONNECTORS_CHECK_AUTH = ['.email', '.webhook'];
+import { ActionTypeRegistry } from '../action_type_registry';
+import { validateSecrets } from '../lib';
+import { RawAction, ActionType } from '../types';
 
 export function transformConnectorsForExport(
-  connectors: SavedObject[]
+  connectors: SavedObject[],
+  actionTypeRegistry: ActionTypeRegistry
 ): Array<SavedObject<RawAction>> {
-  return connectors.map((connector) =>
-    transformConnectorForExport(connector as SavedObject<RawAction>)
-  );
+  return connectors.map((c) => {
+    const connector = c as SavedObject<RawAction>;
+    return transformConnectorForExport(
+      connector,
+      actionTypeRegistry.get(connector.attributes.actionTypeId)
+    );
+  });
 }
 
 function connectorHasNoAuth(connector: SavedObject<RawAction>) {
   return connector?.attributes?.config?.hasAuth === false;
 }
 
-function transformConnectorForExport(connector: SavedObject<RawAction>): SavedObject<RawAction> {
-  // Skip connectors with no secrets
-  if (CONNECTORS_WITHOUT_SECRETS.includes(connector.attributes.actionTypeId)) {
-    return connector;
-  }
-
-  // Skip connectors where hasAuth = false
-  if (
-    CONNECTORS_CHECK_AUTH.includes(connector.attributes.actionTypeId) &&
-    connectorHasNoAuth(connector)
-  ) {
-    return connector;
+function transformConnectorForExport(
+  connector: SavedObject<RawAction>,
+  actionType: ActionType
+): SavedObject<RawAction> {
+  let isMissingSecrets = false;
+  try {
+    validateSecrets(actionType, connector.attributes.secrets);
+  } catch (err) {
+    isMissingSecrets = !connectorHasNoAuth(connector);
   }
 
   // Skip connectors
@@ -42,7 +43,7 @@ function transformConnectorForExport(connector: SavedObject<RawAction>): SavedOb
     ...connector,
     attributes: {
       ...connector.attributes,
-      isMissingSecrets: true,
+      isMissingSecrets,
     },
   };
 }

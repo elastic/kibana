@@ -16,6 +16,7 @@ import { getMigrations } from './migrations';
 import { RawAction } from '../types';
 import { getImportResultMessage, GO_TO_CONNECTORS_BUTTON_LABLE } from './get_import_result_message';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
+import { ActionTypeRegistry } from '../action_type_registry';
 
 export const ACTION_SAVED_OBJECT_TYPE = 'action';
 export const ALERT_SAVED_OBJECT_TYPE = 'alert';
@@ -23,7 +24,8 @@ export const ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE = 'action_task_params';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  actionTypeRegistry: ActionTypeRegistry
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
@@ -41,7 +43,7 @@ export function setupSavedObjects(
         context: SavedObjectsExportTransformContext,
         objects: Array<SavedObject<RawAction>>
       ) {
-        return transformConnectorsForExport(objects);
+        return transformConnectorsForExport(objects, actionTypeRegistry);
       },
       onImport(connectors) {
         return {
