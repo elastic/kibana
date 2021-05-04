@@ -37,12 +37,12 @@ export interface PluginsStart {
 }
 
 /**
- * Setup contract for the spaces plugin.
+ * Setup contract for the Spaces plugin.
  */
 export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
 
 /**
- * Start contract for the spaces plugin.
+ * Start contract for the Spaces plugin.
  */
 export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 

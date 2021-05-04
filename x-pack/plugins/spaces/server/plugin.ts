@@ -52,7 +52,7 @@ export interface PluginsStart {
 }
 
 /**
- * Setup contract for the spaces plugin.
+ * Setup contract for the Spaces plugin.
  */
 export interface SpacesPluginSetup {
   /**
@@ -82,7 +82,7 @@ export interface SpacesPluginSetup {
 }
 
 /**
- * Start contract for the spaces plugin.
+ * Start contract for the Spaces plugin.
  */
 export interface SpacesPluginStart {
   /** Service for interacting with spaces. */

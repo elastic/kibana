@@ -233,7 +233,7 @@
             "type": "string",
             "label": "id",
             "description": [
-              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`"
+              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
@@ -386,7 +386,7 @@
       "label": "SpacesPluginSetup",
       "tags": [],
       "description": [
-        "\nSetup contract for the spaces plugin."
+        "\nSetup contract for the Spaces plugin."
       ],
       "source": {
         "path": "x-pack/plugins/spaces/public/plugin.tsx",
@@ -404,7 +404,7 @@
       "label": "SpacesPluginStart",
       "tags": [],
       "description": [
-        "\nStart contract for the spaces plugin."
+        "\nStart contract for the Spaces plugin."
       ],
       "source": {
         "path": "x-pack/plugins/spaces/public/plugin.tsx",
@@ -428,7 +428,7 @@
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
         "description": [
-          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path.\n"
+          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
         ],
         "children": [
           {
@@ -440,11 +440,11 @@
               "string"
             ],
             "description": [
-              "the server's base path"
+              "the server's base path."
             ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             }
           },
           {
@@ -456,11 +456,11 @@
               "string"
             ],
             "description": [
-              "the space id"
+              "the space id."
             ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             }
           },
           {
@@ -472,21 +472,21 @@
               "string"
             ],
             "description": [
-              "the requested path (e.g. `/app/dashboard`)"
+              "the requested path (e.g. `/app/dashboard`)."
             ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             }
           }
         ],
         "tags": [],
         "returnComment": [
-          "the space-aware version of the requested path, inclusive of the server's base path"
+          "the space-aware version of the requested path, inclusive of the server's base path."
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 60
+          "lineNumber": 61
         },
         "initialIsOpen": false
       }
@@ -606,7 +606,7 @@
         "type": "Interface",
         "label": "ISpacesClient",
         "description": [
-          "\nClient interface for interacting with Kibana spaces."
+          "\nClient interface for interacting with spaces."
         ],
         "tags": [],
         "children": [
@@ -753,7 +753,7 @@
                   }
                 ],
                 "description": [
-                  "the space to create"
+                  "the space to create."
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
@@ -826,7 +826,7 @@
                   }
                 ],
                 "description": [
-                  "The updated space."
+                  "the updated space."
                 ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
@@ -898,7 +898,7 @@
             "type": "string",
             "label": "id",
             "description": [
-              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`"
+              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
@@ -1555,7 +1555,7 @@
       "type": "Interface",
       "label": "SpacesPluginSetup",
       "description": [
-        "\nSetup contract for the spaces plugin."
+        "\nSetup contract for the Spaces plugin."
       ],
       "tags": [],
       "children": [
@@ -1568,7 +1568,7 @@
           "type": "Object",
           "label": "spacesService",
           "description": [
-            "\nService for interacting with Kibana spaces.\n"
+            "\nService for interacting with spaces.\n"
           ],
           "source": {
             "path": "x-pack/plugins/spaces/server/plugin.ts",
@@ -1592,7 +1592,7 @@
           "type": "Object",
           "label": "spacesClient",
           "description": [
-            "\nRegistries exposed for the security plugin to transparently provide authorization and audit logging"
+            "\nRegistries exposed for the security plugin to transparently provide authorization and audit logging."
           ],
           "source": {
             "path": "x-pack/plugins/spaces/server/plugin.ts",
@@ -1631,7 +1631,7 @@
       "type": "Interface",
       "label": "SpacesPluginStart",
       "description": [
-        "\nStart contract for the spaces plugin."
+        "\nStart contract for the Spaces plugin."
       ],
       "tags": [],
       "children": [
@@ -1641,7 +1641,7 @@
           "type": "Object",
           "label": "spacesService",
           "description": [
-            "Service for interacting with Kibana spaces."
+            "Service for interacting with spaces."
           ],
           "source": {
             "path": "x-pack/plugins/spaces/server/plugin.ts",
@@ -1677,7 +1677,7 @@
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
         "description": [
-          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path.\n"
+          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
         ],
         "children": [
           {
@@ -1689,11 +1689,11 @@
               "string"
             ],
             "description": [
-              "the server's base path"
+              "the server's base path."
             ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             }
           },
           {
@@ -1705,11 +1705,11 @@
               "string"
             ],
             "description": [
-              "the space id"
+              "the space id."
             ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             }
           },
           {
@@ -1721,21 +1721,21 @@
               "string"
             ],
             "description": [
-              "the requested path (e.g. `/app/dashboard`)"
+              "the requested path (e.g. `/app/dashboard`)."
             ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             }
           }
         ],
         "tags": [],
         "returnComment": [
-          "the space-aware version of the requested path, inclusive of the server's base path"
+          "the space-aware version of the requested path, inclusive of the server's base path."
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 60
+          "lineNumber": 61
         },
         "initialIsOpen": false
       },

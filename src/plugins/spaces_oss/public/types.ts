@@ -9,20 +9,20 @@
 import type { SpacesApi } from './api';
 
 /**
- * OSS Spaces Plugin start contract when the spaces feature is enabled.
+ * OSS Spaces plugin start contract when the Spaces feature is enabled.
  */
 export interface SpacesAvailableStartContract extends SpacesApi {
-  /** Indicates if the spaces feature is enabled. */
+  /** Indicates if the Spaces feature is enabled. */
   isSpacesAvailable: true;
 }
 
 /**
- * OSS Spaces plugin start contract when the spaces feature is disabled.
- * @deprecated The spaces plugin will always be enabled starting in 8.0.
+ * OSS Spaces plugin start contract when the Spaces feature is disabled.
+ * @deprecated The Spaces plugin will always be enabled starting in 8.0.
  * @removeBy 8.0
  */
 export interface SpacesUnavailableStartContract {
-  /** Indicates if the spaces feature is enabled. */
+  /** Indicates if the Spaces feature is enabled. */
   isSpacesAvailable: false;
 }
 
@@ -43,6 +43,6 @@ export interface SpacesOssPluginSetup {
 }
 
 /**
- * OSS Spaces Plugin start contract.
+ * OSS Spaces plugin start contract.
  */
 export type SpacesOssPluginStart = SpacesAvailableStartContract | SpacesUnavailableStartContract;

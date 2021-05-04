@@ -42,7 +42,7 @@ export type LazyComponentFn<T> = (props: T) => ReactElement;
  */
 export interface SpacesApiUi {
   /**
-   * Lazy-loadable {@link SpacesApiUiComponent | React components} to support the spaces feature.
+   * Lazy-loadable {@link SpacesApiUiComponent | React components} to support the Spaces feature.
    */
   components: SpacesApiUiComponent;
   /**
@@ -69,7 +69,7 @@ export interface SpacesApiUi {
 }
 
 /**
- * React UI components to be used to display the spaces feature in any application.
+ * React UI components to be used to display the Spaces feature in any application.
  */
 export interface SpacesApiUiComponent {
   /**

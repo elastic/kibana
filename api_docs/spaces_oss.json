@@ -402,7 +402,7 @@
             "type": "string",
             "label": "className",
             "description": [
-              "Optional class(es) to apply."
+              "Optional CSS class(es) to apply."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
@@ -565,7 +565,7 @@
             "type": "Object",
             "label": "ui",
             "description": [
-              "\nUI components and services to add spaces capabilities to an application"
+              "\nUI components and services to add spaces capabilities to an application."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
@@ -593,7 +593,7 @@
         "type": "Interface",
         "label": "SpacesApiUi",
         "description": [
-          "\nUI components and services to add spaces capabilities to an application"
+          "\nUI components and services to add spaces capabilities to an application."
         ],
         "tags": [],
         "children": [
@@ -603,7 +603,7 @@
             "type": "Object",
             "label": "components",
             "description": [
-              "\nLazy-loadable {@link SpacesApiUiComponent | React components} to support the spaces feature."
+              "\nLazy-loadable {@link SpacesApiUiComponent | React components} to support the Spaces feature."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
@@ -647,7 +647,7 @@
         "type": "Interface",
         "label": "SpacesApiUiComponent",
         "description": [
-          "\nReact UI components to be used to display the spaces feature in any application."
+          "\nReact UI components to be used to display the Spaces feature in any application."
         ],
         "tags": [],
         "children": [
@@ -835,7 +835,7 @@
           }
         ],
         "description": [
-          "\nOSS Spaces Plugin start contract when the spaces feature is enabled."
+          "\nOSS Spaces plugin start contract when the Spaces feature is enabled."
         ],
         "tags": [],
         "children": [
@@ -845,7 +845,7 @@
             "type": "boolean",
             "label": "isSpacesAvailable",
             "description": [
-              "Indicates if the spaces feature is enabled."
+              "Indicates if the Spaces feature is enabled."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/types.ts",
@@ -899,7 +899,7 @@
         "type": "Interface",
         "label": "SpacesUnavailableStartContract",
         "description": [
-          "\nOSS Spaces plugin start contract when the spaces feature is disabled."
+          "\nOSS Spaces plugin start contract when the Spaces feature is disabled."
         ],
         "tags": [
           "deprecated",
@@ -912,7 +912,7 @@
             "type": "boolean",
             "label": "isSpacesAvailable",
             "description": [
-              "Indicates if the spaces feature is enabled."
+              "Indicates if the Spaces feature is enabled."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/types.ts",
@@ -1025,7 +1025,7 @@
       "label": "SpacesOssPluginStart",
       "tags": [],
       "description": [
-        "\nOSS Spaces Plugin start contract."
+        "\nOSS Spaces plugin start contract."
       ],
       "source": {
         "path": "src/plugins/spaces_oss/public/types.ts",
@@ -1079,7 +1079,7 @@
             "type": "string",
             "label": "id",
             "description": [
-              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`"
+              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
