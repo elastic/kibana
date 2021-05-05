@@ -23,19 +23,20 @@ export function transformConnectorsForExport(
   });
 }
 
-function connectorHasNoAuth(connector: SavedObject<RawAction>) {
-  return connector?.attributes?.config?.hasAuth === false;
-}
-
 function transformConnectorForExport(
   connector: SavedObject<RawAction>,
   actionType: ActionType
 ): SavedObject<RawAction> {
   let isMissingSecrets = false;
   try {
-    validateSecrets(actionType, connector.attributes.secrets);
+    // If connector requires secrets, this will throw an error
+    validateSecrets(actionType, {});
+
+    // If connector has optional secrets, set isMissingSecrets value to value of hasAuth
+    // If connector doesn't have hasAuth value, default to isMissingSecrets: true
+    isMissingSecrets = (connector?.attributes?.config?.hasAuth as boolean) ?? true;
   } catch (err) {
-    isMissingSecrets = !connectorHasNoAuth(connector);
+    isMissingSecrets = true;
   }
 
   // Skip connectors
