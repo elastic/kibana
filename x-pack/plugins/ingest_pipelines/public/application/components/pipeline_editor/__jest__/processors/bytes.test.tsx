@@ -109,7 +109,7 @@ describe('Processor: Bytes', () => {
 
     // Trying to get the monaco text editor to work with CITs.
     const jsonContent = JSON.stringify({ content: "ctx?.network?.name == 'Guest'" });
-    find('mockCodeEditor').simulate('change', { jsonContent });
+    await find('mockCodeEditor').simulate('change', { jsonContent });
 
     // Save the field
     await saveNewProcessor();
