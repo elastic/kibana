@@ -10,6 +10,9 @@ import * as t from 'io-ts';
 import { NonEmptyString } from '../../shared_imports';
 import { operator, type } from '../common/schemas';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const entriesList = t.exact(
   t.type({
     field: NonEmptyString,
@@ -18,4 +21,8 @@ export const entriesList = t.exact(
     type: t.keyof({ list: null }),
   })
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type EntryList = t.TypeOf<typeof entriesList>;

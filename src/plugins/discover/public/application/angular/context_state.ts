@@ -13,8 +13,8 @@ import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
-  BaseStateContainer,
   withNotifyOnErrors,
+  ReduxLikeStateContainer,
 } from '../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
 import { handleSourceColumnState } from './helpers';
@@ -85,11 +85,11 @@ interface GetStateReturn {
   /**
    * Global state, the _g part of the URL
    */
-  globalState: BaseStateContainer<GlobalState>;
+  globalState: ReduxLikeStateContainer<GlobalState>;
   /**
    * App state, the _a part of the URL
    */
-  appState: BaseStateContainer<AppState>;
+  appState: ReduxLikeStateContainer<AppState>;
   /**
    * Start sync between state and URL
    */
