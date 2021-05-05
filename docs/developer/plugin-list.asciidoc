@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within packages/kbn-dev-utils/target/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -338,11 +338,12 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
-|Experimental Feature
+|Case management in Kibana
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
 |The cloud plugin adds cloud specific features to Kibana.
+The client-side plugin configures following values:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
@@ -471,6 +472,12 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
+|This is the metrics and entities plugin where you add can add transforms for your project
+and group those transforms into modules. You can also re-use existing transforms in your
+modules as well.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
