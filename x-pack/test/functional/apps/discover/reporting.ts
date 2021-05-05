@@ -41,9 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Check Available', () => {
       beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
-      it('is not available if new', async () => {
+      it('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('becomes available when saved', async () => {
