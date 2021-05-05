@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { Datatable } from 'src/plugins/expressions/public';
 import { ValueClickContext } from 'src/plugins/embeddable/public';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import { TimeseriesVisParams } from '../../../types';
-
-interface TSVBTables {
-  [key: string]: Datatable;
-}
+import type { TSVBTables } from './types';
 
 export const getClickFilterData = (
   points: Array<[GeometryValue, XYChartSeriesIdentifier]>,
