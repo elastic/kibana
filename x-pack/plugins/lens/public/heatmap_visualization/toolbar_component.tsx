@@ -48,6 +48,7 @@ export const HeatmapToolbar = memo(
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" responsive={false}>
             <LegendSettingsPopover
+              groupPosition={'none'}
               legendOptions={legendOptions}
               mode={legendMode}
               onDisplayChange={(optionId) => {
