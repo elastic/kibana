@@ -31,7 +31,6 @@ import {
 import { StreamingRequestHandler } from './types';
 import { createStream } from './streaming';
 import { getUiSettings } from './ui_settings';
-import { DISABLE_SEARCH_COMPRESSION } from '../common';
 
 // eslint-disable-next-line
 export interface BfetchServerSetupDependencies {}

@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { deflateResponse } from './deflate_response';
 export { inflateResponse } from './inflate_response';
