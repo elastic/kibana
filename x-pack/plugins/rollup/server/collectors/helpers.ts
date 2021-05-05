@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { ElasticsearchClient } from 'kibana/server';
 
 // elasticsearch index.max_result_window default value
-const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 10000;
+const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
 
 interface ESFilterProps {
   term?: {
