@@ -45,18 +45,50 @@ export function registerRollupUsageCollector(
     isReady: () => true,
     schema: {
       index_patterns: {
-        total: { type: 'long' },
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'Counts all the rollup index patterns',
+          },
+        },
       },
       saved_searches: {
-        total: { type: 'long' },
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'Counts all the rollup saved searches',
+          },
+        },
       },
       visualizations: {
         saved_searches: {
-          total: { type: 'long' },
-          lens_total: { type: 'long' },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Counts all the visualizations that are based on rollup saved searches',
+            },
+          },
+          lens_total: {
+            type: 'long',
+            _meta: {
+              description:
+                'Counts all the lens visualizations that are based on rollup saved searches',
+            },
+          },
         },
-        total: { type: 'long' },
-        lens_total: { type: 'long' },
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'Counts all the visualizations that are based on rollup index patterns',
+          },
+        },
+        lens_total: {
+          type: 'long',
+          _meta: {
+            description:
+              'Counts all the lens visualizations that are based on rollup index patterns',
+          },
+        },
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
