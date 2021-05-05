@@ -158,7 +158,7 @@ describe('schema_extractor', () => {
       {
         name: 'force',
         documentation: '',
-        type: 'any', // string
+        type: 'boolean',
       },
     ]);
   });

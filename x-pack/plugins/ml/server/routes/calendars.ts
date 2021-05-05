@@ -7,12 +7,7 @@
 
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
-import {
-  calendarSchema,
-  calendarIdSchema,
-  calendarIdsSchema,
-  updateCalendarSchema,
-} from './schemas/calendars_schema';
+import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 import type { MlClient } from '../lib/ml_client';
 
@@ -163,7 +158,7 @@ export function calendars({ router, routeGuard }: RouteInitialization) {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
         params: calendarIdSchema,
-        body: updateCalendarSchema,
+        body: calendarSchema,
       },
       options: {
         tags: ['access:ml:canCreateCalendar'],
