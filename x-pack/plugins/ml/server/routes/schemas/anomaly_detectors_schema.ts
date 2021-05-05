@@ -117,7 +117,6 @@ export const anomalyDetectionJobSchema = {
     time_field: schema.string(),
     time_format: schema.maybe(schema.string()),
   }),
-  // datafeed_config: schema.maybe(schema.any()),
   description: schema.maybe(schema.string()),
   established_model_memory: schema.maybe(schema.number()),
   finished_time: schema.maybe(schema.number()),

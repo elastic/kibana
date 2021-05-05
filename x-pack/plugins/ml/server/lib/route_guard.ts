@@ -28,7 +28,7 @@ type MLRequestHandlerContext = RequestHandlerContext & {
 
 type Handler<P = unknown, Q = unknown, B = unknown> = (handlerParams: {
   client: IScopedClusterClient;
-  request: KibanaRequest<P, Q, B, any>;
+  request: KibanaRequest<P, Q, B>;
   response: KibanaResponseFactory;
   context: MLRequestHandlerContext;
   jobSavedObjectService: JobSavedObjectService;

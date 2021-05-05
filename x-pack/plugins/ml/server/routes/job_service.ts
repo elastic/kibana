@@ -214,7 +214,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    *  For any supplied job IDs, full job information will be returned, which include the analysis configuration,
    *  job stats, datafeed stats, and calendars.
    *
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (body) optionaljobIdsSchema
    *
    * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
    *    which includes the full configuration and stats for the job.
@@ -322,7 +322,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiName CreateFullJobsList
    * @apiDescription Creates a list of jobs
    *
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (body) optionaljobIdsSchema
    */
   router.post(
     {
