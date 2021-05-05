@@ -230,7 +230,7 @@ Configuring the *Suggestions* that *Lens* automatically populates is unsupported
 
 [float]
 [[is-it-possible-to-use-different-indexpatterns-in-lens]]
-===== Is it possible to use different index patterns in a single visualization?
+===== Can I visualize multiple index patterns in a single visualization?
 
 You can create *Bar*, *Line* and *Area* charts from multiple index patterns.
 
