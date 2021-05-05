@@ -266,7 +266,7 @@ The ability to start the y-axis from another value than 0, or use a logarithmic 
 [[is-it-possible-to-have-pagination-for-datatable]]
 ===== Is it possible to have pagination in a data table?
 
-At the moment it is not possible to have pagination on a *Lens* datatable. However the <<types-of-visualizations,aggregation based data table>> does support this feature.
+Pagination in a data table is unsupported in *Lens*. However, the <<types-of-visualizations,aggregation-based data table>> supports pagination.
 
 [float]
 [[is-it-possible-to-have-more-than-one-Y-axis-scale]]
