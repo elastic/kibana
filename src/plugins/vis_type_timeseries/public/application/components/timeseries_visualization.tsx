@@ -117,11 +117,15 @@ function TimeseriesVisualization({
       points.forEach((point) => {
         const [geometry] = point;
         const { specId } = point[1];
+        // specId for a split series has the format
+        // 61ca57f1-469d-11e7-af02-69e470af7417:Men's Accessories, <layer_id>:<split_label>
         const termArray = specId.split(':');
         const table = tables?.[termArray[0]];
         if (!table) return;
+
         const layer = model.series.filter(({ id }) => id === termArray[0]);
         let splitLabel: string | null = termArray.length > 1 ? termArray[1] : null;
+        // find correct label for filters split mode
         if (layer.length && layer[0].split_mode === 'filters') {
           const filter = layer[0]?.split_filters?.filter(({ id }) => id === termArray[1]);
           splitLabel = filter?.[0].filter?.query;

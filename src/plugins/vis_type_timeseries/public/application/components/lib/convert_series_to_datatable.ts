@@ -116,7 +116,7 @@ export const convertSeriesToDataTable = async (
         isMetric: true,
         type: layer.metrics[0].type,
       });
-      // Adds an extra column, if the layer is split by terms aggregation
+      // Adds an extra column, if the layer is split by terms or filters aggregation
       if (isGroupedByTerms) {
         id++;
         columns.push({
