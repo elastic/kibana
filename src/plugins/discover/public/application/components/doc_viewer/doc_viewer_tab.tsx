@@ -15,11 +15,11 @@ import { getServices } from '../../../kibana_services';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 interface Props {
-  component?: React.ComponentType<DocViewRenderProps>;
   id: number;
-  render?: DocViewRenderFn;
   renderProps: DocViewRenderProps;
   title: string;
+  render?: DocViewRenderFn;
+  component?: React.ComponentType<DocViewRenderProps>;
 }
 
 interface State {
@@ -51,17 +51,11 @@ export class DocViewerTab extends React.Component<Props, State> {
   }
 
   render() {
-    const { component, render, renderProps, title } = this.props;
+    const { component: Component, render, renderProps, title } = this.props;
     const { hasError, error } = this.state;
 
     if (hasError && error) {
       return <DocViewerError error={error} />;
-    } else if (!render && !component) {
-      return (
-        <DocViewerError
-          error={`Invalid plugin ${title}, there is neither a (react) component nor a render function provided`}
-        />
-      );
     }
 
     if (render) {
@@ -70,14 +64,20 @@ export class DocViewerTab extends React.Component<Props, State> {
     }
 
     // doc view is provided by a react component
+    if (Component) {
+      return (
+        <I18nProvider>
+          <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
+            <Component {...renderProps} />
+          </KibanaContextProvider>
+        </I18nProvider>
+      );
+    }
 
-    const Component = component as any;
     return (
-      <I18nProvider>
-        <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
-          <Component {...renderProps} />
-        </KibanaContextProvider>
-      </I18nProvider>
+      <DocViewerError
+        error={`Invalid plugin ${title}, there is neither a (react) component nor a render function provided`}
+      />
     );
   }
 }
