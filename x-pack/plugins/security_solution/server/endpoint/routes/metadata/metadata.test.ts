@@ -6,7 +6,6 @@
  */
 
 import {
-  IClusterClient,
   KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
@@ -53,8 +52,8 @@ import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  let mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockPackageService: jest.Mocked<PackageService>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -118,7 +117,7 @@ describe('test endpoint route', () => {
     it('test find the latest of all endpoints', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({});
       const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
-      mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({ body: response })
       );
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
@@ -158,7 +157,7 @@ describe('test endpoint route', () => {
       mockAgentService.getAgent = jest.fn().mockReturnValue(({
         active: true,
       } as unknown) as Agent);
-      mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({ body: response })
       );
 
@@ -217,7 +216,7 @@ describe('test endpoint route', () => {
     it('test find the latest of all endpoints', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({});
       const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
-      mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({ body: response })
       );
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
@@ -263,7 +262,7 @@ describe('test endpoint route', () => {
 
       mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
       mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
-      mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({
           body: createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata()),
         })
@@ -321,7 +320,7 @@ describe('test endpoint route', () => {
 
       mockAgentService.getAgentStatusById = jest.fn().mockReturnValue('error');
       mockAgentService.listAgents = jest.fn().mockReturnValue(noUnenrolledAgent);
-      mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve({
           body: createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata()),
         })
@@ -401,7 +400,7 @@ describe('test endpoint route', () => {
       it('should return 404 on no results', async () => {
         const mockRequest = httpServerMock.createKibanaRequest({ params: { id: 'BADID' } });
 
-        mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+        (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: createV2SearchResponse() })
         );
 
@@ -439,7 +438,7 @@ describe('test endpoint route', () => {
         mockAgentService.getAgent = jest.fn().mockReturnValue(({
           active: true,
         } as unknown) as Agent);
-        mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+        (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
         );
 
@@ -480,7 +479,7 @@ describe('test endpoint route', () => {
           SavedObjectsErrorHelpers.createGenericNotFoundError();
         });
 
-        mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+        (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
         );
 
@@ -515,7 +514,7 @@ describe('test endpoint route', () => {
         mockAgentService.getAgent = jest.fn().mockReturnValue(({
           active: true,
         } as unknown) as Agent);
-        mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+        (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
         );
 
@@ -545,7 +544,7 @@ describe('test endpoint route', () => {
         const mockRequest = httpServerMock.createKibanaRequest({
           params: { id: response.hits.hits[0]._id },
         });
-        mockScopedClient.asCurrentUser.search.mockImplementationOnce(() =>
+        (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
           Promise.resolve({ body: response })
         );
         mockAgentService.getAgent = jest.fn().mockReturnValue(({
