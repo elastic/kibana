@@ -70,7 +70,7 @@ export function decorateMochaUi(log, lifecycle, context, { isDockerGroup }) {
               !isDockerGroup ? true : !t.startsWith('ciGroup')
             );
 
-            if (tagsToIgnore) {
+            if (tagsToIgnore.length) {
               log.warning(
                 `ignoring ciGroup tags because test is being run by a config using 'dockerServers', tags: ${tagsToIgnore}`
               );
