@@ -63,6 +63,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         width: args.gridConfig.strokeWidth ?? 1,
         color: args.gridConfig.strokeColor ?? '#D3DAE6',
       },
+      cellHeight: {
+        max: 'fill',
+      },
     },
     cell: {
       maxWidth: 'fill',
