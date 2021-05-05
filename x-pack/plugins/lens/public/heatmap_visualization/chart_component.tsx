@@ -53,7 +53,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const xScaleType = xAxisMeta.type === 'date' ? ScaleType.Time : ScaleType.Ordinal;
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
-
+  const yValuesFormatter = formatFactory(yAxisDef.meta.params);
   const valueFormatter = formatFactory(valueDef.meta.params);
 
   const config: HeatmapSpec['config'] = {
@@ -81,6 +81,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       fill: `#6a717d`,
       padding: 8,
       name: yAxisDef.name,
+      formatter: (v: number | string) => yValuesFormatter.convert(v),
     },
     xAxisLabel: {
       visible: args.gridConfig.isXAxisLabelVisible,
