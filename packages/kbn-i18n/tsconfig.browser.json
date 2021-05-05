@@ -1,15 +1,13 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.browser.json",
   "compilerOptions": {
     "incremental": true,
-    "declarationDir": "./target/types",
-    "outDir": "./target/node",
-    "declaration": true,
-    "declarationMap": true,
+    "outDir": "./target/web",
+    "declaration": false,
+    "isolatedModules": true,
     "sourceMap": true,
     "sourceRoot": "../../../../../packages/kbn-i18n/src",
     "types": [
-      "jest",
       "node"
     ]
   },

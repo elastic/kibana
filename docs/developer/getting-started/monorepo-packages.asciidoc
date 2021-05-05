@@ -76,6 +76,7 @@ yarn kbn watch-bazel
 - @kbn/eslint-import-resolver-kibana
 - @kbn/eslint-plugin-eslint
 - @kbn/expect
+- @kbn/i18n
 - @kbn/legacy-logging
 - @kbn/logging
 - @kbn/securitysolution-constants
