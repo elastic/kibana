@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import { SPACES } from '../../common/lib/spaces';
 import {
   testCaseFailures,
@@ -96,21 +95,9 @@ const createTestCases = (spaceId: string): UpdateObjectsSpacesTestCase[] => {
     },
     {
       objects: [
-        {
-          id: CASES.DEFAULT_AND_SPACE_1.id,
-          existingNamespaces: uniq([DEFAULT_SPACE_ID, SPACE_1_ID, spaceId]),
-          ...fail404(spaceId === SPACE_2_ID),
-        },
-        {
-          id: CASES.DEFAULT_AND_SPACE_2.id,
-          existingNamespaces: uniq([DEFAULT_SPACE_ID, SPACE_2_ID, spaceId]),
-          ...fail404(spaceId === SPACE_1_ID),
-        },
-        {
-          id: CASES.SPACE_1_AND_SPACE_2.id,
-          existingNamespaces: uniq([SPACE_1_ID, SPACE_2_ID, spaceId]),
-          ...fail404(spaceId === DEFAULT_SPACE_ID),
-        },
+        { ...CASES.DEFAULT_AND_SPACE_1, ...fail404(spaceId === SPACE_2_ID) },
+        { ...CASES.DEFAULT_AND_SPACE_2, ...fail404(spaceId === SPACE_1_ID) },
+        { ...CASES.SPACE_1_AND_SPACE_2, ...fail404(spaceId === DEFAULT_SPACE_ID) },
         { id: CASES.ALL_SPACES.id, existingNamespaces: ['*', spaceId] },
         { ...CASES.DOES_NOT_EXIST, ...fail404() },
       ],

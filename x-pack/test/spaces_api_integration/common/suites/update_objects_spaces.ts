@@ -35,13 +35,6 @@ export interface UpdateObjectsSpacesTestCase {
   objects: Array<{
     id: string;
     existingNamespaces: string[];
-
-    /**
-     * The spaces that the object should exist in after the operation is complete.
-     * This is optional; if it is not included, it is calculated to be (existingSpaces - spacesToRemove + spacesToAdd).
-     * Note: this is not used in failure cases.
-     */
-    expectedSpaces?: string[];
     failure?: 400 | 404;
   }>;
   spacesToAdd: string[];
@@ -73,23 +66,22 @@ export function updateObjectsSpacesTestSuiteFactory(esArchiver: any, supertest: 
     } else {
       const { objects, spacesToAdd, spacesToRemove } = testCase;
       const apiResponse = response.body as SavedObjectsUpdateObjectsSpacesResponse;
-      objects.forEach(({ id, existingNamespaces, failure, expectedSpaces }, i) => {
+      objects.forEach(({ id, existingNamespaces, failure }, i) => {
         const object = apiResponse.objects[i];
         if (failure === 404) {
           const error = SavedObjectsErrorHelpers.createGenericNotFoundError(TYPE, id);
           expect(object.error).to.eql(error.output.payload);
         } else {
           // success
-          const remainingSpaces = without(
+          const expectedSpaces = without(
             uniq([...existingNamespaces, ...spacesToAdd]),
             ...spacesToRemove
           ).map((x) => (authorizedSpace && x !== authorizedSpace && x !== '*' ? '?' : x));
-          const spaces = expectedSpaces ?? remainingSpaces;
 
           const result = apiResponse.objects[i];
           expect(result.type).to.eql(TYPE);
           expect(result.id).to.eql(id);
-          expect(result.spaces.sort()).to.eql(spaces.sort());
+          expect(result.spaces.sort()).to.eql(expectedSpaces.sort());
         }
       });
     }
