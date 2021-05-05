@@ -188,7 +188,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should make the document table scrollable', async function () {
         await PageObjects.discover.clearFieldSearchInput();
         const dscTable = await find.byCssSelector('.dscTable');
-        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        const fieldNames = (await PageObjects.discover.getAllFieldNames()).filter(
+          (name) => name !== '@timestamp'
+        );
         const clientHeight = await dscTable.getAttribute('clientHeight');
         let fieldCounter = 0;
         const checkScrollable = async () => {
