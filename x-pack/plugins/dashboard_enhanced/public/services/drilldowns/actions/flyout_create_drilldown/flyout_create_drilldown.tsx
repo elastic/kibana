@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { skip, take, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
@@ -82,7 +84,11 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     }
 
     const templates = createDrilldownTemplatesFromSiblings(embeddable);
-
+    const closed$ = new Subject<true>();
+    const close = () => {
+      closed$.next(true);
+      handle.close();
+    };
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
@@ -92,7 +98,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
           templates={templates}
-          onClose={() => handle.close()}
+          onClose={close}
         />
       ),
       {
@@ -100,5 +106,10 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
         'data-test-subj': 'createDrilldownFlyout',
       }
     );
+
+    // Close flyout on application change.
+    core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
+      close();
+    });
   }
 }
