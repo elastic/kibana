@@ -83,7 +83,7 @@ export const CustomStops = ({ controlStops, onChange, rangeType }: CustomPropsFo
               }
               return (
                 <EuiFormRow
-                  key={`${color}-${stop}`}
+                  key={index}
                   display="rowCompressed"
                   isInvalid={Boolean(errorMessages.length)}
                   error={errorMessages[0]}

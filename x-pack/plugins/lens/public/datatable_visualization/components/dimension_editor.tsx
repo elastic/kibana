@@ -76,7 +76,7 @@ export function TableDimensionEditor(
     name: defaultParams.name,
   };
   // need to tell the helper that the colorStops are required to display
-  const { colorStops, mode: paletteMode } = applyPaletteParams(
+  const { colorStops } = applyPaletteParams(
     props.paletteService,
     activePalette,
     minMaxByColumnId[accessor]
@@ -246,7 +246,7 @@ export function TableDimensionEditor(
                   <EuiColorPaletteDisplay
                     data-test-subj="lnsDatatable_dynamicColoring_palette"
                     palette={colorStops}
-                    type={paletteMode === 'stepped' ? 'fixed' : paletteMode}
+                    type={'fixed'}
                     onClick={() => {
                       setIsPaletteOpen(!isPaletteOpen);
                     }}

@@ -65,6 +65,11 @@ export function getPaletteColors(
   const interval = maxStopValue - minStopValue;
   const { stops, ...otherParams } = activePaletteParams || {};
 
+  if (activePaletteParams.name === 'custom') {
+    // need to generate the palette from the existing controlStops
+    return shiftPalette(activePaletteParams?.controlStops || [], maxStopValue);
+  }
+
   const params: Omit<CustomPaletteParams, 'stops'> & {
     stepped?: boolean;
     stops?: number[];
@@ -73,7 +78,7 @@ export function getPaletteColors(
     ...otherParams,
     colors: activePaletteParams.controlStops?.map(({ color }) => color),
     stops: activePaletteParams.controlStops?.map(({ stop }) => stop),
-    stepped: activePaletteParams?.progression !== 'gradient',
+    stepped: false,
   };
 
   const colorStops = palettes
@@ -117,19 +122,32 @@ export function remapForDisplay(
 ) {
   const newStops: ColorStop[] = [];
   const minStop = stops[0].stop;
-  const minRef = params.rangeType === 'percent' ? 0 : dataBounds?.min || -Infinity;
-  const maxRef = params.rangeType === 'percent' ? 100 : dataBounds?.max || Infinity;
-  if (minStop !== minRef) {
+  const minRef = params.rangeType !== 'number' ? 0 : dataBounds?.min || -Infinity;
+  const maxRef = params.rangeType !== 'number' ? 100 : dataBounds?.max || Infinity;
+  // original values are stored into controlStops
+  const controlStops = params?.controlStops || [];
+  if (minStop > minRef) {
     if (params.continuity === 'below' || params.continuity === 'all') {
-      newStops.push({ color: stops[0].color, stop: minRef });
+      newStops.push({
+        color: (controlStops[0] || stops[0]).color,
+        stop: controlStops[0]?.stop || minRef,
+      });
     }
   }
   newStops.push(...stops);
+  if (minStop < maxRef) {
+    if (params.continuity == null || params.continuity === 'above' || params.continuity === 'all') {
+      newStops.push({
+        color: (controlStops[controlStops.length - 1] || stops[stops.length - 1]).color,
+        stop: maxRef,
+      });
+    }
+  }
 
   const interval = maxRef - minRef;
-  const newMin = (minStop / interval) * DEFAULT_MAX_STOP;
+  const newMin = (controlStops[0].stop / interval) * DEFAULT_MAX_STOP;
 
-  return remapStopsByNewInterval(shiftPalette(newStops, maxRef), {
+  return remapStopsByNewInterval(newStops, {
     newInterval: DEFAULT_MAX_STOP,
     newMin,
   });

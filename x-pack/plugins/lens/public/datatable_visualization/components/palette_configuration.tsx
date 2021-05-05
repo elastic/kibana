@@ -33,10 +33,10 @@ import {
   DEFAULT_CUSTOM_STEPS,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  FIXED_PROGRESSION,
   MAX_COLOR_STEPS,
   MIN_COLOR_STEPS,
   RequiredPaletteParamTypes,
-  STEPPED_PROGRESSION,
 } from './coloring/constants';
 import { CustomStops } from './coloring/color_stops';
 
@@ -61,7 +61,10 @@ function getSwitchToCustomParams(
         dataBounds,
       }
     );
-    return mergePaletteParams(activePalette, { ...newParams, stops });
+    return mergePaletteParams(activePalette, {
+      ...newParams,
+      stops,
+    });
   }
   // prepare everything to switch to custom palette
   const newPaletteParams = {
@@ -99,7 +102,7 @@ export function applyPaletteParams(
   }
   return {
     colorStops: paletteColorRepresentation,
-    mode: activePalette?.params?.progression ?? STEPPED_PROGRESSION,
+    mode: FIXED_PROGRESSION,
   };
 }
 
@@ -140,9 +143,7 @@ export function CustomizablePalette({
   const progressionType = activePalette.params?.progression ?? defaultParams.progression;
   const isCustomPalette = activePalette?.params?.name === CUSTOM_PALETTE;
 
-  const showStepsInput =
-    (!isCustomPalette && progressionType !== 'gradient') ||
-    (isCustomPalette && progressionType === STEPPED_PROGRESSION);
+  const showStepsInput = !isCustomPalette;
 
   const controlStops =
     (activePalette?.params?.reverse
@@ -164,6 +165,7 @@ export function CustomizablePalette({
           <PalettePicker
             data-test-subj="lnsDatatable_dynamicColoring_palette_picker"
             palettes={palettes}
+            dataBounds={dataBounds}
             activePalette={activePalette}
             setPalette={(newPalette) => {
               const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
@@ -340,6 +342,8 @@ export function CustomizablePalette({
                 {
                   controlStops: stops,
                   steps: activePalette.params!.steps || DEFAULT_COLOR_STEPS,
+                  rangeMin: stops[0]?.stop,
+                  rangeMax: stops[stops.length - 1]?.stop,
                 },
                 dataBounds
               );
@@ -349,59 +353,6 @@ export function CustomizablePalette({
         </EuiFormRow>
       </div>
       <div className="lnsPalettePanel__section">
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
-            defaultMessage: 'Color progression',
-          })}
-          display="columnCompressed"
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
-              defaultMessage: 'Color progression',
-            })}
-            data-test-subj="lnsDatatable_dynamicColoring_progression_groups"
-            name="dynamicColoringProgressionValue"
-            buttonSize="compressed"
-            options={[
-              {
-                id: `${idPrefix}stepped`,
-                label: i18n.translate('xpack.lens.table.dynamicColoring.progression.stepped', {
-                  defaultMessage: 'Stepped',
-                }),
-                'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_stepped',
-              },
-              {
-                id: `${idPrefix}gradient`,
-                label: i18n.translate('xpack.lens.table.dynamicColoring.progression.gradient', {
-                  defaultMessage: 'Gradient',
-                }),
-                'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_gradient',
-              },
-            ]}
-            idSelected={`${idPrefix}${progressionType}`}
-            onChange={(id) => {
-              const newProgressionType = id.replace(
-                idPrefix,
-                ''
-              ) as RequiredPaletteParamTypes['progression'];
-              const steps = activePalette.params?.steps || DEFAULT_COLOR_STEPS;
-              const newParams = mergePaletteParams(activePalette, {
-                progression: newProgressionType,
-                steps,
-                stops:
-                  progressionType !== STEPPED_PROGRESSION && activePalette.params?.stops
-                    ? activePalette.params.stops
-                    : getPaletteColors(
-                        palettes,
-                        { ...activePalette.params, steps },
-                        { dataBounds }
-                      ),
-              });
-              setPalette(newParams);
-            }}
-          />
-        </EuiFormRow>
         {showStepsInput && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.table.dynamicColoring.progression.stops.label', {

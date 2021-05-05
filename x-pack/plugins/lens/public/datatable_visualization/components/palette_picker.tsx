@@ -9,27 +9,14 @@ import React from 'react';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { CustomPaletteParams } from '../expression';
-import { reversePalette } from './coloring/utils';
+import { remapForDisplay, reversePalette } from './coloring/utils';
 import {
   CUSTOM_PALETTE,
   defaultParams,
   DEFAULT_COLOR_STEPS,
   DEFAULT_CUSTOM_STEPS,
   FIXED_PROGRESSION,
-  STEPPED_PROGRESSION,
 } from './coloring/constants';
-
-function getType(
-  id: string,
-  activePalette: PaletteOutput<CustomPaletteParams> | undefined
-): 'gradient' | 'fixed' {
-  if (id === activePalette?.name) {
-    if (activePalette?.params?.progression === 'gradient') {
-      return activePalette.params.progression;
-    }
-  }
-  return FIXED_PROGRESSION;
-}
 
 function getPaletteSteps(
   id: string,
@@ -45,13 +32,11 @@ function getPaletteSteps(
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,
-  activePalette: PaletteOutput<CustomPaletteParams> | undefined
+  activePalette: PaletteOutput<CustomPaletteParams> | undefined,
+  dataBounds: { min: number; max: number }
 ) {
   const { id, title } = palettes.get(CUSTOM_PALETTE);
-  const displayType: 'gradient' | 'fixed' =
-    activePalette?.params?.progression === STEPPED_PROGRESSION
-      ? FIXED_PROGRESSION
-      : activePalette?.params?.progression || FIXED_PROGRESSION;
+  const displayType: 'fixed' = FIXED_PROGRESSION;
 
   // Try to generate a palette from the current one
   if (activePalette && activePalette.name !== CUSTOM_PALETTE) {
@@ -75,7 +60,7 @@ function getCustomPaletteConfig(
     return { value: id, title, type: 'text' as const };
   }
 
-  const stops = activePalette.params.stops;
+  const stops = remapForDisplay(activePalette.params.stops, activePalette.params, { dataBounds });
 
   // full custom palette
   return {
@@ -92,12 +77,14 @@ export function PalettePicker({
   setPalette,
   showCustomPalette,
   showDynamicColorOnly,
+  dataBounds,
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput) => void;
   showCustomPalette?: boolean;
   showDynamicColorOnly?: boolean;
+  dataBounds: { min: number; max: number };
 }) {
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
@@ -112,12 +99,12 @@ export function PalettePicker({
       return {
         value: id,
         title,
-        type: getType(id, activePalette),
+        type: 'fixed',
         palette: activePalette?.params?.reverse ? colors.reverse() : colors,
       };
     });
   if (showCustomPalette) {
-    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette));
+    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette, dataBounds));
   }
   return (
     <EuiColorPalettePicker

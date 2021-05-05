@@ -187,7 +187,9 @@ export interface CustomPaletteParams {
   reverse?: boolean;
   rangeType?: 'number' | 'percent';
   continuity?: 'above' | 'below' | 'all' | 'none';
-  progression?: 'gradient' | 'stepped'; // | 'fixed';
+  progression?: 'fixed';
+  rangeMin?: number;
+  rangeMax?: number;
   stops?: Array<{ color: string; stop: number }>;
   controlStops?: Array<{ color: string; stop: number }>;
   steps?: number;

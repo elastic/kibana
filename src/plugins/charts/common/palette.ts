@@ -16,6 +16,8 @@ export interface CustomPaletteArguments {
   reverse?: boolean;
   stop?: number[];
   range?: 'number' | 'percent';
+  rangeMin?: number;
+  rangeMax?: number;
   continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
@@ -24,6 +26,8 @@ export interface CustomPaletteState {
   gradient: boolean;
   stops: number[];
   range: 'number' | 'percent';
+  rangeMin: number;
+  rangeMax: number;
   continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
@@ -104,6 +108,14 @@ export function palette(): ExpressionFunctionDefinition<
         default: 'above',
         help: '',
       },
+      rangeMin: {
+        types: ['number'],
+        help: '',
+      },
+      rangeMax: {
+        types: ['number'],
+        help: '',
+      },
       range: {
         types: ['string'],
         options: ['number', 'percent'],
@@ -128,7 +140,16 @@ export function palette(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const { color, continuity, reverse, gradient, stop, range } = args;
+      const {
+        color,
+        continuity,
+        reverse,
+        gradient,
+        stop,
+        range,
+        rangeMin = 0,
+        rangeMax = 100,
+      } = args;
       const colors = ([] as string[]).concat(color || defaultCustomColors);
       const stops = ([] as number[]).concat(stop || []);
       if (stops.length > 0 && colors.length !== stops.length) {
@@ -143,6 +164,8 @@ export function palette(): ExpressionFunctionDefinition<
           range: range ?? 'percent',
           gradient,
           continuity,
+          rangeMin,
+          rangeMax,
         },
       };
     },

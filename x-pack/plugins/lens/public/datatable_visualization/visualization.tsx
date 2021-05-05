@@ -367,7 +367,10 @@ export const getDatatableVisualization = ({
                               type: 'function',
                               function: 'palette',
                               arguments: {
-                                gradient: [paletteConfig?.progression === 'gradient'],
+                                rangeMin:
+                                  paletteConfig?.rangeMin != null ? [paletteConfig?.rangeMin] : [],
+                                rangeMax:
+                                  paletteConfig?.rangeMax != null ? [paletteConfig?.rangeMax] : [],
                                 reverse: [paletteConfig?.reverse || false],
                                 continuity: [paletteConfig?.continuity || 'above'],
                                 range: [paletteConfig?.rangeType || 'percent'],
