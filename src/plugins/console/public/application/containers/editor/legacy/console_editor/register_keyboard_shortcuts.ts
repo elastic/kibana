@@ -15,9 +15,9 @@ interface Actions {
   openDocumentation: () => void;
 }
 
-export function registerCommands({
+export function registerKeyboardShortcuts({
   senseEditor,
-  sendCurrentRequestToES,
+  sendCurrentRequest,
   openDocumentation,
 }: Actions) {
   const throttledAutoIndent = throttle(() => senseEditor.autoIndent(), 500, {
@@ -28,8 +28,8 @@ export function registerCommands({
 
   coreEditor.registerKeyboardShortcut({
     keys: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    name: 'send to Elasticsearch',
-    fn: () => sendCurrentRequestToES(),
+    name: 'send request',
+    fn: () => sendCurrentRequest(),
   });
 
   coreEditor.registerKeyboardShortcut({

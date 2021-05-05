@@ -18,14 +18,14 @@ import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
-  useSendCurrentRequestToES,
+  useSendCurrentRequest,
   useSetInputEditor,
 } from '../../../../hooks';
 import * as senseEditor from '../../../../models/sense_editor';
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
-import { registerCommands } from './keyboard_shortcuts';
+import { registerKeyboardShortcuts } from './register_keyboard_shortcuts';
 
 const { useUIAceKeyboardMode } = ace;
 
@@ -62,7 +62,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToES = useSendCurrentRequestToES();
+  const sendCurrentRequest = useSendCurrentRequest();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -186,12 +186,12 @@ function EditorUI({ initialTextValue }: EditorProps) {
   }, [settings]);
 
   useEffect(() => {
-    registerCommands({
+    registerKeyboardShortcuts({
       senseEditor: editorInstanceRef.current!,
-      sendCurrentRequestToES,
+      sendCurrentRequest,
       openDocumentation,
     });
-  }, [sendCurrentRequestToES, openDocumentation]);
+  }, [sendCurrentRequest, openDocumentation]);
 
   return (
     <div style={abs} data-test-subj="console-application" className="conApp">
@@ -210,7 +210,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
               })}
             >
               <button
-                onClick={sendCurrentRequestToES}
+                onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',

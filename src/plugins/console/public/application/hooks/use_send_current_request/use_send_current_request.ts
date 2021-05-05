@@ -17,7 +17,7 @@ import { track } from './track';
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
 
-export const useSendCurrentRequestToES = () => {
+export const useSendCurrentRequest = () => {
   const {
     services: { history, settings, notifications, trackUiMetric },
   } = useServicesContext();
