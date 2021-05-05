@@ -101,6 +101,15 @@ export function hasValidComposite(buckets: estypes.AggregationContainer) {
   return true;
 }
 
+/**
+ * Validates if aggregation type is currently not supported
+ * e.g. any other type other than 'date_histogram' or 'aggregations'
+ * @param buckets
+ */
+export function isUnsupportedAggType(aggType: string) {
+  return aggType !== 'date_histogram' && aggType !== 'aggs' && aggType !== 'aggregations';
+}
+
 // Returns a flag to indicate whether the source data can be plotted in a time
 // series chart for the specified detector.
 export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex: number): boolean {
@@ -143,6 +152,9 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       if (isPopulatedObject(aggs)) {
         const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
+          if (Object.keys(aggs[aggBucketsName]).some(isUnsupportedAggType)) {
+            return false;
+          }
           // if fieldName is an aggregated field under nested terms using bucket_script
           const aggregations =
             getAggregations<estypes.AggregationContainer>(aggs[aggBucketsName]) ?? {};
@@ -207,7 +219,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
         return i18n.translate(
           'xpack.ml.timeSeriesJob.jobWithUnsupportedCompositeAggregationMessage',
           {
-            defaultMessage: 'Disabled because the datafeed contains unsupported composite sources.',
+            defaultMessage: 'the datafeed contains unsupported composite sources',
           }
         );
       }
@@ -223,7 +235,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
 
   if (isChartableTimeSeriesViewJob === false) {
     return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
-      defaultMessage: 'Disabled because not a viewable time series job.',
+      defaultMessage: 'it is not a viewable time series job',
     });
   }
 }

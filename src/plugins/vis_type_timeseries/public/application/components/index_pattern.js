@@ -113,7 +113,7 @@ export const IndexPattern = ({
   const defaults = {
     [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
-    [dropBucketName]: 1,
+    [dropBucketName]: 0,
     [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };

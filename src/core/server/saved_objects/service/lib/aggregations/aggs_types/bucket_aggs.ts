@@ -14,6 +14,7 @@ import { schema as s, ObjectType } from '@kbn/config-schema';
  * Currently supported:
  * - filter
  * - histogram
+ * - nested
  * - terms
  *
  * Not implemented:

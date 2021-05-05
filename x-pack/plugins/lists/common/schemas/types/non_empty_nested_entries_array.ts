@@ -19,7 +19,7 @@ export type NestedEntriesArray = t.TypeOf<typeof nestedEntriesArray>;
 /**
  * Types the nonEmptyNestedEntriesArray as:
  *   - An array of entries of length 1 or greater
- *
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const nonEmptyNestedEntriesArray = new t.Type<
   NestedEntriesArray,
@@ -38,5 +38,12 @@ export const nonEmptyNestedEntriesArray = new t.Type<
   t.identity
 );
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyNestedEntriesArray = t.OutputOf<typeof nonEmptyNestedEntriesArray>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyNestedEntriesArrayDecoded = t.TypeOf<typeof nonEmptyNestedEntriesArray>;

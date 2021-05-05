@@ -469,7 +469,7 @@ describe('validateAndConvertAggregations', () => {
     );
   });
 
-  it('throws an error when trying to access a property via {type}.{type}.{attr}', () => {
+  it('throws an error when trying to access a property via {type}.{type}.attributes.{attr}', () => {
     expect(() => {
       validateAndConvertAggregations(
         ['alert'],
@@ -489,6 +489,29 @@ describe('validateAndConvertAggregations', () => {
       );
     }).toThrowErrorMatchingInlineSnapshot(
       '"[aggName.cardinality.field] Invalid attribute path: alert.alert.attributes.actions.group"'
+    );
+  });
+
+  it('throws an error when trying to access a property via {type}.{type}.{attr}', () => {
+    expect(() => {
+      validateAndConvertAggregations(
+        ['alert'],
+        {
+          aggName: {
+            cardinality: {
+              field: 'alert.alert.actions.group',
+            },
+            aggs: {
+              aggName: {
+                max: { field: 'alert.alert.actions.group' },
+              },
+            },
+          },
+        },
+        mockMappings
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"[aggName.cardinality.field] Invalid attribute path: alert.alert.actions.group"'
     );
   });
 });

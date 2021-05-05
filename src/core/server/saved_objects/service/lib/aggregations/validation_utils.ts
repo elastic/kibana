@@ -28,12 +28,13 @@ export const isRootLevelAttribute = (
     return false;
   }
 
-  const [type, ...fieldName] = splits;
-  if (allowedTypes.includes(fieldName.join('.'))) {
+  const [type, firstPath, ...otherPaths] = splits;
+  if (allowedTypes.includes(firstPath)) {
     return false;
   }
-
-  return allowedTypes.includes(type) && fieldDefined(indexMapping, fieldName.join('.'));
+  return (
+    allowedTypes.includes(type) && fieldDefined(indexMapping, [firstPath, ...otherPaths].join('.'))
+  );
 };
 
 /**

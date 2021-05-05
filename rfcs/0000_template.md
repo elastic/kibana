@@ -50,6 +50,12 @@ If we implement this proposal, how will existing Kibana developers adopt it? Is
 this a breaking change? Can we write a codemod? Should we coordinate with
 other projects or libraries?
 
+# How this scales
+
+Does this change affect Kibana's performance in a substantial way? Have we discovered
+the upper bounds before we see performance degradations? Will any load 
+tests be added to cover these scenarios?
+
 # How we teach this
 
 What names and terminology work best for these concepts and why? How is this
