@@ -232,7 +232,7 @@ Configuring the *Suggestions* that *Lens* automatically populates is unsupported
 [[is-it-possible-to-use-different-indexpatterns-in-lens]]
 ===== Is it possible to use different index patterns in a single visualization?
 
-You can create a visualization from multiple index patterns in *Lens*: this feature is available for a subset of visualizations such as *Bar*, *Line* and *Area* charts.
+You can create *Bar*, *Line* and *Area* charts from multiple index patterns.
 
 Each *Layer* in a visualization is associated with an index pattern and mutiple *Layers* can be combined together within the same visualization. Each *Layer* also has a chart switcher button in order to select the best type of visualization for the specific dataset.
 At the same time it is possible to dynamically change the indexpattern for the *Layer* when required.
