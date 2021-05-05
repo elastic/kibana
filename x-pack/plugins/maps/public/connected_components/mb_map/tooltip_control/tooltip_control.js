@@ -244,12 +244,9 @@ export class TooltipControl extends React.Component {
     }
 
     const targetMbFeature = mbFeatures[0];
-    if (this.props.openTooltips[0]) {
+    if (this.props.openTooltips[0] && this.props.openTooltips[0].features.length) {
       const firstFeature = this.props.openTooltips[0].features[0];
-      if (
-        firstFeature &&
-        targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME] === firstFeature.id
-      ) {
+      if (targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME] === firstFeature.id) {
         // ignore hover events when hover tooltip is all ready opened for feature
         return;
       }
