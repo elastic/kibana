@@ -171,8 +171,13 @@ export const DiscoverGrid = ({
     const idMap = rows.reduce((prev, row) => {
       return prev.set(getDocId(row), true);
     }, new Map());
-    return selectedDocs.filter((docId) => idMap.get(docId));
-  }, [selectedDocs, rows]);
+    const result = selectedDocs.filter((docId) => idMap.get(docId));
+    if (result.length === 0 && isFilterActive) {
+      setIsFilterActive(false);
+    }
+    return result;
+  }, [selectedDocs, rows, isFilterActive]);
+
   const displayedRows = useMemo(() => {
     if (!rows) {
       return [];
