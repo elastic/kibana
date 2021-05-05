@@ -234,21 +234,14 @@ export const openTimelineTemplateFromSettings = (id: string) => {
 };
 
 export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<HTMLElement>> => {
-  // Why are we checking for null if it is typed to 'string'? We don't currently validate the timeline response
-  // so technically we cannot guarantee that we will have the id. Changing the type to 'string | null' results in
-  // a lot of other changes being needed that would be best as part of a cleanup. Added a log, to give a dev a clue
-  // as to whether it's failing client or server side.
   if (timelineId == null) {
+    // Log out if for some reason this happens to be null just in case for our tests we experience
+    // value of null. Some tests return an "any" which is why this could happen.
     cy.log('"timelineId" is null or undefined');
   }
-
-  cy.root()
-    .pipe(($el) => {
-      $el.find(TIMELINE_TITLE_BY_ID(timelineId)).trigger('click');
-      return $el.find(QUERY_TAB_BUTTON).find('.euiBadge');
-    })
-    .should('be.visible');
-  return cy.root().find(TIMELINE_TITLE_BY_ID(timelineId));
+  // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
+  // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
+  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
 };
 
 export const pinFirstEvent = () => {

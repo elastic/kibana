@@ -15,6 +15,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../constants';
  *   - Natural Number (positive integer and not a float),
  *   - greater than 1
  *   - If undefined then it will use DEFAULT_MAX_SIGNALS (100) as the default
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultMaxSignalsNumber = new t.Type<number, number | undefined, unknown>(
   'DefaultMaxSignals',
