@@ -7,9 +7,8 @@
 
 import { EuiPageTemplate, EuiPageTemplateProps, ExclusiveUnion } from '@elastic/eui';
 import React from 'react';
-import type { Observable } from 'rxjs';
-import type { NavigationSection } from '../../../services/navigation_registry';
-import { ObservabilitySideNav } from './side_nav';
+import { ObservabilitySideNav, ObservabilitySideNavProps } from './side_nav';
+import './side_nav.scss';
 
 export type WrappedPageTemplateProps = Pick<
   EuiPageTemplateProps,
@@ -28,12 +27,13 @@ export type WrappedPageTemplateProps = Pick<
     { template: EuiPageTemplateProps['template'] }
   >;
 
-export type ObservabilityPageTemplateProps = {
-  navigationSections$: Observable<NavigationSection[]>;
-} & WrappedPageTemplateProps;
+export type ObservabilityPageTemplateProps = ObservabilitySideNavProps & WrappedPageTemplateProps;
 
 export function ObservabilityPageTemplate({
   children,
+  currentAppId$,
+  getUrlForApp,
+  navigateToApp,
   navigationSections$,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
@@ -41,7 +41,18 @@ export function ObservabilityPageTemplate({
     <EuiPageTemplate
       restrictWidth={false}
       {...pageTemplateProps}
-      pageSideBar={<ObservabilitySideNav navigationSections$={navigationSections$} />}
+      pageSideBar={
+        <ObservabilitySideNav
+          currentAppId$={currentAppId$}
+          getUrlForApp={getUrlForApp}
+          navigateToApp={navigateToApp}
+          navigationSections$={navigationSections$}
+        />
+      }
+      pageSideBarProps={{
+        className: 'observabilitySideBar',
+        sticky: true,
+      }}
     >
       {children}
     </EuiPageTemplate>

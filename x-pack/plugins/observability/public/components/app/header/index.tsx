@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export * from './header_menu';
+export * from './header_props';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,

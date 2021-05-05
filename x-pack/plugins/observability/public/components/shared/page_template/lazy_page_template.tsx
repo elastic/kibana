@@ -6,23 +6,17 @@
  */
 
 import React from 'react';
-import type { Observable } from 'rxjs';
-import type { NavigationSection } from '../../../services/navigation_registry';
 import type { WrappedPageTemplateProps } from './page_template';
+import { ObservabilitySideNavProps } from './side_nav';
 
 export const LazyObservabilityPageTemplate = React.lazy(() => import('./page_template'));
 
 export type LazyObservabilityPageTemplateProps = WrappedPageTemplateProps;
 
-export function createLazyObservabilityPageTemplate(
-  navigationSections$: Observable<NavigationSection[]>
-) {
+export function createLazyObservabilityPageTemplate(injectedDeps: ObservabilitySideNavProps) {
   return (pageTemplateProps: LazyObservabilityPageTemplateProps) => (
     <React.Suspense fallback={null}>
-      <LazyObservabilityPageTemplate
-        {...pageTemplateProps}
-        navigationSections$={navigationSections$}
-      />
+      <LazyObservabilityPageTemplate {...pageTemplateProps} {...injectedDeps} />
     </React.Suspense>
   );
 }

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -167,6 +167,16 @@ export class Plugin
       });
     }
 
+    this.navigationRegistry.registerSections(
+      of([
+        {
+          label: '',
+          sortKey: 100,
+          entries: [{ label: 'Overview', app: 'observability-overview', path: '/overview' }],
+        },
+      ])
+    );
+
     return {
       dashboard: { register: registerDataHandler },
       navigation: {
@@ -179,7 +189,12 @@ export class Plugin
   public start({ application }: CoreStart) {
     toggleOverviewLinkInNav(this.appUpdater$, application);
 
-    const PageTemplate = createLazyObservabilityPageTemplate(this.navigationRegistry.sections$);
+    const PageTemplate = createLazyObservabilityPageTemplate({
+      currentAppId$: application.currentAppId$,
+      getUrlForApp: application.getUrlForApp,
+      navigateToApp: application.navigateToApp,
+      navigationSections$: this.navigationRegistry.sections$,
+    });
 
     return {
       navigation: {

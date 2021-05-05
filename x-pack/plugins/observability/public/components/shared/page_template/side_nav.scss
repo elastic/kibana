@@ -1,0 +1,12 @@
+.observabilitySideBar {
+  padding: $euiSizeL;
+}
+
+.observabilitySideBar__header {
+  padding-bottom: $euiSizeL;
+}
+
+.observabilitySideBar__headerIcon {
+  @include euiBottomShadowSmall;
+  margin-right: $euiSize;
+}
