@@ -14,8 +14,6 @@ import { getMockArtifacts, toArtifactRecords } from './mocks';
 describe('manifest', () => {
   const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
   const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
-  const ARTIFACT_ID_EXCEPTIONS_LINUX =
-    'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
   const ARTIFACT_ID_EXCEPTIONS_MACOS =
     'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
   const ARTIFACT_ID_EXCEPTIONS_WINDOWS =
