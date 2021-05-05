@@ -195,7 +195,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         body: schema.object({ index: schema.string() }),
       },
       options: {
-        tags: ['access:fileUpload:analyzeFile'],
+        tags: ['access:fileUpload:import'],
       },
     },
     async (context, request, response) => {

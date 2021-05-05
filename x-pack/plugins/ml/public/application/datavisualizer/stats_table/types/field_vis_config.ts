@@ -39,6 +39,7 @@ export interface FieldVisStats {
   latest?: number;
   documentCounts?: {
     buckets?: DocumentCountBuckets;
+    interval?: number;
   };
   avg?: number;
   distribution?: {

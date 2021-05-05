@@ -12,6 +12,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
+import { HOST_ISOLATION_CREATE_API } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -20,6 +21,7 @@ import {
   AlertSearchResponse,
   AlertsIndex,
   UpdateAlertStatusProps,
+  HostIsolationResponse,
 } from './types';
 
 /**
@@ -100,4 +102,27 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
   KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_INDEX_URL, {
     method: 'POST',
     signal,
+  });
+
+/**
+ * Get Host Isolation index
+ *
+ * @param agent id
+ * @param optional comment for the isolation action
+ *
+ * @throws An error if response is not OK
+ */
+export const createHostIsolation = async ({
+  agentId,
+  comment = '',
+}: {
+  agentId: string;
+  comment?: string;
+}): Promise<HostIsolationResponse> =>
+  KibanaServices.get().http.fetch<HostIsolationResponse>(HOST_ISOLATION_CREATE_API, {
+    method: 'POST',
+    body: JSON.stringify({
+      agent_ids: [agentId],
+      comment,
+    }),
   });

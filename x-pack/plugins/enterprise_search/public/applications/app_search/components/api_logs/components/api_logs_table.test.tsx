@@ -95,7 +95,7 @@ describe('ApiLogsTable', () => {
     const wrapper = mountWithIntl(<ApiLogsTable />);
     const promptContent = wrapper.find(EuiEmptyPrompt).text();
 
-    expect(promptContent).toContain('No recent logs');
+    expect(promptContent).toContain('Perform your first API call');
   });
 
   describe('hasPagination', () => {

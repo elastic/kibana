@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
 import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
@@ -27,7 +28,10 @@ export const useAllAgents = (
   opts: RequestOptions = { perPage: 9000 }
 ) => {
   const { perPage } = opts;
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
@@ -52,6 +56,12 @@ export const useAllAgents = (
     },
     {
       enabled: !osqueryPoliciesLoading,
+      onError: (error) =>
+        toasts.addError(error as Error, {
+          title: i18n.translate('xpack.osquery.agents.fetchError', {
+            defaultMessage: 'Error while fetching agents',
+          }),
+        }),
     }
   );
 

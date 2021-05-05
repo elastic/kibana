@@ -9,7 +9,7 @@ pageLoadAssetSize:
   charts: 195358
   cloud: 21076
   console: 46091
-  core: 413500
+  core: 414000
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
@@ -67,12 +67,12 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 189428
+  security: 95864
   securityOss: 30806
-  securitySolution: 235402
+  securitySolution: 187863
   share: 99061
   snapshotRestore: 79032
-  spaces: 387915
+  spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
   tileMap: 65337
@@ -92,11 +92,11 @@ pageLoadAssetSize:
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
-  visTypeTimeseries: 155203
+  visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 113478
-  visualizations: 295025
+  visualizations: 90000
   visualize: 57431
   watcher: 43598
   runtimeFields: 41752
@@ -110,3 +110,4 @@ pageLoadAssetSize:
   banners: 17946
   mapsEms: 26072
   timelines: 28613
+  cases: 162385

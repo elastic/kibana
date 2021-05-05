@@ -175,7 +175,19 @@ export function getAlertType(
     // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {
       const instanceId = groupResult.group;
-      const value = groupResult.metrics[0][1];
+      const metric =
+        groupResult.metrics && groupResult.metrics.length > 0 ? groupResult.metrics[0] : null;
+      const value = metric && metric.length === 2 ? metric[1] : null;
+
+      if (!value) {
+        logger.debug(
+          `alert ${ID}:${alertId} "${name}": no metrics found for group ${instanceId}} from groupResult ${JSON.stringify(
+            groupResult
+          )}`
+        );
+        continue;
+      }
+
       const met = compareFn(value, params.threshold);
 
       if (!met) continue;

@@ -19,10 +19,13 @@ export async function getChoices({
   connectorId: string;
   fields: string[];
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
-    body: JSON.stringify({
-      params: { subAction: 'getChoices', subActionParams: { fields } },
-    }),
-    signal,
-  });
+  return await http.post(
+    `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
+      body: JSON.stringify({
+        params: { subAction: 'getChoices', subActionParams: { fields } },
+      }),
+      signal,
+    }
+  );
 }

@@ -161,6 +161,9 @@ describe('When the add exception modal is opened', () => {
     it('should contain the endpoint specific documentation text', () => {
       expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
     });
+    it('should render the os selection dropdown', () => {
+      expect(wrapper.find('[data-test-subj="os-selection-dropdown"]').exists()).toBeTruthy();
+    });
   });
 
   describe('when there is alert data passed to an endpoint list exception', () => {
@@ -217,6 +220,9 @@ describe('When the add exception modal is opened', () => {
     });
     it('should not display the eql sequence callout', () => {
       expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).not.toBeTruthy();
+    });
+    it('should not render the os selection dropdown', () => {
+      expect(wrapper.find('[data-test-subj="os-selection-dropdown"]').exists()).toBeFalsy();
     });
   });
 

@@ -6,6 +6,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -63,6 +64,7 @@ export interface LensPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -142,6 +144,7 @@ export class LensPlugin {
       visualizations,
       charts,
       globalSearch,
+      usageCollection,
     }: LensPluginSetupDependencies
   ) {
     this.attributeService = async () => {
@@ -156,6 +159,7 @@ export class LensPlugin {
         embeddable,
         charts,
         expressions,
+        usageCollection,
       },
       this.attributeService
     );
