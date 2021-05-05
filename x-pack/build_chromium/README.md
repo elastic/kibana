@@ -108,7 +108,7 @@ Here's the steps on how to test a Puppeteer upgrade, run these tests on Mac, Win
   `x-pack/plugins/reporting/chromium`
 - Make sure there are no errors when using the **Reporting diagnostic tool**
 - All functional and API tests that generate PDF and PNG files should pass.
-- Use a VM to run Kibana in a low-memory environment and try to generate a large dashboard PNG. Document the minimum requirements in the PR.
+- Use a VM to run Kibana in a low-memory environment and try to generate a PNG of a dashboard that outputs as a 4MB file. Document the minimum requirements in the PR.
 
 ## Resources
 
