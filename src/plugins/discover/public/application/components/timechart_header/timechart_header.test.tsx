@@ -79,10 +79,10 @@ describe('timechart header', function () {
     component = mountWithIntl(<TimechartHeader {...props} />);
     const dropdown = findTestSubject(component, 'discoverIntervalSelect');
     expect(dropdown.length).toBe(1);
-    // @ts-ignore
+    // @ts-expect-error
     const values = dropdown.find('option').map((option) => option.prop('value'));
     expect(values).toEqual(['auto', 'ms', 's']);
-    // @ts-ignore
+    // @ts-expect-error
     const labels = dropdown.find('option').map((option) => option.text());
     expect(labels).toEqual(['Auto', 'Millisecond', 'Second']);
   });
