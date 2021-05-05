@@ -63,7 +63,6 @@ import {
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
-import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
 
@@ -326,8 +325,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
-
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
 
     return {
       resolver: async () => {

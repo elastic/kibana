@@ -11,8 +11,5 @@
   },
   "dependencies": {
     "@kbn/i18n": "link:../kbn-i18n"
-  },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }
