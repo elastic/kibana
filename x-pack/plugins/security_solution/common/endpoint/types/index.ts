@@ -223,9 +223,6 @@ export interface Host {
   mac: string[];
   architecture: string;
   os: OSFields;
-  Ext: {
-    isolated?: boolean;
-  };
 }
 
 /**
@@ -469,6 +466,12 @@ export type HostMetadata = Immutable<{
         endpoint_policy_version: number;
         version: number;
       };
+    };
+    configuration: {
+      isolation?: boolean;
+    };
+    state: {
+      isolation?: boolean;
     };
   };
   agent: {

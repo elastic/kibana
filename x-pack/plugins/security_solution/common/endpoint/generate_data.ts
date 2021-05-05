@@ -254,6 +254,12 @@ interface HostInfo {
         version: number;
       };
     };
+    configuration: {
+      isolation: boolean;
+    };
+    state: {
+      isolation: boolean;
+    };
   };
 }
 
@@ -452,14 +458,17 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),
         os: this.randomChoice(OS),
-        Ext: {
-          isolated: false,
-        },
       },
       Endpoint: {
         status: EndpointStatus.enrolled,
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
+        },
+        configuration: {
+          isolation: false,
+        },
+        state: {
+          isolation: false,
         },
       },
     };
