@@ -76,72 +76,6 @@ include::field-formatters/duration-formatter.asciidoc[]
 
 include::field-formatters/color-formatter.asciidoc[]
 
-[[runtime-fields]]
-=== Explore your data with runtime fields 
-
-Manipulate your data fields without indexing your data. Runtime fields are most flexible than scripted fields. 
-
-Index runtime fields so that you can view and analyze the field values in *Discover* and *Dashboard*.
-
-*Discover* displays runtime fields as part of the document data...
-
-You can visualize runtime fields in the following editors: 
-
-* *Lens*
-* *Maps*
-* *TSVB*
-* *Timelion*
-* *Aggregation-based*
-
-In *Discover* and *Dashboard*, you can query runtime fields with the <<kuery-query, {kib} query language>>, and create filters for runtime fields. 
-
-For more information about runtime fields, refer to {ref}/runtime.html[Runtime fields].
-
-[float]
-[[create-runtime-fields]]
-=== Create runtime fields
-
-You can create runtime fields in *Discover* and *Lens*, or to visualize runtime fields in *Maps*, *TSVB*, *Timelion*, and *Aggregation-based* visualizations, 
-create runtime fields for the index patterns you want to visualize.
-
-// Do we add the Discover and Lens content here? Or in the separate sections?
-
-. Open the main menu, then click *Stack Management > Index Patterns*.
-. Select the index pattern you want to add the runtime field to.
-. Click *Add field*, then enter the field details. 
-
-[float]
-[[set-the-field-value]]
-==== Set the field value
-
-Set the value of a field by emitting a single value from a Painless script. 
-
-For example, to emit a single value from a Painless script:
-----
-emit(doc['bytes'].value / 1024)
-----
-
-For example, to calculate the day of the week based on the value of the `@timestamp` field:
-----
-emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT)
-----
-
-// The script field uses Painless. 
-// The UI needs to point to the Kibana docs, not the ES docs. 
-// We need good script examples from Jason Burns (runtime fields PM).
-
-[float]
-[[manage-runtime-fields]]
-=== Manage runtime fields
-
-Edit the settings for existing runtime fields, or remove runtime fields from the index pattern. 
-
-. Open the main menu, then click *Stack Management > Index Patterns*.
-. Select the index pattern that contains the runtime field you want to manage.
-. For the runtime field you want to manage, open the edit options, or delete the runtime field. 
-
-// What translates in scripted fields to runtime fields? Add that.
-
 [[scripted-fields]]
 === Add scripted fields to index patterns
 
@@ -199,5 +133,141 @@ exceptions whenever you try to view the dynamically generated data.
 . Click the *Scripted fields* tab for the index pattern.
 . Click *Delete* for the scripted field you want to remove.
 . Click *Delete* on the confirmation window.
+
+[[runtime-fields]]
+=== Explore your data with runtime fields 
+
+Runtime fields are fields that you add to documents after you've ingested, and are evaluated at query time. With runtime fields, you allow for a smaller index and 
+faster ingest time so that you can use less resources and reduce your operating costs. 
+
+When you use runtime fields, you can:
+
+* Add fields to existing documents without reindexing your data. 
+
+* Start working on your data without first understanding the structure. 
+
+* Override the returned values from index fields.
+
+* Define fields for a specific use without modifying the underlying schema. 
+
+You can view runtime field data in *Discover*, create visualizations with runtime fields using the visualization editors, and create alerts for runtime fields. 
+
+The following visualization editors support runtime fields:
+
+* *Lens*
+* *Maps*
+* *TSVB*
+* *Timelion*
+* *Aggregation-based*
+
+WARNING: Runtime fields can impact {kib} performance. When you run a query, {es} uses the fields you index first to shorten the response time. 
+Index the fields that you commonly search for and filter on, such as `timestamp`, then use runtime fields to limit the number of fields {es} uses to calculate values. 
+
+For more information, refer to {ref}/runtime.html[Runtime fields].
+
+[float]
+[[create-runtime-fields]]
+=== Create runtime fields
+
+Create runtime fields in your index patterns, or create runtime fields in *Discover* and *Lens*. 
+
+. Open the main menu, then click *Stack Management > Index Patterns*.
+
+. Select the index pattern you want to add the runtime field to, then click *Add field*.
+
+. Enter a *Name* for the runtime field, then select the field *Type*.
+
+. Select *Set value*, then define the field value by emitting a single value using the {ref}/modules-scripting-painless.html[Painless scripting language].
+
+. Click *Create field*.
+//+
+//For information on how to create runtime fields in *Discover*, refer to <<add-field-in-discover,Add a field>>.
++
+For information on how to create runtime fields in *Lens*, refer to <<add-fields-in-lens,Add fields>>.
+
+[float]
+[[runtime-field-examples]]
+=== Runtime field examples
+
+Try the runtime field examples on your own using the *Sample web logs* data index pattern. 
+
+[float]
+[[simple-hello-world-example]]
+==== Return a keyword value
+
+To return `Hello World!` value:
+
+----
+emit("Hello World!");
+----
+
+[float]
+[[perform-a-calculation-on-a-single-field]]
+==== Perform a calculation on a single field
+
+Calculate kilobytes from bytes:
+
+----
+emit(doc['bytes'].value / 1024)
+----
+
+[float]
+[[return-substring]]
+==== Return a substring
+
+Return the string that appears after the last slash in the URL:
+
+----
+def path = doc["url.keyword"].value;
+if (path != null) {
+    int lastSlashIndex = path.lastIndexOf('/');
+    if (lastSlashIndex > 0) {
+        emit(path.substring(lastSlashIndex+1));
+    return;
+    }
+}
+emit("");
+----
+
+[float]
+[[replace-nulls-with-blanks]]
+==== Replace nulls with blanks
+
+Replace null values with none values:
+
+----
+def source = doc['referer'].value;
+if (source != null) {
+	emit(source);
+	return;
+}
+else { 
+	emit("None");
+}
+----
+
+Specify operating system condition:
+
+----
+def source = doc['machine.os.keyword'].value;
+if (source != "") {
+	emit(source);
+}
+else { 
+	emit("None");
+}
+----
+
+[float]
+[[manage-runtime-fields]]
+=== Manage runtime fields
+
+Edit the settings for runtime fields, or remove runtime fields from index patterns. 
+
+. Open the main menu, then click *Stack Management > Index Patterns*.
+
+. Select the index pattern that contains the runtime field you want to manage, then open the runtime field edit options or delete the runtime field.
+
+
 
 

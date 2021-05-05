@@ -55,6 +55,27 @@ For array value fields, the percentage distribution considers each value in the 
 TIP: *Other* can equal more than 100% by a small amount.
 
 [float]
+[[add-fields-in-lens]]
+===== Add fields
+
+Add and define fields that you want to visualize using the {ref}/modules-scripting-painless.html[Painless scripting language].
+
+. Click *...*, then select *Add field to index pattern*.
++
+[role="screenshot"]
+image:{kib-repo}/discover/images/add-field-to-pattern.png[Dropdown menu located next to index pattern field with item for adding a field to an index pattern, width=50%]
+
+. Enter a *Name* for the field, then select the field *Type*.
+
+. Select *Set value*, then define the field value by emitting a single value using the {ref}/modules-scripting-painless.html[Painless scripting language].
+
+. Click *Save*.
++
+To manage the field, click *...*, select *Manage index pattern fields*, then open the edit options or delete the field.
++
+For more information about adding fields index patterns and Painless scripting language examples, refer to <<runtime-fields,Runtime fields>>.
+
+[float]
 [[create-the-visualization-panel]]
 ==== Create the visualization panel
 
