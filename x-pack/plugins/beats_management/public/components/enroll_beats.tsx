@@ -207,7 +207,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
 
                   <div className="eui-textBreakAll">
                     <EuiSpacer size="m" />
-                    <EuiCodeBlock language="sh">{`$ ${cmdText}`}</EuiCodeBlock>
+                    <EuiCodeBlock language="bash">{`$ ${cmdText}`}</EuiCodeBlock>
                   </div>
 
                   <EuiSpacer size="m" />
