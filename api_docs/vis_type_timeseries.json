@@ -12,71 +12,81 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "visTypeTimeseries",
         "id": "def-server.isVisSeriesData",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.isVisSeriesData.$1",
-            "type": "CompoundType",
-            "label": "data",
-            "isRequired": true,
-            "signature": [
-              "TimeseriesVisData"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/vis_type_timeseries/common/types.ts",
-              "lineNumber": 74
-            }
-          }
-        ],
+        "tags": [],
+        "label": "isVisSeriesData",
+        "description": [],
         "signature": [
           "(data: ",
           "TimeseriesVisData",
           ") => data is ",
           "SeriesData"
         ],
-        "description": [],
-        "label": "isVisSeriesData",
         "source": {
           "path": "src/plugins/vis_type_timeseries/common/types.ts",
-          "lineNumber": 74
+          "lineNumber": 76
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeTimeseries",
+            "id": "def-server.isVisSeriesData.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "TimeseriesVisData"
+            ],
+            "source": {
+              "path": "src/plugins/vis_type_timeseries/common/types.ts",
+              "lineNumber": 76
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "visTypeTimeseries",
         "id": "def-server.isVisTableData",
         "type": "Function",
-        "children": [
-          {
-            "id": "def-server.isVisTableData.$1",
-            "type": "CompoundType",
-            "label": "data",
-            "isRequired": true,
-            "signature": [
-              "TimeseriesVisData"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/vis_type_timeseries/common/types.ts",
-              "lineNumber": 71
-            }
-          }
-        ],
+        "tags": [],
+        "label": "isVisTableData",
+        "description": [],
         "signature": [
           "(data: ",
           "TimeseriesVisData",
           ") => data is TableData"
         ],
-        "description": [],
-        "label": "isVisTableData",
         "source": {
           "path": "src/plugins/vis_type_timeseries/common/types.ts",
-          "lineNumber": 71
+          "lineNumber": 73
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeTimeseries",
+            "id": "def-server.isVisTableData.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "TimeseriesVisData"
+            ],
+            "source": {
+              "path": "src/plugins/vis_type_timeseries/common/types.ts",
+              "lineNumber": 73
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -85,40 +95,45 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "visTypeTimeseries",
         "id": "def-server.TimeseriesVisData",
         "type": "Type",
-        "label": "TimeseriesVisData",
         "tags": [],
+        "label": "TimeseriesVisData",
         "description": [],
-        "source": {
-          "path": "src/plugins/vis_type_timeseries/common/types.ts",
-          "lineNumber": 36
-        },
         "signature": [
           "SeriesData",
           " | TableData"
         ],
+        "source": {
+          "path": "src/plugins/vis_type_timeseries/common/types.ts",
+          "lineNumber": 36
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "visTypeTimeseries",
       "id": "def-server.VisTypeTimeseriesSetup",
       "type": "Interface",
+      "tags": [],
       "label": "VisTypeTimeseriesSetup",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
+        "lineNumber": 54
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "visTypeTimeseries",
           "id": "def-server.VisTypeTimeseriesSetup.getVisData",
           "type": "Function",
+          "tags": [],
           "label": "getVisData",
           "description": [],
-          "source": {
-            "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-            "lineNumber": 55
-          },
           "signature": [
             "(requestContext: ",
             "DataRequestHandlerContext",
@@ -133,13 +148,14 @@
             "<unknown, unknown, unknown, any>, options: any) => Promise<",
             "TimeseriesVisData",
             ">"
-          ]
+          ],
+          "source": {
+            "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
+            "lineNumber": 55
+          },
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-        "lineNumber": 54
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }
