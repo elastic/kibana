@@ -1,31 +1,21 @@
 #!/bin/groovy
+
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
-kibanaPipeline(timeoutMinutes: 300) {
-  slackNotifications.onFailure(disabled: true) {
+
+kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
+  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
     githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
-        workers.ci(ramDisk: false, name: "package-build", size: 'l', runErrorReporter: false) {
-          withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
-            kibanaPipeline.bash("test/scripts/jenkins_xpack_package_build.sh", "Package builds")
-          }
+      ciStats.trackBuild(requireSuccess: githubPr.isPr()) {
+        catchError {
+          retryable.enable()
+          kibanaPipeline.allCiTasks()
         }
-        def packageTypes = ['deb', 'docker', 'rpm']
-        def workers = [:]
-        packageTypes.each { type ->
-          workers["package-${type}"] = {
-            testPackage(type)
-          }
-        }
-        parallel(workers)
       }
     }
   }
-}
-def testPackage(packageType) {
-  workers.ci(ramDisk: false, name: "package-${packageType}", size: 's', runErrorReporter: false) {
-    withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
-      kibanaPipeline.bash("test/scripts/jenkins_xpack_package_${packageType}.sh", "Execute package testing for ${packageType}")
-    }
+
+  if (params.NOTIFY_ON_FAILURE) {
+    kibanaPipeline.sendMail()
   }
 }
