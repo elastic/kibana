@@ -103,6 +103,9 @@ export class ToolsControl extends Component<Props, State> {
 
   _closePopover = () => {
     this.setState({ isPopoverOpen: false });
+    if (this.props.isDrawingFilter) {
+      this.props.deactivateDrawMode();
+    }
   };
 
   _initiateShapeDraw = (options: {
