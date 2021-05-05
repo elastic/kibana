@@ -268,7 +268,9 @@ export class TooltipControl extends React.Component {
 
   _getMbLayerIdsForTooltips() {
     const mbLayerIds = this.props.layerList.reduce((mbLayerIds, layer) => {
-      return layer.isVisible() && layer.canShowTooltip !== undefined
+      // tooltips are only supported for vector layers, filter out all other layer types
+      const isVectorLayer = layer.canShowTooltip !== undefined;
+      return layer.isVisible() && isVectorLayer
         ? mbLayerIds.concat(layer.getMbLayerIds())
         : mbLayerIds;
     }, []);
