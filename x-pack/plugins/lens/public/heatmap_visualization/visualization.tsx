@@ -320,7 +320,7 @@ export const getHeatmapVisualization = ({
                     function: LEGEND_FUNCTION,
                     arguments: {
                       isVisible: [false],
-                      position: [state.legend.position],
+                      position: [],
                     },
                   },
                 ],
@@ -340,12 +340,6 @@ export const getHeatmapVisualization = ({
                       isCellLabelVisible: [false],
                       // Y-axis
                       isYAxisLabelVisible: [false],
-                      yAxisLabelWidth: state.gridConfig.yAxisLabelWidth
-                        ? [state.gridConfig.yAxisLabelWidth]
-                        : [],
-                      yAxisLabelColor: state.gridConfig.yAxisLabelColor
-                        ? [state.gridConfig.yAxisLabelColor]
-                        : [],
                       // X-axis
                       isXAxisLabelVisible: [false],
                     },
