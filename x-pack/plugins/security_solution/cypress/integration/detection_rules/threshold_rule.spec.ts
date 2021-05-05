@@ -26,7 +26,7 @@ import {
   RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
-import { PREVIEW_HEATHER_SUBTITLE } from '../../screens/create_new_rule';
+import { PREVIEW_HEADER_SUBTITLE } from '../../screens/create_new_rule';
 import {
   ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
@@ -192,6 +192,6 @@ describe('Detection rules, threshold', () => {
     fillDefineThresholdRule(previewRule);
     previewResults();
 
-    cy.get(PREVIEW_HEATHER_SUBTITLE).should('have.text', '3 unique hits');
+    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
   });
 });
