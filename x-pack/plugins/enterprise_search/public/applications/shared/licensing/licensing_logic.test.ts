@@ -158,5 +158,34 @@ describe('LicensingLogic', () => {
         expect(LicensingLogic.values.hasGoldLicense).toEqual(false);
       });
     });
+
+    describe('isTrial', () => {
+      it('is true for active trial license', () => {
+        updateLicense({ status: 'active', type: 'trial' });
+        expect(LicensingLogic.values.isTrial).toEqual(true);
+      });
+
+      it('is false if the trial license is expired', () => {
+        updateLicense({ status: 'expired', type: 'trial' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+      });
+
+      it('is false for all non-trial licenses', () => {
+        updateLicense({ status: 'active', type: 'basic' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+
+        updateLicense({ status: 'active', type: 'standard' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+
+        updateLicense({ status: 'active', type: 'gold' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+
+        updateLicense({ status: 'active', type: 'platinum' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+
+        updateLicense({ status: 'active', type: 'enterprise' });
+        expect(LicensingLogic.values.isTrial).toEqual(false);
+      });
+    });
   });
 });

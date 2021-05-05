@@ -164,7 +164,10 @@ export class DiscoverPlugin
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
-  setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
+  setup(
+    core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
+    plugins: DiscoverSetupPlugins
+  ): DiscoverSetup {
     const baseUrl = core.http.basePath.prepend('/app/discover');
 
     if (plugins.share) {
@@ -190,7 +193,8 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit }) => <JsonCodeEditor json={hit} hasLineNumbers />,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      component: ({ hit }) => <JsonCodeEditor json={hit as any} hasLineNumbers />,
     });
 
     const {
