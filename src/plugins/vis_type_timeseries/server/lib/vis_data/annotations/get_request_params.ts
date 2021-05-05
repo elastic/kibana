@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Annotation, Panel } from '../../../../common/types';
+import type { Annotation, Panel } from '../../../../common/types';
 import { buildAnnotationRequest } from './build_request_body';
 import {
   VisTypeTimeseriesRequestHandlerContext,

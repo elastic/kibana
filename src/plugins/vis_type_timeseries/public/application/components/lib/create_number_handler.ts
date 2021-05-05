@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 
 export const createNumberHandler = (

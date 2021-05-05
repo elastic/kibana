@@ -30,7 +30,7 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
-import { TOOLTIP_MODES } from '../../../../../common/types';
+import { TOOLTIP_MODES } from '../../../../../common/enums';
 import { emptyLabel } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 import { renderEndzoneTooltip } from '../../../../../../charts/public';

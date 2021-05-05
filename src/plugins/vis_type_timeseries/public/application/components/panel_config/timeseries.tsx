@@ -38,7 +38,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
-import { TOOLTIP_MODES } from '../../../../common/types';
+import { TOOLTIP_MODES } from '../../../../common/enums';
 
 const positionOptions = [
   {

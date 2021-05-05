@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Annotation, Panel, Series } from '../../../common/types';
+import type { Annotation, Panel, Series } from '../../../common/types';
 // @ts-expect-error
 import { handleAnnotationResponse } from './response_processors/annotations';
 import { AnnotationServices, getAnnotationRequestParams } from './annotations/get_request_params';

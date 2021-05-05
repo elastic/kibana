@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 
 export const newMetricAggFn = (): Metric => {
   return {

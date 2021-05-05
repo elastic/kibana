@@ -27,7 +27,7 @@ import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
 import { KBN_FIELD_TYPES } from '../../../../../../data/public';
-import { Metric, Panel, SanitizedFieldType } from '../../../../../common/types';
+import type { Metric, Panel, SanitizedFieldType } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';
 

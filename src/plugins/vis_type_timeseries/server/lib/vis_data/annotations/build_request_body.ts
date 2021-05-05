@@ -8,7 +8,7 @@
 
 import { IUiSettingsClient } from 'kibana/server';
 import { EsQueryConfig } from 'src/plugins/data/server';
-import { Annotation, FetchedIndexPattern, Panel } from '../../../../common/types';
+import type { Annotation, FetchedIndexPattern, Panel } from '../../../../common/types';
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 import { DefaultSearchCapabilities } from '../../search_strategies';
 import { buildProcessorFunction } from '../build_processor_function';

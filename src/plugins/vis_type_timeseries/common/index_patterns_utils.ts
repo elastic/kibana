@@ -7,7 +7,7 @@
  */
 
 import { uniq } from 'lodash';
-import { Panel, IndexPatternValue, FetchedIndexPattern } from '../common/types';
+import type { Panel, IndexPatternValue, FetchedIndexPattern } from '../common/types';
 import { IIndexPattern, IndexPatternsService } from '../../data/common';
 
 export const isStringTypeIndexPattern = (

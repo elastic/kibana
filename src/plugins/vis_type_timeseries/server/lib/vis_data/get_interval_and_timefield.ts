@@ -7,7 +7,7 @@
  */
 
 import { AUTO_INTERVAL } from '../../../common/constants';
-import { FetchedIndexPattern, Panel, Series } from '../../../common/types';
+import type { FetchedIndexPattern, Panel, Series } from '../../../common/types';
 import { validateField } from '../../../common/fields_utils';
 
 export function getIntervalAndTimefield(panel: Panel, series: Series, index: FetchedIndexPattern) {

@@ -6,62 +6,36 @@
  * Side Public License, v 1.
  */
 
-import {
-  ColorRules,
-  BackgroundColorRules,
-  BarColorRules,
-  GaugeColorRules,
-} from './color_rules_types';
-import { PANEL_TYPES } from '../panel_types';
-import { TOOLTIP_MODES } from './index';
-
-export type IndexPatternValue = { id: string } | string | undefined;
-
-interface QueryObject {
-  language: string;
-  query: string | { [key: string]: any };
-}
-
-export interface Annotation {
-  color?: string | null;
-  fields?: string | null;
-  hidden?: boolean;
-  icon?: string | null;
-  id: string;
-  ignore_global_filters?: number;
-  ignore_panel_filters?: number;
-  index_pattern: IndexPatternValue;
-  query_string?: QueryObject;
-  template?: string | null;
-  time_field?: string | null;
-}
+import { PANEL_TYPES, TOOLTIP_MODES } from '../enums';
+import { IndexPatternValue, Annotation, QueryObject } from './index';
+import { ColorRules, BackgroundColorRules, BarColorRules, GaugeColorRules } from './color_rules';
 
 interface MetricVariable {
-  field?: string | null;
+  field?: string;
   id: string;
-  name?: string | null;
+  name?: string;
 }
 
 interface Percentile {
   id: string;
   mode: 'line' | 'band';
-  field?: string | null;
-  shade?: number | string | null;
-  value?: number | string | null;
-  percentile?: string | null;
+  field?: string;
+  shade?: number | string;
+  value?: number | string;
+  percentile?: string;
 }
 
 export interface Metric {
-  field?: string | null;
+  field?: string;
   id: string;
-  alias?: string | null;
-  metric_agg?: string | null;
+  alias?: string;
+  metric_agg?: string;
   numerator?: QueryObject;
   denominator?: QueryObject;
-  sigma?: string | null;
-  unit?: string | null;
-  model_type?: string | null;
-  mode?: string | null;
+  sigma?: string;
+  unit?: string;
+  model_type?: string;
+  mode?: string;
   lag?: number | '';
   alpha?: number;
   beta?: number;
@@ -69,32 +43,32 @@ export interface Metric {
   period?: number;
   multiplicative?: boolean;
   window?: number;
-  function?: string | null;
-  script?: string | null;
+  function?: string;
+  script?: string;
   variables?: MetricVariable[];
   numberOfSignificantValueDigits?: number;
   percentiles?: Percentile[];
   type: string;
-  value?: string | null;
-  values?: Array<string | null> | null;
-  size?: string | number | null;
-  agg_with?: string | null;
-  order?: string | null;
-  order_by?: string | null;
+  value?: string;
+  values?: string[];
+  size?: string | number;
+  agg_with?: string;
+  order?: string;
+  order_by?: string;
 }
 
 interface SplitFilters {
-  color?: string | null;
+  color?: string;
   filter?: QueryObject;
-  id?: string | null;
-  label?: string | null;
+  id?: string;
+  label?: string;
 }
 
 export interface Series {
-  aggregate_by?: string | null;
-  aggregate_function?: string | null;
-  axis_min?: string | number | null;
-  axis_max?: string | number | null;
+  aggregate_by?: string;
+  aggregate_function?: string;
+  axis_min?: string | number;
+  axis_max?: string | number;
   axis_position: string;
   chart_type: string;
   color: string;
@@ -106,10 +80,10 @@ export interface Series {
   hide_in_legend?: number;
   id: string;
   ignore_global_filter?: number;
-  label?: string | null;
+  label?: string;
   line_width?: number | '';
   metrics: Metric[];
-  offset_time?: string | null;
+  offset_time?: string;
   override_index_pattern?: number;
   palette: {
     type: string;
@@ -120,46 +94,46 @@ export interface Series {
   seperate_axis: number;
   series_drop_last_bucket: number;
   series_index_pattern: IndexPatternValue;
-  series_interval?: string | null;
+  series_interval?: string;
   series_max_bars: number;
-  series_time_field?: string | null;
-  split_color_mode?: string | null;
+  series_time_field?: string;
+  split_color_mode?: string;
   split_filters?: SplitFilters[];
   split_mode: string;
   stacked: string;
   steps: number;
-  terms_direction?: string | null;
-  terms_exclude?: string | null;
-  terms_field?: string | null;
-  terms_include?: string | null;
-  terms_order_by?: string | null;
-  terms_size?: string | null;
-  time_range_mode?: string | null;
+  terms_direction?: string;
+  terms_exclude?: string;
+  terms_field?: string;
+  terms_include?: string;
+  terms_order_by?: string;
+  terms_size?: string;
+  time_range_mode?: string;
   trend_arrows?: number;
-  type?: string | null;
-  value_template?: string | null;
-  var_name?: string | null;
+  type?: string;
+  value_template?: string;
+  var_name?: string;
 }
 
 export interface Panel {
   annotations?: Annotation[];
   axis_formatter: string;
-  axis_max?: string | number | null;
-  axis_min?: string | number | null;
+  axis_max?: string | number;
+  axis_min?: string | number;
   axis_position: string;
   axis_scale: string;
-  background_color?: string | null;
+  background_color?: string;
   background_color_rules?: BackgroundColorRules[];
   bar_color_rules: BarColorRules[];
   drilldown_url?: string;
   drop_last_bucket: number;
   filter?: QueryObject;
   gauge_color_rules?: GaugeColorRules[];
-  gauge_inner_color?: string | null;
-  gauge_inner_width?: string | number | null;
+  gauge_inner_color?: string;
+  gauge_inner_width?: string | number;
   gauge_max?: number | '';
-  gauge_style?: string | null;
-  gauge_width?: string | number | null;
+  gauge_style?: string;
+  gauge_width?: string | number;
   hide_last_value_indicator: boolean;
   id: string;
   ignore_global_filter?: number;
@@ -167,48 +141,25 @@ export interface Panel {
   index_pattern: IndexPatternValue;
   interval: string;
   isModelInvalid?: boolean;
-  legend_position?: string | null;
-  markdown?: string | null;
-  markdown_css?: string | null;
-  markdown_less?: string | null;
+  legend_position?: string;
+  markdown?: string;
+  markdown_css?: string;
+  markdown_less?: string;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   markdown_openLinksInNewTab: number;
   markdown_scrollbars: number;
-  markdown_vertical_align?: string | null;
+  markdown_vertical_align?: string;
   max_bars: number;
-  pivot_id?: string | null;
-  pivot_label?: string | null;
-  pivot_rows?: string | null;
-  pivot_type?: string | null;
+  pivot_id?: string;
+  pivot_label?: string;
+  pivot_rows?: string;
+  pivot_type?: string;
   series: Series[];
   show_grid: number;
   show_legend: number;
-  time_field?: string | null;
-  time_range_mode?: string | null;
+  time_field?: string;
+  time_range_mode?: string;
   tooltip_mode?: TOOLTIP_MODES;
   type: PANEL_TYPES;
   use_kibana_indexes?: boolean;
-}
-
-export interface VisPayload {
-  filters: Array<any | null>;
-  panels: Panel[];
-  // general
-  query: QueryObject[] | null;
-  state: {
-    sort?: {
-      column: string;
-      order: 'asc' | 'desc';
-    };
-  };
-  timerange: {
-    timezone: string;
-    min: string;
-    max: string;
-  };
-  searchSession?: {
-    sessionId: string;
-    isRestore: boolean;
-    isStored: boolean;
-  };
 }

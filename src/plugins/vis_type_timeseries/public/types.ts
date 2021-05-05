@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiDraggable } from '@elastic/eui';
-import { Panel } from '../common/types';
+import type { Panel } from '../common/types';
 
 type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
 type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any

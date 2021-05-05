@@ -21,7 +21,7 @@ import type {
   VisTypeTimeseriesRequestServices,
 } from '../../types';
 import type { Panel } from '../../../common/types';
-import { PANEL_TYPES } from '../../../common/panel_types';
+import { PANEL_TYPES } from '../../../common/enums';
 
 export async function getSeriesData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,

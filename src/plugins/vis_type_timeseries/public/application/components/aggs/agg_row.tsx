@@ -12,7 +12,7 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 
 interface AggRowProps {

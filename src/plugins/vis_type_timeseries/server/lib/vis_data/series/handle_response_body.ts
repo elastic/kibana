@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Panel } from '../../../../common/types';
+import type { Panel } from '../../../../common/types';
 import { buildProcessorFunction } from '../build_processor_function';
 // @ts-expect-error
 import { processors } from '../response_processors/series';
