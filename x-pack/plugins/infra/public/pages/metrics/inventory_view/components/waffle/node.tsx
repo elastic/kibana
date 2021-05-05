@@ -106,26 +106,32 @@ export class Node extends React.PureComponent<Props, State> {
             </NodeContainer>
           </ConditionalToolTip>
         </NodeContextMenu>
-        <NodeContextPopover
-          openAlertFlyout={this.openAlertFlyout}
-          node={node}
-          nodeType={nodeType}
-          isOpen={this.state.isOverlayOpen}
-          options={options}
-          currentTime={currentTime}
-          onClose={this.toggleNewOverlay}
-        />
-        <AlertFlyout
-          filter={
-            options.fields
-              ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-              : ''
-          }
-          options={options}
-          nodeType={nodeType}
-          setVisible={this.setAlertFlyoutVisible}
-          visible={isAlertFlyoutVisible}
-        />
+
+        {this.state.isOverlayOpen && (
+          <NodeContextPopover
+            openAlertFlyout={this.openAlertFlyout}
+            node={node}
+            nodeType={nodeType}
+            isOpen={this.state.isOverlayOpen}
+            options={options}
+            currentTime={currentTime}
+            onClose={this.toggleNewOverlay}
+          />
+        )}
+
+        {isAlertFlyoutVisible && (
+          <AlertFlyout
+            filter={
+              options.fields
+                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+                : ''
+            }
+            options={options}
+            nodeType={nodeType}
+            setVisible={this.setAlertFlyoutVisible}
+            visible={isAlertFlyoutVisible}
+          />
+        )}
       </>
     );
   }

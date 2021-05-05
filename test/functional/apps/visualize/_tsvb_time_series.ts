@@ -26,6 +26,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Time Series', () => {
       beforeEach(async () => {
         await visualBuilder.resetPage();
+        await visualBuilder.clickPanelOptions('timeSeries');
+        await visualBuilder.setDropLastBucket(true);
+        await visualBuilder.clickDataTab('timeSeries');
       });
 
       it('should render all necessary components', async () => {

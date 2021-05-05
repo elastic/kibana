@@ -25,8 +25,8 @@ import {
 } from '@elastic/eui';
 
 import { memoizeLast } from '../../legacy/memoize';
+import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { BaseVisType, TypesStart } from '../../vis_types';
-import { VisGroups } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 import './agg_based_selection.scss';
 
