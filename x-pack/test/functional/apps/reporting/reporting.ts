@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('Reporting', function () {
-    this.tags('smoke');
+    this.tags(['smoke', 'ciGroup2']);
     before(async () => {
       await esArchiver.loadIfNeeded('packaging');
     });
