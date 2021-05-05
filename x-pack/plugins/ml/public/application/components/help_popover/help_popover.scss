@@ -5,7 +5,7 @@
 .mlHelpPopover__content {
   @include euiYScrollWithShadows;
   max-height: 40vh;
-  padding: $euiSizeM;
+  padding: $euiSizeS;
 }
 
 .mlHelpPopover__buttonIcon {
