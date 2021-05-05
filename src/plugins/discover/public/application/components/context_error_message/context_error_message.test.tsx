@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
-// @ts-ignore
+// @ts-expect-error
 import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
