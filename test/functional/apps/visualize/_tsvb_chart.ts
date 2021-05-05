@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const security = getService('security');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'visualize',
     'visualBuilder',
@@ -254,13 +253,4 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   });
-
-  async function initTests() {
-    await kibanaServer.savedObjects.clean({ types: ['visualization'] });
-    await kibanaServer.importExport.load('visualize');
-
-    await kibanaServer.uiSettings.replace({
-      defaultIndex: 'logstash-*',
-    });
-  }
 }
