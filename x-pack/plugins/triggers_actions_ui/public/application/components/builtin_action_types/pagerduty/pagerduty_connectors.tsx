@@ -71,6 +71,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
         <Fragment>
           {getEncryptedFieldNotifyLabel(
             !action.id,
+            1,
             action.isMissingSecrets ?? false,
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.reenterValueLabel',

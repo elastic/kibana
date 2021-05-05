@@ -98,6 +98,7 @@ const ServiceNowConnectorFields: React.FC<
           <EuiFormRow fullWidth>
             {getEncryptedFieldNotifyLabel(
               !action.id,
+              2,
               action.isMissingSecrets ?? false,
               i18n.REENTER_VALUES_LABEL
             )}

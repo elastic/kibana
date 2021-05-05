@@ -9,7 +9,7 @@ import { getEncryptedFieldNotifyLabel } from './get_encrypted_field_notify_label
 
 describe('getEncryptedFieldNotifyLabel', () => {
   test('renders proper notify label when isCreate equals true', () => {
-    const jsxObject = getEncryptedFieldNotifyLabel(true, false, 'test');
+    const jsxObject = getEncryptedFieldNotifyLabel(true, 2, false, 'test');
 
     expect(
       jsxObject.props.children.filter(
@@ -29,7 +29,7 @@ describe('getEncryptedFieldNotifyLabel', () => {
   });
 
   test('renders proper notify label when secrets is missing', () => {
-    const jsxObject = getEncryptedFieldNotifyLabel(false, true, 'test');
+    const jsxObject = getEncryptedFieldNotifyLabel(false, 2, true, 'test');
 
     expect(
       jsxObject.props.children.filter(
@@ -49,7 +49,7 @@ describe('getEncryptedFieldNotifyLabel', () => {
   });
 
   test('renders proper notify label when isCreate false (edit mode) and isMissingSecrets false', () => {
-    const jsxObject = getEncryptedFieldNotifyLabel(false, false, 'test');
+    const jsxObject = getEncryptedFieldNotifyLabel(false, 2, false, 'test');
 
     expect(
       jsxObject.props.children.filter(

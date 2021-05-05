@@ -123,6 +123,7 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
           <EuiFormRow fullWidth>
             {getEncryptedFieldNotifyLabel(
               !action.id,
+              2,
               action.isMissingSecrets ?? false,
               i18n.JIRA_REENTER_VALUES_LABEL
             )}

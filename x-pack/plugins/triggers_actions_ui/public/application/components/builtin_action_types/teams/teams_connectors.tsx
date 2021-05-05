@@ -45,6 +45,7 @@ const TeamsActionFields: React.FunctionComponent<
         <>
           {getEncryptedFieldNotifyLabel(
             !action.id,
+            1,
             action.isMissingSecrets ?? false,
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',

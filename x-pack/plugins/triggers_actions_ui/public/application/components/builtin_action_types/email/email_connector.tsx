@@ -205,6 +205,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
         <>
           {getEncryptedFieldNotifyLabel(
             !action.id,
+            2,
             action.isMissingSecrets ?? false,
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.reenterValuesLabel',

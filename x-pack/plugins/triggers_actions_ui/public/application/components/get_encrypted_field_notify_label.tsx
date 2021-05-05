@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export const getEncryptedFieldNotifyLabel = (
   isCreate: boolean,
+  encryptedFieldsLength: number,
   isMissingSecrets: boolean,
   reEnterDefaultMessage: string
 ) => {
@@ -28,7 +29,8 @@ export const getEncryptedFieldNotifyLabel = (
             'xpack.triggersActionsUI.components.builtinActionTypes.missingSecretsValuesLabel',
             {
               defaultMessage:
-                'Sensitive information is not imported. Please enter values for the following fields.',
+                'Sensitive information is not imported. Please enter value{encryptedFieldsLength, plural, one {} other {s}} for the following field{encryptedFieldsLength, plural, one {} other {s}}.',
+              values: { encryptedFieldsLength },
             }
           )}
         />
@@ -42,8 +44,9 @@ export const getEncryptedFieldNotifyLabel = (
         <EuiSpacer size="s" />
         <EuiText size="s" data-test-subj="rememberValuesMessage">
           <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.rememberValueLabel"
-            defaultMessage="Remember this value. You must reenter it each time you edit the connector."
+            id="xpack.triggersActionsUI.components.builtinActionTypes.rememberValueLabel"
+            defaultMessage="Remember {encryptedFieldsLength, plural, one {this} other {these}} value. You must reenter {encryptedFieldsLength, plural, one {it} other {them}} each time you edit the connector."
+            values={{ encryptedFieldsLength }}
           />
         </EuiText>
         <EuiSpacer size="s" />
