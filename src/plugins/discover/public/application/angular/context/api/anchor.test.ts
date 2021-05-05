@@ -16,6 +16,7 @@ describe('context app', function () {
     anchorId: string,
     sort: EsQuerySortValue[]
   ) => Promise<AnchorHitRecord>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let searchSourceStub: any;
 
   describe('function fetchAnchor', function () {

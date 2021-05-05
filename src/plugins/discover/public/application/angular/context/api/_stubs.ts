@@ -34,6 +34,7 @@ export function createIndexPatternsStub() {
  * A stubbed search source with a `fetch` method that returns all of `_stubHits`.
  */
 export function createSearchSourceStub(hits: EsHitRecordList, timeField?: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchSourceStub: any = {
     _stubHits: hits,
     _stubTimeField: timeField,

@@ -14,6 +14,7 @@ import { setServices, SortDirection } from '../../../../kibana_services';
 import { Query } from '../../../../../../data/public';
 import { EsHitRecordList, fetchContextProvider } from './context';
 import { AnchorHitRecord } from './anchor';
+import { DiscoverServices } from '../../../../build_services';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -37,13 +38,14 @@ describe('context app', function () {
     tieBreakerValue: number,
     size: number
   ) => Promise<EsHitRecordList>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
 
   describe('function fetchSuccessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices({
+      setServices(({
         data: {
           search: {
             searchSource: {
@@ -51,7 +53,7 @@ describe('context app', function () {
             },
           },
         },
-      });
+      } as unknown) as DiscoverServices);
 
       fetchSuccessors = (
         indexPatternId,
@@ -238,7 +240,7 @@ describe('context app', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices({
+      setServices(({
         data: {
           search: {
             searchSource: {
@@ -246,7 +248,7 @@ describe('context app', function () {
             },
           },
         },
-      });
+      } as unknown) as DiscoverServices);
 
       fetchSuccessors = (
         indexPatternId,
