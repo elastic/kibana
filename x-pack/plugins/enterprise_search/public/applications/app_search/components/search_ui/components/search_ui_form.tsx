@@ -53,11 +53,11 @@ const SORT_FIELD_LABEL = i18n.translate(
   { defaultMessage: 'Sort fields (Optional)' }
 );
 const SORT_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.sortFieldLabel',
+  'xpack.enterpriseSearch.appSearch.engine.searchUI.sortHelpText',
   { defaultMessage: 'Used to display result sorting options, ascending and descending' }
 );
 const SORT_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.sortFieldLabel',
+  'xpack.enterpriseSearch.appSearch.engine.searchUI.sortFieldPlaceholder',
   { defaultMessage: 'Click to select' }
 );
 const URL_FIELD_LABEL = i18n.translate(
