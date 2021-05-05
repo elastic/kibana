@@ -182,7 +182,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                 color="warning"
                 content={i18n.translate(
                   'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
-                  { defaultMessage: 'Sensitive information is not imported' }
+                  { defaultMessage: 'Sensitive information was not imported' }
                 )}
                 position="right"
               />
@@ -227,27 +227,31 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               onDelete={() => setConnectorsToDelete([item.id])}
             />
             {item.isMissingSecrets ? (
-              <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
-                    { defaultMessage: 'Fix connector configuration' }
-                  )}
-                >
-                  <EuiButtonEmpty
-                    size="xs"
-                    data-test-subj="fixConnectorButton"
-                    onClick={() => editItem(item, EditConectorTabs.Configuration, true)}
-                  >
-                    {i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
-                      {
-                        defaultMessage: 'Fix',
-                      }
-                    )}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              </EuiFlexItem>
+              <>
+                {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
+                  <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
+                        { defaultMessage: 'Fix connector configuration' }
+                      )}
+                    >
+                      <EuiButtonEmpty
+                        size="xs"
+                        data-test-subj="fixConnectorButton"
+                        onClick={() => editItem(item, EditConectorTabs.Configuration, true)}
+                      >
+                        {i18n.translate(
+                          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
+                          {
+                            defaultMessage: 'Fix',
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                ) : null}
+              </>
             ) : (
               <RunOperation
                 canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
