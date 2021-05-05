@@ -72,12 +72,11 @@ const eventFiltersCreate: MiddlewareActionHandler = async (store, eventFiltersSe
     ) as CreateExceptionListItemSchema;
 
     const exception = await eventFiltersService.addEventFilters(updatedCommentsEntry);
+
     store.dispatch({
       type: 'eventFiltersCreateSuccess',
-      payload: {
-        exception,
-      },
     });
+
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
       payload: {
@@ -257,6 +256,14 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
             query,
             content: results,
           },
+        },
+      });
+
+      dispatch({
+        type: 'eventFiltersListPageDataExistsChanged',
+        payload: {
+          type: 'LoadedResourceState',
+          data: Boolean(results.total),
         },
       });
 

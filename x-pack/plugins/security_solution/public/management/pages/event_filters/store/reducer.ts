@@ -136,7 +136,6 @@ const eventFiltersFormStateChanged: CaseReducer<EventFiltersFormStateChanged> = 
 const eventFiltersCreateSuccess: CaseReducer<EventFiltersCreateSuccess> = (state, action) => {
   return {
     ...state,
-    entries: [action.payload.exception, ...state.entries],
     // If we are on the List page, then force a refresh of data
     listPage: getListPageIsActive(state)
       ? {

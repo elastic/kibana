@@ -51,11 +51,7 @@ export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
 export type EventFiltersUpdateStart = Action<'eventFiltersUpdateStart'>;
 export type EventFiltersUpdateSuccess = Action<'eventFiltersUpdateSuccess'>;
 export type EventFiltersCreateStart = Action<'eventFiltersCreateStart'>;
-export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'> & {
-  payload: {
-    exception: ExceptionListItemSchema;
-  };
-};
+export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'>;
 export type EventFiltersCreateError = Action<'eventFiltersCreateError'>;
 
 export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'> & {
