@@ -94,9 +94,7 @@ describe('Hosts Table', () => {
           sortField: 'lastSeen',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-          'Last seen Click to sort in ascending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Last seen ');
         expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
       });
 
@@ -111,9 +109,7 @@ describe('Hosts Table', () => {
           sortField: 'hostName',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-          'Host nameClick to sort in descending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Host name');
       });
     });
   });

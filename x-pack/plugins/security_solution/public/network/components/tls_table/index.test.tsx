@@ -90,7 +90,7 @@ describe('Tls Table Component', () => {
       });
 
       expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-        'SHA1 fingerprintClick to sort in descending order'
+        'SHA1 fingerprint'
       );
     });
   });
