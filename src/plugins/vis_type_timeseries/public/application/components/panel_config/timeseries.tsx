@@ -406,6 +406,7 @@ export class TimeseriesPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="timeSeriesEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.timeseries.dataTab.dataButtonLabel"

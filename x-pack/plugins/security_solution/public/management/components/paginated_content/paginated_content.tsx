@@ -32,12 +32,13 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { MaybeImmutable } from '../../../../common/endpoint/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
 
 export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> extends CommonProps {
-  items: T[];
+  items: MaybeImmutable<T[]>;
   onChange: (changes: { pageIndex: number; pageSize: number }) => void;
   /**
    * The React Component that will be used to render the `items`. use `itemComponentProps` below to
@@ -79,6 +80,7 @@ interface TypedGenericComponentMemo {
 
 const RootContainer = styled.div`
   position: relative;
+  padding-top: ${({ theme }) => theme.eui.paddingSizes.xs};
 
   .body {
     min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};
@@ -174,7 +176,11 @@ export const PaginatedContent = memo(
       const Item = ItemComponent as ComponentType<ReturnType<typeof itemComponentProps>>;
 
       if (items.length) {
-        return items.map((item) => {
+        // Cast here is to get around the fact that TS does not seem to be able to narrow the types down when the only
+        // difference is that the array might be Readonly. The error output is:
+        // `...has signatures, but none of those signatures are compatible with each other.`
+        // Can read more about it here: https://github.com/microsoft/TypeScript/issues/33591
+        return (items as T[]).map((item) => {
           let key: Key;
 
           if (itemId) {
@@ -197,16 +203,15 @@ export const PaginatedContent = memo(
 
     return (
       <RootContainer data-test-subj={dataTestSubj} aria-label={ariaLabel} className={className}>
-        {loading && <EuiProgress size="xs" color="primary" />}
+        {loading && <EuiProgress size="xs" color="primary" position="absolute" />}
 
         <div className="body" data-test-subj={getTestId('body')}>
-          <EuiSpacer size="l" />
           <div className={`body-content ${contentClassName}`}>
             {children ? children : generatedBodyItemContent}
           </div>
         </div>
 
-        {pagination && (
+        {pagination && (children || items.length > 0) && (
           <div data-test-subj={getTestId('footer')}>
             <EuiSpacer size="l" />
 

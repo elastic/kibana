@@ -7,7 +7,7 @@
   "false_positives": [
     "Rare and unusual errors may indicate an impending service failure state. Rare and unusual user error activity can also be due to manual troubleshooting or reconfiguration attempts by insufficiently privileged users, bugs in cloud automation scripts or workflows, or changes to IAM privileges."
   ],
-  "from": "now-60m",
+  "from": "now-2h",
   "interval": "15m",
   "license": "Elastic License v2",
   "machine_learning_job_id": "rare_error_code",
@@ -26,5 +26,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 3
+  "version": 4
 }

@@ -14,16 +14,17 @@ import {
 import { AppAction } from '../../../../common/store/actions';
 import { createEventFiltersPageMiddleware } from './middleware';
 import { eventFiltersPageReducer } from './reducer';
-import { EventFiltersService } from '../service';
 import { EventFiltersListPageState } from '../state';
 import { initialEventFiltersPageState } from './builders';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
+import { EventFiltersService } from '../types';
 
 const initialState: EventFiltersListPageState = initialEventFiltersPageState();
 
 const createEventFiltersServiceMock = (): jest.Mocked<EventFiltersService> => ({
   addEventFilters: jest.fn(),
+  getList: jest.fn(),
 });
 
 const createStoreSetup = (eventFiltersService: EventFiltersService) => {
@@ -86,6 +87,7 @@ describe('middleware', () => {
       await spyMiddleware.waitForAction('eventFiltersFormStateChanged');
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        entries: [createdEventFilterEntryMock()],
         form: {
           ...store.getState().form,
           submissionResourceState: {

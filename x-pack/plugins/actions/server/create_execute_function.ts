@@ -46,11 +46,17 @@ export function createExecutionEnqueuerFunction({
       );
     }
 
-    const actionTypeId = await getActionTypeId(
+    const { actionTypeId, name, isMissingSecrets } = await getAction(
       unsecuredSavedObjectsClient,
       preconfiguredActions,
       id
     );
+
+    if (isMissingSecrets) {
+      throw new Error(
+        `Unable to execute action because no secrets are defined for the "${name}" connector.`
+      );
+    }
 
     if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
@@ -91,18 +97,16 @@ function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorO
     : {};
 }
 
-async function getActionTypeId(
+async function getAction(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string
-): Promise<string> {
+): Promise<PreConfiguredAction | RawAction> {
   const pcAction = preconfiguredActions.find((action) => action.id === actionId);
   if (pcAction) {
-    return pcAction.actionTypeId;
+    return pcAction;
   }
 
-  const {
-    attributes: { actionTypeId },
-  } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return actionTypeId;
+  const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
+  return attributes;
 }

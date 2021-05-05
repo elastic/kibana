@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SchemaConflictFieldTypes, SchemaConflicts } from '../../../../../shared/types';
+import { SchemaConflictFieldTypes, SchemaConflicts } from '../../../../../shared/schema/types';
 import { EngineDetails } from '../../../engine/types';
 
 export const getConflictingEnginesFromConflictingField = (
