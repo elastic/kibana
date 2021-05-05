@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+jest.mock('../utils', () => ({
+  generatePreviwUrl: jest.fn(),
+}));
+
 import { setMockValues, setMockActions } from '../../../../__mocks__';
 
 import React from 'react';
@@ -12,6 +16,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ActiveField } from '../types';
+import { generatePreviwUrl } from '../utils';
 
 import { SearchUIForm } from './search_ui_form';
 
@@ -170,5 +175,33 @@ describe('SearchUIForm', () => {
       subject().simulate('blur');
       expect(actions.onActiveFieldChange).toHaveBeenCalledWith(ActiveField.None);
     });
+  });
+
+  it('includes a link to generate the preview', () => {
+    (generatePreviwUrl as jest.Mock).mockReturnValue('http://www.example.com?foo=bar');
+
+    setMockValues({
+      ...values,
+      engineName: 'engine1',
+      urlField: 'foo',
+      titleField: 'bar',
+      facetFields: ['baz'],
+      sortFields: ['qux'],
+    });
+
+    const subject = () =>
+      shallow(<SearchUIForm />).find('[data-test-subj="generateReferenceUiPreview"]');
+
+    expect(subject().prop('href')).toBe('http://www.example.com?foo=bar');
+    expect(generatePreviwUrl).toHaveBeenCalledWith(
+      {
+        fromKibana: 'true',
+        urlField: 'foo',
+        titleField: 'bar',
+        facets: ['baz'],
+        sortFields: ['qux'],
+      },
+      'engine1'
+    );
   });
 });

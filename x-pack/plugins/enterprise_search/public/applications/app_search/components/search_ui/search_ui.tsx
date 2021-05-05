@@ -15,6 +15,8 @@ import {
   EuiText,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -68,15 +70,16 @@ export const SearchUI: React.FC = () => {
             <EuiText size="s" color="subdued">
               <p>{SEARCH_UI_BODY_TEXT}</p>
               <p>
-                <a target="_blank" href="https://github.com/elastic/search-ui">
+                <EuiLink target="_blank" href="https://github.com/elastic/search-ui">
                   {REPOSITORY_LINK_TEXT}
-                </a>{' '}
+                </EuiLink>{' '}
                 |{' '}
-                <a target="_blank" href={`${DOCS_PREFIX}/reference-ui-guide.html`}>
+                <EuiLink target="_blank" href={`${DOCS_PREFIX}/reference-ui-guide.html`}>
                   {GUIDE_LINK_TEXT}
-                </a>{' '}
+                </EuiLink>{' '}
               </p>
             </EuiText>
+            <EuiSpacer />
             <SearchUIForm />
           </EuiFlexItem>
           <EuiFlexItem />

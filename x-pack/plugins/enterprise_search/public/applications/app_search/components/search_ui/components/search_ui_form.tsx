@@ -19,8 +19,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EngineLogic } from '../../engine';
 import { SearchUILogic } from '../search_ui_logic';
 import { ActiveField } from '../types';
+import { generatePreviwUrl } from '../utils';
 
 const TITLE_FIELD_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.titleFieldLabel',
@@ -89,6 +91,7 @@ export const SearchUIForm: React.FC = () => {
     facetFields,
     sortFields,
   } = useValues(SearchUILogic);
+  const { engineName } = useValues(EngineLogic);
   const {
     onActiveFieldChange,
     onFacetFieldsChange,
@@ -97,8 +100,16 @@ export const SearchUIForm: React.FC = () => {
     onUrlFieldChange,
   } = useActions(SearchUILogic);
 
-  // TODO
-  const previewHref = '/';
+  const previewHref = generatePreviwUrl(
+    {
+      fromKibana: 'true',
+      titleField,
+      urlField,
+      facets: facetFields,
+      sortFields,
+    },
+    engineName
+  );
 
   const formatSelectOption = (fieldName: string) => {
     return { text: fieldName, value: fieldName };
@@ -178,7 +189,14 @@ export const SearchUIForm: React.FC = () => {
             data-test-subj="selectUrl"
           />
         </EuiFormRow>
-        <EuiButton href={previewHref} fill data-test-subj="generateReferenceUiPreview">
+        <EuiButton
+          href={previewHref}
+          target="_blank"
+          fill
+          iconType="popout"
+          iconSide="right"
+          data-test-subj="generateReferenceUiPreview"
+        >
           {GENERATE_PREVIEW_BUTTON_LABEL}
         </EuiButton>
       </EuiForm>
