@@ -120,7 +120,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     hideGrouping,
     dateRange,
     dimensionGroups,
-    runtimeError,
   } = props;
   const services = {
     data: props.data,
@@ -537,7 +536,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       isFocused={timeShiftedFocused}
                       activeData={props.activeData}
                       layerId={layerId}
-                      runtimeError={runtimeError}
                     />
                   ) : null,
               },

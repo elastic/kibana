@@ -299,7 +299,6 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
-  runtimeError?: Error;
 };
 
 // The only way a visualization has to restrict the query building
@@ -321,7 +320,6 @@ export interface DatasourceLayerPanelProps<T> {
   state: T;
   setState: StateSetter<T>;
   activeData?: Record<string, Datatable>;
-  runtimeError?: Error;
 }
 
 export interface DraggedOperation extends DraggingIdentifier {
@@ -522,7 +520,6 @@ export interface FramePublicAPI {
    * If accessing, make sure to check whether expected columns actually exist.
    */
   activeData?: Record<string, Datatable>;
-  runtimeError?: Error;
 
   dateRange: DateRange;
   query: Query;

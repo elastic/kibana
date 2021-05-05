@@ -49,8 +49,7 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
 export function isColumnInvalid(
   layer: IndexPatternLayer,
   columnId: string,
-  indexPattern: IndexPattern,
-  runtimeError?: Error
+  indexPattern: IndexPattern
 ) {
   const column: IndexPatternColumn | undefined = layer.columns[columnId];
   if (!column) return;

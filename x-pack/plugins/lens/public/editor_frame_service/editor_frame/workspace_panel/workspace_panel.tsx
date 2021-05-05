@@ -75,7 +75,6 @@ export interface WorkspacePanelProps {
   core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
-  hasRuntimeError?: boolean;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
 }
@@ -133,7 +132,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   title,
   visualizeTriggerFieldContext,
   suggestionForDraggedField,
-  hasRuntimeError,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -341,7 +339,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
         application={core.application}
-        hasRuntimeError={hasRuntimeError}
         activeDatasourceId={activeDatasourceId}
       />
     );
@@ -386,7 +383,6 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent,
   dispatch,
   application,
-  hasRuntimeError,
   activeDatasourceId,
 }: {
   expression: string | null | undefined;
@@ -405,7 +401,6 @@ export const VisualizationWrapper = ({
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;
-  hasRuntimeError?: boolean;
   activeDatasourceId: string | null;
 }) => {
   const context: ExecutionContextSearch = useMemo(
@@ -596,12 +591,6 @@ export const VisualizationWrapper = ({
         onData$={onData$}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          if (!hasRuntimeError && error?.original) {
-            dispatch({
-              type: 'RUNTIME_ERROR',
-              error: error.original,
-            });
-          }
           const errorsFromRequest = getOriginalRequestErrorMessages(error);
           const visibleErrorMessages = errorsFromRequest.length
             ? errorsFromRequest

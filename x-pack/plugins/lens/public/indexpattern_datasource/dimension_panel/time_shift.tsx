@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Query } from 'src/plugins/data/public';
 import { search } from '../../../../../../src/plugins/data/public';
-import { parseTimeShift, ShiftError } from '../../../../../../src/plugins/data/common';
+import { parseTimeShift } from '../../../../../../src/plugins/data/common';
 import { IndexPatternColumn, operationDefinitionMap } from '../operations';
 import { IndexPattern, IndexPatternLayer } from '../types';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
@@ -118,7 +118,6 @@ export function TimeShift({
   isFocused,
   activeData,
   layerId,
-  runtimeError,
 }: {
   selectedColumn: IndexPatternColumn;
   indexPattern: IndexPattern;
@@ -128,7 +127,6 @@ export function TimeShift({
   isFocused: boolean;
   activeData: IndexPatternDimensionEditorProps['activeData'];
   layerId: string;
-  runtimeError?: Error | undefined;
 }) {
   const [localValue, setLocalValue] = useState(selectedColumn.timeShift);
   useEffect(() => {
@@ -170,23 +168,9 @@ export function TimeShift({
     );
   }
 
-  function getRuntimeErrorReason() {
-    if (!(runtimeError instanceof ShiftError)) {
-      return undefined;
-    }
-    if (!runtimeError.aggIds.includes(columnId)) {
-      return undefined;
-    }
-    return runtimeError.reason;
-  }
-
   const parsedLocalValue = localValue && parseTimeShift(localValue);
-  const localValueTooSmall =
-    (parsedLocalValue && isValueTooSmall(parsedLocalValue)) ||
-    getRuntimeErrorReason() === 'tooSmall';
-  const localValueNotMultiple =
-    (parsedLocalValue && isValueNotMultiple(parsedLocalValue)) ||
-    getRuntimeErrorReason() === 'notAMultiple';
+  const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
+  const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
   const isLocalValueInvalid = Boolean(
     parsedLocalValue === 'invalid' || localValueTooSmall || localValueNotMultiple
   );
