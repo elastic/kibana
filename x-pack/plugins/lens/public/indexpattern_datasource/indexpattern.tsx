@@ -376,7 +376,13 @@ export function getIndexPatternDatasource({
       // Forward the indexpattern as well, as it is required by some operationType checks
       const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
         (
-          getErrorMessages(layer, state.indexPatterns[layer.indexPatternId], state, layerId) ?? []
+          getErrorMessages(
+            layer,
+            state.indexPatterns[layer.indexPatternId],
+            state,
+            layerId,
+            core.http
+          ) ?? []
         ).map((message) => ({
           shortMessage: '', // Not displayed currently
           longMessage: typeof message === 'string' ? message : message.message,

@@ -227,12 +227,12 @@ export function TimeShift({
           localValueTooSmall
             ? i18n.translate('xpack.lens.indexPattern.timeShift.tooSmallHelp', {
                 defaultMessage:
-                  'Time shift has to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
+                  'Time shift should to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
               })
             : localValueNotMultiple
             ? i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
                 defaultMessage:
-                  'Time shift has to be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
+                  'Time shift should be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
               })
             : undefined
         }
@@ -259,11 +259,7 @@ export function TimeShift({
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);
-                if (
-                  parsedVal !== 'invalid' &&
-                  !isValueTooSmall(parsedVal) &&
-                  !isValueNotMultiple(parsedVal)
-                ) {
+                if (parsedVal !== 'invalid') {
                   updateLayer(setTimeShift(columnId, layer, val));
                 } else {
                   setLocalValue(val);
@@ -277,11 +273,7 @@ export function TimeShift({
 
                 const choice = choices[0].value as string;
                 const parsedVal = parseTimeShift(choice);
-                if (
-                  parsedVal !== 'invalid' &&
-                  !isValueTooSmall(parsedVal) &&
-                  !isValueNotMultiple(parsedVal)
-                ) {
+                if (parsedVal !== 'invalid') {
                   updateLayer(setTimeShift(columnId, layer, choice));
                 } else {
                   setLocalValue(choice);
@@ -289,21 +281,19 @@ export function TimeShift({
               }}
             />
           </EuiFlexItem>
-          {selectedOperation.timeScalingMode === 'optional' && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="indexPattern-time-shift-remove"
-                color="danger"
-                aria-label={i18n.translate('xpack.lens.timeShift.removeLabel', {
-                  defaultMessage: 'Remove time shift',
-                })}
-                onClick={() => {
-                  updateLayer(setTimeShift(columnId, layer, undefined));
-                }}
-                iconType="cross"
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="indexPattern-time-shift-remove"
+              color="danger"
+              aria-label={i18n.translate('xpack.lens.timeShift.removeLabel', {
+                defaultMessage: 'Remove time shift',
+              })}
+              onClick={() => {
+                updateLayer(setTimeShift(columnId, layer, undefined));
+              }}
+              iconType="cross"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
     </div>

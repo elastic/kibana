@@ -234,7 +234,13 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   ) =>
     | Array<
         | string
-        | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+        | {
+            message: string;
+            fixAction?: {
+              label: string;
+              newState: (http: HttpSetup) => Promise<IndexPatternPrivateState>;
+            };
+          }
       >
     | undefined;
 
@@ -342,7 +348,13 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
   ) =>
     | Array<
         | string
-        | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+        | {
+            message: string;
+            fixAction?: {
+              label: string;
+              newState: (http: HttpSetup) => Promise<IndexPatternPrivateState>;
+            };
+          }
       >
     | undefined;
 }

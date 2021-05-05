@@ -16,11 +16,14 @@ import {
   EuiAccordion,
   EuiIconTip,
 } from '@elastic/eui';
+import { uniq } from 'lodash';
+import { HttpSetup } from 'kibana/public';
+import { FieldStatsResponse } from '../../../../../common';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType } from '../../../../types';
-import { OperationDefinition } from '../index';
+import { FiltersIndexPatternColumn, OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
@@ -48,6 +51,77 @@ function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
     !('references' in column) &&
     !isReferenced(layer, columnId)
   );
+}
+
+function getDisallowedTermsMessage(
+  layer: IndexPatternLayer,
+  columnId: string,
+  state?: IndexPatternPrivateState,
+  layerId?: string
+) {
+  const hasMultipleShifts =
+    uniq(Object.values(layer.columns).map((col) => col.timeShift !== '')).length > 1;
+  if (!hasMultipleShifts) {
+    return undefined;
+  }
+  const dateHistogramParent = layer.columnOrder
+    .slice(0, layer.columnOrder.indexOf(columnId))
+    .find((colId) => layer.columns[colId].operationType === 'date_histogram');
+
+  if (!dateHistogramParent) {
+    return undefined;
+  }
+  return {
+    message: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShifts', {
+      defaultMessage:
+        "Can't use multiple time shifts in a single layer together with dynamic top values. Either use the same time shift for all metrics or use filters instead of top values.",
+    }),
+    fixAction:
+      state && layerId
+        ? {
+            label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
+              defaultMessage: 'Pin top values',
+            }),
+            newState: async (http: HttpSetup) => {
+              const indexPattern = state.indexPatterns[layer.indexPatternId];
+              const fieldName = (layer.columns[columnId] as TermsIndexPatternColumn).sourceField;
+              const response: FieldStatsResponse<string | number> = await http.post(
+                `/api/lens/index_stats/${indexPattern.id}/field`,
+                {
+                  body: JSON.stringify({
+                    fieldName,
+                  }),
+                }
+              );
+              return {
+                ...state,
+                layers: {
+                  ...state.layers,
+                  [layerId]: {
+                    ...layer,
+                    columns: {
+                      ...layer.columns,
+                      [columnId]: {
+                        ...layer.columns[columnId],
+                        operationType: 'filters',
+                        params: {
+                          filters: response.topValues?.buckets.map(({ key }) => ({
+                            input: {
+                              query: `${fieldName}: "${key}"`,
+                              language: 'kuery',
+                            },
+                            label: '',
+                          })),
+                        },
+                      } as FiltersIndexPatternColumn,
+                    },
+                  },
+                },
+              };
+            },
+          }
+        : undefined,
+  };
 }
 
 function getInvalidNestingOrderMessage(
@@ -87,7 +161,7 @@ function getInvalidNestingOrderMessage(
                 defaultMessage: 'Reorder dimensions',
               }
             ),
-            newState: {
+            newState: async () => ({
               ...state,
               layers: {
                 ...state.layers,
@@ -100,7 +174,7 @@ function getInvalidNestingOrderMessage(
                   },
                 },
               },
-            },
+            }),
           }
         : undefined,
   };
@@ -152,6 +226,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         indexPattern
       ) || []),
       getInvalidNestingOrderMessage(layer, columnId, state, layerId) || '',
+      getDisallowedTermsMessage(layer, columnId, state, layerId) || '',
     ].filter(Boolean),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);

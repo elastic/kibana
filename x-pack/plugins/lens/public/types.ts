@@ -240,7 +240,7 @@ export interface Datasource<T = unknown, P = unknown> {
     | Array<{
         shortMessage: string;
         longMessage: string;
-        fixAction?: { label: string; newState: T };
+        fixAction?: { label: string; newState: () => Promise<T> };
       }>
     | undefined;
   /**

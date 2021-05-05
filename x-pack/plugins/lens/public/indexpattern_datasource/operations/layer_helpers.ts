@@ -6,6 +6,7 @@
  */
 
 import _, { partition } from 'lodash';
+import { HttpSetup } from 'kibana/public';
 import type { OperationMetadata, VisualizationDimensionGroupConfig } from '../../types';
 import {
   operationDefinitionMap,
@@ -993,15 +994,29 @@ export function getErrorMessages(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
   state: IndexPatternPrivateState,
-  layerId: string
+  layerId: string,
+  http: HttpSetup
 ):
   | Array<
       | string
-      | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+      | {
+          message: string;
+          fixAction?: {
+            label: string;
+            newState: (http: HttpSetup) => Promise<IndexPatternPrivateState>;
+          };
+        }
     >
   | undefined {
   const errors: Array<
-    string | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+    | string
+    | {
+        message: string;
+        fixAction?: {
+          label: string;
+          newState: () => Promise<IndexPatternPrivateState>;
+        };
+      }
   > = Object.entries(layer.columns)
     .flatMap(([columnId, column]) => {
       const def = operationDefinitionMap[column.operationType];
@@ -1009,17 +1024,36 @@ export function getErrorMessages(
         return def.getErrorMessage(layer, columnId, indexPattern, state, layerId);
       }
     })
+    .map((errorMessage) => {
+      if (typeof errorMessage !== 'object') {
+        return errorMessage;
+      }
+      return {
+        ...errorMessage,
+        fixAction: errorMessage.fixAction
+          ? {
+              ...errorMessage.fixAction,
+              newState: () => errorMessage.fixAction!.newState(http),
+            }
+          : undefined,
+      };
+    })
     // remove the undefined values
     .filter(
       (
         v:
           | string
           | undefined
-          | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } }
+          | {
+              message: string;
+              fixAction?: { label: string; newState: () => Promise<IndexPatternPrivateState> };
+            }
       ): v is
         | string
-        | { message: string; fixAction?: { label: string; newState: IndexPatternPrivateState } } =>
-        v != null
+        | {
+            message: string;
+            fixAction?: { label: string; newState: () => Promise<IndexPatternPrivateState> };
+          } => v != null
     );
 
   return errors.length ? errors : undefined;

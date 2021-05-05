@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ShiftError } from '../../../../../src/plugins/data/common';
 import { DataType } from '../types';
 import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
 import type {
@@ -69,14 +68,7 @@ export function isColumnInvalid(
     indexPattern
   );
 
-  const hasTimeShiftError =
-    runtimeError instanceof ShiftError && runtimeError.aggIds.includes(columnId);
-
-  return (
-    (operationErrorMessages && operationErrorMessages.length > 0) ||
-    referencesHaveErrors ||
-    hasTimeShiftError
-  );
+  return (operationErrorMessages && operationErrorMessages.length > 0) || referencesHaveErrors;
 }
 
 function getReferencesErrors(
