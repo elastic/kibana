@@ -274,7 +274,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem grow={false}>{<AnomalyTimelineHelpPopover />}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AnomalyTimelineHelpPopover />
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
