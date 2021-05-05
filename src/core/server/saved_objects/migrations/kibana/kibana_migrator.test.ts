@@ -344,13 +344,13 @@ const mockV2MigrationOptions = () => {
 
   options.client.openPointInTime = jest
     .fn()
-    .mockImplementationOnce(() =>
+    .mockImplementation(() =>
       elasticsearchClientMock.createSuccessTransportRequestPromise({ id: 'pit_id' })
     );
 
   options.client.closePointInTime = jest
     .fn()
-    .mockImplementationOnce(() =>
+    .mockImplementation(() =>
       elasticsearchClientMock.createSuccessTransportRequestPromise({ succeeded: true })
     );
 

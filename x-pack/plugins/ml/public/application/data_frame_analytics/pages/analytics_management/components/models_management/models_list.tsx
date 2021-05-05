@@ -53,6 +53,7 @@ import { timeFormatter } from '../../../../../../../common/util/date_utils';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { usePageUrlState } from '../../../../../util/url_state';
 import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_frame_analytics';
+import { useTableSettings } from '../analytics_list/use_table_settings';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -90,12 +91,6 @@ export const ModelsList: FC = () => {
   );
 
   const searchQueryText = pageState.queryText ?? '';
-  const setSearchQueryText = useCallback(
-    (value) => {
-      updatePageState({ queryText: value });
-    },
-    [updatePageState]
-  );
 
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
@@ -521,13 +516,19 @@ export const ModelsList: FC = () => {
       }
     : undefined;
 
+  const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
+    items,
+    pageState,
+    updatePageState
+  );
+
   const search: EuiSearchBarProps = {
     query: searchQueryText,
     onChange: (searchChange) => {
       if (searchChange.error !== null) {
         return false;
       }
-      setSearchQueryText(searchChange.queryText);
+      updatePageState({ queryText: searchChange.queryText, pageIndex: 0 });
       return true;
     },
     box: {
@@ -572,6 +573,9 @@ export const ModelsList: FC = () => {
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
           })}
+          pagination={pagination}
+          onTableChange={onTableChange}
+          sorting={sorting}
         />
       </div>
       {modelsToDelete.length > 0 && (

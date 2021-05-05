@@ -9,6 +9,8 @@ def label(size) {
       return 'docker && linux && immutable'
     case 's-highmem':
       return 'docker && tests-s'
+    case 'm':
+      return 'docker && linux && immutable && gobld/machineType:n2-standard-8'
     case 'm-highmem':
       return 'docker && linux && immutable && gobld/machineType:n1-highmem-8'
     case 'l':
@@ -77,10 +79,12 @@ def base(Map params, Closure closure) {
       dir("kibana") {
         checkoutInfo = getCheckoutInfo()
 
-        // use `checkoutInfo` as a flag to indicate that we've already reported the pending commit status
-        if (buildState.get('shouldSetCommitStatus') && !buildState.has('checkoutInfo')) {
+        if (!buildState.has('checkoutInfo')) {
           buildState.set('checkoutInfo', checkoutInfo)
-          githubCommitStatus.onStart()
+
+          if (buildState.get('shouldSetCommitStatus')) {
+            githubCommitStatus.onStart()
+          }
         }
       }
 
