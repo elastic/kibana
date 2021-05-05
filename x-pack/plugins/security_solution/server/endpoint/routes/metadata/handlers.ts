@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import type {
+  ElasticsearchClient,
+  ILegacyScopedClusterClient,
   IScopedClusterClient,
   Logger,
   RequestHandler,
@@ -25,7 +27,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import { Agent, AgentStatus, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { AgentNotFoundError } from '../../../../../fleet/server';
-import { EndpointAppContext, HostListQueryResult } from '../../types';
+import { EndpointAppContext, HostListQueryResult, HostQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { findAgentIDsByStatus } from './support/agent_status';
@@ -33,6 +35,7 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 export interface MetadataRequestContext {
   esClient?: IScopedClusterClient;
+  esLegacyClient?: ILegacyScopedClusterClient;
   endpointAppContextService: EndpointAppContextService;
   logger: Logger;
   requestHandlerContext?: SecuritySolutionRequestHandlerContext;
@@ -83,6 +86,7 @@ export const getMetadataListRequestHandler = function (
 
     const metadataRequestContext: MetadataRequestContext = {
       esClient: context.core.elasticsearch.client,
+      esLegacyClient: context.core.elasticsearch.legacy.client,
       endpointAppContextService: endpointAppContext.service,
       logger,
       requestHandlerContext: context,
@@ -119,10 +123,9 @@ export const getMetadataListRequestHandler = function (
       }
     );
 
-    const result = await context.core.elasticsearch.client.asCurrentUser.search<HostMetadata>(
-      queryParams
+    const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(
+      await context.core.elasticsearch.legacy.client.callAsCurrentUser('search', queryParams)
     );
-    const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(result.body);
     return response.ok({
       body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),
     });
@@ -147,6 +150,7 @@ export const getMetadataRequestHandler = function (
 
     const metadataRequestContext: MetadataRequestContext = {
       esClient: context.core.elasticsearch.client,
+      esLegacyClient: context.core.elasticsearch.legacy.client,
       endpointAppContextService: endpointAppContext.service,
       logger,
       requestHandlerContext: context,
@@ -190,14 +194,31 @@ export async function getHostData(
     ?.getMetadataService()
     ?.queryStrategy(metadataRequestContext.savedObjectsClient, queryStrategyVersion);
   const query = getESQueryHostMetadataByID(id, queryStrategy!);
-  if (!metadataRequestContext.esClient) {
+
+  if (
+    !metadataRequestContext.esLegacyClient &&
+    !metadataRequestContext.requestHandlerContext?.core.elasticsearch.legacy.client
+  ) {
     return undefined;
   }
-  const response = await metadataRequestContext.esClient.asCurrentUser.search<HostMetadata>(query);
 
-  const hostResult = queryStrategy!.queryResponseToHostResult(response.body);
+  let hostResult: HostQueryResult;
+
+  if (metadataRequestContext.esLegacyClient) {
+    hostResult = queryStrategy!.queryResponseToHostResult(
+      await (metadataRequestContext?.esLegacyClient).callAsCurrentUser('search', query)
+    );
+  } else {
+    hostResult = queryStrategy!.queryResponseToHostResult(
+      await metadataRequestContext.requestHandlerContext?.core.elasticsearch.legacy.client.callAsCurrentUser(
+        'search',
+        query
+      )
+    );
+  }
 
   const hostMetadata = hostResult.result;
+
   if (!hostMetadata) {
     return undefined;
   }
@@ -220,17 +241,22 @@ export async function getHostData(
 
 async function findAgent(
   metadataRequestContext: MetadataRequestContext,
-  hostMetadata: HostMetadata,
-  includeAgentData?: boolean
+  hostMetadata: HostMetadata
 ): Promise<Agent | undefined> {
   try {
-    if (metadataRequestContext.esClient == null) {
+    if (
+      !metadataRequestContext.esClient &&
+      !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
+    ) {
       throw new Error(`esClient not found`);
     }
-
+    const es =
+      metadataRequestContext.esClient?.asCurrentUser ??
+      (metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
+        .asCurrentUser as ElasticsearchClient);
     return await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
-      ?.getAgent(metadataRequestContext.esClient.asCurrentUser, hostMetadata.elastic.agent.id);
+      ?.getAgent(es, hostMetadata.elastic.agent.id);
   } catch (e) {
     if (e instanceof AgentNotFoundError) {
       metadataRequestContext.logger.warn(

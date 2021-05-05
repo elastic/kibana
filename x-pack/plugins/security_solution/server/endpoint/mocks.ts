@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
@@ -132,11 +132,11 @@ export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestC
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mock<IScopedClusterClient>,
+  dataClient: jest.Mocked<ILegacyScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
   const context = xpackMocks.createRequestHandlerContext();
-  context.core.elasticsearch.client = dataClient;
+  context.core.elasticsearch.legacy.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;
 }

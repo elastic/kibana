@@ -26,7 +26,6 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
   endpointContext: EndpointAppContext
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
-
   return {
     search: (request, options, deps) => {
       if (request.factoryQueryType == null) {
@@ -47,6 +46,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
         mergeMap((esSearchRes) =>
           queryFactory.parse(request, esSearchRes, {
             esClient: deps.esClient,
+            esLegacyClient: deps.esLegacyClient,
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,
           })

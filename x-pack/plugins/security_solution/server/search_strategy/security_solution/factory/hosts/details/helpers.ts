@@ -8,6 +8,7 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import {
+  ILegacyScopedClusterClient,
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '../../../../../../../../../src/core/server';
@@ -181,11 +182,12 @@ export const getHostEndpoint = async (
   id: string | null,
   deps: {
     esClient: IScopedClusterClient;
+    esLegacyClient: ILegacyScopedClusterClient;
     savedObjectsClient: SavedObjectsClientContract;
     endpointContext: EndpointAppContext;
   }
 ): Promise<EndpointFields | null> => {
-  const { esClient, endpointContext, savedObjectsClient } = deps;
+  const { esClient, esLegacyClient, endpointContext, savedObjectsClient } = deps;
   const logger = endpointContext.logFactory.get('metadata');
   try {
     const agentService = endpointContext.service.getAgentService();
@@ -194,16 +196,17 @@ export const getHostEndpoint = async (
     }
     const metadataRequestContext = {
       esClient,
+      esLegacyClient,
       endpointAppContextService: endpointContext.service,
       logger,
       savedObjectsClient,
     };
+
     const includeAgentData = false;
     const endpointData =
       id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
         ? await getHostData(metadataRequestContext, id, undefined, includeAgentData)
         : null;
-
     return endpointData != null && endpointData.metadata
       ? {
           endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,

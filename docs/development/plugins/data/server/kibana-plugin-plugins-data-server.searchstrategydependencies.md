@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SearchStrategyDependencies 
+export interface SearchStrategyDependencies
 ```
 
 ## Properties
@@ -15,6 +15,7 @@ export interface SearchStrategyDependencies
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [esClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.esclient.md) | <code>IScopedClusterClient</code> |  |
+|  [esLegacyClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.eslegacyclient.md) | <code>ILegacyScopedClusterClient</code> |  |
 |  [savedObjectsClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> |  |
 |  [searchSessionsClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.searchsessionsclient.md) | <code>IScopedSearchSessionsClient</code> |  |
 |  [uiSettingsClient](./kibana-plugin-plugins-data-server.searchstrategydependencies.uisettingsclient.md) | <code>IUiSettingsClient</code> |  |

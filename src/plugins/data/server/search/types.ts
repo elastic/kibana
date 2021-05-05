@@ -34,6 +34,7 @@ export interface SearchEnhancements {
 
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
+  esLegacyClient: ILegacyScopedClusterClient;
   esClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
   searchSessionsClient: IScopedSearchSessionsClient;

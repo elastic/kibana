@@ -400,6 +400,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         searchSessionsClient,
         savedObjectsClient,
         esClient: elasticsearch.client.asScoped(request),
+        esLegacyClient: elasticsearch.legacy.client.asScoped(request),
         uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
       };
       return {

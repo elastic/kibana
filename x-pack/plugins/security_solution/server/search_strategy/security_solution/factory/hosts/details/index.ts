@@ -22,6 +22,7 @@ import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { formatHostItem, getHostEndpoint } from './helpers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
 import {
+  ILegacyScopedClusterClient,
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '../../../../../../../../../src/core/server';
@@ -33,6 +34,7 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
     response: IEsSearchResponse<HostAggEsData>,
     deps?: {
       esClient: IScopedClusterClient;
+      esLegacyClient: ILegacyScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
     }
