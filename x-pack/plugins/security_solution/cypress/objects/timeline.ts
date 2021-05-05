@@ -42,6 +42,16 @@ export const timeline: TimelineTemplate = {
   templateTimelineId: '123456789',
 };
 
+/**
+ * Timeline query that finds no valid data to cut down on test failures
+ * or other issues for when we want to test one specific thing and not also
+ * test the queries happening
+ */
+export const timelineNonValidQuery: CompleteTimeline = {
+  ...timeline,
+  query: 'query_to_intentionally_find_nothing: *',
+};
+
 export const caseTimeline: Timeline = {
   title: 'SIEM test',
   description: 'description',
