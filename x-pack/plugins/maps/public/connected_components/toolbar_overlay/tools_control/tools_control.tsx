@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import {
-  DRAW_MODE,
   DRAW_TYPE,
   ES_GEO_FIELD_TYPE,
   ES_SPATIAL_RELATIONS,
@@ -28,8 +27,9 @@ import {
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/distance_filter_form';
 import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
+// @ts-expect-error
+import { IndexGeometrySelectPopoverForm } from '../../../components/index_geometry_select_popover_form';
 import { DrawState } from '../../../../common/descriptor_types';
-import { setDrawMode } from '../../../actions';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',
@@ -41,6 +41,10 @@ const DRAW_BOUNDS_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLa
 
 const DRAW_DISTANCE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawDistanceLabel', {
   defaultMessage: 'Draw distance to filter data',
+});
+
+const ADD_FEATURES_LABEL = i18n.translate('xpack.maps.toolbarOverlay.editFeaturesLabel', {
+  defaultMessage: 'Add features to index',
 });
 
 const DRAW_SHAPE_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabelShort', {
@@ -58,6 +62,13 @@ const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
   }
 );
 
+const ADD_FEATURES_LABEL_SHORT = i18n.translate(
+  'xpack.maps.toolbarOverlay.editFeaturesLabelShort',
+  {
+    defaultMessage: 'Add features',
+  }
+);
+
 export interface Props {
   cancelDraw: () => void;
   geoFields: GeoFieldWithIndex[];
@@ -66,6 +77,8 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   activateDrawFilterMode: () => void;
+  activateDrawPointsMode: () => void;
+  activateDrawShapesMode: () => void;
   deactivateDrawMode: () => void;
 }
 
@@ -93,7 +106,6 @@ export class ToolsControl extends Component<Props, State> {
 
   _closePopover = () => {
     this.setState({ isPopoverOpen: false });
-    this.props.deactivateDrawMode();
   };
 
   _initiateShapeDraw = (options: {
@@ -153,6 +165,10 @@ export class ToolsControl extends Component<Props, State> {
       {
         name: DRAW_DISTANCE_LABEL,
         panel: 3,
+      },
+      {
+        name: ADD_FEATURES_LABEL,
+        panel: 4,
       },
     ];
 
@@ -215,6 +231,23 @@ export class ToolsControl extends Component<Props, State> {
             getFilterActions={this.props.getFilterActions}
             getActionContext={this.props.getActionContext}
             onSubmit={this._initiateDistanceDraw}
+          />
+        ),
+      },
+      {
+        id: 4,
+        title: ADD_FEATURES_LABEL_SHORT,
+        content: (
+          <IndexGeometrySelectPopoverForm
+            className="mapDrawControl__geometryFilterForm"
+            geoFields={this.props.geoFields}
+            onSubmit={({ geoFieldType }: { geoFieldType: string }) => {
+              if (geoFieldType === 'geo_point') {
+                this.props.activateDrawPointsMode();
+              } else {
+                this.props.activateDrawShapesMode();
+              }
+            }}
           />
         ),
       },
