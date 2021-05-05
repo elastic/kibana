@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { AdministrationListPage as _AdministrationListPage } from '../../../components/administration_list_page';
 import { EventFiltersListEmptyState } from './components/empty';
@@ -29,6 +29,8 @@ import {
   ExceptionItem,
   ExceptionItemProps,
 } from '../../../../common/components/exceptions/viewer/exception_item';
+
+import { SearchBar } from '../../../components/search_bar';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -105,6 +107,10 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
+  const handleOnSearch = useCallback((query: string) => navigateCallback({ filter: query }), [
+    navigateCallback,
+  ]);
+
   return (
     <AdministrationListPage
       beta={false}
@@ -137,7 +143,12 @@ export const EventFiltersListPage = memo(() => {
       }
     >
       {showFlyout && <EventFiltersFlyout onCancel={handleAddCancelButtonClick} />}
-
+      {doesDataExist && (
+        <>
+          <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
         items={listItems}
         ItemComponent={ExceptionItem}
