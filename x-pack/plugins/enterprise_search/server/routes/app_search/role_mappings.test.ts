@@ -11,7 +11,6 @@ import {
   registerRoleMappingsRoute,
   registerRoleMappingRoute,
   registerNewRoleMappingRoute,
-  registerResetRoleMappingRoute,
 } from './role_mappings';
 
 const roleMappingBaseSchema = {
