@@ -57,10 +57,7 @@ export const getEncryptedFieldNotifyLabel = (
         size="s"
         iconType="iInCircle"
         data-test-subj="reenterValuesMessage"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.reenterValueLabel',
-          { defaultMessage: reEnterDefaultMessage }
-        )}
+        title={reEnterDefaultMessage}
       />
       <EuiSpacer size="m" />
     </>

@@ -27,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { WebhookActionConnector } from '../types';
-import { getEncryptedFieldNotifyLabel } from '../../missing_secrets_callout';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -311,7 +311,13 @@ const WebhookActionConnectorFields: React.FunctionComponent<
           {getEncryptedFieldNotifyLabel(
             !action.id,
             action.isMissingSecrets ?? false,
-            'Username and password are encrypted. Please reenter values for these fields.'
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.reenterValuesLabel',
+              {
+                defaultMessage:
+                  'Username and password are encrypted. Please reenter values for these fields.',
+              }
+            )
           )}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>

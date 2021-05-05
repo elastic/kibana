@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getEncryptedFieldNotifyLabel renders proper notify label when isCreate equals true 1`] = `
+Array [
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>,
+  <EuiText
+    data-test-subj="rememberValuesMessage"
+    size="s"
+  >
+    <div
+      className="euiText euiText--small"
+      data-test-subj="rememberValuesMessage"
+    >
+      <FormattedMessage
+        defaultMessage="Remember this value. You must reenter it each time you edit the connector."
+        id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.rememberValueLabel"
+        values={Object {}}
+      >
+        Remember this value. You must reenter it each time you edit the connector.
+      </FormattedMessage>
+    </div>
+  </EuiText>,
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>,
+]
+`;
+
+exports[`getEncryptedFieldNotifyLabel renders proper notify label when isCreate equals true 2`] = `
+Array [
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>,
+  <EuiText
+    data-test-subj="rememberValuesMessage"
+    size="s"
+  >
+    <div
+      className="euiText euiText--small"
+      data-test-subj="rememberValuesMessage"
+    >
+      <FormattedMessage
+        defaultMessage="Remember this value. You must reenter it each time you edit the connector."
+        id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.rememberValueLabel"
+        values={Object {}}
+      >
+        Remember this value. You must reenter it each time you edit the connector.
+      </FormattedMessage>
+    </div>
+  </EuiText>,
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>,
+]
+`;

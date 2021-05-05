@@ -24,7 +24,7 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEncryptedFieldNotifyLabel } from '../../missing_secrets_callout';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>

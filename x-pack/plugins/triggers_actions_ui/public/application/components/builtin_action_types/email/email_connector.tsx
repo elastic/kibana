@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -14,10 +14,8 @@ import {
   EuiFieldPassword,
   EuiSwitch,
   EuiFormRow,
-  EuiText,
   EuiTitle,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,7 +23,7 @@ import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEncryptedFieldNotifyLabel } from '../../missing_secrets_callout';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
@@ -208,7 +206,13 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           {getEncryptedFieldNotifyLabel(
             !action.id,
             action.isMissingSecrets ?? false,
-            'Username and password are encrypted. Please reenter values for these fields.'
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.reenterValuesLabel',
+              {
+                defaultMessage:
+                  'Username and password are encrypted. Please reenter values for these fields.',
+              }
+            )
           )}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>

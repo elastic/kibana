@@ -21,7 +21,7 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
 import { JiraActionConnector } from './types';
-import { getEncryptedFieldNotifyLabel } from '../../missing_secrets_callout';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnector>> = ({
   action,

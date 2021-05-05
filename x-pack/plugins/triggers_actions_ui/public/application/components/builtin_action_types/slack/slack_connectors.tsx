@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { SlackActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEncryptedFieldNotifyLabel } from '../../missing_secrets_callout';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const SlackActionFields: React.FunctionComponent<
   ActionConnectorFieldsProps<SlackActionConnector>
@@ -46,7 +46,10 @@ const SlackActionFields: React.FunctionComponent<
           {getEncryptedFieldNotifyLabel(
             !action.id,
             action.isMissingSecrets ?? false,
-            'This URL is encrypted. Please reenter a value for this field.'
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.reenterValueLabel',
+              { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
+            )
           )}
           <EuiFieldText
             fullWidth
