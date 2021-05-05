@@ -444,7 +444,7 @@
     "@kbn/cli-dev-mode": "link:packages/kbn-cli-dev-mode",
     "@kbn/dev-utils": "link:bazel-bin/packages/kbn-dev-utils/npm_module",
     "@kbn/docs-utils": "link:packages/kbn-docs-utils",
-    "@kbn/es": "link:packages/kbn-es",
+    "@kbn/es": "link:bazel-bin/packages/kbn-es/npm_module",
     "@kbn/es-archiver": "link:packages/kbn-es-archiver",
     "@kbn/eslint-import-resolver-kibana": "link:bazel-bin/packages/kbn-eslint-import-resolver-kibana/npm_module",
     "@kbn/eslint-plugin-eslint": "link:bazel-bin/packages/kbn-eslint-plugin-eslint/npm_module",
