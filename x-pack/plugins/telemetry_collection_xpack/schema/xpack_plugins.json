@@ -4441,14 +4441,20 @@
         "index_patterns": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
             }
           }
         },
         "saved_searches": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
             }
           }
         },
@@ -4457,18 +4463,30 @@
             "saved_searches": {
               "properties": {
                 "total": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
                 },
                 "lens_total": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
                 }
               }
             },
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
             },
             "lens_total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
+              }
             }
           }
         }
