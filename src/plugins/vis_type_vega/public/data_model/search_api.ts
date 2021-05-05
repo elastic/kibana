@@ -9,34 +9,35 @@
 import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
-import type { RuntimeFields } from '@elastic/elasticsearch/api/types';
 import { getData } from '../services';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
   DataPublicPluginStart,
   IEsSearchResponse,
-  IndexPattern,
 } from '../../../data/public';
 import { search as dataPluginSearch } from '../../../data/public';
-import { ISearchRequestParams } from '../../../data/common';
 import { VegaInspectorAdapters } from '../vega_inspector';
 import { RequestResponder } from '../../../inspector/public';
 
-const extendSearchParamsWithRuntimeFields = (requestParams: ISearchRequestParams) =>
-  new Promise(async (resolve) => {
-    const indexPatternTitle = requestParams.index as string;
-    const indexPatterns = await getData().indexPatterns.find(indexPatternTitle);
-    const indexPattern = indexPatterns.find(
-      (index: IndexPattern) => index.title === indexPatternTitle
+const extendSearchParamsWithRuntimeFields = async (
+  requestParams: ReturnType<typeof getSearchParamsFromRequest>,
+  indexPatternString?: string
+) => {
+  if (indexPatternString) {
+    const indexPattern = (await getData().indexPatterns.find(indexPatternString)).find(
+      (index) => index.title === indexPatternString
     );
-    const runtimeFields = indexPattern?.getComputedFields().runtimeFields as RuntimeFields;
+    const runtimeFields = indexPattern?.getComputedFields().runtimeFields;
 
-    resolve({
+    return {
       ...requestParams,
-      body: { ...requestParams.body, runtime_mappings: runtimeFields ?? undefined },
-    });
-  });
+      body: { ...requestParams.body, runtime_mappings: runtimeFields },
+    };
+  }
+
+  return requestParams;
+};
 
 export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
@@ -71,7 +72,7 @@ export class SearchAPI {
           requestResponders[requestId].json(requestParams.body);
         }
 
-        return from(extendSearchParamsWithRuntimeFields(requestParams)).pipe(
+        return from(extendSearchParamsWithRuntimeFields(requestParams, request.index)).pipe(
           switchMap((params) =>
             search
               .search(
