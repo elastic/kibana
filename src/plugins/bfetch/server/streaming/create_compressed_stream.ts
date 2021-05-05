@@ -6,32 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { promisify } from 'util';
 import { Observable } from 'rxjs';
 import { catchError, concatMap, finalize } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { Stream, PassThrough } from 'stream';
-import { createDeflate, constants } from 'zlib';
+import { constants, deflate } from 'zlib';
 
 const delimiter = '\n';
 
 async function zipMessageToStream(output: PassThrough, message: string) {
-  return new Promise((resolve, reject) => {
-    const gz = createDeflate({
-      flush: constants.Z_SYNC_FLUSH,
-    });
-    gz.on('error', function (err) {
-      reject(err);
-    });
-    gz.on('data', (data) => {
-      output.write(data.toString('hex'));
-    });
-    // gz.pipe(output, { end: false });
-    gz.end(Buffer.from(message));
-
-    Stream.finished(gz, {}, () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const gzipped = await promisify(deflate)(message, {
+        flush: constants.Z_SYNC_FLUSH,
+      });
+      output.write(gzipped.toString('base64'));
       output.write(delimiter);
       resolve(undefined);
-    });
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 

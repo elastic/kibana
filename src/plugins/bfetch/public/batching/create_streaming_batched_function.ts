@@ -47,6 +47,11 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
    * before sending the batch request.
    */
   maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
+
+  /**
+   * Disabled zlib compression of response chunks.
+   */
+  disabledCompression?: boolean;
 }
 
 /**
@@ -64,6 +69,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
+    disabledCompression = false,
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
@@ -127,10 +133,12 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           for (const { future } of items) future.reject(normalizedError);
         };
 
-        stream.pipe(split('\r\n')).subscribe({
+        stream.pipe(split('\n')).subscribe({
           next: (json: string) => {
             try {
-              const response = inflateResponse<Result>(json.trim());
+              const response = disabledCompression
+                ? JSON.parse(json)
+                : inflateResponse<Result>(json);
               if (response.error) {
                 items[response.id].future.reject(response.error);
               } else if (response.result !== undefined) {

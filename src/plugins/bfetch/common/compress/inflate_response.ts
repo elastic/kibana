@@ -13,7 +13,7 @@ export function inflateResponse<Result extends object>(
   response: string
 ): BatchResponseItem<Result, ErrorLike> {
   try {
-    const buff = Buffer.from(response, 'hex');
+    const buff = Buffer.from(response, 'base64');
 
     const unzip = unzlibSync(buff);
     const inflatedRes = strFromU8(unzip);

@@ -8,7 +8,7 @@
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
 import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
-import { removeLeadingSlash } from '../common';
+import { removeLeadingSlash, DISABLE_SEARCH_COMPRESSION } from '../common';
 import {
   createStreamingBatchedFunction,
   StreamingBatchedFunctionParams,
@@ -40,6 +40,7 @@ export class BfetchPublicPlugin
       BfetchPublicStartDependencies
     > {
   private contract!: BfetchPublicContract;
+  private disabledCompression!: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -59,6 +60,7 @@ export class BfetchPublicPlugin
   }
 
   public start(core: CoreStart, plugins: BfetchPublicStartDependencies): BfetchPublicStart {
+    this.disabledCompression = core.uiSettings.get<boolean>(DISABLE_SEARCH_COMPRESSION, true);
     return this.contract;
   }
 
@@ -84,5 +86,6 @@ export class BfetchPublicPlugin
     createStreamingBatchedFunction({
       ...params,
       fetchStreaming: params.fetchStreaming || fetchStreaming,
+      disabledCompression: this.disabledCompression,
     });
 }
