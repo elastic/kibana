@@ -6,7 +6,7 @@
  */
 
 import React, { MouseEvent, useEffect, useState } from 'react';
-import { EuiButton, EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   visualizeGeoFieldTrigger,
@@ -55,21 +55,18 @@ export function VisualizeGeoFieldButton(props: Props) {
 
   return (
     <>
-      <EuiSpacer size="m" />
-      <EuiTextAlign textAlign="center">
-        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-        <EuiButton
-          onClick={onClick}
-          href={href}
-          size="s"
-          data-test-subj={`lensVisualize-GeoField-${props.fieldName}`}
-        >
-          <FormattedMessage
-            id="xpack.lens.indexPattern.fieldItem.visualizeGeoFieldLinkText"
-            defaultMessage="Visualize in Maps"
-          />
-        </EuiButton>
-      </EuiTextAlign>
+      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+      <EuiButton
+        onClick={onClick}
+        href={href}
+        size="s"
+        data-test-subj={`lensVisualize-GeoField-${props.fieldName}`}
+      >
+        <FormattedMessage
+          id="xpack.lens.indexPattern.fieldItem.visualizeGeoFieldLinkText"
+          defaultMessage="Visualize in Maps"
+        />
+      </EuiButton>
     </>
   );
 }

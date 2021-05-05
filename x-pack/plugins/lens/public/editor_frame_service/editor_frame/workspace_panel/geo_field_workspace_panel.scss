@@ -1,8 +1,7 @@
 @import '../../../mixins';
 
 .lnsVisualizeGeoFieldWorkspacePanel__dragDrop {
-  width: $euiSizeXXL * 8;
-  height: $euiSizeXXL;
+  padding: $euiSizeL;
   border: $euiBorderThin;
   border-radius: $euiBorderRadiusSmall;
 

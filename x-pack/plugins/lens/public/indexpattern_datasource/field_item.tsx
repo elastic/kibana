@@ -22,6 +22,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
+  EuiTextAlign,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -485,11 +486,14 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
         <EuiText size="s">{getVisualizeGeoFieldMessage(field.type)}</EuiText>
 
-        <VisualizeGeoFieldButton
-          uiActions={uiActions}
-          indexPatternId={indexPattern.id}
-          fieldName={field.name}
-        />
+        <EuiSpacer size="m" />
+        <EuiTextAlign textAlign="center">
+          <VisualizeGeoFieldButton
+            uiActions={uiActions}
+            indexPatternId={indexPattern.id}
+            fieldName={field.name}
+          />
+        </EuiTextAlign>
       </>
     );
   } else if (
