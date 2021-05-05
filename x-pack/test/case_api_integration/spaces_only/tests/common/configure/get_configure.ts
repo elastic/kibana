@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql(getConfigurationOutput(false, { created_by: nullUser }));
     });
 
-    it('should not find a configuration in when looking in a different space', async () => {
+    it('should not find a configuration when looking in a different space', async () => {
       await createConfiguration(supertest, getConfigurationRequest(), 200, authSpace1);
       const configuration = await getConfiguration({
         supertest,

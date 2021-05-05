@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it('should return a configuration with mapping from space1', async () => {
+    it('should return a configuration with a mapping from space1', async () => {
       const connector = await createConnector({
         supertest,
         req: {
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    it('should not return a configuration with mapping from a different space', async () => {
+    it('should not return a configuration with a mapping from a different space', async () => {
       const connector = await createConnector({
         supertest,
         req: {
