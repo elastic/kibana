@@ -2619,7 +2619,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/crypto@link:packages/kbn-crypto":
+"@kbn/crypto@link:bazel-bin/packages/kbn-crypto/npm_module":
   version "0.0.0"
   uid ""
 
