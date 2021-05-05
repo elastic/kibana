@@ -95,21 +95,25 @@ export async function fetchThreadPoolRejectionStats(
 
   const response = await callCluster('search', params);
   const stats: AlertThreadPoolRejectionsStats[] = [];
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
 
-  if (!clusterBuckets.length) {
+  if (!clusterBuckets?.length) {
     return stats;
   }
 
   for (const clusterBucket of clusterBuckets) {
     for (const node of clusterBucket.nodes.buckets) {
-      const mostRecentDoc = get(node, 'most_recent.hits.hits[0]');
-      mostRecentDoc.timestamp = mostRecentDoc.sort[0];
+      const mostRecentDoc = get(node, 'most_recent.hits.hits[0]') as { timestamp: string, sort: string[], _index: string };
+      const leastRecentDoc = get(node, 'least_recent.hits.hits[0]') as { timestamp: string, sort: string[] };
 
-      const leastRecentDoc = get(node, 'least_recent.hits.hits[0]');
+      if (!mostRecentDoc || !leastRecentDoc) {
+        continue;
+      }
+
+      mostRecentDoc.timestamp = mostRecentDoc.sort[0];
       leastRecentDoc.timestamp = leastRecentDoc.sort[0];
 
-      if (!mostRecentDoc || mostRecentDoc.timestamp === leastRecentDoc.timestamp) {
+      if (mostRecentDoc.timestamp === leastRecentDoc.timestamp) {
         continue;
       }
 
@@ -133,7 +137,7 @@ export async function fetchThreadPoolRejectionStats(
         clusterUuid: clusterBucket.key,
         nodeId: node.key,
         nodeName,
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
       };
       stats.push(nodeStat);
     }
