@@ -21,6 +21,7 @@ import {
   EventFiltersChangeForm,
   EventFiltersFormStateChanged,
   EventFiltersCreateSuccess,
+  EventFiltersUpdateSuccess,
   EventFiltersListPageStateChanged,
   EventFiltersListPageDataChanged,
   EventFiltersListPageDataExistsChanged,
@@ -146,6 +147,19 @@ const eventFiltersCreateSuccess: CaseReducer<EventFiltersCreateSuccess> = (state
   };
 };
 
+const eventFiltersUpdateSuccess: CaseReducer<EventFiltersUpdateSuccess> = (state, action) => {
+  return {
+    ...state,
+    // If we are on the List page, then force a refresh of data
+    listPage: getListPageIsActive(state)
+      ? {
+          ...state.listPage,
+          forceRefresh: true,
+        }
+      : state.listPage,
+  };
+};
+
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   if (isEventFiltersPageLocation(action.payload)) {
     const location = extractEventFiltetrsPageLocation(parse(action.payload.search.slice(1)));
@@ -185,6 +199,8 @@ export const eventFiltersPageReducer: StateReducer = (
       return eventFiltersFormStateChanged(state, action);
     case 'eventFiltersCreateSuccess':
       return eventFiltersCreateSuccess(state, action);
+    case 'eventFiltersUpdateSuccess':
+      return eventFiltersUpdateSuccess(state, action);
     case 'userChangedUrl':
       return userChangedUrl(state, action);
   }

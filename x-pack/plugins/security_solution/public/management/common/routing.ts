@@ -24,7 +24,7 @@ import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
-import { EventFiltersPageLocation } from '../pages/event_filters/types';
+import { EventFiltersListPageUrlSearchParams } from '../pages/event_filters/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -119,8 +119,8 @@ const normalizeTrustedAppsPageLocation = (
 };
 
 const normalizeEventFiltersPageLocation = (
-  location?: Partial<EventFiltersPageLocation>
-): Partial<EventFiltersPageLocation> => {
+  location?: Partial<EventFiltersListPageUrlSearchParams>
+): Partial<EventFiltersListPageUrlSearchParams> => {
   if (location) {
     return {
       ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
@@ -203,8 +203,11 @@ export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLoc
 
 export const extractEventFiltetrsPageLocation = (
   query: querystring.ParsedUrlQuery
-): EventFiltersPageLocation => {
-  const showParamValue = extractFirstParamValue(query, 'show') as EventFiltersPageLocation['show'];
+): EventFiltersListPageUrlSearchParams => {
+  const showParamValue = extractFirstParamValue(
+    query,
+    'show'
+  ) as EventFiltersListPageUrlSearchParams['show'];
 
   return {
     ...extractListPaginationParams(query),
@@ -214,7 +217,9 @@ export const extractEventFiltetrsPageLocation = (
   };
 };
 
-export const getEventFiltersListPath = (location?: Partial<EventFiltersPageLocation>): string => {
+export const getEventFiltersListPath = (
+  location?: Partial<EventFiltersListPageUrlSearchParams>
+): string => {
   const path = generatePath(MANAGEMENT_ROUTING_EVENT_FILTERS_PATH, {
     tabName: AdministrationSubTab.eventFilters,
   });

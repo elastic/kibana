@@ -21,7 +21,7 @@ import {
 import { EventFiltersHttpService } from '../../../service';
 import { createdEventFilterEntryMock } from '../../../test_utils';
 import { getFormEntryState, isUninitialisedForm } from '../../../store/selector';
-import { EventFiltersListPageState } from '../../../types';
+import { EventFiltersListPageState } from '../../../state';
 
 jest.mock('../form');
 jest.mock('../../../service');

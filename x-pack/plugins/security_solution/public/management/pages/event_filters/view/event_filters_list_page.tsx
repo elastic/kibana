@@ -116,9 +116,15 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleItemEdit: ExceptionItemProps['onEditException'] = useCallback((item) => {
-    // TODO: implement edit item
-  }, []);
+  const handleItemEdit: ExceptionItemProps['onEditException'] = useCallback(
+    (item: ExceptionListItemSchema) => {
+      navigateCallback({
+        show: 'edit',
+        id: item.id,
+      });
+    },
+    [navigateCallback]
+  );
 
   const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback((args) => {
     // TODO: implement delete item

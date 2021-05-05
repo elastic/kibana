@@ -142,6 +142,9 @@ const eventFiltersUpdate = async (
 
     const exception = await eventFiltersService.updateOne(updatedCommentsEntry);
     store.dispatch({
+      type: 'eventFiltersUpdateSuccess',
+    });
+    store.dispatch({
       type: 'eventFiltersFormStateChanged',
       payload: {
         type: 'LoadedResourceState',
@@ -167,7 +170,6 @@ const eventFiltersLoadById = async (
 ) => {
   const submissionResourceState = getSubmissionResource(store.getState());
   try {
-    // TODO: Try to get the entry from the list before perform API call
     const entry = await eventFiltersService.getOne(id);
     store.dispatch({
       type: 'eventFiltersInitForm',
@@ -292,7 +294,11 @@ export const createEventFiltersPageMiddleware = (
 
     // Middleware that only applies to the List Page for Event Filters
     if (getListPageIsActive(store.getState())) {
-      if (action.type === 'userChangedUrl' || action.type === 'eventFiltersCreateSuccess') {
+      if (
+        action.type === 'userChangedUrl' ||
+        action.type === 'eventFiltersCreateSuccess' ||
+        action.type === 'eventFiltersUpdateSuccess'
+      ) {
         refreshListDataIfNeeded(store, eventFiltersService);
       }
     }

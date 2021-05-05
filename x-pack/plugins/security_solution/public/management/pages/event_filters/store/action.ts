@@ -49,6 +49,7 @@ export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
 };
 
 export type EventFiltersUpdateStart = Action<'eventFiltersUpdateStart'>;
+export type EventFiltersUpdateSuccess = Action<'eventFiltersUpdateSuccess'>;
 export type EventFiltersCreateStart = Action<'eventFiltersCreateStart'>;
 export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'> & {
   payload: {
@@ -68,8 +69,9 @@ export type EventFiltersPageAction =
   | EventFiltersInitForm
   | EventFiltersInitFromId
   | EventFiltersChangeForm
-  | EventFiltersCreateStart
   | EventFiltersUpdateStart
+  | EventFiltersUpdateSuccess
+  | EventFiltersCreateStart
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
   | EventFiltersFormStateChanged;
