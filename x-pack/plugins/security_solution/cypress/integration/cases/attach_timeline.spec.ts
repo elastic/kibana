@@ -43,6 +43,7 @@ describe.skip('attach timeline to case', () => {
 
     it('attach timeline to an existing case with no case', function () {
       loginAndWaitForTimeline(this.myTimeline.savedObjectId);
+      loginAndWaitForTimeline(this.myTimeline.savedObjectId);
       attachTimelineToExistingCase();
       addNewCase();
 

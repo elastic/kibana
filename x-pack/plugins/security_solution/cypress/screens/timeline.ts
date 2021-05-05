@@ -28,10 +28,6 @@ export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
 export const COLUMN_HEADERS = '[data-test-subj="column-headers"] [data-test-subj^=header-text]';
 
-export const COLUMNS = '[data-test-subj="data-driven-columns"]';
-
-export const COLUMN_TEXT = '[data-test-subj^=draggable-content]';
-
 export const COMBO_BOX = '.euiComboBoxOption__content';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
@@ -47,12 +43,8 @@ export const GRAPH_TAB_BUTTON = '[data-test-subj="timelineTabs-graph"]';
 
 export const HEADER = '[data-test-subj="header"]';
 
-export const HEADER_GROUP = '[data-test-subj="headers-group"]';
-
 export const HEADERS_GROUP =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"]';
-
-export const HEADER_TEXT = '[data-test-subj^=header-text]';
 
 export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
 

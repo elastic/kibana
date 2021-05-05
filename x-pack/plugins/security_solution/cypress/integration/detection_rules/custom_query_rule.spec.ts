@@ -121,7 +121,7 @@ describe('Custom detection rules creation', () => {
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(newRule.timeline).then((response) => {
+    createTimeline(newRule.timeline!).then((response) => {
       cy.wrap({
         ...newRule,
         timeline: {

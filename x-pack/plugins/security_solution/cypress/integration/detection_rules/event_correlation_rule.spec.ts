@@ -87,7 +87,7 @@ describe('Detection rules, EQL', () => {
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(eqlRule.timeline).then((response) => {
+    createTimeline(eqlRule.timeline!).then((response) => {
       cy.wrap({
         ...eqlRule,
         timeline: {
@@ -182,7 +182,7 @@ describe('Detection rules, sequence EQL', () => {
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(eqlSequenceRule.timeline).then((response) => {
+    createTimeline(eqlSequenceRule.timeline!).then((response) => {
       cy.wrap({
         ...eqlSequenceRule,
         timeline: {
