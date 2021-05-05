@@ -39,6 +39,7 @@ export async function setupMocha(lifecycle, log, config, providers) {
   loadTestFiles({
     mocha,
     log,
+    config,
     lifecycle,
     providers,
     paths: config.get('testFiles'),
