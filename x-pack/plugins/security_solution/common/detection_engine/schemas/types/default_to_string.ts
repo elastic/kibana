@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the DefaultToString as:
  *   - If null or undefined, then a default of the string "now" will be used
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultToString = new t.Type<string, string | undefined, unknown>(
   'DefaultToString',
