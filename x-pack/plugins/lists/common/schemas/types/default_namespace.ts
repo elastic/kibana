@@ -14,6 +14,7 @@ export type NamespaceType = t.TypeOf<typeof namespaceType>;
 /**
  * Types the DefaultNamespace as:
  *   - If null or undefined, then a default string/enumeration of "single" will be used.
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultNamespace = new t.Type<NamespaceType, NamespaceType | undefined, unknown>(
   'DefaultNamespace',
