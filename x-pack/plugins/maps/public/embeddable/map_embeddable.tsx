@@ -78,7 +78,6 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-export { MapEmbeddableInput, MapEmbeddableOutput };
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {

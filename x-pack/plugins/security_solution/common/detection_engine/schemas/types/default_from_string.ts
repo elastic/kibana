@@ -11,6 +11,7 @@ import { from } from '../common/schemas';
 /**
  * Types the DefaultFromString as:
  *   - If null or undefined, then a default of the string "now-6m" will be used
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultFromString = new t.Type<string, string | undefined, unknown>(
   'DefaultFromString',

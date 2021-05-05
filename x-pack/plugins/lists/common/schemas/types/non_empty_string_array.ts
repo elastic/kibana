@@ -13,6 +13,7 @@ import { Either } from 'fp-ts/lib/Either';
  *   - A string that is not empty (which will be turned into an array of size 1)
  *   - A comma separated string that can turn into an array by splitting on it
  *   - Example input converted to output: "a,b,c" -> ["a", "b", "c"]
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const NonEmptyStringArray = new t.Type<string[], string, unknown>(
   'NonEmptyStringArray',
@@ -36,5 +37,12 @@ export const NonEmptyStringArray = new t.Type<string[], string, unknown>(
   String
 );
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyStringArray = t.OutputOf<typeof NonEmptyStringArray>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyStringArrayDecoded = t.TypeOf<typeof NonEmptyStringArray>;
