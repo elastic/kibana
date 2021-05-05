@@ -8,6 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
+
+import { sendRequest } from '../../../../../es_ui_shared';
 import { isQuotaExceededError } from '../../../services/history';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
@@ -16,6 +18,12 @@ import { track } from './track';
 
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
+
+let _httpClient;
+
+export const initRequests = (httpClient) => {
+  _httpClient = httpClient;
+};
 
 export const useSendCurrentRequest = () => {
   const {
@@ -43,7 +51,17 @@ export const useSendCurrentRequest = () => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequestToES({ requests });
+      // const results = await sendRequestToES({ requests });
+      console.log(requests)
+      const { data, method, url } = requests[0];
+      const KIBANA_API_KEYWORD = 'kbn:';
+      const isKibanaApiRequest = url.indexOf(KIBANA_API_KEYWORD) === 0;
+
+      const path = url.split(KIBANA_API_KEYWORD)[1];
+      console.log('path', path)
+      const response = await _httpClient[method.toLowerCase()](path, { body: data });
+      console.log(response)
+      const results = [response];
 
       let saveToHistoryError: undefined | Error;
 

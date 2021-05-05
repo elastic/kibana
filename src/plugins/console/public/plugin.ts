@@ -11,6 +11,7 @@ import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
 import { AppSetupUIPluginDependencies } from './types';
+import { initRequests } from './application/hooks/use_send_current_request';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
   public setup(
@@ -49,6 +50,8 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         } = core;
 
         const { renderApp } = await import('./application');
+
+        initRequests(http);
 
         return renderApp({
           http,

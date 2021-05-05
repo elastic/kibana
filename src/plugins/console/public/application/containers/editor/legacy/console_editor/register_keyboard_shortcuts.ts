@@ -11,7 +11,7 @@ import { SenseEditor } from '../../../../models/sense_editor';
 
 interface Actions {
   senseEditor: SenseEditor;
-  sendCurrentRequestToES: () => void;
+  sendCurrentRequest: () => void;
   openDocumentation: () => void;
 }
 
