@@ -24,6 +24,7 @@ const ConfigRecordSchema = schema.recordOf(
   schema.object({
     type: schema.maybe(schema.string()),
     value: schema.maybe(schema.any()),
+    frozen: schema.maybe(schema.boolean()),
   })
 );
 

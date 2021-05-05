@@ -16,6 +16,10 @@ import { entriesMatchWildcard } from './entry_match_wildcard';
 
 // NOTE: Type nested is not included here to denote it's non-recursive nature.
 // So a nested entry is really just a collection of `Entry` types.
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const entry = t.union([
   entriesMatch,
   entriesMatchAny,
@@ -23,8 +27,15 @@ export const entry = t.union([
   entriesExists,
   entriesMatchWildcard,
 ]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Entry = t.TypeOf<typeof entry>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const entriesArray = t.array(
   t.union([
     entriesMatch,
@@ -35,7 +46,18 @@ export const entriesArray = t.array(
     entriesMatchWildcard,
   ])
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type EntriesArray = t.TypeOf<typeof entriesArray>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const entriesArrayOrUndefined = t.union([entriesArray, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type EntriesArrayOrUndefined = t.TypeOf<typeof entriesArrayOrUndefined>;
