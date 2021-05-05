@@ -7,6 +7,7 @@
  */
 import { DiscoverWrapper } from './discover_wrapper';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDiscoverDirective(reactDirective: any) {
   return reactDirective(DiscoverWrapper, [
     ['angularRoute', { watchDepth: 'reference' }],

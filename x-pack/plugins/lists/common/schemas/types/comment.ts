@@ -10,6 +10,9 @@ import * as t from 'io-ts';
 import { NonEmptyString } from '../../shared_imports';
 import { created_at, created_by, id, updated_at, updated_by } from '../common/schemas';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const comment = t.intersection([
   t.exact(
     t.type({
@@ -27,8 +30,27 @@ export const comment = t.intersection([
   ),
 ]);
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const commentsArray = t.array(comment);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type CommentsArray = t.TypeOf<typeof commentsArray>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Comment = t.TypeOf<typeof comment>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const commentsArrayOrUndefined = t.union([commentsArray, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type CommentsArrayOrUndefined = t.TypeOf<typeof commentsArrayOrUndefined>;
