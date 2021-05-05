@@ -12,6 +12,7 @@ import { Threats, threats } from '../common/schemas';
 /**
  * Types the DefaultThreatArray as:
  *   - If null or undefined, then an empty array will be set
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultThreatArray = new t.Type<Threats, Threats | undefined, unknown>(
   'DefaultThreatArray',
