@@ -715,7 +715,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       // If 'namespaces' is undefined, the object was not found (or it is namespace-agnostic).
       // Either way, we will pass in an empty 'spaces' array to the base client, which will cause it to skip this object.
       for (const space of spaces) {
-        allSpacesSet.add(space);
+        if (space !== ALL_SPACES_ID) {
+          // If this is a specific space, add it to the spaces we'll check privileges for (don't accidentally check for global privileges)
+          allSpacesSet.add(space);
+        }
       }
       return { type, id, spaces, version };
     });

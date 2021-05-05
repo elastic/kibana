@@ -1614,7 +1614,7 @@ describe('#updateObjectsSpaces', () => {
         { ...obj1, spaces: [spaceA, spaceC, spaceD] },
         { ...obj2, spaces: [spaceA, spaceC, spaceD] },
         { ...obj3, spaces: [spaceA, spaceC, spaceD] },
-        { ...obj4, spaces: ['*', spaceA] },
+        { ...obj4, spaces: ['*', spaceA] }, // even though this object exists in all spaces, we won't pass '*' to ensureAuthorized
         { ...obj5, spaces: [], error: new Error('Oh no!') }, // we encountered an error when attempting to update obj5
       ] as SavedObjectsUpdateObjectsSpacesResponseObject[],
     });
@@ -1636,6 +1636,13 @@ describe('#updateObjectsSpaces', () => {
 
     expect(clientOpts.baseClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+      expect.any(Object), // dependencies
+      ['x', 'y', 'z'], // unique types of the fetched objects
+      ['bulk_get', 'share_to_space'], // actions
+      [spaceC, spaceA, spaceB, spaceD], // unique spaces of: the current space, spacesToAdd, spacesToRemove, and spaces that the fetched objects exist in (excludes '*')
+      { requireFullAuthorization: false }
+    );
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(5);
     expectAuditEvent(AUDIT_ACTION, 'unknown', obj1);
     expectAuditEvent(AUDIT_ACTION, 'unknown', obj2);
@@ -1648,6 +1655,72 @@ describe('#updateObjectsSpaces', () => {
       spacesToAdd,
       spacesToRemove,
       options
+    );
+  });
+
+  test(`checks privileges for the global resource when spacesToAdd includes '*'`, async () => {
+    const bulkGetResults = [{ ...obj1, namespaces: [spaceA], version: 'v1' }] as SavedObject[];
+    clientOpts.baseClient.bulkGet.mockResolvedValue({ saved_objects: bulkGetResults });
+    mockEnsureAuthorized.mockResolvedValue({
+      status: 'fully_authorized',
+      typeActionMap: new Map().set('x', {
+        bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      }),
+    });
+    clientOpts.baseClient.updateObjectsSpaces.mockResolvedValue({
+      objects: [
+        // The object was removed from spaceA and added to '*'
+        { ...obj1, spaces: ['*'] },
+      ] as SavedObjectsUpdateObjectsSpacesResponseObject[],
+    });
+
+    const objects = [obj1];
+    const spacesToAdd = ['*'];
+    const spacesToRemove = [spaceA];
+    const options = { namespace: spaceC }; // spaceC is the current space
+    await client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+
+    expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+      expect.any(Object), // dependencies
+      ['x'], // unique types of the fetched objects
+      ['bulk_get', 'share_to_space'], // actions
+      [spaceC, '*', spaceA], // unique spaces of: the current space, spacesToAdd, spacesToRemove, and spaces that the fetched objects exist in (excludes '*')
+      { requireFullAuthorization: false }
+    );
+  });
+
+  test(`checks privileges for the global resource when spacesToRemove includes '*'`, async () => {
+    const bulkGetResults = [{ ...obj1, namespaces: ['*'], version: 'v1' }] as SavedObject[];
+    clientOpts.baseClient.bulkGet.mockResolvedValue({ saved_objects: bulkGetResults });
+    mockEnsureAuthorized.mockResolvedValue({
+      status: 'fully_authorized',
+      typeActionMap: new Map().set('x', {
+        bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      }),
+    });
+    clientOpts.baseClient.updateObjectsSpaces.mockResolvedValue({
+      objects: [
+        // The object was removed from spaceA and added to '*'
+        { ...obj1, spaces: ['*'] },
+      ] as SavedObjectsUpdateObjectsSpacesResponseObject[],
+    });
+
+    const objects = [obj1];
+    const spacesToAdd = [spaceA];
+    const spacesToRemove = ['*'];
+    const options = { namespace: spaceC }; // spaceC is the current space
+    await client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+
+    expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+      expect.any(Object), // dependencies
+      ['x'], // unique types of the fetched objects
+      ['bulk_get', 'share_to_space'], // actions
+      [spaceC, spaceA, '*'], // unique spaces of: the current space, spacesToAdd, spacesToRemove, and spaces that the fetched objects exist in (excludes '*')
+      { requireFullAuthorization: false }
     );
   });
 });
