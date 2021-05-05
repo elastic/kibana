@@ -12955,7 +12955,6 @@
     "xpack.maps.tooltip.loadingMsg": "正在加载",
     "xpack.maps.tooltip.pageNumerText": "第 {pageNumber} 页，共 {total} 页",
     "xpack.maps.tooltip.showAddFilterActionsViewLabel": "筛选操作",
-    "xpack.maps.tooltip.showGeometryFilterViewLinkLabel": "按几何筛选",
     "xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel": "取消",
     "xpack.maps.tooltip.unableToLoadContentTitle": "无法加载工具提示内容",
     "xpack.maps.tooltip.viewActionsTitle": "查看筛选操作",
