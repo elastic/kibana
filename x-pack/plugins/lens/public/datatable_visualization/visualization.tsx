@@ -21,7 +21,6 @@ import {
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CustomPaletteParams } from './expression';
-import { remapForDisplay } from './components/coloring/utils';
 
 export interface ColumnState {
   columnId: string;
@@ -260,12 +259,7 @@ export const getDatatableVisualization = ({
                   : hasColoring
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring
-                  ? remapForDisplay(
-                      columnConfig.palette?.params?.stops || [],
-                      columnConfig.palette?.params || {}
-                    )
-                  : undefined,
+                palette: hasColoring ? columnConfig.palette?.params?.stops || [] : undefined,
               };
             }),
           supportsMoreColumns: true,
@@ -375,19 +369,8 @@ export const getDatatableVisualization = ({
                               arguments: {
                                 gradient: [paletteConfig?.progression === 'gradient'],
                                 reverse: [paletteConfig?.reverse || false],
-                                range: [paletteConfig?.rangeType || 'auto'],
-                                rangeMin:
-                                  paletteConfig?.rangeMin != null &&
-                                  paletteConfig?.rangeType &&
-                                  paletteConfig.rangeType !== 'auto'
-                                    ? [paletteConfig?.rangeMin]
-                                    : [],
-                                rangeMax:
-                                  paletteConfig?.rangeMax != null &&
-                                  paletteConfig?.rangeType &&
-                                  paletteConfig.rangeType !== 'auto'
-                                    ? [paletteConfig?.rangeMax]
-                                    : [],
+                                continuity: [paletteConfig?.continuity || 'above'],
+                                range: [paletteConfig?.rangeType || 'percent'],
                                 color: (paletteConfig?.stops || []).map(({ color }) => color),
                                 stop:
                                   paletteConfig?.name === 'custom'

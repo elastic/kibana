@@ -79,7 +79,7 @@ export function TableDimensionEditor(
   const { colorStops, mode: paletteMode } = applyPaletteParams(
     props.paletteService,
     activePalette,
-    { forDisplay: true }
+    minMaxByColumnId[accessor]
   );
 
   return (
@@ -222,6 +222,10 @@ export function TableDimensionEditor(
                     },
                   };
                 }
+                // clear up when switching to no coloring
+                if (column?.palette && newMode === 'none') {
+                  params.palette = undefined;
+                }
                 setState({
                   ...state,
                   columns: updateColumnWith(state, accessor, params),
@@ -241,11 +245,7 @@ export function TableDimensionEditor(
                 <EuiFlexItem>
                   <EuiColorPaletteDisplay
                     data-test-subj="lnsDatatable_dynamicColoring_palette"
-                    palette={
-                      activePalette?.params?.name !== 'custom'
-                        ? colorStops || []
-                        : (colorStops || []).map(({ color }) => color)
-                    }
+                    palette={colorStops}
                     type={paletteMode === 'stepped' ? 'fixed' : paletteMode}
                     onClick={() => {
                       setIsPaletteOpen(!isPaletteOpen);

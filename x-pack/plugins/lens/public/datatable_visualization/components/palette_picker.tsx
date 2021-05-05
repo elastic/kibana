@@ -7,17 +7,16 @@
 
 import React from 'react';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { CustomPaletteParams } from '../expression';
-import { remapForDisplay, reversePalette } from './coloring/utils';
+import { reversePalette } from './coloring/utils';
 import {
   CUSTOM_PALETTE,
+  defaultParams,
   DEFAULT_COLOR_STEPS,
-  DEFAULT_CUSTOM_PROGRESSION,
   DEFAULT_CUSTOM_STEPS,
-  DEFAULT_PROGRESSION,
+  FIXED_PROGRESSION,
+  STEPPED_PROGRESSION,
 } from './coloring/constants';
 
 function getType(
@@ -25,15 +24,11 @@ function getType(
   activePalette: PaletteOutput<CustomPaletteParams> | undefined
 ): 'gradient' | 'fixed' {
   if (id === activePalette?.name) {
-    if (
-      activePalette.params &&
-      activePalette.params.progression &&
-      activePalette.params.progression !== DEFAULT_CUSTOM_PROGRESSION
-    ) {
+    if (activePalette?.params?.progression === 'gradient') {
       return activePalette.params.progression;
     }
   }
-  return DEFAULT_PROGRESSION;
+  return FIXED_PROGRESSION;
 }
 
 function getPaletteSteps(
@@ -53,10 +48,10 @@ function getCustomPaletteConfig(
   activePalette: PaletteOutput<CustomPaletteParams> | undefined
 ) {
   const { id, title } = palettes.get(CUSTOM_PALETTE);
-  const displayType =
-    activePalette?.params?.progression === DEFAULT_CUSTOM_PROGRESSION
-      ? DEFAULT_PROGRESSION
-      : activePalette?.params?.progression || DEFAULT_PROGRESSION;
+  const displayType: 'gradient' | 'fixed' =
+    activePalette?.params?.progression === STEPPED_PROGRESSION
+      ? FIXED_PROGRESSION
+      : activePalette?.params?.progression || FIXED_PROGRESSION;
 
   // Try to generate a palette from the current one
   if (activePalette && activePalette.name !== CUSTOM_PALETTE) {
@@ -80,7 +75,7 @@ function getCustomPaletteConfig(
     return { value: id, title, type: 'text' as const };
   }
 
-  const stops = remapForDisplay(activePalette.params.stops, activePalette.params);
+  const stops = activePalette.params.stops;
 
   // full custom palette
   return {
@@ -125,28 +120,18 @@ export function PalettePicker({
     palettesToShow.push(getCustomPaletteConfig(palettes, activePalette));
   }
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      fullWidth
-      label={i18n.translate('xpack.lens.palettePicker.label', {
-        defaultMessage: 'Color palette',
-      })}
-    >
-      <>
-        <EuiColorPalettePicker
-          data-test-subj="lns-palettePicker"
-          compressed
-          palettes={palettesToShow}
-          onChange={(newPalette) => {
-            setPalette({
-              type: 'palette',
-              name: newPalette,
-            });
-          }}
-          valueOfSelected={activePalette?.name || 'default'}
-          selectionDisplay={'palette'}
-        />
-      </>
-    </EuiFormRow>
+    <EuiColorPalettePicker
+      data-test-subj="lns-palettePicker"
+      compressed
+      palettes={palettesToShow}
+      onChange={(newPalette) => {
+        setPalette({
+          type: 'palette',
+          name: newPalette,
+        });
+      }}
+      valueOfSelected={activePalette?.name || defaultParams.name}
+      selectionDisplay={'palette'}
+    />
   );
 }

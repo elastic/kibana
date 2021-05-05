@@ -16,7 +16,6 @@ import { IUiSettingsClient } from 'kibana/public';
 import type { FormatFactory } from '../../types';
 import type { DataContextType } from './types';
 import { ColumnConfig } from './table_basic';
-import { ensureStopsAreUpToDate } from './coloring/utils';
 
 function findColorSegment(
   value: number,
@@ -71,22 +70,27 @@ function workoutColorForCell(
   if (value == null) {
     return '';
   }
-  const { colors, stops, range, rangeMin, rangeMax, gradient } = params;
-  const isAutoRange = range === 'auto';
+  const { colors, stops, range, gradient, continuity } = params;
   // ranges can be absolute numbers or percentages
   // normalized the incoming value to the same format as range to make easier comparisons
   const normalizedValue = getNormalizedValueByRange(value, params, minMax);
-  const extraRangeArguments = isAutoRange ? [minMax.min, minMax.max] : [rangeMin, rangeMax];
+  const extraRangeArguments = range === 'percent' ? [0, 100] : [minMax.min, minMax.max];
   const comparisonFn = (v: number, threshold: number) => v - threshold;
 
-  const maxValue = !isAutoRange ? rangeMax! : minMax.max;
-  const minValue = !isAutoRange ? rangeMin! : minMax.min;
+  const maxRange = stops.length ? stops[stops.length - 1] : extraRangeArguments[1];
+  const minRange = stops.length ? stops[0] : extraRangeArguments[0];
 
   // in case of shorter rangers, extends the steps on the sides to cover the whole set
-  if (comparisonFn(normalizedValue, maxValue) > 0) {
+  if (comparisonFn(normalizedValue, maxRange) > 0) {
+    if (continuity === 'above' || continuity === 'all') {
+      return colors[colors.length - 1];
+    }
     return;
   }
-  if (comparisonFn(normalizedValue, minValue) < 0) {
+  if (comparisonFn(normalizedValue, minRange) < 0) {
+    if (continuity === 'below' || continuity === 'all') {
+      return colors[0];
+    }
     return;
   }
 
@@ -95,12 +99,7 @@ function workoutColorForCell(
   }
 
   if (stops.length) {
-    return findColorsByStops(
-      normalizedValue,
-      comparisonFn,
-      colors,
-      ensureStopsAreUpToDate(params, minMax)
-    );
+    return findColorsByStops(normalizedValue, comparisonFn, colors, stops);
   }
 
   return findColorSegment(normalizedValue, minMax, comparisonFn, colors, ...extraRangeArguments);

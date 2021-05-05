@@ -94,7 +94,7 @@ export function PalettePanelContainer({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutHeader>
-            <EuiFlexItem className="eui-yScrollWithShadows lsnPalettePanelContainerBody" grow={1}>
+            <EuiFlexItem className="eui-yScrollWithShadows" grow={1}>
               {children}
             </EuiFlexItem>
             <EuiFlyoutFooter className="lnsPalettePanelContainer__footer">

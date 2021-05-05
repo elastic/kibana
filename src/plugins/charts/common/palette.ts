@@ -15,18 +15,16 @@ export interface CustomPaletteArguments {
   gradient: boolean;
   reverse?: boolean;
   stop?: number[];
-  range?: 'auto' | 'number' | 'percent';
-  rangeMin?: number;
-  rangeMax?: number;
+  range?: 'number' | 'percent';
+  continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
 export interface CustomPaletteState {
   colors: string[];
   gradient: boolean;
   stops: number[];
-  range: 'auto' | 'number' | 'percent';
-  rangeMin?: number;
-  rangeMax?: number;
+  range: 'number' | 'percent';
+  continuity?: 'above' | 'below' | 'all' | 'none';
 }
 
 export interface SystemPaletteArguments {
@@ -100,21 +98,17 @@ export function palette(): ExpressionFunctionDefinition<
         }),
         required: false,
       },
+      continuity: {
+        types: ['string'],
+        options: ['above', 'below', 'all', 'none'],
+        default: 'above',
+        help: '',
+      },
       range: {
         types: ['string'],
-        options: ['auto', 'number', 'percent'],
-        default: 'auto',
+        options: ['number', 'percent'],
+        default: 'percent',
         help: '',
-      },
-      rangeMin: {
-        types: ['number'],
-        help: '',
-        required: false,
-      },
-      rangeMax: {
-        types: ['number'],
-        help: '',
-        required: false,
       },
       gradient: {
         types: ['boolean'],
@@ -134,7 +128,7 @@ export function palette(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const { color, reverse, gradient, stop, range, rangeMin, rangeMax } = args;
+      const { color, continuity, reverse, gradient, stop, range } = args;
       const colors = ([] as string[]).concat(color || defaultCustomColors);
       const stops = ([] as number[]).concat(stop || []);
       if (stops.length > 0 && colors.length !== stops.length) {
@@ -146,10 +140,9 @@ export function palette(): ExpressionFunctionDefinition<
         params: {
           colors: reverse ? colors.reverse() : colors,
           stops,
-          range: range ?? 'auto',
-          rangeMin,
-          rangeMax,
+          range: range ?? 'percent',
           gradient,
+          continuity,
         },
       };
     },

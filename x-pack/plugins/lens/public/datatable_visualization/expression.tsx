@@ -185,10 +185,9 @@ export const datatableColumn: ExpressionFunctionDefinition<
 export interface CustomPaletteParams {
   name?: string;
   reverse?: boolean;
-  rangeType?: 'auto' | 'number' | 'percent';
-  rangeMin?: number;
-  rangeMax?: number;
-  progression?: 'gradient' | 'stepped' | 'fixed';
+  rangeType?: 'number' | 'percent';
+  continuity?: 'above' | 'below' | 'all' | 'none';
+  progression?: 'gradient' | 'stepped'; // | 'fixed';
   stops?: Array<{ color: string; stop: number }>;
   controlStops?: Array<{ color: string; stop: number }>;
   steps?: number;
