@@ -14,7 +14,7 @@ import { AsyncResourceState } from '../../state/async_resource_state';
 import { Immutable } from '../../../../common/endpoint/types';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas';
 
-export interface EventFiltersListPageUrlSearchParams {
+export interface EventFiltersPageLocation {
   page_index: number;
   page_size: number;
   show?: 'create' | 'edit';

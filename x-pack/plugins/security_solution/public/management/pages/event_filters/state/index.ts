@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '../../../../shared_imports';
+import { ExceptionListItemSchema } from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
 import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { EventFiltersListPageUrlSearchParams, EventFiltersServiceGetListOptions } from '../types';
+import {
+  EventFiltersForm,
+  EventFiltersPageLocation,
+  EventFiltersServiceGetListOptions,
+} from '../types';
 
 export interface EventFiltersListPageState {
   entries: ExceptionListItemSchema[];
-  form: {
-    entry: CreateExceptionListItemSchema | UpdateExceptionListItemSchema | undefined;
-    hasNameError: boolean;
-    hasItemsError: boolean;
-    hasOSError: boolean;
-    newComment: string;
-    submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
-  };
-  location: EventFiltersListPageUrlSearchParams;
+  form: EventFiltersForm;
+  location: EventFiltersPageLocation;
   /** State for the Event Filters List page */
   listPage: {
     active: boolean;

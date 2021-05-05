@@ -27,7 +27,7 @@ import {
 
 import { State } from '../../../../common/store';
 import { EventFiltersListPageState } from '../state';
-import { EventFiltersListPageUrlSearchParams } from '../types';
+import { EventFiltersPageLocation } from '../types';
 import { getEventFiltersListPath } from '../../../common/routing';
 
 import {
@@ -72,7 +72,7 @@ export function useEventFiltersNavigateCallback() {
   const history = useHistory();
 
   return useCallback(
-    (args: Partial<EventFiltersListPageUrlSearchParams>) =>
+    (args: Partial<EventFiltersPageLocation>) =>
       history.push(getEventFiltersListPath({ ...location, ...args })),
     [history, location]
   );

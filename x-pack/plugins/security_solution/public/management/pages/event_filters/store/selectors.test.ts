@@ -26,7 +26,7 @@ import {
 } from './selector';
 import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
-import { EventFiltersListPageUrlSearchParams } from '../types';
+import { EventFiltersPageLocation } from '../types';
 import { EventFiltersListPageState } from '../state';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
@@ -342,7 +342,7 @@ describe('event filters selectors', () => {
   });
   describe('getCurrentLocation()', () => {
     it('returns current locations', () => {
-      const expectedLocation: EventFiltersListPageUrlSearchParams = {
+      const expectedLocation: EventFiltersPageLocation = {
         show: 'create',
         page_index: MANAGEMENT_DEFAULT_PAGE,
         page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
