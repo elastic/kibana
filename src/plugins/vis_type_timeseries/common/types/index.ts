@@ -7,9 +7,9 @@
  */
 
 import { IndexPattern } from '../../../data/common';
-import { Panel } from './common';
+import { Panel } from './panel_model';
 
-export { Metric, Series, Panel } from './common';
+export { Metric, Series, Panel } from './panel_model';
 export { TimeseriesVisData, PanelData, SeriesData, TableData } from './vis_data';
 
 export interface FetchedIndexPattern {
