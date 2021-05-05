@@ -27,7 +27,7 @@ export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) 
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="l">
       <EuiFlexItem>
         <EuiFieldSearch
-          defaultValue={query}
+          defaultValue={defaultValue}
           placeholder={i18n.translate('xpack.securitySolution.list.search.placeholder', {
             defaultMessage: 'Search',
           })}

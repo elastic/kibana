@@ -26,7 +26,8 @@ import {
   listDataNeedsRefresh,
 } from './selector';
 import { EventFiltersService, EventFiltersServiceGetListOptions } from '../types';
-import { parseQueryFilterToKQL } from './utils';
+import { parseQueryFilterToKQL } from '../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../constants';
 
 type MiddlewareActionHandler = (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
@@ -131,7 +132,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       perPage: pageSize,
       sortField: 'created_at',
       sortOrder: 'desc',
-      filter: parseQueryFilterToKQL(filter) || undefined,
+      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
     };
 
     try {
