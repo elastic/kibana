@@ -7,7 +7,6 @@
 
 import React, { Fragment, useEffect, useState } from 'react';
 import { IUiSettingsClient, HttpSetup } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
 import { interval } from 'rxjs';
 import {
   AnnotationDomainType,
@@ -130,9 +129,9 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     groupBy,
     threshold,
   } = alertParams;
-  const { http, notifications, uiSettings } = useKibana().services;
+  const { http, uiSettings } = useKibana().services;
   const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
-  const [error, setError] = useState<undefined | Error>(undefined);
+  const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, MetricResult[]>>();
   const [startVisualizationAt, setStartVisualizationAt] = useState<Date>(new Date());
 
@@ -153,16 +152,9 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         setVisualizationData(
           await getVisualizationData(alertWithoutActions, visualizeOptions, http!)
         );
+        setErrorMessage(undefined);
       } catch (e) {
-        if (notifications) {
-          notifications.toasts.addDanger({
-            title: i18n.translate(
-              'xpack.stackAlerts.threshold.ui.visualization.unableToLoadVisualizationMessage',
-              { defaultMessage: 'Unable to load visualization' }
-            ),
-          });
-        }
-        setError(e);
+        setErrorMessage(e?.body?.message);
       } finally {
         setLoadingState(LoadingStateType.Idle);
       }
@@ -216,7 +208,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     );
   }
 
-  if (error) {
+  if (errorMessage) {
     return (
       <Fragment>
         <EuiSpacer size="l" />
@@ -232,7 +224,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           color="danger"
           iconType="alert"
         >
-          {error}
+          {errorMessage}
         </EuiCallOut>
       </Fragment>
     );
