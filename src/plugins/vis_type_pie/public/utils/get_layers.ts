@@ -128,7 +128,7 @@ export const getLayers = (
         return String(d);
       },
       sortPredicate: ([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => {
-        const params = col?.meta?.sourceParams?.params as SplitDimensionParams | undefined;
+        const params = col.meta?.sourceParams?.params as SplitDimensionParams | undefined;
         const sort: string | undefined = params?.orderBy;
         // metric sorting
         if (sort !== '_key') {

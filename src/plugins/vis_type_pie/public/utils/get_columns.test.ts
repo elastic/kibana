@@ -130,7 +130,7 @@ describe('getColumns', () => {
   });
 
   it('should return the first data column if no buckets specified', () => {
-    const visParamsNoDimensions = ({
+    const visParamsOnlyMetric = ({
       addLegend: true,
       addTooltip: true,
       isDonut: true,
@@ -149,13 +149,43 @@ describe('getColumns', () => {
         type: 'palette',
       },
       type: 'pie',
+      dimensions: {
+        metric: {
+          accessor: 1,
+          format: {
+            id: 'number',
+          },
+          params: {},
+          label: 'Count',
+          aggType: 'count',
+        },
+      },
     } as unknown) as PieVisParams;
-    const { metricColumn } = getColumns(visParamsNoDimensions, visData);
-    expect(metricColumn).toEqual(visData.columns[0]);
+    const { metricColumn } = getColumns(visParamsOnlyMetric, visData);
+    expect(metricColumn).toEqual({
+      id: 'col-1-1',
+      meta: {
+        index: 'kibana_sample_data_flights',
+        params: {
+          id: 'number',
+        },
+        source: 'esaggs',
+        sourceParams: {
+          enabled: true,
+          id: '1',
+          indexPatternId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+          params: {},
+          schema: 'metric',
+          type: 'count',
+        },
+        type: 'number',
+      },
+      name: 'Count',
+    });
   });
 
   it('should return an object with the name of the metric if no buckets specified', () => {
-    const visParamsNoDimensions = ({
+    const visParamsOnlyMetric = ({
       addLegend: true,
       addTooltip: true,
       isDonut: true,
@@ -174,8 +204,19 @@ describe('getColumns', () => {
         type: 'palette',
       },
       type: 'pie',
+      dimensions: {
+        metric: {
+          accessor: 1,
+          format: {
+            id: 'number',
+          },
+          params: {},
+          label: 'Count',
+          aggType: 'count',
+        },
+      },
     } as unknown) as PieVisParams;
-    const { bucketColumns, metricColumn } = getColumns(visParamsNoDimensions, visData);
+    const { bucketColumns, metricColumn } = getColumns(visParamsOnlyMetric, visData);
     expect(bucketColumns).toEqual([{ name: metricColumn.name }]);
   });
 });

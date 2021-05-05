@@ -9,25 +9,35 @@
 import { DatatableColumn, Datatable } from '../../../expressions/public';
 import { BucketColumns, PieVisParams } from '../types';
 
-export const getColumns = (visParams: PieVisParams, visData: Datatable) => {
-  const bucketColumns: Array<Partial<BucketColumns>> = [];
-  let metricColumn: DatatableColumn;
-  if (visParams?.dimensions?.buckets) {
-    visParams.dimensions.buckets.forEach((b) => {
-      bucketColumns.push({ ...visData.columns[b.accessor], format: b.format });
-    });
+export const getColumns = (
+  visParams: PieVisParams,
+  visData: Datatable
+): {
+  metricColumn: DatatableColumn;
+  bucketColumns: Array<Partial<BucketColumns>>;
+} => {
+  if (visParams.dimensions.buckets && visParams.dimensions.buckets.length > 0) {
+    const bucketColumns: Array<Partial<BucketColumns>> = visParams.dimensions.buckets.map(
+      ({ accessor, format }) => ({
+        ...visData.columns[accessor],
+        format,
+      })
+    );
     const lastBucketId = bucketColumns[bucketColumns.length - 1].id;
     const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
-    metricColumn = visData.columns[matchingIndex + 1];
-  } else {
-    const metricAccessor = visParams?.dimensions?.metric.accessor;
-    metricColumn = visData.columns[metricAccessor ?? 0];
-    bucketColumns.push({
-      name: metricColumn.name,
-    });
+    return {
+      bucketColumns,
+      metricColumn: visData.columns[matchingIndex + 1],
+    };
   }
+  const metricAccessor = visParams?.dimensions?.metric.accessor ?? 0;
+  const metricColumn = visData.columns[metricAccessor];
   return {
-    bucketColumns,
     metricColumn,
+    bucketColumns: [
+      {
+        name: metricColumn.name,
+      },
+    ],
   };
 };

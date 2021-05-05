@@ -27,10 +27,15 @@ export const samplePieVis = {
         addLegend: true,
         legendPosition: 'right',
         isDonut: true,
+        nestedLegend: true,
+        distinctColors: false,
+        palette: 'kibana_palette',
         labels: {
           show: false,
           values: true,
           last_level: true,
+          valuesFormat: 'percent',
+          percentDecimals: 2,
           truncate: 100,
         },
       },
@@ -124,6 +129,7 @@ export const samplePieVis = {
     },
   },
   data: {
+    indexPattern: { id: '123' },
     searchSource: {
       id: 'data_source1',
       requestStartHandlers: [],
@@ -1314,6 +1320,7 @@ export const samplePieVis = {
           }),
         },
       ],
+      aggs: [],
     },
   },
   isHierarchical: () => true,

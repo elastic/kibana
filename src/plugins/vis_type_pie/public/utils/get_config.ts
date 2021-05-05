@@ -45,7 +45,10 @@ export const getConfig = (
 
   // On small multiples we want the labels to only appear inside
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
-  if (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) {
+  if (
+    (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) &&
+    visParams.labels.show
+  ) {
     config.linkLabel = { maxCount: 0 };
   }
   return config;

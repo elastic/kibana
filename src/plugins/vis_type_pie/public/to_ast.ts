@@ -36,7 +36,7 @@ const prepareLabels = (params: LabelsParams) => {
   if (params.valuesFormat) {
     pieLabels.addArgument('valuesFormat', params.valuesFormat);
   }
-  if (params.percentDecimals) {
+  if (params.percentDecimals != null) {
     pieLabels.addArgument('percentDecimals', params.percentDecimals);
   }
   return buildExpression([pieLabels]);

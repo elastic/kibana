@@ -126,7 +126,7 @@ const PieOptions = (props: PieOptionsProps) => {
                 <EuiFlexItem grow={false}>
                   <SwitchOption
                     label={i18n.translate('visTypePie.editors.pie.distinctColorsLabel', {
-                      defaultMessage: 'Distinct colors per slice',
+                      defaultMessage: 'Use distinct colors per slice',
                     })}
                     paramName="distinctColors"
                     value={stateParams.distinctColors}
@@ -137,7 +137,7 @@ const PieOptions = (props: PieOptionsProps) => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
-                    content="Enabled in case of multi-layer chart or multiple charts."
+                    content="Use with multi-layer chart or multiple charts."
                     position="top"
                     type="iInCircle"
                     color="subdued"
@@ -159,7 +159,7 @@ const PieOptions = (props: PieOptionsProps) => {
             />
             <SwitchOption
               label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
-                defaultMessage: 'Nested legend',
+                defaultMessage: 'Nest legend',
               })}
               paramName="nestedLegend"
               value={stateParams.nestedLegend}
