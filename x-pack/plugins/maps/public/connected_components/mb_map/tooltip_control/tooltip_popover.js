@@ -70,20 +70,6 @@ export class TooltipPopover extends Component {
     return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
-  _loadPreIndexedShape = async ({ layerId, featureId }) => {
-    const tooltipLayer = this.props.findLayerById(layerId);
-    if (!tooltipLayer || typeof featureId === 'undefined') {
-      return null;
-    }
-
-    const targetFeature = tooltipLayer.getFeatureById(featureId);
-    if (!targetFeature) {
-      return null;
-    }
-
-    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
-  };
-
   _getLayerName = async (layerId) => {
     const layer = this.props.findLayerById(layerId);
     if (!layer) {
@@ -112,11 +98,7 @@ export class TooltipPopover extends Component {
 
     return (
       <EuiText size="xs" style={{ maxWidth: '425px' }}>
-        <FeaturesTooltip
-          {...publicProps}
-          findLayerById={this.props.findLayerById}
-          loadPreIndexedShape={this._loadPreIndexedShape}
-        />
+        <FeaturesTooltip {...publicProps} findLayerById={this.props.findLayerById} />
       </EuiText>
     );
   };

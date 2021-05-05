@@ -13,11 +13,8 @@ import { GeoJsonProperties, Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { FeatureProperties } from './feature_properties';
 import { RawValue } from '../../../../common/constants';
-import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 import { Footer } from './footer';
 import { Header } from './header';
-import { PreIndexedShape } from '../../../../common/elasticsearch_util';
-import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
 import { GEOMETRY_FILTER_ACTION, TooltipFeature } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../../classes/layers/layer';
@@ -53,13 +50,6 @@ interface Props {
   }) => Geometry | null;
   getLayerName: (layerId: string) => Promise<string | null>;
   findLayerById: (layerId: string) => ILayer | undefined;
-  loadPreIndexedShape: ({
-    layerId,
-    featureId,
-  }: {
-    layerId: string;
-    featureId?: string | number;
-  }) => Promise<PreIndexedShape | null>;
 }
 
 interface State {
@@ -125,17 +115,6 @@ export class FeaturesTooltip extends Component<Props, State> {
     });
   }
 
-  _loadCurrentFeaturePreIndexedShape = async () => {
-    if (!this.state.currentFeature) {
-      return null;
-    }
-
-    return this.props.loadPreIndexedShape({
-      layerId: this.state.currentFeature.layerId,
-      featureId: this.state.currentFeature.id,
-    });
-  };
-
   _renderBackButton(label: string) {
     return (
       <button
@@ -161,23 +140,11 @@ export class FeaturesTooltip extends Component<Props, State> {
       return id === this.state.view;
     });
 
-    if (this.state.view === GEOMETRY_FILTER_ACTION && action && this.props.addFilters) {
-      const actionContext = action.context as {
-        geometry: Geometry;
-        geoFields: GeoFieldWithIndex[];
-      };
+    if (action) {
       return (
         <Fragment>
           {this._renderBackButton(action.label)}
-          <FeatureGeometryFilterForm
-            onClose={this.props.closeTooltip}
-            geometry={actionContext.geometry}
-            geoFields={actionContext.geoFields}
-            addFilters={this.props.addFilters}
-            getFilterActions={this.props.getFilterActions}
-            getActionContext={this.props.getActionContext}
-            loadPreIndexedShape={this._loadCurrentFeaturePreIndexedShape}
-          />
+          {action.form}
         </Fragment>
       );
     }

@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
 import { Query } from '../../../../../src/plugins/data/common';
@@ -47,7 +48,7 @@ export const GEOMETRY_FILTER_ACTION = 'GEOMETRY_FILTER_ACTION';
 export type TooltipFeatureAction = {
   label: string;
   id: typeof GEOMETRY_FILTER_ACTION;
-  context: unknown;
+  form: ReactNode;
 };
 
 export type TooltipFeature = {

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getFeatureActions } from './get_feature_actions';
+export { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 export { FeaturesTooltip } from './features_tooltip';

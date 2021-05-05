@@ -7,10 +7,21 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import uuid from 'uuid/v4';
+import {
+  ES_GEO_FIELD_TYPE,
+  FEATURE_ID_PROPERTY_NAME,
+  GEO_JSON_TYPE,
+  LON_INDEX,
+} from '../../../../common/constants';
+import { GEOMETRY_FILTER_ACTION } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
-import { getFeatureActions } from '../features_tooltip';
+import { FeatureGeometryFilterForm } from '../features_tooltip';
 import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
+
+const IS_LOCKED = true;
+const IS_NOT_LOCKED = false;
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {
   let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
@@ -78,7 +89,76 @@ export class TooltipControl extends React.Component {
     });
   }
 
-  _getTooltipFeatures(mbFeatures, isLocked) {
+  _loadPreIndexedShape = async ({ layerId, featureId }) => {
+    const tooltipLayer = this._findLayerById(layerId);
+    if (!tooltipLayer || typeof featureId === 'undefined') {
+      return null;
+    }
+
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    if (!targetFeature) {
+      return null;
+    }
+
+    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
+  };
+
+  _getFeatureActions({ layerId, featureId, tooltipId }) {
+    const actions = [];
+
+    const geometry = this._getFeatureGeometry({ layerId, featureId });
+    const geoFieldsForFeature = this._filterGeoFieldsByFeatureGeometry(geometry);
+    if (geoFieldsForFeature.length && this.props.addFilters) {
+      actions.push({
+        label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
+          defaultMessage: 'Filter by geometry',
+        }),
+        id: GEOMETRY_FILTER_ACTION,
+        form: (
+          <FeatureGeometryFilterForm
+            onClose={() => {
+              this.props.closeOnClickTooltip(tooltipId);
+            }}
+            geometry={geometry}
+            geoFields={geoFieldsForFeature}
+            addFilters={this.props.addFilters}
+            getFilterActions={this.props.getFilterActions}
+            getActionContext={this.props.getActionContext}
+            loadPreIndexedShape={async () => {
+              return this._loadPreIndexedShape({ layerId, featureId });
+            }}
+          />
+        ),
+      });
+    }
+
+    return actions;
+  }
+
+  _filterGeoFieldsByFeatureGeometry(geometry) {
+    if (!geometry) {
+      return [];
+    }
+
+    // line geometry can only create filters for geo_shape fields.
+    if (
+      geometry.type === GEO_JSON_TYPE.LINE_STRING ||
+      geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING
+    ) {
+      return this.props.geoFields.filter(({ geoFieldType }) => {
+        return geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      });
+    }
+
+    // TODO support geo distance filters for points
+    if (geometry.type === GEO_JSON_TYPE.POINT || geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+      return [];
+    }
+
+    return this.props.geoFields;
+  }
+
+  _getTooltipFeatures(mbFeatures, isLocked, tooltipId) {
     const uniqueFeatures = [];
     //there may be duplicates in the results from mapbox
     //this is because mapbox returns the results per tile
@@ -104,14 +184,7 @@ export class TooltipControl extends React.Component {
         // - As empty object literal
         // To avoid ambiguity, normalize properties to empty object literal.
         const mbProperties = mbFeature.properties ? mbFeature.properties : {};
-        const actions = isLocked
-          ? getFeatureActions({
-              layerId,
-              featureId,
-              geometry: this._getFeatureGeometry({ layerId, featureId }),
-              geoFields: this.props.geoFields,
-            })
-          : [];
+        const actions = isLocked ? this._getFeatureActions({ layerId, featureId, tooltipId }) : [];
 
         const hasActions = isLocked && actions.length;
         if (hasActions || layer.canShowTooltip()) {
@@ -145,13 +218,16 @@ export class TooltipControl extends React.Component {
     const targetMbFeataure = mbFeatures[0];
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
-    const features = this._getTooltipFeatures(mbFeatures, true);
+    const tooltipId = uuid();
+    const features = this._getTooltipFeatures(mbFeatures, IS_LOCKED, tooltipId);
     if (features.length === 0) {
       return;
     }
     this.props.openOnClickTooltip({
       features,
       location: popupAnchorLocation,
+      isLocked: IS_LOCKED,
+      id: tooltipId,
     });
   };
 
@@ -180,13 +256,16 @@ export class TooltipControl extends React.Component {
     }
 
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
-    const features = this._getTooltipFeatures(mbFeatures, false);
+    const tooltipId = uuid();
+    const features = this._getTooltipFeatures(mbFeatures, IS_NOT_LOCKED, tooltipId);
     if (features.length === 0) {
       return;
     }
     this.props.openOnHoverTooltip({
       features: features,
       location: popupAnchorLocation,
+      isLocked: IS_NOT_LOCKED,
+      id: tooltipId,
     });
   }, 100);
 
