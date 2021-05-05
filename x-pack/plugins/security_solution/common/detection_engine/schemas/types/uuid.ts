@@ -14,6 +14,7 @@ const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * Types the risk score as:
  *   - Natural Number (positive integer and not a float),
  *   - Between the values [0 and 100] inclusive.
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const UUID = new t.Type<string, string, unknown>(
   'UUID',

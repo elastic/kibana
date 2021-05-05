@@ -55,7 +55,6 @@ export const EmptyState: React.FC = () => {
             actions={
               <>
                 <EuiButtonTo
-                  iconType="popout"
                   data-test-subj="EmptyStateCreateFirstEngineCta"
                   fill
                   to={ENGINE_CREATION_PATH}
