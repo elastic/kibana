@@ -277,7 +277,7 @@ export interface OutdatedDocumentsTransform extends PostInitState {
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
 }
-export type TransformedDocumentsBulkIndex = PostInitState & {
+export interface TransformedDocumentsBulkIndex extends PostInitState {
   /**
    * Write the up-to-date transformed documents to the target index
    */
@@ -286,7 +286,7 @@ export type TransformedDocumentsBulkIndex = PostInitState & {
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
   readonly pitId: string;
-};
+}
 
 export interface MarkVersionIndexReady extends PostInitState {
   /**
