@@ -26,7 +26,7 @@ export function createIntervalBasedFormatter(
   ignoreDaylightTime: boolean
 ) {
   const fixedOffset = moment(JANUARY_MOMENT_CONFIG).utcOffset();
-  return (val: moment.MomentInput): string => {
+  return (val: moment.MomentInput) => {
     const momentVal = moment(val);
     if (ignoreDaylightTime) {
       momentVal.utcOffset(fixedOffset);

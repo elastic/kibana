@@ -127,7 +127,7 @@ export class TimeseriesPanelConfig extends Component<
       legend_position: 'right',
       show_grid: 1,
       tooltip_mode: 'show_all',
-      ignore_daylight_time: 0,
+      ignore_daylight_time: false,
     };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;

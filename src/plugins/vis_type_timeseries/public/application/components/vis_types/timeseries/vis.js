@@ -38,11 +38,9 @@ class TimeseriesVisualization extends Component {
       interval,
       this.scaledDataFormat,
       this.dateFormat,
-      Boolean(this.props.model.ignore_daylight_time)
+      this.props.model.ignore_daylight_time
     );
-    return (val) => {
-      return formatter(val);
-    };
+    return (val) => formatter(val);
   };
 
   yAxisStackedByPercentFormatter = (val) => {
