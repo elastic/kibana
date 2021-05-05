@@ -1042,6 +1042,37 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT');
         expect(newState.pitId).toBe('pit_id');
       });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if no outdated documents to transform and we have failed document migrations', () => {
+        const corruptDocumentIdsCarriedOver = ['a:somethingelse'];
+        const originalTransformError = new Error('something went wrong');
+        const transFormErr = new TransformSavedObjectDocumentError(
+          '123',
+          'vis',
+          undefined,
+          'randomvis: 7.12.0',
+          'failedDoc',
+          originalTransformError
+        );
+        const transformationErrors = [
+          { rawId: 'bob:tail', err: transFormErr },
+        ] as TransformErrorObjects[];
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
+          outdatedDocuments: [],
+          lastHitSortValue: undefined,
+        });
+        const transformErrorsState: OutdatedDocumentsSearchRead = {
+          ...state,
+          corruptDocumentIds: [...corruptDocumentIdsCarriedOver],
+          transformErrors: [...transformationErrors],
+        };
+        const newState = model(transformErrorsState, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.reason.includes('Migrations failed. Reason: ')).toBe(true);
+        expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
+        expect(newState.reason.includes('Transformation errors: ')).toBe(true);
+        expect(newState.reason.includes('randomvis: 7.12.0')).toBe(true);
+      });
     });
 
     describe('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT', () => {

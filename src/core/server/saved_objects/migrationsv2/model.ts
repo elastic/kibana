@@ -705,22 +705,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // If documents couldn't be transformed or there were transformation errors we fail the migration
           const corruptDocumentIdReason =
             stateP.corruptDocumentIds.length > 0
-              ? `The following corrupt saved object documents: ${stateP.corruptDocumentIds.join(
-                  ','
-                )}`
-              : '';
+              ? ` Corrupt saved object documents: ${stateP.corruptDocumentIds.join(',')}.\n`
+              : ' ';
           // we have both the saved object Id and the stack trace in each `transformErrors` item.
           const transformErrorsReason =
             stateP.transformErrors.length > 0
-              ? 'the following saved object documents could not be transformed:/n' +
+              ? 'Transformation errors: ' +
                 stateP.transformErrors
-                  .map((errObj) => `${errObj.rawId}: ${errObj.err.message}`)
+                  .map(
+                    (errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`
+                  )
                   .join('/n')
               : '';
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason: ${corruptDocumentIdReason} ${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`,
+            reason: `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`,
           };
         } else {
           // If there are no more results we have transformed all outdated
