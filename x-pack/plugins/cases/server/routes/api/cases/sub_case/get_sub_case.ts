@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SubCaseResponseRt } from '../../../../../common/api';
+import { SubCaseResponseRt } from '../../../../../common';
 import { RouteDeps } from '../../types';
 import { flattenSubCaseSavedObject, wrapError } from '../../utils';
-import { SUB_CASE_DETAILS_URL } from '../../../../../common/constants';
+import { SUB_CASE_DETAILS_URL } from '../../../../../common';
 import { countAlertsForID } from '../../../../common';
 
 export function initGetSubCaseApi({ caseService, router, logger }: RouteDeps) {
