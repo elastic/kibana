@@ -44,7 +44,7 @@ export const EventFiltersListEmptyState = memo<{
           fill
           isDisabled={isAddDisabled}
           onClick={onAdd}
-          data-test-subj="eventFiltersListAddButton"
+          data-test-subj="eventFiltersListEmptyStateAddButton"
         >
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.listEmpty.addButton"
