@@ -15,11 +15,11 @@ export const ALERT_SOURCE_LABEL = i18n.translate(
 );
 
 export const CASE_ID_LABEL = i18n.translate('xpack.cases.connectors.swimlane.caseIdLabel', {
-  defaultMessage: 'Incident Types',
+  defaultMessage: 'Case Id',
 });
 
 export const CASE_NAME_LABEL = i18n.translate('xpack.cases.connectors.swimlane.caseNameLabel', {
-  defaultMessage: 'Incident Types',
+  defaultMessage: 'Case Name',
 });
 
 export const SEVERITY_LABEL = i18n.translate('xpack.cases.connectors.swimlane.severityLabel', {

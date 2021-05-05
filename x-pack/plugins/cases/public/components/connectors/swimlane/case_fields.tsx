@@ -16,9 +16,8 @@ const SwimlaneFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<SwimlaneUnmappedFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const [state, setState] = useState<SwimlaneUnmappedFieldsType>(
-    fields ?? { alertSource: null, caseId: null, caseName: null, severity: null }
+    fields ?? { alertSource: '', caseId: '', caseName: '', severity: '' }
   );
-  const { alertSource, caseId, caseName, severity } = state;
 
   const onFieldChange = useCallback((key, { target: { value } }) => {
     setState((prevState) => ({
@@ -26,59 +25,78 @@ const SwimlaneFieldsComponent: React.FunctionComponent<
       [key]: value,
     }));
   }, []);
-
   const listItems = useMemo(
-    () => [
-      ...(alertSource != null && alertSource.length > 0
-        ? [
-            {
-              title: fieldLabels.alertSource,
-              description: alertSource ?? '',
-            },
-          ]
-        : []),
-      ...(caseName != null && caseName.length > 0
-        ? [
-            {
-              title: fieldLabels.caseName,
-              description: caseName ?? '',
-            },
-          ]
-        : []),
-      ...(caseId != null && caseId.length > 0
-        ? [
-            {
-              title: fieldLabels.caseId,
-              description: caseId ?? '',
-            },
-          ]
-        : []),
-      ...(severity != null && severity.length > 0
-        ? [
-            {
-              title: fieldLabels.severity,
-              description: severity ?? '',
-            },
-          ]
-        : []),
-    ],
-    [alertSource, caseId, caseName, severity]
+    () =>
+      Object.keys(state).reduce((acc: Array<{ title: string; description: string }>, f) => {
+        const fieldName = f as keyof SwimlaneUnmappedFieldsType;
+        return [
+          ...acc,
+          ...(state[fieldName] !== null && state[fieldName] !== ''
+            ? [
+                {
+                  title: fieldLabels[fieldName],
+                  description: state[fieldName] ?? '',
+                },
+              ]
+            : []),
+        ];
+      }, []),
+    [state]
   );
+  // const listItems = useMemo(
+  //   () => [
+  //     ...(alertSource != null && alertSource.length > 0
+  //       ? [
+  //           {
+  //             title: fieldLabels.alertSource,
+  //             description: alertSource ?? '',
+  //           },
+  //         ]
+  //       : []),
+  //     ...(caseName != null && caseName.length > 0
+  //       ? [
+  //           {
+  //             title: fieldLabels.caseName,
+  //             description: caseName ?? '',
+  //           },
+  //         ]
+  //       : []),
+  //     ...(caseId != null && caseId.length > 0
+  //       ? [
+  //           {
+  //             title: fieldLabels.caseId,
+  //             description: caseId ?? '',
+  //           },
+  //         ]
+  //       : []),
+  //     ...(severity != null && severity.length > 0
+  //       ? [
+  //           {
+  //             title: fieldLabels.severity,
+  //             description: severity ?? '',
+  //           },
+  //         ]
+  //       : []),
+  //   ],
+  //   [alertSource, caseId, caseName, severity]
+  // );
   const Fields = useCallback(
     () => (
       <span data-test-subj={'connector-fields-swimlane'}>
-        {Object.keys(state).map((f) => (
-          <>
-            <EuiFormRow fullWidth label={fieldLabels[f]}>
-              <EuiFieldText
-                value={state[f]}
-                onChange={(e) => onFieldChange(f, e)}
-                aria-label="Use aria labels when no actual label is in use"
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-          </>
-        ))}
+        {Object.keys(state).map((f) => {
+          const fieldName = f as keyof SwimlaneUnmappedFieldsType;
+          return (
+            <>
+              <EuiFormRow fullWidth label={fieldLabels[fieldName]}>
+                <EuiFieldText
+                  value={state[fieldName] ?? ''}
+                  onChange={(e) => onFieldChange(f, e)}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+            </>
+          );
+        })}
       </span>
     ),
     [onFieldChange, state]

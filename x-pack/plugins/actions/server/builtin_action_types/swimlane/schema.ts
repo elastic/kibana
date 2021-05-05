@@ -41,14 +41,29 @@ export const SwimlaneSecretsConfiguration = {
 };
 
 export const SwimlaneSecretsConfigurationSchema = schema.object(SwimlaneSecretsConfiguration);
-
-export const ExecutorSubActionCreateRecordParamsSchema = schema.object({
-  alertName: schema.nullable(schema.string()),
+const SwimlaneFields = {
+  alertName: schema.string(),
   alertSource: schema.nullable(schema.string()),
   caseId: schema.nullable(schema.string()),
   caseName: schema.nullable(schema.string()),
   comments: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
+};
+export const ExecutorSubActionCreateRecordParamsSchema = schema.object(SwimlaneFields);
+
+export const ExecutorSubActionPushParamsSchema = schema.object({
+  incident: schema.object({
+    ...SwimlaneFields,
+    externalId: schema.nullable(schema.string()),
+  }),
+  comments: schema.nullable(
+    schema.arrayOf(
+      schema.object({
+        comment: schema.string(),
+        commentId: schema.string(),
+      })
+    )
+  ),
 });
 
 export const ExecutorSubActionGetApplicationParamsSchema = schema.object({ id: schema.string() });
@@ -57,5 +72,9 @@ export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
     subAction: schema.literal('createRecord'),
     subActionParams: ExecutorSubActionCreateRecordParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('pushToService'),
+    subActionParams: ExecutorSubActionPushParamsSchema,
   }),
 ]);

@@ -110,18 +110,17 @@ const getPreferredFields = (theType: string, swimlaneMappings?: SwimlaneMappings
     title = 'short_description';
     description = 'description';
     comments = 'work_notes';
-  } else if (theType === ConnectorTypes.swimlane && swimlaneMappings != null) {
-    return swimlaneMappings;
+  } else if (theType === ConnectorTypes.swimlane) {
+    title = 'alertName';
+    description = 'comments';
+    comments = 'comments';
   }
 
   return { title, description, comments };
 };
 
-export const createDefaultMapping = (
-  theType: string,
-  swimlaneMappings?: SwimlaneMappings
-): ConnectorMappingsAttributes[] => {
-  const { description, title, comments } = getPreferredFields(theType, swimlaneMappings);
+export const createDefaultMapping = (theType: string): ConnectorMappingsAttributes[] => {
+  const { description, title, comments } = getPreferredFields(theType);
   return [
     {
       source: 'title',

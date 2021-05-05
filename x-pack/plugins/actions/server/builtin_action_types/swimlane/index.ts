@@ -17,6 +17,7 @@ import {
   SwimlaneSecretConfigurationType,
   ExecutorParams,
   ExecutorSubActionCreateRecordParams,
+  ExecutorSubActionPushParams,
 } from './types';
 import { validate } from './validators';
 import {
@@ -32,7 +33,7 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['application', 'createRecord'];
+const supportedSubActions: string[] = ['application', 'createRecord', 'pushToService'];
 
 // action type definition
 export function getActionType(
@@ -77,7 +78,6 @@ async function executor(
 ): Promise<ActionTypeExecutorResult<SwimlaneExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
-
   let data: SwimlaneExecutorResultData | null = null;
 
   const externalService = createExternalService(
@@ -111,6 +111,21 @@ async function executor(
     });
 
     logger.debug(`Swimlane new record id ${data.id}`);
+  }
+  if (subAction === 'pushToService') {
+    const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
+
+    data = await api.pushToService({
+      externalService,
+      params: pushToServiceParams,
+      logger,
+    });
+    data = {
+      ...data,
+      url: `${config.apiUrl}/record/${config.appId}/${data.id}`,
+    };
+
+    logger.debug(`response push to service for incident id: ${data.id}`);
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

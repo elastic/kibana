@@ -10,12 +10,13 @@
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import {
-  SwimlaneSecretsConfigurationSchema,
-  SwimlaneServiceConfigurationSchema,
+  ConfigMappingSchema,
   ExecutorParamsSchema,
   ExecutorSubActionCreateRecordParamsSchema,
   ExecutorSubActionGetApplicationParamsSchema,
-  ConfigMappingSchema,
+  ExecutorSubActionPushParamsSchema,
+  SwimlaneSecretsConfigurationSchema,
+  SwimlaneServiceConfigurationSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
@@ -26,6 +27,7 @@ export type MappingConfigType = TypeOf<typeof ConfigMappingSchema> &
   Record<string, FieldConfig | null>;
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
 
 export type ExecutorSubActionCreateRecordParams = TypeOf<
   typeof ExecutorSubActionCreateRecordParamsSchema
@@ -41,11 +43,22 @@ export interface ExternalServiceValidation {
   secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
 }
 
-export type CreateRecordParams = TypeOf<typeof ExecutorSubActionCreateRecordParamsSchema> &
-  Record<string, string | number | null>;
+export interface CreateRecordParams {
+  incident: Incident;
+}
+export interface UpdateRecordParams extends CreateRecordParams {
+  incidentId: string;
+}
 
-export interface CreateRecordResponse {
+export type PushToServiceApiParams = ExecutorSubActionPushParams;
+export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: PushToServiceApiParams;
+  logger: Logger;
+}
+
+export interface ExternalServiceIncidentResponse {
   id: string;
+  title: string;
 }
 
 export interface FieldConfig {
@@ -55,10 +68,23 @@ export interface FieldConfig {
   fieldType: string;
 }
 
-export interface ExternalService {
-  createRecord: (params: CreateRecordParams) => Promise<CreateRecordResponse>;
+export interface SwimlaneRecordPayload {
+  applicationId: string;
+  values?: SwimlaneDataValues;
+  comments?: SwimlaneDataComments;
 }
 
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  url: string;
+}
+
+// export type ExternalServiceParams = Record<string, unknown>;
+export interface ExternalService {
+  createRecord: (params: CreateRecordParams) => Promise<ExternalServiceIncidentResponse>;
+  updateRecord: (params: UpdateRecordParams) => Promise<ExternalServiceIncidentResponse>;
+}
+
+export type Incident = ExecutorSubActionPushParams['incident'];
 export type CreateRecordApiParams = ExecutorSubActionCreateRecordParams;
 
 export type ExecutorSubActionGetApplicationParams = TypeOf<
@@ -75,23 +101,23 @@ export interface CreateRecordApiHandlerArgs extends ExternalServiceApiHandlerArg
   logger: Logger;
 }
 
+export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: PushToServiceApiParams;
+  logger: Logger;
+}
+
 export interface GetApplicationHandlerArgs {
   externalService: ExternalService;
 }
 
 export interface ExternalServiceApi {
-  createRecord: (args: CreateRecordApiHandlerArgs) => Promise<CreateRecordResponse>;
+  createRecord: (args: CreateRecordApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
+  pushToService: (args: PushToServiceApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
 }
 
-export type SwimlaneExecutorResultData = CreateRecordResponse;
+export type SwimlaneExecutorResultData = ExternalServiceIncidentResponse | PushToServiceResponse;
 export type SwimlaneDataValues = Record<string, string | number>;
 export type SwimlaneDataComments = Record<
   string,
   Array<{ fieldId: string; message: string | number; createdDate: string; isRichText: boolean }>
 >;
-
-export interface SwimlaneRecordPayload {
-  applicationId: string;
-  values?: SwimlaneDataValues;
-  comments?: SwimlaneDataComments;
-}

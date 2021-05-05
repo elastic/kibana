@@ -6,20 +6,14 @@
  */
 
 import { ExternalServiceFormatter } from '../types';
-import { ConnectorSwimlaneTypeFields, SwimlaneFieldsType } from '../../../common';
+import { ConnectorSwimlaneTypeFields, SwimlaneUnmappedFieldsType } from '../../../common';
 
-const format: ExternalServiceFormatter<SwimlaneFieldsType>['format'] = (theCase) => {
-  const {
-    alertName = '',
-    alertSource = null,
-    caseId = null,
-    caseName = null,
-    comments = null,
-    severity = null,
-  } = (theCase.connector.fields as ConnectorSwimlaneTypeFields['fields']) ?? {};
-  return { alertName, alertSource, caseId, caseName, comments, severity };
+const format: ExternalServiceFormatter<SwimlaneUnmappedFieldsType>['format'] = (theCase) => {
+  const { alertSource = null, caseId = null, caseName = null, severity = null } =
+    (theCase.connector.fields as ConnectorSwimlaneTypeFields['fields']) ?? {};
+  return { alertSource, caseId, caseName, severity };
 };
 
-export const swimlaneExternalServiceFormatter: ExternalServiceFormatter<SwimlaneFieldsType> = {
+export const swimlaneExternalServiceFormatter: ExternalServiceFormatter<SwimlaneUnmappedFieldsType> = {
   format,
 };

@@ -16,7 +16,7 @@ import {
 export const getBodyForEventAction = (
   applicationId: string,
   mappingConfig: MappingConfigType,
-  params: CreateRecordParams
+  params: CreateRecordParams['incident']
 ): SwimlaneRecordPayload => {
   const data: SwimlaneRecordPayload = {
     applicationId,

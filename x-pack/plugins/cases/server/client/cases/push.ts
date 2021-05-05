@@ -215,7 +215,7 @@ export const push = async ({
   let updatedComments: SavedObjectsBulkUpdateResponse<CommentAttributes>;
 
   const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure, myCase);
-
+  console.log('step 17', externalService);
   try {
     [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({

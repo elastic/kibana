@@ -16,7 +16,7 @@ import {
   ExternalService,
   ExternalServiceCredentials,
   CreateRecordParams,
-  CreateRecordResponse,
+  ExternalServiceIncidentResponse,
   SwimlaneSecretConfigurationType,
   MappingConfigType,
 } from './types';
@@ -48,11 +48,12 @@ export const createExternalService = (
   const recordUrl = `${apiUrl}/app/{appId}/record`;
   const getPostRecordUrl = (id: string) => recordUrl.replace('{appId}', id);
 
-  const createRecord = async (params: CreateRecordParams): Promise<CreateRecordResponse> => {
+  const createRecord = async (
+    params: CreateRecordParams
+  ): Promise<ExternalServiceIncidentResponse> => {
     try {
       const mappingConfig = mappings as MappingConfigType;
-      const data = getBodyForEventAction(appId, mappingConfig, params);
-      console.log('data', JSON.stringify(data));
+      const data = getBodyForEventAction(appId, mappingConfig, params.incident);
       const res = await request({
         axios: axiosInstance,
         url: getPostRecordUrl(appId),
@@ -62,7 +63,33 @@ export const createExternalService = (
         method: 'post',
         data,
       });
-      return { id: res.data.id };
+      return { id: res.data.id, title: res.data.name };
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to create record in application with id ${appId}. Error: ${error.message}`
+        )
+      );
+    }
+  };
+
+  const updateRecord = async (
+    params: CreateRecordParams
+  ): Promise<ExternalServiceIncidentResponse> => {
+    try {
+      const mappingConfig = mappings as MappingConfigType;
+      const data = getBodyForEventAction(appId, mappingConfig, params.incident);
+      const res = await request({
+        axios: axiosInstance,
+        url: getPostRecordUrl(appId),
+        logger,
+        configurationUtilities,
+        headers,
+        method: 'post',
+        data,
+      });
+      return { id: res.data.id, title: res.data.name };
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -75,5 +102,6 @@ export const createExternalService = (
 
   return {
     createRecord,
+    updateRecord,
   };
 };
