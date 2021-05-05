@@ -18,11 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import {
-  DRAW_TYPE,
-  ES_GEO_FIELD_TYPE,
-  ES_SPATIAL_RELATIONS,
-} from '../../../../common/constants';
+import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/distance_filter_form';
@@ -74,6 +70,7 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   initiateDraw: (drawState: DrawState) => void;
   isDrawingFilter: boolean;
+  featureModeActive: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   activateDrawFilterMode: () => void;
@@ -242,6 +239,7 @@ export class ToolsControl extends Component<Props, State> {
             className="mapDrawControl__geometryFilterForm"
             geoFields={this.props.geoFields}
             onSubmit={({ geoFieldType }: { geoFieldType: string }) => {
+              this._closePopover();
               if (geoFieldType === 'geo_point') {
                 this.props.activateDrawPointsMode();
               } else {
@@ -260,7 +258,7 @@ export class ToolsControl extends Component<Props, State> {
         <EuiButtonIcon
           size="s"
           color="text"
-          iconType="wrench"
+          iconType="pencil"
           onClick={this._togglePopover}
           aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
             defaultMessage: 'Tools',
@@ -287,7 +285,7 @@ export class ToolsControl extends Component<Props, State> {
       </EuiPopover>
     );
 
-    if (!this.props.isDrawingFilter) {
+    if (!(this.props.isDrawingFilter || this.props.featureModeActive)) {
       return toolsPopoverButton;
     }
 

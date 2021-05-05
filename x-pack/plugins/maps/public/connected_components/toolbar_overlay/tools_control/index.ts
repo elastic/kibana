@@ -14,10 +14,13 @@ import { setDrawMode, updateDrawState } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { DrawState } from '../../../../common/descriptor_types';
 import { DRAW_MODE } from '../../../../common';
+import { getDrawMode } from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     isDrawingFilter: isDrawingFilter(state),
+    featureModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_POINTS || getDrawMode(state) === DRAW_MODE.DRAW_SHAPES,
   };
 }
 
@@ -28,6 +31,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     cancelDraw: () => {
       dispatch(updateDrawState(null));
+      dispatch(setDrawMode(DRAW_MODE.NONE));
     },
     activateDrawFilterMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_FILTERS)),
     activateDrawPointsMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_POINTS)),

@@ -15,7 +15,6 @@ import { FeatureDrawControl } from './feature_draw_controls/feature_draw_control
 import { FeatureEditControl } from './feature_draw_controls/feature_edit_control';
 import { FitToData } from './fit_to_data';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
-import { EditControl } from './edit_control';
 
 export interface Props {
   addFilters?: ((filters: Filter[], actionId: string) => Promise<void>) | null;
@@ -42,19 +41,6 @@ export function ToolbarOverlay(props: Props) {
           getFilterActions={getFilterActions}
           getActionContext={getActionContext}
         />
-      </EuiFlexItem>
-    );
-  }
-
-  function renderEditLayerControl() {
-    const { geoFields } = props;
-    if (!geoFields.length || props.addDrawLayerInProgress) {
-      return null;
-    }
-
-    return (
-      <EuiFlexItem>
-        <EditControl geoFields={geoFields} />
       </EuiFlexItem>
     );
   }
@@ -89,8 +75,6 @@ export function ToolbarOverlay(props: Props) {
       </EuiFlexItem>
 
       {renderToolsControl()}
-
-      {renderEditLayerControl()}
 
       {renderFeatureDrawAndEditControls()}
     </EuiFlexGroup>
