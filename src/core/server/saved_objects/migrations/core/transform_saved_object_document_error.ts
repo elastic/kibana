@@ -28,12 +28,5 @@ export class TransformSavedObjectDocumentError extends Error {
     public readonly originalError: Error
   ) {
     super(`Failed to transform document ${id}. Transform: ${failedTransform}\nDoc: ${failedDoc}`);
-    this.id = id;
-    this.namespace = namespace;
-    this.type = type;
-    // Removed because not including still seems to work, it may have been an old Typescript 2.1 issue:
-    // Set the prototype explicitly, see:
-    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    // Object.setPrototypeOf(this, TransformSavedObjectDocumentError.prototype);
   }
 }

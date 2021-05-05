@@ -44,7 +44,7 @@ import { AliasAction, RetryableEsClientError } from './actions';
 import { createInitialState, model } from './model';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
-import { TransformErrorObjects } from '../migrations/core';
+import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../migrations/core';
 
 describe('migrations v2 model', () => {
   const baseState: BaseState = {
@@ -858,12 +858,12 @@ describe('migrations v2 model', () => {
         corruptDocumentIds: [],
         transformErrors: [],
       };
-      const processedDocs = ([
+      const processedDocs = [
         {
           _id: 'a:b',
           _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
         },
-      ] as unknown[]) as SavedObjectsRawDoc[];
+      ] as SavedObjectsRawDoc[];
 
       it('REINDEX_SOURCE_TO_TEMP_INDEX -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX'> = Either.right({
@@ -903,7 +903,12 @@ describe('migrations v2 model', () => {
       });
     });
     describe('REINDEX_SOURCE_TO_TEMP_INDEX_BULK', () => {
-      const transformedDocs = ([Symbol('raw saved object doc')] as unknown) as SavedObjectsRawDoc[];
+      const transformedDocs = [
+        {
+          _id: 'a:b',
+          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        },
+      ] as SavedObjectsRawDoc[];
       const reindexSourceToTempIndexBulkState: ReindexSourceToTempIndexBulk = {
         ...baseState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
@@ -1076,9 +1081,20 @@ describe('migrations v2 model', () => {
     });
 
     describe('OUTDATED_DOCUMENTS_TRANSFORM', () => {
-      const outdatedDocuments = ([
-        Symbol('raw saved object doc'),
-      ] as unknown) as SavedObjectsRawDoc[];
+      const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+      const corruptDocumentIds = ['a:somethingelse'];
+      const originalTransformError = new Error('Dang diggity!');
+      const transFormErr = new TransformSavedObjectDocumentError(
+        'id',
+        'type',
+        'namespace',
+        'failedTransform',
+        'failedDoc',
+        originalTransformError
+      );
+      const transformationErrors = [
+        { rawId: 'bob:tail', err: transFormErr },
+      ] as TransformErrorObjects[];
       const outdatedDocumentsTransformState: OutdatedDocumentsTransform = {
         ...baseState,
         controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
@@ -1093,14 +1109,12 @@ describe('migrations v2 model', () => {
         hasTransformedDocs: false,
       };
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action succeeds', () => {
-        const processedDocs = ([Symbol('raw saved object doc')] as unknown) as SavedObjectsRawDoc[];
-        const corruptDocumentIds = ([Symbol('raw saved object doc ID')] as unknown) as string[];
-        const transformationErrors = ([
+        const processedDocs = [
           {
-            rawId: Symbol('transform error object') as unknown,
-            err: Symbol('transform error itself') as unknown,
+            _id: 'a:b',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
           },
-        ] as unknown) as TransformErrorObjects[];
+        ] as SavedObjectsRawDoc[];
         test('OUTDATED_DOCUMENTS_TRANSFORM -> TRANSFORMED_DOCUMENTS_BULK_INDEX if action succeeds', () => {
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right({ processedDocs });
           const newState = model(
@@ -1148,7 +1162,6 @@ describe('migrations v2 model', () => {
       });
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action fails', () => {
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ adding newly failed documents to state if documents failed the transform', () => {
-          const corruptDocumentIds = ([Symbol('raw saved object doc ID')] as unknown) as string[];
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.left({
             type: 'documents_transform_failed',
             corruptDocumentIds,
@@ -1162,16 +1175,7 @@ describe('migrations v2 model', () => {
           expect(newState.corruptDocumentIds).toEqual(corruptDocumentIds);
         });
         test('OUTDATED_DOCUMENTS_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ combines newly failed documents with those already on state if documents failed the transform', () => {
-          const corruptDocumentIds = ([Symbol('raw saved object doc ID')] as unknown) as string[];
-          const transformationErrors = ([
-            {
-              rawId: Symbol('transform error object') as unknown,
-              err: Symbol('transform error itself') as unknown,
-            },
-          ] as unknown) as TransformErrorObjects[];
-          const newFailedTransformDocumentIds = ([
-            Symbol('raw saved object doc ID 2'),
-          ] as unknown) as string[];
+          const newFailedTransformDocumentIds = ['b:other', 'c:__'];
           const outdatedDocumentsTransformStateWithFailedDocuments: OutdatedDocumentsTransform = {
             ...outdatedDocumentsTransformState,
             corruptDocumentIds: [...corruptDocumentIds],
@@ -1195,7 +1199,12 @@ describe('migrations v2 model', () => {
       });
     });
     describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
-      const transformedDocs = ([Symbol('raw saved object doc')] as unknown) as SavedObjectsRawDoc[];
+      const transformedDocs = [
+        {
+          _id: 'a:b',
+          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        },
+      ] as SavedObjectsRawDoc[];
       const transformedDocumentsBulkIndexState: TransformedDocumentsBulkIndex = {
         ...baseState,
         controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',

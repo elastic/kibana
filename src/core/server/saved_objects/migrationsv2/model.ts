@@ -546,8 +546,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
-    // We used to transform and index documents in one action.
-    // This is not split into two steps: One for transforms, the next for the bulk index
     // We follow a similar control flow as for
     // outdated document search -> outdated document transform -> transform documents bulk index
     // collecting issues along the way rather than failing

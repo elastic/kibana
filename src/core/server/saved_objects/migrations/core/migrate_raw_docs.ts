@@ -86,29 +86,25 @@ export async function migrateRawDocs(
  * and converts the saved object to a raw document.
  * Captures the ids and errors from any documents that are not valid saved objects or
  * for which the transformation function failed.
- * @param {SavedObjectsSerializer} serializer
- * @param {TransformFn} migrateDoc
- * @param {SavedObjectsRawDoc[]} rawDocs
- * @param {SavedObjectsMigrationLogger} log
  * @returns {TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>}
  */
-export function migrateRawDocsNonThrowing(
+export function migrateRawDocsSafely(
   serializer: SavedObjectsSerializer,
   migrateDoc: MigrateAndConvertFn,
   rawDocs: SavedObjectsRawDoc[]
 ): TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> {
   return async () => {
-    const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
+    const migrateDocNonBlocking = transformNonBlocking(migrateDoc);
     const processedDocs: SavedObjectsRawDoc[] = [];
     const transformErrors: TransformErrorObjects[] = [];
     const corruptSavedObjectIds: string[] = [];
+    const options = { namespaceTreatment: 'lax' as const };
     for (const raw of rawDocs) {
-      const options = { namespaceTreatment: 'lax' as const };
       if (serializer.isRawSavedObject(raw, options)) {
         const savedObject = convertToRawAddMigrationVersion(raw, options, serializer);
         try {
           processedDocs.push(
-            ...(await migrateMapToRawDoc(migrateDocWithoutBlocking, savedObject, serializer))
+            ...(await migrateMapToRawDoc(migrateDocNonBlocking, savedObject, serializer))
           );
         } catch (err) {
           if (err instanceof TransformSavedObjectDocumentError) {

@@ -10,7 +10,7 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsSerializer } from '../../serialization';
-import { migrateRawDocs, migrateRawDocsNonThrowing } from './migrate_raw_docs';
+import { migrateRawDocs, migrateRawDocsSafely } from './migrate_raw_docs';
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 
 describe('migrateRawDocs', () => {
@@ -122,7 +122,7 @@ describe('migrateRawDocs', () => {
   });
 });
 
-describe('migrateRawDocsNonThrowing', () => {
+describe('migrateRawDocsSafely', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -132,7 +132,7 @@ describe('migrateRawDocsNonThrowing', () => {
     const transform = jest.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
     ]);
-    const task = migrateRawDocsNonThrowing(
+    const task = migrateRawDocsSafely(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
       [
@@ -181,7 +181,7 @@ describe('migrateRawDocsNonThrowing', () => {
     const transform = jest.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
-    const task = migrateRawDocsNonThrowing(
+    const task = migrateRawDocsSafely(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
       [
@@ -207,7 +207,7 @@ describe('migrateRawDocsNonThrowing', () => {
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
       { id: 'bar', type: 'foo', attributes: { name: 'baz' } },
     ]);
-    const task = migrateRawDocsNonThrowing(
+    const task = migrateRawDocsSafely(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
       [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }]
@@ -252,7 +252,7 @@ describe('migrateRawDocsNonThrowing', () => {
         new Error('error during transform')
       );
     });
-    const task = migrateRawDocsNonThrowing(
+    const task = migrateRawDocsSafely(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
       [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }] // this is the raw doc

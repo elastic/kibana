@@ -35,7 +35,7 @@ import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { runResilientMigrator } from '../../migrationsv2';
-import { migrateRawDocsNonThrowing } from '../core/migrate_raw_docs';
+import { migrateRawDocsSafely } from '../core/migrate_raw_docs';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -184,7 +184,7 @@ export class KibanaMigrator {
               logger: this.log,
               preMigrationScript: indexMap[index].script,
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
-                migrateRawDocsNonThrowing(
+                migrateRawDocsSafely(
                   this.serializer,
                   this.documentMigrator.migrateAndConvert,
                   rawDocs
