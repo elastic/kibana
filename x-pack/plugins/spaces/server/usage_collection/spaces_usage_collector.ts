@@ -338,13 +338,13 @@ export function getSpacesUsageCollector(
       available: {
         type: 'boolean',
         _meta: {
-          description: 'Indicates if the spaces feature is available in this installation.',
+          description: 'Indicates if the Spaces feature is available in this installation.',
         },
       },
       enabled: {
         type: 'boolean',
         _meta: {
-          description: 'Indicates if the spaces feature is enabled in this installation.',
+          description: 'Indicates if the Spaces feature is enabled in this installation.',
         },
       },
       count: {
