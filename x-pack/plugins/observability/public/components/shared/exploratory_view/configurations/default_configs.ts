@@ -31,9 +31,9 @@ export const getDefaultConfigs = ({ reportType, seriesId, indexPattern }: Props)
     case 'kpi-trends':
       return getKPITrendsLensConfig({ seriesId, indexPattern });
     case 'uptime-duration':
-      return getMonitorDurationConfig({ seriesId });
+      return getMonitorDurationConfig({ seriesId, indexPattern });
     case 'uptime-pings':
-      return getMonitorPingsConfig({ seriesId });
+      return getMonitorPingsConfig({ seriesId, indexPattern });
     case 'service-latency':
       return getServiceLatencyLensConfig({ seriesId, indexPattern });
     case 'service-throughput':

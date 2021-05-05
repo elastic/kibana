@@ -63,10 +63,12 @@ function getSelectOptions({
   start,
   end,
   rangeTo,
+  comparisonEnabled,
 }: {
   start?: string;
   end?: string;
   rangeTo?: string;
+  comparisonEnabled?: boolean;
 }) {
   const momentStart = moment(start);
   const momentEnd = moment(end);
@@ -112,6 +114,7 @@ function getSelectOptions({
     comparisonType: TimeRangeComparisonType.PeriodBefore,
     start,
     end,
+    comparisonEnabled,
   });
 
   const dateFormat = getDateFormat({
@@ -140,7 +143,12 @@ export function TimeComparison() {
     urlParams: { start, end, comparisonEnabled, comparisonType, rangeTo },
   } = useUrlParams();
 
-  const selectOptions = getSelectOptions({ start, end, rangeTo });
+  const selectOptions = getSelectOptions({
+    start,
+    end,
+    rangeTo,
+    comparisonEnabled,
+  });
 
   // Sets default values
   if (comparisonEnabled === undefined || comparisonType === undefined) {

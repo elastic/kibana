@@ -24,6 +24,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'networkDetailsQuery';
 
@@ -52,7 +53,7 @@ export const useNetworkDetails = ({
   skip,
   ip,
 }: UseNetworkDetails): [boolean, NetworkDetailsArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -73,6 +74,7 @@ export const useNetworkDetails = ({
     isInspected: false,
     refetch: refetch.current,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const networkDetailsSearch = useCallback(
     (request: NetworkDetailsRequestOptions | null) => {
@@ -100,16 +102,14 @@ export const useNetworkDetails = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_DETAILS);
+                addWarning(i18n.ERROR_NETWORK_DETAILS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_NETWORK_DETAILS,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -120,7 +120,7 @@ export const useNetworkDetails = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

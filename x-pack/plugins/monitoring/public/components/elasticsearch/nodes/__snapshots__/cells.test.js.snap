@@ -31,13 +31,19 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
           <div
             class="euiPopover__anchor"
           >
-            <span
-              data-euiicon-type="arrowDown"
+            <button
+              aria-label="More information about this metric"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="monitoringCellIcon-testCell2"
-              role="button"
-              tabindex="0"
               title="More information about this metric"
-            />
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                data-euiicon-type="sortDown"
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -78,13 +84,19 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
           <div
             class="euiPopover__anchor"
           >
-            <span
-              data-euiicon-type="arrowDown"
+            <button
+              aria-label="More information about this metric"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="monitoringCellIcon-testCell"
-              role="button"
-              tabindex="0"
               title="More information about this metric"
-            />
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                data-euiicon-type="sortDown"
+              />
+            </button>
           </div>
         </div>
       </div>

@@ -25,6 +25,7 @@ import {
 } from '../../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 
 export interface UseTimelineLastEventTimeArgs {
   lastSeen: string | null;
@@ -45,7 +46,7 @@ export const useTimelineLastEventTime = ({
   indexNames,
   details,
 }: UseTimelineLastEventTimeProps): [boolean, UseTimelineLastEventTimeArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -69,6 +70,7 @@ export const useTimelineLastEventTime = ({
     refetch: refetch.current,
     errorMessage: undefined,
   });
+  const { addError, addWarning } = useAppToasts();
 
   const timelineLastEventTimeSearch = useCallback(
     (request: TimelineEventsLastEventTimeRequestOptions) => {
@@ -96,15 +98,13 @@ export const useTimelineLastEventTime = ({
                 }));
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_LAST_EVENT_TIME);
+                addWarning(i18n.ERROR_LAST_EVENT_TIME);
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_LAST_EVENT_TIME,
-                text: msg.message,
               });
               setTimelineLastEventTimeResponse((prevResponse) => ({
                 ...prevResponse,
@@ -118,7 +118,7 @@ export const useTimelineLastEventTime = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts]
+    [data.search, addError, addWarning]
   );
 
   useEffect(() => {

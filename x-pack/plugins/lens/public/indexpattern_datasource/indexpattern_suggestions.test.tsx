@@ -965,7 +965,19 @@ describe('IndexPattern Data Source suggestions', () => {
             currentLayer: {
               ...initialState.layers.currentLayer,
               columns: {
-                cola: initialState.layers.currentLayer.columns.cola,
+                cola: {
+                  dataType: 'string',
+                  isBucketed: true,
+                  sourceField: 'source',
+                  label: 'values of source',
+                  customLabel: true,
+                  operationType: 'terms',
+                  params: {
+                    orderBy: { type: 'alphabetical', fallback: false },
+                    orderDirection: 'asc',
+                    size: 5,
+                  },
+                },
               },
               columnOrder: ['cola'],
             },
@@ -1094,11 +1106,11 @@ describe('IndexPattern Data Source suggestions', () => {
                   operation: expect.objectContaining({ dataType: 'date', isBucketed: true }),
                 },
                 {
-                  columnId: 'newid',
+                  columnId: 'ref',
                   operation: expect.objectContaining({ dataType: 'number', isBucketed: false }),
                 },
                 {
-                  columnId: 'ref',
+                  columnId: 'newid',
                   operation: expect.objectContaining({ dataType: 'number', isBucketed: false }),
                 },
               ],
@@ -1147,21 +1159,21 @@ describe('IndexPattern Data Source suggestions', () => {
               changeType: 'extended',
               columns: [
                 {
-                  columnId: 'newid',
-                  operation: {
-                    dataType: 'number',
-                    isBucketed: false,
-                    label: 'Count of records',
-                    scale: 'ratio',
-                  },
-                },
-                {
                   columnId: 'ref',
                   operation: {
                     dataType: 'number',
                     isBucketed: false,
                     label: '',
                     scale: undefined,
+                  },
+                },
+                {
+                  columnId: 'newid',
+                  operation: {
+                    dataType: 'number',
+                    isBucketed: false,
+                    label: 'Count of records',
+                    scale: 'ratio',
                   },
                 },
               ],

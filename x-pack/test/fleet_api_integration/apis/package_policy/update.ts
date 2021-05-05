@@ -46,7 +46,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test managed policy',
+          name: 'Test hosted agent policy',
           namespace: 'default',
           is_managed: true,
         });
@@ -173,6 +173,43 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(500);
+    });
+
+    it('should work with frozen input vars', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_id: agentPolicyId,
+          enabled: true,
+          output_id: '',
+          inputs: [
+            {
+              enabled: true,
+              type: 'test-input',
+              streams: [],
+              vars: {
+                frozen_var: {
+                  type: 'text',
+                  value: 'abc',
+                  frozen: true,
+                },
+                unfrozen_var: {
+                  type: 'text',
+                  value: 'def',
+                },
+              },
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        });
     });
   });
 }

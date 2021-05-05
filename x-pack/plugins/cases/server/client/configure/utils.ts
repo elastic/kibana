@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  ConnectorField,
-  ConnectorMappingsAttributes,
-  ConnectorTypes,
-} from '../../../common/api/connectors';
+import { ConnectorField, ConnectorMappingsAttributes, ConnectorTypes } from '../../../common';
 import {
   JiraGetFieldsResponse,
   ResilientGetFieldsResponse,
@@ -78,17 +74,6 @@ export const formatFields = (theData: unknown, theType: string): ConnectorField[
       return [];
   }
 };
-const findTextField = (fields: ConnectorField[]): string =>
-  (
-    fields.find((field: ConnectorField) => field.type === 'text' && field.required) ??
-    fields.find((field: ConnectorField) => field.type === 'text')
-  )?.id ?? '';
-const findTextAreaField = (fields: ConnectorField[]): string =>
-  (
-    fields.find((field: ConnectorField) => field.type === 'textarea' && field.required) ??
-    fields.find((field: ConnectorField) => field.type === 'textarea') ??
-    fields.find((field: ConnectorField) => field.type === 'text')
-  )?.id ?? '';
 
 const getPreferredFields = (theType: string) => {
   let title: string = '';
@@ -115,73 +100,25 @@ const getPreferredFields = (theType: string) => {
   return { title, description, comments };
 };
 
-const getRemainingFields = (fields: ConnectorField[], titleTarget: string) =>
-  fields.filter((field: ConnectorField) => field.id !== titleTarget);
-
-const getDynamicFields = (fields: ConnectorField[], dynamicTitle = findTextField(fields)) => {
-  const remainingFields = getRemainingFields(fields, dynamicTitle);
-  const dynamicDescription = findTextAreaField(remainingFields);
-  return {
-    description: dynamicDescription,
-    title: dynamicTitle,
-  };
-};
-
-const getField = (fields: ConnectorField[], fieldId: string) =>
-  fields.find((field: ConnectorField) => field.id === fieldId);
-
-// if dynamic title is not required and preferred is, true
-const shouldTargetBePreferred = (
-  fields: ConnectorField[],
-  dynamic: string,
-  preferred: string
-): boolean => {
-  if (dynamic !== preferred) {
-    const dynamicT = getField(fields, dynamic);
-    const preferredT = getField(fields, preferred);
-    return preferredT != null && !(dynamicT?.required && !preferredT.required);
-  }
-  return false;
-};
 export const createDefaultMapping = (
   fields: ConnectorField[],
   theType: string
 ): ConnectorMappingsAttributes[] => {
-  const { description: dynamicDescription, title: dynamicTitle } = getDynamicFields(fields);
-
-  const {
-    description: preferredDescription,
-    title: preferredTitle,
-    comments: preferredComments,
-  } = getPreferredFields(theType);
-
-  let titleTarget = dynamicTitle;
-  let descriptionTarget = dynamicDescription;
-
-  if (preferredTitle.length > 0 && preferredDescription.length > 0) {
-    if (shouldTargetBePreferred(fields, dynamicTitle, preferredTitle)) {
-      const { description: dynamicDescriptionOverwrite } = getDynamicFields(fields, preferredTitle);
-      titleTarget = preferredTitle;
-      descriptionTarget = dynamicDescriptionOverwrite;
-    }
-    if (shouldTargetBePreferred(fields, descriptionTarget, preferredDescription)) {
-      descriptionTarget = preferredDescription;
-    }
-  }
+  const { description, title, comments } = getPreferredFields(theType);
   return [
     {
       source: 'title',
-      target: titleTarget,
+      target: title,
       action_type: 'overwrite',
     },
     {
       source: 'description',
-      target: descriptionTarget,
+      target: description,
       action_type: 'overwrite',
     },
     {
       source: 'comments',
-      target: preferredComments,
+      target: comments,
       action_type: 'append',
     },
   ];

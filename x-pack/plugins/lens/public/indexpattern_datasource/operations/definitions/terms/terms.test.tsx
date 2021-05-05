@@ -358,7 +358,7 @@ describe('terms', () => {
         },
       });
       expect(termsColumn.params).toEqual(
-        expect.objectContaining({ orderBy: { type: 'alphabetical' } })
+        expect.objectContaining({ orderBy: { type: 'alphabetical', fallback: true } })
       );
     });
 
@@ -469,7 +469,7 @@ describe('terms', () => {
       );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -516,7 +516,7 @@ describe('terms', () => {
       );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -548,7 +548,7 @@ describe('terms', () => {
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
         })
       );
     });
@@ -592,7 +592,81 @@ describe('terms', () => {
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
-          orderBy: { type: 'alphabetical' },
+          orderBy: { type: 'alphabetical', fallback: true },
+        })
+      );
+    });
+
+    it('should set order to ascending if falling back to alphabetical', () => {
+      const termsColumn = termsOperation.onOtherColumnChanged!(
+        {
+          columns: {
+            col2: {
+              label: 'Top value of category',
+              dataType: 'string',
+              isBucketed: true,
+
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'column', columnId: 'col1' },
+                size: 3,
+                orderDirection: 'desc',
+              },
+              sourceField: 'category',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+        'col2',
+        'col1'
+      );
+      expect(termsColumn.params).toEqual(
+        expect.objectContaining({
+          orderDirection: 'asc',
+        })
+      );
+    });
+
+    it('should switch back to descending metric sorting if alphabetical sorting was applied as fallback', () => {
+      const initialColumn: TermsIndexPatternColumn = {
+        label: 'Top value of category',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        params: {
+          orderBy: { type: 'alphabetical', fallback: true },
+          size: 3,
+          orderDirection: 'asc',
+        },
+        sourceField: 'category',
+      };
+      const updatedColumn = termsOperation.onOtherColumnChanged!(
+        {
+          indexPatternId: '',
+          columnOrder: [],
+          columns: {
+            col2: initialColumn,
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+        },
+        'col2',
+        'col1'
+      );
+
+      expect(updatedColumn.params).toEqual(
+        expect.objectContaining({
+          orderBy: { type: 'column', columnId: 'col1' },
+          orderDirection: 'desc',
         })
       );
     });
@@ -774,6 +848,7 @@ describe('terms', () => {
                 type: 'column',
                 columnId: 'col2',
               },
+              orderDirection: 'desc',
             },
           },
         },

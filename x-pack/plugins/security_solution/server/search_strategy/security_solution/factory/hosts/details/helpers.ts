@@ -55,6 +55,11 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
       host_ip: {
         terms: {
           script: {
+            // We might be able to remove this when PR is fixed in Elasticsearch: https://github.com/elastic/elasticsearch/issues/72276
+            // Currently we cannot use "value_type" with an aggregation when we have a mapping conflict which is why this painless script exists
+            // See public ticket: https://github.com/elastic/kibana/pull/78912
+            // See private ticket: https://github.com/elastic/security-team/issues/333
+            // for more details on the use cases and causes of the conflicts and why this is here.
             source: "doc['host.ip']",
             lang: 'painless',
           },

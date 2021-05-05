@@ -14,7 +14,7 @@ import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
@@ -82,6 +82,8 @@ export function App({
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
+  const startSession = useCallback(() => data.search.session.start(), [data]);
+
   const [state, setState] = useState<LensAppState>(() => {
     return {
       query: data.query.queryString.getQuery(),
@@ -96,7 +98,7 @@ export function App({
       isSaveModalVisible: false,
       indicateNoData: false,
       isSaveable: false,
-      searchSessionId: data.search.session.start(),
+      searchSessionId: startSession(),
     };
   });
 
@@ -178,7 +180,7 @@ export function App({
         setState((s) => ({
           ...s,
           filters: data.query.filterManager.getFilters(),
-          searchSessionId: data.search.session.start(),
+          searchSessionId: startSession(),
         }));
         trackUiEvent('app_filters_updated');
       },
@@ -188,7 +190,7 @@ export function App({
       next: () => {
         setState((s) => ({
           ...s,
-          searchSessionId: data.search.session.start(),
+          searchSessionId: startSession(),
         }));
       },
     });
@@ -199,7 +201,7 @@ export function App({
         tap(() => {
           setState((s) => ({
             ...s,
-            searchSessionId: data.search.session.start(),
+            searchSessionId: startSession(),
           }));
         }),
         switchMap((done) =>
@@ -219,11 +221,29 @@ export function App({
       kbnUrlStateStorage
     );
 
+    const sessionSubscription = data.search.session
+      .getSession$()
+      // wait for a tick to filter/timerange subscribers the chance to update the session id in the state
+      .pipe(delay(0))
+      // then update if it didn't get updated yet
+      .subscribe((newSessionId) => {
+        if (newSessionId) {
+          setState((prevState) => {
+            if (prevState.searchSessionId !== newSessionId) {
+              return { ...prevState, searchSessionId: newSessionId };
+            } else {
+              return prevState;
+            }
+          });
+        }
+      });
+
     return () => {
       stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
       autoRefreshSubscription.unsubscribe();
+      sessionSubscription.unsubscribe();
     };
   }, [
     data.query.filterManager,
@@ -234,6 +254,7 @@ export function App({
     data.query,
     history,
     initialContext,
+    startSession,
   ]);
 
   useEffect(() => {
@@ -627,67 +648,66 @@ export function App({
   return (
     <>
       <div className="lnsApp">
-        <div className="lnsApp__header">
-          <TopNavMenu
-            setMenuMountPoint={setHeaderActionMenu}
-            config={topNavConfig}
-            showSearchBar={true}
-            showDatePicker={true}
-            showQueryBar={true}
-            showFilterBar={true}
-            indexPatterns={state.indexPatternsForTopNav}
-            showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-            savedQuery={state.savedQuery}
-            data-test-subj="lnsApp_topNav"
-            screenTitle={'lens'}
-            appName={'lens'}
-            onQuerySubmit={(payload) => {
-              const { dateRange, query } = payload;
-              const currentRange = data.query.timefilter.timefilter.getTime();
-              if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
-                data.query.timefilter.timefilter.setTime(dateRange);
-                trackUiEvent('app_date_change');
-              } else {
-                // Query has changed, renew the session id.
-                // Time change will be picked up by the time subscription
-                setState((s) => ({
-                  ...s,
-                  searchSessionId: data.search.session.start(),
-                }));
-                trackUiEvent('app_query_change');
-              }
+        <TopNavMenu
+          setMenuMountPoint={setHeaderActionMenu}
+          config={topNavConfig}
+          showSearchBar={true}
+          showDatePicker={true}
+          showQueryBar={true}
+          showFilterBar={true}
+          indexPatterns={state.indexPatternsForTopNav}
+          showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+          savedQuery={state.savedQuery}
+          data-test-subj="lnsApp_topNav"
+          screenTitle={'lens'}
+          appName={'lens'}
+          onQuerySubmit={(payload) => {
+            const { dateRange, query } = payload;
+            const currentRange = data.query.timefilter.timefilter.getTime();
+            if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
+              data.query.timefilter.timefilter.setTime(dateRange);
+              trackUiEvent('app_date_change');
+            } else {
+              // Query has changed, renew the session id.
+              // Time change will be picked up by the time subscription
               setState((s) => ({
                 ...s,
-                query: query || s.query,
+                searchSessionId: startSession(),
               }));
-            }}
-            onSaved={(savedQuery) => {
-              setState((s) => ({ ...s, savedQuery }));
-            }}
-            onSavedQueryUpdated={(savedQuery) => {
-              const savedQueryFilters = savedQuery.attributes.filters || [];
-              const globalFilters = data.query.filterManager.getGlobalFilters();
-              data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-              setState((s) => ({
-                ...s,
-                savedQuery: { ...savedQuery }, // Shallow query for reference issues
-              }));
-            }}
-            onClearSavedQuery={() => {
-              data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-              setState((s) => ({
-                ...s,
-                savedQuery: undefined,
-                filters: data.query.filterManager.getGlobalFilters(),
-                query: data.query.queryString.getDefaultQuery(),
-              }));
-            }}
-            query={state.query}
-            dateRangeFrom={fromDate}
-            dateRangeTo={toDate}
-            indicateNoData={state.indicateNoData}
-          />
-        </div>
+              trackUiEvent('app_query_change');
+            }
+            setState((s) => ({
+              ...s,
+              query: query || s.query,
+            }));
+          }}
+          onSaved={(savedQuery) => {
+            setState((s) => ({ ...s, savedQuery }));
+          }}
+          onSavedQueryUpdated={(savedQuery) => {
+            const savedQueryFilters = savedQuery.attributes.filters || [];
+            const globalFilters = data.query.filterManager.getGlobalFilters();
+            data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+            setState((s) => ({
+              ...s,
+              savedQuery: { ...savedQuery }, // Shallow query for reference issues
+              query: savedQuery.attributes.query,
+            }));
+          }}
+          onClearSavedQuery={() => {
+            data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+            setState((s) => ({
+              ...s,
+              savedQuery: undefined,
+              filters: data.query.filterManager.getGlobalFilters(),
+              query: data.query.queryString.getDefaultQuery(),
+            }));
+          }}
+          query={state.query}
+          dateRangeFrom={fromDate}
+          dateRangeTo={toDate}
+          indicateNoData={state.indicateNoData}
+        />
         {(!state.isLoading || state.persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}

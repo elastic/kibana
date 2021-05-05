@@ -25,6 +25,7 @@ describe('ExploratoryViewHeader', function () {
     mockUrlStorage({
       data: {
         'uptime-pings-histogram': {
+          dataType: 'synthetics',
           reportType: 'upp',
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },

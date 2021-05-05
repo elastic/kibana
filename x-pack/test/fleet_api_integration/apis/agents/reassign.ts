@@ -55,8 +55,8 @@ export default function (providerContext: FtrProviderContext) {
           .expect(404);
       });
 
-      it('can reassign from unmanaged policy to unmanaged', async () => {
-        // policy2 is not managed
+      it('can reassign from regular agent policy to regular', async () => {
+        // policy2 is not hosted
         // reassign succeeds
         await supertest
           .put(`/api/fleet/agents/agent1/reassign`)
@@ -67,8 +67,8 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('cannot reassign from unmanaged policy to managed', async () => {
-        // agent1 is enrolled in policy1. set policy1 to managed
+      it('cannot reassign from regular agent policy to hosted', async () => {
+        // agent1 is enrolled in policy1. set policy1 to hosted
         await supertest
           .put(`/api/fleet/agent_policies/policy1`)
           .set('kbn-xsrf', 'xxx')
@@ -138,8 +138,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent3data.body.item.policy_id).to.eql('policy2');
       });
 
-      it('should allow to reassign multiple agents by id -- mixed invalid, managed, etc', async () => {
-        // agent1 is enrolled in policy1. set policy1 to managed
+      it('should allow to reassign multiple agents by id -- mixed invalid, hosted, etc', async () => {
+        // agent1 is enrolled in policy1. set policy1 to hosted
         await supertest
           .put(`/api/fleet/agent_policies/policy1`)
           .set('kbn-xsrf', 'xxx')
@@ -157,7 +157,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.eql({
           agent2: {
             success: false,
-            error: 'Cannot reassign an agent from managed agent policy policy1',
+            error:
+              'Cannot reassign an agent from hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
           },
           INVALID_ID: {
             success: false,
@@ -165,7 +166,8 @@ export default function (providerContext: FtrProviderContext) {
           },
           agent3: {
             success: false,
-            error: 'Cannot reassign an agent from managed agent policy policy1',
+            error:
+              'Cannot reassign an agent from hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
           },
         });
 

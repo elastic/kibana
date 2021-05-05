@@ -438,10 +438,10 @@ export const getSavedObjects = (): SavedObject[] => [
     attributes: {
       title: 'kibana_sample_data_flights',
       timeFieldName: 'timestamp',
-      fields:
-        '[{"name":"hour_of_day","type":"number","count":0,"scripted":true,"script":"doc[\'timestamp\'].value.hourOfDay","lang":"painless","searchable":true,"aggregatable":true,"readFromDocValues":false}]',
       fieldFormatMap:
         '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
+        runtimeFieldMap:
+        '{"hour_of_day":{"type":"long","script":{"source":"emit(doc[\'timestamp\'].value.hourOfDay);"}}}',
     },
     references: [],
   },

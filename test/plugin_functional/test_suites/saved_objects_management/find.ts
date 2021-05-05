@@ -33,28 +33,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           .set('kbn-xsrf', 'true')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              page: 1,
-              per_page: 20,
-              total: 1,
-              saved_objects: [
-                {
-                  type: 'test-hidden-importable-exportable',
-                  id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
-                  attributes: {
-                    title: 'Hidden Saved object type that is importable/exportable.',
-                  },
-                  references: [],
-                  updated_at: '2021-02-11T18:51:23.794Z',
-                  version: 'WzIsMl0=',
-                  namespaces: ['default'],
-                  score: 0,
-                  meta: {
-                    namespaceType: 'single',
-                  },
-                },
-              ],
-            });
+            expect(
+              resp.body.saved_objects.map((so: { id: string; type: string }) => ({
+                id: so.id,
+                type: so.type,
+              }))
+            ).to.eql([
+              {
+                type: 'test-hidden-importable-exportable',
+                id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
+              },
+            ]);
           }));
 
       it('returns empty response for non importableAndExportable types', async () =>
@@ -65,12 +54,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           .set('kbn-xsrf', 'true')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              page: 1,
-              per_page: 20,
-              total: 0,
-              saved_objects: [],
-            });
+            expect(resp.body.saved_objects).to.eql([]);
           }));
     });
   });

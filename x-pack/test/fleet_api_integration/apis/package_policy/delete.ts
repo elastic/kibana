@@ -87,8 +87,8 @@ export default function (providerContext: FtrProviderContext) {
       await getService('esArchiver').unload('fleet/empty_fleet_server');
     });
 
-    it('should fail on managed agent policies', async function () {
-      // update existing policy to managed
+    it('should fail on hosted agent policies', async function () {
+      // update existing policy to hosted
       await supertest
         .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
         .set('kbn-xsrf', 'xxxx')
@@ -110,7 +110,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(Array.isArray(results));
       expect(results.length).to.be(1);
       expect(results[0].success).to.be(false);
-      expect(results[0].body.message).to.contain('Cannot remove integrations of managed policy');
+      expect(results[0].body.message).to.contain(
+        'Cannot remove integrations of hosted agent policy'
+      );
 
       // same, but with force
       const { body: resultsWithForce } = await supertest
@@ -124,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(resultsWithForce.length).to.be(1);
       expect(resultsWithForce[0].success).to.be(true);
 
-      // revert existing policy to unmanaged
+      // revert existing policy to regular
       await supertest
         .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
         .set('kbn-xsrf', 'xxxx')
@@ -136,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should work for unmanaged policies', async function () {
+    it('should work for regular policies', async function () {
       await supertest
         .post(`/api/fleet/package_policies/delete`)
         .set('kbn-xsrf', 'xxxx')

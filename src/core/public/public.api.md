@@ -74,6 +74,9 @@ export interface App<HistoryLocationState = unknown> {
 }
 
 // @public
+export const APP_WRAPPER_CLASS = "kbnAppWrapper";
+
+// @public
 export interface AppCategory {
     ariaLabel?: string;
     euiIconType?: string;
@@ -490,6 +493,9 @@ export interface DocLinksStart {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly canvas: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -583,6 +589,9 @@ export interface DocLinksStart {
             readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
+        readonly search: {
+            readonly sessions: string;
+        };
         readonly indexPatterns: {
             readonly introduction: string;
             readonly fieldFormattersNumber: string;
@@ -613,6 +622,9 @@ export interface DocLinksStart {
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
             bulkIndexAlias: string;
+            byteSizeUnits: string;
+            createAutoFollowPattern: string;
+            createFollower: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
@@ -632,6 +644,7 @@ export interface DocLinksStart {
             putIndexTemplateV1: string;
             putWatch: string;
             simulatePipeline: string;
+            timeUnits: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;
@@ -905,11 +918,6 @@ export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
     getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
-    getSaved$: <T = any>() => Observable<{
-        key: string;
-        newValue: T;
-        oldValue: T;
-    }>;
     getUpdate$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -920,7 +928,6 @@ export interface IUiSettingsClient {
     isDeclared: (key: string) => boolean;
     isDefault: (key: string) => boolean;
     isOverridden: (key: string) => boolean;
-    overrideLocalDefault: (key: string, newDefault: any) => void;
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
 }
@@ -1224,9 +1231,9 @@ export class SavedObjectsClient {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
     delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
-    find: <T = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T>>;
+    find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    update<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
 
 // @public
@@ -1244,6 +1251,8 @@ export interface SavedObjectsCreateOptions {
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
+    // @alpha
+    aggs?: Record<string, estypes.AggregationContainer>;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
@@ -1284,7 +1293,9 @@ export interface SavedObjectsFindOptionsReference {
 }
 
 // @public
-export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown, A = unknown> extends SavedObjectsBatchResponse<T> {
+    // (undocumented)
+    aggregations?: A;
     // (undocumented)
     page: number;
     // (undocumented)
@@ -1443,10 +1454,11 @@ export interface SavedObjectsStart {
 }
 
 // @public (undocumented)
-export interface SavedObjectsUpdateOptions {
-    migrationVersion?: SavedObjectsMigrationVersion;
+export interface SavedObjectsUpdateOptions<Attributes = unknown> {
     // (undocumented)
     references?: SavedObjectReference[];
+    // (undocumented)
+    upsert?: Attributes;
     // (undocumented)
     version?: string;
 }

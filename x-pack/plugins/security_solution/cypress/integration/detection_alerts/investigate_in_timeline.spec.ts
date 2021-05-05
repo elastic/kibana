@@ -29,7 +29,7 @@ describe('Alerts timeline', () => {
     waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(newRule);
     refreshPage();
-    waitForAlertsToPopulate();
+    waitForAlertsToPopulate(500);
   });
 
   it('Investigate alert in default timeline', () => {

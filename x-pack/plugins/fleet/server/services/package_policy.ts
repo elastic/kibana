@@ -30,7 +30,11 @@ import type {
   ListResult,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
-import { IngestManagerError, ingestErrorToResponseOptions } from '../errors';
+import {
+  HostedAgentPolicyRestrictionRelatedError,
+  IngestManagerError,
+  ingestErrorToResponseOptions,
+} from '../errors';
 import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
   NewPackagePolicy,
@@ -75,8 +79,8 @@ class PackagePolicyService {
       throw new Error('Agent policy not found');
     }
     if (parentAgentPolicy.is_managed && !options?.force) {
-      throw new IngestManagerError(
-        `Cannot add integrations to managed policy ${parentAgentPolicy.id}`
+      throw new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot add integrations to hosted agent policy ${parentAgentPolicy.id}`
       );
     }
     if (
