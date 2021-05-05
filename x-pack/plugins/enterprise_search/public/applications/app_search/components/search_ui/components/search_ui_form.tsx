@@ -65,11 +65,11 @@ const URL_FIELD_LABEL = i18n.translate(
   { defaultMessage: 'URL field (Optional)' }
 );
 const URL_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldLabel',
+  'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldHelpText',
   { defaultMessage: "Used as a result's link target, if applicable" }
 );
 const URL_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldLabel',
+  'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldPlaceholder',
   { defaultMessage: 'Select a URL field' }
 );
 const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
