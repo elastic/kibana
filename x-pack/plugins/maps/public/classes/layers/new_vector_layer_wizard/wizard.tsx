@@ -70,20 +70,15 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
   };
 
   _onIndexChange = (indexName: string, indexError?: string) => {
-    this.setState(
-      {
-        indexName,
-        ...(indexError ? { indexError } : { indexError: '' }),
-      },
-      () => {
-        const { enableNextBtn, disableNextBtn } = this.props;
-        if (this.state.indexName && !this.state.indexError) {
-          enableNextBtn();
-        } else {
-          disableNextBtn();
-        }
-      }
-    );
+    this.setState({
+      indexName,
+      ...(indexError ? { indexError } : { indexError: '' }),
+    })
+    if (indexName && !indexError) {
+      this.props.enableNextBtn();
+    } else {
+      this.props.disableNextBtn();
+    }
   };
 
   render() {
