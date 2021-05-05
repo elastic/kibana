@@ -19,6 +19,7 @@ import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
 import { ObservabilityPublicPluginsStart, ObservabilityRuleRegistry } from '../plugin';
+import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -73,12 +74,14 @@ export const renderApp = ({
   plugins,
   appMountParameters,
   observabilityRuleRegistry,
+  ObservabilityPageTemplate,
 }: {
   config: ConfigSchema;
   core: CoreStart;
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleRegistry: ObservabilityRuleRegistry;
   appMountParameters: AppMountParameters;
+  ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
 }) => {
   const { element, history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -97,7 +100,14 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
       <PluginContext.Provider
-        value={{ appMountParameters, config, core, plugins, observabilityRuleRegistry }}
+        value={{
+          appMountParameters,
+          config,
+          core,
+          plugins,
+          observabilityRuleRegistry,
+          ObservabilityPageTemplate,
+        }}
       >
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>

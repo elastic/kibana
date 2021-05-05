@@ -28,6 +28,7 @@ import type { LensPublicStart } from '../../lens/public';
 import type { RuleRegistryPublicPluginSetupContract } from '../../rule_registry/public';
 import type { ObservabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
 import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
+import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
 import { FormatterRuleRegistry } from './rules/formatter_rule_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
@@ -50,7 +51,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
 }
 
-export type ObservabilityPublicStart = void;
+export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
 export class Plugin
   implements
@@ -68,7 +69,7 @@ export class Plugin
   }
 
   public setup(
-    coreSetup: CoreSetup<ObservabilityPublicPluginsStart>,
+    coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
@@ -87,7 +88,7 @@ export class Plugin
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
-      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
       return renderApp({
         config,
@@ -95,6 +96,7 @@ export class Plugin
         plugins: pluginsStart,
         appMountParameters: params,
         observabilityRuleRegistry,
+        ObservabilityPageTemplate: navigation.PageTemplate,
       });
     };
 
@@ -176,5 +178,13 @@ export class Plugin
   }
   public start({ application }: CoreStart) {
     toggleOverviewLinkInNav(this.appUpdater$, application);
+
+    const PageTemplate = createLazyObservabilityPageTemplate(this.navigationRegistry.sections$);
+
+    return {
+      navigation: {
+        PageTemplate,
+      },
+    };
   }
 }
