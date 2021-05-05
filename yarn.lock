@@ -2635,7 +2635,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es@link:packages/kbn-es":
+"@kbn/es@link:bazel-bin/packages/kbn-es/npm_module":
   version "0.0.0"
   uid ""
 
