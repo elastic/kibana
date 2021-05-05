@@ -45,8 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const pivotGroupByEntries = [
           {
-            identifier: 'terms(category.keyword)',
-            label: 'category.keyword',
+            identifier: 'terms(category)',
+            label: 'category',
           },
           {
             identifier: 'date_histogram(order_date)',

@@ -7,25 +7,19 @@
 
 export const esArchiverLoad = (folder: string) => {
   cy.exec(
-    `node ../../../../scripts/es_archiver load ${folder} --dir ./cypress/fixtures/es_archiver --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`
+    `node ../../../../scripts/es_archiver load ${folder} --dir ./cypress/fixtures/es_archiver --config ../../../test/functional/config.js`
   );
 };
 
 export const esArchiverUnload = (folder: string) => {
   cy.exec(
-    `node ../../../../scripts/es_archiver unload ${folder} --dir ./cypress/fixtures/es_archiver --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`
+    `node ../../../../scripts/es_archiver unload ${folder} --dir ./cypress/fixtures/es_archiver --config ../../../test/functional/config.js`
   );
 };
 
 export const esArchiverResetKibana = () => {
   cy.exec(
-    `node ../../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`,
+    `node ../../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.js`,
     { failOnNonZeroExit: false }
   );
 };
