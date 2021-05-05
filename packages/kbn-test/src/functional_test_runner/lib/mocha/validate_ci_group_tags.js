@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { createFailError } from '@kbn/dev-utils';
-
 /**
  * Traverse the suites configured and ensure that each suite has no more than one ciGroup assigned
  *
