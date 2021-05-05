@@ -142,6 +142,7 @@ emit("Hello World!");
 [role="screenshot"]
 image:images/hello-field.png[Top values for the hello field, width=50%]
 
+For more information on adding fields and Painless scripting language examples, refer to <<runtime-fields, Explore your data with runtime fields>>.
 
 [float]
 [[search-in-discover]]
