@@ -14,7 +14,7 @@ import { entriesList } from './entry_list';
 /**
  * Types the nonEmptyEntriesArray as:
  *   - An array of entries of length 1 or greater
- *
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const nonEmptyEntriesArray = new t.Type<EntriesArray, EntriesArray, unknown>(
   'NonEmptyEntriesArray',
@@ -37,5 +37,12 @@ export const nonEmptyEntriesArray = new t.Type<EntriesArray, EntriesArray, unkno
   t.identity
 );
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyEntriesArray = t.OutputOf<typeof nonEmptyEntriesArray>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyEntriesArrayDecoded = t.TypeOf<typeof nonEmptyEntriesArray>;
