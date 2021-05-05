@@ -88,6 +88,7 @@ describe('Processor: Bytes', () => {
     const {
       actions: { addProcessor, saveNewProcessor, addProcessorType },
       form,
+      find,
     } = testBed;
 
     // This test ensures that the common fields that are used across all processors
@@ -107,7 +108,8 @@ describe('Processor: Bytes', () => {
     form.setInputValue('tagField.input', 'some_tag');
 
     // Trying to get the monaco text editor to work with CITs.
-    // form.setInputValue('ifField.textarea', "ctx?.network?.name == 'Guest'");
+    const jsonContent = JSON.stringify({ content: "ctx?.network?.name == 'Guest'" });
+    find('mockCodeEditor').simulate('change', { jsonContent });
 
     // Save the field
     await saveNewProcessor();
@@ -116,7 +118,7 @@ describe('Processor: Bytes', () => {
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
       ignore_failure: true,
-      if: undefined,
+      if: jsonContent,
       tag: 'some_tag',
       ignore_missing: undefined,
       target_field: 'target_field',
