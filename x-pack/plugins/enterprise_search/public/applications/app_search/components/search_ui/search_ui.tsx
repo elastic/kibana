@@ -27,6 +27,7 @@ import { DOCS_PREFIX } from '../../routes';
 import { getEngineBreadcrumbs } from '../engine';
 
 import { SearchUIForm } from './components/search_ui_form';
+import { SearchUIGraphic } from './components/search_ui_graphic';
 import { SEARCH_UI_TITLE } from './constants';
 import { SearchUILogic } from './search_ui_logic';
 
@@ -82,7 +83,9 @@ export const SearchUI: React.FC = () => {
             <EuiSpacer />
             <SearchUIForm />
           </EuiFlexItem>
-          <EuiFlexItem />
+          <EuiFlexItem>
+            <SearchUIGraphic />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContentBody>
     </>

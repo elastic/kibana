@@ -1,0 +1,188 @@
+.search-ui-graphic {
+  transform-style: preserve-3d;
+  transform: rotate3d(0, 1, 0, -8deg);
+
+  #search-area {
+    .outer-box {
+      fill:  $euiColorLightShade;
+    }
+    .field {
+      fill: $euiColorEmptyShade;
+    }
+    .search-icon {
+      fill: $euiColorDarkShade;
+    }
+    .type {
+      fill: $euiColorDarkShade;
+    }
+  }
+  #background {
+    fill: $euiColorLightestShade;
+  }
+  #results {
+    .outer-box {
+      fill: $euiColorEmptyShade;
+      stroke: $euiColorLightShade;
+      stroke-width: 1px;
+    }
+    .shoe {
+      fill: $euiColorMediumShade;
+    }
+    .url {
+      fill: $euiColorDarkShade;
+      transform: translateY(5px);
+    }
+    .title-copy {
+      fill: $euiColorDarkShade;
+    }
+    .title-box {
+      fill: $euiColorEmptyShade;
+    }
+    .block-in {
+      fill: $euiColorLightShade;
+    }
+  }
+  #filter {
+    .outer-box {
+      fill: $euiColorEmptyShade;
+      stroke: $euiColorLightShade;
+      stroke-width: 1px;
+    }
+    .header {
+      fill: $euiColorDarkShade;
+    }
+    .checkbox {
+      fill: $euiColorDarkShade;
+    }
+    .check {
+      fill: $euiColorEmptyShade;
+    }
+    .filter-copy {
+      fill: $euiColorDarkShade;
+    }
+  }
+  #sort {
+    .outer-box {
+      fill: $euiColorEmptyShade;
+      stroke: $euiColorLightShade;
+      stroke-width: 1px;
+    }
+    .header {
+      fill: $euiColorDarkShade;
+    }
+    .select-copy {
+      fill: $euiColorDarkShade;
+    }
+    .select-box {
+      fill: $euiColorEmptyShade;
+      stroke: $euiColorLightShade;
+      stroke-width: 1px;
+    }
+    .select-control {
+      fill: $euiColorDarkShade;
+    }
+  }
+  #pagination {
+    .outer-box {
+      fill:  $euiColorLightShade;
+    }
+    .arrow {
+      fill: $euiColorEmptyShade;
+    }
+  }
+
+  &.active-title {
+    #results {
+      .title-box {
+        fill: $euiColorEmptyShade;
+        stroke: $euiColorPrimary;
+        stroke-width: 1px;
+      }
+      .title-copy {
+        fill: $euiColorPrimary;
+      }
+      .outer-box {
+        fill: $euiColorEmptyShade;
+        stroke: $euiColorPrimary;
+      }
+      .url {
+        fill: $euiColorPrimary;
+        opacity: .1;
+      }
+      .shoe {
+        fill: $euiColorPrimary;
+        opacity: .1;
+      }
+    }
+  }
+
+  &.active-url {
+    #results {
+      .outer-box {
+        fill: $euiColorEmptyShade;
+        stroke: $euiColorPrimary;
+        stroke-width: 1px;
+      }
+      .url {
+        fill: $euiColorPrimary;
+      }
+      .title-box {
+        fill: $euiColorEmptyShade;
+      }
+      .title-copy {
+        fill: $euiColorPrimary;
+        opacity: .1;
+      }
+      .shoe {
+        fill: $euiColorPrimary;
+        opacity: .1;
+      }
+    }
+  }
+
+  &.active-filter {
+    #filter {
+      .outer-box {
+        fill: $euiColorEmptyShade;
+        stroke: $euiColorPrimary;
+        stroke-width: 2px;
+      }
+      .header {
+        fill: $euiColorPrimary;
+      }
+      .checkbox {
+        fill: $euiColorPrimary;
+      }
+      .check {
+        fill: $euiColorEmptyShade;
+      }
+      .filter-copy {
+        fill: $euiColorPrimary;
+      }
+    }
+  }
+
+  &.active-sort {
+    #sort {
+      .outer-box {
+        fill: $euiColorEmptyShade;
+        stroke: $euiColorPrimary;
+        stroke-width: 2px;
+      }
+      .header {
+        fill:  $euiColorPrimary;
+      }
+      .select-copy {
+        fill:  $euiColorPrimary;
+      }
+      .select-box {
+        fill: $euiColorEmptyShade;
+        stroke:  $euiColorPrimary;
+        stroke-width: 1px;
+      }
+      .select-control {
+        fill:  $euiColorPrimary;
+      }
+    }
+  }
+}
