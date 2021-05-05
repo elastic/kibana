@@ -24,17 +24,12 @@ export interface EditorFrameState extends PreviewState {
   stagedPreview?: PreviewState;
   activeDatasourceId: string | null;
   activeData?: TableInspectorAdapter;
-  lastRuntimeError?: Error;
 }
 
 export type Action =
   | {
       type: 'RESET';
       state: EditorFrameState;
-    }
-  | {
-      type: 'RUNTIME_ERROR';
-      error: Error;
     }
   | {
       type: 'UPDATE_TITLE';
@@ -149,14 +144,11 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return action.state;
     case 'UPDATE_TITLE':
       return { ...state, title: action.title };
-    case 'RUNTIME_ERROR':
-      return { ...state, lastRuntimeError: action.error };
     case 'UPDATE_STATE':
       return action.updater(state);
     case 'UPDATE_ACTIVE_DATA':
       return {
         ...state,
-        lastRuntimeError: undefined,
         activeData: { ...action.tables },
       };
     case 'UPDATE_LAYER':
