@@ -73,7 +73,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     this.setState({
       indexName,
       ...(indexError ? { indexError } : { indexError: '' }),
-    })
+    });
     if (indexName && !indexError) {
       this.props.enableNextBtn();
     } else {
