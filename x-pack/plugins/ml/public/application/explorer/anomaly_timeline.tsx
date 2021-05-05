@@ -57,10 +57,10 @@ const AnomalyTimelineHelpPopover = () => {
       })}
     >
       <p>
-        {i18n.translate('xpack.ml.explorer.anomalyTimelinePopoverBasicExplanation', {
-          defaultMessage:
-            'Swim lanes provide an overview of the buckets of data that have been analyzed within the selected time period. You can view an overall swim lane or view them by job or influencer.',
-        })}
+        <FormattedMessage
+          id="xpack.ml.explorer.anomalyTimelinePopoverBasicExplanation"
+          defaultMessage="Swim lanes provide an overview of the buckets of data that have been analyzed within the selected time period. You can view an overall swim lane or view them by job or influencer."
+         />
       </p>
       <p>
         {i18n.translate('xpack.ml.explorer.anomalyTimelinePopoverScoreExplanation', {
