@@ -6,12 +6,14 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiTitle,
   // @ts-ignore
@@ -23,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
+import { useLink } from '../../../hooks';
 import { useLocalSearch, searchIdField } from '../hooks';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
@@ -33,9 +36,16 @@ interface ListProps {
   controls?: ReactNode;
   title: string;
   list: PackageList;
+  setSelectedCategory: (category: string) => void;
 }
 
-export function PackageListGrid({ isLoading, controls, title, list }: ListProps) {
+export function PackageListGrid({
+  isLoading,
+  controls,
+  title,
+  list,
+  setSelectedCategory,
+}: ListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
   const [query, setQuery] = useState<Query | null>(initialQuery);
@@ -56,6 +66,11 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
       setQuery(query);
       setSearchTerm(userInput);
     }
+  };
+
+  const resetQuery = () => {
+    setQuery(initialQuery);
+    setSearchTerm('');
   };
 
   const controlsContent = <ControlsColumn title={title} controls={controls} />;
@@ -90,6 +105,11 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
         />
         <EuiSpacer />
         {gridContent}
+        <EuiSpacer size="xxl" />
+        <MissingIntegrationContent
+          resetQuery={resetQuery}
+          setSelectedCategory={setSelectedCategory}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -129,17 +149,68 @@ function GridColumn({ list }: GridColumnProps) {
           </EuiFlexItem>
         ))
       ) : (
-        <EuiFlexItem>
+        <EuiFlexItem grow={3}>
           <EuiText>
             <p>
               <FormattedMessage
                 id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                defaultMessage="No packages found"
+                defaultMessage="We didn't find any integrations matching your search term. Please try another keyword or browse using the categories on the left."
               />
             </p>
           </EuiText>
         </EuiFlexItem>
       )}
     </EuiFlexGrid>
+  );
+}
+
+interface MissingIntegrationContentProps {
+  resetQuery: () => void;
+  setSelectedCategory: (category: string) => void;
+}
+
+function MissingIntegrationContent({
+  resetQuery,
+  setSelectedCategory,
+}: MissingIntegrationContentProps) {
+  const history = useHistory();
+  const { getPath } = useLink();
+
+  const handleCustomInputsLinkClick = useCallback(() => {
+    resetQuery();
+    setSelectedCategory('custom');
+
+    history.push({
+      pathname: getPath('integrations_all'),
+    });
+  }, [history, getPath, resetQuery, setSelectedCategory]);
+
+  return (
+    <EuiText>
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.integrations.missing"
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations using our {discussForumLink}."
+          values={{
+            customInputsLink: (
+              <EuiLink onClick={handleCustomInputsLinkClick}>
+                <FormattedMessage
+                  id="xpack.fleet.integrations.customInputsLink"
+                  defaultMessage="custom inputs"
+                />
+              </EuiLink>
+            ),
+            discussForumLink: (
+              <EuiLink href="https://discuss.elastic.co/tag/fleet" external target="_blank">
+                <FormattedMessage
+                  id="xpack.fleet.integrations.discussForumLink"
+                  defaultMessage="discuss forum"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiText>
   );
 }

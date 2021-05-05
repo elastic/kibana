@@ -114,6 +114,7 @@ function InstalledPackages() {
       controls={controls}
       title={title}
       list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
+      setSelectedCategory={setSelectedCategory}
     />
   );
 }
@@ -167,6 +168,7 @@ function AvailablePackages() {
       title={title}
       controls={controls}
       list={packages}
+      setSelectedCategory={setSelectedCategory}
     />
   );
 }
