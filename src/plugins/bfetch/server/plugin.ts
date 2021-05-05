@@ -142,15 +142,8 @@ export class BfetchServerPlugin
 
   public stop() {}
 
-  private async getCompressionDisabled(
-    request: KibanaRequest,
-    getStartServices: StartServicesAccessor
-  ) {
-    const [core] = await getStartServices();
-    const uiSettingsClient = core.uiSettings.asScopedToClient(
-      core.savedObjects.getScopedClient(request)
-    );
-    return uiSettingsClient.get(DISABLE_SEARCH_COMPRESSION);
+  private getCompressionDisabled(request: KibanaRequest) {
+    return !request.headers['x-encode-chunks'];
   }
 
   private addStreamingResponseRoute = ({
@@ -170,10 +163,9 @@ export class BfetchServerPlugin
         },
       },
       async (context, request, response) => {
-        const compressionDisabled = await this.getCompressionDisabled(request, getStartServices);
-
         const handlerInstance = handler(request);
         const data = request.body;
+        const compressionDisabled = this.getCompressionDisabled(request);
         return response.ok({
           headers: streamingHeaders,
           body: createStream(handlerInstance.getResponseStream(data), logger, compressionDisabled),
@@ -194,7 +186,7 @@ export class BfetchServerPlugin
     response
   ) => {
     const response$ = await streamHandler(context, request);
-    const compressionDisabled = await this.getCompressionDisabled(request, getStartServices);
+    const compressionDisabled = this.getCompressionDisabled(request);
     return response.ok({
       headers: streamingHeaders,
       body: createStream(response$, logger, compressionDisabled),

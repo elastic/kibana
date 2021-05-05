@@ -14,11 +14,12 @@ import { Stream, PassThrough } from 'stream';
 import { constants, deflate } from 'zlib';
 
 const delimiter = '\n';
+const pDeflate = promisify(deflate);
 
 async function zipMessageToStream(output: PassThrough, message: string) {
   return new Promise(async (resolve, reject) => {
     try {
-      const gzipped = await promisify(deflate)(message, {
+      const gzipped = await pDeflate(message, {
         flush: constants.Z_SYNC_FLUSH,
       });
       output.write(gzipped.toString('base64'));

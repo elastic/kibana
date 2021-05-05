@@ -7,8 +7,9 @@
  */
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
+import { StartServicesAccessor } from 'kibana/public';
 import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
-import { removeLeadingSlash, DISABLE_SEARCH_COMPRESSION } from '../common';
+import { removeLeadingSlash } from '../common';
 import {
   createStreamingBatchedFunction,
   StreamingBatchedFunctionParams,
@@ -40,7 +41,6 @@ export class BfetchPublicPlugin
       BfetchPublicStartDependencies
     > {
   private contract!: BfetchPublicContract;
-  private disabledCompression!: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -49,7 +49,7 @@ export class BfetchPublicPlugin
     const basePath = core.http.basePath.get();
 
     const fetchStreaming = this.fetchStreaming(version, basePath);
-    const batchedFunction = this.batchedFunction(fetchStreaming);
+    const batchedFunction = this.batchedFunction(fetchStreaming, core.getStartServices);
 
     this.contract = {
       fetchStreaming,
@@ -60,7 +60,6 @@ export class BfetchPublicPlugin
   }
 
   public start(core: CoreStart, plugins: BfetchPublicStartDependencies): BfetchPublicStart {
-    this.disabledCompression = core.uiSettings.get<boolean>(DISABLE_SEARCH_COMPRESSION, true);
     return this.contract;
   }
 
@@ -81,11 +80,12 @@ export class BfetchPublicPlugin
     });
 
   private batchedFunction = (
-    fetchStreaming: BfetchPublicContract['fetchStreaming']
+    fetchStreaming: BfetchPublicContract['fetchStreaming'],
+    getStartServices: StartServicesAccessor
   ): BfetchPublicContract['batchedFunction'] => (params) =>
     createStreamingBatchedFunction({
       ...params,
       fetchStreaming: params.fetchStreaming || fetchStreaming,
-      disabledCompression: this.disabledCompression,
+      getStartServices,
     });
 }
