@@ -55,14 +55,14 @@ describe('getColumns', () => {
       checkboxColumn = getColumns(defaultProps)[0] as Column;
     });
 
-    test('should be disabled when the field does not exist', () => {
+    test('should be enabled when the field does not exist', () => {
       const testField = 'nonExistingField';
       const wrapper = mount(
         <TestProviders>{checkboxColumn.render(testField, testData)}</TestProviders>
       ) as ReactWrapper;
       expect(
         wrapper.find(`[data-test-subj="toggle-field-${testField}"]`).first().prop('disabled')
-      ).toBe(true);
+      ).toBe(false);
     });
 
     test('should be enabled when the field does exist', () => {

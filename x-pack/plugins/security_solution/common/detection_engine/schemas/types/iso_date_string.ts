@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the IsoDateString as:
  *   - A string that is an ISOString
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const IsoDateString = new t.Type<string, string, unknown>(
   'IsoDateString',

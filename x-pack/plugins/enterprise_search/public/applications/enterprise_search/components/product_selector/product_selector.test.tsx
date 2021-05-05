@@ -13,8 +13,10 @@ import { shallow } from 'enzyme';
 
 import { EuiPage } from '@elastic/eui';
 
+import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
+import { TrialCallout } from '../trial_callout';
 
 import { ProductSelector } from './';
 
@@ -26,6 +28,15 @@ describe('ProductSelector', () => {
     expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
     expect(wrapper.find(ProductCard)).toHaveLength(2);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
+    expect(wrapper.find(LicenseCallout)).toHaveLength(0);
+  });
+
+  it('renders the license and trial callouts', () => {
+    setMockValues({ config: { host: 'localhost' } });
+    const wrapper = shallow(<ProductSelector access={{}} />);
+
+    expect(wrapper.find(TrialCallout)).toHaveLength(1);
+    expect(wrapper.find(LicenseCallout)).toHaveLength(1);
   });
 
   describe('access checks when host is set', () => {

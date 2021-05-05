@@ -201,17 +201,19 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
             </Section>
           </div>
         </ActionMenu>
-        <AlertFlyout
-          filter={
-            options.fields
-              ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-              : ''
-          }
-          options={options}
-          nodeType={nodeType}
-          setVisible={setFlyoutVisible}
-          visible={flyoutVisible}
-        />
+        {flyoutVisible && (
+          <AlertFlyout
+            filter={
+              options.fields
+                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+                : ''
+            }
+            options={options}
+            nodeType={nodeType}
+            setVisible={setFlyoutVisible}
+            visible={flyoutVisible}
+          />
+        )}
       </>
     );
   }
