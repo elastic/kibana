@@ -156,7 +156,7 @@ A subset of *Lens* visualizations support value labels.
 [role="screenshot"]
 image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
 
-Note: it is not possible yet to control the labels position in bar visualizations.
+NOTE: In bar charts, you are unable to move the label positions.
 
 * *Pie*, *Donut*, and *Treemap*
 +
