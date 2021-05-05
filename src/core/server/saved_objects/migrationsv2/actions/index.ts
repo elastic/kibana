@@ -107,34 +107,37 @@ export const setWriteBlock = (
   IndexNotFound | RetryableEsClientError,
   'set_write_block_succeeded'
 > => () => {
-  return client.indices
-    .addBlock<{
-      acknowledged: boolean;
-      shards_acknowledged: boolean;
-    }>(
-      {
-        index,
-        block: 'write',
-      },
-      { maxRetries: 0 /** handle retry ourselves for now */ }
-    )
-    .then((res: any) => {
-      return res.body.acknowledged === true
-        ? Either.right('set_write_block_succeeded' as const)
-        : Either.left({
-            type: 'retryable_es_client_error' as const,
-            message: 'set_write_block_failed',
-          });
-    })
-    .catch((e: ElasticsearchClientError) => {
-      if (e instanceof EsErrors.ResponseError) {
-        if (e.message === 'index_not_found_exception') {
-          return Either.left({ type: 'index_not_found_exception' as const, index });
+  return (
+    client.indices
+      .addBlock<{
+        acknowledged: boolean;
+        shards_acknowledged: boolean;
+      }>(
+        {
+          index,
+          block: 'write',
+        },
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      )
+      // not typed yet
+      .then((res: any) => {
+        return res.body.acknowledged === true
+          ? Either.right('set_write_block_succeeded' as const)
+          : Either.left({
+              type: 'retryable_es_client_error' as const,
+              message: 'set_write_block_failed',
+            });
+      })
+      .catch((e: ElasticsearchClientError) => {
+        if (e instanceof EsErrors.ResponseError) {
+          if (e.body?.error?.type === 'index_not_found_exception') {
+            return Either.left({ type: 'index_not_found_exception' as const, index });
+          }
         }
-      }
-      throw e;
-    })
-    .catch(catchRetryableEsClientErrors);
+        throw e;
+      })
+      .catch(catchRetryableEsClientErrors)
+  );
 };
 
 /**
@@ -263,12 +266,12 @@ export const cloneIndex = (
         });
       })
       .catch((error: EsErrors.ResponseError) => {
-        if (error.body.error.type === 'index_not_found_exception') {
+        if (error?.body?.error?.type === 'index_not_found_exception') {
           return Either.left({
             type: 'index_not_found_exception' as const,
             index: error.body.error.index,
           });
-        } else if (error.body.error.type === 'resource_already_exists_exception') {
+        } else if (error?.body?.error?.type === 'resource_already_exists_exception') {
           /**
            * If the target index already exists it means a previous clone
            * operation had already been started. However, we can't be sure
@@ -452,21 +455,18 @@ export interface ReadWithPit {
 
 /*
  * Requests documents from the index using PIT mechanism.
- * Filter unusedTypesToExclude documents out to exclude them from being migrated.
  * */
 export const readWithPit = (
   client: ElasticsearchClient,
   pitId: string,
-  /* When reading we use a source query to exclude saved objects types which
-   * are no longer used. These saved objects will still be kept in the outdated
-   * index for backup purposes, but won't be available in the upgraded index.
-   */
-  unusedTypesQuery: Option.Option<estypes.QueryContainer>,
+  query: estypes.QueryContainer,
   batchSize: number,
-  searchAfter?: number[]
+  searchAfter?: number[],
+  seqNoPrimaryTerm?: boolean
 ): TaskEither.TaskEither<RetryableEsClientError, ReadWithPit> => () => {
   return client
     .search<SavedObjectsRawDoc>({
+      seq_no_primary_term: seqNoPrimaryTerm,
       body: {
         // Sort fields are required to use searchAfter
         sort: {
@@ -479,8 +479,7 @@ export const readWithPit = (
         // Improve performance by not calculating the total number of hits
         // matching the query.
         track_total_hits: false,
-        // Exclude saved object types
-        query: Option.isSome(unusedTypesQuery) ? unusedTypesQuery.value : undefined,
+        query,
       },
     })
     .then((response) => {
@@ -531,6 +530,7 @@ export const transformDocs = (
   transformRawDocs: TransformRawDocs,
   outdatedDocuments: SavedObjectsRawDoc[],
   index: string,
+  // used for testing purposes only
   refresh: estypes.Refresh
 ): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotFound | TargetIndexHadWriteBlock,
@@ -552,6 +552,22 @@ export interface ReindexResponse {
 }
 
 /**
+ * Wait for Elasticsearch to reindex all the changes.
+ */
+export const refreshIndex = (
+  client: ElasticsearchClient,
+  targetIndex: string
+): TaskEither.TaskEither<RetryableEsClientError, { refreshed: boolean }> => () => {
+  return client.indices
+    .refresh({
+      index: targetIndex,
+    })
+    .then(() => {
+      return Either.right({ refreshed: true });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+/**
  * Reindex documents from the `sourceIndex` into the `targetIndex`. Returns a
  * task ID which can be tracked for progress.
  *
@@ -569,7 +585,7 @@ export const reindex = (
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesQuery: Option.Option<estypes.QueryContainer>
+  unusedTypesQuery: estypes.QueryContainer
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -584,10 +600,7 @@ export const reindex = (
           // Set reindex batch size
           size: BATCH_SIZE,
           // Exclude saved object types
-          query: Option.fold<estypes.QueryContainer, estypes.QueryContainer | undefined>(
-            () => undefined,
-            (query) => query
-          )(unusedTypesQuery),
+          query: unusedTypesQuery,
         },
         dest: {
           index: targetIndex,
@@ -785,22 +798,22 @@ export const updateAliases = (
     })
     .catch((err: EsErrors.ElasticsearchClientError) => {
       if (err instanceof EsErrors.ResponseError) {
-        if (err.body.error.type === 'index_not_found_exception') {
+        if (err?.body?.error?.type === 'index_not_found_exception') {
           return Either.left({
             type: 'index_not_found_exception' as const,
             index: err.body.error.index,
           });
         } else if (
-          err.body.error.type === 'illegal_argument_exception' &&
-          err.body.error.reason.match(
+          err?.body?.error?.type === 'illegal_argument_exception' &&
+          err?.body?.error?.reason?.match(
             /The provided expression \[.+\] matches an alias, specify the corresponding concrete indices instead./
           )
         ) {
           return Either.left({ type: 'remove_index_not_a_concrete_index' as const });
         } else if (
-          err.body.error.type === 'aliases_not_found_exception' ||
-          (err.body.error.type === 'resource_not_found_exception' &&
-            err.body.error.reason.match(/required alias \[.+\] does not exist/))
+          err?.body?.error?.type === 'aliases_not_found_exception' ||
+          (err?.body?.error?.type === 'resource_not_found_exception' &&
+            err?.body?.error?.reason?.match(/required alias \[.+\] does not exist/))
         ) {
           return Either.left({
             type: 'alias_not_found_exception' as const,
@@ -893,7 +906,7 @@ export const createIndex = (
         });
       })
       .catch((error) => {
-        if (error.body.error.type === 'resource_already_exists_exception') {
+        if (error?.body?.error?.type === 'resource_already_exists_exception') {
           /**
            * If the target index already exists it means a previous create
            * operation had already been started. However, we can't be sure
@@ -997,6 +1010,8 @@ interface SearchForOutdatedDocumentsOptions {
  * Search for outdated saved object documents with the provided query. Will
  * return one batch of documents. Searching should be repeated until no more
  * outdated documents can be found.
+ *
+ * Used for testing only
  */
 export const searchForOutdatedDocuments = (
   client: ElasticsearchClient,
