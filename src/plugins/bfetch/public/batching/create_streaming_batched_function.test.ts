@@ -52,11 +52,16 @@ const setup = () => {
 };
 
 describe('createStreamingBatchedFunction()', () => {
+  let getCompressionDisabled: any;
+  beforeEach(() => {
+    getCompressionDisabled = jest.fn().mockResolvedValue(true);
+  });
   test('returns a function', () => {
     const { fetchStreaming } = setup();
     const fn = createStreamingBatchedFunction({
       url: '/test',
       fetchStreaming,
+      getCompressionDisabled,
     });
     expect(typeof fn).toBe('function');
   });
@@ -66,6 +71,7 @@ describe('createStreamingBatchedFunction()', () => {
     const fn = createStreamingBatchedFunction({
       url: '/test',
       fetchStreaming,
+      getCompressionDisabled,
     });
     const res = fn({});
     expect(typeof res.then).toBe('function');
@@ -79,6 +85,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
@@ -98,6 +105,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
@@ -112,6 +120,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       fn({ foo: 'bar' });
@@ -130,6 +139,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       fn({ foo: 'bar' });
@@ -151,6 +161,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
@@ -169,6 +180,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const abortController = new AbortController();
@@ -191,6 +203,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       fn({ a: '1' });
@@ -214,6 +227,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       fn({ a: '1' });
@@ -234,6 +248,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const promise1 = fn({ a: '1' });
@@ -251,6 +266,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const promise1 = fn({ a: '1' });
@@ -292,6 +308,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const promise1 = fn({ a: '1' });
@@ -326,6 +343,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const promise1 = fn({ a: '1' });
@@ -366,6 +384,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const promise1 = fn({ a: '1' });
@@ -407,6 +426,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const promise = fn({ a: '1' });
@@ -435,6 +455,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const promise1 = of(fn({ a: '1' }));
@@ -487,6 +508,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          getCompressionDisabled,
         });
 
         const abortController = new AbortController();
@@ -516,6 +538,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          getCompressionDisabled,
         });
 
         const abortController = new AbortController();
@@ -554,6 +577,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          getCompressionDisabled,
         });
 
         const promise1 = of(fn({ a: '1' }));
@@ -584,6 +608,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          getCompressionDisabled,
         });
 
         const promise1 = of(fn({ a: '1' }));
@@ -621,6 +646,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          getCompressionDisabled,
         });
 
         const promise1 = of(fn({ a: '1' }));
@@ -653,6 +679,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          getCompressionDisabled,
         });
 
         const promise1 = of(fn({ a: '1' }));
@@ -689,6 +716,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        getCompressionDisabled,
       });
 
       const promise1 = of(fn({ a: '1' }));

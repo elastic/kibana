@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from 'kibana/public';
 import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
@@ -15,7 +14,6 @@ import {
   ErrorLike,
   normalizeError,
   inflateResponse,
-  DISABLE_SEARCH_COMPRESSION,
 } from '../../common';
 import { fetchStreaming, split } from '../streaming';
 import { BatchedFunc, BatchItem } from './types';
@@ -53,7 +51,7 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
   /**
    * Disabled zlib compression of response chunks.
    */
-  getStartServices: StartServicesAccessor;
+  getCompressionDisabled: () => Promise<boolean>;
 }
 
 /**
@@ -71,7 +69,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
-    getStartServices,
+    getCompressionDisabled,
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
@@ -121,9 +119,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           abortController.abort();
         });
         const batch = items.map((item) => item.payload);
-
-        const [core] = await getStartServices();
-        const disabledCompression = core.uiSettings.get<boolean>(DISABLE_SEARCH_COMPRESSION);
+        const disabledCompression = await getCompressionDisabled();
 
         const { stream } = fetchStreamingInjected({
           url,
