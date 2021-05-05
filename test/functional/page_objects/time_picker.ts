@@ -26,6 +26,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const log = getService('log');
   const find = getService('find');
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const { header } = getPageObjects(['header']);
   const kibanaServer = getService('kibanaServer');
@@ -68,7 +69,9 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     private async getTimePickerPanel() {
-      return await find.byCssSelector('div.euiPopover__panel-isOpen');
+      return await retry.try(async () => {
+        return await find.byCssSelector('div.euiPopover__panel-isOpen');
+      });
     }
 
     private async waitPanelIsGone(panelElement: WebElementWrapper) {
