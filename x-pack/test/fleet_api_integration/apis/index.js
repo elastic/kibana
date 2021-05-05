@@ -7,24 +7,17 @@
 
 export default function ({ loadTestFile }) {
   describe('Fleet Endpoints', function () {
-    this.tags('ciGroup10');
+    this.tags('ciGroupDocker');
     // EPM
     loadTestFile(require.resolve('./epm/index'));
 
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup'));
 
-    // Agent setup
-    loadTestFile(require.resolve('./agents_setup'));
-
     // Agents
     loadTestFile(require.resolve('./agents/delete'));
     loadTestFile(require.resolve('./agents/list'));
-    loadTestFile(require.resolve('./agents/enroll'));
     loadTestFile(require.resolve('./agents/unenroll'));
-    loadTestFile(require.resolve('./agents/checkin'));
-    loadTestFile(require.resolve('./agents/acks'));
-    loadTestFile(require.resolve('./agents/complete_flow'));
     loadTestFile(require.resolve('./agents/actions'));
     loadTestFile(require.resolve('./agents/upgrade'));
     loadTestFile(require.resolve('./agents/reassign'));
@@ -50,5 +43,11 @@ export default function ({ loadTestFile }) {
 
     // Preconfiguration
     loadTestFile(require.resolve('./preconfiguration/index'));
+
+    // Service tokens
+    loadTestFile(require.resolve('./service_tokens'));
+
+    // Outputs
+    loadTestFile(require.resolve('./outputs'));
   });
 }

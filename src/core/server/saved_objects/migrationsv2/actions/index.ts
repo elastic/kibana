@@ -14,10 +14,10 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { flow } from 'fp-ts/lib/function';
-import { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
-import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
+import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
+import type { TransformRawDocs } from '../types';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
@@ -420,10 +420,150 @@ export const pickupUpdatedMappings = (
     .catch(catchRetryableEsClientErrors);
 };
 
+/** @internal */
+export interface OpenPitResponse {
+  pitId: string;
+}
+
+// how long ES should keep PIT alive
+const pitKeepAlive = '10m';
+/*
+ * Creates a lightweight view of data when the request has been initiated.
+ * See https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
+ * */
+export const openPit = (
+  client: ElasticsearchClient,
+  index: string
+): TaskEither.TaskEither<RetryableEsClientError, OpenPitResponse> => () => {
+  return client
+    .openPointInTime({
+      index,
+      keep_alive: pitKeepAlive,
+    })
+    .then((response) => Either.right({ pitId: response.body.id }))
+    .catch(catchRetryableEsClientErrors);
+};
+
+/** @internal */
+export interface ReadWithPit {
+  outdatedDocuments: SavedObjectsRawDoc[];
+  readonly lastHitSortValue: number[] | undefined;
+}
+
+/*
+ * Requests documents from the index using PIT mechanism.
+ * */
+export const readWithPit = (
+  client: ElasticsearchClient,
+  pitId: string,
+  query: estypes.QueryContainer,
+  batchSize: number,
+  searchAfter?: number[],
+  seqNoPrimaryTerm?: boolean
+): TaskEither.TaskEither<RetryableEsClientError, ReadWithPit> => () => {
+  return client
+    .search<SavedObjectsRawDoc>({
+      seq_no_primary_term: seqNoPrimaryTerm,
+      body: {
+        // Sort fields are required to use searchAfter
+        sort: {
+          // the most efficient option as order is not important for the migration
+          _shard_doc: { order: 'asc' },
+        },
+        pit: { id: pitId, keep_alive: pitKeepAlive },
+        size: batchSize,
+        search_after: searchAfter,
+        // Improve performance by not calculating the total number of hits
+        // matching the query.
+        track_total_hits: false,
+        query,
+      },
+    })
+    .then((response) => {
+      const hits = response.body.hits.hits;
+
+      if (hits.length > 0) {
+        return Either.right({
+          // @ts-expect-error @elastic/elasticsearch _source is optional
+          outdatedDocuments: hits as SavedObjectsRawDoc[],
+          lastHitSortValue: hits[hits.length - 1].sort as number[],
+        });
+      }
+
+      return Either.right({
+        outdatedDocuments: [],
+        lastHitSortValue: undefined,
+      });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+/*
+ * Closes PIT.
+ * See https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
+ * */
+export const closePit = (
+  client: ElasticsearchClient,
+  pitId: string
+): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
+  return client
+    .closePointInTime({
+      body: { id: pitId },
+    })
+    .then((response) => {
+      if (!response.body.succeeded) {
+        throw new Error(`Failed to close PointInTime with id: ${pitId}`);
+      }
+      return Either.right({});
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+/*
+ * Transform outdated docs and write them to the index.
+ * */
+export const transformDocs = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  outdatedDocuments: SavedObjectsRawDoc[],
+  index: string,
+  // used for testing purposes only
+  refresh: estypes.Refresh
+): TaskEither.TaskEither<
+  RetryableEsClientError | IndexNotFound | TargetIndexHadWriteBlock,
+  'bulk_index_succeeded'
+> =>
+  pipe(
+    TaskEither.tryCatch(
+      () => transformRawDocs(outdatedDocuments),
+      (e) => {
+        throw e;
+      }
+    ),
+    TaskEither.chain((docs) => bulkOverwriteTransformedDocuments(client, index, docs, refresh))
+  );
+
+/** @internal */
 export interface ReindexResponse {
   taskId: string;
 }
 
+/**
+ * Wait for Elasticsearch to reindex all the changes.
+ */
+export const refreshIndex = (
+  client: ElasticsearchClient,
+  targetIndex: string
+): TaskEither.TaskEither<RetryableEsClientError, { refreshed: boolean }> => () => {
+  return client.indices
+    .refresh({
+      index: targetIndex,
+    })
+    .then(() => {
+      return Either.right({ refreshed: true });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
 /**
  * Reindex documents from the `sourceIndex` into the `targetIndex`. Returns a
  * task ID which can be tracked for progress.
@@ -440,9 +580,9 @@ export const reindex = (
   requireAlias: boolean,
   /* When reindexing we use a source query to exclude saved objects types which
    * are no longer used. These saved objects will still be kept in the outdated
-   * index for backup purposes, but won't be availble in the upgraded index.
+   * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesToExclude: Option.Option<string[]>
+  unusedTypesQuery: estypes.QueryContainer
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -457,14 +597,7 @@ export const reindex = (
           // Set reindex batch size
           size: BATCH_SIZE,
           // Exclude saved object types
-          query: Option.fold<string[], QueryContainer | undefined>(
-            () => undefined,
-            (types) => ({
-              bool: {
-                must_not: types.map((type) => ({ term: { type } })),
-              },
-            })
-          )(unusedTypesToExclude),
+          query: unusedTypesQuery,
         },
         dest: {
           index: targetIndex,
@@ -494,10 +627,12 @@ interface WaitForReindexTaskFailure {
   readonly cause: { type: string; reason: string };
 }
 
+/** @internal */
 export interface TargetIndexHadWriteBlock {
   type: 'target_index_had_write_block';
 }
 
+/** @internal */
 export interface IncompatibleMappingException {
   type: 'incompatible_mapping_exception';
 }
@@ -610,14 +745,17 @@ export const waitForPickupUpdatedMappingsTask = flow(
   )
 );
 
+/** @internal */
 export interface AliasNotFound {
   type: 'alias_not_found_exception';
 }
 
+/** @internal */
 export interface RemoveIndexNotAConcreteIndex {
   type: 'remove_index_not_a_concrete_index';
 }
 
+/** @internal */
 export type AliasAction =
   | { remove_index: { index: string } }
   | { remove: { index: string; alias: string; must_exist: boolean } }
@@ -684,11 +822,19 @@ export const updateAliases = (
     .catch(catchRetryableEsClientErrors);
 };
 
+/** @internal */
 export interface AcknowledgeResponse {
   acknowledged: boolean;
   shardsAcknowledged: boolean;
 }
 
+function aliasArrayToRecord(aliases: string[]): Record<string, estypes.Alias> {
+  const result: Record<string, estypes.Alias> = {};
+  for (const alias of aliases) {
+    result[alias] = {};
+  }
+  return result;
+}
 /**
  * Creates an index with the given mappings
  *
@@ -703,16 +849,13 @@ export const createIndex = (
   client: ElasticsearchClient,
   indexName: string,
   mappings: IndexMapping,
-  aliases?: string[]
+  aliases: string[] = []
 ): TaskEither.TaskEither<RetryableEsClientError, 'create_index_succeeded'> => {
   const createIndexTask: TaskEither.TaskEither<
     RetryableEsClientError,
     AcknowledgeResponse
   > = () => {
-    const aliasesObject = (aliases ?? []).reduce((acc, alias) => {
-      acc[alias] = {};
-      return acc;
-    }, {} as Record<string, estypes.Alias>);
+    const aliasesObject = aliasArrayToRecord(aliases);
 
     return client.indices
       .create(
@@ -797,6 +940,7 @@ export const createIndex = (
   );
 };
 
+/** @internal */
 export interface UpdateAndPickupMappingsResponse {
   taskId: string;
 }
@@ -847,6 +991,8 @@ export const updateAndPickupMappings = (
     })
   );
 };
+
+/** @internal */
 export interface SearchResponse {
   outdatedDocuments: SavedObjectsRawDoc[];
 }
@@ -861,6 +1007,8 @@ interface SearchForOutdatedDocumentsOptions {
  * Search for outdated saved object documents with the provided query. Will
  * return one batch of documents. Searching should be repeated until no more
  * outdated documents can be found.
+ *
+ * Used for testing only
  */
 export const searchForOutdatedDocuments = (
   client: ElasticsearchClient,
@@ -911,7 +1059,8 @@ export const searchForOutdatedDocuments = (
 export const bulkOverwriteTransformedDocuments = (
   client: ElasticsearchClient,
   index: string,
-  transformedDocs: SavedObjectsRawDoc[]
+  transformedDocs: SavedObjectsRawDoc[],
+  refresh: estypes.Refresh
 ): TaskEither.TaskEither<RetryableEsClientError, 'bulk_index_succeeded'> => () => {
   return client
     .bulk({
@@ -924,15 +1073,7 @@ export const bulkOverwriteTransformedDocuments = (
       // system indices puts in place a hard control.
       require_alias: false,
       wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-      // Wait for a refresh to happen before returning. This ensures that when
-      // this Kibana instance searches for outdated documents, it won't find
-      // documents that were already transformed by itself or another Kibna
-      // instance. However, this causes each OUTDATED_DOCUMENTS_SEARCH ->
-      // OUTDATED_DOCUMENTS_TRANSFORM cycle to take 1s so when batches are
-      // small performance will become a lot worse.
-      // The alternative is to use a search_after with either a tie_breaker
-      // field or using a Point In Time as a cursor to go through all documents.
-      refresh: 'wait_for',
+      refresh,
       filter_path: ['items.*.error'],
       body: transformedDocs.flatMap((doc) => {
         return [

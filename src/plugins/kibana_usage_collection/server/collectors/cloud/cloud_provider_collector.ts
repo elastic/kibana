@@ -23,7 +23,7 @@ export function registerCloudProviderUsageCollector(usageCollection: UsageCollec
 
   const collector = usageCollection.makeUsageCollector<Usage | undefined>({
     type: 'cloud_provider',
-    isReady: () => Boolean(cloudDetector.getCloudDetails()),
+    isReady: () => typeof cloudDetector.getCloudDetails() !== 'undefined',
     async fetch() {
       const details = cloudDetector.getCloudDetails();
       if (!details) {

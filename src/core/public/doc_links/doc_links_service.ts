@@ -21,12 +21,16 @@ export class DocLinksService {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
     const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+    const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
+        canvas: {
+          guide: `${KIBANA_DOCS}canvas.html`,
+        },
         dashboard: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
           drilldowns: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
@@ -109,6 +113,7 @@ export class DocLinksService {
           top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
         },
         runtimeFields: {
+          overview: `${ELASTICSEARCH_DOCS}runtime.html`,
           mapping: `${ELASTICSEARCH_DOCS}runtime-mapping-fields.html`,
         },
         scriptedFields: {
@@ -129,9 +134,51 @@ export class DocLinksService {
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
+        upgradeAssistant: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/upgrade-assistant.html`,
         elasticsearch: {
+          docsBase: `${ELASTICSEARCH_DOCS}`,
+          asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
+          dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
+          indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
+          indexTemplates: `${ELASTICSEARCH_DOCS}indices-templates.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
+          mappingAnalyzer: `${ELASTICSEARCH_DOCS}analyzer.html`,
+          mappingCoerce: `${ELASTICSEARCH_DOCS}coerce.html`,
+          mappingCopyTo: `${ELASTICSEARCH_DOCS}copy-to.html`,
+          mappingDocValues: `${ELASTICSEARCH_DOCS}doc-values.html`,
+          mappingDynamic: `${ELASTICSEARCH_DOCS}dynamic.html`,
+          mappingDynamicFields: `${ELASTICSEARCH_DOCS}dynamic-field-mapping.html`,
+          mappingDynamicTemplates: `${ELASTICSEARCH_DOCS}dynamic-templates.html`,
+          mappingEagerGlobalOrdinals: `${ELASTICSEARCH_DOCS}eager-global-ordinals.html`,
+          mappingEnabled: `${ELASTICSEARCH_DOCS}enabled.html`,
+          mappingFieldData: `${ELASTICSEARCH_DOCS}text.html#fielddata-mapping-param`,
+          mappingFieldDataEnable: `${ELASTICSEARCH_DOCS}text.html#before-enabling-fielddata`,
+          mappingFieldDataFilter: `${ELASTICSEARCH_DOCS}text.html#field-data-filtering`,
+          mappingFieldDataTypes: `${ELASTICSEARCH_DOCS}mapping-types.html`,
+          mappingFormat: `${ELASTICSEARCH_DOCS}mapping-date-format.html`,
+          mappingIgnoreAbove: `${ELASTICSEARCH_DOCS}ignore-above.html`,
+          mappingIgnoreMalformed: `${ELASTICSEARCH_DOCS}ignore-malformed.html`,
+          mappingIndex: `${ELASTICSEARCH_DOCS}mapping-index.html`,
+          mappingIndexOptions: `${ELASTICSEARCH_DOCS}index-options.html`,
+          mappingIndexPhrases: `${ELASTICSEARCH_DOCS}index-phrases.html`,
+          mappingIndexPrefixes: `${ELASTICSEARCH_DOCS}index-prefixes.html`,
+          mappingJoinFieldsPerformance: `${ELASTICSEARCH_DOCS}parent-join.html#_parent_join_and_performance`,
+          mappingMeta: `${ELASTICSEARCH_DOCS}mapping-field-meta.html`,
+          mappingMetaFields: `${ELASTICSEARCH_DOCS}mapping-meta-field.html`,
+          mappingNormalizer: `${ELASTICSEARCH_DOCS}normalizer.html`,
+          mappingNorms: `${ELASTICSEARCH_DOCS}norms.html`,
+          mappingNullValue: `${ELASTICSEARCH_DOCS}null-value.html`,
+          mappingParameters: `${ELASTICSEARCH_DOCS}mapping-params.html`,
+          mappingPositionIncrementGap: `${ELASTICSEARCH_DOCS}position-increment-gap.html`,
+          mappingRankFeatureFields: `${ELASTICSEARCH_DOCS}rank-feature.html`,
+          mappingRouting: `${ELASTICSEARCH_DOCS}mapping-routing-field.html`,
+          mappingSimilarity: `${ELASTICSEARCH_DOCS}similarity.html`,
+          mappingSourceFields: `${ELASTICSEARCH_DOCS}mapping-source-field.html`,
+          mappingSourceFieldsDisable: `${ELASTICSEARCH_DOCS}mapping-source-field.html#disable-source-field`,
+          mappingStore: `${ELASTICSEARCH_DOCS}mapping-store.html`,
+          mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
+          mappingTypesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           remoteClusters: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html`,
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
@@ -139,6 +186,7 @@ export class DocLinksService {
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
           transportSettings: `${ELASTICSEARCH_DOCS}modules-transport.html`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
+          deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
         },
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
@@ -146,17 +194,22 @@ export class DocLinksService {
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
-          luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
-          queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
           kueryQuerySyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
+          luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
+          percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
+          queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
+        },
+        search: {
+          sessions: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/search-sessions.html`,
         },
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
           dateMathIndexNames: `${ELASTICSEARCH_DOCS}date-math-index-names.html`,
         },
         management: {
-          kibanaSearchSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
           dashboardSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-dashboard-settings`,
+          indexManagement: `${ELASTICSEARCH_DOCS}index-mgmt.html`,
+          kibanaSearchSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
           visualizationSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-visualization-settings`,
         },
         ml: {
@@ -199,10 +252,10 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
         },
         alerting: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/managing-alerts-and-actions.html`,
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-management.html`,
           actionTypes: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/action-types.html`,
           emailAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html`,
-          emailActionConfig: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html#configuring-email`,
+          emailActionConfig: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html`,
           generalSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-action-type.html`,
           esQuery: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/rule-type-es-query.html`,
@@ -258,6 +311,10 @@ export class DocLinksService {
           skippingDisconnectedClusters: `${ELASTICSEARCH_DOCS}modules-cross-cluster-search.html#skip-unavailable-clusters`,
         },
         apis: {
+          bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
+          byteSizeUnits: `${ELASTICSEARCH_DOCS}common-options.html#byte-units`,
+          createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
+          createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
           createSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
@@ -274,9 +331,11 @@ export class DocLinksService {
           painlessExecuteAPIContexts: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html#_contexts`,
           putComponentTemplateMetadata: `${ELASTICSEARCH_DOCS}indices-component-template.html#component-templates-metadata`,
           putEnrichPolicy: `${ELASTICSEARCH_DOCS}put-enrich-policy-api.html`,
+          putIndexTemplateV1: `${ELASTICSEARCH_DOCS}indices-templates-v1.html`,
           putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
           simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
+          timeUnits: `${ELASTICSEARCH_DOCS}common-options.html#time-units`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
         plugins: {
@@ -349,6 +408,9 @@ export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
+    readonly canvas: {
+      readonly guide: string;
+    };
     readonly dashboard: {
       readonly guide: string;
       readonly drilldowns: string;
@@ -429,6 +491,7 @@ export interface DocLinksStart {
       readonly top_hits: string;
     };
     readonly runtimeFields: {
+      readonly overview: string;
       readonly mapping: string;
     };
     readonly scriptedFields: {
@@ -441,6 +504,9 @@ export interface DocLinksStart {
       readonly painlessWalkthrough: string;
       readonly luceneExpressions: string;
     };
+    readonly search: {
+      readonly sessions: string;
+    };
     readonly indexPatterns: {
       readonly introduction: string;
       readonly fieldFormattersNumber: string;
@@ -448,6 +514,7 @@ export interface DocLinksStart {
     };
     readonly addData: string;
     readonly kibana: string;
+    readonly upgradeAssistant: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
       readonly guide: string;
@@ -455,9 +522,10 @@ export interface DocLinksStart {
     };
     readonly query: {
       readonly eql: string;
-      readonly luceneQuerySyntax: string;
-      readonly queryDsl: string;
       readonly kueryQuerySyntax: string;
+      readonly luceneQuerySyntax: string;
+      readonly percolate: string;
+      readonly queryDsl: string;
     };
     readonly date: {
       readonly dateMath: string;
@@ -468,6 +536,10 @@ export interface DocLinksStart {
     readonly transforms: Record<string, string>;
     readonly visualize: Record<string, string>;
     readonly apis: Readonly<{
+      bulkIndexAlias: string;
+      byteSizeUnits: string;
+      createAutoFollowPattern: string;
+      createFollower: string;
       createIndex: string;
       createSnapshotLifecyclePolicy: string;
       createRoleMapping: string;
@@ -484,8 +556,10 @@ export interface DocLinksStart {
       painlessExecuteAPIContexts: string;
       putComponentTemplateMetadata: string;
       putSnapshotLifecyclePolicy: string;
+      putIndexTemplateV1: string;
       putWatch: string;
       simulatePipeline: string;
+      timeUnits: string;
       updateTransform: string;
     }>;
     readonly observability: Record<string, string>;

@@ -23,7 +23,7 @@ export const getCachedIndexPatternFetcher = (indexPatternsService: IndexPatterns
 
     const fetchedIndex = fetchIndexPattern(indexPatternValue, indexPatternsService);
 
-    cache.set(indexPatternValue, fetchedIndex);
+    cache.set(key, fetchedIndex);
 
     return fetchedIndex;
   };

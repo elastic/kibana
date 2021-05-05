@@ -32,11 +32,11 @@ export const isValidKuery = (query: string) => {
 };
 
 export const QueryBar = () => {
-  const { index_pattern: indexPattern } = useIndexPattern();
-
   const { search: urlValue } = useGetUrlParams();
 
   const { query, setQuery } = useQueryBar();
+
+  const { index_pattern: indexPattern } = useIndexPattern();
 
   const [inputVal, setInputVal] = useState<string>(query.query);
 

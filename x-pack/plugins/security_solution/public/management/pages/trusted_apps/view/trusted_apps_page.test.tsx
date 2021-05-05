@@ -45,7 +45,9 @@ const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as j
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
-    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
+    'Add a trusted application to improve performance or alleviate conflicts with other ' +
+    'applications running on your hosts. Trusted applications are applied to hosts running the Endpoint Security ' +
+    'integration on their agents.';
 
   const generator = new EndpointDocGenerator('policy-list');
 

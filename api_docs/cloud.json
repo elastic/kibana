@@ -19,20 +19,6 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 17
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CloudConfigType.resetPasswordUrl",
-            "type": "string",
-            "label": "resetPasswordUrl",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/cloud/public/plugin.ts",
               "lineNumber": 18
             },
             "signature": [
@@ -41,9 +27,9 @@
           },
           {
             "tags": [],
-            "id": "def-public.CloudConfigType.deploymentUrl",
+            "id": "def-public.CloudConfigType.cname",
             "type": "string",
-            "label": "deploymentUrl",
+            "label": "cname",
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
@@ -55,9 +41,9 @@
           },
           {
             "tags": [],
-            "id": "def-public.CloudConfigType.accountUrl",
+            "id": "def-public.CloudConfigType.base_url",
             "type": "string",
-            "label": "accountUrl",
+            "label": "base_url",
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
@@ -66,11 +52,53 @@
             "signature": [
               "string | undefined"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.profile_url",
+            "type": "string",
+            "label": "profile_url",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 21
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.deployment_url",
+            "type": "string",
+            "label": "deployment_url",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CloudConfigType.organization_url",
+            "type": "string",
+            "label": "organization_url",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cloud/public/plugin.ts",
+              "lineNumber": 23
+            },
+            "signature": [
+              "string | undefined"
+            ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/cloud/public/plugin.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "initialIsOpen": false
       }
@@ -93,7 +121,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 32
+            "lineNumber": 35
           },
           "signature": [
             "string | undefined"
@@ -101,13 +129,69 @@
         },
         {
           "tags": [],
-          "id": "def-public.CloudSetup.cloudDeploymentUrl",
+          "id": "def-public.CloudSetup.cname",
           "type": "string",
-          "label": "cloudDeploymentUrl",
+          "label": "cname",
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 33
+            "lineNumber": 36
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.baseUrl",
+          "type": "string",
+          "label": "baseUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 37
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.deploymentUrl",
+          "type": "string",
+          "label": "deploymentUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 38
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.profileUrl",
+          "type": "string",
+          "label": "profileUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 39
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-public.CloudSetup.organizationUrl",
+          "type": "string",
+          "label": "organizationUrl",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/public/plugin.ts",
+            "lineNumber": 40
           },
           "signature": [
             "string | undefined"
@@ -121,41 +205,13 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 34
+            "lineNumber": 41
           }
-        },
-        {
-          "tags": [],
-          "id": "def-public.CloudSetup.resetPasswordUrl",
-          "type": "string",
-          "label": "resetPasswordUrl",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 35
-          },
-          "signature": [
-            "string | undefined"
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-public.CloudSetup.accountUrl",
-          "type": "string",
-          "label": "accountUrl",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 36
-          },
-          "signature": [
-            "string | undefined"
-          ]
         }
       ],
       "source": {
         "path": "x-pack/plugins/cloud/public/plugin.ts",
-        "lineNumber": 31
+        "lineNumber": 34
       },
       "lifecycle": "setup",
       "initialIsOpen": true

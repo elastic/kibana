@@ -17,25 +17,7 @@
         },
         "shards": {
           "total": 1,
-          "primaries": 1,
-          "replication": 0,
-          "index": {
-            "shards": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            },
-            "primaries": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            },
-            "replication": {
-              "min": 0,
-              "max": 0,
-              "avg": 0
-            }
-          }
+          "primaries": 1
         },
         "store": {
           "size_in_bytes": 34095
@@ -44,7 +26,6 @@
       "nodes": {
         "fs": {
           "total_in_bytes": 499065712640,
-          "free_in_bytes": 200665341952,
           "available_in_bytes": 200403197952
         },
         "count": {
@@ -85,23 +66,24 @@
     "count": 0
   },
   "beats": {
-    "totalEvents": null,
-    "bytesSent": null,
+    "totalEvents": 0,
+    "bytesSent": 0,
     "beats": {
-      "total": null,
+      "total": 0,
       "types": []
     }
   },
   "apm": {
-    "totalEvents": null,
-    "memRss": null,
-    "memTotal": null,
+    "totalEvents": 0,
+    "memRss": 0,
+    "memTotal": 0,
     "apms": {
-      "total": null
+      "total": 0
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {
@@ -132,25 +114,7 @@
         },
         "shards": {
           "total": 8,
-          "primaries": 8,
-          "replication": 0,
-          "index": {
-            "shards": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            },
-            "primaries": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            },
-            "replication": {
-              "min": 0,
-              "max": 0,
-              "avg": 0
-            }
-          }
+          "primaries": 8
         },
         "store": {
           "size_in_bytes": 2647163
@@ -159,7 +123,6 @@
       "nodes": {
         "fs": {
           "total_in_bytes": 499065712640,
-          "free_in_bytes": 200665792512,
           "available_in_bytes": 200403648512
         },
         "count": {
@@ -200,23 +163,24 @@
     "count": 0
   },
   "beats": {
-    "totalEvents": null,
-    "bytesSent": null,
+    "totalEvents": 0,
+    "bytesSent": 0,
     "beats": {
-      "total": null,
+      "total": 0,
       "types": []
     }
   },
   "apm": {
-    "totalEvents": null,
-    "memRss": null,
-    "memTotal": null,
+    "totalEvents": 0,
+    "memRss": 0,
+    "memTotal": 0,
     "apms": {
-      "total": null
+      "total": 0
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {
@@ -247,25 +211,7 @@
         },
         "shards": {
           "total": 26,
-          "primaries": 13,
-          "replication": 1,
-          "index": {
-            "shards": {
-              "min": 2,
-              "max": 10,
-              "avg": 5.2
-            },
-            "primaries": {
-              "min": 1,
-              "max": 5,
-              "avg": 2.6
-            },
-            "replication": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            }
-          }
+          "primaries": 13
         },
         "store": {
           "size_in_bytes": 4838464
@@ -274,7 +220,6 @@
       "nodes": {
         "fs": {
           "total_in_bytes": 499065712640,
-          "free_in_bytes": 200666353664,
           "available_in_bytes": 200404209664
         },
         "count": {
@@ -315,23 +260,24 @@
     "count": 1
   },
   "beats": {
-    "totalEvents": null,
-    "bytesSent": null,
+    "totalEvents": 0,
+    "bytesSent": 0,
     "beats": {
-      "total": null,
+      "total": 0,
       "types": []
     }
   },
   "apm": {
-    "totalEvents": null,
-    "memRss": null,
-    "memTotal": null,
+    "totalEvents": 0,
+    "memRss": 0,
+    "memTotal": 0,
     "apms": {
-      "total": null
+      "total": 0
     },
     "config": {
       "container": false
-    }
+    },
+    "versions": [ ]
   },
   "alerts": {
     "alertsMeta": {

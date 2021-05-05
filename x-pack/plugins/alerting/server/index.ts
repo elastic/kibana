@@ -33,6 +33,7 @@ export { PluginSetupContract, PluginStartContract } from './plugin';
 export { FindResult } from './alerts_client';
 export { PublicAlertInstance as AlertInstance } from './alert_instance';
 export { parseDuration } from './lib';
+export { getEsErrorMessage } from './lib/errors';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

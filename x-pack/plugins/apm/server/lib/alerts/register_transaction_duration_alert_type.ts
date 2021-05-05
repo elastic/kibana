@@ -77,8 +77,8 @@ export function registerTransactionDurationAlertType({
 
         const searchParams = {
           index: indices['apm_oss.transactionIndices'],
-          size: 0,
           body: {
+            size: 0,
             query: {
               bool: {
                 filter: [
@@ -112,10 +112,10 @@ export function registerTransactionDurationAlertType({
           },
         };
 
-        const response = await alertingEsClient(
-          services.scopedClusterClient,
-          searchParams
-        );
+        const response = await alertingEsClient({
+          scopedClusterClient: services.scopedClusterClient,
+          params: searchParams,
+        });
 
         if (!response.aggregations) {
           return {};
@@ -149,6 +149,10 @@ export function registerTransactionDurationAlertType({
                   ? { [SERVICE_ENVIRONMENT]: environmentParsed.esFieldValue }
                   : {}),
                 [TRANSACTION_TYPE]: alertParams.transactionType,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                'kibana.observability.evaluation.value': transactionDuration,
+                'kibana.observability.evaluation.threshold':
+                  alertParams.threshold * 1000,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {

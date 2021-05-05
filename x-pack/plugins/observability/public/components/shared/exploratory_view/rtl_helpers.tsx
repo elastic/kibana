@@ -22,7 +22,7 @@ import {
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { lensPluginMock } from '../../../../../lens/public/mocks';
-import { IndexPatternContextProvider } from './hooks/use_default_index_pattern';
+import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
 import { AllSeries, UrlStorageContextProvider } from './hooks/use_url_storage';
 import {
   withNotifyOnErrors,
@@ -33,6 +33,7 @@ import * as useUrlHook from './hooks/use_url_storage';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
+import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
@@ -148,7 +149,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
       <EuiThemeProvider darkMode={false}>
         <I18nProvider>
-          <IndexPatternContextProvider indexPattern={indexPattern}>
+          <IndexPatternContextProvider>
             <UrlStorageContextProvider storage={kbnUrlStateStorage}>
               {children}
             </UrlStorageContextProvider>
@@ -234,6 +235,19 @@ export const mockUseHasData = () => {
   return { spy, onRefreshTimeRange };
 };
 
+export const mockAppIndexPattern = () => {
+  const loadIndexPattern = jest.fn();
+  const spy = jest.spyOn(useAppIndexPatternHook, 'useAppIndexPatternContext').mockReturnValue({
+    indexPattern: mockIndexPattern,
+    selectedApp: 'ux',
+    hasData: true,
+    loading: false,
+    hasAppData: { ux: true } as any,
+    loadIndexPattern,
+  });
+  return { spy, loadIndexPattern };
+};
+
 export const mockUseValuesList = (values?: string[]) => {
   const onRefreshTimeRange = jest.fn();
   const spy = jest.spyOn(useValuesListHook, 'useValuesList').mockReturnValue({
@@ -254,6 +268,7 @@ export const mockUrlStorage = ({
   const mockDataSeries = data || {
     'performance-distribution': {
       reportType: 'pld',
+      dataType: 'ux',
       breakdown: breakdown || 'user_agent.name',
       time: { from: 'now-15m', to: 'now' },
       ...(filters ? { filters } : {}),

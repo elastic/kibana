@@ -87,7 +87,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewByPerPage,
       swimlaneLimit,
       loading,
+      overallAnnotations,
     } = explorerState;
+
+    const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
     const menuItems = useMemo(() => {
       const items = [];
@@ -240,6 +243,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             isLoading={loading}
             noDataWarning={<NoOverallData />}
             showTimeline={false}
+            annotationsData={annotations}
           />
 
           <EuiSpacer size="m" />
@@ -257,6 +261,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 })
               }
               timeBuckets={timeBuckets}
+              showLegend={true}
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}

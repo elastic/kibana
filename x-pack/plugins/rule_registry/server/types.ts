@@ -16,14 +16,14 @@ import {
 import { ActionGroup, AlertExecutorOptions } from '../../alerting/server';
 import { RuleRegistry } from './rule_registry';
 import { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
-import { DefaultFieldMap } from './rule_registry/defaults/field_map';
+import { BaseRuleFieldMap } from '../common';
 
 export type RuleParams = Type<any>;
 
 type TypeOfRuleParams<TRuleParams extends RuleParams> = TypeOf<TRuleParams>;
 
 type RuleExecutorServices<
-  TFieldMap extends DefaultFieldMap,
+  TFieldMap extends BaseRuleFieldMap,
   TActionVariable extends ActionVariable
 > = AlertExecutorOptions<
   AlertTypeParams,
@@ -48,7 +48,7 @@ type PassthroughAlertExecutorOptions = Pick<
 >;
 
 type RuleExecutorFunction<
-  TFieldMap extends DefaultFieldMap,
+  TFieldMap extends BaseRuleFieldMap,
   TRuleParams extends RuleParams,
   TActionVariable extends ActionVariable,
   TAdditionalRuleExecutorServices extends Record<string, any>
@@ -76,7 +76,7 @@ interface RuleTypeBase {
 }
 
 export type RuleType<
-  TFieldMap extends DefaultFieldMap,
+  TFieldMap extends BaseRuleFieldMap,
   TRuleParams extends RuleParams,
   TActionVariable extends ActionVariable,
   TAdditionalRuleExecutorServices extends Record<string, any> = {}

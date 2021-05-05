@@ -263,7 +263,7 @@ const rumJSErrors = createApmServerRoute({
 
 const rumHasDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/observability_overview/has_rum_data',
-  params: t.type({
+  params: t.partial({
     query: t.intersection([uiFiltersRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },

@@ -59,7 +59,7 @@ export const setupValueSuggestionProvider = (
       return core.http
         .fetch(`/api/kibana/suggestions/values/${index}`, {
           method: 'POST',
-          body: JSON.stringify({ query, field: field.name, filters }),
+          body: JSON.stringify({ query, field: field.name, fieldMeta: field?.toSpec?.(), filters }),
           signal,
         })
         .then((r) => {

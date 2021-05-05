@@ -16,6 +16,7 @@ import {
 
 import { PersistableFilter } from '../../../../../lens/common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 
 export const ReportViewTypes = {
   pld: 'page-load-dist',
@@ -53,18 +54,21 @@ export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn: Partial<FieldBasedIndexPatternColumn>;
+  yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested: string }>;
+  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[];
+  filters?: PersistableFilter[] | ExistsFilter[];
   reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
+  yTitle?: string;
 }
+
+export type URLReportDefinition = Record<string, string[]>;
 
 export interface SeriesUrl {
   time: {
@@ -76,8 +80,8 @@ export interface SeriesUrl {
   seriesType?: SeriesType;
   reportType: ReportViewTypeId;
   operationType?: OperationType;
-  dataType?: AppDataType;
-  reportDefinitions?: Record<string, string>;
+  dataType: AppDataType;
+  reportDefinitions?: URLReportDefinition;
 }
 
 export interface UrlFilter {
@@ -91,7 +95,7 @@ export interface ConfigProps {
   indexPattern: IIndexPattern;
 }
 
-export type AppDataType = 'synthetics' | 'rum' | 'logs' | 'metrics' | 'apm';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
 
 type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';

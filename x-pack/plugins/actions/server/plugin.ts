@@ -26,17 +26,28 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { SpacesPluginStart } from '../../spaces/server';
+import { SpacesPluginStart, SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
+import {
+  ensureCleanupFailedExecutionsTaskScheduled,
+  registerCleanupFailedExecutionsTaskDefinition,
+} from './cleanup_failed_executions';
 
 import { ActionsConfig, getValidatedConfig } from './config';
-import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
+import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
+import {
+  ActionExecutor,
+  TaskRunnerFactory,
+  LicenseState,
+  ILicenseState,
+  spaceIdToNamespace,
+} from './lib';
 import {
   Services,
   ActionType,
@@ -115,6 +126,7 @@ export interface ActionsPluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -146,7 +158,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get('actions');
-    this.actionsConfig = getValidatedConfig(this.logger, initContext.config.get<ActionsConfig>());
+    this.actionsConfig = getValidatedConfig(
+      this.logger,
+      resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
+    );
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
     this.kibanaIndexConfig = initContext.config.legacy.get();
@@ -224,6 +239,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     if (usageCollection) {
       registerActionsUsageCollector(
         usageCollection,
+        this.actionsConfig,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
     }
@@ -243,6 +259,18 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     // Routes
     defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
+
+    // Cleanup failed execution task definition
+    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
+      registerCleanupFailedExecutionsTaskDefinition(plugins.taskManager, {
+        actionTypeRegistry,
+        logger: this.logger,
+        coreStartServices: core.getStartServices(),
+        config: this.actionsConfig.cleanupFailedExecutionsTask,
+        kibanaIndex: this.kibanaIndexConfig.kibana.index,
+        taskManagerIndex: plugins.taskManager.index,
+      });
+    }
 
     return {
       registerType: <
@@ -351,18 +379,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       preconfiguredActions,
     });
 
-    const spaceIdToNamespace = (spaceId?: string) => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
-        : undefined;
-    };
-
     taskRunnerFactory!.initialize({
       logger,
       actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
         this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
     });
@@ -374,6 +396,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         client: core.elasticsearch.client.asInternalUser,
         logger: this.logger,
       });
+    }
+
+    // Cleanup failed execution task
+    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
+      ensureCleanupFailedExecutionsTaskScheduled(
+        plugins.taskManager,
+        this.logger,
+        this.actionsConfig.cleanupFailedExecutionsTask
+      );
     }
 
     return {

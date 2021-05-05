@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { timeline } from '../../objects/timeline';
+import { timelineNonValidQuery } from '../../objects/timeline';
 
 import { NOTES_TEXT, NOTES_TEXT_AREA } from '../../screens/timeline';
 import { createTimeline } from '../../tasks/api_calls/timelines';
@@ -13,45 +13,40 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import {
-  addNotesToTimeline,
-  closeTimeline,
-  goToNotesTab,
-  openTimelineById,
-  waitForEventsPanelToBeLoaded,
-} from '../../tasks/timeline';
+import { addNotesToTimeline, closeTimeline, openTimelineById } from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline notes tab', () => {
-  let timelineId: string | null = null;
+  let timelineId: string;
+
   before(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
-    createTimeline(timeline)
+    createTimeline(timelineNonValidQuery)
       .then((response) => {
+        if (response.body.data.persistTimeline.timeline.savedObjectId == null) {
+          cy.log('"createTimeline" did not return expected response');
+        }
         timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
+        waitForTimelinesPanelToBeLoaded();
       })
       .then(() => {
-        waitForTimelinesPanelToBeLoaded();
-        openTimelineById(timelineId!)
-          .click({ force: true })
-          .then(() => {
-            waitForEventsPanelToBeLoaded();
-            goToNotesTab();
-            addNotesToTimeline(timeline.notes);
-          });
+        openTimelineById(timelineId).then(() => {
+          addNotesToTimeline(timelineNonValidQuery.notes);
+        });
       });
   });
+
   after(() => {
     closeTimeline();
   });
 
   it('should contain notes', () => {
-    cy.get(NOTES_TEXT).should('have.text', timeline.notes);
+    cy.get(NOTES_TEXT).should('have.text', timelineNonValidQuery.notes);
   });
 
   it('should render mockdown', () => {

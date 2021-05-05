@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { screen } from '@testing-library/dom';
 import { AlertMonitorStatusComponent, AlertMonitorStatusProps } from './alert_monitor_status';
+import { render } from '../../../../lib/helper/rtl_helpers';
 
-describe('alert monitor status component', () => {
+// Failing: See https://github.com/elastic/kibana/issues/98910
+describe.skip('alert monitor status component', () => {
   describe('AlertMonitorStatus', () => {
     const defaultProps: AlertMonitorStatusProps = {
       alertParams: {
@@ -28,90 +30,19 @@ describe('alert monitor status component', () => {
       timerange: { from: 'now-12h', to: 'now' },
     };
 
-    it('passes default props to children', () => {
-      const component = shallowWithIntl(<AlertMonitorStatusComponent {...defaultProps} />);
-      expect(component).toMatchInlineSnapshot(`
-        <Fragment>
-          <OldAlertCallOut
-            isOldAlert={true}
-          />
-          <EuiCallOut
-            iconType="iInCircle"
-            size="s"
-            title={
-              <span>
-                <FormattedMessage
-                  defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
-                  id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
-                  values={
-                    Object {
-                      "snapshotCount": 0,
-                    }
-                  }
-                />
-                 
-              </span>
-            }
-          />
-          <EuiSpacer
-            size="s"
-          />
-          <AlertQueryBar
-            onChange={[Function]}
-            query="monitor.id: foo"
-          />
-          <EuiSpacer
-            size="s"
-          />
-          <AddFilterButton
-            newFilters={Array []}
-            onNewFilter={[Function]}
-          />
-          <FiltersExpressionSelectContainer
-            alertParams={
-              Object {
-                "numTimes": 3,
-                "search": "monitor.id: foo",
-                "timerangeCount": 21,
-                "timerangeUnit": "h",
-              }
-            }
-            newFilters={Array []}
-            onRemoveFilter={[Function]}
-            setAlertParams={[MockFunction]}
-            shouldUpdateUrl={false}
-          />
-          <EuiHorizontalRule />
-          <StatusExpressionSelect
-            alertParams={
-              Object {
-                "numTimes": 3,
-                "search": "monitor.id: foo",
-                "timerangeCount": 21,
-                "timerangeUnit": "h",
-              }
-            }
-            hasFilters={false}
-            setAlertParams={[MockFunction]}
-          />
-          <EuiHorizontalRule />
-          <AvailabilityExpressionSelect
-            alertParams={
-              Object {
-                "numTimes": 3,
-                "search": "monitor.id: foo",
-                "timerangeCount": 21,
-                "timerangeUnit": "h",
-              }
-            }
-            isOldAlert={true}
-            setAlertParams={[MockFunction]}
-          />
-          <EuiSpacer
-            size="m"
-          />
-        </Fragment>
-      `);
+    it('passes default props to children', async () => {
+      render(<AlertMonitorStatusComponent {...defaultProps} />);
+
+      expect(
+        await screen.findByText('This alert will apply to approximately 0 monitors.')
+      ).toBeInTheDocument();
+      expect(await screen.findByText('Add filter')).toBeInTheDocument();
+      expect(await screen.findByText('Availability')).toBeInTheDocument();
+      expect(await screen.findByText('Status check')).toBeInTheDocument();
+      expect(await screen.findByText('matching monitors are up in')).toBeInTheDocument();
+      expect(await screen.findByText('days')).toBeInTheDocument();
+      expect(await screen.findByText('hours')).toBeInTheDocument();
+      expect(await screen.findByText('within the last')).toBeInTheDocument();
     });
   });
 });

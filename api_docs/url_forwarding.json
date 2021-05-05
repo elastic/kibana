@@ -35,6 +35,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlForwardingPlugin.setup.$1",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -84,13 +85,7 @@
                 "text": "CoreStart"
               },
               ", { kibanaLegacy }: { kibanaLegacy: { dashboardConfig: ",
-              {
-                "pluginId": "kibanaLegacy",
-                "scope": "public",
-                "docId": "kibKibanaLegacyPluginApi",
-                "section": "def-public.DashboardConfig",
-                "text": "DashboardConfig"
-              },
+              "DashboardConfig",
               "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }; }) => { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
@@ -104,6 +99,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlForwardingPlugin.start.$1",
                 "type": "Object",
                 "label": "{ application, http: { basePath }, uiSettings }",
                 "isRequired": true,
@@ -123,7 +119,7 @@
                 }
               },
               {
-                "id": "def-public.UrlForwardingPlugin.start.{-kibanaLegacy }",
+                "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy",
                 "type": "Object",
                 "label": "{ kibanaLegacy }",
                 "tags": [],
@@ -131,7 +127,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.UrlForwardingPlugin.start.{-kibanaLegacy }.kibanaLegacy",
+                    "id": "def-public.UrlForwardingPlugin.start.$2.kibanaLegacy.kibanaLegacy",
                     "type": "Object",
                     "label": "kibanaLegacy",
                     "description": [],
@@ -141,13 +137,7 @@
                     },
                     "signature": [
                       "{ dashboardConfig: ",
-                      {
-                        "pluginId": "kibanaLegacy",
-                        "scope": "public",
-                        "docId": "kibKibanaLegacyPluginApi",
-                        "section": "def-public.DashboardConfig",
-                        "text": "DashboardConfig"
-                      },
+                      "DashboardConfig",
                       "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
                     ]
                   }

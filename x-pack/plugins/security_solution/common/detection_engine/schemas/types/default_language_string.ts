@@ -12,6 +12,7 @@ import { language } from '../common/schemas';
 /**
  * Types the DefaultLanguageString as:
  *   - If null or undefined, then a default of the string "kuery" will be used
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultLanguageString = new t.Type<string, string | undefined, unknown>(
   'DefaultLanguageString',

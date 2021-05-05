@@ -7,38 +7,37 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { AppDataType } from '../../types';
-import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useUrlStorage } from '../../hooks/use_url_storage';
+import { ReportToDataTypeMap } from '../../configurations/constants';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
-  { id: 'rum', label: 'User Experience(RUM)' },
-  { id: 'logs', label: 'Logs' },
-  { id: 'metrics', label: 'Metrics' },
-  { id: 'apm', label: 'APM' },
+  { id: 'ux', label: 'User Experience (RUM)' },
+  // { id: 'infra_logs', label: 'Logs' },
+  // { id: 'infra_metrics', label: 'Metrics' },
+  // { id: 'apm', label: 'APM' },
 ];
 
-export function DataTypesCol() {
-  const { series, setSeries, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
+export function DataTypesCol({ seriesId }: { seriesId: string }) {
+  const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
 
-  const { loadIndexPattern, indexPattern } = useIndexPatternContext();
+  const { loading } = useAppIndexPatternContext();
 
   const onDataTypeChange = (dataType?: AppDataType) => {
-    if (dataType) {
-      loadIndexPattern(dataType);
-    }
     if (!dataType) {
-      removeSeries(NEW_SERIES_KEY);
+      removeSeries(seriesId);
     } else {
-      setSeries(NEW_SERIES_KEY, { dataType } as any);
+      setSeries(seriesId || `${dataType}-series`, { dataType } as any);
     }
   };
 
-  const selectedDataType = series.dataType;
+  const selectedDataType = series.dataType ?? ReportToDataTypeMap[series.reportType];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <FlexGroup direction="column" gutterSize="xs">
       {dataTypes.map(({ id: dataTypeId, label }) => (
         <EuiFlexItem key={dataTypeId}>
           <EuiButton
@@ -47,16 +46,20 @@ export function DataTypesCol() {
             iconType="arrowRight"
             color={selectedDataType === dataTypeId ? 'primary' : 'text'}
             fill={selectedDataType === dataTypeId}
-            isDisabled={!indexPattern}
-            isLoading={!indexPattern && selectedDataType === dataTypeId}
+            isDisabled={loading}
+            isLoading={loading && selectedDataType === dataTypeId}
             onClick={() => {
-              onDataTypeChange(dataTypeId === selectedDataType ? undefined : dataTypeId);
+              onDataTypeChange(dataTypeId);
             }}
           >
             {label}
           </EuiButton>
         </EuiFlexItem>
       ))}
-    </EuiFlexGroup>
+    </FlexGroup>
   );
 }
+
+const FlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+`;

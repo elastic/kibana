@@ -93,9 +93,30 @@ function getMockData(
 
 describe('create()', () => {
   let alertsClient: AlertsClient;
+  let actionsClient: jest.Mocked<ActionsClient>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     alertsClient = new AlertsClient(alertsClientParams);
+    actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+    ]);
+    alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
   });
 
   describe('authorization', () => {
@@ -104,19 +125,6 @@ describe('create()', () => {
         bar: boolean;
       }>
     ): Promise<unknown> {
-      unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: '1',
-            type: 'action',
-            attributes: {
-              actions: [],
-              actionTypeId: 'test',
-            },
-            references: [],
-          },
-        ],
-      });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
@@ -460,7 +468,6 @@ describe('create()', () => {
         "scheduledTaskId": "task-123",
       }
     `);
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
@@ -557,6 +564,39 @@ describe('create()', () => {
         },
       ],
     });
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+    ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -683,19 +723,6 @@ describe('create()', () => {
 
   test('creates a disabled alert', async () => {
     const data = getMockData({ enabled: false });
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -761,19 +788,6 @@ describe('create()', () => {
 
   test('should trim alert name when creating API key', async () => {
     const data = getMockData({ name: ' my alert name ' });
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -1275,10 +1289,8 @@ describe('create()', () => {
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
     // Reset from default behaviour
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
-    alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test Error"`
     );
@@ -1291,19 +1303,6 @@ describe('create()', () => {
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
-    });
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     const createdAt = new Date().toISOString();
@@ -1329,19 +1328,6 @@ describe('create()', () => {
 
   test('attempts to remove saved object if scheduling failed', async () => {
     const data = getMockData();
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -1386,19 +1372,6 @@ describe('create()', () => {
 
   test('returns task manager error if cleanup fails, logs to console', async () => {
     const data = getMockData();
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -1454,19 +1427,6 @@ describe('create()', () => {
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
-    });
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1579,19 +1539,6 @@ describe('create()', () => {
 
   test(`doesn't create API key for disabled alerts`, async () => {
     const data = getMockData({ enabled: false });
-    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actions: [],
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -1701,6 +1648,18 @@ describe('create()', () => {
     );
   });
 
+  test('throws an error if API key creation throws', async () => {
+    const data = getMockData();
+    alertsClientParams.createAPIKey.mockImplementation(() => {
+      throw new Error('no');
+    });
+    expect(
+      async () => await alertsClient.create({ data })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error creating rule: could not create API key - no"`
+    );
+  });
+
   test('throws error when ensureActionTypeEnabled throws', async () => {
     const data = getMockData();
     alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
@@ -1709,5 +1668,33 @@ describe('create()', () => {
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail"`
     );
+  });
+
+  test('throws error when adding action using connector with missing secrets', async () => {
+    const data = getMockData();
+    // Reset from default behaviour
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: true,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+    ]);
+    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Invalid connectors: email connector"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 });

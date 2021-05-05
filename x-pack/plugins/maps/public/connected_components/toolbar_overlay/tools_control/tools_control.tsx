@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -205,18 +206,20 @@ export class ToolsControl extends Component<Props, State> {
 
   _renderToolsButton() {
     return (
-      <EuiButtonIcon
-        className="mapToolbarOverlay__button"
-        color="text"
-        iconType="wrench"
-        onClick={this._togglePopover}
-        aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
-          defaultMessage: 'Tools',
-        })}
-        title={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
-          defaultMessage: 'Tools',
-        })}
-      />
+      <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
+        <EuiButtonIcon
+          size="s"
+          color="text"
+          iconType="wrench"
+          onClick={this._togglePopover}
+          aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
+            defaultMessage: 'Tools',
+          })}
+          title={i18n.translate('xpack.maps.toolbarOverlay.toolsControlTitle', {
+            defaultMessage: 'Tools',
+          })}
+        />
+      </EuiPanel>
     );
   }
 
