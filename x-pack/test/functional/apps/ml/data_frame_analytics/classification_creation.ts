@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -25,11 +26,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
+    const jobId = `bm_1_${Date.now()}`;
     const testDataList = [
       {
         suiteTitle: 'bank marketing',
         jobType: 'classification',
-        jobId: `bm_1_${Date.now()}`,
+        jobId,
         jobDescription:
           "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
         source: 'ft_bank_marketing',
@@ -68,6 +70,22 @@ export default function ({ getService }: FtrProviderContext) {
             status: 'stopped',
             progress: '100',
           },
+          rowDetails: {
+            jobDetails: [
+              {
+                section: 'state',
+                expectedEntries: {
+                  id: jobId,
+                  state: 'stopped',
+                  data_counts:
+                    '{"training_docs_count":1862,"test_docs_count":7452,"skipped_docs_count":0}',
+                  description:
+                    "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+                },
+              },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
+            ],
+          } as AnalyticsTableRowDetails,
         },
       },
     ];
@@ -230,6 +248,11 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
+            testData.jobId,
+            testData.expected.rowDetails
+          );
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

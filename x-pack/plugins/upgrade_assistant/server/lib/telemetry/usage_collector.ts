@@ -73,6 +73,7 @@ export async function fetchUpgradeAssistantMetrics(
         overview: 0,
         cluster: 0,
         indices: 0,
+        kibana: 0,
       },
       ui_reindex: {
         close: 0,
@@ -91,6 +92,7 @@ export async function fetchUpgradeAssistantMetrics(
         overview: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.overview', 0),
         cluster: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.cluster', 0),
         indices: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.indices', 0),
+        kibana: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.kibana', 0),
       },
       ui_reindex: {
         close: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.close', 0),
@@ -129,13 +131,41 @@ export function registerUpgradeAssistantUsageCollector({
       schema: {
         features: {
           deprecation_logging: {
-            enabled: { type: 'boolean' },
+            enabled: {
+              type: 'boolean',
+              _meta: {
+                description: 'Whether user has enabled Elasticsearch deprecation logging',
+              },
+            },
           },
         },
         ui_open: {
-          cluster: { type: 'long' },
-          indices: { type: 'long' },
-          overview: { type: 'long' },
+          cluster: {
+            type: 'long',
+            _meta: {
+              description:
+                'Number of times a user viewed the list of Elasticsearch cluster deprecations.',
+            },
+          },
+          indices: {
+            type: 'long',
+            _meta: {
+              description:
+                'Number of times a user viewed the list of Elasticsearch index deprecations.',
+            },
+          },
+          overview: {
+            type: 'long',
+            _meta: {
+              description: 'Number of times a user viewed the Overview page.',
+            },
+          },
+          kibana: {
+            type: 'long',
+            _meta: {
+              description: 'Number of times a user viewed the list of Kibana deprecations',
+            },
+          },
         },
         ui_reindex: {
           close: { type: 'long' },

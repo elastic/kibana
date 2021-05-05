@@ -4326,6 +4326,30 @@ describe('SavedObjectsRepository', () => {
         await test([]);
       });
 
+      it(`uses the 'upsertAttributes' option when specified`, async () => {
+        await updateSuccess(type, id, attributes, {
+          upsert: {
+            title: 'foo',
+            description: 'bar',
+          },
+        });
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'index-pattern:logstash-*',
+            body: expect.objectContaining({
+              upsert: expect.objectContaining({
+                type: 'index-pattern',
+                'index-pattern': {
+                  title: 'foo',
+                  description: 'bar',
+                },
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
       it(`doesn't accept custom references if not an array`, async () => {
         const test = async (references) => {
           await updateSuccess(type, id, attributes, { references });

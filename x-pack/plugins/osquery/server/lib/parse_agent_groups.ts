@@ -44,7 +44,7 @@ export const parseAgentSelection = async (
   const { allAgentsSelected, platformsSelected, policiesSelected, agents } = agentSelection;
   const agentService = context.service.getAgentService();
   const packagePolicyService = context.service.getPackagePolicyService();
-  const kueryFragments = ['active:true'];
+  const kueryFragments = [];
 
   if (agentService && packagePolicyService) {
     const osqueryPolicies = await aggregateResults(async (page, perPage) => {
@@ -55,7 +55,7 @@ export const parseAgentSelection = async (
       });
       return { results: items.map((it) => it.policy_id), total };
     });
-    kueryFragments.push(`policy_id:(${uniq(osqueryPolicies).join(',')})`);
+    kueryFragments.push(`policy_id:(${uniq(osqueryPolicies).join(' or ')})`);
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
       const fetchedAgents = await aggregateResults(async (page, perPage) => {
@@ -72,10 +72,10 @@ export const parseAgentSelection = async (
       if (platformsSelected.length > 0 || policiesSelected.length > 0) {
         const groupFragments = [];
         if (platformsSelected.length) {
-          groupFragments.push(`local_metadata.os.platform:(${platformsSelected.join(',')})`);
+          groupFragments.push(`local_metadata.os.platform:(${platformsSelected.join(' or ')})`);
         }
         if (policiesSelected.length) {
-          groupFragments.push(`policy_id:(${policiesSelected.join(',')})`);
+          groupFragments.push(`policy_id:(${policiesSelected.join(' or ')})`);
         }
         kueryFragments.push(`(${groupFragments.join(' or ')})`);
         const kuery = kueryFragments.join(' and ');
