@@ -124,8 +124,8 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineSchema && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_SCHEMA_PATH))}
+          to={generateEnginePath(ENGINE_SCHEMA_PATH)}
+          shouldShowActiveForSubroutes
           data-test-subj="EngineSchemaLink"
         >
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
@@ -168,8 +168,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewMetaEngineSourceEngines && isMetaEngine && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH))}
+          to={generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH)}
           data-test-subj="MetaEngineEnginesLink"
         >
           {ENGINES_TITLE}

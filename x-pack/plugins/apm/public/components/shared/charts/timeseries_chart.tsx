@@ -98,7 +98,12 @@ export function TimeseriesChart({
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
   return (
-    <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
+    <ChartContainer
+      hasData={!isEmpty}
+      height={height}
+      status={fetchStatus}
+      id={id}
+    >
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
