@@ -150,13 +150,27 @@
           },
           {
             "tags": [],
+            "id": "def-server.ActionResult.isMissingSecrets",
+            "type": "CompoundType",
+            "label": "isMissingSecrets",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/server/types.ts",
+              "lineNumber": 66
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-server.ActionResult.config",
             "type": "Uncategorized",
             "label": "config",
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 66
+              "lineNumber": 67
             },
             "signature": [
               "Config | undefined"
@@ -170,7 +184,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 67
+              "lineNumber": 68
             }
           }
         ],
@@ -316,7 +330,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 101
+              "lineNumber": 102
             }
           },
           {
@@ -327,7 +341,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 102
+              "lineNumber": 103
             }
           },
           {
@@ -338,7 +352,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 103
+              "lineNumber": 104
             },
             "signature": [
               "number | undefined"
@@ -352,7 +366,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 104
+              "lineNumber": 105
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -366,7 +380,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 105
+              "lineNumber": 106
             },
             "signature": [
               "{ params?: ValidatorType<Params> | undefined; config?: ValidatorType<Config> | undefined; secrets?: ValidatorType<Secrets> | undefined; } | undefined"
@@ -392,7 +406,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/actions/server/types.ts",
-                  "lineNumber": 111
+                  "lineNumber": 112
                 }
               },
               {
@@ -406,7 +420,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/actions/server/types.ts",
-                  "lineNumber": 112
+                  "lineNumber": 113
                 }
               },
               {
@@ -420,7 +434,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/actions/server/types.ts",
-                  "lineNumber": 113
+                  "lineNumber": 114
                 }
               }
             ],
@@ -428,7 +442,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 110
+              "lineNumber": 111
             }
           },
           {
@@ -439,7 +453,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 115
+              "lineNumber": 116
             },
             "signature": [
               "ExecutorType",
@@ -449,7 +463,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/types.ts",
-          "lineNumber": 95
+          "lineNumber": 96
         },
         "initialIsOpen": false
       },
@@ -577,7 +591,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 74
+              "lineNumber": 75
             },
             "signature": [
               "Secrets"
@@ -586,7 +600,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/types.ts",
-          "lineNumber": 70
+          "lineNumber": 71
         },
         "initialIsOpen": false
       }
@@ -634,7 +648,7 @@
           "lineNumber": 50
         },
         "signature": [
-          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"warning\" | \"info\" | \"error\" | \"critical\" | undefined; readonly timestamp?: string | undefined; readonly component?: string | undefined; readonly group?: string | undefined; readonly class?: string | undefined; }"
+          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"warning\" | \"info\" | \"error\" | \"critical\" | undefined; readonly component?: string | undefined; readonly group?: string | undefined; readonly class?: string | undefined; }"
         ],
         "initialIsOpen": false
       },
@@ -1009,7 +1023,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 88
+                "lineNumber": 99
               }
             }
           ],
@@ -1017,13 +1031,13 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 82
+            "lineNumber": 93
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 81
+        "lineNumber": 92
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1055,7 +1069,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 93
+                "lineNumber": 104
               }
             },
             {
@@ -1073,13 +1087,13 @@
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 93
+                    "lineNumber": 104
                   }
                 }
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 93
+                "lineNumber": 104
               }
             }
           ],
@@ -1087,7 +1101,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 93
+            "lineNumber": 104
           }
         },
         {
@@ -1110,7 +1124,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 95
+                "lineNumber": 106
               }
             },
             {
@@ -1124,7 +1138,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 96
+                "lineNumber": 107
               }
             },
             {
@@ -1142,13 +1156,13 @@
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 97
+                    "lineNumber": 108
                   }
                 }
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 97
+                "lineNumber": 108
               }
             }
           ],
@@ -1156,7 +1170,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 94
+            "lineNumber": 105
           }
         },
         {
@@ -1202,7 +1216,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 99
+                "lineNumber": 110
               }
             }
           ],
@@ -1210,7 +1224,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 99
+            "lineNumber": 110
           }
         },
         {
@@ -1256,7 +1270,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 100
+                "lineNumber": 111
               }
             }
           ],
@@ -1264,7 +1278,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 100
+            "lineNumber": 111
           }
         },
         {
@@ -1275,7 +1289,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 101
+            "lineNumber": 112
           },
           "signature": [
             {
@@ -1308,7 +1322,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 103
+                "lineNumber": 114
               }
             },
             {
@@ -1322,7 +1336,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 104
+                "lineNumber": 115
               }
             },
             {
@@ -1336,7 +1350,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 105
+                "lineNumber": 116
               }
             },
             {
@@ -1350,7 +1364,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 106
+                "lineNumber": 117
               }
             }
           ],
@@ -1358,13 +1372,13 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 102
+            "lineNumber": 113
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 92
+        "lineNumber": 103
       },
       "lifecycle": "start",
       "initialIsOpen": true

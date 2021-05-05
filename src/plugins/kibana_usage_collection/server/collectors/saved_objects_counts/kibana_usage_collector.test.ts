@@ -16,11 +16,11 @@ import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/mocks';
-import { registerKibanaUsageCollector } from './';
+import { getKibanaSavedObjectCounts, registerKibanaUsageCollector } from './kibana_usage_collector';
 
 const logger = loggingSystemMock.createLogger();
 
-describe('telemetry_kibana', () => {
+describe('kibana_usage', () => {
   let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
@@ -57,6 +57,56 @@ describe('telemetry_kibana', () => {
       index_pattern: { total: 0 },
       graph_workspace: { total: 0 },
       timelion_sheet: { total: 0 },
+    });
+  });
+});
+
+function mockGetSavedObjectsCounts<TBody>(params: TBody) {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.search.mockResolvedValue(
+    // @ts-expect-error we only care about the response body
+    { body: { ...params } }
+  );
+  return esClient;
+}
+
+describe('getKibanaSavedObjectCounts', () => {
+  test('Get all the saved objects equal to 0 because no results were found', async () => {
+    const esClient = mockGetSavedObjectsCounts({});
+
+    const results = await getKibanaSavedObjectCounts(esClient, '.kibana');
+    expect(results).toStrictEqual({
+      dashboard: { total: 0 },
+      visualization: { total: 0 },
+      search: { total: 0 },
+      index_pattern: { total: 0 },
+      graph_workspace: { total: 0 },
+      timelion_sheet: { total: 0 },
+    });
+  });
+
+  test('Merge the zeros with the results', async () => {
+    const esClient = mockGetSavedObjectsCounts({
+      aggregations: {
+        types: {
+          buckets: [
+            { key: 'dashboard', doc_count: 1 },
+            { key: 'timelion-sheet', doc_count: 2 },
+            { key: 'index-pattern', value: 2 }, // Malformed on purpose
+            { key: 'graph_workspace', doc_count: 3 }, // already snake_cased
+          ],
+        },
+      },
+    });
+
+    const results = await getKibanaSavedObjectCounts(esClient, '.kibana');
+    expect(results).toStrictEqual({
+      dashboard: { total: 1 },
+      visualization: { total: 0 },
+      search: { total: 0 },
+      index_pattern: { total: 0 },
+      graph_workspace: { total: 3 },
+      timelion_sheet: { total: 2 },
     });
   });
 });

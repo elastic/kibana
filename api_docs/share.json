@@ -490,7 +490,7 @@
           },
           " extends Pick<",
           "EuiContextMenuPanelItemDescriptorEntry",
-          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
+          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"disabled\" | \"data-test-subj\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
         ],
         "description": [],
         "tags": [

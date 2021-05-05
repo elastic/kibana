@@ -7,3 +7,4 @@
  */
 
 export { registerKibanaUsageCollector } from './kibana_usage_collector';
+export { registerSavedObjectsCountUsageCollector } from './saved_objects_count_collector';
