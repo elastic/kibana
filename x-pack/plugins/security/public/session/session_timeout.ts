@@ -208,19 +208,21 @@ export class SessionTimeout {
   private fetchSessionInfo = async (extend = false) => {
     this.isFetchingSessionInfo = true;
     try {
-      const { expiresInMs, canBeExtended } = await this.http.fetch<SessionInfo>(SESSION_ROUTE, {
+      const sessionInfo = await this.http.fetch<SessionInfo | ''>(SESSION_ROUTE, {
         method: extend ? 'POST' : 'GET',
         asSystemRequest: !extend,
       });
-
-      const nextState = {
-        lastExtensionTime: Date.now(),
-        expiresInMs,
-        canBeExtended,
-      };
-      this.sessionState$.next(nextState);
-      if (this.channel) {
-        this.channel.postMessage(nextState);
+      if (sessionInfo) {
+        const { expiresInMs, canBeExtended } = sessionInfo;
+        const nextState = {
+          lastExtensionTime: Date.now(),
+          expiresInMs,
+          canBeExtended,
+        };
+        this.sessionState$.next(nextState);
+        if (this.channel) {
+          this.channel.postMessage(nextState);
+        }
       }
     } catch (error) {
       // ignore

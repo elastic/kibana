@@ -51,6 +51,7 @@ function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBe
 describe('SessionTimeout', () => {
   afterEach(async () => {
     jest.clearAllMocks();
+    jest.clearAllTimers();
   });
 
   test(`does not initialize when starting an anonymous path`, async () => {
@@ -259,6 +260,17 @@ describe('SessionTimeout', () => {
 
   it('does not log user out if session does not expire', async () => {
     const { sessionTimeout, sessionExpired } = createSessionTimeout(null);
+    await sessionTimeout.start();
+
+    jest.runOnlyPendingTimers();
+
+    expect(sessionExpired.logout).not.toHaveBeenCalled();
+  });
+
+  it('does not log user out if session does not exist', async () => {
+    const { sessionTimeout, sessionExpired, http } = createSessionTimeout();
+
+    http.fetch.mockResolvedValue(''); // Session endpoint return 402 No content when session does not exist
     await sessionTimeout.start();
 
     jest.runOnlyPendingTimers();
