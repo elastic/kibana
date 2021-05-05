@@ -68,36 +68,32 @@ export async function fetchIndexShardSize(
             size,
           },
           aggs: {
-            over_threshold: {
+            index: {
+              terms: {
+                field: 'index_stats.index',
+                size,
+              },
               aggs: {
-                index: {
-                  terms: {
-                    field: 'index_stats.index',
-                    size,
-                  },
-                  aggs: {
-                    hits: {
-                      top_hits: {
-                        sort: [
-                          {
-                            timestamp: {
-                              order: 'desc' as const,
-                              unmapped_type: 'long' as const,
-                            },
-                          },
-                        ],
-                        _source: {
-                          includes: [
-                            '_index',
-                            'index_stats.shards.primaries',
-                            'index_stats.primaries.store.size_in_bytes',
-                            'source_node.name',
-                            'source_node.uuid',
-                          ],
+                hits: {
+                  top_hits: {
+                    sort: [
+                      {
+                        timestamp: {
+                          order: 'desc' as const,
+                          unmapped_type: 'long' as const,
                         },
-                        size: 1,
                       },
+                    ],
+                    _source: {
+                      includes: [
+                        '_index',
+                        'index_stats.shards.primaries',
+                        'index_stats.primaries.store.size_in_bytes',
+                        'source_node.name',
+                        'source_node.uuid',
+                      ],
                     },
+                    size: 1,
                   },
                 },
               },
@@ -118,7 +114,7 @@ export async function fetchIndexShardSize(
   const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
   const thresholdBytes = threshold * gbMultiplier;
   for (const clusterBucket of clusterBuckets) {
-    const indexBuckets = clusterBucket.over_threshold.index.buckets;
+    const indexBuckets = clusterBucket.index.buckets;
     const clusterUuid = clusterBucket.key;
 
     for (const indexBucket of indexBuckets) {
