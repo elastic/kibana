@@ -27,12 +27,7 @@ import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url'
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import { WORKPLACE_SEARCH_TITLE, ACCOUNT_NAV } from '../../../constants';
-import {
-  ALPHA_PATH,
-  PERSONAL_SOURCES_PATH,
-  LOGOUT_ROUTE,
-  KIBANA_ACCOUNT_ROUTE,
-} from '../../../routes';
+import { PERSONAL_SOURCES_PATH, LOGOUT_ROUTE, KIBANA_ACCOUNT_ROUTE } from '../../../routes';
 
 export const AccountHeader: React.FC = () => {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -84,9 +79,7 @@ export const AccountHeader: React.FC = () => {
       </EuiHeaderSection>
       <EuiHeaderSection grow={false} side="right">
         <EuiHeaderLinks>
-          {isAdmin && (
-            <EuiButtonEmptyTo to={ALPHA_PATH}>{ACCOUNT_NAV.ORG_DASHBOARD}</EuiButtonEmptyTo>
-          )}
+          {isAdmin && <EuiButtonEmptyTo to="/">{ACCOUNT_NAV.ORG_DASHBOARD}</EuiButtonEmptyTo>}
           <EuiPopover
             id="accountSubNav"
             button={accountButton}
