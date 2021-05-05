@@ -58,7 +58,7 @@ export function useDiscoverState({
     [config, data, history, savedSearch, services.core.notifications.toasts]
   );
 
-  const { appStateContainer, getPreviousAppState, stopSync } = stateContainer;
+  const { appStateContainer, getPreviousAppState } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
 
@@ -95,7 +95,6 @@ export function useDiscoverState({
     return () => {
       stopSyncingQueryAppStateWithStateContainer();
       stopSyncingGlobalStateWithUrl();
-      stopSync();
     };
   }, [
     appStateContainer,
@@ -103,11 +102,9 @@ export function useDiscoverState({
     data.query,
     data.search.session,
     getPreviousAppState,
-    indexPattern.id,
     services.filterManager,
     services.indexPatterns,
     stateContainer,
-    stopSync,
   ]);
 
   useEffect(() => {

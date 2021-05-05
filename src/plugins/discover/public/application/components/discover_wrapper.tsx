@@ -19,7 +19,7 @@ const DiscoverMemoized = React.memo(Discover);
 
 export function DiscoverWrapper(props: DiscoverProps) {
   const { services } = props.opts;
-  const { chrome, docLinks, uiSettings: config } = services;
+  const { chrome, docLinks, uiSettings: config, data } = services;
 
   const history = useMemo(() => services.history(), [services]);
 
@@ -100,6 +100,10 @@ export function DiscoverWrapper(props: DiscoverProps) {
         useSavedSearch.refetch$.next();
       }
     });
+    return () => {
+      data.search.session.clear();
+      stateContainer.stopSync();
+    };
   }, [
     savedSearch,
     chrome,
@@ -108,6 +112,7 @@ export function DiscoverWrapper(props: DiscoverProps) {
     services,
     shouldSearchOnPageLoad,
     stateContainer,
+    data,
   ]);
 
   return (
