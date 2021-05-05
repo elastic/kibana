@@ -13,6 +13,7 @@ import { CommentsArray, comment } from './comment';
 /**
  * Types the DefaultCommentsArray as:
  *   - If null or undefined, then a default array of type entry will be set
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultCommentsArray = new t.Type<CommentsArray, CommentsArray, unknown>(
   'DefaultCommentsArray',
