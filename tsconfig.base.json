@@ -55,7 +55,7 @@
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom",
-      "@types/resize-observer-browser"
+      "resize-observer-polyfill"
     ]
   }
 }
