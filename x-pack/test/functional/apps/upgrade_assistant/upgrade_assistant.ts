@@ -21,7 +21,7 @@ export default function upgradeAssistantFunctionalTests({
 
   // Updated for the hiding of the UA UI.
   describe('Upgrade Checkup', function () {
-    this.tags('includeFirefox');
+    this.tags('skipFirefox');
 
     before(async () => {
       await esArchiver.load('empty_kibana');
