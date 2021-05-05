@@ -13,7 +13,8 @@ import {
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
 
-import { CollectorOptions, Collector, CollectorSet } from './collector';
+import { CollectorOptions, CollectorSet } from './collector';
+import { Collector } from './collector/collector';
 import { UsageCollectionSetup, CollectorFetchContext } from './index';
 
 export type { CollectorOptions };

@@ -19,6 +19,7 @@ import {
   getDataFromFieldsHits,
   getDataSafety,
 } from '../../../../../../common/utils/field_formatters';
+import { TIMELINE_EVENTS_FIELDS } from './constants';
 
 const getTimestamp = (hit: EventHit): string => {
   if (hit.fields && hit.fields['@timestamp']) {
@@ -28,6 +29,12 @@ const getTimestamp = (hit: EventHit): string => {
   }
   return '';
 };
+
+export const buildFieldsRequest = (fields: string[]) =>
+  uniq([...fields.filter((f) => !f.startsWith('_')), ...TIMELINE_EVENTS_FIELDS]).map((field) => ({
+    field,
+    include_unmapped: true,
+  }));
 
 export const formatTimelineData = async (
   dataFields: readonly string[],

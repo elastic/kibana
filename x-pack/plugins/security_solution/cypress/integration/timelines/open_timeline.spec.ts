@@ -48,9 +48,10 @@ describe('Open timeline', () => {
         addNoteToTimeline(note, timelineId!).should((response) => {
           expect(response.status).to.equal(200);
           waitForTimelinesPanelToBeLoaded();
-          openTimelineById(timelineId!);
-          pinFirstEvent();
-          markAsFavorite();
+          openTimelineById(timelineId!).then(() => {
+            pinFirstEvent();
+            markAsFavorite();
+          });
         });
       });
   });
