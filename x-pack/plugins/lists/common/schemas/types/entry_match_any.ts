@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-utils';
 
-import { NonEmptyString } from '../../shared_imports';
 import { operator } from '../common/schemas';
 
 import { nonEmptyOrNullableStringArray } from './non_empty_or_nullable_string_array';

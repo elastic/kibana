@@ -9,8 +9,8 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
+import { addIdToItem } from '@kbn/securitysolution-utils';
 
-import { addIdToItem } from '../../../../common/shared_imports';
 import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   CreateExceptionListItemSchema,

@@ -7,9 +7,9 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { DATE_NOW } from '../../constants.mock';
-import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getCommentsArrayMock, getCommentsMock } from './comment.mock';
 import {

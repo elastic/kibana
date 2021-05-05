@@ -7,8 +7,8 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { foldLeftRight, getPaths } from '../../../shared_imports';
 import { getEntryMatchAnyMock } from '../entry_match_any.mock';
 
 import { getEndpointEntryMatchAnyMock } from './entry_match_any.mock';

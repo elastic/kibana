@@ -6,8 +6,7 @@
  */
 
 import * as t from 'io-ts';
-
-import { NonEmptyString } from '../../shared_imports';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-utils';
 
 /**
  * @deprecated Use packages/kbn-securitysolution-io-ts-utils

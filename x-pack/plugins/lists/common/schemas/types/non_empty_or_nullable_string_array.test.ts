@@ -7,8 +7,7 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-
-import { foldLeftRight, getPaths } from '../../shared_imports';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { nonEmptyOrNullableStringArray } from './non_empty_or_nullable_string_array';
 

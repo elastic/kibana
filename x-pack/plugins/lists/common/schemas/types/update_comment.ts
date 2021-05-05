@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-utils';
 
-import { NonEmptyString } from '../../shared_imports';
 import { id } from '../common/schemas';
 
 /**

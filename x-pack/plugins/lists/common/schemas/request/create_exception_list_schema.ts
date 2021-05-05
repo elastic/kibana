@@ -6,6 +6,11 @@
  */
 
 import * as t from 'io-ts';
+import {
+  DefaultUuid,
+  DefaultVersionNumber,
+  DefaultVersionNumberDecoded,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import {
   ListId,
@@ -20,11 +25,6 @@ import {
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import {
-  DefaultUuid,
-  DefaultVersionNumber,
-  DefaultVersionNumberDecoded,
-} from '../../shared_imports';
 import { NamespaceType } from '../types';
 
 export const createExceptionListSchema = t.intersection([

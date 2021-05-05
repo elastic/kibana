@@ -61,6 +61,7 @@ export * from './severity';
 export * from './severity_mapping';
 export * from './string_to_positive_number';
 export * from './tags';
+export * from './test_utils';
 export * from './threat';
 export * from './threat_mapping';
 export * from './threat_subtechnique';

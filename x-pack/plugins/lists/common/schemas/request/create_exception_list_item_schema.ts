@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { DefaultUuid } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   ItemId,
@@ -28,7 +29,6 @@ import {
   nonEmptyEntriesArray,
 } from '../types';
 import { EntriesArray } from '../types/entries';
-import { DefaultUuid } from '../../shared_imports';
 
 export const createExceptionListItemSchema = t.intersection([
   t.exact(

@@ -6,10 +6,13 @@
  */
 
 import * as t from 'io-ts';
+import {
+  DefaultVersionNumber,
+  DefaultVersionNumberDecoded,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import { description, deserializer, id, meta, name, serializer, type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { DefaultVersionNumber, DefaultVersionNumberDecoded } from '../../shared_imports';
 
 export const createListSchema = t.intersection([
   t.exact(

@@ -6,9 +6,10 @@
  */
 
 import uuid from 'uuid';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { addIdToItem, removeIdFromItem, validate } from '../../../../common/shared_imports';
 import {
   CreateExceptionListItemSchema,
   EntriesArray,

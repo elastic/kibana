@@ -8,9 +8,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
+import {
+  DefaultArray,
+  DefaultStringArray,
+  NonEmptyString,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import { DefaultNamespace } from '../types/default_namespace';
-import { DefaultArray, DefaultStringArray, NonEmptyString } from '../../shared_imports';
 
 /**
  * @deprecated Use packages/kbn-securitysolution-io-ts-utils
