@@ -17,7 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const es = getService('es');
 
-  describe('uptime settings page', () => {
+  /* eslint-disable ban/ban */
+  describe.only('uptime settings page', () => {
     beforeEach('navigate to clean app root', async () => {
       // make 10 checks
       await makeChecks(es, 'myMonitor', 1, 1, 1);
@@ -113,4 +114,5 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(fields.certAgeThreshold).to.eql(newAgeThreshold);
     });
   });
+  /* eslint-enable ban/ban */
 };
