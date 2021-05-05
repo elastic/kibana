@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { CoreStart } from 'kibana/public';
 import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
 import type { EMSSettings } from '../common/ems_settings';
 import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
-import { FileUploadComponentProps, IndexNameFormProps } from '../../file_upload/public';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
@@ -25,15 +23,8 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
   pluginsStart = plugins;
 }
 
-let IndexNameFormComponent: React.ComponentType<IndexNameFormProps>;
-let FileUploadComponent: React.ComponentType<FileUploadComponentProps>;
-export async function setAsyncComponents() {
-  IndexNameFormComponent = await getFileUpload().getIndexNameFormComponent();
-  FileUploadComponent = await getFileUpload().getFileUploadComponent();
-}
-export const getIndexNameFormComponent = () => IndexNameFormComponent;
-export const getFileUploadComponent = () => FileUploadComponent;
-
+export const getIndexNameFormComponent = () => pluginsStart.fileUpload.getIndexNameFormComponent();
+export const getFileUploadComponent = () => pluginsStart.fileUpload.getFileUploadComponent();
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
 export const getAutocompleteService = () => pluginsStart.data.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
