@@ -237,6 +237,15 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
+        const table = await testSubjects.find(`~transformIndexPreview`);
+        const $ = await table.parseDomContent();
+        const actualColumnLength = $('.euiDataGridHeaderCell__content').toArray().length;
+
+        expect(actualColumnLength).to.eql(
+          expectedHistogramCharts.length,
+          `Number of index preview column charts should be '${expectedHistogramCharts.length}' (got '${actualColumnLength}')`
+        );
+
         for (const expected of expectedHistogramCharts.values()) {
           const id = expected.id;
           await testSubjects.existOrFail(`mlDataGridChart-${id}`);
@@ -253,12 +262,18 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
                 `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
                 sortedExpectedColorStats,
                 undefined,
-                4
+                10
               );
 
               expect(actualColorStats.length).to.eql(
                 sortedExpectedColorStats.length,
-                `Expected and actual color stats for column '${expected.id}' should have the same amount of elements. Expected: ${sortedExpectedColorStats.length} (got ${actualColorStats.length})`
+                `Expected and actual color stats for column '${
+                  expected.id
+                }' should have the same amount of elements. Expected: ${
+                  sortedExpectedColorStats.length
+                } '${JSON.stringify(sortedExpectedColorStats)}' (got ${
+                  actualColorStats.length
+                } '${JSON.stringify(actualColorStats)}')`
               );
               expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
                 true,

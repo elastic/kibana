@@ -8,9 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UNIFIED_TOOLBAR = 'labs:presentation:unifiedToolbar';
+export const USE_DATA_SERVICE = 'labs:canvas:useDataService';
+export const TIME_TO_PRESENT = 'labs:presentation:timeToPresent';
 
-export const projectIDs = [UNIFIED_TOOLBAR] as const;
+export const projectIDs = [TIME_TO_PRESENT, USE_DATA_SERVICE] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 
@@ -19,17 +20,34 @@ export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
  * provided to users of our solutions in Kibana.
  */
 export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
-  [UNIFIED_TOOLBAR]: {
-    id: UNIFIED_TOOLBAR,
+  [TIME_TO_PRESENT]: {
+    id: TIME_TO_PRESENT,
     isActive: false,
+    isDisplayed: false,
     environments: ['kibana', 'browser', 'session'],
-    name: i18n.translate('presentationUtil.labs.enableUnifiedToolbarProjectName', {
-      defaultMessage: 'Unified Toolbar',
+    name: i18n.translate('presentationUtil.labs.enableTimeToPresentProjectName', {
+      defaultMessage: 'Canvas Presentation UI',
     }),
     description: i18n.translate('presentationUtil.labs.enableUnifiedToolbarProjectDescription', {
-      defaultMessage: 'Enable the new unified toolbar design for Presentation solutions',
+      defaultMessage: 'Enable the new presentation-oriented UI for Canvas.',
     }),
-    solutions: ['dashboard', 'canvas'],
+    solutions: ['canvas'],
+  },
+  [USE_DATA_SERVICE]: {
+    id: USE_DATA_SERVICE,
+    isActive: true,
+    isDisplayed: true,
+    environments: ['kibana', 'browser', 'session'],
+    name: i18n.translate('presentationUtil.experiments.enableUseDataServiceExperimentName', {
+      defaultMessage: 'Use data service',
+    }),
+    description: i18n.translate(
+      'presentationUtil.experiments.enableUseDataServiceExperimentDescription',
+      {
+        defaultMessage: 'An experiment of using the new data.search service for Canvas datasources',
+      }
+    ),
+    solutions: ['canvas'],
   },
 };
 
@@ -51,6 +69,7 @@ export interface ProjectConfig {
   id: ProjectID;
   name: string;
   isActive: boolean;
+  isDisplayed: boolean;
   environments: EnvironmentName[];
   description: string;
   solutions: SolutionName[];
