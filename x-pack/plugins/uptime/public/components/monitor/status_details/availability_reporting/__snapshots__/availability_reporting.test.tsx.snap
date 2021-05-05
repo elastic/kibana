@@ -41,7 +41,7 @@ Array [
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -49,7 +49,7 @@ Array [
                 >
                   Location
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -57,7 +57,7 @@ Array [
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -65,7 +65,7 @@ Array [
                 >
                   Availability
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -73,7 +73,7 @@ Array [
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -81,7 +81,7 @@ Array [
                 >
                   Last check
                 </span>
-              </div>
+              </span>
             </th>
           </tr>
         </thead>

@@ -37,7 +37,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -46,7 +46,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -54,7 +54,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -63,7 +63,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
                 >
                   OS
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -71,7 +71,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -80,7 +80,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
                 >
                   Date Created
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -88,7 +88,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -97,14 +97,14 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
                 >
                   Created By
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -113,7 +113,7 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
                 >
                   Actions
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -122,13 +122,13 @@ exports[`TrustedAppsList renders correctly initially 1`] = `
               scope="col"
               style="width: 40px;"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -195,7 +195,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -204,7 +204,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -212,7 +212,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -221,7 +221,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
                 >
                   OS
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -229,7 +229,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -238,7 +238,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
                 >
                   Date Created
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -246,7 +246,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -255,14 +255,14 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
                 >
                   Created By
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -271,7 +271,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
                 >
                   Actions
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -280,13 +280,13 @@ exports[`TrustedAppsList renders correctly when failed loading data for the firs
               scope="col"
               style="width: 40px;"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -358,7 +358,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -367,7 +367,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -375,7 +375,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -384,7 +384,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
                 >
                   OS
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -392,7 +392,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -401,7 +401,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
                 >
                   Date Created
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -409,7 +409,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -418,14 +418,14 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
                 >
                   Created By
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -434,7 +434,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
                 >
                   Actions
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -443,13 +443,13 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
               scope="col"
               style="width: 40px;"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -533,7 +533,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -542,7 +542,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -550,7 +550,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -559,7 +559,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   OS
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -567,7 +567,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -576,7 +576,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   Date Created
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -584,7 +584,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -593,14 +593,14 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   Created By
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -609,7 +609,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   Actions
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -618,13 +618,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               scope="col"
               style="width: 40px;"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -726,6 +726,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -754,6 +755,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowUp"
                   />
                 </button>
@@ -911,7 +913,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                                             scope="col"
                                             style="width: 30%;"
                                           >
-                                            <div
+                                            <span
                                               class="euiTableCellContent"
                                             >
                                               <span
@@ -919,7 +921,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                                               >
                                                 Field
                                               </span>
-                                            </div>
+                                            </span>
                                           </th>
                                           <th
                                             class="euiTableHeaderCell"
@@ -928,7 +930,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                                             scope="col"
                                             style="width: 20%;"
                                           >
-                                            <div
+                                            <span
                                               class="euiTableCellContent"
                                             >
                                               <span
@@ -936,7 +938,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                                               >
                                                 Operator
                                               </span>
-                                            </div>
+                                            </span>
                                           </th>
                                           <th
                                             class="euiTableHeaderCell"
@@ -945,7 +947,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                                             scope="col"
                                             style="width: 60%;"
                                           >
-                                            <div
+                                            <span
                                               class="euiTableCellContent"
                                             >
                                               <span
@@ -953,7 +955,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                                               >
                                                 Value
                                               </span>
-                                            </div>
+                                            </span>
                                           </th>
                                         </tr>
                                       </thead>
@@ -1137,6 +1139,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -1165,6 +1168,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1267,6 +1271,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -1295,6 +1300,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1397,6 +1403,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -1425,6 +1432,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1527,6 +1535,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -1555,6 +1564,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1657,6 +1667,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -1685,6 +1696,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1787,6 +1799,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -1815,6 +1828,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1917,6 +1931,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -1945,6 +1960,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -2047,6 +2063,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -2075,6 +2092,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -2177,6 +2195,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -2205,6 +2224,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -2307,6 +2327,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -2335,6 +2356,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -2437,6 +2459,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -2465,6 +2488,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -2567,6 +2591,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -2595,6 +2620,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -2697,6 +2723,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -2725,6 +2752,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -2827,6 +2855,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -2855,6 +2884,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -2957,6 +2987,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -2985,6 +3016,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -3087,6 +3119,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -3115,6 +3148,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -3217,6 +3251,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -3245,6 +3280,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -3347,6 +3383,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -3375,6 +3412,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -3477,6 +3515,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -3505,6 +3544,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -3540,6 +3580,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 >
                   <span
                     class="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                   <span
@@ -3570,6 +3611,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowLeft"
               />
             </button>
@@ -3727,6 +3769,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowRight"
               />
             </a>
@@ -3775,7 +3818,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -3784,7 +3827,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -3792,7 +3835,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -3801,7 +3844,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   OS
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -3809,7 +3852,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -3818,7 +3861,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   Date Created
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -3826,7 +3869,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -3835,14 +3878,14 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   Created By
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -3851,7 +3894,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   Actions
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -3860,13 +3903,13 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               scope="col"
               style="width: 40px;"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -3967,6 +4010,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -3995,6 +4039,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -4097,6 +4142,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -4125,6 +4171,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -4227,6 +4274,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -4255,6 +4303,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -4357,6 +4406,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -4385,6 +4435,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -4487,6 +4538,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -4515,6 +4567,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -4617,6 +4670,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -4645,6 +4699,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -4747,6 +4802,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -4775,6 +4831,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -4877,6 +4934,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -4905,6 +4963,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -5007,6 +5066,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -5035,6 +5095,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -5137,6 +5198,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -5165,6 +5227,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -5267,6 +5330,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -5295,6 +5359,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -5397,6 +5462,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -5425,6 +5491,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -5527,6 +5594,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -5555,6 +5623,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -5657,6 +5726,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -5685,6 +5755,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -5787,6 +5858,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -5815,6 +5887,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -5917,6 +5990,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -5945,6 +6019,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -6047,6 +6122,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -6075,6 +6151,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -6177,6 +6254,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -6205,6 +6283,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -6307,6 +6386,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -6335,6 +6415,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -6437,6 +6518,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -6465,6 +6547,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -6500,6 +6583,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
                 >
                   <span
                     class="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                   <span
@@ -6530,6 +6614,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowLeft"
               />
             </button>
@@ -6687,6 +6772,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowRight"
               />
             </a>
@@ -6735,7 +6821,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -6744,7 +6830,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -6752,7 +6838,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -6761,7 +6847,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
                 >
                   OS
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -6769,7 +6855,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -6778,7 +6864,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
                 >
                   Date Created
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -6786,7 +6872,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -6795,14 +6881,14 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
                 >
                   Created By
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -6811,7 +6897,7 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
                 >
                   Actions
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -6820,13 +6906,13 @@ exports[`TrustedAppsList renders correctly when loading data for the first time 
               scope="col"
               style="width: 40px;"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -6893,7 +6979,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -6902,7 +6988,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -6910,7 +6996,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -6919,7 +7005,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   OS
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -6927,7 +7013,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -6936,7 +7022,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   Date Created
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -6944,7 +7030,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -6953,14 +7039,14 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   Created By
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -6969,7 +7055,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   Actions
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -6978,13 +7064,13 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               scope="col"
               style="width: 40px;"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -7085,6 +7171,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -7113,6 +7200,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -7215,6 +7303,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -7243,6 +7332,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -7345,6 +7435,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -7373,6 +7464,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -7475,6 +7567,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -7503,6 +7596,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -7605,6 +7699,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -7633,6 +7728,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -7735,6 +7831,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -7763,6 +7860,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -7865,6 +7963,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -7893,6 +7992,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -7995,6 +8095,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -8023,6 +8124,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -8125,6 +8227,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -8153,6 +8256,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -8255,6 +8359,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -8283,6 +8388,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -8385,6 +8491,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -8413,6 +8520,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -8515,6 +8623,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -8543,6 +8652,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -8645,6 +8755,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -8673,6 +8784,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -8775,6 +8887,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -8803,6 +8916,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -8905,6 +9019,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -8933,6 +9048,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -9035,6 +9151,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -9063,6 +9180,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -9165,6 +9283,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -9193,6 +9312,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -9295,6 +9415,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -9323,6 +9444,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -9425,6 +9547,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -9453,6 +9576,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -9555,6 +9679,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -9583,6 +9708,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -9618,6 +9744,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
                 >
                   <span
                     class="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                   <span
@@ -9648,6 +9775,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowLeft"
               />
             </button>
@@ -9805,6 +9933,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowRight"
               />
             </a>
@@ -9853,7 +9982,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -9862,7 +9991,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -9870,7 +9999,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -9879,7 +10008,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   OS
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -9887,7 +10016,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -9896,7 +10025,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   Date Created
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -9904,7 +10033,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -9913,14 +10042,14 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   Created By
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
@@ -9929,7 +10058,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   Actions
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -9938,13 +10067,13 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               scope="col"
               style="width: 40px;"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -10045,6 +10174,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -10073,6 +10203,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -10175,6 +10306,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -10203,6 +10335,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -10305,6 +10438,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -10333,6 +10467,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -10435,6 +10570,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -10463,6 +10599,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -10565,6 +10702,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -10593,6 +10731,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -10695,6 +10834,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -10723,6 +10863,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -10825,6 +10966,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -10853,6 +10995,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -10955,6 +11098,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -10983,6 +11127,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -11085,6 +11230,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -11113,6 +11259,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -11215,6 +11362,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -11243,6 +11391,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -11345,6 +11494,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -11373,6 +11523,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -11475,6 +11626,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -11503,6 +11655,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -11605,6 +11758,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -11633,6 +11787,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -11735,6 +11890,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -11763,6 +11919,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -11865,6 +12022,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -11893,6 +12051,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -11995,6 +12154,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -12023,6 +12183,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -12125,6 +12286,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -12153,6 +12315,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -12255,6 +12418,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -12283,6 +12447,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -12385,6 +12550,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -12413,6 +12579,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -12515,6 +12682,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                     <span
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                   </button>
@@ -12543,6 +12711,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -12578,6 +12747,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
                 >
                   <span
                     class="euiButtonContent__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                   <span
@@ -12609,6 +12779,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowLeft"
               />
             </a>
@@ -12716,6 +12887,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
               <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
+                color="inherit"
                 data-euiicon-type="arrowRight"
               />
             </a>
