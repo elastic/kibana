@@ -157,12 +157,14 @@ export const getMetadataRequestHandler = function (
       savedObjectsClient: context.core.savedObjects.client,
     };
 
+    const includeAgentData = true;
+
     try {
       const doc = await getHostData(
         metadataRequestContext,
         request?.params?.id,
         queryStrategyVersion,
-        true
+        includeAgentData
       );
       if (doc) {
         return response.ok({ body: doc });
@@ -222,6 +224,11 @@ export async function getHostData(
   if (!hostMetadata) {
     return undefined;
   }
+
+  /* Skip agent data if we only need meta data, by doing this
+   **  we can avoid users get 404 error from findAgent and
+   ** therefore unable to get endpoint meta data
+   */
   if (includeAgentData) {
     const agent = await findAgent(metadataRequestContext, hostMetadata);
 
