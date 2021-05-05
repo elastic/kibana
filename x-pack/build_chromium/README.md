@@ -98,6 +98,18 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
 After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}-{arch}`, for example: `chromium-4747cc2-linux-x64`.
 The zip files and md5 files are copied to a staging bucket in GCP storage.
 
+## Testing
+Search the Puppeteer Github repo for known issues that could affect our use case, and make sure to test anywhere that is affected.
+
+Here's the steps on how to test a Puppeteer upgrade, run these tests on Mac, Windows, Linux x64 and Linux arm64:
+
+- Make sure the Reporting plugin is fetching the correct version of the browser
+  at start-up time, and that it can successfully unzip it and copy the files to
+  `x-pack/plugins/reporting/chromium`
+- Make sure there are no errors when using the **Reporting diagnostic tool**
+- All functional and API tests that generate PDF and PNG files should pass.
+- Use a VM to run Kibana in a low-memory environment and try to generate a large dashboard PNG. Document the minimum requirements in the PR.
+
 ## Resources
 
 The following links provide helpful context about how the Chromium build works, and its prerequisites:
