@@ -119,7 +119,9 @@ export const getMetadataListRequestHandler = function (
       }
     );
 
-    const result = await context.core.elasticsearch.client.asCurrentUser.search(queryParams);
+    const result = await context.core.elasticsearch.client.asCurrentUser.search<HostMetadata>(
+      queryParams
+    );
     const hostListQueryResult = queryStrategy!.queryResponseToHostListResult(result.body);
     return response.ok({
       body: await mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext),

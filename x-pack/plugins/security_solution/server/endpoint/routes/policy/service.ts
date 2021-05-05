@@ -8,7 +8,7 @@
 import { SearchResponse } from 'elasticsearch';
 import {
   ElasticsearchClient,
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
@@ -49,20 +49,17 @@ export function getESQueryPolicyResponseByAgentID(agentID: string, index: string
 export async function getPolicyResponseByAgentId(
   index: string,
   agentID: string,
-  dataClient: ILegacyScopedClusterClient
+  dataClient: IScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
   const query = getESQueryPolicyResponseByAgentID(agentID, index);
-  const response = (await dataClient.callAsCurrentUser(
-    'search',
-    query
-  )) as SearchResponse<HostPolicyResponse>;
+  const response = await dataClient.asCurrentUser.search<GetHostPolicyResponse>(query);
 
-  if (response.hits.hits.length === 0) {
+  if (response.body.hits.hits.length === 0) {
     return undefined;
   }
 
   return {
-    policy_response: response.hits.hits[0]._source,
+    policy_response: response.body.hits.hits[0]._source,
   };
 }
 
