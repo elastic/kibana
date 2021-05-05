@@ -32,9 +32,9 @@ function transformConnectorForExport(
     // If connector requires secrets, this will throw an error
     validateSecrets(actionType, {});
 
-    // If connector has optional secrets, set isMissingSecrets value to value of hasAuth
-    // If connector doesn't have hasAuth value, default to isMissingSecrets: true
-    isMissingSecrets = (connector?.attributes?.config?.hasAuth as boolean) ?? true;
+    // If connector has optional (or no) secrets, set isMissingSecrets value to value of hasAuth
+    // If connector doesn't have hasAuth value, default to isMissingSecrets: false
+    isMissingSecrets = (connector?.attributes?.config?.hasAuth as boolean) ?? false;
   } catch (err) {
     isMissingSecrets = true;
   }
