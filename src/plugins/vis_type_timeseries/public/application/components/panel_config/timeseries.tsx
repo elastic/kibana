@@ -238,7 +238,7 @@ export class TimeseriesPanelConfig extends Component<
                   )}
                 >
                   <YesNo
-                    value={model.ignore_daylight_time}
+                    value={Number(model.ignore_daylight_time)}
                     name="ignore_daylight_time"
                     onChange={this.props.onChange}
                   />
