@@ -4,7 +4,7 @@
   "integrationFolder": "./cypress/integration",
   "pluginsFile": "./cypress/plugins/index.js",
   "screenshotsFolder": "./cypress/screenshots",
-  "supportFile": "./cypress/support/index.js",
+  "supportFile": "./cypress/support/index.ts",
   "videosFolder": "./cypress/videos",
   "defaultCommandTimeout": 30000,
   "execTimeout": 120000,

@@ -352,6 +352,13 @@ describe('SearchSource', () => {
         const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['*']);
       });
+
+      test('_source is not set when using the fields API', async () => {
+        searchSource.setField('fields', ['*']);
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['*']);
+        expect(request._source).toEqual(false);
+      });
     });
 
     describe('source filters handling', () => {
@@ -605,6 +612,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
+        expect(request.hasOwnProperty('docvalue_fields')).toBe(false);
         expect(request.fields).toEqual([
           { field: 'foo-bar' },
           { field: 'field1' },

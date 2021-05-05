@@ -29,6 +29,7 @@ import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
+import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -104,12 +105,20 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
    * @param resultType
    * @param severity
    */
-  const getResultTypeAggRequest = (resultType: AnomalyResultType, severity: number) => {
+  const getResultTypeAggRequest = (
+    resultType: AnomalyResultType,
+    severity: number,
+    useInitialScore?: boolean
+  ) => {
+    const influencerScoreField = `${useInitialScore ? 'initial_' : ''}influencer_score`;
+    const recordScoreField = `${useInitialScore ? 'initial_' : ''}record_score`;
+    const bucketScoreField = `${useInitialScore ? 'initial_' : ''}anomaly_score`;
+
     return {
       influencer_results: {
         filter: {
           range: {
-            influencer_score: {
+            [influencerScoreField]: {
               gte: resultType === ANOMALY_RESULT_TYPE.INFLUENCER ? severity : 0,
             },
           },
@@ -119,7 +128,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             top_hits: {
               sort: [
                 {
-                  influencer_score: {
+                  [influencerScoreField]: {
                     order: 'desc',
                   },
                 },
@@ -141,7 +150,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                 score: {
                   script: {
                     lang: 'painless',
-                    source: 'Math.floor(doc["influencer_score"].value)',
+                    source: `Math.floor(doc["${influencerScoreField}"].value)`,
                   },
                 },
                 unique_key: {
@@ -159,7 +168,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
       record_results: {
         filter: {
           range: {
-            record_score: {
+            [recordScoreField]: {
               gte: resultType === ANOMALY_RESULT_TYPE.RECORD ? severity : 0,
             },
           },
@@ -169,7 +178,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             top_hits: {
               sort: [
                 {
-                  record_score: {
+                  [recordScoreField]: {
                     order: 'desc',
                   },
                 },
@@ -198,7 +207,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                 score: {
                   script: {
                     lang: 'painless',
-                    source: 'Math.floor(doc["record_score"].value)',
+                    source: `Math.floor(doc["${recordScoreField}"].value)`,
                   },
                 },
                 unique_key: {
@@ -217,7 +226,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             bucket_results: {
               filter: {
                 range: {
-                  anomaly_score: {
+                  [bucketScoreField]: {
                     gt: severity,
                   },
                 },
@@ -227,7 +236,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                   top_hits: {
                     sort: [
                       {
-                        anomaly_score: {
+                        [bucketScoreField]: {
                           order: 'desc',
                         },
                       },
@@ -247,7 +256,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
                       score: {
                         script: {
                           lang: 'painless',
-                          source: 'Math.floor(doc["anomaly_score"].value)',
+                          source: `Math.floor(doc["${bucketScoreField}"].value)`,
                         },
                       },
                       unique_key: {
@@ -271,6 +280,18 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
    */
   const getAlertInstanceKey = (source: AnomalyRecordDoc): string => {
     return source.job_id;
+  };
+
+  const getRecordKey = (source: AnomalyRecordDoc): string => {
+    let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
+
+    const fieldName = getEntityFieldName(source);
+    const fieldValue = getEntityFieldValue(source);
+    const entity =
+      fieldName !== undefined && fieldValue !== undefined ? `_${fieldName}_${fieldValue}` : '';
+    alertInstanceKey += `_${source.detector_index}_${source.function}${entity}`;
+
+    return alertInstanceKey;
   };
 
   const getResultsFormatter = (resultType: AnomalyResultType) => {
@@ -306,7 +327,7 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
           return {
             ...h._source,
             score: h.fields.score[0],
-            unique_key: h.fields.unique_key[0],
+            unique_key: getRecordKey(h._source),
           };
         }) as RecordAnomalyAlertDoc[],
         topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
@@ -404,11 +425,11 @@ export function alertingServiceProvider(mlClient: MlClient, datafeedsService: Da
             alerts_over_time: {
               date_histogram: {
                 field: 'timestamp',
-                fixed_interval: lookBackTimeInterval,
+                fixed_interval: `${maxBucket}s`,
                 // Ignore empty buckets
                 min_doc_count: 1,
               },
-              aggs: getResultTypeAggRequest(params.resultType, params.severity),
+              aggs: getResultTypeAggRequest(params.resultType, params.severity, true),
             },
           }
         : getResultTypeAggRequest(params.resultType, params.severity),
