@@ -15,7 +15,7 @@ export const READ_ONLY_SAVED_OBJECT_MSG = i18n.translate(
   'xpack.cases.readOnlySavedObjectDescription',
   {
     defaultMessage:
-      'You only have permissions to view cases. If you need to open and update cases, contact your Kibana administrator.',
+      'You only have privileges to view cases. If you need to open and update cases, contact your Kibana administrator.',
   }
 );
 

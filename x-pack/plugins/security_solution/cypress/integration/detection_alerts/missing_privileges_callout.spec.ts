@@ -41,8 +41,7 @@ const waitForPageTitleToBeShown = () => {
 };
 
 describe('Detections > Callouts', () => {
-  const ALERTS_CALLOUT = 'read-only-access-to-alerts';
-  const RULES_CALLOUT = 'read-only-access-to-rules';
+  const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
@@ -62,15 +61,15 @@ describe('Detections > Callouts', () => {
       });
 
       it('We show one primary callout', () => {
-        waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
+        waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
       });
 
       context('When a user clicks Dismiss on the callout', () => {
         it('We hide it and persist the dismissal', () => {
-          waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
-          dismissCallOut(ALERTS_CALLOUT);
+          waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
+          dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
           reloadPage();
-          getCallOut(ALERTS_CALLOUT).should('not.exist');
+          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
         });
       });
     });
@@ -81,15 +80,15 @@ describe('Detections > Callouts', () => {
       });
 
       it('We show one primary callout', () => {
-        waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
+        waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
       });
 
       context('When a user clicks Dismiss on the callout', () => {
         it('We hide it and persist the dismissal', () => {
-          waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
-          dismissCallOut(RULES_CALLOUT);
+          waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
+          dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
           reloadPage();
-          getCallOut(RULES_CALLOUT).should('not.exist');
+          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
         });
       });
     });
@@ -106,27 +105,18 @@ describe('Detections > Callouts', () => {
         deleteCustomRule();
       });
 
-      it('We show two primary callouts', () => {
-        waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
-        waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
+      it('We show one primary callout', () => {
+        waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
       });
 
       context('When a user clicks Dismiss on the callouts', () => {
         it('We hide them and persist the dismissal', () => {
-          waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
-          waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
+          waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-          dismissCallOut(ALERTS_CALLOUT);
+          dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
           reloadPage();
 
-          getCallOut(ALERTS_CALLOUT).should('not.exist');
-          getCallOut(RULES_CALLOUT).should('be.visible');
-
-          dismissCallOut(RULES_CALLOUT);
-          reloadPage();
-
-          getCallOut(ALERTS_CALLOUT).should('not.exist');
-          getCallOut(RULES_CALLOUT).should('not.exist');
+          getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
         });
       });
     });
@@ -139,8 +129,7 @@ describe('Detections > Callouts', () => {
       });
 
       it('We show no callout', () => {
-        getCallOut(ALERTS_CALLOUT).should('not.exist');
-        getCallOut(RULES_CALLOUT).should('not.exist');
+        getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
       });
     });
 
@@ -150,8 +139,7 @@ describe('Detections > Callouts', () => {
       });
 
       it('We show no callout', () => {
-        getCallOut(ALERTS_CALLOUT).should('not.exist');
-        getCallOut(RULES_CALLOUT).should('not.exist');
+        getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
       });
     });
 
@@ -168,8 +156,7 @@ describe('Detections > Callouts', () => {
       });
 
       it('We show no callouts', () => {
-        getCallOut(ALERTS_CALLOUT).should('not.exist');
-        getCallOut(RULES_CALLOUT).should('not.exist');
+        getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');
       });
     });
   });
