@@ -146,7 +146,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await security.testUser.restoreDefaults();
-        await esArchiver.unload('index_pattern_without_timefield');
         await esArchiver.load('empty_kibana');
       });
 
