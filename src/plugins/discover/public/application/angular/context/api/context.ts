@@ -18,8 +18,10 @@ import { AnchorHitRecord } from './anchor';
 
 export type SurrDocType = 'successors' | 'predecessors';
 export interface EsHitRecord {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fields: Record<string, any>;
   sort: number[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _source: Record<string, any>;
   _id: string;
 }

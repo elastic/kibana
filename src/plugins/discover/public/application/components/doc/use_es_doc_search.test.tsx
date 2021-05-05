@@ -11,6 +11,7 @@ import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_d
 import { DocProps } from './doc';
 import { Observable } from 'rxjs';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
+import { IndexPattern } from 'src/plugins/data/common';
 
 const mockSearchResult = new Observable();
 
@@ -35,60 +36,60 @@ jest.mock('../../../kibana_services', () => ({
 
 describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody given useNewFieldsApi is false', () => {
-    const indexPattern = {
+    const indexPattern = ({
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
-    } as any;
+    } as unknown) as IndexPattern;
     const actual = buildSearchBody('1', indexPattern, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "_source": true,
-        "docvalue_fields": Array [],
-        "fields": undefined,
-        "query": Object {
-          "ids": Object {
-            "values": Array [
-              "1",
-            ],
+        "body": Object {
+          "_source": true,
+          "fields": Array [],
+          "query": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
           },
+          "script_fields": Array [],
+          "stored_fields": Array [],
         },
-        "runtime_mappings": Object {},
-        "script_fields": Array [],
-        "stored_fields": Array [],
       }
     `);
   });
 
   test('buildSearchBody useNewFieldsApi is true', () => {
-    const indexPattern = {
+    const indexPattern = ({
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
-    } as any;
+    } as unknown) as IndexPattern;
     const actual = buildSearchBody('1', indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "_source": false,
-        "docvalue_fields": Array [],
-        "fields": Array [
-          Object {
-            "field": "*",
-            "include_unmapped": "true",
+        "body": Object {
+          "fields": Array [
+            Object {
+              "field": "*",
+              "include_unmapped": "true",
+            },
+          ],
+          "query": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
           },
-        ],
-        "query": Object {
-          "ids": Object {
-            "values": Array [
-              "1",
-            ],
-          },
+          "runtime_mappings": Object {},
+          "script_fields": Array [],
+          "stored_fields": Array [],
         },
-        "runtime_mappings": Object {},
-        "script_fields": Array [],
-        "stored_fields": Array [],
       }
     `);
   });
 
   test('buildSearchBody with runtime fields', () => {
-    const indexPattern = {
+    const indexPattern = ({
       getComputedFields: () => ({
         storedFields: [],
         scriptFields: [],
@@ -102,35 +103,35 @@ describe('Test of <Doc /> helper / hook', () => {
           },
         },
       }),
-    } as any;
+    } as unknown) as IndexPattern;
     const actual = buildSearchBody('1', indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "_source": false,
-        "docvalue_fields": Array [],
-        "fields": Array [
-          Object {
-            "field": "*",
-            "include_unmapped": "true",
-          },
-        ],
-        "query": Object {
-          "ids": Object {
-            "values": Array [
-              "1",
-            ],
-          },
-        },
-        "runtime_mappings": Object {
-          "myRuntimeField": Object {
-            "script": Object {
-              "source": "emit(10.0)",
+        "body": Object {
+          "fields": Array [
+            Object {
+              "field": "*",
+              "include_unmapped": "true",
             },
-            "type": "double",
+          ],
+          "query": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
           },
+          "runtime_mappings": Object {
+            "myRuntimeField": Object {
+              "script": Object {
+                "source": "emit(10.0)",
+              },
+              "type": "double",
+            },
+          },
+          "script_fields": Array [],
+          "stored_fields": Array [],
         },
-        "script_fields": Array [],
-        "stored_fields": Array [],
       }
     `);
   });
@@ -139,21 +140,22 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => [],
     };
-    const indexPatternService = {
-      get: jest.fn(() => Promise.resolve(indexPattern)),
-    } as any;
-    const props = {
+    const getMock = jest.fn(() => Promise.resolve(indexPattern));
+    const indexPatternService = ({
+      get: getMock,
+    } as unknown) as IndexPattern;
+    const props = ({
       id: '1',
       index: 'index1',
       indexPatternId: 'xyz',
       indexPatternService,
-    } as DocProps;
-    let hook;
+    } as unknown) as DocProps;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let hook: any;
     await act(async () => {
       hook = renderHook((p: DocProps) => useEsDocSearch(p), { initialProps: props });
     });
-    // @ts-ignore
     expect(hook.result.current).toEqual([ElasticRequestState.Loading, null, indexPattern]);
-    expect(indexPatternService.get).toHaveBeenCalled();
+    expect(getMock).toHaveBeenCalled();
   });
 });

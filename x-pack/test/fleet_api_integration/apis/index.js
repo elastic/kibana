@@ -7,7 +7,7 @@
 
 export default function ({ loadTestFile }) {
   describe('Fleet Endpoints', function () {
-    this.tags('ciGroup10');
+    this.tags('ciGroupDocker');
     // EPM
     loadTestFile(require.resolve('./epm/index'));
 
@@ -46,5 +46,8 @@ export default function ({ loadTestFile }) {
 
     // Service tokens
     loadTestFile(require.resolve('./service_tokens'));
+
+    // Outputs
+    loadTestFile(require.resolve('./outputs'));
   });
 }
