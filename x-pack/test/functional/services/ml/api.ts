@@ -23,6 +23,7 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../../plugins/ml/common/constants/index_patterns';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { PutTrainedModelConfig } from '../../../../plugins/ml/common/types/trained_models';
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -934,6 +935,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           expect(body[jobType]).to.not.have.property(jobId);
         }
       }
+    },
+
+    async createTrainedModel(modelId: string, body: PutTrainedModelConfig) {
+      log.debug(`Creating trained model with id "${modelId}"`);
+      const model = await esSupertest
+        .put(`/_ml/trained_models/${modelId}`)
+        .send(body)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      log.debug('> Trained model crated');
+      return model;
     },
   };
 }
