@@ -264,7 +264,7 @@ At the moment it is not possible to change the scale of the Y axis (for instance
 
 [float]
 [[is-it-possible-to-have-pagination-for-datatable]]
-===== Is it possible to have pagination in the datatable visualization?
+===== Is it possible to have pagination in a data table?
 
 At the moment it is not possible to have pagination on a *Lens* datatable. However the <<types-of-visualizations,aggregation based data table>> does support this feature.
 
