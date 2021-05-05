@@ -211,7 +211,6 @@ Refer to https://www.elastic.co/blog/discover-uses-fields-api-in-7-12[the blog a
 === Known issues
 
 When upgrading to 7.12.0, {kib} retries failed saved object migrations without user intervention.
-There are known issues, including users who tried the fleet beta where migrations might fail.
 
 Impacts include:
 
