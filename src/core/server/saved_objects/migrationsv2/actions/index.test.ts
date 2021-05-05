@@ -18,7 +18,7 @@ describe('actions', () => {
     jest.clearAllMocks();
   });
 
-  // Create a mock client that rejects all methods with a 503 statuscode
+  // Create a mock client that rejects all methods with a 503 status code
   // response.
   const retryableError = new EsErrors.ResponseError(
     elasticsearchClientMock.createApiResponse({
@@ -92,7 +92,7 @@ describe('actions', () => {
 
   describe('readWithPit', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.readWithPit(client, 'pitId', Option.none, 10_000);
+      const task = Actions.readWithPit(client, 'pitId', { match_all: {} }, 10_000);
       try {
         await task();
       } catch (e) {
@@ -134,7 +134,7 @@ describe('actions', () => {
         'my_target_index',
         Option.none,
         false,
-        Option.none
+        {}
       );
       try {
         await task();
@@ -254,6 +254,19 @@ describe('actions', () => {
   describe('bulkOverwriteTransformedDocuments', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
       const task = Actions.bulkOverwriteTransformedDocuments(client, 'new_index', [], 'wait_for');
+      try {
+        await task();
+      } catch (e) {
+        /** ignore */
+      }
+
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+  });
+
+  describe('refreshIndex', () => {
+    it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
+      const task = Actions.refreshIndex(client, 'target_index');
       try {
         await task();
       } catch (e) {

@@ -34,7 +34,7 @@ data and understand what’s going on at any given time.
 
 You’ll learn to:
 
-- **Select** data for your exploration, and then set a time range for that data,
+- **Select** data for your exploration, set a time range for that data,
 search it with the {kib} Query Language, and filter the results.
 - **Explore** the details of your data, view individual documents, and create tables
 that summarize the contents of the data.
@@ -50,7 +50,8 @@ data in *Discover*.
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 - You must have data in {es}.  This tutorial uses the
 <<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
-- You should have an understanding of {ref}/documents-indices.html[{es} documents and indices].
+- You should have an understanding of {ref}/documents-indices.html[{es} documents and indices]
+and <<kibana-concepts-analysts, {kib} concepts>>.
 
 
 [float]
@@ -68,11 +69,11 @@ your {es} data.
 To view the ecommerce sample data, make sure the index pattern is set to **kibana_sample_data_ecommerce**.
 +
 [role="screenshot"]
-image::images/discover-index-pattern.png[How to set the index pattern in Discover]
+image::images/discover-index-pattern.png[How to set the index pattern in Discover, width=50%]
 
-. Adjust the time range to view data for the *Last 7 days*.
+. Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
 +
-NOTE: The range selection is based on the default time field in your data.
+The range selection is based on the default time field in your data.
 If you are using the sample data, this value was set when you added the data.
 If you  are using your own data, and it does not have a time field, the range selection is not available.
 
@@ -87,28 +88,28 @@ click and drag the mouse over the histogram.
 By default, the table includes columns for the time field and the document `_source`,
 which can be overwhelming. You’ll modify this table to display only your fields of interest.
 
-. Scan through the list of **Available fields** to see
-what’s in your data. You can also search for a field by name.
+. Scan through the list of **Available fields** until you find the `manufacturer` field.
+You can also search for the field by name.
 +
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
 
-. Find the `manufacturer` field, and then click it to view the five most popular values for that field.
-+
-**Discover** fetches a maximum of 500 documents, which it uses to calculate the popular values.
+. Click the `manufacturer` field to view its five most popular values.
 +
 [role="screenshot"]
-image:images/filter-field.png[Fields list that displays the top five search results]
+image:images/find-manufacturer-field.png[Fields list that displays the top five search results, width=75%]
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
 
-. Add `day of week` so your document table looks like this:
+. Find the `day of week` field and add it to your document table. Your table should look like this:
 +
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, geo.country_iso_code, and day_of_week]
 
+
 . To rearrange the table columns, hover the mouse over a
 column header, and then use the move and sort controls.
+
 
 [float]
 [[search-in-discover]]
@@ -142,16 +143,16 @@ Search the ecommerce data for documents where the country matches US:
 Whereas the query defines the set of documents you are interested in,
 filters enable you to zero in on different subsets of those documents.
 You can filter results to include or exclude specific fields, filter for a value in a range,
-and more. The **Add filter** popup prompts you with the fields you can filter
-and the operators you can use.
-
-[role="screenshot"]
-image:images/discover-add-filter.png[Add filter dialog in Discover]
+and more.
 
 Exclude documents where day of week is not Wednesday:
 
 . Click **Add filter**.
 . Set **Field** to *day_of_week*, **Operator** to *is not*, and **Value** to *Wednesday*.
++
+[role="screenshot"]
+image:images/discover-add-filter.png[Add filter dialog in Discover]
+
 . Save the filter.
 . Continue your exploration by adding more filters.
 . To remove a filter,
@@ -164,20 +165,21 @@ click the close icon (x) next to its name in the filter bar.
 Dive into an individual document to view its fields and the documents
 that occurred before and after it.
 
-. In the document table, expand any document.
+. In the document table, expand any document. To view more of the document table, click *Hide chart*.
 +
 [role="screenshot"]
 image:images/document-table-expanded.png[Table view with document expanded]
 
 . Scan through the fields and their values. If you find a field of interest,
-hover of its name for filters and other controls.
+hover over its name for filters and other controls.
 
 . To view documents that occurred before or after the event you are looking at, click
-<<discover-document-context, View surrounding documents>>.
+<<discover-view-surrounding-documents, View surrounding documents>>.
 
-. For direct access to a particular document, click **View single document**.
+. For direct access to a particular document, click **<<discover-view-single-document,View single document>>**.
 +
 You can bookmark this document and share the link.
+
 
 [float]
 [[save-your-search]]
@@ -209,21 +211,16 @@ image:images/discover-visualize.png[Discover sidebar field popover with visualiz
 the visualization builder pane.
 +
 [role="screenshot"]
-image:images/visualize-from-discover.png[Visualization that opens from Discover based on your data]
+image:images/discover-from-visualize.png[Visualization that opens from Discover based on your data]
 
 . Save your visualization for use on a dashboard.
-
-If your documents contain geo point fields (image:images/geoip-icon.png[Geo point field icon, width=20px]), you can visualize them in **Maps**.
-
-. Make sure the index pattern is set to **kibana_sample_data_ecommerce** and the configured time range
-contains data.
-
-. From the **Available fields** list, click `geoip.location`, and then click **Visualize**.
++
+For geo point fields (image:images/geoip-icon.png[Geo point field icon, width=20px]),
+if you click **Visualize**,
+your data appears in a map.
 +
 [role="screenshot"]
 image:images/discover-maps.png[Map containing documents]
-
-. Save your map for use on a dashboard.
 
 
 [float]
@@ -233,17 +230,15 @@ image:images/discover-maps.png[Map containing documents]
 
 * <<discover-search-for-relevance, Search for relevance>>.
 
-* <<kibana-discover-settings, Configure Discover>> to better meet your needs.
-In **Advanced Settings**, you can configure the number of documents to show,
-the table columns that display by default, and more.
-
-* <<dashboard,Create a dashboard>> with even more visualizations of your findings, such as treemaps, metrics, and tables.
-
 * <<reporting-getting-started, Present your findings in a report>>.
+
+* <<kibana-discover-settings, Configure Discover>> to better meet your needs.
+Go to **Advanced Settings** to configure the number of documents to show,
+the table columns that display by default, and more.
 
 --
 
-include::{kib-repo-dir}/discover/context.asciidoc[]
+include::{kib-repo-dir}/discover/view-document.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 

@@ -11,7 +11,6 @@ import { delay } from 'bluebird';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

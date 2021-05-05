@@ -26,7 +26,8 @@ import {
 } from './translations';
 
 import { State } from '../../../../common/store';
-import { EventFiltersListPageState } from '../types';
+import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageUrlSearchParams } from '../types';
 import { getEventFiltersListPath } from '../../../common/routing';
 
 import {
@@ -70,8 +71,9 @@ export function useEventFiltersNavigateCallback() {
   const location = useEventFiltersSelector(getCurrentLocation);
   const history = useHistory();
 
-  return useCallback((args) => history.push(getEventFiltersListPath({ ...location, ...args })), [
-    history,
-    location,
-  ]);
+  return useCallback(
+    (args: Partial<EventFiltersListPageUrlSearchParams>) =>
+      history.push(getEventFiltersListPath({ ...location, ...args })),
+    [history, location]
+  );
 }

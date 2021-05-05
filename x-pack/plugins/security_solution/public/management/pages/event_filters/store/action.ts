@@ -12,6 +12,19 @@ import {
   UpdateExceptionListItemSchema,
 } from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
+import { EventFiltersListPageState } from '../state';
+
+export type EventFiltersListPageStateChanged = Action<'eventFiltersListPageStateChanged'> & {
+  payload: EventFiltersListPageState['listPage'];
+};
+
+export type EventFiltersListPageDataChanged = Action<'eventFiltersListPageDataChanged'> & {
+  payload: EventFiltersListPageState['listPage']['data'];
+};
+
+export type EventFiltersListPageDataExistsChanged = Action<'eventFiltersListPageDataExistsChanged'> & {
+  payload: EventFiltersListPageState['listPage']['dataExist'];
+};
 
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
@@ -35,8 +48,8 @@ export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
   };
 };
 
-export type EventFiltersCreateStart = Action<'eventFiltersCreateStart'>;
 export type EventFiltersUpdateStart = Action<'eventFiltersUpdateStart'>;
+export type EventFiltersCreateStart = Action<'eventFiltersCreateStart'>;
 export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'> & {
   payload: {
     exception: ExceptionListItemSchema;
@@ -49,7 +62,9 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
 };
 
 export type EventFiltersPageAction =
-  | EventFiltersCreateStart
+  | EventFiltersListPageStateChanged
+  | EventFiltersListPageDataChanged
+  | EventFiltersListPageDataExistsChanged
   | EventFiltersInitForm
   | EventFiltersInitFromId
   | EventFiltersChangeForm

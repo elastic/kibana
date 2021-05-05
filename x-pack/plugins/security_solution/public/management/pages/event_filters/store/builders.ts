@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState } from '../types';
+import { EventFiltersListPageState } from '../state';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
 
 export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
@@ -22,5 +22,12 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     page_index: MANAGEMENT_DEFAULT_PAGE,
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
+  },
+  listPage: {
+    active: false,
+    forceRefresh: false,
+    data: { type: 'UninitialisedResourceState' },
+    /** We started off assuming data exists, until we can confirm othewise */
+    dataExist: { type: 'LoadedResourceState', data: true },
   },
 });
