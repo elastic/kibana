@@ -54,6 +54,10 @@ const isTime = (op: OperationMetadata) => op.dataType === 'date';
 const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
 const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number';
 
+const isCellValueSupported = (op: OperationMetadata) => {
+  return !isBucketed(op) && (op.scale === 'ordinal' || op.scale === 'ratio') && isNumericMetric(op);
+};
+
 export const getHeatmapVisualization = ({
   paletteService,
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
@@ -161,7 +165,7 @@ export const getHeatmapVisualization = ({
             defaultMessage: 'Cell value',
           }),
           accessors: state.valueAccessor ? [{ columnId: state.valueAccessor }] : [],
-          filterOperations: isNumericMetric,
+          filterOperations: isCellValueSupported,
           supportsMoreColumns: !state.valueAccessor,
           required: true,
           dataTestSubj: 'lnsHeatmap_cellPanel',
