@@ -59,7 +59,7 @@ export class ChromiumArchivePaths {
       architecture: 'arm64',
       archiveFilename: 'chromium-d163fd7-linux_arm64.zip',
       archiveChecksum: '29834735bc2f0e0d9134c33bc0580fb6',
-      binaryChecksum: 'dcfd277800c1a5c7d566c445cbdc225c',
+      binaryChecksum: '13baccf2e5c8385cb9d9588db6a9e2c2',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
     },
