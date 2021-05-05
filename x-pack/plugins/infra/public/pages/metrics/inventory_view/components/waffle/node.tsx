@@ -105,14 +105,12 @@ export class Node extends React.PureComponent<Props, State> {
           closePopover={this.closePopover}
           anchorPosition="downCenter"
         >
-          {isPopoverOpen && (
-            <NodeContextMenu
-              node={node}
-              nodeType={nodeType}
-              options={options}
-              currentTime={currentTime}
-            />
-          )}
+          <NodeContextMenu
+            node={node}
+            nodeType={nodeType}
+            options={options}
+            currentTime={currentTime}
+          />
         </EuiPopover>
 
         {this.state.isOverlayOpen && (
