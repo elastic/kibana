@@ -37,6 +37,7 @@ import {
   isOperator,
 } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
+import { OsTypeArray } from '../../../../common/schemas';
 
 import {
   BuilderEntry,
@@ -279,9 +280,10 @@ export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IIndexPattern, t: ExceptionListType) => IIndexPattern
+  preFilter?: (i: IIndexPattern, t: ExceptionListType, o?: OsTypeArray) => IIndexPattern,
+  osTypes?: OsTypeArray
 ): IIndexPattern => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type) : patterns;
+  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown

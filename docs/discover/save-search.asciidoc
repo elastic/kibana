@@ -1,38 +1,42 @@
 [[save-open-search]]
-== Save a search
-A saved search persists your current view of Discover for
-later retrieval and reuse. You can reload a saved search into Discover,
-add it to a dashboard, and use it as the basis for a visualization.
+== Save a search for reuse
 
-A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
+A saved search is a convenient way to reuse a search
+that you've created in *Discover*.
+Saved searches are good for adding search results to a dashboard,
+and can also serve as a foundation for building visualizations.
+
+[role="screenshot"]
+image::discover/images/saved-search.png[Example of Discover's save search option]
+
+
+A saved search stores the query text, filters, and
+current view of *Discover*&mdash;the columns selected in the document table,
+the sort order, and the index pattern.
+Saved searches are different from <<save-load-delete-query,saved queries>>, which
+are primarily used for storing query text and are available in any app with a query bar.
 
 [role="xpack"]
 [[discover-read-only-access]]
 [float]
 === Read-only access
-When you have insufficient privileges to save searches, the following indicator in Kibana will be
-displayed and the *Save* button won't be visible. For more information on granting access to
-Kibana see <<xpack-security-authorization>>.
+If you don't have sufficient privileges to save searches, the following indicator is
+displayed and the *Save* button is not visible. For more information, refer to <<xpack-security-authorization>>.
 
 [role="screenshot"]
 image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
 [float]
 === Save a search
-To save the current search:
 
-. Click *Save* in the toolbar.
+. Once you've created a search worth saving, click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
-
-To import, export, and delete saved searches, open the main menu,
-then click *Stack Management > Saved Objects*.
-
-[float]
-=== Open a saved search
-To load a saved search into Discover:
-
-. Click *Open* in the toolbar.
-. Select the search you want to open.
-
+. To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
++
 If the saved search is associated with a different index pattern than is currently
 selected, opening the saved search changes the selected index pattern. The query language
-used for the saved search will also be automatically selected.
+used for the saved search is also automatically selected.
+. To add your search results to an existing dashboard:
+.. Open the dashboard, then click *Edit*.
+.. Click *Add from library*.
+.. Open the *Types* menu, then select *Saved search*.
+.. Select the the saved search that you want.
