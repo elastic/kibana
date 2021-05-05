@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
+import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   createCase,
   deleteCasesByESQuery,
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesByESQuery(es);
     });
 
-    it('should return reporters in space1', async () => {
+    it('should not return reporters when security is disabled', async () => {
       await Promise.all([
         createCase(supertest, getPostCaseRequest(), 200, getAuthWithSuperUser('space2')),
         createCase(supertest, getPostCaseRequest(), 200, authSpace1),
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const reporters = await getReporters({ supertest, auth: authSpace1 });
 
-      expect(reporters).to.eql([defaultUser]);
+      expect(reporters).to.eql([]);
     });
   });
 };

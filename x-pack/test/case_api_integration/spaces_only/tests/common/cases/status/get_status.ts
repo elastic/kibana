@@ -23,6 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
+  const authSpace2 = getAuthWithSuperUser('space2');
 
   describe('get_status', () => {
     afterEach(async () => {
@@ -41,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const [, inProgressCase, postedCase] = await Promise.all([
         createCase(supertest, postCaseReq, 200, authSpace1),
         createCase(supertest, postCaseReq, 200, authSpace1),
-        createCase(supertest, postCaseReq, 200, getAuthWithSuperUser('space2')),
+        createCase(supertest, postCaseReq, 200, authSpace2),
       ]);
 
       await updateCase({
@@ -53,6 +54,15 @@ export default ({ getService }: FtrProviderContext): void => {
               version: inProgressCase.version,
               status: CaseStatuses['in-progress'],
             },
+          ],
+        },
+        auth: authSpace1,
+      });
+
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
             {
               id: postedCase.id,
               version: postedCase.version,
@@ -60,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         },
-        auth: authSpace1,
+        auth: authSpace2,
       });
 
       const statuses = await getAllCasesStatuses({ supertest, auth: authSpace1 });

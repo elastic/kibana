@@ -22,14 +22,17 @@ import {
   updateConfiguration,
   getServiceNowConnector,
   createConnector,
+  getAuthWithSuperUser,
 } from '../../../../common/lib/utils';
 import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const authSpace1 = getAuthWithSuperUser();
 
   describe('patch_configure', () => {
     const actionsRemover = new ActionsRemover(supertest);
@@ -46,19 +49,25 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it('should patch a configuration connector and create mappings', async () => {
+    it('should patch a configuration connector and create mappings in space1', async () => {
       const connector = await createConnector({
         supertest,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: servicenowSimulatorURL },
         },
+        auth: authSpace1,
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, connector.id, 'action', 'actions');
 
       // Configuration is created with no connector so the mappings are empty
-      const configuration = await createConfiguration(supertest);
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest(),
+        200,
+        authSpace1
+      );
 
       // the update request doesn't accept the owner field
       const { owner, ...reqWithoutOwner } = getConfigurationRequest({
@@ -68,14 +77,22 @@ export default ({ getService }: FtrProviderContext): void => {
         fields: null,
       });
 
-      const newConfiguration = await updateConfiguration(supertest, configuration.id, {
-        ...reqWithoutOwner,
-        version: configuration.version,
-      });
+      const newConfiguration = await updateConfiguration(
+        supertest,
+        configuration.id,
+        {
+          ...reqWithoutOwner,
+          version: configuration.version,
+        },
+        200,
+        authSpace1
+      );
 
       const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
       expect(data).to.eql({
         ...getConfigurationOutput(true),
+        created_by: nullUser,
+        updated_by: nullUser,
         connector: {
           id: connector.id,
           name: connector.name,
@@ -102,67 +119,44 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should mappings when updating the connector', async () => {
+    it('should not patch a configuration connector when it is in a different space', async () => {
       const connector = await createConnector({
         supertest,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: servicenowSimulatorURL },
         },
+        auth: authSpace1,
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, connector.id, 'action', 'actions');
 
-      // Configuration is created with connector so the mappings are created
+      // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(
         supertest,
-        getConfigurationRequest({
-          id: connector.id,
-          name: connector.name,
-          type: connector.connector_type_id as ConnectorTypes,
-        })
+        getConfigurationRequest(),
+        200,
+        authSpace1
       );
 
       // the update request doesn't accept the owner field
-      const { owner, ...rest } = getConfigurationRequest({
+      const { owner, ...reqWithoutOwner } = getConfigurationRequest({
         id: connector.id,
-        name: 'New name',
+        name: connector.name,
         type: connector.connector_type_id as ConnectorTypes,
         fields: null,
       });
 
-      const newConfiguration = await updateConfiguration(supertest, configuration.id, {
-        ...rest,
-        version: configuration.version,
-      });
-
-      const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
-      expect(data).to.eql({
-        ...getConfigurationOutput(true),
-        connector: {
-          id: connector.id,
-          name: 'New name',
-          type: connector.connector_type_id as ConnectorTypes,
-          fields: null,
+      await updateConfiguration(
+        supertest,
+        configuration.id,
+        {
+          ...reqWithoutOwner,
+          version: configuration.version,
         },
-        mappings: [
-          {
-            action_type: 'overwrite',
-            source: 'title',
-            target: 'short_description',
-          },
-          {
-            action_type: 'overwrite',
-            source: 'description',
-            target: 'description',
-          },
-          {
-            action_type: 'append',
-            source: 'comments',
-            target: 'work_notes',
-          },
-        ],
-      });
+        404,
+        getAuthWithSuperUser('space2')
+      );
     });
   });
 };

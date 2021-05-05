@@ -29,9 +29,10 @@ import {
   createComment,
   CreateConnectorResponse,
   updateCase,
-  getAllUserAction,
+  getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   deleteAllCaseItems,
+  superUserSpace1Auth,
 } from '../../../../common/lib/utils';
 import {
   ExternalServiceSimulator,
@@ -55,7 +56,6 @@ import {
   superUser,
 } from '../../../../common/lib/authentication/users';
 import { User } from '../../../../common/lib/authentication/types';
-import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         connectorId: connector.id,
       });
-      const userActions = await getAllUserAction(supertest, pushedCase.id);
+      const userActions = await getCaseUserActions({ supertest, caseID: pushedCase.id });
       const pushUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
       const { new_value, ...rest } = pushUserAction as CaseUserActionResponse;

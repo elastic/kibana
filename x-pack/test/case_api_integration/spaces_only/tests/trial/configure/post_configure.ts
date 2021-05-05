@@ -22,13 +22,16 @@ import {
   createConfiguration,
   createConnector,
   getServiceNowConnector,
+  getAuthWithSuperUser,
 } from '../../../../common/lib/utils';
+import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const authSpace1 = getAuthWithSuperUser();
 
   describe('post_configure', () => {
     const actionsRemover = new ActionsRemover(supertest);
@@ -45,16 +48,17 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it('should create a configuration with mapping', async () => {
+    it('should create a configuration with mapping in space1', async () => {
       const connector = await createConnector({
         supertest,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: servicenowSimulatorURL },
         },
+        auth: authSpace1,
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, connector.id, 'action', 'actions');
 
       const postRes = await createConfiguration(
         supertest,
@@ -62,12 +66,15 @@ export default ({ getService }: FtrProviderContext): void => {
           id: connector.id,
           name: connector.name,
           type: connector.connector_type_id as ConnectorTypes,
-        })
+        }),
+        200,
+        authSpace1
       );
 
       const data = removeServerGeneratedPropertiesFromSavedObject(postRes);
       expect(data).to.eql(
         getConfigurationOutput(false, {
+          created_by: nullUser,
           mappings: [
             {
               action_type: 'overwrite',

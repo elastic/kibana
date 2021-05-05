@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
         getAuthWithSuperUser('space2')
       );
 
-      const tags = await getTags({ supertest });
+      const tags = await getTags({ supertest, auth: authSpace1 });
       expect(tags).to.eql(['defacement']);
     });
   });

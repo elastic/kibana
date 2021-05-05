@@ -22,14 +22,17 @@ import {
   getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
+  getAuthWithSuperUser,
 } from '../../../../common/lib/utils';
 import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const actionsRemover = new ActionsRemover(supertest);
   const kibanaServer = getService('kibanaServer');
+  const authSpace1 = getAuthWithSuperUser();
 
   describe('get_configure', () => {
     let servicenowSimulatorURL: string = '<could not determine kibana url>';
@@ -44,15 +47,16 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it('should return a configuration with mapping', async () => {
+    it('should return a configuration with mapping from space1', async () => {
       const connector = await createConnector({
         supertest,
         req: {
           ...getServiceNowConnector(),
           config: { apiUrl: servicenowSimulatorURL },
         },
+        auth: authSpace1,
       });
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add('space1', connector.id, 'action', 'actions');
 
       await createConfiguration(
         supertest,
@@ -60,10 +64,12 @@ export default ({ getService }: FtrProviderContext): void => {
           id: connector.id,
           name: connector.name,
           type: connector.connector_type_id as ConnectorTypes,
-        })
+        }),
+        200,
+        authSpace1
       );
 
-      const configuration = await getConfiguration({ supertest });
+      const configuration = await getConfiguration({ supertest, auth: authSpace1 });
 
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration[0]);
       expect(data).to.eql(
@@ -91,8 +97,39 @@ export default ({ getService }: FtrProviderContext): void => {
             type: connector.connector_type_id,
             fields: null,
           },
+          created_by: nullUser,
         })
       );
+    });
+
+    it('should not return a configuration with mapping from a different space', async () => {
+      const connector = await createConnector({
+        supertest,
+        req: {
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        },
+        auth: authSpace1,
+      });
+      actionsRemover.add('space1', connector.id, 'action', 'actions');
+
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          id: connector.id,
+          name: connector.name,
+          type: connector.connector_type_id as ConnectorTypes,
+        }),
+        200,
+        authSpace1
+      );
+
+      const configuration = await getConfiguration({
+        supertest,
+        auth: getAuthWithSuperUser('space2'),
+      });
+
+      expect(configuration).to.eql([]);
     });
   });
 };

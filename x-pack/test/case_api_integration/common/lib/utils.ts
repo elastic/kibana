@@ -12,6 +12,7 @@ import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
+import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import {
   CASES_URL,
   CASE_CONFIGURE_CONNECTORS_URL,
@@ -45,7 +46,7 @@ import {
   CasesConfigurationsResponse,
   CaseUserActionsResponse,
 } from '../../../../plugins/cases/common/api';
-import { postCollectionReq, postCommentGenAlertReq } from './mock';
+import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
@@ -539,13 +540,13 @@ export const deleteMappings = async (es: KibanaClient): Promise<void> => {
   });
 };
 
+export const superUserSpace1Auth = getAuthWithSuperUser();
+
 /**
  * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
  * functions.
  */
-export function getAuthWithSuperUser(
-  space: string = 'space1'
-): { user: User; space: string | null } {
+export function getAuthWithSuperUser(space: string = 'space1'): { user: User; space: string } {
   return { user: superUser, space };
 }
 
@@ -564,6 +565,72 @@ export const ensureSavedObjectIsAuthorized = (
 ) => {
   expect(entities.length).to.eql(numberOfExpectedCases);
   entities.forEach((entity) => expect(owners.includes(entity.owner)).to.be(true));
+};
+
+export const createCaseWithConnector = async ({
+  supertest,
+  configureReq = {},
+  servicenowSimulatorURL,
+  actionsRemover,
+  auth = { user: superUser, space: null },
+  createCaseReq = getPostCaseRequest(),
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  servicenowSimulatorURL: string;
+  actionsRemover: ActionsRemover;
+  configureReq?: Record<string, unknown>;
+  auth?: { user: User; space: string | null };
+  createCaseReq?: CasePostRequest;
+}): Promise<{
+  postedCase: CaseResponse;
+  connector: CreateConnectorResponse;
+}> => {
+  const connector = await createConnector({
+    supertest,
+    req: {
+      ...getServiceNowConnector(),
+      config: { apiUrl: servicenowSimulatorURL },
+    },
+    auth,
+  });
+
+  actionsRemover.add(auth.space ?? 'default', connector.id, 'action', 'actions');
+  await createConfiguration(
+    supertest,
+    {
+      ...getConfigurationRequest({
+        id: connector.id,
+        name: connector.name,
+        type: connector.connector_type_id as ConnectorTypes,
+      }),
+      ...configureReq,
+    },
+    200,
+    auth
+  );
+
+  const postedCase = await createCase(
+    supertest,
+    {
+      ...createCaseReq,
+      connector: {
+        id: connector.id,
+        name: connector.name,
+        type: connector.connector_type_id,
+        fields: {
+          urgency: '2',
+          impact: '2',
+          severity: '2',
+          category: 'software',
+          subcategory: 'os',
+        },
+      } as CaseConnector,
+    },
+    200,
+    auth
+  );
+
+  return { postedCase, connector };
 };
 
 export const createCase = async (
@@ -630,19 +697,6 @@ export const createComment = async ({
     .expect(expectedHttpCode);
 
   return theCase;
-};
-
-export const getAllUserAction = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  caseId: string,
-  expectedHttpCode: number = 200
-): Promise<CaseUserActionResponse[]> => {
-  const { body: userActions } = await supertest
-    .get(`${CASES_URL}/${caseId}/user_actions`)
-    .set('kbn-xsrf', 'true')
-    .expect(expectedHttpCode);
-
-  return userActions;
 };
 
 export const updateCase = async ({
@@ -752,13 +806,13 @@ export const getComment = async ({
   caseId,
   commentId,
   expectedHttpCode = 200,
-  auth = { user: superUser },
+  auth = { user: superUser, space: null },
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   caseId: string;
   commentId: string;
   expectedHttpCode?: number;
-  auth?: { user: User; space?: string };
+  auth?: { user: User; space: string | null };
 }): Promise<CommentResponse> => {
   const { body: comment } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments/${commentId}`)
@@ -853,13 +907,18 @@ export const createConnector = async ({
   return connector;
 };
 
-export const getCaseConnectors = async (
-  supertest: st.SuperTest<supertestAsPromised.Test>,
-  expectedHttpCode: number = 200
-): Promise<FindActionResult[]> => {
+export const getCaseConnectors = async ({
+  supertest,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<FindActionResult[]> => {
   const { body: connectors } = await supertest
-    .get(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`)
-    .set('kbn-xsrf', 'true')
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_CONNECTORS_URL}/_find`)
+    .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
   return connectors;

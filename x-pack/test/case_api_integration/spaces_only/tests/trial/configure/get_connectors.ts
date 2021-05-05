@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../../plugins/cases/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   getServiceNowConnector,
@@ -16,29 +15,30 @@ import {
   getResilientConnector,
   createConnector,
   getServiceNowSIRConnector,
+  getAuthWithSuperUser,
+  getCaseConnectors,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const actionsRemover = new ActionsRemover(supertest);
+  const authSpace1 = getAuthWithSuperUser();
 
   describe('get_connectors', () => {
     afterEach(async () => {
       await actionsRemover.removeAll();
     });
 
-    it('should return the correct connectors', async () => {
-      const { body: snConnector } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
-        .expect(200);
-
-      const { body: emailConnector } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'true')
-        .send({
+    it('should return the correct connectors in space1', async () => {
+      const snConnector = await createConnector({
+        supertest,
+        req: getServiceNowConnector(),
+        auth: authSpace1,
+      });
+      const emailConnector = await createConnector({
+        supertest,
+        req: {
           name: 'An email action',
           connector_type_id: '.email',
           config: {
@@ -49,34 +49,32 @@ export default ({ getService }: FtrProviderContext): void => {
             user: 'bob',
             password: 'supersecret',
           },
-        })
-        .expect(200);
+        },
+        auth: authSpace1,
+      });
+      const jiraConnector = await createConnector({
+        supertest,
+        req: getJiraConnector(),
+        auth: authSpace1,
+      });
+      const resilientConnector = await createConnector({
+        supertest,
+        req: getResilientConnector(),
+        auth: authSpace1,
+      });
+      const sir = await createConnector({
+        supertest,
+        req: getServiceNowSIRConnector(),
+        auth: authSpace1,
+      });
 
-      const { body: jiraConnector } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'true')
-        .send(getJiraConnector())
-        .expect(200);
+      actionsRemover.add(authSpace1.space, sir.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, snConnector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, emailConnector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, jiraConnector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, resilientConnector.id, 'action', 'actions');
 
-      const { body: resilientConnector } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'true')
-        .send(getResilientConnector())
-        .expect(200);
-
-      const sir = await createConnector({ supertest, req: getServiceNowSIRConnector() });
-
-      actionsRemover.add('default', sir.id, 'action', 'actions');
-      actionsRemover.add('default', snConnector.id, 'action', 'actions');
-      actionsRemover.add('default', emailConnector.id, 'action', 'actions');
-      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
-      actionsRemover.add('default', resilientConnector.id, 'action', 'actions');
-
-      const { body: connectors } = await supertest
-        .get(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const connectors = await getCaseConnectors({ supertest, auth: authSpace1 });
 
       expect(connectors).to.eql([
         {
@@ -124,6 +122,58 @@ export default ({ getService }: FtrProviderContext): void => {
           referencedByCount: 0,
         },
       ]);
+    });
+
+    it('should not return any connectors when looking in the wrong space', async () => {
+      const snConnector = await createConnector({
+        supertest,
+        req: getServiceNowConnector(),
+        auth: authSpace1,
+      });
+      const emailConnector = await createConnector({
+        supertest,
+        req: {
+          name: 'An email action',
+          connector_type_id: '.email',
+          config: {
+            service: '__json',
+            from: 'bob@example.com',
+          },
+          secrets: {
+            user: 'bob',
+            password: 'supersecret',
+          },
+        },
+        auth: authSpace1,
+      });
+      const jiraConnector = await createConnector({
+        supertest,
+        req: getJiraConnector(),
+        auth: authSpace1,
+      });
+      const resilientConnector = await createConnector({
+        supertest,
+        req: getResilientConnector(),
+        auth: authSpace1,
+      });
+      const sir = await createConnector({
+        supertest,
+        req: getServiceNowSIRConnector(),
+        auth: authSpace1,
+      });
+
+      actionsRemover.add(authSpace1.space, sir.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, snConnector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, emailConnector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, jiraConnector.id, 'action', 'actions');
+      actionsRemover.add(authSpace1.space, resilientConnector.id, 'action', 'actions');
+
+      const connectors = await getCaseConnectors({
+        supertest,
+        auth: getAuthWithSuperUser('space2'),
+      });
+
+      expect(connectors).to.eql([]);
     });
   });
 };
