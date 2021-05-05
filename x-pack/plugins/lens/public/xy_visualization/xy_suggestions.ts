@@ -525,6 +525,9 @@ function buildSuggestion({
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,
+    hideEndzones: currentState?.hideEndzones,
+    yLeftExtent: currentState?.yLeftExtent,
+    yRightExtent: currentState?.yRightExtent,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
       x: true,
       yLeft: true,

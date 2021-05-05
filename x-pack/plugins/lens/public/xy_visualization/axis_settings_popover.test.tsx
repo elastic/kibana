@@ -32,6 +32,7 @@ describe('Axes Settings', () => {
       toggleAxisTitleVisibility: jest.fn(),
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
+      hasBarOnAxis: false,
     };
   });
 
@@ -90,5 +91,38 @@ describe('Axes Settings', () => {
       <AxisSettingsPopover {...props} endzonesVisible={true} setEndzoneVisibility={() => {}} />
     );
     expect(component.find('[data-test-subj="lnsshowEndzones"]').prop('checked')).toBe(true);
+  });
+
+  describe('axis extent', () => {
+    it('hides the extent section if no extent is passed in', () => {
+      const component = shallow(<AxisSettingsPopover {...props} />);
+      expect(component.find('[data-test-subj="lnsXY_axisBounds_groups"]').length).toBe(0);
+    });
+
+    it('shows the section and allows to change mode if extent is present', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover {...props} extent={{ mode: 'dataBounds' }} setExtent={setSpy} />
+      );
+      const modeGroup = component.find('[data-test-subj="lnsXY_axisBounds_groups"]');
+      expect(modeGroup.prop('idSelected')).toContain('dataBounds');
+      ((modeGroup.prop('onChange') as unknown) as (mode: string) => void)('custom');
+      expect(setSpy).toHaveBeenCalledWith({ mode: 'custom' });
+    });
+
+    it('renders bound inputs if mode is custom', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover
+          {...props}
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
+          setExtent={setSpy}
+        />
+      );
+      const lower = component.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
+      const upper = component.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
+      expect(lower.prop('value')).toEqual(123);
+      expect(upper.prop('value')).toEqual(456);
+    });
   });
 });

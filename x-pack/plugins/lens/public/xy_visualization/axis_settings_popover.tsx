@@ -262,6 +262,14 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             label={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
               defaultMessage: 'Bounds',
             })}
+            helpText={
+              hasBarOnAxis && extent.mode !== 'custom'
+                ? i18n.translate('xpack.lens.xyChart.axisExtent.disabledDataBoundsMessage', {
+                    defaultMessage:
+                      "Bar series always have to start at zero and can't be fit to data bounds",
+                  })
+                : undefined
+            }
           >
             <EuiButtonGroup
               isFullWidth
@@ -295,7 +303,9 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                   'data-test-subj': 'lnsXY_axisExtent_groups_custom',
                 },
               ]}
-              idSelected={`${idPrefix}${extent.mode}`}
+              idSelected={`${idPrefix}${
+                hasBarOnAxis && extent.mode === 'dataBounds' ? 'full' : extent.mode
+              }`}
               onChange={(id) => {
                 const newMode = id.replace(idPrefix, '') as AxisExtentConfig['mode'];
                 setExtent({ ...extent, mode: newMode });
@@ -316,13 +326,12 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                     isInvalid={
                       hasBarOnAxis && extent.lowerBound !== undefined && extent.lowerBound > 0
                     }
-                    error={
-                      hasBarOnAxis &&
-                      extent.lowerBound !== undefined &&
-                      extent.lowerBound > 0 &&
-                      i18n.translate('xpack.lens.xyChart.lowerBoundError', {
-                        defaultMessage: "Lower bound can't be above zero for bar series",
-                      })
+                    helpText={
+                      hasBarOnAxis
+                        ? i18n.translate('xpack.lens.xyChart.lowerBoundError', {
+                            defaultMessage: "Lower bound can't be above zero for bar series",
+                          })
+                        : undefined
                     }
                   >
                     <EuiFieldNumber
@@ -330,6 +339,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                       isInvalid={
                         hasBarOnAxis && extent.lowerBound !== undefined && extent.lowerBound > 0
                       }
+                      data-test-subj="lnsXY_axisExtent_lowerBound"
                       onChange={(e) => {
                         const val = Number(e.target.value);
                         if (Number.isNaN(Number(val))) {
@@ -357,6 +367,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                   >
                     <EuiFieldNumber
                       value={extent.upperBound || ''}
+                      data-test-subj="lnsXY_axisExtent_upperBound"
                       onChange={(e) => {
                         const val = Number(e.target.value);
                         if (Number.isNaN(Number(val))) {
