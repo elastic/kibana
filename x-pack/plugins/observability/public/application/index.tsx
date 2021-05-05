@@ -10,7 +10,7 @@ import React, { MouseEvent, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -91,6 +91,9 @@ export const renderApp = ({
     links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
   });
 
+  // ensure all divs are .kbnAppWrappers
+  element.classList.add(APP_WRAPPER_CLASS);
+
   ReactDOM.render(
     <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
       <PluginContext.Provider
@@ -99,7 +102,7 @@ export const renderApp = ({
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>
             <i18nCore.Context>
-              <RedirectAppLinks application={core.application}>
+              <RedirectAppLinks application={core.application} className="kbnAppWrapper">
                 <HasDataContextProvider>
                   <App />
                 </HasDataContextProvider>
