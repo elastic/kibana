@@ -17,13 +17,17 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
-import { HttpSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { FieldStatsResponse } from '../../../../../common';
-import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
+import {
+  AggFunctionsMapping,
+  esQuery,
+  IIndexPattern,
+} from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
-import { DataType } from '../../../../types';
-import { FiltersIndexPatternColumn, OperationDefinition } from '../index';
+import { DataType, FramePublicAPI } from '../../../../types';
+import { FiltersIndexPatternColumn, OperationDefinition, operationDefinitionMap } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
@@ -60,15 +64,12 @@ function getDisallowedTermsMessage(
   layerId?: string
 ) {
   const hasMultipleShifts =
-    uniq(Object.values(layer.columns).map((col) => col.timeShift !== '')).length > 1;
+    uniq(
+      Object.values(layer.columns)
+        .filter((col) => operationDefinitionMap[col.operationType].shiftable)
+        .map((col) => col.timeShift || '')
+    ).length > 1;
   if (!hasMultipleShifts) {
-    return undefined;
-  }
-  const dateHistogramParent = layer.columnOrder
-    .slice(0, layer.columnOrder.indexOf(columnId))
-    .find((colId) => layer.columns[colId].operationType === 'date_histogram');
-
-  if (!dateHistogramParent) {
     return undefined;
   }
   return {
@@ -80,16 +81,24 @@ function getDisallowedTermsMessage(
       state && layerId
         ? {
             label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
-              defaultMessage: 'Pin top values',
+              defaultMessage: 'Pin current top values',
             }),
-            newState: async (http: HttpSetup) => {
+            newState: async (core: CoreStart, frame: FramePublicAPI) => {
               const indexPattern = state.indexPatterns[layer.indexPatternId];
               const fieldName = (layer.columns[columnId] as TermsIndexPatternColumn).sourceField;
-              const response: FieldStatsResponse<string | number> = await http.post(
+              const response: FieldStatsResponse<string | number> = await core.http.post(
                 `/api/lens/index_stats/${indexPattern.id}/field`,
                 {
                   body: JSON.stringify({
                     fieldName,
+                    dslQuery: esQuery.buildEsQuery(
+                      indexPattern as IIndexPattern,
+                      frame.query,
+                      frame.filters,
+                      esQuery.getEsQueryConfig(core.uiSettings)
+                    ),
+                    fromDate: frame.dateRange.fromDate,
+                    toDate: frame.dateRange.toDate,
                   }),
                 }
               );
@@ -102,7 +111,15 @@ function getDisallowedTermsMessage(
                     columns: {
                       ...layer.columns,
                       [columnId]: {
-                        ...layer.columns[columnId],
+                        label: i18n.translate('xpack.lens.indexPattern.pinnedTopValuesLabel', {
+                          defaultMessage: 'Pinned top values of {field}',
+                          values: {
+                            field: fieldName,
+                          },
+                        }),
+                        customLabel: true,
+                        isBucketed: layer.columns[columnId].isBucketed,
+                        dataType: 'string',
                         operationType: 'filters',
                         params: {
                           filters: response.topValues?.buckets.map(({ key }) => ({
@@ -110,7 +127,7 @@ function getDisallowedTermsMessage(
                               query: `${fieldName}: "${key}"`,
                               language: 'kuery',
                             },
-                            label: '',
+                            label: String(key),
                           })),
                         },
                       } as FiltersIndexPatternColumn,

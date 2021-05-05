@@ -235,7 +235,11 @@ export interface Datasource<T = unknown, P = unknown> {
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
   getErrorMessages: (
     state: T,
-    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>
+    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>,
+    dateRange?: {
+      fromDate: string;
+      toDate: string;
+    }
   ) =>
     | Array<{
         shortMessage: string;

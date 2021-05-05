@@ -6,8 +6,12 @@
  */
 
 import _, { partition } from 'lodash';
-import { HttpSetup } from 'kibana/public';
-import type { OperationMetadata, VisualizationDimensionGroupConfig } from '../../types';
+import { CoreStart } from 'kibana/public';
+import type {
+  FramePublicAPI,
+  OperationMetadata,
+  VisualizationDimensionGroupConfig,
+} from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -1075,7 +1079,7 @@ export function getErrorMessages(
   indexPattern: IndexPattern,
   state: IndexPatternPrivateState,
   layerId: string,
-  http: HttpSetup
+  core: CoreStart
 ):
   | Array<
       | string
@@ -1083,21 +1087,12 @@ export function getErrorMessages(
           message: string;
           fixAction?: {
             label: string;
-            newState: (http: HttpSetup) => Promise<IndexPatternPrivateState>;
+            newState: (frame: FramePublicAPI) => Promise<IndexPatternPrivateState>;
           };
         }
     >
   | undefined {
-  const errors: Array<
-    | string
-    | {
-        message: string;
-        fixAction?: {
-          label: string;
-          newState: () => Promise<IndexPatternPrivateState>;
-        };
-      }
-  > = Object.entries(layer.columns)
+  const errors = Object.entries(layer.columns)
     .flatMap(([columnId, column]) => {
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
@@ -1113,28 +1108,22 @@ export function getErrorMessages(
         fixAction: errorMessage.fixAction
           ? {
               ...errorMessage.fixAction,
-              newState: () => errorMessage.fixAction!.newState(http),
+              newState: (frame: FramePublicAPI) => errorMessage.fixAction!.newState(core, frame),
             }
           : undefined,
       };
     })
     // remove the undefined values
-    .filter(
-      (
-        v:
-          | string
-          | undefined
-          | {
-              message: string;
-              fixAction?: { label: string; newState: () => Promise<IndexPatternPrivateState> };
-            }
-      ): v is
-        | string
-        | {
-            message: string;
-            fixAction?: { label: string; newState: () => Promise<IndexPatternPrivateState> };
-          } => v != null
-    );
+    .filter((v) => v != null) as Array<
+    | string
+    | {
+        message: string;
+        fixAction?: {
+          label: string;
+          newState: (framePublicAPI: FramePublicAPI) => Promise<IndexPatternPrivateState>;
+        };
+      }
+  >;
 
   return errors.length ? errors : undefined;
 }

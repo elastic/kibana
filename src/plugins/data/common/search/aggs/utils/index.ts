@@ -16,4 +16,3 @@ export * from './prop_filter';
 export * from './to_angular_json';
 export * from './infer_time_zone';
 export * from './parse_time_shift';
-export * from './shift_error';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
 import { filtersOperation, FiltersIndexPatternColumn } from './filters';
@@ -36,7 +36,7 @@ import {
 } from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { OperationMetadata } from '../../../types';
+import { FramePublicAPI, OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import {
   IndexPattern,
@@ -238,7 +238,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
             message: string;
             fixAction?: {
               label: string;
-              newState: (http: HttpSetup) => Promise<IndexPatternPrivateState>;
+              newState: (
+                core: CoreStart,
+                frame: FramePublicAPI
+              ) => Promise<IndexPatternPrivateState>;
             };
           }
       >
@@ -352,7 +355,10 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
             message: string;
             fixAction?: {
               label: string;
-              newState: (http: HttpSetup) => Promise<IndexPatternPrivateState>;
+              newState: (
+                core: CoreStart,
+                frame: FramePublicAPI
+              ) => Promise<IndexPatternPrivateState>;
             };
           }
       >

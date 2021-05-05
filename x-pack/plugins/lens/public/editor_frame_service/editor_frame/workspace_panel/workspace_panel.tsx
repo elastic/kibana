@@ -84,7 +84,7 @@ interface WorkspaceState {
   expressionBuildError?: Array<{
     shortMessage: string;
     longMessage: string;
-    fixAction?: { label: string; newState: () => Promise<unknown> };
+    fixAction?: { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> };
   }>;
   expandError: boolean;
 }
@@ -399,7 +399,7 @@ export const VisualizationWrapper = ({
     configurationValidationError?: Array<{
       shortMessage: string;
       longMessage: string;
-      fixAction?: { label: string; newState: () => Promise<unknown> };
+      fixAction?: { label: string; newState: (framePublicAPI: FramePublicAPI) => Promise<unknown> };
     }>;
     missingRefsErrors?: Array<{ shortMessage: string; longMessage: string }>;
   };
@@ -487,7 +487,9 @@ export const VisualizationWrapper = ({
                 {localState.configurationValidationError[0].fixAction && activeDatasourceId && (
                   <EuiButton
                     onClick={async () => {
-                      const newState = await localState.configurationValidationError?.[0].fixAction?.newState();
+                      const newState = await localState.configurationValidationError?.[0].fixAction?.newState(
+                        framePublicAPI
+                      );
                       dispatch({
                         type: 'UPDATE_DATASOURCE_STATE',
                         datasourceId: activeDatasourceId,
