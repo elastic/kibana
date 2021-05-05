@@ -201,7 +201,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       });
     }
 
-    public async clickDocSortAsc(field?: string, sortText = 'Sort New-Old') {
+    public async clickDocSortAsc(field?: string, sortText = 'Sort Old-New') {
       if (field) {
         await this.openColMenuByField(field);
       } else {
@@ -210,7 +210,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       await find.clickByButtonText(sortText);
     }
 
-    public async clickDocSortDesc(field?: string, sortText = 'Sort Old-New') {
+    public async clickDocSortDesc(field?: string, sortText = 'Sort New-Old') {
       if (field) {
         await this.openColMenuByField(field);
       } else {
