@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import type { AgentPolicy } from '../../../../types';
+import type { AgentPolicy, PackagePolicy } from '../../../../types';
+import { sendGetOneAgentPolicy } from '../../../../hooks';
+import { FLEET_SERVER_PACKAGE } from '../../../../constants';
 
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 
@@ -48,21 +50,55 @@ export const AgentPolicySelectionStep = ({
   agentPolicies,
   setSelectedAPIKeyId,
   setSelectedPolicyId,
+  setIsFleetServerPolicySelected,
+  excludeFleetServer,
 }: {
   agentPolicies?: AgentPolicy[];
   setSelectedAPIKeyId?: (key: string) => void;
   setSelectedPolicyId?: (policyId: string) => void;
+  setIsFleetServerPolicySelected?: (selected: boolean) => void;
+  excludeFleetServer?: boolean;
 }) => {
+  const regularAgentPolicies = Array.isArray(agentPolicies)
+    ? agentPolicies.filter(
+        (policy) =>
+          policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
+      )
+    : [];
+
+  const onAgentPolicyChange = useCallback(
+    async (policyId: string) => {
+      if (setSelectedPolicyId) {
+        setSelectedPolicyId(policyId);
+      }
+      if (setIsFleetServerPolicySelected) {
+        const agentPolicyRequest = await sendGetOneAgentPolicy(policyId);
+        if (
+          agentPolicyRequest.data?.item &&
+          (agentPolicyRequest.data.item.package_policies as PackagePolicy[]).some(
+            (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
+          )
+        ) {
+          setIsFleetServerPolicySelected(true);
+        } else {
+          setIsFleetServerPolicySelected(false);
+        }
+      }
+    },
+    [setIsFleetServerPolicySelected, setSelectedPolicyId]
+  );
+
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
       defaultMessage: 'Choose an agent policy',
     }),
     children: (
       <EnrollmentStepAgentPolicy
-        agentPolicies={agentPolicies}
+        agentPolicies={regularAgentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
         onKeyChange={setSelectedAPIKeyId}
-        onAgentPolicyChange={setSelectedPolicyId}
+        onAgentPolicyChange={onAgentPolicyChange}
+        excludeFleetServer={excludeFleetServer}
       />
     ),
   };

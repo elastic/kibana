@@ -45,5 +45,7 @@ interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 
 type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
 
+export type ObjectValues<T> = Array<T[keyof T]>;
+
 export type ObjectEntry<T> = [keyof T, T[keyof T]];
 export type ObjectEntries<T> = Array<ObjectEntry<T>>;

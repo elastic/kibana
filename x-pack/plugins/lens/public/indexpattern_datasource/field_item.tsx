@@ -193,6 +193,10 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     }
   }
 
+  const onDragStart = useCallback(() => {
+    setOpen(false);
+  }, [setOpen]);
+
   const value = useMemo(
     () => ({
       field,
@@ -244,6 +248,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             order={order}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
+            onDragStart={onDragStart}
           >
             <FieldButton
               className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
@@ -657,7 +662,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
           const formatted = formatter.convert(topValue.key);
           return (
             <div className="lnsFieldItem__topValue" key={topValue.key}>
-              <EuiFlexGroup alignItems="stretch" key={topValue.key} gutterSize="xs">
+              <EuiFlexGroup
+                alignItems="stretch"
+                key={topValue.key}
+                gutterSize="xs"
+                responsive={false}
+              >
                 <EuiFlexItem grow={true} className="eui-textTruncate">
                   {formatted === '' ? (
                     <EuiText size="xs" color="subdued">
@@ -697,7 +707,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         })}
         {otherCount ? (
           <>
-            <EuiFlexGroup alignItems="stretch" gutterSize="xs">
+            <EuiFlexGroup alignItems="stretch" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={true} className="eui-textTruncate">
                 <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {i18n.translate('xpack.lens.indexPattern.otherDocsLabel', {

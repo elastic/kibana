@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ENABLE_CASE_CONNECTOR } from '../../cases/common/constants';
+import type { TransformConfigSchema } from './transforms/types';
+import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -25,6 +26,8 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+// The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
+// If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore';
@@ -36,6 +39,7 @@ export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
+export const DEFAULT_TRANSFORMS = 'securitySolution:transforms';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
 export const GLOBAL_HEADER_HEIGHT = 98; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
@@ -104,6 +108,38 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
 
+/** The default settings for the transforms */
+export const defaultTransformsSetting: TransformConfigSchema = {
+  enabled: false,
+  auto_start: true,
+  auto_create: true,
+  query: {
+    range: {
+      '@timestamp': {
+        gte: 'now-1d/d',
+        format: 'strict_date_optional_time',
+      },
+    },
+  },
+  retention_policy: {
+    time: {
+      field: '@timestamp',
+      max_age: '1w',
+    },
+  },
+  max_page_search_size: 5000,
+  settings: [
+    {
+      prefix: 'all',
+      indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+      data_sources: [
+        ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+      ],
+    },
+  ],
+};
+export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSetting, null, 2);
+
 /**
  * Id for the signals alerting type
  */
@@ -136,10 +172,15 @@ export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 
 export const TIMELINE_URL = '/api/timeline';
+export const TIMELINES_URL = '/api/timelines';
+export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
 export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
+
+export const NOTE_URL = '/api/note';
+export const PINNED_EVENT_URL = '/api/pinned_event';
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -207,3 +248,10 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+/**
+ * Used for transforms for metrics_entities. If the security_solutions pulls in
+ * the metrics_entities plugin, then it should pull this constant from there rather
+ * than use it from here.
+ */
+export const ELASTIC_NAME = 'estc';

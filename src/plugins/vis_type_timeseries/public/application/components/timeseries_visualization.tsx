@@ -59,22 +59,44 @@ function TimeseriesVisualization({
       const indexPatternValue = model.index_pattern || '';
       const { indexPatterns } = getDataStart();
       const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
+      let event;
+      // trigger applyFilter if no index pattern found, url drilldowns are supported only
+      // for the index pattern mode
+      if (indexPattern) {
+        const tables = indexPattern
+          ? await convertSeriesToDataTable(model, series, indexPattern)
+          : null;
+        const table = tables?.[model.series[0].id];
 
-      const tables = indexPattern
-        ? await convertSeriesToDataTable(model, series, indexPattern)
-        : null;
-      const table = tables?.[model.series[0].id];
+        const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
+        event = {
+          data: {
+            table,
+            column: X_ACCESSOR_INDEX,
+            range,
+            timeFieldName: indexPattern?.timeFieldName,
+          },
+          name: 'brush',
+        };
+      } else {
+        event = {
+          name: 'applyFilter',
+          data: {
+            timeFieldName: '*',
+            filters: [
+              {
+                range: {
+                  '*': {
+                    gte,
+                    lte,
+                  },
+                },
+              },
+            ],
+          },
+        };
+      }
 
-      const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
-      const event = {
-        data: {
-          table,
-          column: X_ACCESSOR_INDEX,
-          range,
-          timeFieldName: indexPattern?.timeFieldName,
-        },
-        name: 'brush',
-      };
       handlers.event(event);
     },
     [handlers, model]
@@ -121,6 +143,7 @@ function TimeseriesVisualization({
                 `${isVisSeriesData(visData) ? model.id : 'series[0]'}.series[0].data`,
                 undefined
               )}
+              ignoreDaylightTime={model.ignore_daylight_time}
               panelInterval={getInterval(visData, model)}
               modelInterval={model.interval ?? AUTO_INTERVAL}
             />

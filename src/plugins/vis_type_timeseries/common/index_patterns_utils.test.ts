@@ -81,7 +81,7 @@ describe('fetchIndexPattern', () => {
   });
 
   describe('text-based index', () => {
-    test('should return the Kibana index if it exists', async () => {
+    test('should return the Kibana index if it exists (fetchKibabaIndexForStringIndexes is true)', async () => {
       mockedIndices = [
         {
           id: 'indexId',
@@ -89,7 +89,9 @@ describe('fetchIndexPattern', () => {
         },
       ] as IndexPattern[];
 
-      const value = await fetchIndexPattern('indexTitle', indexPatternsService);
+      const value = await fetchIndexPattern('indexTitle', indexPatternsService, {
+        fetchKibabaIndexForStringIndexes: true,
+      });
 
       expect(value).toMatchInlineSnapshot(`
         Object {
@@ -102,8 +104,10 @@ describe('fetchIndexPattern', () => {
       `);
     });
 
-    test('should return only indexPatternString if Kibana index does not exist', async () => {
-      const value = await fetchIndexPattern('indexTitle', indexPatternsService);
+    test('should return only indexPatternString if Kibana index does not exist (fetchKibabaIndexForStringIndexes is true)', async () => {
+      const value = await fetchIndexPattern('indexTitle', indexPatternsService, {
+        fetchKibabaIndexForStringIndexes: true,
+      });
 
       expect(value).toMatchInlineSnapshot(`
         Object {

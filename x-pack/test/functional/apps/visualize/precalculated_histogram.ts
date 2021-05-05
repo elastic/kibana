@@ -27,8 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('appears correctly in discover', async function () {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.clickFieldListItemAdd('histogram-content');
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData.includes('"values":[0.3,1,3,4.2,4.8]')).to.be.ok();
+      expect(rowData).to.contain('"values":[0.3,1,3,4.2,4.8]');
     });
 
     describe('works in visualizations', () => {

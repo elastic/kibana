@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { DataSeries } from '../../types';
+import { ConfigProps, DataSeries } from '../../types';
 import { FieldLabels } from '../constants';
+import { buildExistsFilter } from '../utils';
+import { DOWN_LABEL, UP_LABEL } from '../constants/labels';
 
-interface Props {
-  seriesId: string;
-}
-
-export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
+export function getMonitorPingsConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
     id: seriesId,
     reportType: 'uptime-pings',
@@ -21,18 +19,27 @@ export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'count',
-      label: 'Monitor pings',
-    },
-    hasMetricType: false,
-    defaultFilters: ['observer.geo.name'],
-    breakdowns: ['monitor.status', 'observer.geo.name', 'monitor.type'],
-    filters: [],
+    yAxisColumns: [
+      {
+        operationType: 'sum',
+        sourceField: 'summary.up',
+        label: UP_LABEL,
+      },
+      {
+        operationType: 'sum',
+        sourceField: 'summary.down',
+        label: DOWN_LABEL,
+      },
+    ],
+    yTitle: 'Pings',
+    hasOperationType: false,
+    defaultFilters: ['observer.geo.name', 'monitor.type', 'tags'],
+    breakdowns: ['observer.geo.name', 'monitor.type'],
+    filters: [...buildExistsFilter('summary.up', indexPattern)],
     palette: { type: 'palette', name: 'status' },
     reportDefinitions: [
       {
-        field: 'monitor.id',
+        field: 'monitor.name',
       },
       {
         field: 'url.full',

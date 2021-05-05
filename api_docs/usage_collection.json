@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.TrackApplicationView.$1",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -31,7 +32,13 @@
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
-          "TrackApplicationViewProps",
+          {
+            "pluginId": "usageCollection",
+            "scope": "public",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-public.TrackApplicationViewProps",
+            "text": "TrackApplicationViewProps"
+          },
           ">) => JSX.Element"
         ],
         "description": [
@@ -43,38 +50,75 @@
           "lineNumber": 23
         },
         "tags": [
-          "Link",
           "constructor"
         ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [
+    "interfaces": [
       {
-        "id": "def-public.METRIC_TYPE",
-        "type": "Enum",
-        "label": "METRIC_TYPE",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
-          "lineNumber": 10
-        },
-        "signature": [
-          "METRIC_TYPE"
+        "id": "def-public.TrackApplicationViewProps",
+        "type": "Interface",
+        "label": "TrackApplicationViewProps",
+        "description": [
+          "\nProps to provide to the {@link TrackApplicationView} component."
         ],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [
+              "public"
+            ],
+            "id": "def-public.TrackApplicationViewProps.viewId",
+            "type": "string",
+            "label": "viewId",
+            "description": [
+              "\nThe name of the view to be tracked. The appId will be obtained automatically."
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
+              "lineNumber": 20
+            }
+          },
+          {
+            "tags": [
+              "public"
+            ],
+            "id": "def-public.TrackApplicationViewProps.children",
+            "type": "CompoundType",
+            "label": "children",
+            "description": [
+              "\nThe React component to be tracked."
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              "React.ReactNode"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       }
     ],
+    "enums": [],
     "misc": [],
     "objects": [],
     "setup": {
       "id": "def-public.UsageCollectionSetup",
       "type": "Interface",
       "label": "UsageCollectionSetup",
-      "description": [],
+      "description": [
+        "Public's setup APIs exposed by the UsageCollection Service"
+      ],
       "tags": [],
       "children": [
         {
@@ -82,10 +126,12 @@
           "id": "def-public.UsageCollectionSetup.components",
           "type": "Object",
           "label": "components",
-          "description": [],
+          "description": [
+            "Component helpers to track usage collection in the UI"
+          ],
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 35
+            "lineNumber": 38
           },
           "signature": [
             "{ ApplicationUsageTrackingProvider: React.FC<{}>; }"
@@ -96,10 +142,12 @@
           "id": "def-public.UsageCollectionSetup.reportUiCounter",
           "type": "Function",
           "label": "reportUiCounter",
-          "description": [],
+          "description": [
+            "Report whenever a UI event occurs for UI counters to report it"
+          ],
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 38
+            "lineNumber": 75
           },
           "signature": [
             "(appName: string, type: ",
@@ -110,7 +158,7 @@
       ],
       "source": {
         "path": "src/plugins/usage_collection/public/plugin.tsx",
-        "lineNumber": 34
+        "lineNumber": 36
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -119,7 +167,9 @@
       "id": "def-public.UsageCollectionStart",
       "type": "Interface",
       "label": "UsageCollectionStart",
-      "description": [],
+      "description": [
+        "Public's start APIs exposed by the UsageCollection Service"
+      ],
       "tags": [],
       "children": [
         {
@@ -127,10 +177,12 @@
           "id": "def-public.UsageCollectionStart.reportUiCounter",
           "type": "Function",
           "label": "reportUiCounter",
-          "description": [],
+          "description": [
+            "Report whenever a UI event occurs for UI counters to report it"
+          ],
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 42
+            "lineNumber": 86
           },
           "signature": [
             "(appName: string, type: ",
@@ -141,40 +193,62 @@
       ],
       "source": {
         "path": "src/plugins/usage_collection/public/plugin.tsx",
-        "lineNumber": 41
+        "lineNumber": 84
       },
       "lifecycle": "start",
       "initialIsOpen": true
     }
   },
   "server": {
-    "classes": [
+    "classes": [],
+    "functions": [],
+    "interfaces": [
       {
-        "id": "def-server.Collector",
-        "type": "Class",
-        "tags": [],
-        "label": "Collector",
-        "description": [],
+        "id": "def-server.ICollector",
+        "type": "Interface",
+        "label": "ICollector",
         "signature": [
           {
             "pluginId": "usageCollection",
             "scope": "server",
             "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.Collector",
-            "text": "Collector"
+            "section": "def-server.ICollector",
+            "text": "ICollector"
           },
           "<TFetchReturn, ExtraOptions>"
         ],
+        "description": [
+          "\nCommon interface for Usage and Stats Collectors"
+        ],
+        "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-server.Collector.extendFetchContext",
+            "id": "def-server.ICollector.log",
+            "type": "Object",
+            "label": "log",
+            "description": [
+              "Logger"
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/server/collector/types.ts",
+              "lineNumber": 173
+            },
+            "signature": [
+              "Logger"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ICollector.extendFetchContext",
             "type": "CompoundType",
             "label": "extendFetchContext",
-            "description": [],
+            "description": [
+              "\nThe options to extend the context provided to the `fetch` method: {@link CollectorOptionsFetchExtendedContext}."
+            ],
             "source": {
-              "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 144
+              "path": "src/plugins/usage_collection/server/collector/types.ts",
+              "lineNumber": 178
             },
             "signature": [
               {
@@ -184,43 +258,33 @@
                 "section": "def-server.CollectorOptionsFetchExtendedContext",
                 "text": "CollectorOptionsFetchExtendedContext"
               },
-              "<any>"
+              "<boolean>"
             ]
           },
           {
             "tags": [],
-            "id": "def-server.Collector.type",
+            "id": "def-server.ICollector.type",
             "type": "string",
             "label": "type",
-            "description": [],
+            "description": [
+              "The registered type (aka name) of the collector"
+            ],
             "source": {
-              "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 145
+              "path": "src/plugins/usage_collection/server/collector/types.ts",
+              "lineNumber": 180
             }
           },
           {
             "tags": [],
-            "id": "def-server.Collector.init",
-            "type": "Object",
-            "label": "init",
-            "description": [],
-            "source": {
-              "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 146
-            },
-            "signature": [
-              "Function | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.Collector.fetch",
+            "id": "def-server.ICollector.fetch",
             "type": "Function",
             "label": "fetch",
-            "description": [],
+            "description": [
+              "\nThe actual logic that reports the Usage collection.\nIt will be called on every collection request.\nWhatever is returned in this method will be passed through as-is under\nthe {@link ICollector.type} key.\n"
+            ],
             "source": {
-              "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 147
+              "path": "src/plugins/usage_collection/server/collector/types.ts",
+              "lineNumber": 192
             },
             "signature": [
               {
@@ -230,107 +294,209 @@
                 "section": "def-server.CollectorFetchMethod",
                 "text": "CollectorFetchMethod"
               },
-              "<any, TFetchReturn, ExtraOptions>"
+              "<boolean, TFetchReturn, ExtraOptions>"
             ]
           },
           {
             "tags": [],
-            "id": "def-server.Collector.isReady",
+            "id": "def-server.ICollector.isReady",
             "type": "Function",
             "label": "isReady",
-            "description": [],
+            "description": [
+              "\nShould return `true` when it's safe to call the `fetch` method."
+            ],
             "source": {
-              "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 148
+              "path": "src/plugins/usage_collection/server/collector/types.ts",
+              "lineNumber": 196
             },
             "signature": [
               "() => boolean | Promise<boolean>"
             ]
-          },
-          {
-            "id": "def-server.Collector.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "log",
-                "isRequired": true,
-                "signature": [
-                  "Logger"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/usage_collection/server/collector/collector.ts",
-                  "lineNumber": 155
-                }
-              },
-              {
-                "type": "CompoundType",
-                "label": "{\n      type,\n      init,\n      fetch,\n      isReady,\n      extendFetchContext = {},\n      ...options\n    }",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "usageCollection",
-                    "scope": "server",
-                    "docId": "kibUsageCollectionPluginApi",
-                    "section": "def-server.CollectorOptions",
-                    "text": "CollectorOptions"
-                  },
-                  "<TFetchReturn, any, ExtraOptions>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/usage_collection/server/collector/collector.ts",
-                  "lineNumber": 156
-                }
-              }
-            ],
-            "tags": [
-              "private"
-            ],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 154
-            }
           }
         ],
         "source": {
-          "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 143
+          "path": "src/plugins/usage_collection/server/collector/types.ts",
+          "lineNumber": 171
         },
         "initialIsOpen": false
-      }
-    ],
-    "functions": [],
-    "interfaces": [
+      },
       {
-        "id": "def-server.SchemaField",
+        "id": "def-server.IncrementCounterParams",
         "type": "Interface",
-        "label": "SchemaField",
-        "description": [],
+        "label": "IncrementCounterParams",
+        "description": [
+          "\nDetails about the counter to be incremented"
+        ],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-server.SchemaField.type",
+            "id": "def-server.IncrementCounterParams.counterName",
             "type": "string",
-            "label": "type",
-            "description": [],
+            "label": "counterName",
+            "description": [
+              "The name of the counter"
+            ],
             "source": {
-              "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 33
+              "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
+              "lineNumber": 28
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.IncrementCounterParams.counterType",
+            "type": "string",
+            "label": "counterType",
+            "description": [
+              "The counter type (\"count\" by default)"
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IncrementCounterParams.incrementBy",
+            "type": "number",
+            "label": "incrementBy",
+            "description": [
+              "Increment the counter by this number (1 if not specified)"
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
+              "lineNumber": 32
+            },
+            "signature": [
+              "number | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
+          "lineNumber": 26
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.IUsageCounter",
+        "type": "Interface",
+        "label": "IUsageCounter",
+        "description": [
+          "\nUsage Counter allows to keep track of any events that occur.\nBy calling {@link IUsageCounter.incrementCounter} devs can notify this\nAPI whenever the event happens."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.IUsageCounter.incrementCounter",
+            "type": "Function",
+            "label": "incrementCounter",
+            "description": [
+              "\nNotifies the counter about a new event happening so it can increase the count internally."
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
+              "lineNumber": 45
+            },
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.IncrementCounterParams",
+                "text": "IncrementCounterParams"
+              },
+              ") => void"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
+          "lineNumber": 40
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.UsageCountersSavedObjectAttributes",
+        "type": "Interface",
+        "label": "UsageCountersSavedObjectAttributes",
+        "signature": [
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.UsageCountersSavedObjectAttributes",
+            "text": "UsageCountersSavedObjectAttributes"
+          },
+          " extends ",
+          "SavedObjectAttributes"
+        ],
+        "description": [
+          "\nThe attributes stored in the UsageCounters' SavedObjects"
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.UsageCountersSavedObjectAttributes.domainId",
+            "type": "string",
+            "label": "domainId",
+            "description": [
+              "The domain ID registered in the Usage Counter"
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
+              "lineNumber": 23
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.UsageCountersSavedObjectAttributes.counterName",
+            "type": "string",
+            "label": "counterName",
+            "description": [
+              "The counter name"
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
+              "lineNumber": 25
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.UsageCountersSavedObjectAttributes.counterType",
+            "type": "string",
+            "label": "counterType",
+            "description": [
+              "The counter type"
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
+              "lineNumber": 27
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.UsageCountersSavedObjectAttributes.count",
+            "type": "number",
+            "label": "count",
+            "description": [
+              "Number of times the event has occurred"
+            ],
+            "source": {
+              "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
+              "lineNumber": 29
             }
           }
         ],
         "source": {
-          "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 32
+          "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
+          "lineNumber": 21
         },
         "initialIsOpen": false
       }
@@ -342,10 +508,12 @@
         "type": "Type",
         "label": "AllowedSchemaTypes",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nPossible type values in the schema"
+        ],
         "source": {
-          "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 27
+          "path": "src/plugins/usage_collection/server/collector/types.ts",
+          "lineNumber": 33
         },
         "signature": [
           "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"short\" | \"integer\" | \"byte\" | \"float\""
@@ -361,11 +529,36 @@
           "\nThe context for the `fetch` method: It includes the most commonly used clients in the collectors (ES and SO clients).\nBoth are scoped based on the request and the context:\n- When users are requesting a sample of data, it is scoped to their role to avoid exposing data they shouldn't read\n- When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user\n"
         ],
         "source": {
-          "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 64
+          "path": "src/plugins/usage_collection/server/collector/types.ts",
+          "lineNumber": 76
         },
         "signature": [
           "{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract; } & (WithKibanaRequest extends true ? { kibanaRequest?: KibanaRequest<unknown, unknown, unknown, any> | undefined; } : {})"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.CollectorFetchMethod",
+        "type": "Type",
+        "label": "CollectorFetchMethod",
+        "tags": [],
+        "description": [
+          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the the first parameter is {@link CollectorFetchContext}."
+        ],
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/types.ts",
+          "lineNumber": 104
+        },
+        "signature": [
+          "(context: ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorFetchContext",
+            "text": "CollectorFetchContext"
+          },
+          "<WithKibanaRequest>) => TReturn | Promise<TReturn>"
         ],
         "initialIsOpen": false
       },
@@ -374,13 +567,32 @@
         "type": "Type",
         "label": "CollectorOptions",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nOptions to instantiate a collector"
+        ],
         "source": {
-          "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 111
+          "path": "src/plugins/usage_collection/server/collector/types.ts",
+          "lineNumber": 135
         },
         "signature": [
-          "{ type: string; init?: Function | undefined; isReady: () => Promise<boolean> | boolean; schema?: MakeSchemaFrom<TFetchReturn> | undefined; fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>; } : { extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest> | undefined; })"
+          "{ type: string; isReady: () => Promise<boolean> | boolean; schema?: MakeSchemaFrom<TFetchReturn> | undefined; fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>; } : { extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest> | undefined; })"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.CollectorOptionsFetchExtendedContext",
+        "type": "Type",
+        "label": "CollectorOptionsFetchExtendedContext",
+        "tags": [],
+        "description": [
+          "\nThe options to extend the context provided to the `fetch` method."
+        ],
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/types.ts",
+          "lineNumber": 125
+        },
+        "signature": [
+          "ICollectorOptionsFetchExtendedContext<WithKibanaRequest> & (WithKibanaRequest extends true ? Required<Pick<ICollectorOptionsFetchExtendedContext<WithKibanaRequest>, \"kibanaRequest\">> : {})"
         ],
         "initialIsOpen": false
       },
@@ -389,10 +601,12 @@
         "type": "Type",
         "label": "MakeSchemaFrom",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nThe `schema` property in {@link CollectorOptions} must match the output of\nthe `fetch` method. This type helps ensure that is correct"
+        ],
         "source": {
-          "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 50
+          "path": "src/plugins/usage_collection/server/collector/types.ts",
+          "lineNumber": 61
         },
         "signature": [
           "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: 'array'; items: RecursiveMakeSchemaFrom<U>; } : RecursiveMakeSchemaFrom<Required<Base>[Key]>; }"
@@ -400,50 +614,19 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.UsageCollectionSetup",
-        "type": "Type",
-        "label": "UsageCollectionSetup",
         "tags": [],
-        "description": [],
+        "id": "def-server.USAGE_COUNTERS_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "label": "USAGE_COUNTERS_SAVED_OBJECT_TYPE",
+        "description": [
+          "The Saved Objects type for Usage Counters"
+        ],
         "source": {
-          "path": "src/plugins/usage_collection/server/plugin.ts",
-          "lineNumber": 21
+          "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
+          "lineNumber": 38
         },
         "signature": [
-          "{ makeStatsCollector: <TFetchReturn, WithKibanaRequest, ExtraOptions>(options: ",
-          {
-            "pluginId": "usageCollection",
-            "scope": "server",
-            "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.CollectorOptions",
-            "text": "CollectorOptions"
-          },
-          "<TFetchReturn, WithKibanaRequest, ExtraOptions>) => ",
-          {
-            "pluginId": "usageCollection",
-            "scope": "server",
-            "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.Collector",
-            "text": "Collector"
-          },
-          "<TFetchReturn, ExtraOptions>; makeUsageCollector: <TFetchReturn, WithKibanaRequest, ExtraOptions>(options: ",
-          {
-            "pluginId": "usageCollection",
-            "scope": "server",
-            "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.UsageCollectorOptions",
-            "text": "UsageCollectorOptions"
-          },
-          "<TFetchReturn, WithKibanaRequest, ExtraOptions>) => ",
-          "UsageCollector",
-          "<TFetchReturn, ExtraOptions>; registerCollector: <TFetchReturn, ExtraOptions>(collector: ",
-          {
-            "pluginId": "usageCollection",
-            "scope": "server",
-            "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.Collector",
-            "text": "Collector"
-          }
+          "\"usage-counters\""
         ],
         "initialIsOpen": false
       },
@@ -452,13 +635,15 @@
         "type": "Type",
         "label": "UsageCollectorOptions",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nSame as {@link CollectorOptions} but with the `schema` property enforced"
+        ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
-          "lineNumber": 13
+          "lineNumber": 16
         },
         "signature": [
-          "{ type: string; init?: Function | undefined; isReady: () => boolean | Promise<boolean>; schema?: ",
+          "{ type: string; isReady: () => boolean | Promise<boolean>; schema?: ",
           {
             "pluginId": "usageCollection",
             "scope": "server",
@@ -467,17 +652,196 @@
             "text": "MakeSchemaFrom"
           },
           "<TFetchReturn> | undefined; fetch: ",
-          "CollectorFetchMethod",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorFetchMethod",
+            "text": "CollectorFetchMethod"
+          },
           "<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: ",
-          "CollectorOptionsFetchExtendedContext",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorOptionsFetchExtendedContext",
+            "text": "CollectorOptionsFetchExtendedContext"
+          },
           "<WithKibanaRequest>; } : { extendFetchContext?: ",
-          "CollectorOptionsFetchExtendedContext",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorOptionsFetchExtendedContext",
+            "text": "CollectorOptionsFetchExtendedContext"
+          },
           "<WithKibanaRequest> | undefined; }) & Required<Pick<CollectorOptions<TFetchReturn, boolean, {}>, \"schema\">>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.UsageCountersSavedObject",
+        "type": "Type",
+        "label": "UsageCountersSavedObject",
+        "tags": [],
+        "description": [
+          "\nThe structure of the SavedObjects of type \"usage-counters\""
+        ],
+        "source": {
+          "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
+          "lineNumber": 35
+        },
+        "signature": [
+          "SavedObject<UsageCountersSavedObjectAttributes>"
         ],
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "id": "def-server.UsageCollectionSetup",
+      "type": "Interface",
+      "label": "UsageCollectionSetup",
+      "description": [
+        "Server's setup APIs exposed by the UsageCollection Service"
+      ],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-server.UsageCollectionSetup.createUsageCounter",
+          "type": "Function",
+          "label": "createUsageCounter",
+          "description": [
+            "\nCreates and registers a usage counter to collect daily aggregated plugin counter events"
+          ],
+          "source": {
+            "path": "src/plugins/usage_collection/server/plugin.ts",
+            "lineNumber": 33
+          },
+          "signature": [
+            "(type: string) => ",
+            {
+              "pluginId": "usageCollection",
+              "scope": "server",
+              "docId": "kibUsageCollectionPluginApi",
+              "section": "def-server.IUsageCounter",
+              "text": "IUsageCounter"
+            }
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-server.UsageCollectionSetup.getUsageCounterByType",
+          "type": "Function",
+          "label": "getUsageCounterByType",
+          "description": [
+            "\nReturns a usage counter by type"
+          ],
+          "source": {
+            "path": "src/plugins/usage_collection/server/plugin.ts",
+            "lineNumber": 37
+          },
+          "signature": [
+            "(type: string) => ",
+            {
+              "pluginId": "usageCollection",
+              "scope": "server",
+              "docId": "kibUsageCollectionPluginApi",
+              "section": "def-server.IUsageCounter",
+              "text": "IUsageCounter"
+            },
+            " | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-server.UsageCollectionSetup.makeUsageCollector",
+          "type": "Function",
+          "label": "makeUsageCollector",
+          "description": [
+            "\nCreates a usage collector to collect plugin telemetry data.\nregisterCollector must be called to connect the created collector with the service."
+          ],
+          "source": {
+            "path": "src/plugins/usage_collection/server/plugin.ts",
+            "lineNumber": 42
+          },
+          "signature": [
+            "<TFetchReturn, WithKibanaRequest extends boolean = false, ExtraOptions extends object = {}>(options: ",
+            {
+              "pluginId": "usageCollection",
+              "scope": "server",
+              "docId": "kibUsageCollectionPluginApi",
+              "section": "def-server.UsageCollectorOptions",
+              "text": "UsageCollectorOptions"
+            },
+            "<TFetchReturn, WithKibanaRequest, ExtraOptions>) => ",
+            {
+              "pluginId": "usageCollection",
+              "scope": "server",
+              "docId": "kibUsageCollectionPluginApi",
+              "section": "def-server.ICollector",
+              "text": "ICollector"
+            },
+            "<TFetchReturn, ExtraOptions>"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-server.UsageCollectionSetup.registerCollector",
+          "type": "Function",
+          "label": "registerCollector",
+          "description": [
+            "\nRegister a usage collector or a stats collector.\nUsed to connect the created collector to telemetry."
+          ],
+          "source": {
+            "path": "src/plugins/usage_collection/server/plugin.ts",
+            "lineNumber": 53
+          },
+          "signature": [
+            "<TFetchReturn, ExtraOptions extends object>(collector: ",
+            {
+              "pluginId": "usageCollection",
+              "scope": "server",
+              "docId": "kibUsageCollectionPluginApi",
+              "section": "def-server.ICollector",
+              "text": "ICollector"
+            },
+            "<TFetchReturn, ExtraOptions>) => void"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-server.UsageCollectionSetup.getCollectorByType",
+          "type": "Function",
+          "label": "getCollectorByType",
+          "description": [
+            "\nReturns a usage collector by type"
+          ],
+          "source": {
+            "path": "src/plugins/usage_collection/server/plugin.ts",
+            "lineNumber": 59
+          },
+          "signature": [
+            "<TFetchReturn, ExtraOptions extends object>(type: string) => ",
+            {
+              "pluginId": "usageCollection",
+              "scope": "server",
+              "docId": "kibUsageCollectionPluginApi",
+              "section": "def-server.ICollector",
+              "text": "ICollector"
+            },
+            "<TFetchReturn, ExtraOptions> | undefined"
+          ]
+        }
+      ],
+      "source": {
+        "path": "src/plugins/usage_collection/server/plugin.ts",
+        "lineNumber": 29
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

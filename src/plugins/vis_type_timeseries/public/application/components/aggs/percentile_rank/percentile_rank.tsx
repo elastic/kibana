@@ -90,24 +90,20 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.percentileRank.fieldLabel"
                 defaultMessage="Field"
               />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={RESTRICT_FIELDS}
-              indexPattern={indexPattern}
-              value={model.field ?? ''}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={RESTRICT_FIELDS}
+            indexPattern={indexPattern}
+            value={model.field ?? ''}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>

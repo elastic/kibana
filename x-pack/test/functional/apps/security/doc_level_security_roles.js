@@ -75,9 +75,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('1');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be(
-        'name:ABC Company name.keyword:ABC Company region:EAST region.keyword:EAST _id:doc1 _index:dlstest _score:0 _type: -'
-      );
+      expect(rowData).to.contain('EAST');
     });
     after('logout', async () => {
       await PageObjects.security.forceLogout();

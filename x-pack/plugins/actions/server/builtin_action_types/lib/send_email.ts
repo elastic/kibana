@@ -11,6 +11,7 @@ import { default as MarkdownIt } from 'markdown-it';
 
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
+import { CustomHostSettings } from '../../config';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -52,7 +53,10 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
-  const transportConfig: Record<string, unknown> = {};
+  // The transport options do not seem to be exposed as a type, and we reference
+  // some deep properties, so need to use any here.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transportConfig: Record<string, any> = {};
   const proxySettings = configurationUtilities.getProxySettings();
   const rejectUnauthorized = configurationUtilities.isRejectUnauthorizedCertificatesEnabled();
 
@@ -73,6 +77,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       useProxy = false;
     }
   }
+  let customHostSettings: CustomHostSettings | undefined;
 
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
@@ -83,6 +88,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.host = host;
     transportConfig.port = port;
     transportConfig.secure = !!secure;
+    customHostSettings = configurationUtilities.getCustomHostSettings(`smtp://${host}:${port}`);
 
     if (proxySettings && useProxy) {
       transportConfig.tls = {
@@ -98,6 +104,33 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       transportConfig.tls = { rejectUnauthorized: false };
     } else {
       transportConfig.tls = { rejectUnauthorized };
+    }
+
+    // finally, allow customHostSettings to override some of the settings
+    // see: https://nodemailer.com/smtp/
+    if (customHostSettings) {
+      const tlsConfig: Record<string, unknown> = {};
+      const tlsSettings = customHostSettings.tls;
+      const smtpSettings = customHostSettings.smtp;
+
+      if (tlsSettings?.certificateAuthoritiesData) {
+        tlsConfig.ca = tlsSettings?.certificateAuthoritiesData;
+      }
+      if (tlsSettings?.rejectUnauthorized !== undefined) {
+        tlsConfig.rejectUnauthorized = tlsSettings?.rejectUnauthorized;
+      }
+
+      if (!transportConfig.tls) {
+        transportConfig.tls = tlsConfig;
+      } else {
+        transportConfig.tls = { ...transportConfig.tls, ...tlsConfig };
+      }
+
+      if (smtpSettings?.ignoreTLS) {
+        transportConfig.ignoreTLS = true;
+      } else if (smtpSettings?.requireTLS) {
+        transportConfig.requireTLS = true;
+      }
     }
   }
 

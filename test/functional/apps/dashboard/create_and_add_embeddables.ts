@@ -35,8 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('adds new visualization via the top nav link', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await PageObjects.dashboard.switchToEditMode();
-        await dashboardAddPanel.clickCreateNewLink();
-        await PageObjects.visualize.clickAggBasedVisualizations();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess(
@@ -52,13 +52,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('adds a new visualization', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-        await dashboardAddPanel.ensureAddPanelIsShowing();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
-        await PageObjects.visualize.clickAggBasedVisualizations();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess(
           'visualization from add new link',
+          { redirectToOrigin: true }
+        );
+
+        await retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(originalPanelCount + 1);
+        });
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      it('adds a markdown visualization via the quick button', async () => {
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+        await dashboardAddPanel.clickMarkdownQuickButton();
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'visualization from markdown quick button',
           { redirectToOrigin: true }
         );
 

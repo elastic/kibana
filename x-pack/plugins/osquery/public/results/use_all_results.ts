@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
@@ -35,71 +34,59 @@ export interface ResultsArgs {
 interface UseAllResults {
   actionId: string;
   activePage: number;
-  agentId?: string;
-  direction: Direction;
   limit: number;
-  sortField: string;
+  sort: Array<{ field: string; direction: Direction }>;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
+  isLive?: boolean;
 }
 
 export const useAllResults = ({
   actionId,
   activePage,
-  agentId,
-  direction,
   limit,
-  sortField,
+  sort,
   filterQuery,
   skip = false,
+  isLive = false,
 }: UseAllResults) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  const [resultsRequest, setHostRequest] = useState<ResultsRequestOptions | null>(null);
-
-  const response = useQuery(
-    ['allActionResults', { actionId, activePage, direction, limit, sortField }],
+  return useQuery(
+    ['allActionResults', { actionId, activePage, limit, sort }],
     async () => {
-      if (!resultsRequest) return Promise.resolve();
-
       const responseData = await data.search
-        .search<ResultsRequestOptions, ResultsStrategyResponse>(resultsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
+        .search<ResultsRequestOptions, ResultsStrategyResponse>(
+          {
+            actionId,
+            factoryQueryType: OsqueryQueries.results,
+            filterQuery: createFilter(filterQuery),
+            pagination: generateTablePaginationOptions(activePage, limit),
+            sort,
+          },
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
         .toPromise();
 
       return {
         ...responseData,
-        results: responseData.edges,
         inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
     {
-      refetchInterval: 1000,
-      enabled: !skip && !!resultsRequest,
+      refetchInterval: isLive ? 1000 : false,
+      enabled: !skip,
+      onError: (error: Error) =>
+        toasts.addError(error, {
+          title: i18n.translate('xpack.osquery.results.fetchError', {
+            defaultMessage: 'Error while fetching results',
+          }),
+        }),
     }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        actionId,
-        agentId,
-        factoryQueryType: OsqueryQueries.results,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [actionId, activePage, agentId, direction, filterQuery, limit, sortField]);
-
-  return response;
 };

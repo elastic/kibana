@@ -27,7 +27,6 @@ import {
   openTimelineById,
   openTimelineFromSettings,
   pinFirstEvent,
-  waitForEventsPanelToBeLoaded,
 } from '../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
@@ -49,13 +48,10 @@ describe('Open timeline', () => {
         addNoteToTimeline(note, timelineId!).should((response) => {
           expect(response.status).to.equal(200);
           waitForTimelinesPanelToBeLoaded();
-          openTimelineById(timelineId!)
-            .click({ force: true })
-            .then(() => {
-              waitForEventsPanelToBeLoaded();
-              pinFirstEvent();
-              markAsFavorite();
-            });
+          openTimelineById(timelineId!).then(() => {
+            pinFirstEvent();
+            markAsFavorite();
+          });
         });
       });
   });
@@ -96,6 +92,7 @@ describe('Open timeline', () => {
       cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/97544
     it('should display timeline content - description', () => {
       cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description); // This is the flake part where it sometimes does not show/load the timelines correctly
     });

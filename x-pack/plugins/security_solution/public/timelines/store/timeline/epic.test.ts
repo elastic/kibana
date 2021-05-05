@@ -6,8 +6,8 @@
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
-import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 import { TimelineModel } from './model';
 
@@ -21,42 +21,42 @@ describe('Epic Timeline', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
-            width: 190,
+            initialWidth: 190,
           },
           {
             columnHeaderType: 'not-filtered',
             id: 'message',
-            width: 180,
+            initialWidth: 180,
           },
           {
             columnHeaderType: 'not-filtered',
             id: 'event.category',
-            width: 180,
+            initialWidth: 180,
           },
           {
             columnHeaderType: 'not-filtered',
             id: 'event.action',
-            width: 180,
+            initialWidth: 180,
           },
           {
             columnHeaderType: 'not-filtered',
             id: 'host.name',
-            width: 180,
+            initialWidth: 180,
           },
           {
             columnHeaderType: 'not-filtered',
             id: 'source.ip',
-            width: 180,
+            initialWidth: 180,
           },
           {
             columnHeaderType: 'not-filtered',
             id: 'destination.ip',
-            width: 180,
+            initialWidth: 180,
           },
           {
             columnHeaderType: 'not-filtered',
             id: 'user.name',
-            width: 180,
+            initialWidth: 180,
           },
         ],
         dataProviders: [

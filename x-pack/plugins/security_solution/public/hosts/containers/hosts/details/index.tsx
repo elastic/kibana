@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -55,7 +56,7 @@ export const useHostDetails = ({
   skip = false,
   startDate,
 }: UseHostDetails): [boolean, HostDetailsArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -63,6 +64,7 @@ export const useHostDetails = ({
   const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions | null>(
     null
   );
+  const { addError, addWarning } = useAppToasts();
 
   const [hostDetailsResponse, setHostDetailsResponse] = useState<HostDetailsArgs>({
     endDate,
@@ -104,16 +106,14 @@ export const useHostDetails = ({
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_HOST_OVERVIEW);
+                addWarning(i18n.ERROR_HOST_OVERVIEW);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
-              notifications.toasts.addDanger({
+              addError(msg, {
                 title: i18n.FAIL_HOST_OVERVIEW,
-                text: msg.message,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -124,7 +124,7 @@ export const useHostDetails = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {

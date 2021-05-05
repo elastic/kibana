@@ -48,26 +48,27 @@ import {
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { buildTimeRangeFilter } from './helpers';
-import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
 
 interface OwnProps {
-  timelineId: TimelineIdLiteral;
   defaultFilters?: Filter[];
-  hasIndexWrite: boolean;
-  hasIndexMaintenance: boolean;
   from: string;
+  hasIndexMaintenance: boolean;
+  hasIndexWrite: boolean;
   loading: boolean;
   onRuleChange?: () => void;
-  showBuildingBlockAlerts: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
+  onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
+  showBuildingBlockAlerts: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
+  timelineId: TimelineIdLiteral;
   to: string;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
-  timelineId,
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
@@ -75,17 +76,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   from,
   globalFilters,
   globalQuery,
-  hasIndexWrite,
   hasIndexMaintenance,
+  hasIndexWrite,
   isSelectAllChecked,
   loading,
   loadingEventIds,
   onRuleChange,
+  onShowBuildingBlockAlertsChanged,
+  onShowOnlyThreatIndicatorAlertsChanged,
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
   showBuildingBlockAlerts,
-  onShowBuildingBlockAlertsChanged,
+  showOnlyThreatIndicatorAlerts,
+  timelineId,
   to,
 }) => {
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
@@ -264,30 +268,34 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         <AlertsUtilityBar
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
-          hasIndexWrite={hasIndexWrite}
-          hasIndexMaintenance={hasIndexMaintenance}
           currentFilter={filterGroup}
+          hasIndexMaintenance={hasIndexMaintenance}
+          hasIndexWrite={hasIndexWrite}
+          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+          onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
           selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
           showBuildingBlockAlerts={showBuildingBlockAlerts}
-          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
           showClearSelection={showClearSelectionAction}
+          showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
           totalCount={totalCount}
           updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
         />
       );
     },
     [
-      hasIndexWrite,
-      hasIndexMaintenance,
       clearSelectionCallback,
       filterGroup,
-      showBuildingBlockAlerts,
-      onShowBuildingBlockAlertsChanged,
+      hasIndexMaintenance,
+      hasIndexWrite,
       loadingEventIds.length,
+      onShowBuildingBlockAlertsChanged,
+      onShowOnlyThreatIndicatorAlertsChanged,
       selectAllOnAllPagesCallback,
       selectedEventIds,
+      showBuildingBlockAlerts,
       showClearSelectionAction,
+      showOnlyThreatIndicatorAlerts,
       updateAlertsStatusCallback,
     ]
   );
@@ -303,7 +311,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     initializeTimeline({
-      defaultModel: alertsDefaultModel,
+      defaultModel: {
+        ...alertsDefaultModel,
+        columns,
+      },
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
@@ -338,7 +349,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       headerFilterGroup={headerFilterGroup}
       id={timelineId}
       onRuleChange={onRuleChange}
-      renderCellValue={DefaultCellRenderer}
+      renderCellValue={RenderCellValue}
       rowRenderers={defaultRowRenderers}
       scopeId={SourcererScopeName.detections}
       start={from}

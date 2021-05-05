@@ -69,7 +69,7 @@ describe('ResultHeaderItem', () => {
     const wrapper = shallow(
       <ResultHeaderItem field="foo" type="score" href="http://www.example.com" />
     );
-    expect(wrapper.find('ReactRouterHelper').exists()).toBe(true);
-    expect(wrapper.find('ReactRouterHelper').prop('to')).toBe('http://www.example.com');
+    expect(wrapper.find('EuiLinkTo').exists()).toBe(true);
+    expect(wrapper.find('EuiLinkTo').prop('to')).toBe('http://www.example.com');
   });
 });

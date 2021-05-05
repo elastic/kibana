@@ -10,7 +10,6 @@ import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/s
 import type { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 import type {
   Agent,
-  AgentEvent,
   AgentPolicy,
   PackagePolicy,
   EnrollmentAPIKey,
@@ -33,18 +32,6 @@ export const migrateAgentToV7100: SavedObjectMigrationFn<
   delete agentDoc.attributes.config_revision;
 
   return agentDoc;
-};
-
-export const migrateAgentEventToV7100: SavedObjectMigrationFn<
-  Exclude<AgentEvent, 'policy_id'> & {
-    config_id?: string;
-  },
-  AgentEvent
-> = (agentEventDoc) => {
-  agentEventDoc.attributes.policy_id = agentEventDoc.attributes.config_id;
-  delete agentEventDoc.attributes.config_id;
-
-  return agentEventDoc;
 };
 
 export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
@@ -91,6 +78,7 @@ export const migrateSettingsToV7100: SavedObjectMigrationFn<
   },
   Settings
 > = (settingsDoc) => {
+  // @ts-expect-error
   settingsDoc.attributes.kibana_urls = [settingsDoc.attributes.kibana_url];
   // @ts-expect-error
   delete settingsDoc.attributes.kibana_url;

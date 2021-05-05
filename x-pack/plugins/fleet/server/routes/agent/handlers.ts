@@ -7,17 +7,12 @@
 
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { AbortController } from 'abort-controller';
 
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,
-  GetOneAgentEventsResponse,
-  PostAgentCheckinResponse,
-  PostAgentEnrollResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
-  PostAgentEnrollRequest,
   PostBulkAgentReassignResponse,
 } from '../../../common/types';
 import type {
@@ -25,17 +20,13 @@ import type {
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
-  GetOneAgentEventsRequestSchema,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
 } from '../../types';
-import type { PostAgentCheckinRequest } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
-import * as APIKeyService from '../../services/api_keys';
-import { appContextService } from '../../services/app_context';
 
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
@@ -60,39 +51,6 @@ export const getAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-export const getAgentEventsHandler: RequestHandler<
-  TypeOf<typeof GetOneAgentEventsRequestSchema.params>,
-  TypeOf<typeof GetOneAgentEventsRequestSchema.query>
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  try {
-    const { page, perPage, kuery } = request.query;
-    const { items, total } = await AgentService.getAgentEvents(soClient, request.params.agentId, {
-      page,
-      perPage,
-      kuery,
-    });
-
-    const body: GetOneAgentEventsResponse = {
-      list: items,
-      total,
-      page,
-      perPage,
-    };
-
-    return response.ok({
-      body,
-    });
-  } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
-      });
-    }
     return defaultIngestErrorHandler({ error, response });
   }
 };
@@ -149,89 +107,6 @@ export const updateAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-export const postAgentCheckinHandler: RequestHandler<
-  PostAgentCheckinRequest['params'],
-  undefined,
-  PostAgentCheckinRequest['body']
-> = async (context, request, response) => {
-  try {
-    const soClient = appContextService.getInternalUserSOClient(request);
-    const esClient = appContextService.getInternalUserESClient();
-    const agent = await AgentService.authenticateAgentWithAccessToken(esClient, request);
-    const abortController = new AbortController();
-    request.events.aborted$.subscribe(() => {
-      abortController.abort();
-    });
-    const signal = abortController.signal;
-
-    const { actions } = await AgentService.agentCheckin(
-      soClient,
-      esClient,
-      agent,
-      {
-        events: request.body.events || [],
-        localMetadata: request.body.local_metadata,
-        status: request.body.status,
-      },
-      { signal }
-    );
-    const body: PostAgentCheckinResponse = {
-      action: 'checkin',
-      actions: actions.map((a) => ({
-        agent_id: agent.id,
-        type: a.type,
-        data: a.data,
-        id: a.id,
-        created_at: a.created_at,
-      })),
-    };
-
-    return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-export const postAgentEnrollHandler: RequestHandler<
-  undefined,
-  undefined,
-  PostAgentEnrollRequest['body']
-> = async (context, request, response) => {
-  try {
-    const soClient = appContextService.getInternalUserSOClient(request);
-    const esClient = context.core.elasticsearch.client.asInternalUser;
-    const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
-    const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(esClient, apiKeyId);
-
-    if (!enrollmentAPIKey || !enrollmentAPIKey.active) {
-      return response.unauthorized({
-        body: { message: 'Invalid Enrollment API Key' },
-      });
-    }
-
-    const agent = await AgentService.enroll(
-      soClient,
-      request.body.type,
-      enrollmentAPIKey.policy_id as string,
-      {
-        userProvided: request.body.metadata.user_provided,
-        local: request.body.metadata.local,
-      }
-    );
-    const body: PostAgentEnrollResponse = {
-      action: 'created',
-      item: {
-        ...agent,
-        status: AgentService.getAgentStatus(agent),
-      },
-    };
-
-    return response.ok({ body });
-  } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
 };

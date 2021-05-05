@@ -21,10 +21,12 @@ export function getLogsFrequencyLensConfig({ seriesId }: Props): DataSeries {
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'count',
-    },
-    hasMetricType: false,
+    yAxisColumns: [
+      {
+        operationType: 'count',
+      },
+    ],
+    hasOperationType: false,
     defaultFilters: [],
     breakdowns: ['agent.hostname'],
     filters: [],

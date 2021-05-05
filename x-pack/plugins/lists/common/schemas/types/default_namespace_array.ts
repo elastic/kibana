@@ -17,6 +17,7 @@ export type NamespaceTypeArray = t.TypeOf<typeof namespaceTypeArray>;
  * Types the DefaultNamespaceArray as:
  *   - If null or undefined, then a default string array of "single" will be used.
  *   - If it contains a string, then it is split along the commas and puts them into an array and validates it
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultNamespaceArray = new t.Type<
   NamespaceTypeArray,
@@ -40,5 +41,12 @@ export const DefaultNamespaceArray = new t.Type<
   String
 );
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type DefaultNamespaceArrayType = t.OutputOf<typeof DefaultNamespaceArray>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type DefaultNamespaceArrayTypeDecoded = t.TypeOf<typeof DefaultNamespaceArray>;

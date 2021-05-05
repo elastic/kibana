@@ -19,7 +19,12 @@ describe('utils', () => {
     });
     it('should parse complex query with term', () => {
       expect(parseQueryFilterToKQL('complex query')).toBe(
-        'exception-list-agnostic.attributes.name:*complex* *query* OR exception-list-agnostic.attributes.description:*complex* *query* OR exception-list-agnostic.attributes.entries.value:*complex* *query* OR exception-list-agnostic.attributes.entries.entries.value:*complex* *query*'
+        'exception-list-agnostic.attributes.name:*complex*query* OR exception-list-agnostic.attributes.description:*complex*query* OR exception-list-agnostic.attributes.entries.value:*complex*query* OR exception-list-agnostic.attributes.entries.entries.value:*complex*query*'
+      );
+    });
+    it('should parse complex query with special chars term', () => {
+      expect(parseQueryFilterToKQL('C:\\tmpes')).toBe(
+        'exception-list-agnostic.attributes.name:*C\\:\\\\tmpes* OR exception-list-agnostic.attributes.description:*C\\:\\\\tmpes* OR exception-list-agnostic.attributes.entries.value:*C\\:\\\\tmpes* OR exception-list-agnostic.attributes.entries.entries.value:*C\\:\\\\tmpes*'
       );
     });
   });

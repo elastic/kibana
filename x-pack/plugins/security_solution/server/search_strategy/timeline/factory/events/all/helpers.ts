@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import { get, has, merge, uniq } from 'lodash/fp';
+import { Ecs } from '../../../../../../common/ecs';
 import {
   EventHit,
+  Fields,
   TimelineEdges,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy';
-import { toStringArray } from '../../../../helpers/to_array';
-import { getDataSafety, getDataFromFieldsHits } from '../details/helpers';
+import { toStringArray } from '../../../../../../common/utils/to_array';
+import {
+  getDataFromFieldsHits,
+  getDataSafety,
+} from '../../../../../../common/utils/field_formatters';
+import { TIMELINE_EVENTS_FIELDS } from './constants';
 
 const getTimestamp = (hit: EventHit): string => {
   if (hit.fields && hit.fields['@timestamp']) {
@@ -22,6 +29,12 @@ const getTimestamp = (hit: EventHit): string => {
   }
   return '';
 };
+
+export const buildFieldsRequest = (fields: string[]) =>
+  uniq([...fields.filter((f) => !f.startsWith('_')), ...TIMELINE_EVENTS_FIELDS]).map((field) => ({
+    field,
+    include_unmapped: true,
+  }));
 
 export const formatTimelineData = async (
   dataFields: readonly string[],
@@ -75,18 +88,13 @@ const getValuesFromFields = async (
       [fieldName]: get(fieldName, hit._source),
     };
   } else {
-    if (nestedParentFieldName == null || nestedParentFieldName === fieldName) {
+    if (nestedParentFieldName == null) {
       fieldToEval = {
         [fieldName]: hit.fields[fieldName],
       };
-    } else if (nestedParentFieldName != null) {
+    } else {
       fieldToEval = {
         [nestedParentFieldName]: hit.fields[nestedParentFieldName],
-      };
-    } else {
-      // fallback, should never hit
-      fieldToEval = {
-        [fieldName]: [],
       };
     }
   }
@@ -99,6 +107,37 @@ const getValuesFromFields = async (
   );
 };
 
+const buildObjectRecursive = (fieldPath: string, fields: Fields): Partial<Ecs> => {
+  const nestedParentPath = getNestedParentPath(fieldPath, fields);
+  if (!nestedParentPath) {
+    return set({}, fieldPath, toStringArray(get(fieldPath, fields)));
+  }
+
+  const subPath = fieldPath.replace(`${nestedParentPath}.`, '');
+  const subFields = (get(nestedParentPath, fields) ?? []) as Fields[];
+  return set(
+    {},
+    nestedParentPath,
+    subFields.map((subField) => buildObjectRecursive(subPath, subField))
+  );
+};
+
+export const buildObjectForFieldPath = (fieldPath: string, hit: EventHit): Partial<Ecs> => {
+  if (has(fieldPath, hit._source)) {
+    const value = get(fieldPath, hit._source);
+    return set({}, fieldPath, toStringArray(value));
+  }
+
+  return buildObjectRecursive(fieldPath, hit.fields);
+};
+
+/**
+ * If a prefix of our full field path is present as a field, we know that our field is nested
+ */
+const getNestedParentPath = (fieldPath: string, fields: Fields | undefined): string | undefined =>
+  fields &&
+  Object.keys(fields).find((field) => field !== fieldPath && fieldPath.startsWith(`${field}.`));
+
 const mergeTimelineFieldsWithHit = async <T>(
   fieldName: string,
   flattenedFields: T,
@@ -106,15 +145,12 @@ const mergeTimelineFieldsWithHit = async <T>(
   dataFields: readonly string[],
   ecsFields: readonly string[]
 ) => {
-  if (fieldName != null || dataFields.includes(fieldName)) {
-    const fieldNameAsArray = fieldName.split('.');
-    const nestedParentFieldName = Object.keys(hit.fields ?? []).find((f) => {
-      return f === fieldNameAsArray.slice(0, f.split('.').length).join('.');
-    });
+  if (fieldName != null) {
+    const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
     if (
+      nestedParentPath != null ||
       has(fieldName, hit._source) ||
       has(fieldName, hit.fields) ||
-      nestedParentFieldName != null ||
       specialFields.includes(fieldName)
     ) {
       const objectWithProperty = {
@@ -123,22 +159,13 @@ const mergeTimelineFieldsWithHit = async <T>(
           data: dataFields.includes(fieldName)
             ? [
                 ...get('node.data', flattenedFields),
-                ...(await getValuesFromFields(fieldName, hit, nestedParentFieldName)),
+                ...(await getValuesFromFields(fieldName, hit, nestedParentPath)),
               ]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
             ? {
                 ...get('node.ecs', flattenedFields),
-                // @ts-expect-error
-                ...fieldName.split('.').reduceRight(
-                  // @ts-expect-error
-                  (obj, next) => ({ [next]: obj }),
-                  toStringArray(
-                    has(fieldName, hit._source)
-                      ? get(fieldName, hit._source)
-                      : hit.fields[fieldName]
-                  )
-                ),
+                ...buildObjectForFieldPath(fieldName, hit),
               }
             : get('node.ecs', flattenedFields),
         },

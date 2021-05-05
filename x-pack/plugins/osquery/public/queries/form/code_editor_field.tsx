@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
+import { isEmpty } from 'lodash/fp';
+import { EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import { OsqueryEditor } from '../../editor';
@@ -14,10 +17,35 @@ interface CodeEditorFieldProps {
   field: FieldHook<string>;
 }
 
-const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ field }) => {
-  const { value, setValue } = field;
+const OsquerySchemaLink = React.memo(() => (
+  <EuiText size="xs">
+    <EuiLink href="https://osquery.io/schema/4.7.0" target="_blank">
+      <FormattedMessage
+        id="xpack.osquery.codeEditorField.osquerySchemaLinkLabel"
+        defaultMessage="Osquery schema"
+      />
+    </EuiLink>
+  </EuiText>
+));
 
-  return <OsqueryEditor defaultValue={value} onChange={setValue} />;
+OsquerySchemaLink.displayName = 'OsquerySchemaLink';
+
+const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ field }) => {
+  const { value, label, labelAppend, helpText, setValue, errors } = field;
+  const error = errors[0]?.message;
+
+  return (
+    <EuiFormRow
+      label={label}
+      labelAppend={!isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink />}
+      helpText={helpText}
+      isInvalid={typeof error === 'string'}
+      error={error}
+      fullWidth
+    >
+      <OsqueryEditor defaultValue={value} onChange={setValue} />
+    </EuiFormRow>
+  );
 };
 
 export const CodeEditorField = React.memo(CodeEditorFieldComponent);

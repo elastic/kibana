@@ -317,17 +317,6 @@ export class SearchEmbeddable
 
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
-    const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
-      defaultMessage: 'Data',
-    });
-    const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-    });
-
-    const requestResponder = this.inspectorAdapters.requests!.start(title, {
-      description,
-      searchSessionId,
-    });
 
     this.searchScope.$apply(() => {
       this.searchScope!.isLoading = true;
@@ -336,11 +325,20 @@ export class SearchEmbeddable
 
     try {
       // Make the request
-      const resp = await searchSource
+      const { rawResponse: resp } = await searchSource
         .fetch$({
           abortSignal: this.abortController.signal,
           sessionId: searchSessionId,
-          requestResponder,
+          inspector: {
+            adapter: this.inspectorAdapters.requests,
+            title: i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
+              defaultMessage: 'Data',
+            }),
+            description: i18n.translate('discover.embeddable.inspectorRequestDescription', {
+              defaultMessage:
+                'This request queries Elasticsearch to fetch the data for the search.',
+            }),
+          },
         })
         .toPromise();
       this.updateOutput({ loading: false, error: undefined });

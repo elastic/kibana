@@ -13,7 +13,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('node detail advanced', () => {
-    const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
+    const archive = 'monitoring/singlecluster_three_nodes_shard_relocation';
     const timeRange = {
       min: '2017-10-05T20:31:48.000Z',
       max: '2017-10-05T20:35:12.000Z',

@@ -39,7 +39,7 @@ export async function getSeriesRequestParams(
     panel,
     series,
     esQueryConfig,
-    seriesIndex.indexPattern,
+    seriesIndex,
     capabilities,
     uiSettings
   );
@@ -48,6 +48,7 @@ export async function getSeriesRequestParams(
     index: seriesIndex.indexPatternString,
     body: {
       ...request,
+      runtime_mappings: seriesIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
     },
   };

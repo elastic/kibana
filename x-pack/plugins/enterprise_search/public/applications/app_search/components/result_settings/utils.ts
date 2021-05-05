@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual } from 'lodash';
 
-import { Schema } from '../../../shared/types';
+import { Schema } from '../../../shared/schema/types';
 
 import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from './constants';
 import {
@@ -113,8 +113,8 @@ export const splitResultFields = (resultFields: FieldResultSettingObject, schema
 };
 
 export const areFieldsEmpty = (fields: FieldResultSettingObject) => {
-  const anyNonEmptyField = Object.values(fields).find((resultSettings) => {
-    return !isEmpty(resultSettings);
+  const anyNonEmptyField = Object.values(fields).find((field) => {
+    return (field as FieldResultSetting).raw || (field as FieldResultSetting).snippet;
   });
   return !anyNonEmptyField;
 };

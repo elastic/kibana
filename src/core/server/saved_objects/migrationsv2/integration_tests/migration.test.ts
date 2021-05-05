@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import Path from 'path';
+import Fs from 'fs';
+import Util from 'util';
 import Semver from 'semver';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
@@ -19,8 +21,15 @@ import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
-// FLAKY: https://github.com/elastic/kibana/issues/91107
-describe.skip('migration v2', () => {
+const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
+
+const asyncUnlink = Util.promisify(Fs.unlink);
+async function removeLogFile() {
+  // ignore errors if it doesn't exist
+  await asyncUnlink(logFilePath).catch(() => void 0);
+}
+
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
@@ -42,12 +51,14 @@ describe.skip('migration v2', () => {
         migrations: {
           skip: false,
           enableV2: true,
+          // There are 53 docs in fixtures. Batch size configured to enforce 3 migration steps.
+          batchSize: 20,
         },
         logging: {
           appenders: {
             file: {
               type: 'file',
-              fileName: join(__dirname, 'migration_test_kibana.log'),
+              fileName: logFilePath,
               layout: {
                 type: 'json',
               },
@@ -122,9 +133,10 @@ describe.skip('migration v2', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
+      await removeLogFile();
       await startServers({
         oss: false,
-        dataArchive: join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+        dataArchive: Path.join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
       });
     });
 
@@ -179,9 +191,10 @@ describe.skip('migration v2', () => {
     const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
     beforeAll(async () => {
+      await removeLogFile();
       await startServers({
         oss: true,
-        dataArchive: join(__dirname, 'archives', '8.0.0_oss_sample_saved_objects.zip'),
+        dataArchive: Path.join(__dirname, 'archives', '8.0.0_oss_sample_saved_objects.zip'),
       });
     });
 

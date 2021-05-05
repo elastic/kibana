@@ -364,7 +364,7 @@ export class AlertingPlugin {
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup
+    core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
@@ -376,6 +376,10 @@ export class AlertingPlugin {
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
         getFrameworkHealth: async () =>
           await getHealth(savedObjects.createInternalRepository(['alert'])),
+        areApiKeysEnabled: async () => {
+          const [, { security }] = await core.getStartServices();
+          return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
+        },
       };
     };
   };
