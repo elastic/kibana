@@ -542,6 +542,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       name: i18n.translate('xpack.lens.indexPattern.quickFunctionsLabel', {
         defaultMessage: 'Quick functions',
       }),
+      'data-test-subj': 'lens-dimensionTabs-quickFunctions',
       content: quickFunctions,
     },
     {
@@ -549,6 +550,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       name: i18n.translate('xpack.lens.indexPattern.formulaLabel', {
         defaultMessage: 'Formula',
       }),
+      'data-test-subj': 'lens-dimensionTabs-formula',
       content: ParamEditor ? (
         <>
           <ParamEditor

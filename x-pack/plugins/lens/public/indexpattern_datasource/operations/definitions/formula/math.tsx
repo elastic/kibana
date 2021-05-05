@@ -87,8 +87,12 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
 };
 
 function astToString(ast: TinymathAST | string): string | number {
-  if (typeof ast === 'number' || typeof ast === 'string') {
+  if (typeof ast === 'number') {
     return ast;
+  }
+  if (typeof ast === 'string') {
+    // Double quotes around uuids like 1234-5678X2 to avoid ambiguity
+    return `"${ast}"`;
   }
   if (ast.type === 'variable') {
     return ast.value;

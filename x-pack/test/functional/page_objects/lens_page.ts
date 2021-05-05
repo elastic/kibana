@@ -107,6 +107,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         isPreviousIncompatible?: boolean;
         keepOpen?: boolean;
         palette?: string;
+        formula?: string;
       },
       layerIndex = 0
     ) {
@@ -114,15 +115,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
         await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
       });
-      const operationSelector = opts.isPreviousIncompatible
-        ? `lns-indexPatternDimension-${opts.operation} incompatible`
-        : `lns-indexPatternDimension-${opts.operation}`;
-      await testSubjects.click(operationSelector);
+
+      if (opts.operation === 'formula') {
+        await this.switchToFormula();
+      } else {
+        const operationSelector = opts.isPreviousIncompatible
+          ? `lns-indexPatternDimension-${opts.operation} incompatible`
+          : `lns-indexPatternDimension-${opts.operation}`;
+        await testSubjects.click(operationSelector);
+      }
 
       if (opts.field) {
         const target = await testSubjects.find('indexPattern-dimension-field');
         await comboBox.openOptionsList(target);
         await comboBox.setElement(target, opts.field);
+      }
+
+      if (opts.formula) {
+        await this.typeFormula(opts.formula);
       }
 
       if (opts.palette) {
@@ -906,6 +916,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
       );
       await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async switchToFormula() {
+      await testSubjects.click('lens-dimensionTabs-formula');
+    },
+
+    async typeFormula(formula: string) {
+      await find.byCssSelector('.monaco-editor');
+      await find.clickByCssSelectorWhenNotDisabled('.monaco-editor');
+      const input = await find.activeElement();
+      await input.type(formula);
     },
   });
 }

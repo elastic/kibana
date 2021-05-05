@@ -139,7 +139,7 @@ export const formulaOperation: OperationDefinition<
                       type: 'function',
                       function: 'math',
                       arguments: {
-                        expression: [`${currentColumn.references[0]}`],
+                        expression: [`"${currentColumn.references[0]}"`],
                       },
                     },
                   ],
