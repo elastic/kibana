@@ -39,7 +39,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   incompleteOperation?: OperationType;
   operationSupportMatrix: OperationSupportMatrix;
   onChoose: (choice: FieldChoice) => void;
-  onDeleteColumn: () => void;
+  onDeleteColumn?: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
@@ -195,7 +195,7 @@ export function FieldSelect({
       singleSelection={{ asPlainText: true }}
       onChange={(choices) => {
         if (choices.length === 0) {
-          onDeleteColumn();
+          onDeleteColumn?.();
           return;
         }
 

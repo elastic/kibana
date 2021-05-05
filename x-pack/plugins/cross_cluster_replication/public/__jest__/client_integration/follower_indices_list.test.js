@@ -16,7 +16,7 @@ import { act } from 'react-dom/test-utils';
 
 import { getFollowerIndexMock } from './fixtures/follower_index';
 import './mocks';
-import { setupEnvironment, pageHelpers, delay, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.followerIndexList;
 
@@ -71,7 +71,6 @@ describe('<FollowerIndicesList />', () => {
   });
 
   describe('when there are multiple pages of follower indices', () => {
-    let find;
     let component;
     let table;
     let actions;
@@ -95,7 +94,7 @@ describe('<FollowerIndicesList />', () => {
       httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
 
       await act(async () => {
-        ({ find, component, table, actions, form } = setup());
+        ({ component, table, actions, form } = setup());
       });
 
       component.update();
@@ -110,9 +109,8 @@ describe('<FollowerIndicesList />', () => {
       expect(tableCellsValues.length).toBe(10);
     });
 
-    // Skipped until we can figure out how to get this test to work.
-    test.skip('search works', () => {
-      form.setInputValue(find('followerIndexSearch'), 'unique');
+    test('search works', () => {
+      form.setInputValue('followerIndexSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('followerIndexListTable');
       expect(tableCellsValues.length).toBe(1);
     });
@@ -146,12 +144,6 @@ describe('<FollowerIndicesList />', () => {
 
       // Read the index list table
       ({ tableCellsValues } = table.getMetaData('followerIndexListTable'));
-    });
-
-    afterEach(async () => {
-      // The <EuiPopover /> updates are not all synchronouse
-      // We need to wait for all the updates to ran before unmounting our component
-      await delay(100);
     });
 
     test('should not display the empty prompt', () => {

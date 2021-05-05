@@ -38,7 +38,9 @@
               },
               ">"
             ],
-            "description": [],
+            "description": [
+              "the space."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
               "lineNumber": 24
@@ -88,7 +90,9 @@
               },
               ">"
             ],
-            "description": [],
+            "description": [
+              "the space."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
               "lineNumber": 64
@@ -138,7 +142,9 @@
               },
               ">"
             ],
-            "description": [],
+            "description": [
+              "the space."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/public/space_avatar/space_attributes.ts",
               "lineNumber": 43
@@ -176,7 +182,9 @@
             "text": "Space"
           }
         ],
-        "description": [],
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "tags": [],
         "children": [
           {
@@ -184,10 +192,12 @@
             "id": "def-public.GetSpaceResult.authorizedPurposes",
             "type": "Object",
             "label": "authorizedPurposes",
-            "description": [],
+            "description": [
+              "\nA set of flags indicating which purposes the user is authorized for."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22
+              "lineNumber": 51
             },
             "signature": [
               "Record<",
@@ -204,7 +214,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21
+          "lineNumber": 47
         },
         "initialIsOpen": false
       },
@@ -212,7 +222,9 @@
         "id": "def-public.Space",
         "type": "Interface",
         "label": "Space",
-        "description": [],
+        "description": [
+          "\nA Kibana Space."
+        ],
         "tags": [],
         "children": [
           {
@@ -220,10 +232,12 @@
             "id": "def-public.Space.id",
             "type": "string",
             "label": "id",
-            "description": [],
+            "description": [
+              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 10
+              "lineNumber": 19
             }
           },
           {
@@ -231,10 +245,12 @@
             "id": "def-public.Space.name",
             "type": "string",
             "label": "name",
-            "description": [],
+            "description": [
+              "\nDisplay name for this space."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 11
+              "lineNumber": 24
             }
           },
           {
@@ -242,10 +258,12 @@
             "id": "def-public.Space.description",
             "type": "string",
             "label": "description",
-            "description": [],
+            "description": [
+              "\nOptional description for this space."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 12
+              "lineNumber": 29
             },
             "signature": [
               "string | undefined"
@@ -256,10 +274,12 @@
             "id": "def-public.Space.color",
             "type": "string",
             "label": "color",
-            "description": [],
+            "description": [
+              "\nOptional color (hex code) for this space.\nIf neither `color` nor `imageUrl` is specified, then a color will be automatically generated."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 13
+              "lineNumber": 35
             },
             "signature": [
               "string | undefined"
@@ -270,10 +290,28 @@
             "id": "def-public.Space.initials",
             "type": "string",
             "label": "initials",
-            "description": [],
+            "description": [
+              "\nOptional display initials for this space's avatar. Supports a maximum of 2 characters.\nIf initials are not provided, then they will be derived from the space name automatically.\n\nInitials are not displayed if an `imageUrl` has been specified."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 14
+              "lineNumber": 43
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Space.imageUrl",
+            "type": "string",
+            "label": "imageUrl",
+            "description": [
+              "\nOptional base-64 encoded data image url to show as this space's avatar.\nThis setting takes precedence over any configured `color` or `initials`."
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 49
             },
             "signature": [
               "string | undefined"
@@ -284,47 +322,39 @@
             "id": "def-public.Space.disabledFeatures",
             "type": "Array",
             "label": "disabledFeatures",
-            "description": [],
+            "description": [
+              "\nThe set of feature ids that should be hidden within this space."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 15
+              "lineNumber": 54
             },
             "signature": [
               "string[]"
             ]
           },
           {
-            "tags": [],
+            "tags": [
+              "private"
+            ],
             "id": "def-public.Space._reserved",
             "type": "CompoundType",
             "label": "_reserved",
-            "description": [],
+            "description": [
+              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 16
+              "lineNumber": 61
             },
             "signature": [
               "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Space.imageUrl",
-            "type": "string",
-            "label": "imageUrl",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 17
-            },
-            "signature": [
-              "string | undefined"
             ]
           }
         ],
         "source": {
           "path": "src/plugins/spaces_oss/common/types.ts",
-          "lineNumber": 9
+          "lineNumber": 12
         },
         "initialIsOpen": false
       }
@@ -336,10 +366,12 @@
         "type": "Type",
         "label": "GetAllSpacesPurpose",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nThe set of purposes to retrieve spaces:\n- `any`: retrieves all spaces the user is authorized to see.\n- `copySavedObjectsIntoSpace`: retrieves all spaces the user is authorized to copy saved objects into.\n- `findSavedObjects`: retrieves all spaces the user is authorized to search within.\n- `shareSavedObjectsIntoSpace`: retrieves all spaces the user is authorized to share saved objects into."
+        ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15
+          "lineNumber": 38
         },
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
@@ -353,10 +385,12 @@
       "type": "Type",
       "label": "SpacesPluginSetup",
       "tags": [],
-      "description": [],
+      "description": [
+        "\nSetup contract for the Spaces plugin."
+      ],
       "source": {
         "path": "x-pack/plugins/spaces/public/plugin.tsx",
-        "lineNumber": 39
+        "lineNumber": 42
       },
       "signature": [
         "{}"
@@ -369,10 +403,12 @@
       "type": "Type",
       "label": "SpacesPluginStart",
       "tags": [],
-      "description": [],
+      "description": [
+        "\nStart contract for the Spaces plugin."
+      ],
       "source": {
         "path": "x-pack/plugins/spaces/public/plugin.tsx",
-        "lineNumber": 40
+        "lineNumber": 47
       },
       "signature": [
         "SpacesApi"
@@ -391,7 +427,9 @@
         "signature": [
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
-        "description": [],
+        "description": [
+          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
+        ],
         "children": [
           {
             "id": "def-server.addSpaceIdToPath.$1",
@@ -401,10 +439,12 @@
             "signature": [
               "string"
             ],
-            "description": [],
+            "description": [
+              "the server's base path."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 44
+              "lineNumber": 62
             }
           },
           {
@@ -415,10 +455,12 @@
             "signature": [
               "string"
             ],
-            "description": [],
+            "description": [
+              "the space id."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 45
+              "lineNumber": 63
             }
           },
           {
@@ -429,18 +471,22 @@
             "signature": [
               "string"
             ],
-            "description": [],
+            "description": [
+              "the requested path (e.g. `/app/dashboard`)."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 46
+              "lineNumber": 64
             }
           }
         ],
         "tags": [],
-        "returnComment": [],
+        "returnComment": [
+          "the space-aware version of the requested path, inclusive of the server's base path."
+        ],
         "source": {
           "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 43
+          "lineNumber": 61
         },
         "initialIsOpen": false
       }
@@ -450,32 +496,42 @@
         "id": "def-server.GetAllSpacesOptions",
         "type": "Interface",
         "label": "GetAllSpacesOptions",
-        "description": [],
+        "description": [
+          "\nControls how spaces are retrieved."
+        ],
         "tags": [],
         "children": [
           {
-            "tags": [],
+            "tags": [
+              "see"
+            ],
             "id": "def-server.GetAllSpacesOptions.purpose",
             "type": "CompoundType",
             "label": "purpose",
-            "description": [],
+            "description": [
+              "\nAn optional purpose describing how the set of spaces will be used.\nThe default purpose (`any`) will retrieve all spaces the user is authorized to see,\nwhereas a more specific purpose will retrieve all spaces the user is authorized to perform a specific action within.\n"
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 11
+              "lineNumber": 21
             },
             "signature": [
               "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
             ]
           },
           {
-            "tags": [],
+            "tags": [
+              "see"
+            ],
             "id": "def-server.GetAllSpacesOptions.includeAuthorizedPurposes",
             "type": "CompoundType",
             "label": "includeAuthorizedPurposes",
-            "description": [],
+            "description": [
+              "\nSet to true to return a set of flags indicating which purposes the user is authorized for.\n"
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 12
+              "lineNumber": 28
             },
             "signature": [
               "boolean | undefined"
@@ -484,7 +540,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 13
         },
         "initialIsOpen": false
       },
@@ -509,7 +565,9 @@
             "text": "Space"
           }
         ],
-        "description": [],
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "tags": [],
         "children": [
           {
@@ -517,10 +575,12 @@
             "id": "def-server.GetSpaceResult.authorizedPurposes",
             "type": "Object",
             "label": "authorizedPurposes",
-            "description": [],
+            "description": [
+              "\nA set of flags indicating which purposes the user is authorized for."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22
+              "lineNumber": 51
             },
             "signature": [
               "Record<",
@@ -537,7 +597,289 @@
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21
+          "lineNumber": 47
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ISpacesClient",
+        "type": "Interface",
+        "label": "ISpacesClient",
+        "description": [
+          "\nClient interface for interacting with spaces."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-server.ISpacesClient.getAll",
+            "type": "Function",
+            "label": "getAll",
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetAllSpacesOptions",
+                "text": "GetAllSpacesOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetSpaceResult",
+                "text": "GetSpaceResult"
+              },
+              "[]>"
+            ],
+            "description": [
+              "\nRetrieve all available spaces."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.getAll.$1",
+                "type": "Object",
+                "label": "options",
+                "isRequired": false,
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.GetAllSpacesOptions",
+                    "text": "GetAllSpacesOptions"
+                  },
+                  " | undefined"
+                ],
+                "description": [
+                  "controls which spaces are retrieved."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 34
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 34
+            }
+          },
+          {
+            "id": "def-server.ISpacesClient.get",
+            "type": "Function",
+            "label": "get",
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "description": [
+              "\nRetrieve a space by its id."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.get.$1",
+                "type": "string",
+                "label": "id",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [
+                  "the space id."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 40
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 40
+            }
+          },
+          {
+            "id": "def-server.ISpacesClient.create",
+            "type": "Function",
+            "label": "create",
+            "signature": [
+              "(space: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "description": [
+              "\nCreates a space."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.create.$1",
+                "type": "Object",
+                "label": "space",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "spacesOss",
+                    "scope": "common",
+                    "docId": "kibSpacesOssPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "description": [
+                  "the space to create."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 46
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 46
+            }
+          },
+          {
+            "id": "def-server.ISpacesClient.update",
+            "type": "Function",
+            "label": "update",
+            "signature": [
+              "(id: string, space: ",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "spacesOss",
+                "scope": "common",
+                "docId": "kibSpacesOssPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "description": [
+              "\nUpdates a space."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.update.$1",
+                "type": "string",
+                "label": "id",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [
+                  "the id of the space to update."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 53
+                }
+              },
+              {
+                "id": "def-server.ISpacesClient.update.$2",
+                "type": "Object",
+                "label": "space",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "spacesOss",
+                    "scope": "common",
+                    "docId": "kibSpacesOssPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "description": [
+                  "the updated space."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 53
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 53
+            }
+          },
+          {
+            "id": "def-server.ISpacesClient.delete",
+            "type": "Function",
+            "label": "delete",
+            "signature": [
+              "(id: string) => Promise<void>"
+            ],
+            "description": [
+              "\nDeletes a space, and all saved objects belonging to that space."
+            ],
+            "children": [
+              {
+                "id": "def-server.ISpacesClient.delete.$1",
+                "type": "string",
+                "label": "id",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [
+                  "the id of the space to delete."
+                ],
+                "source": {
+                  "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                  "lineNumber": 59
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+              "lineNumber": 59
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+          "lineNumber": 29
         },
         "initialIsOpen": false
       },
@@ -545,7 +887,9 @@
         "id": "def-server.Space",
         "type": "Interface",
         "label": "Space",
-        "description": [],
+        "description": [
+          "\nA Kibana Space."
+        ],
         "tags": [],
         "children": [
           {
@@ -553,10 +897,12 @@
             "id": "def-server.Space.id",
             "type": "string",
             "label": "id",
-            "description": [],
+            "description": [
+              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 10
+              "lineNumber": 19
             }
           },
           {
@@ -564,10 +910,12 @@
             "id": "def-server.Space.name",
             "type": "string",
             "label": "name",
-            "description": [],
+            "description": [
+              "\nDisplay name for this space."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 11
+              "lineNumber": 24
             }
           },
           {
@@ -575,10 +923,12 @@
             "id": "def-server.Space.description",
             "type": "string",
             "label": "description",
-            "description": [],
+            "description": [
+              "\nOptional description for this space."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 12
+              "lineNumber": 29
             },
             "signature": [
               "string | undefined"
@@ -589,10 +939,12 @@
             "id": "def-server.Space.color",
             "type": "string",
             "label": "color",
-            "description": [],
+            "description": [
+              "\nOptional color (hex code) for this space.\nIf neither `color` nor `imageUrl` is specified, then a color will be automatically generated."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 13
+              "lineNumber": 35
             },
             "signature": [
               "string | undefined"
@@ -603,10 +955,28 @@
             "id": "def-server.Space.initials",
             "type": "string",
             "label": "initials",
-            "description": [],
+            "description": [
+              "\nOptional display initials for this space's avatar. Supports a maximum of 2 characters.\nIf initials are not provided, then they will be derived from the space name automatically.\n\nInitials are not displayed if an `imageUrl` has been specified."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 14
+              "lineNumber": 43
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.Space.imageUrl",
+            "type": "string",
+            "label": "imageUrl",
+            "description": [
+              "\nOptional base-64 encoded data image url to show as this space's avatar.\nThis setting takes precedence over any configured `color` or `initials`."
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 49
             },
             "signature": [
               "string | undefined"
@@ -617,47 +987,39 @@
             "id": "def-server.Space.disabledFeatures",
             "type": "Array",
             "label": "disabledFeatures",
-            "description": [],
+            "description": [
+              "\nThe set of feature ids that should be hidden within this space."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 15
+              "lineNumber": 54
             },
             "signature": [
               "string[]"
             ]
           },
           {
-            "tags": [],
+            "tags": [
+              "private"
+            ],
             "id": "def-server.Space._reserved",
             "type": "CompoundType",
             "label": "_reserved",
-            "description": [],
+            "description": [
+              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 16
+              "lineNumber": 61
             },
             "signature": [
               "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.Space.imageUrl",
-            "type": "string",
-            "label": "imageUrl",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 17
-            },
-            "signature": [
-              "string | undefined"
             ]
           }
         ],
         "source": {
           "path": "src/plugins/spaces_oss/common/types.ts",
-          "lineNumber": 9
+          "lineNumber": 12
         },
         "initialIsOpen": false
       },
@@ -665,7 +1027,9 @@
         "id": "def-server.SpacesServiceSetup",
         "type": "Interface",
         "label": "SpacesServiceSetup",
-        "description": [],
+        "description": [
+          "\nThe Spaces service setup contract."
+        ],
         "tags": [],
         "children": [
           {
@@ -702,20 +1066,23 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
+                "description": [
+                  "the request."
+                ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 23
+                  "lineNumber": 27
                 }
               }
             ],
             "tags": [
-              "deprecated"
+              "deprecated",
+              "removeBy"
             ],
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 23
+              "lineNumber": 27
             }
           },
           {
@@ -737,20 +1104,23 @@
                 "signature": [
                   "string"
                 ],
-                "description": [],
+                "description": [
+                  "the space id to convert."
+                ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 31
+                  "lineNumber": 36
                 }
               }
             ],
             "tags": [
-              "deprecated"
+              "deprecated",
+              "removeBy"
             ],
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 31
+              "lineNumber": 36
             }
           },
           {
@@ -772,26 +1142,29 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "description": [],
+                "description": [
+                  "the namespace to convert."
+                ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 39
+                  "lineNumber": 45
                 }
               }
             ],
             "tags": [
-              "deprecated"
+              "deprecated",
+              "removeBy"
             ],
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 39
+              "lineNumber": 45
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-          "lineNumber": 16
+          "lineNumber": 19
         },
         "initialIsOpen": false
       },
@@ -799,7 +1172,9 @@
         "id": "def-server.SpacesServiceStart",
         "type": "Interface",
         "label": "SpacesServiceStart",
-        "description": [],
+        "description": [
+          "\nThe Spaces service start contract."
+        ],
         "tags": [],
         "children": [
           {
@@ -812,7 +1187,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 46
+              "lineNumber": 56
             },
             "signature": [
               "(request: ",
@@ -823,9 +1198,14 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>) => Pick<",
-              "SpacesClient",
-              ", \"get\" | \"delete\" | \"create\" | \"update\" | \"getAll\">"
+              "<unknown, unknown, unknown, any>) => ",
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.ISpacesClient",
+                "text": "ISpacesClient"
+              }
             ]
           },
           {
@@ -862,10 +1242,12 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
+                "description": [
+                  "the request."
+                ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 52
+                  "lineNumber": 62
                 }
               }
             ],
@@ -873,7 +1255,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 52
+              "lineNumber": 62
             }
           },
           {
@@ -910,10 +1292,12 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
+                "description": [
+                  "the request."
+                ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 58
+                  "lineNumber": 68
                 }
               }
             ],
@@ -921,7 +1305,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 58
+              "lineNumber": 68
             }
           },
           {
@@ -966,10 +1350,12 @@
                   },
                   "<unknown, unknown, unknown, any>"
                 ],
-                "description": [],
+                "description": [
+                  "the request."
+                ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 64
+                  "lineNumber": 74
                 }
               }
             ],
@@ -977,7 +1363,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 64
+              "lineNumber": 74
             }
           },
           {
@@ -999,10 +1385,12 @@
                 "signature": [
                   "string"
                 ],
-                "description": [],
+                "description": [
+                  "the space id to convert."
+                ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 70
+                  "lineNumber": 80
                 }
               }
             ],
@@ -1010,7 +1398,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 70
+              "lineNumber": 80
             }
           },
           {
@@ -1032,10 +1420,12 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "description": [],
+                "description": [
+                  "the namespace to convert."
+                ],
                 "source": {
                   "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-                  "lineNumber": 76
+                  "lineNumber": 86
                 }
               }
             ],
@@ -1043,13 +1433,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-              "lineNumber": 76
+              "lineNumber": 86
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
-          "lineNumber": 42
+          "lineNumber": 51
         },
         "initialIsOpen": false
       }
@@ -1061,10 +1451,12 @@
         "type": "Type",
         "label": "GetAllSpacesPurpose",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nThe set of purposes to retrieve spaces:\n- `any`: retrieves all spaces the user is authorized to see.\n- `copySavedObjectsIntoSpace`: retrieves all spaces the user is authorized to copy saved objects into.\n- `findSavedObjects`: retrieves all spaces the user is authorized to search within.\n- `shareSavedObjectsIntoSpace`: retrieves all spaces the user is authorized to share saved objects into."
+        ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15
+          "lineNumber": 38
         },
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
@@ -1072,17 +1464,87 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ISpacesClient",
+        "id": "def-server.SpacesClientRepositoryFactory",
         "type": "Type",
-        "label": "ISpacesClient",
-        "tags": [],
-        "description": [],
+        "label": "SpacesClientRepositoryFactory",
+        "tags": [
+          "private"
+        ],
+        "description": [
+          "\nFor consumption by the security plugin only."
+        ],
         "source": {
-          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
-          "lineNumber": 27
+          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
+          "lineNumber": 34
         },
         "signature": [
-          "{ get: (id: string) => Promise<Space>; delete: (id: string) => Promise<void>; create: (space: Space) => Promise<Space>; update: (id: string, space: Space) => Promise<Space>; getAll: (options?: GetAllSpacesOptions) => Promise<GetSpaceResult[]>; }"
+          "(request: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>, savedObjectsStart: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsServiceStart",
+            "text": "SavedObjectsServiceStart"
+          },
+          ") => Pick<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsRepository",
+            "text": "SavedObjectsRepository"
+          },
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.SpacesClientWrapper",
+        "type": "Type",
+        "label": "SpacesClientWrapper",
+        "tags": [
+          "private"
+        ],
+        "description": [
+          "\nFor consumption by the security plugin only."
+        ],
+        "source": {
+          "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
+          "lineNumber": 25
+        },
+        "signature": [
+          "(request: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>, baseClient: ",
+          {
+            "pluginId": "spaces",
+            "scope": "server",
+            "docId": "kibSpacesPluginApi",
+            "section": "def-server.ISpacesClient",
+            "text": "ISpacesClient"
+          },
+          ") => ",
+          {
+            "pluginId": "spaces",
+            "scope": "server",
+            "docId": "kibSpacesPluginApi",
+            "section": "def-server.ISpacesClient",
+            "text": "ISpacesClient"
+          }
         ],
         "initialIsOpen": false
       }
@@ -1092,18 +1554,25 @@
       "id": "def-server.SpacesPluginSetup",
       "type": "Interface",
       "label": "SpacesPluginSetup",
-      "description": [],
+      "description": [
+        "\nSetup contract for the Spaces plugin."
+      ],
       "tags": [],
       "children": [
         {
-          "tags": [],
+          "tags": [
+            "deprecated",
+            "removeBy"
+          ],
           "id": "def-server.SpacesPluginSetup.spacesService",
           "type": "Object",
           "label": "spacesService",
-          "description": [],
+          "description": [
+            "\nService for interacting with spaces.\n"
+          ],
           "source": {
             "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 55
+            "lineNumber": 64
           },
           "signature": [
             {
@@ -1116,27 +1585,43 @@
           ]
         },
         {
-          "tags": [],
+          "tags": [
+            "private"
+          ],
           "id": "def-server.SpacesPluginSetup.spacesClient",
           "type": "Object",
           "label": "spacesClient",
-          "description": [],
+          "description": [
+            "\nRegistries exposed for the security plugin to transparently provide authorization and audit logging."
+          ],
           "source": {
             "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 56
+            "lineNumber": 70
           },
           "signature": [
             "{ setClientRepositoryFactory: (factory: ",
-            "SpacesClientRepositoryFactory",
+            {
+              "pluginId": "spaces",
+              "scope": "server",
+              "docId": "kibSpacesPluginApi",
+              "section": "def-server.SpacesClientRepositoryFactory",
+              "text": "SpacesClientRepositoryFactory"
+            },
             ") => void; registerClientWrapper: (wrapper: ",
-            "SpacesClientWrapper",
+            {
+              "pluginId": "spaces",
+              "scope": "server",
+              "docId": "kibSpacesPluginApi",
+              "section": "def-server.SpacesClientWrapper",
+              "text": "SpacesClientWrapper"
+            },
             ") => void; }"
           ]
         }
       ],
       "source": {
         "path": "x-pack/plugins/spaces/server/plugin.ts",
-        "lineNumber": 54
+        "lineNumber": 57
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1145,7 +1630,9 @@
       "id": "def-server.SpacesPluginStart",
       "type": "Interface",
       "label": "SpacesPluginStart",
-      "description": [],
+      "description": [
+        "\nStart contract for the Spaces plugin."
+      ],
       "tags": [],
       "children": [
         {
@@ -1153,10 +1640,12 @@
           "id": "def-server.SpacesPluginStart.spacesService",
           "type": "Object",
           "label": "spacesService",
-          "description": [],
+          "description": [
+            "Service for interacting with spaces."
+          ],
           "source": {
             "path": "x-pack/plugins/spaces/server/plugin.ts",
-            "lineNumber": 63
+            "lineNumber": 89
           },
           "signature": [
             {
@@ -1171,7 +1660,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/spaces/server/plugin.ts",
-        "lineNumber": 62
+        "lineNumber": 87
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1187,7 +1676,9 @@
         "signature": [
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
-        "description": [],
+        "description": [
+          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
+        ],
         "children": [
           {
             "id": "def-common.addSpaceIdToPath.$1",
@@ -1197,10 +1688,12 @@
             "signature": [
               "string"
             ],
-            "description": [],
+            "description": [
+              "the server's base path."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 44
+              "lineNumber": 62
             }
           },
           {
@@ -1211,10 +1704,12 @@
             "signature": [
               "string"
             ],
-            "description": [],
+            "description": [
+              "the space id."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 45
+              "lineNumber": 63
             }
           },
           {
@@ -1225,18 +1720,22 @@
             "signature": [
               "string"
             ],
-            "description": [],
+            "description": [
+              "the requested path (e.g. `/app/dashboard`)."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 46
+              "lineNumber": 64
             }
           }
         ],
         "tags": [],
-        "returnComment": [],
+        "returnComment": [
+          "the space-aware version of the requested path, inclusive of the server's base path."
+        ],
         "source": {
           "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 43
+          "lineNumber": 61
         },
         "initialIsOpen": false
       },
@@ -1247,7 +1746,9 @@
         "signature": [
           "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
         ],
-        "description": [],
+        "description": [
+          "\nExtracts the space id from the given path.\n"
+        ],
         "children": [
           {
             "id": "def-common.getSpaceIdFromPath.$1",
@@ -1257,10 +1758,12 @@
             "signature": [
               "string | null | undefined"
             ],
-            "description": [],
+            "description": [
+              "The base path of the current request."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 13
+              "lineNumber": 22
             }
           },
           {
@@ -1271,18 +1774,24 @@
             "signature": [
               "string | null | undefined"
             ],
-            "description": [],
+            "description": [
+              "The server's base path."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-              "lineNumber": 14
+              "lineNumber": 23
             }
           }
         ],
-        "tags": [],
-        "returnComment": [],
+        "tags": [
+          "private"
+        ],
+        "returnComment": [
+          "the space id."
+        ],
         "source": {
           "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
-          "lineNumber": 12
+          "lineNumber": 21
         },
         "initialIsOpen": false
       },
@@ -1346,32 +1855,42 @@
         "id": "def-common.GetAllSpacesOptions",
         "type": "Interface",
         "label": "GetAllSpacesOptions",
-        "description": [],
+        "description": [
+          "\nControls how spaces are retrieved."
+        ],
         "tags": [],
         "children": [
           {
-            "tags": [],
+            "tags": [
+              "see"
+            ],
             "id": "def-common.GetAllSpacesOptions.purpose",
             "type": "CompoundType",
             "label": "purpose",
-            "description": [],
+            "description": [
+              "\nAn optional purpose describing how the set of spaces will be used.\nThe default purpose (`any`) will retrieve all spaces the user is authorized to see,\nwhereas a more specific purpose will retrieve all spaces the user is authorized to perform a specific action within.\n"
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 11
+              "lineNumber": 21
             },
             "signature": [
               "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
             ]
           },
           {
-            "tags": [],
+            "tags": [
+              "see"
+            ],
             "id": "def-common.GetAllSpacesOptions.includeAuthorizedPurposes",
             "type": "CompoundType",
             "label": "includeAuthorizedPurposes",
-            "description": [],
+            "description": [
+              "\nSet to true to return a set of flags indicating which purposes the user is authorized for.\n"
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 12
+              "lineNumber": 28
             },
             "signature": [
               "boolean | undefined"
@@ -1380,7 +1899,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 13
         },
         "initialIsOpen": false
       },
@@ -1405,7 +1924,9 @@
             "text": "Space"
           }
         ],
-        "description": [],
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "tags": [],
         "children": [
           {
@@ -1413,10 +1934,12 @@
             "id": "def-common.GetSpaceResult.authorizedPurposes",
             "type": "Object",
             "label": "authorizedPurposes",
-            "description": [],
+            "description": [
+              "\nA set of flags indicating which purposes the user is authorized for."
+            ],
             "source": {
               "path": "x-pack/plugins/spaces/common/types.ts",
-              "lineNumber": 22
+              "lineNumber": 51
             },
             "signature": [
               "Record<",
@@ -1433,7 +1956,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 21
+          "lineNumber": 47
         },
         "initialIsOpen": false
       }
@@ -1462,10 +1985,12 @@
         "type": "Type",
         "label": "GetAllSpacesPurpose",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nThe set of purposes to retrieve spaces:\n- `any`: retrieves all spaces the user is authorized to see.\n- `copySavedObjectsIntoSpace`: retrieves all spaces the user is authorized to copy saved objects into.\n- `findSavedObjects`: retrieves all spaces the user is authorized to search within.\n- `shareSavedObjectsIntoSpace`: retrieves all spaces the user is authorized to share saved objects into."
+        ],
         "source": {
           "path": "x-pack/plugins/spaces/common/types.ts",
-          "lineNumber": 15
+          "lineNumber": 38
         },
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
