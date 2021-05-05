@@ -8,6 +8,7 @@ SOURCE_FILES = glob(
   [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "src/core/locales.js",
     "types/**/*.ts",
   ],
   exclude = [
@@ -82,6 +83,7 @@ ts_project(
   args = ['--pretty'],
   srcs = SRCS,
   deps = DEPS,
+  allow_js = True,
   declaration = True,
   declaration_dir = "types",
   declaration_map = True,
@@ -97,6 +99,7 @@ ts_project(
   args = ['--pretty'],
   srcs = SRCS,
   deps = DEPS,
+  allow_js = True,
   declaration = False,
   incremental = True,
   out_dir = "web",

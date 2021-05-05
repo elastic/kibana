@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.browser.json",
   "compilerOptions": {
+    "allowJs": true,
     "incremental": true,
     "outDir": "./target/web",
     "declaration": false,
