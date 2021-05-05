@@ -46,5 +46,8 @@ export default function ({ loadTestFile }) {
 
     // Service tokens
     loadTestFile(require.resolve('./service_tokens'));
+
+    // Outputs
+    loadTestFile(require.resolve('./outputs'));
   });
 }
