@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
+
+import { REPO_ROOT } from '@kbn/dev-utils';
+
 /**
  * Traverse the suites configured and ensure that each suite has no more than one ciGroup assigned
  *
@@ -53,7 +57,13 @@ export function validateCiGroupTags(log, mocha) {
 
   if (suitesWithMultipleCiGroups.length) {
     const list = suitesWithMultipleCiGroups
-      .map((s) => ` - ${getCiGroups(s).join(', ')}: ${getTitles(s).join(' > ') || '--unknown--'}`)
+      .map((s) => {
+        const groups = getCiGroups(s).join(', ');
+        const title = getTitles(s).join(' > ') || '';
+        const from = s.file ? ` (from: ${Path.relative(REPO_ROOT, s.file)})` : '';
+
+        return ` - ${groups}: ${title}${from}`;
+      })
       .join('\n');
 
     log.error(
