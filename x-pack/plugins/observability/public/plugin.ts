@@ -31,6 +31,7 @@ import { observabilityRuleRegistrySettings } from '../common/rules/observability
 import { registerDataHandler } from './data_handler';
 import { FormatterRuleRegistry } from './rules/formatter_rule_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
+import { createNavigationRegistry } from './services/navigation_registry';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
 
@@ -60,6 +61,7 @@ export class Plugin
       ObservabilityPublicPluginsStart
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly navigationRegistry = createNavigationRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -165,6 +167,9 @@ export class Plugin
 
     return {
       dashboard: { register: registerDataHandler },
+      navigation: {
+        registerSections: this.navigationRegistry.registerSections,
+      },
       ruleRegistry: observabilityRuleRegistry,
       isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
     };
