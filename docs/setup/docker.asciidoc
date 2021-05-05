@@ -20,13 +20,13 @@ These images contain both free and subscription features.
 
 ifeval::["{release-state}"=="unreleased"]
 
-NOTE: No Docker images is currently available for {kib} {version}.
+NOTE: No Docker images are currently available for {kib} {version}.
 
 endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-To start a {es} container for development or testing, run:
+To start an {es} container for development or testing, run:
 
 [source,sh,subs="attributes"]
 ----
@@ -36,7 +36,7 @@ docker run --name es01-test --net elastic -p 9200:9200 -p 9300:9300 -e "discover
 ----
 
 To start {kib} and connect it to your {es} container, run the following commands
-in a new terminal session.
+in a new terminal session:
 
 [source,sh,subs="attributes"]
 ----
@@ -44,7 +44,7 @@ docker pull {docker-image}
 docker run --name kib01-test --net elastic -p 5601:5601 -e "ELASTICSEARCH_HOSTS=http://es01-test:9200" {docker-image}
 ----
 
-To access {kib}, go to http://localhost:5601[http://localhost:5601]
+To access {kib}, go to http://localhost:5601[http://localhost:5601].
 
 [float]
 === Stop Docker containers
