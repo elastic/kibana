@@ -57,7 +57,7 @@ import {
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
-import { REFRESH_BUTTON, TIMELINE, TIMELINES_TABLE } from '../screens/timelines';
+import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
 import { drag, drop } from '../tasks/common';
 
