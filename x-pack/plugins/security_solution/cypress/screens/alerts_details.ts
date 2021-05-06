@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+export const CELL_TEXT = '.euiText';
+
 export const JSON_CONTENT = '[data-test-subj="jsonView"]';
 
 export const JSON_LINES = '.ace_line';
 
 export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
+
+export const TABLE_TAB = '[data-test-subj="tableTab"]';
+
+export const TABLE_ROWS = '.euiTableRow';
