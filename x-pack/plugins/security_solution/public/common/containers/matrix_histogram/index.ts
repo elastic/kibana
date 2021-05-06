@@ -259,9 +259,6 @@ export const useMatrixHistogramCombined = (
   const skipMissingData = useMemo(() => !matrixHistogramQueryProps.stackByField.endsWith('.ip'), [
     matrixHistogramQueryProps.stackByField,
   ]);
-  /* we include missing data in a single query by default,
-   * but we do extra query for missing data if value type is ip, due to https://github.com/elastic/kibana/issues/89205
-   **/
   const [missingDataLoading, missingDataResponse] = useMatrixHistogram({
     ...matrixHistogramQueryProps,
     includeMissingData: false,
@@ -312,7 +309,7 @@ export const useMatrixHistogramCombined = (
       refetch: combinedRefetch,
       buckets,
     };
-  }, [combinedLoading, mainResponse, missingDataResponse]);
+  }, [combinedLoading, mainResponse, missingDataResponse, skipMissingData]);
 
   return [combinedLoading, combinedResponse];
 };

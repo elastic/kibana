@@ -208,7 +208,7 @@ export const ModalInspectQuery = ({
       name: 'Response',
       content:
         inspectResponses.length > 0 ? (
-          responses.map((response, index) => (
+          responses.map((responseText, index) => (
             <Fragment key={index}>
               <EuiSpacer />
               <EuiCodeBlock
@@ -219,7 +219,7 @@ export const ModalInspectQuery = ({
                 overflowHeight={300}
                 isCopyable
               >
-                {response}
+                {responseText}
               </EuiCodeBlock>
             </Fragment>
           ))

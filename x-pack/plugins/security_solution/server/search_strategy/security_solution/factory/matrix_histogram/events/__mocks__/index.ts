@@ -442,7 +442,7 @@ export const expectedIpNotIncludingMissingDataDsl = {
     'filebeat-*',
     'logs-*',
     'packetbeat-*',
-    'winlogbeat-*'
+    'winlogbeat-*',
   ],
   allowNoIndices: true,
   ignoreUnavailable: true,
@@ -457,11 +457,11 @@ export const expectedIpNotIncludingMissingDataDsl = {
               field: '@timestamp',
               fixed_interval: '2700000ms',
               min_doc_count: 0,
-              extended_bounds: { min: 1599581486215, max: 1599667886215 }
-            }
-          }
-        }
-      }
+              extended_bounds: { min: 1599581486215, max: 1599667886215 },
+            },
+          },
+        },
+      },
     },
     query: {
       bool: {
@@ -469,10 +469,10 @@ export const expectedIpNotIncludingMissingDataDsl = {
           {
             bool: {
               must: [],
-              filter: [ { match_all: {} } ],
+              filter: [{ match_all: {} }],
               should: [],
-              must_not: []
-            }
+              must_not: [],
+            },
           },
           { exists: { field: 'source.ip' } },
           {
@@ -480,13 +480,13 @@ export const expectedIpNotIncludingMissingDataDsl = {
               '@timestamp': {
                 gte: '2020-09-08T16:11:26.215Z',
                 lte: '2020-09-09T16:11:26.215Z',
-                format: 'strict_date_optional_time'
-              }
-            }
-          }
-        ]
-      }
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+      },
     },
-    size: 0
-  }
+    size: 0,
+  },
 };

@@ -105,22 +105,22 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   let additionalRequests: string[] | null = null;
   if (inspect != null && inspect.dsl.length > 0) {
     if (multiple) {
-      [request, ...additionalRequests] =  inspect.dsl;
+      [request, ...additionalRequests] = inspect.dsl;
     } else {
       request = inspect.dsl[inspectIndex];
     }
-  } 
-  
+  }
+
   let response: string | null = null;
   let additionalResponses: string[] | null = null;
   if (inspect != null && inspect.response.length > 0) {
     if (multiple) {
-      [response, ...additionalResponses] =  inspect.response;
+      [response, ...additionalResponses] = inspect.response;
     } else {
       response = inspect.response[inspectIndex];
     }
-  } 
-  
+  }
+
   return (
     <>
       {inputId === 'timeline' && !compact && (
