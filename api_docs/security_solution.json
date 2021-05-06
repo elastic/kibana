@@ -33,13 +33,7 @@
             "text": "PluginSetup"
           },
           ", ",
-          {
-            "pluginId": "securitySolution",
-            "scope": "public",
-            "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-public.PluginStart",
-            "text": "PluginStart"
-          },
+          "PluginStart",
           ", ",
           "SetupPlugins"
         ],
@@ -71,7 +65,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 79
+                  "lineNumber": 78
                 }
               }
             ],
@@ -79,7 +73,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 79
+              "lineNumber": 78
             }
           },
           {
@@ -98,13 +92,7 @@
               "<",
               "StartPlugins",
               ", ",
-              {
-                "pluginId": "securitySolution",
-                "scope": "public",
-                "docId": "kibSecuritySolutionPluginApi",
-                "section": "def-public.PluginStart",
-                "text": "PluginStart"
-              },
+              "PluginStart",
               ">, plugins: ",
               "SetupPlugins",
               ") => ",
@@ -134,19 +122,13 @@
                   "<",
                   "StartPlugins",
                   ", ",
-                  {
-                    "pluginId": "securitySolution",
-                    "scope": "public",
-                    "docId": "kibSecuritySolutionPluginApi",
-                    "section": "def-public.PluginStart",
-                    "text": "PluginStart"
-                  },
+                  "PluginStart",
                   ">"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 103
+                  "lineNumber": 102
                 }
               },
               {
@@ -160,7 +142,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 103
+                  "lineNumber": 102
                 }
               }
             ],
@@ -168,7 +150,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 103
+              "lineNumber": 102
             }
           },
           {
@@ -207,7 +189,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 346
+                  "lineNumber": 343
                 }
               },
               {
@@ -221,7 +203,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 346
+                  "lineNumber": 343
                 }
               }
             ],
@@ -229,7 +211,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 346
+              "lineNumber": 343
             }
           },
           {
@@ -245,13 +227,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 391
+              "lineNumber": 388
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-          "lineNumber": 75
+          "lineNumber": 74
         },
         "initialIsOpen": false
       }
@@ -276,7 +258,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/security_solution/public/types.ts",
-            "lineNumber": 68
+            "lineNumber": 70
           },
           "signature": [
             "() => Promise<",
@@ -287,23 +269,9 @@
       ],
       "source": {
         "path": "x-pack/plugins/security_solution/public/types.ts",
-        "lineNumber": 67
+        "lineNumber": 69
       },
       "lifecycle": "setup",
-      "initialIsOpen": true
-    },
-    "start": {
-      "id": "def-public.PluginStart",
-      "type": "Interface",
-      "label": "PluginStart",
-      "description": [],
-      "tags": [],
-      "children": [],
-      "source": {
-        "path": "x-pack/plugins/security_solution/public/types.ts",
-        "lineNumber": 71
-      },
-      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
@@ -453,7 +421,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 145
+                  "lineNumber": 146
                 }
               }
             ],
@@ -461,7 +429,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 145
+              "lineNumber": 146
             }
           },
           {
@@ -521,7 +489,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 157
+                  "lineNumber": 158
                 }
               },
               {
@@ -535,7 +503,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 157
+                  "lineNumber": 158
                 }
               }
             ],
@@ -543,7 +511,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 157
+              "lineNumber": 158
             }
           },
           {
@@ -582,7 +550,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 338
+                  "lineNumber": 341
                 }
               },
               {
@@ -596,7 +564,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 338
+                  "lineNumber": 341
                 }
               }
             ],
@@ -604,7 +572,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 338
+              "lineNumber": 341
             }
           },
           {
@@ -620,13 +588,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 412
+              "lineNumber": 415
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/plugin.ts",
-          "lineNumber": 129
+          "lineNumber": 130
         },
         "initialIsOpen": false
       }
@@ -1484,7 +1452,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 105
+        "lineNumber": 106
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1498,7 +1466,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 108
+        "lineNumber": 109
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1554,7 +1522,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts",
-              "lineNumber": 16
+              "lineNumber": 17
             }
           }
         ],
@@ -1575,9 +1543,11 @@
         "label": "DefaultArray",
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1596,7 +1566,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             }
           },
           {
@@ -1613,7 +1583,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             }
           }
         ],
@@ -1634,21 +1604,25 @@
         "label": "exactCheck",
         "source": {
           "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-          "lineNumber": 29
+          "lineNumber": 30
         },
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "id": "def-common.foldLeftRight",
         "type": "Function",
         "label": "foldLeftRight",
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 29
+          "lineNumber": 38
         },
         "signature": [
           "<T>(ma: ",
@@ -1674,7 +1648,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/format_errors.ts",
-              "lineNumber": 11
+              "lineNumber": 14
             }
           }
         ],
@@ -1687,9 +1661,11 @@
         "label": "formatErrors",
         "source": {
           "path": "x-pack/plugins/security_solution/common/format_errors.ts",
-          "lineNumber": 11
+          "lineNumber": 14
         },
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1711,7 +1687,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-              "lineNumber": 36
+              "lineNumber": 46
             }
           }
         ],
@@ -1728,9 +1704,11 @@
         "label": "getPaths",
         "source": {
           "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 36
+          "lineNumber": 46
         },
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1749,7 +1727,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-              "lineNumber": 49
+              "lineNumber": 60
             }
           }
         ],
@@ -1762,9 +1740,11 @@
         "label": "removeExternalLinkText",
         "source": {
           "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 49
+          "lineNumber": 60
         },
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1914,7 +1894,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "signature": [
           "number"
@@ -1924,7 +1904,9 @@
     ],
     "objects": [
       {
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "id": "def-common.DefaultStringArray",
         "type": "Object",
         "label": "DefaultStringArray",
@@ -1933,7 +1915,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_string_array.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "signature": [
           "Type",
@@ -1942,7 +1924,9 @@
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "id": "def-common.DefaultUuid",
         "type": "Object",
         "label": "DefaultUuid",
@@ -1951,7 +1935,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_uuid.ts",
-          "lineNumber": 19
+          "lineNumber": 20
         },
         "signature": [
           "Type",
@@ -1960,7 +1944,9 @@
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "id": "def-common.DefaultVersionNumber",
         "type": "Object",
         "label": "DefaultVersionNumber",
@@ -1969,7 +1955,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "signature": [
           "Type",
@@ -1978,7 +1964,9 @@
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "id": "def-common.NonEmptyString",
         "type": "Object",
         "label": "NonEmptyString",
@@ -1987,7 +1975,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/non_empty_string.ts",
-          "lineNumber": 15
+          "lineNumber": 16
         },
         "signature": [
           "Type",

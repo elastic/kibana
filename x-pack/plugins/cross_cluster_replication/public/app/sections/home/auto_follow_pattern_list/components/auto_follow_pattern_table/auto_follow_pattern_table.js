@@ -55,11 +55,12 @@ const getFilteredPatterns = (autoFollowPatterns, queryText) => {
     const normalizedSearchText = queryText.toLowerCase();
 
     return autoFollowPatterns.filter((autoFollowPattern) => {
+      // default values to avoid undefined errors
       const {
-        name,
-        remoteCluster,
-        followIndexPatternPrefix,
-        followIndexPatternSuffix,
+        name = '',
+        remoteCluster = '',
+        followIndexPatternPrefix = '',
+        followIndexPatternSuffix = '',
       } = autoFollowPattern;
 
       const inName = name.toLowerCase().includes(normalizedSearchText);

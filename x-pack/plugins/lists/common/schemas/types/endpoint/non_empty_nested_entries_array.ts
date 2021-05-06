@@ -11,15 +11,22 @@ import { Either } from 'fp-ts/lib/Either';
 import { endpointEntryMatchAny } from './entry_match_any';
 import { endpointEntryMatch } from './entry_match';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const endpointNestedEntriesArray = t.array(
   t.union([endpointEntryMatch, endpointEntryMatchAny])
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type EndpointNestedEntriesArray = t.TypeOf<typeof endpointNestedEntriesArray>;
 
 /**
  * Types the nonEmptyNestedEntriesArray as:
  *   - An array of entries of length 1 or greater
- *
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const nonEmptyEndpointNestedEntriesArray = new t.Type<
   EndpointNestedEntriesArray,
@@ -38,9 +45,16 @@ export const nonEmptyEndpointNestedEntriesArray = new t.Type<
   t.identity
 );
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyEndpointNestedEntriesArray = t.OutputOf<
   typeof nonEmptyEndpointNestedEntriesArray
 >;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyEndpointNestedEntriesArrayDecoded = t.TypeOf<
   typeof nonEmptyEndpointNestedEntriesArray
 >;

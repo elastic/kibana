@@ -791,12 +791,12 @@
           "description": [],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 76
+            "lineNumber": 77
           },
           "signature": [
-            "{ addDocView(docViewRaw: ",
-            "DocViewInput",
-            " | ",
+            "{ addDocView(docViewRaw: ComponentDocViewInput | ",
+            "RenderDocViewInput",
+            " | DirectiveDocViewInput | ",
             "DocViewInputFn",
             "): void; }"
           ]
@@ -804,7 +804,7 @@
       ],
       "source": {
         "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 75
+        "lineNumber": 76
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -824,7 +824,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 87
+            "lineNumber": 88
           },
           "signature": [
             {
@@ -846,7 +846,7 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 105
+            "lineNumber": 106
           },
           "signature": [
             {
@@ -862,7 +862,7 @@
       ],
       "source": {
         "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 86
+        "lineNumber": 87
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -984,6 +984,21 @@
         },
         "signature": [
           "\"fields:popularLimit\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MAX_DOC_FIELDS_DISPLAYED",
+        "type": "string",
+        "label": "MAX_DOC_FIELDS_DISPLAYED",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 21
+        },
+        "signature": [
+          "\"discover:maxDocFieldsDisplayed\""
         ],
         "initialIsOpen": false
       },

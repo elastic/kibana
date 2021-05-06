@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the NonEmptyString as:
  *   - A string that is not empty
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const NonEmptyString = new t.Type<string, string, unknown>(
   'NonEmptyString',
