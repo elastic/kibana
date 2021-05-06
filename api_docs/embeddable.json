@@ -4938,6 +4938,20 @@
                 "signature": [
                   "React.ComponentType<any>"
                 ]
+              },
+              {
+                "tags": [],
+                "id": "def-public.openAddPanelFlyout.$1.options.showCreateNewMenu",
+                "type": "CompoundType",
+                "label": "showCreateNewMenu",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
+                  "lineNumber": 23
+                },
+                "signature": [
+                  "boolean | undefined"
+                ]
               }
             ],
             "source": {
@@ -5450,7 +5464,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             }
           },
           {
@@ -5463,7 +5477,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "signature": [
               "() => Promise<boolean>"
@@ -5477,7 +5491,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "signature": [
               {
@@ -5492,6 +5506,29 @@
           },
           {
             "tags": [],
+            "id": "def-public.EmbeddableFactory.grouping",
+            "type": "Array",
+            "label": "grouping",
+            "description": [
+              "\nIndicates the grouping this factory should appear in a sub-menu. Example, this is used for grouping\noptions in the editors menu in Dashboard for creating new embeddables"
+            ],
+            "source": {
+              "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
+              "lineNumber": 56
+            },
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.PresentableGrouping",
+                "text": "PresentableGrouping"
+              },
+              "<unknown> | undefined"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-public.EmbeddableFactory.isContainerType",
             "type": "boolean",
             "label": "isContainerType",
@@ -5500,7 +5537,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 57
+              "lineNumber": 64
             }
           },
           {
@@ -5518,7 +5555,43 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 63
+              "lineNumber": 70
+            }
+          },
+          {
+            "id": "def-public.EmbeddableFactory.getIconType",
+            "type": "Function",
+            "label": "getIconType",
+            "signature": [
+              "() => string"
+            ],
+            "description": [
+              "\nReturns an EUI Icon type to be displayed in a menu."
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
+              "lineNumber": 75
+            }
+          },
+          {
+            "id": "def-public.EmbeddableFactory.getDescription",
+            "type": "Function",
+            "label": "getDescription",
+            "signature": [
+              "() => string"
+            ],
+            "description": [
+              "\nReturns a description about the embeddable."
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
+              "lineNumber": 80
             }
           },
           {
@@ -5536,7 +5609,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 69
+              "lineNumber": 86
             }
           },
           {
@@ -5561,7 +5634,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-                  "lineNumber": 77
+                  "lineNumber": 94
                 }
               }
             ],
@@ -5569,7 +5642,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 77
+              "lineNumber": 94
             }
           },
           {
@@ -5587,7 +5660,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 84
+              "lineNumber": 101
             }
           },
           {
@@ -5644,7 +5717,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-                  "lineNumber": 94
+                  "lineNumber": 111
                 }
               },
               {
@@ -5660,7 +5733,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-                  "lineNumber": 95
+                  "lineNumber": 112
                 }
               },
               {
@@ -5697,7 +5770,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-                  "lineNumber": 96
+                  "lineNumber": 113
                 }
               }
             ],
@@ -5705,7 +5778,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 93
+              "lineNumber": 110
             }
           },
           {
@@ -5762,7 +5835,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-                  "lineNumber": 106
+                  "lineNumber": 123
                 }
               },
               {
@@ -5799,7 +5872,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-                  "lineNumber": 107
+                  "lineNumber": 124
                 }
               }
             ],
@@ -5807,13 +5880,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 105
+              "lineNumber": 122
             }
           }
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-          "lineNumber": 30
+          "lineNumber": 31
         },
         "initialIsOpen": false
       },
@@ -5832,7 +5905,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 19
+              "lineNumber": 20
             }
           },
           {
@@ -5843,7 +5916,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 20
+              "lineNumber": 21
             },
             "signature": [
               "string | undefined"
@@ -5852,7 +5925,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-          "lineNumber": 18
+          "lineNumber": 19
         },
         "initialIsOpen": false
       },
@@ -7110,7 +7183,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "signature": [
               "any"
@@ -7119,7 +7192,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
-          "lineNumber": 23
+          "lineNumber": 24
         },
         "initialIsOpen": false
       },
@@ -7608,7 +7681,7 @@
           "lineNumber": 14
         },
         "signature": [
-          "Pick<EmbeddableFactory<I, O, E, T>, \"type\" | \"create\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<EmbeddableFactory<I, O, E, T>, \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\">>"
+          "Pick<EmbeddableFactory<I, O, E, T>, \"type\" | \"create\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<EmbeddableFactory<I, O, E, T>, \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
         ],
         "initialIsOpen": false
       },

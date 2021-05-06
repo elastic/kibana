@@ -2896,7 +2896,7 @@
               "lineNumber": 15
             },
             "signature": [
-              "\"warning\" | \"primary\" | \"success\" | \"danger\" | undefined"
+              "\"warning\" | \"success\" | \"primary\" | \"danger\" | undefined"
             ]
           },
           {

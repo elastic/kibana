@@ -1358,13 +1358,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 90
+              "lineNumber": 92
             }
           }
         ],
         "source": {
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "lineNumber": 89
+          "lineNumber": 91
         },
         "initialIsOpen": false
       },
@@ -1893,7 +1893,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/dashboard/public/plugin.tsx",
-          "lineNumber": 87
+          "lineNumber": 89
         },
         "signature": [
           "UrlGeneratorContract<\"DASHBOARD_APP_URL_GENERATOR\">"
@@ -2030,7 +2030,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/dashboard/public/plugin.tsx",
-        "lineNumber": 120
+        "lineNumber": 123
       },
       "signature": [
         "void"
@@ -2053,7 +2053,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 123
+            "lineNumber": 126
           },
           "signature": [
             "() => ",
@@ -2074,7 +2074,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 124
+            "lineNumber": 127
           },
           "signature": [
             "() => React.FC<Props>"
@@ -2088,7 +2088,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 127
+            "lineNumber": 130
           },
           "signature": [
             {
@@ -2109,7 +2109,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/dashboard/public/plugin.tsx",
-            "lineNumber": 128
+            "lineNumber": 131
           },
           "signature": [
             {
@@ -2124,7 +2124,7 @@
       ],
       "source": {
         "path": "src/plugins/dashboard/public/plugin.tsx",
-        "lineNumber": 122
+        "lineNumber": 125
       },
       "lifecycle": "start",
       "initialIsOpen": true

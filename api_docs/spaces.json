@@ -223,7 +223,7 @@
         "type": "Interface",
         "label": "Space",
         "description": [
-          "\nA Kibana Space."
+          "\nA Space."
         ],
         "tags": [],
         "children": [
@@ -888,7 +888,7 @@
         "type": "Interface",
         "label": "Space",
         "description": [
-          "\nA Kibana Space."
+          "\nA Space."
         ],
         "tags": [],
         "children": [

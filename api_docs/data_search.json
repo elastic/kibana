@@ -70,7 +70,13 @@
                 "label": "err",
                 "isRequired": true,
                 "signature": [
-                  "IEsError"
+                  {
+                    "pluginId": "data",
+                    "scope": "public",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-public.IEsError",
+                    "text": "IEsError"
+                  }
                 ],
                 "description": [],
                 "source": {
@@ -191,143 +197,32 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 65
+                  "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+                  "lineNumber": 93
                 }
               }
             ],
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 65
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 93
             }
           },
           {
-            "id": "def-public.SearchInterceptor.getTimeoutMode",
+            "id": "def-public.SearchInterceptor.stop",
             "type": "Function",
-            "label": "getTimeoutMode",
+            "label": "stop",
             "signature": [
-              "() => ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-public.TimeoutErrorMode",
-                "text": "TimeoutErrorMode"
-              }
+              "() => void"
             ],
             "description": [],
             "children": [],
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 81
-            }
-          },
-          {
-            "id": "def-public.SearchInterceptor.handleSearchError",
-            "type": "Function",
-            "label": "handleSearchError",
-            "signature": [
-              "(e: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.KibanaServerError",
-                "text": "KibanaServerError"
-              },
-              "<unknown> | ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.AbortError",
-                "text": "AbortError"
-              },
-              ", options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
-              },
-              " | undefined, isTimeout?: boolean | undefined) => Error"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.SearchInterceptor.handleSearchError.$1",
-                "type": "CompoundType",
-                "label": "e",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.KibanaServerError",
-                    "text": "KibanaServerError"
-                  },
-                  "<unknown> | ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.AbortError",
-                    "text": "AbortError"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 90
-                }
-              },
-              {
-                "id": "def-public.SearchInterceptor.handleSearchError.$2",
-                "type": "Object",
-                "label": "options",
-                "isRequired": false,
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
-                  },
-                  " | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 91
-                }
-              },
-              {
-                "id": "def-public.SearchInterceptor.handleSearchError.$3",
-                "type": "CompoundType",
-                "label": "isTimeout",
-                "isRequired": false,
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 92
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 89
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 113
             }
           },
           {
@@ -335,7 +230,7 @@
             "type": "Function",
             "label": "search",
             "signature": [
-              "(request: ",
+              "({ id, ...request }: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -348,8 +243,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
+                "section": "def-common.IAsyncSearchOptions",
+                "text": "IAsyncSearchOptions"
               },
               ") => ",
               "Observable",
@@ -370,7 +265,7 @@
               {
                 "id": "def-public.SearchInterceptor.search.$1",
                 "type": "Object",
-                "label": "request",
+                "label": "{ id, ...request }",
                 "isRequired": true,
                 "signature": [
                   {
@@ -384,8 +279,8 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 183
+                  "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+                  "lineNumber": 313
                 }
               },
               {
@@ -398,14 +293,14 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ISearchOptions",
-                    "text": "ISearchOptions"
+                    "section": "def-common.IAsyncSearchOptions",
+                    "text": "IAsyncSearchOptions"
                   }
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 184
+                  "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+                  "lineNumber": 313
                 }
               }
             ],
@@ -416,8 +311,8 @@
               "`Observable` emitting the search response or an error."
             ],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 182
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 313
             }
           },
           {
@@ -439,22 +334,22 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/public/search/search_interceptor.ts",
-                  "lineNumber": 207
+                  "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+                  "lineNumber": 386
                 }
               }
             ],
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 207
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 386
             }
           }
         ],
         "source": {
-          "path": "src/plugins/data/public/search/search_interceptor.ts",
-          "lineNumber": 46
+          "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+          "lineNumber": 67
         },
         "initialIsOpen": false
       },
@@ -492,7 +387,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-              "lineNumber": 26
+              "lineNumber": 25
             },
             "signature": [
               {
@@ -524,7 +419,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-                  "lineNumber": 27
+                  "lineNumber": 26
                 }
               },
               {
@@ -544,7 +439,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-                  "lineNumber": 27
+                  "lineNumber": 26
                 }
               }
             ],
@@ -552,7 +447,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-              "lineNumber": 27
+              "lineNumber": 26
             }
           },
           {
@@ -589,7 +484,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-                  "lineNumber": 80
+                  "lineNumber": 66
                 }
               }
             ],
@@ -597,13 +492,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-              "lineNumber": 80
+              "lineNumber": 66
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-          "lineNumber": 25
+          "lineNumber": 24
         },
         "initialIsOpen": false
       }
@@ -666,6 +561,40 @@
         "source": {
           "path": "src/plugins/data/public/search/es_search/get_es_preference.ts",
           "lineNumber": 14
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.isEsError",
+        "type": "Function",
+        "label": "isEsError",
+        "signature": [
+          "(e: any) => boolean"
+        ],
+        "description": [
+          "\nChecks if a given errors originated from Elasticsearch.\nThose params are assigned to the attributes property of an error.\n"
+        ],
+        "children": [
+          {
+            "id": "def-public.isEsError.$1",
+            "type": "Any",
+            "label": "e",
+            "isRequired": true,
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/search/errors/types.ts",
+              "lineNumber": 51
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/data/public/search/errors/types.ts",
+          "lineNumber": 51
         },
         "initialIsOpen": false
       },
@@ -766,7 +695,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 29
+              "lineNumber": 24
             },
             "signature": [
               "AggsCommonSetup"
@@ -780,7 +709,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 30
+              "lineNumber": 25
             },
             "signature": [
               "SearchUsageCollector",
@@ -797,7 +726,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 35
+              "lineNumber": 30
             },
             "signature": [
               "Pick<",
@@ -815,7 +744,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 40
+              "lineNumber": 35
             },
             "signature": [
               "Pick<",
@@ -826,7 +755,7 @@
         ],
         "source": {
           "path": "src/plugins/data/public/search/types.ts",
-          "lineNumber": 28
+          "lineNumber": 23
         },
         "initialIsOpen": false
       },
@@ -851,7 +780,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 57
+              "lineNumber": 48
             },
             "signature": [
               "Pick<Pick<",
@@ -873,7 +802,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 62
+              "lineNumber": 53
             },
             "signature": [
               {
@@ -893,7 +822,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 64
+              "lineNumber": 55
             },
             "signature": [
               "(e: Error) => void"
@@ -909,7 +838,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 69
+              "lineNumber": 60
             },
             "signature": [
               {
@@ -931,7 +860,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 74
+              "lineNumber": 65
             },
             "signature": [
               "Pick<",
@@ -949,7 +878,7 @@
             ],
             "source": {
               "path": "src/plugins/data/public/search/types.ts",
-              "lineNumber": 79
+              "lineNumber": 70
             },
             "signature": [
               "Pick<",
@@ -960,7 +889,113 @@
         ],
         "source": {
           "path": "src/plugins/data/public/search/types.ts",
-          "lineNumber": 51
+          "lineNumber": 42
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Reason",
+        "type": "Interface",
+        "label": "Reason",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Reason.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/search/errors/types.ts",
+              "lineNumber": 19
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Reason.reason",
+            "type": "string",
+            "label": "reason",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/search/errors/types.ts",
+              "lineNumber": 20
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Reason.script_stack",
+            "type": "Array",
+            "label": "script_stack",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/search/errors/types.ts",
+              "lineNumber": 21
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Reason.position",
+            "type": "Object",
+            "label": "position",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/search/errors/types.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "{ offset: number; start: number; end: number; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Reason.lang",
+            "type": "string",
+            "label": "lang",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/search/errors/types.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Reason.script",
+            "type": "string",
+            "label": "script",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/search/errors/types.ts",
+              "lineNumber": 28
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Reason.caused_by",
+            "type": "Object",
+            "label": "caused_by",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/search/errors/types.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "{ type: string; reason: string; } | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/public/search/errors/types.ts",
+          "lineNumber": 18
         },
         "initialIsOpen": false
       },
@@ -978,8 +1013,8 @@
             "label": "bfetch",
             "description": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 37
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 55
             },
             "signature": [
               {
@@ -998,8 +1033,8 @@
             "label": "http",
             "description": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 38
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 56
             },
             "signature": [
               {
@@ -1018,8 +1053,8 @@
             "label": "uiSettings",
             "description": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 39
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 57
             },
             "signature": [
               {
@@ -1038,8 +1073,8 @@
             "label": "startServices",
             "description": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 40
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 58
             },
             "signature": [
               "Promise<[",
@@ -1060,8 +1095,8 @@
             "label": "toasts",
             "description": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 41
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 59
             },
             "signature": [
               "Pick<",
@@ -1082,8 +1117,8 @@
             "label": "usageCollector",
             "description": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 42
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 60
             },
             "signature": [
               "SearchUsageCollector",
@@ -1097,8 +1132,8 @@
             "label": "session",
             "description": [],
             "source": {
-              "path": "src/plugins/data/public/search/search_interceptor.ts",
-              "lineNumber": 43
+              "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+              "lineNumber": 61
             },
             "signature": [
               "Pick<",
@@ -1108,8 +1143,8 @@
           }
         ],
         "source": {
-          "path": "src/plugins/data/public/search/search_interceptor.ts",
-          "lineNumber": 36
+          "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
+          "lineNumber": 54
         },
         "initialIsOpen": false
       },
@@ -1266,6 +1301,21 @@
     ],
     "misc": [
       {
+        "id": "def-public.IEsError",
+        "type": "Type",
+        "label": "IEsError",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/public/search/errors/types.ts",
+          "lineNumber": 43
+        },
+        "signature": [
+          "KibanaServerError<IEsErrorAttributes>"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.ISessionsClient",
         "type": "Type",
         "label": "ISessionsClient",
@@ -1276,7 +1326,7 @@
           "lineNumber": 18
         },
         "signature": [
-          "{ get: (sessionId: string) => Promise<SearchSessionSavedObject>; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, urlGeneratorId, initialState, restoreState, sessionId, }: { name: string; appId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; urlGeneratorId: string; sessionId: string; }) => Promise<SearchSessionSavedObject>; find: (options: Pick<SavedObjectsFindOptions, \"filter\" | \"fields\" | \"searchAfter\" | \"search\" | \"page\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\" | \"pit\">) => Promise<SavedObjectsFindResponse<unknown>>; update: (sessionId: string, attributes: unknown) => Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>>; rename: (sessionId: string, newName: string) => Promise<SavedObjectsUpdateResponse<Pick<SearchSessionSavedObjectAttributes, \"name\">>>; extend: (sessionId: string, expires: string) => Promise<SavedObjectsFindResponse<SearchSessionSavedObjectAttributes>>; }"
+          "{ get: (sessionId: string) => Promise<SearchSessionSavedObject>; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, urlGeneratorId, initialState, restoreState, sessionId, }: { name: string; appId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; urlGeneratorId: string; sessionId: string; }) => Promise<SearchSessionSavedObject>; find: (options: Pick<SavedObjectsFindOptions, \"filter\" | \"aggs\" | \"fields\" | \"searchAfter\" | \"preference\" | \"page\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"pit\">) => Promise<SavedObjectsFindResponse<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>>; rename: (sessionId: string, newName: string) => Promise<SavedObjectsUpdateResponse<Pick<SearchSessionSavedObjectAttributes, \"name\">>>; extend: (sessionId: string, expires: string) => Promise<SavedObjectsFindResponse<SearchSessionSavedObjectAttributes, unknown>>; }"
         ],
         "initialIsOpen": false
       },
@@ -1367,7 +1417,7 @@
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/data/server/search/es_search/request_utils.ts",
+              "path": "src/plugins/data/server/search/strategies/es_search/request_utils.ts",
               "lineNumber": 20
             }
           }
@@ -1375,7 +1425,7 @@
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "src/plugins/data/server/search/es_search/request_utils.ts",
+          "path": "src/plugins/data/server/search/strategies/es_search/request_utils.ts",
           "lineNumber": 19
         },
         "initialIsOpen": false
@@ -1414,7 +1464,7 @@
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/data/server/search/es_search/request_utils.ts",
+              "path": "src/plugins/data/server/search/strategies/es_search/request_utils.ts",
               "lineNumber": 14
             }
           }
@@ -1422,7 +1472,7 @@
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "src/plugins/data/server/search/es_search/request_utils.ts",
+          "path": "src/plugins/data/server/search/strategies/es_search/request_utils.ts",
           "lineNumber": 14
         },
         "initialIsOpen": false
@@ -1585,6 +1635,160 @@
     ],
     "interfaces": [
       {
+        "id": "def-server.AsyncSearchResponse",
+        "type": "Interface",
+        "label": "AsyncSearchResponse",
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.AsyncSearchResponse",
+            "text": "AsyncSearchResponse"
+          },
+          "<T>"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.AsyncSearchResponse.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+              "lineNumber": 13
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.AsyncSearchResponse.response",
+            "type": "Object",
+            "label": "response",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+              "lineNumber": 14
+            },
+            "signature": [
+              "SearchResponse",
+              "<T>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.AsyncSearchResponse.start_time_in_millis",
+            "type": "number",
+            "label": "start_time_in_millis",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+              "lineNumber": 15
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.AsyncSearchResponse.expiration_time_in_millis",
+            "type": "number",
+            "label": "expiration_time_in_millis",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+              "lineNumber": 16
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.AsyncSearchResponse.is_partial",
+            "type": "boolean",
+            "label": "is_partial",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+              "lineNumber": 17
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.AsyncSearchResponse.is_running",
+            "type": "boolean",
+            "label": "is_running",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+              "lineNumber": 18
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+          "lineNumber": 12
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.AsyncSearchStatusResponse",
+        "type": "Interface",
+        "label": "AsyncSearchStatusResponse",
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.AsyncSearchStatusResponse",
+            "text": "AsyncSearchStatusResponse"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.AsyncSearchResponse",
+            "text": "AsyncSearchResponse"
+          },
+          "<unknown>, \"id\" | \"start_time_in_millis\" | \"expiration_time_in_millis\" | \"is_partial\" | \"is_running\">"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.AsyncSearchStatusResponse.completion_status",
+            "type": "number",
+            "label": "completion_status",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+              "lineNumber": 21
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.AsyncSearchStatusResponse._shards",
+            "type": "Object",
+            "label": "_shards",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "ShardsResponse"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
+          "lineNumber": 20
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.IScopedSearchClient",
         "type": "Interface",
         "label": "IScopedSearchClient",
@@ -1659,7 +1863,7 @@
                 "section": "def-server.SavedObjectsFindOptions",
                 "text": "SavedObjectsFindOptions"
               },
-              ", \"filter\" | \"fields\" | \"searchAfter\" | \"search\" | \"page\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\" | \"pit\">) => Promise<",
+              ", \"filter\" | \"aggs\" | \"fields\" | \"searchAfter\" | \"preference\" | \"page\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"pit\">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1667,7 +1871,7 @@
                 "section": "def-server.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
-              "<unknown>>"
+              "<unknown, unknown>>"
             ]
           },
           {
@@ -1774,7 +1978,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/session/types.ts",
-              "lineNumber": 37
+              "lineNumber": 39
             },
             "signature": [
               "(core: ",
@@ -1801,7 +2005,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/session/types.ts",
-          "lineNumber": 36
+          "lineNumber": 38
         },
         "initialIsOpen": false
       },
@@ -3423,7 +3627,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 65
+              "lineNumber": 66
             },
             "signature": [
               {
@@ -3443,7 +3647,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 66
+              "lineNumber": 67
             },
             "signature": [
               {
@@ -3464,10 +3668,24 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 67
+              "lineNumber": 68
             },
             "signature": [
               "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.AggConfigs.hierarchical",
+            "type": "CompoundType",
+            "label": "hierarchical",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+              "lineNumber": 69
+            },
+            "signature": [
+              "boolean | undefined"
             ]
           },
           {
@@ -3478,7 +3696,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 70
+              "lineNumber": 73
             },
             "signature": [
               {
@@ -3517,7 +3735,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 73
+                  "lineNumber": 76
                 }
               },
               {
@@ -3549,7 +3767,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 74
+                  "lineNumber": 77
                 }
               },
               {
@@ -3569,7 +3787,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 75
+                  "lineNumber": 78
                 }
               }
             ],
@@ -3577,7 +3795,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 72
+              "lineNumber": 75
             }
           },
           {
@@ -3600,7 +3818,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 87
+                  "lineNumber": 91
                 }
               }
             ],
@@ -3608,7 +3826,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 87
+              "lineNumber": 91
             }
           },
           {
@@ -3645,7 +3863,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 91
+                  "lineNumber": 95
                 }
               }
             ],
@@ -3653,7 +3871,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 91
+              "lineNumber": 95
             }
           },
           {
@@ -3683,7 +3901,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 109
+                  "lineNumber": 113
                 }
               }
             ],
@@ -3691,7 +3909,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 109
+              "lineNumber": 113
             }
           },
           {
@@ -3727,7 +3945,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 123
+                  "lineNumber": 127
                 }
               },
               {
@@ -3741,7 +3959,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 124
+                  "lineNumber": 128
                 }
               }
             ],
@@ -3785,7 +4003,7 @@
             "label": "createAggConfig",
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 122
+              "lineNumber": 126
             },
             "tags": [],
             "returnComment": []
@@ -3829,7 +4047,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 165
+                  "lineNumber": 169
                 }
               }
             ],
@@ -3837,7 +4055,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 165
+              "lineNumber": 169
             }
           },
           {
@@ -3845,30 +4063,15 @@
             "type": "Function",
             "label": "toDsl",
             "signature": [
-              "(hierarchical?: boolean) => Record<string, any>"
+              "() => Record<string, any>"
             ],
             "description": [],
-            "children": [
-              {
-                "id": "def-common.AggConfigs.toDsl.$1",
-                "type": "boolean",
-                "label": "hierarchical",
-                "isRequired": true,
-                "signature": [
-                  "boolean"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 177
-                }
-              }
-            ],
+            "children": [],
             "tags": [],
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 177
+              "lineNumber": 181
             }
           },
           {
@@ -3892,7 +4095,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 246
+              "lineNumber": 250
             }
           },
           {
@@ -3922,7 +4125,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 250
+                  "lineNumber": 254
                 }
               }
             ],
@@ -3930,7 +4133,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 250
+              "lineNumber": 254
             }
           },
           {
@@ -3961,7 +4164,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 254
+                  "lineNumber": 258
                 }
               }
             ],
@@ -3969,7 +4172,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 254
+              "lineNumber": 258
             }
           },
           {
@@ -4000,7 +4203,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 258
+                  "lineNumber": 262
                 }
               }
             ],
@@ -4008,7 +4211,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 258
+              "lineNumber": 262
             }
           },
           {
@@ -4039,7 +4242,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 262
+                  "lineNumber": 266
                 }
               }
             ],
@@ -4047,7 +4250,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 262
+              "lineNumber": 266
             }
           },
           {
@@ -4078,7 +4281,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 266
+                  "lineNumber": 270
                 }
               }
             ],
@@ -4086,7 +4289,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 266
+              "lineNumber": 270
             }
           },
           {
@@ -4117,7 +4320,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 270
+                  "lineNumber": 274
                 }
               }
             ],
@@ -4125,7 +4328,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 270
+              "lineNumber": 274
             }
           },
           {
@@ -4149,7 +4352,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 274
+              "lineNumber": 278
             }
           },
           {
@@ -4180,7 +4383,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 288
+                  "lineNumber": 292
                 }
               }
             ],
@@ -4188,7 +4391,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 288
+              "lineNumber": 292
             }
           },
           {
@@ -4216,7 +4419,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 303
+              "lineNumber": 307
             }
           },
           {
@@ -4251,7 +4454,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 317
+                  "lineNumber": 321
                 }
               }
             ],
@@ -4261,7 +4464,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 317
+              "lineNumber": 321
             }
           },
           {
@@ -4308,7 +4511,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 326
+                  "lineNumber": 330
                 }
               },
               {
@@ -4329,7 +4532,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 326
+                  "lineNumber": 330
                 }
               }
             ],
@@ -4337,13 +4540,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 326
+              "lineNumber": 330
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-          "lineNumber": 64
+          "lineNumber": 65
         },
         "initialIsOpen": false
       },
@@ -4554,7 +4757,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 71
+              "lineNumber": 74
             }
           },
           {
@@ -4565,7 +4768,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 73
+              "lineNumber": 76
             }
           },
           {
@@ -4576,7 +4779,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 74
+              "lineNumber": 77
             },
             "signature": [
               "string | undefined"
@@ -4595,7 +4798,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 81
+              "lineNumber": 84
             }
           },
           {
@@ -4611,7 +4814,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 88
+              "lineNumber": 91
             }
           },
           {
@@ -4627,7 +4830,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 95
+              "lineNumber": 98
             }
           },
           {
@@ -4640,10 +4843,10 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 100
+              "lineNumber": 103
             },
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"unknown\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
             ]
           },
           {
@@ -4658,7 +4861,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 109
+              "lineNumber": 112
             },
             "signature": [
               "((aggConfig: TAggConfig) => string) | (() => string)"
@@ -4677,7 +4880,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 124
+              "lineNumber": 127
             },
             "signature": [
               "any"
@@ -4695,7 +4898,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 132
+              "lineNumber": 135
             }
           },
           {
@@ -4710,7 +4913,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 138
+              "lineNumber": 141
             }
           },
           {
@@ -4723,7 +4926,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 145
+              "lineNumber": 148
             },
             "signature": [
               "((aggConfig: TAggConfig, key: any, params?: any) => any) | undefined"
@@ -4742,7 +4945,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 152
+              "lineNumber": 155
             },
             "signature": [
               "TParam[]"
@@ -4760,7 +4963,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 162
+              "lineNumber": 165
             },
             "signature": [
               "((aggConfig: TAggConfig) => TAggConfig[]) | (() => void | TAggConfig[])"
@@ -4778,7 +4981,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 173
+              "lineNumber": 176
             },
             "signature": [
               "((aggConfig: TAggConfig) => TAggConfig[]) | (() => void | TAggConfig[])"
@@ -4794,7 +4997,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 178
+              "lineNumber": 181
             },
             "signature": [
               "() => any"
@@ -4812,34 +5015,10 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 191
+              "lineNumber": 194
             },
             "signature": [
-              "(resp: any, aggConfigs: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggConfigs",
-                "text": "AggConfigs"
-              },
-              ", aggConfig: TAggConfig, searchSource: Pick<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              ", \"create\" | \"history\" | \"setPreferredSearchStrategyId\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\">, inspectorRequestAdapter?: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.RequestAdapter",
-                "text": "RequestAdapter"
-              },
-              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined) => Promise<any>"
+              "PostFlightRequestFn<TAggConfig>"
             ]
           },
           {
@@ -4854,7 +5033,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 209
+              "lineNumber": 204
             },
             "signature": [
               "(agg: TAggConfig) => ",
@@ -4876,7 +5055,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 211
+              "lineNumber": 206
             },
             "signature": [
               "(agg: TAggConfig, bucket: any) => any"
@@ -4890,7 +5069,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 213
+              "lineNumber": 208
             },
             "signature": [
               "((bucket: any, key: any, agg: TAggConfig) => any) | undefined"
@@ -4911,7 +5090,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 215
+                  "lineNumber": 210
                 }
               }
             ],
@@ -4922,7 +5101,7 @@
             "label": "paramByName",
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 215
+              "lineNumber": 210
             },
             "tags": [],
             "returnComment": []
@@ -4942,7 +5121,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 219
+                  "lineNumber": 214
                 }
               }
             ],
@@ -4953,7 +5132,7 @@
             "label": "getValueBucketPath",
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 219
+              "lineNumber": 214
             },
             "tags": [],
             "returnComment": []
@@ -4997,7 +5176,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 232
+                  "lineNumber": 227
                 }
               }
             ],
@@ -5008,13 +5187,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 232
+              "lineNumber": 227
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-          "lineNumber": 61
+          "lineNumber": 64
         },
         "initialIsOpen": false
       },
@@ -6275,7 +6454,13 @@
               "lineNumber": 19
             },
             "signature": [
-              "SearchResponse",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
               "<any> | undefined"
             ]
           },
@@ -6315,7 +6500,13 @@
                 "label": "resp",
                 "isRequired": false,
                 "signature": [
-                  "SearchResponse",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.IKibanaSearchResponse",
+                    "text": "IKibanaSearchResponse"
+                  },
                   "<any> | undefined"
                 ],
                 "description": [],
@@ -6356,7 +6547,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 112
+              "lineNumber": 129
             },
             "signature": [
               "Record<string, any>[]"
@@ -6388,7 +6579,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 116
+                  "lineNumber": 133
                 }
               },
               {
@@ -6408,7 +6599,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 116
+                  "lineNumber": 133
                 }
               }
             ],
@@ -6416,7 +6607,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 116
+              "lineNumber": 133
             }
           },
           {
@@ -6441,7 +6632,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 134
+                  "lineNumber": 151
                 }
               }
             ],
@@ -6449,7 +6640,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 134
+              "lineNumber": 151
             }
           },
           {
@@ -6484,7 +6675,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 143
+                  "lineNumber": 160
                 }
               },
               {
@@ -6507,7 +6698,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 143
+                  "lineNumber": 160
                 }
               }
             ],
@@ -6515,7 +6706,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 143
+              "lineNumber": 160
             }
           },
           {
@@ -6542,7 +6733,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 155
+                  "lineNumber": 172
                 }
               }
             ],
@@ -6550,7 +6741,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 155
+              "lineNumber": 172
             }
           },
           {
@@ -6591,7 +6782,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 166
+                  "lineNumber": 183
                 }
               }
             ],
@@ -6601,7 +6792,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 166
+              "lineNumber": 183
             }
           },
           {
@@ -6619,7 +6810,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 174
+              "lineNumber": 191
             }
           },
           {
@@ -6644,7 +6835,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 181
+              "lineNumber": 198
             }
           },
           {
@@ -6677,7 +6868,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 188
+                  "lineNumber": 205
                 }
               },
               {
@@ -6691,7 +6882,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 188
+                  "lineNumber": 205
                 }
               }
             ],
@@ -6699,7 +6890,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 188
+              "lineNumber": 205
             }
           },
           {
@@ -6732,7 +6923,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 199
+                  "lineNumber": 216
                 }
               }
             ],
@@ -6740,7 +6931,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 199
+              "lineNumber": 216
             }
           },
           {
@@ -6765,7 +6956,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 206
+              "lineNumber": 223
             }
           },
           {
@@ -6790,7 +6981,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 213
+              "lineNumber": 230
             }
           },
           {
@@ -6822,7 +7013,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 227
+                  "lineNumber": 244
                 }
               }
             ],
@@ -6830,7 +7021,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 227
+              "lineNumber": 244
             }
           },
           {
@@ -6881,7 +7072,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 239
+                  "lineNumber": 256
                 }
               },
               {
@@ -6903,7 +7094,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 239
+                  "lineNumber": 256
                 }
               }
             ],
@@ -6915,7 +7106,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 239
+              "lineNumber": 256
             }
           },
           {
@@ -6943,7 +7134,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 249
+              "lineNumber": 266
             }
           },
           {
@@ -6962,8 +7153,16 @@
               ") => ",
               "Observable",
               "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<",
               "SearchResponse",
-              "<any>>"
+              "<any>>>"
             ],
             "description": [
               "\nFetch this source from Elasticsearch, returning an observable over the response(s)"
@@ -6986,7 +7185,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 257
+                  "lineNumber": 275
                 }
               }
             ],
@@ -6994,7 +7193,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 257
+              "lineNumber": 274
             }
           },
           {
@@ -7035,7 +7234,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 297
+                  "lineNumber": 312
                 }
               }
             ],
@@ -7045,7 +7244,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 297
+              "lineNumber": 312
             }
           },
           {
@@ -7102,7 +7301,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 307
+                  "lineNumber": 326
                 }
               }
             ],
@@ -7112,7 +7311,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 306
+              "lineNumber": 325
             }
           },
           {
@@ -7130,7 +7329,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 315
+              "lineNumber": 334
             }
           },
           {
@@ -7150,7 +7349,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 323
+              "lineNumber": 342
             }
           },
           {
@@ -7182,7 +7381,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 701
+                  "lineNumber": 826
                 }
               }
             ],
@@ -7190,7 +7389,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 701
+              "lineNumber": 826
             }
           },
           {
@@ -7212,13 +7411,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 730
+              "lineNumber": 855
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/search_source.ts",
-          "lineNumber": 104
+          "lineNumber": 121
         },
         "initialIsOpen": false
       },
@@ -8430,98 +8629,6 @@
         },
         "tags": [],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.fetchSoon",
-        "type": "Function",
-        "label": "fetchSoon",
-        "signature": [
-          "(request: Record<string, any>, options: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
-          },
-          ", fetchHandlers: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.FetchHandlers",
-            "text": "FetchHandlers"
-          },
-          ") => Promise<",
-          "SearchResponse",
-          "<any>>"
-        ],
-        "description": [
-          "\nThis function introduces a slight delay in the request process to allow multiple requests to queue\nup (e.g. when a dashboard is loading)."
-        ],
-        "children": [
-          {
-            "id": "def-common.fetchSoon.$1",
-            "type": "Object",
-            "label": "request",
-            "isRequired": true,
-            "signature": [
-              "Record<string, any>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/fetch_soon.ts",
-              "lineNumber": 20
-            }
-          },
-          {
-            "id": "def-common.fetchSoon.$2",
-            "type": "Object",
-            "label": "options",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/fetch_soon.ts",
-              "lineNumber": 21
-            }
-          },
-          {
-            "id": "def-common.fetchSoon.$3",
-            "type": "Object",
-            "label": "fetchHandlers",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.FetchHandlers",
-                "text": "FetchHandlers"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/fetch_soon.ts",
-              "lineNumber": 22
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/data/common/search/search_source/legacy/fetch_soon.ts",
-          "lineNumber": 19
-        },
         "initialIsOpen": false
       },
       {
@@ -10046,7 +10153,7 @@
         "signature": [
           "(resp: ",
           "SearchResponse",
-          "<unknown>, searchSource: Pick<",
+          "<unknown> | undefined, searchSource: Pick<",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10069,10 +10176,10 @@
             "id": "def-common.getResponseInspectorStats.$1",
             "type": "Object",
             "label": "resp",
-            "isRequired": true,
+            "isRequired": false,
             "signature": [
               "SearchResponse",
-              "<unknown>"
+              "<unknown> | undefined"
             ],
             "description": [],
             "source": {
@@ -10471,7 +10578,7 @@
           {
             "id": "def-common.handleRequest.$1",
             "type": "Object",
-            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  metricsAtAllLevels,\n  partialRows,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  getNow,\n}",
+            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  partialRows,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  getNow,\n}",
             "isRequired": true,
             "signature": [
               "RequestHandlerParams"
@@ -10479,12 +10586,12 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
-              "lineNumber": 58
+              "lineNumber": 43
             }
           }
         ],
         "signature": [
-          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, metricsAtAllLevels, partialRows, query, searchSessionId, searchSourceService, timeFields, timeRange, getNow, }: ",
+          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, partialRows, query, searchSessionId, searchSourceService, timeFields, timeRange, getNow, }: ",
           "RequestHandlerParams",
           ") => Promise<",
           {
@@ -10500,7 +10607,7 @@
         "label": "handleRequest",
         "source": {
           "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
-          "lineNumber": 58
+          "lineNumber": 43
         },
         "tags": [],
         "returnComment": [],
@@ -11255,6 +11362,90 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-common.pollSearch",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-common.pollSearch.$1",
+            "type": "Function",
+            "label": "search",
+            "isRequired": true,
+            "signature": [
+              "() => Promise<Response>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/poll_search.ts",
+              "lineNumber": 19
+            }
+          },
+          {
+            "id": "def-common.pollSearch.$2",
+            "type": "Function",
+            "label": "cancel",
+            "isRequired": false,
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/poll_search.ts",
+              "lineNumber": 20
+            }
+          },
+          {
+            "id": "def-common.pollSearch.$3",
+            "type": "Object",
+            "label": "{ pollInterval = 1000, abortSignal }",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IAsyncSearchOptions",
+                "text": "IAsyncSearchOptions"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/poll_search.ts",
+              "lineNumber": 21
+            }
+          }
+        ],
+        "signature": [
+          "<Response extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<any>>(search: () => Promise<Response>, cancel?: (() => void) | undefined, { pollInterval, abortSignal }?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IAsyncSearchOptions",
+            "text": "IAsyncSearchOptions"
+          },
+          ") => ",
+          "Observable",
+          "<Response>"
+        ],
+        "description": [],
+        "label": "pollSearch",
+        "source": {
+          "path": "src/plugins/data/common/search/poll_search.ts",
+          "lineNumber": 18
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.propFilter",
         "type": "Function",
         "label": "propFilter",
@@ -11372,97 +11563,6 @@
         "source": {
           "path": "src/plugins/data/common/search/aggs/utils/date_interval_utils/parse_interval.ts",
           "lineNumber": 16
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.tabify",
-        "type": "Function",
-        "children": [
-          {
-            "id": "def-common.tabify.$1",
-            "type": "Object",
-            "label": "searchSource",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/tabify/index.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "id": "def-common.tabify.$2",
-            "type": "Object",
-            "label": "esResponse",
-            "isRequired": true,
-            "signature": [
-              "SearchResponse",
-              "<unknown>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/tabify/index.ts",
-              "lineNumber": 17
-            }
-          },
-          {
-            "id": "def-common.tabify.$3",
-            "type": "CompoundType",
-            "label": "opts",
-            "isRequired": true,
-            "signature": [
-              "Partial<",
-              "TabbedResponseWriterOptions",
-              "> | ",
-              "TabifyDocsOptions"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/tabify/index.ts",
-              "lineNumber": 18
-            }
-          }
-        ],
-        "signature": [
-          "(searchSource: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSource",
-            "text": "SearchSource"
-          },
-          ", esResponse: ",
-          "SearchResponse",
-          "<unknown>, opts: Partial<",
-          "TabbedResponseWriterOptions",
-          "> | ",
-          "TabifyDocsOptions",
-          ") => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
-          }
-        ],
-        "description": [],
-        "label": "tabify",
-        "source": {
-          "path": "src/plugins/data/common/search/tabify/index.ts",
-          "lineNumber": 15
         },
         "tags": [],
         "returnComment": [],
@@ -11840,6 +11940,20 @@
             },
             "signature": [
               "AggTypesRegistryStart"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.AggConfigsOptions.hierarchical",
+            "type": "CompoundType",
+            "label": "hierarchical",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+              "lineNumber": 46
+            },
+            "signature": [
+              "boolean | undefined"
             ]
           }
         ],
@@ -14664,7 +14778,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 26
+              "lineNumber": 37
             }
           },
           {
@@ -14675,7 +14789,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 27
+              "lineNumber": 38
             }
           },
           {
@@ -14686,7 +14800,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 28
+              "lineNumber": 39
             },
             "signature": [
               "((aggConfig: TAggConfig, key: any, params?: any) => any) | undefined"
@@ -14700,7 +14814,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 29
+              "lineNumber": 40
             },
             "signature": [
               "string | undefined"
@@ -14714,7 +14828,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 30
+              "lineNumber": 41
             },
             "signature": [
               "string | undefined"
@@ -14728,7 +14842,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 31
+              "lineNumber": 42
             }
           },
           {
@@ -14739,7 +14853,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 32
+              "lineNumber": 43
             },
             "signature": [
               "((aggConfig: TAggConfig) => string) | (() => string) | undefined"
@@ -14753,7 +14867,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 33
+              "lineNumber": 44
             },
             "signature": [
               "any"
@@ -14767,7 +14881,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 34
+              "lineNumber": 45
             },
             "signature": [
               "boolean | undefined"
@@ -14781,7 +14895,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 35
+              "lineNumber": 46
             },
             "signature": [
               "boolean | undefined"
@@ -14795,7 +14909,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 36
+              "lineNumber": 47
             },
             "signature": [
               "Partial<TParam>[] | undefined"
@@ -14809,10 +14923,10 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 37
+              "lineNumber": 48
             },
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"unknown\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
             ]
           },
           {
@@ -14823,7 +14937,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 38
+              "lineNumber": 49
             },
             "signature": [
               "((aggConfig: TAggConfig) => TAggConfig[]) | (() => void | TAggConfig[]) | undefined"
@@ -14837,7 +14951,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 39
+              "lineNumber": 50
             },
             "signature": [
               "((aggConfig: TAggConfig) => TAggConfig[]) | (() => void | TAggConfig[]) | undefined"
@@ -14851,7 +14965,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 40
+              "lineNumber": 51
             },
             "signature": [
               "boolean | undefined"
@@ -14865,7 +14979,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 41
+              "lineNumber": 52
             },
             "signature": [
               "boolean | undefined"
@@ -14879,7 +14993,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 42
+              "lineNumber": 53
             },
             "signature": [
               "(() => any) | undefined"
@@ -14893,34 +15007,10 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 43
+              "lineNumber": 54
             },
             "signature": [
-              "((resp: any, aggConfigs: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggConfigs",
-                "text": "AggConfigs"
-              },
-              ", aggConfig: TAggConfig, searchSource: Pick<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              ", \"create\" | \"history\" | \"setPreferredSearchStrategyId\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\">, inspectorRequestAdapter?: ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.RequestAdapter",
-                "text": "RequestAdapter"
-              },
-              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined) => Promise<any>) | undefined"
+              "PostFlightRequestFn<TAggConfig> | undefined"
             ]
           },
           {
@@ -14931,7 +15021,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 52
+              "lineNumber": 55
             },
             "signature": [
               "((agg: TAggConfig) => ",
@@ -14953,7 +15043,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 53
+              "lineNumber": 56
             },
             "signature": [
               "((agg: TAggConfig, bucket: any) => any) | undefined"
@@ -14967,7 +15057,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 54
+              "lineNumber": 57
             },
             "signature": [
               "((bucket: any, key: any, agg: TAggConfig) => any) | undefined"
@@ -14981,7 +15071,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 55
+              "lineNumber": 58
             },
             "signature": [
               "((agg: TAggConfig) => string) | undefined"
@@ -14990,7 +15080,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-          "lineNumber": 22
+          "lineNumber": 33
         },
         "initialIsOpen": false
       },
@@ -15285,6 +15375,61 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-common.EqlSearchStrategyRequest",
+        "type": "Interface",
+        "label": "EqlSearchStrategyRequest",
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlSearchStrategyRequest",
+            "text": "EqlSearchStrategyRequest"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchRequest",
+            "text": "IKibanaSearchRequest"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EqlRequestParams",
+            "text": "EqlRequestParams"
+          },
+          ">"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.EqlSearchStrategyRequest.options",
+            "type": "Object",
+            "label": "options",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+              "lineNumber": 19
+            },
+            "signature": [
+              "TransportRequestOptions",
+              " | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+          "lineNumber": 18
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.EsRawResponse",
         "type": "Interface",
         "label": "EsRawResponse",
@@ -15352,7 +15497,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 23
+              "lineNumber": 22
             },
             "signature": [
               {
@@ -15374,42 +15519,32 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 28
+              "lineNumber": 27
             },
             "signature": [
               "(request: Record<string, any>, response: ",
-              "SearchResponse",
-              "<any>) => ",
-              "SearchResponse",
-              "<any>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.FetchHandlers.legacy",
-            "type": "Object",
-            "label": "legacy",
-            "description": [
-              "\nThese handlers are only used by the legacy defaultSearchStrategy and can be removed\nonce that strategy has been deprecated."
-            ],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 36
-            },
-            "signature": [
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.LegacyFetchHandlers",
-                "text": "LegacyFetchHandlers"
-              }
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<any>) => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<any>"
             ]
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-          "lineNumber": 22
+          "lineNumber": 21
         },
         "initialIsOpen": false
       },
@@ -15488,6 +15623,53 @@
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
           "lineNumber": 30
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.IAsyncSearchOptions",
+        "type": "Interface",
+        "label": "IAsyncSearchOptions",
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IAsyncSearchOptions",
+            "text": "IAsyncSearchOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchOptions",
+            "text": "ISearchOptions"
+          }
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.IAsyncSearchOptions.pollInterval",
+            "type": "number",
+            "label": "pollInterval",
+            "description": [
+              "\nThe number of milliseconds to wait between receiving a response and sending another request"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
+              "lineNumber": 17
+            },
+            "signature": [
+              "number | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
+          "lineNumber": 13
         },
         "initialIsOpen": false
       },
@@ -15710,7 +15892,7 @@
             "label": "indexType",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/search/es_search/types.ts",
+              "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
               "lineNumber": 19
             },
             "signature": [
@@ -15719,8 +15901,82 @@
           }
         ],
         "source": {
-          "path": "src/plugins/data/common/search/es_search/types.ts",
+          "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
           "lineNumber": 18
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.IInspectorInfo",
+        "type": "Interface",
+        "label": "IInspectorInfo",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.IInspectorInfo.adapter",
+            "type": "Object",
+            "label": "adapter",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/types.ts",
+              "lineNumber": 84
+            },
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.IInspectorInfo.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/types.ts",
+              "lineNumber": 85
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.IInspectorInfo.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/types.ts",
+              "lineNumber": 86
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.IInspectorInfo.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/types.ts",
+              "lineNumber": 87
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/common/search/types.ts",
+          "lineNumber": 83
         },
         "initialIsOpen": false
       },
@@ -15751,7 +16007,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 79
+              "lineNumber": 78
             },
             "signature": [
               "string | undefined"
@@ -15765,7 +16021,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 81
+              "lineNumber": 80
             },
             "signature": [
               "Params | undefined"
@@ -15774,7 +16030,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/types.ts",
-          "lineNumber": 75
+          "lineNumber": 74
         },
         "initialIsOpen": false
       },
@@ -15805,7 +16061,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 45
+              "lineNumber": 44
             },
             "signature": [
               "string | undefined"
@@ -15821,7 +16077,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 51
+              "lineNumber": 50
             },
             "signature": [
               "number | undefined"
@@ -15837,7 +16093,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 57
+              "lineNumber": 56
             },
             "signature": [
               "number | undefined"
@@ -15853,7 +16109,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 62
+              "lineNumber": 61
             },
             "signature": [
               "boolean | undefined"
@@ -15869,7 +16125,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 67
+              "lineNumber": 66
             },
             "signature": [
               "boolean | undefined"
@@ -15885,7 +16141,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 72
+              "lineNumber": 71
             },
             "signature": [
               "RawResponse"
@@ -15894,7 +16150,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/types.ts",
-          "lineNumber": 41
+          "lineNumber": 40
         },
         "initialIsOpen": false
       },
@@ -15973,7 +16229,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 30
+              "lineNumber": 29
             },
             "signature": [
               {
@@ -15995,7 +16251,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 34
+              "lineNumber": 33
             },
             "signature": [
               {
@@ -16017,7 +16273,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 38
+              "lineNumber": 37
             },
             "signature": [
               {
@@ -16032,7 +16288,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/types.ts",
-          "lineNumber": 29
+          "lineNumber": 28
         },
         "initialIsOpen": false
       },
@@ -16053,7 +16309,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 88
+              "lineNumber": 94
             },
             "signature": [
               "AbortSignal | undefined"
@@ -16069,7 +16325,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 93
+              "lineNumber": 99
             },
             "signature": [
               "string | undefined"
@@ -16085,7 +16341,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 99
+              "lineNumber": 105
             },
             "signature": [
               "boolean | undefined"
@@ -16101,7 +16357,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 104
+              "lineNumber": 110
             },
             "signature": [
               "string | undefined"
@@ -16117,7 +16373,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 109
+              "lineNumber": 115
             },
             "signature": [
               "boolean | undefined"
@@ -16133,7 +16389,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 115
+              "lineNumber": 121
             },
             "signature": [
               "boolean | undefined"
@@ -16149,7 +16405,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 121
+              "lineNumber": 126
             },
             "signature": [
               {
@@ -16164,21 +16420,23 @@
           },
           {
             "tags": [],
-            "id": "def-common.ISearchOptions.requestResponder",
+            "id": "def-common.ISearchOptions.inspector",
             "type": "Object",
-            "label": "requestResponder",
-            "description": [],
+            "label": "inspector",
+            "description": [
+              "\nInspector integration options"
+            ],
             "source": {
               "path": "src/plugins/data/common/search/types.ts",
-              "lineNumber": 123
+              "lineNumber": 131
             },
             "signature": [
               {
-                "pluginId": "inspector",
+                "pluginId": "data",
                 "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.RequestResponder",
-                "text": "RequestResponder"
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IInspectorInfo",
+                "text": "IInspectorInfo"
               },
               " | undefined"
             ]
@@ -16186,7 +16444,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/types.ts",
-          "lineNumber": 84
+          "lineNumber": 90
         },
         "initialIsOpen": false
       },
@@ -16211,7 +16469,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             },
             "signature": [
               "(fields?: ",
@@ -16243,7 +16501,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             },
             "signature": [
               "() => Pick<",
@@ -16260,7 +16518,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 25
+          "lineNumber": 26
         },
         "initialIsOpen": false
       },
@@ -16314,65 +16572,6 @@
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/std_deviation.ts",
           "lineNumber": 27
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.LegacyFetchHandlers",
-        "type": "Interface",
-        "label": "LegacyFetchHandlers",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.LegacyFetchHandlers.callMsearch",
-            "type": "Function",
-            "label": "callMsearch",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 35
-            },
-            "signature": [
-              "(params: { body: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.MsearchRequestBody",
-                "text": "MsearchRequestBody"
-              },
-              "; signal: AbortSignal; }) => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.MsearchResponse",
-                "text": "MsearchResponse"
-              },
-              ">"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.LegacyFetchHandlers.loadingCount$",
-            "type": "Object",
-            "label": "loadingCount$",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 39
-            },
-            "signature": [
-              "BehaviorSubject",
-              "<number>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 34
         },
         "initialIsOpen": false
       },
@@ -16466,7 +16665,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 25
+              "lineNumber": 23
             },
             "signature": [
               "MsearchRequest[]"
@@ -16475,7 +16674,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 24
+          "lineNumber": 22
         },
         "initialIsOpen": false
       },
@@ -16494,7 +16693,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 30
+              "lineNumber": 28
             },
             "signature": [
               "ApiResponse",
@@ -16506,7 +16705,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 29
+          "lineNumber": 27
         },
         "initialIsOpen": false
       },
@@ -16719,7 +16918,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 123
+              "lineNumber": 132
             },
             "signature": [
               "string[]"
@@ -16733,7 +16932,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 124
+              "lineNumber": 133
             },
             "signature": [
               "unknown"
@@ -16747,7 +16946,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 125
+              "lineNumber": 134
             },
             "signature": [
               "unknown"
@@ -16761,7 +16960,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 126
+              "lineNumber": 135
             },
             "signature": [
               "unknown"
@@ -16775,7 +16974,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 127
+              "lineNumber": 136
             },
             "signature": [
               "unknown"
@@ -16789,7 +16988,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 128
+              "lineNumber": 137
             },
             "signature": [
               "string[]"
@@ -16798,7 +16997,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 122
+          "lineNumber": 131
         },
         "initialIsOpen": false
       },
@@ -16817,7 +17016,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 132
+              "lineNumber": 141
             },
             "signature": [
               "{ failed: number; failures: ",
@@ -16834,7 +17033,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 131
+          "lineNumber": 140
         },
         "initialIsOpen": false
       },
@@ -16853,7 +17052,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 40
+              "lineNumber": 31
             }
           },
           {
@@ -16864,7 +17063,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 41
+              "lineNumber": 32
             }
           },
           {
@@ -16875,7 +17074,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 42
+              "lineNumber": 33
             }
           },
           {
@@ -16886,7 +17085,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 43
+              "lineNumber": 34
             }
           },
           {
@@ -16897,7 +17096,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 44
+              "lineNumber": 35
             }
           },
           {
@@ -16908,13 +17107,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 45
+              "lineNumber": 36
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-          "lineNumber": 39
+          "lineNumber": 30
         },
         "initialIsOpen": false
       },
@@ -17366,7 +17565,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 100
+              "lineNumber": 117
             },
             "signature": [
               {
@@ -17381,7 +17580,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/search_source.ts",
-          "lineNumber": 99
+          "lineNumber": 116
         },
         "initialIsOpen": false
       },
@@ -17402,7 +17601,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 62
+              "lineNumber": 71
             },
             "signature": [
               "string | undefined"
@@ -17418,7 +17617,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 66
+              "lineNumber": 75
             },
             "signature": [
               {
@@ -17441,7 +17640,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 70
+              "lineNumber": 79
             },
             "signature": [
               {
@@ -17488,7 +17687,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 74
+              "lineNumber": 83
             },
             "signature": [
               "Record<string, ",
@@ -17507,6 +17706,14 @@
                 "section": "def-common.SortDirectionNumeric",
                 "text": "SortDirectionNumeric"
               },
+              " | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SortDirectionFormat",
+                "text": "SortDirectionFormat"
+              },
               "> | Record<string, ",
               {
                 "pluginId": "data",
@@ -17522,8 +17729,7 @@
                 "docId": "kibDataSearchPluginApi",
                 "section": "def-common.SortDirectionNumeric",
                 "text": "SortDirectionNumeric"
-              },
-              ">[] | undefined"
+              }
             ]
           },
           {
@@ -17534,7 +17740,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 75
+              "lineNumber": 84
             },
             "signature": [
               "any"
@@ -17548,7 +17754,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 76
+              "lineNumber": 85
             },
             "signature": [
               "boolean | undefined"
@@ -17562,7 +17768,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 77
+              "lineNumber": 86
             },
             "signature": [
               "number | boolean | undefined"
@@ -17571,17 +17777,25 @@
           {
             "tags": [],
             "id": "def-common.SearchSourceFields.aggs",
-            "type": "Any",
+            "type": "CompoundType",
             "label": "aggs",
             "description": [
               "\n{@link AggConfigs}"
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 81
+              "lineNumber": 90
             },
             "signature": [
-              "any"
+              "object | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfigs",
+                "text": "AggConfigs"
+              },
+              " | (() => object) | undefined"
             ]
           },
           {
@@ -17592,7 +17806,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 82
+              "lineNumber": 91
             },
             "signature": [
               "number | undefined"
@@ -17606,7 +17820,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 83
+              "lineNumber": 92
             },
             "signature": [
               "number | undefined"
@@ -17620,7 +17834,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 84
+              "lineNumber": 93
             },
             "signature": [
               "string | boolean | string[] | undefined"
@@ -17634,7 +17848,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 85
+              "lineNumber": 94
             },
             "signature": [
               "boolean | undefined"
@@ -17650,7 +17864,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 89
+              "lineNumber": 98
             },
             "signature": [
               {
@@ -17675,7 +17889,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 95
+              "lineNumber": 104
             },
             "signature": [
               "string | boolean | string[] | undefined"
@@ -17691,7 +17905,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 99
+              "lineNumber": 108
             },
             "signature": [
               {
@@ -17712,7 +17926,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 100
+              "lineNumber": 109
             },
             "signature": [
               {
@@ -17733,7 +17947,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 101
+              "lineNumber": 110
             },
             "signature": [
               "string | undefined"
@@ -17747,7 +17961,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 102
+              "lineNumber": 111
             },
             "signature": [
               "number | undefined"
@@ -17761,7 +17975,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 104
+              "lineNumber": 113
             },
             "signature": [
               {
@@ -17777,7 +17991,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 61
+          "lineNumber": 70
         },
         "initialIsOpen": false
       },
@@ -17796,7 +18010,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 108
+              "lineNumber": 117
             },
             "signature": [
               "boolean | undefined"
@@ -17805,161 +18019,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 107
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.SearchStrategyProvider",
-        "type": "Interface",
-        "label": "SearchStrategyProvider",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SearchStrategyProvider.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 48
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchStrategyProvider.search",
-            "type": "Function",
-            "label": "search",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 49
-            },
-            "signature": [
-              "(params: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchStrategySearchParams",
-                "text": "SearchStrategySearchParams"
-              },
-              ") => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchStrategyResponse",
-                "text": "SearchStrategyResponse"
-              },
-              "<any>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 47
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.SearchStrategyResponse",
-        "type": "Interface",
-        "label": "SearchStrategyResponse",
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchStrategyResponse",
-            "text": "SearchStrategyResponse"
-          },
-          "<T>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SearchStrategyResponse.searching",
-            "type": "Object",
-            "label": "searching",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 53
-            },
-            "signature": [
-              "Promise<",
-              "SearchResponse",
-              "<T>[]>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchStrategyResponse.abort",
-            "type": "Function",
-            "label": "abort",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 54
-            },
-            "signature": [
-              "() => void"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 52
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.SearchStrategySearchParams",
-        "type": "Interface",
-        "label": "SearchStrategySearchParams",
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchStrategySearchParams",
-            "text": "SearchStrategySearchParams"
-          },
-          " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.FetchHandlers",
-            "text": "FetchHandlers"
-          }
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SearchStrategySearchParams.searchRequests",
-            "type": "Array",
-            "label": "searchRequests",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 43
-            },
-            "signature": [
-              "Record<string, any>[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 42
+          "lineNumber": 116
         },
         "initialIsOpen": false
       },
@@ -17978,7 +18038,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 142
+              "lineNumber": 151
             }
           },
           {
@@ -17989,7 +18049,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 143
+              "lineNumber": 152
             }
           },
           {
@@ -18000,7 +18060,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 144
+              "lineNumber": 153
             },
             "signature": [
               "{ caused_by: { reason: string; type: string; }; reason: string; lang?: string | undefined; script?: string | undefined; script_stack?: string[] | undefined; type: string; }"
@@ -18014,13 +18074,61 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 155
+              "lineNumber": 164
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 141
+          "lineNumber": 150
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.SortDirectionFormat",
+        "type": "Interface",
+        "label": "SortDirectionFormat",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.SortDirectionFormat.order",
+            "type": "Enum",
+            "label": "order",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/search_source/types.ts",
+              "lineNumber": 46
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SortDirection",
+                "text": "SortDirection"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.SortDirectionFormat.format",
+            "type": "string",
+            "label": "format",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/search_source/types.ts",
+              "lineNumber": 47
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/common/search/search_source/types.ts",
+          "lineNumber": 45
         },
         "initialIsOpen": false
       },
@@ -18039,7 +18147,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 45
+              "lineNumber": 51
             },
             "signature": [
               {
@@ -18059,7 +18167,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 46
+              "lineNumber": 52
             },
             "signature": [
               "\"date\" | \"long\" | \"double\" | \"date_nanos\" | undefined"
@@ -18068,7 +18176,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 44
+          "lineNumber": 50
         },
         "initialIsOpen": false
       },
@@ -18087,7 +18195,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 112
+              "lineNumber": 121
             },
             "signature": [
               "\"max\" | \"min\" | \"sum\" | \"avg\" | \"median\" | undefined"
@@ -18101,7 +18209,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 113
+              "lineNumber": 122
             },
             "signature": [
               "\"date\" | \"long\" | \"double\" | \"date_nanos\" | undefined"
@@ -18115,7 +18223,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 114
+              "lineNumber": 123
             },
             "signature": [
               "object | undefined"
@@ -18129,7 +18237,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 115
+              "lineNumber": 124
             },
             "signature": [
               "string | undefined"
@@ -18143,7 +18251,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 116
+              "lineNumber": 125
             },
             "signature": [
               "\"arc\" | \"plane\" | undefined"
@@ -18157,7 +18265,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 117
+              "lineNumber": 126
             },
             "signature": [
               "string | undefined"
@@ -18171,7 +18279,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 118
+              "lineNumber": 127
             },
             "signature": [
               "boolean | undefined"
@@ -18185,7 +18293,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/types.ts",
-              "lineNumber": 119
+              "lineNumber": 128
             },
             "signature": [
               "object | undefined"
@@ -18194,7 +18302,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 111
+          "lineNumber": 120
         },
         "initialIsOpen": false
       }
@@ -18256,7 +18364,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 39
+          "lineNumber": 40
         },
         "initialIsOpen": false
       }
@@ -18915,7 +19023,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-          "lineNumber": 48
+          "lineNumber": 49
         },
         "signature": [
           "{ type: string | IAggType; enabled?: boolean | undefined; id?: string | undefined; schema?: string | undefined; params?: {} | ",
@@ -18926,12 +19034,72 @@
       },
       {
         "tags": [],
+        "id": "def-common.ENHANCED_ES_SEARCH_STRATEGY",
+        "type": "string",
+        "label": "ENHANCED_ES_SEARCH_STRATEGY",
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"ese\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.EQL_SEARCH_STRATEGY",
+        "type": "string",
+        "label": "EQL_SEARCH_STRATEGY",
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+          "lineNumber": 14
+        },
+        "signature": [
+          "\"eql\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.EqlRequestParams",
+        "type": "Type",
+        "label": "EqlRequestParams",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+          "lineNumber": 16
+        },
+        "signature": [
+          "EqlSearch<Record<string, unknown>>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.EqlSearchStrategyResponse",
+        "type": "Type",
+        "label": "EqlSearchStrategyResponse",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
+          "lineNumber": 22
+        },
+        "signature": [
+          "IKibanaSearchResponse<ApiResponse<T, unknown>>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
         "id": "def-common.ES_SEARCH_STRATEGY",
         "type": "string",
         "label": "ES_SEARCH_STRATEGY",
         "description": [],
         "source": {
-          "path": "src/plugins/data/common/search/es_search/types.ts",
+          "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
           "lineNumber": 12
         },
         "signature": [
@@ -19028,7 +19196,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 37
+          "lineNumber": 38
         },
         "signature": [
           "[",
@@ -19047,10 +19215,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 49
+          "lineNumber": 55
         },
         "signature": [
-          "{ [x: string]: SortDirection | SortDirectionNumeric; }"
+          "{ [x: string]: SortDirection | SortDirectionNumeric | SortDirectionFormat; }"
         ],
         "initialIsOpen": false
       },
@@ -19642,7 +19810,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-          "lineNumber": 59
+          "lineNumber": 62
         },
         "signature": [
           "AggType<AggConfig, AggParamType<AggConfig>>"
@@ -19656,7 +19824,7 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "src/plugins/data/common/search/es_search/types.ts",
+          "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
           "lineNumber": 22
         },
         "signature": [
@@ -19784,7 +19952,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/types.ts",
-          "lineNumber": 22
+          "lineNumber": 21
         },
         "signature": [
           "(id: string, options: ",
@@ -19807,7 +19975,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/types.ts",
-          "lineNumber": 23
+          "lineNumber": 22
         },
         "signature": [
           "(id: string, keepAlive: string, options: ",
@@ -19830,7 +19998,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/types.ts",
-          "lineNumber": 14
+          "lineNumber": 13
         },
         "signature": [
           "(request: SearchStrategyRequest, options: ",
@@ -19857,7 +20025,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/types.ts",
-          "lineNumber": 130
+          "lineNumber": 138
         },
         "signature": [
           "{ isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; }"
@@ -19871,7 +20039,7 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "src/plugins/data/common/search/es_search/types.ts",
+          "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
           "lineNumber": 14
         },
         "signature": [
@@ -19891,31 +20059,37 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 19
+          "lineNumber": 20
         },
         "signature": [
           "{ create: () => SearchSource; history: Record<string, any>[]; setPreferredSearchStrategyId: (searchStrategyId: string) => void; setField: <K>(field: K, value: SearchSourceFields[K]) => SearchSource; removeField: <K>(field: K) => SearchSource; setFields: (newFields: SearchSourceFields) => SearchSource; getId: () => string; getFields: () => SearchSourceFields; getField: <K>(field: K, recurse?: boolean) => SearchSourceFields[K]; getOwnField: <K>(field: K) => SearchSourceFields[K]; createCopy: () => SearchSource; createChild: (options?: {}) => SearchSource; setParent: (parent?: Pick<SearchSource, \"create\" | \"history\" | \"setPreferredSearchStrategyId\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined, options?: SearchSourceOptions) => SearchSource; getParent: () => SearchSource | undefined; fetch$: (options?: ",
           {
             "pluginId": "data",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibDataPluginApi",
-            "section": "def-common.ISearchOptions",
+            "section": "def-public.ISearchOptions",
             "text": "ISearchOptions"
           },
           ") => ",
           "Observable",
           "<",
-          "SearchResponse",
-          "<any>>; fetch: (options?: ",
           {
             "pluginId": "data",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibDataPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-public.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
           },
-          ") => Promise<",
-          "SearchResponse"
+          "<",
+          "SearchResponse",
+          "<any>>>; fetch: (options?: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataPluginApi",
+            "section": "def-public.ISearchOptions",
+            "text": "ISearchOptions"
+          }
         ],
         "initialIsOpen": false
       },
@@ -20089,7 +20263,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/search_source/types.ts",
-          "lineNumber": 56
+          "lineNumber": 65
         },
         "signature": [
           "string | SearchField"

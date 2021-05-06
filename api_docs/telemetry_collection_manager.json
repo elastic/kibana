@@ -368,15 +368,9 @@
             "lineNumber": 23
           },
           "signature": [
-            "(config: ",
-            {
-              "pluginId": "telemetryCollectionManager",
-              "scope": "server",
-              "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.StatsGetterConfig",
-              "text": "StatsGetterConfig"
-            },
-            ") => Promise<string[] | ",
+            "{ (config: ",
+            "UnencryptedStatsGetterConfig",
+            "): Promise<",
             {
               "pluginId": "telemetryCollectionManager",
               "scope": "server",
@@ -384,7 +378,9 @@
               "section": "def-server.UsageStatsPayload",
               "text": "UsageStatsPayload"
             },
-            "[]>"
+            "[]>; (config: ",
+            "EncryptedStatsGetterConfig",
+            "): Promise<string[]>; }"
           ]
         },
         {
@@ -449,15 +445,9 @@
             "lineNumber": 29
           },
           "signature": [
-            "(config: ",
-            {
-              "pluginId": "telemetryCollectionManager",
-              "scope": "server",
-              "docId": "kibTelemetryCollectionManagerPluginApi",
-              "section": "def-server.StatsGetterConfig",
-              "text": "StatsGetterConfig"
-            },
-            ") => Promise<string[] | ",
+            "{ (config: ",
+            "UnencryptedStatsGetterConfig",
+            "): Promise<",
             {
               "pluginId": "telemetryCollectionManager",
               "scope": "server",
@@ -465,7 +455,9 @@
               "section": "def-server.UsageStatsPayload",
               "text": "UsageStatsPayload"
             },
-            "[]>"
+            "[]>; (config: ",
+            "EncryptedStatsGetterConfig",
+            "): Promise<string[]>; }"
           ]
         },
         {

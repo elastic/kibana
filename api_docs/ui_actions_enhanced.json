@@ -266,7 +266,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"order\" | \"MenuItem\" | \"getIconType\" | \"getDisplayNameTooltip\" | \"isCompatible\" | \"grouping\">,",
+          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -1629,7 +1629,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-                  "lineNumber": 246
+                  "lineNumber": 251
                 }
               },
               {
@@ -1660,7 +1660,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-                  "lineNumber": 246
+                  "lineNumber": 251
                 }
               },
               {
@@ -1676,7 +1676,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-                  "lineNumber": 246
+                  "lineNumber": 251
                 }
               }
             ],
@@ -1684,7 +1684,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-              "lineNumber": 246
+              "lineNumber": 251
             }
           },
           {
@@ -1711,7 +1711,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-                  "lineNumber": 277
+                  "lineNumber": 282
                 }
               }
             ],
@@ -1719,7 +1719,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-              "lineNumber": 277
+              "lineNumber": 282
             }
           },
           {
@@ -1746,7 +1746,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-                  "lineNumber": 297
+                  "lineNumber": 302
                 }
               }
             ],
@@ -1754,7 +1754,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-              "lineNumber": 297
+              "lineNumber": 302
             }
           }
         ],
@@ -2031,7 +2031,7 @@
             "section": "def-public.BaseActionFactoryContext",
             "text": "BaseActionFactoryContext"
           },
-          ">>) => JSX.Element"
+          ">>) => JSX.Element | null"
         ],
         "description": [],
         "label": "ActionWizard",
@@ -2293,7 +2293,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"order\" | \"MenuItem\" | \"getIconType\" | \"getDisplayNameTooltip\" | \"isCompatible\" | \"grouping\">>,",
+          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -2920,6 +2920,122 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.DrilldownTemplate",
+        "type": "Interface",
+        "label": "DrilldownTemplate",
+        "description": [
+          "\nTemplate for a pre-configured new drilldown, this gives ability to create a\ndrilldown from a template instead of user creating a drilldown from scratch.\nThis is used in \"drilldown cloning\" functionality, where drilldowns can be\ncloned from one dashboard panel to another."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.DrilldownTemplate.id",
+            "type": "string",
+            "label": "id",
+            "description": [
+              "\nAny string that uniquely identifies this item in a list of `DrilldownTemplate[]`."
+            ],
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+              "lineNumber": 93
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.DrilldownTemplate.icon",
+            "type": "string",
+            "label": "icon",
+            "description": [
+              "\nEUI icon display next to the description."
+            ],
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+              "lineNumber": 98
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DrilldownTemplate.description",
+            "type": "string",
+            "label": "description",
+            "description": [
+              "\nA user facing text that provides information about the source of this template."
+            ],
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+              "lineNumber": 103
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.DrilldownTemplate.factoryId",
+            "type": "string",
+            "label": "factoryId",
+            "description": [
+              "\nDrilldown type, dynamic action factory ID."
+            ],
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+              "lineNumber": 108
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.DrilldownTemplate.name",
+            "type": "string",
+            "label": "name",
+            "description": [
+              "\nSuggested new name of the cloned drilldown. If a drilldown with such suggested\nname already exists at current place, a suffix like \" (copy 1)\" will be added."
+            ],
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+              "lineNumber": 114
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.DrilldownTemplate.triggers",
+            "type": "Array",
+            "label": "triggers",
+            "description": [
+              "\nPre-selected triggers."
+            ],
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+              "lineNumber": 119
+            },
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DrilldownTemplate.config",
+            "type": "Unknown",
+            "label": "config",
+            "description": [
+              "\nPreliminary configuration of the new drilldown, to be used in the dynamicaction factory."
+            ],
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+              "lineNumber": 124
+            },
+            "signature": [
+              "unknown"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
+          "lineNumber": 89
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.DynamicActionManagerParams",
         "type": "Interface",
         "label": "DynamicActionManagerParams",
@@ -3252,24 +3368,18 @@
       "children": [
         {
           "tags": [],
-          "id": "def-public.StartContract.FlyoutManageDrilldowns",
+          "id": "def-public.StartContract.DrilldownManager",
           "type": "Function",
-          "label": "FlyoutManageDrilldowns",
+          "label": "DrilldownManager",
           "description": [],
           "source": {
             "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
             "lineNumber": 60
           },
           "signature": [
-            "React.FC<ConnectedFlyoutManageDrilldownsProps<",
-            {
-              "pluginId": "uiActionsEnhanced",
-              "scope": "public",
-              "docId": "kibUiActionsEnhancedPluginApi",
-              "section": "def-public.BaseActionFactoryContext",
-              "text": "BaseActionFactoryContext"
-            },
-            ">>"
+            "React.FC<",
+            "PublicDrilldownManagerProps",
+            ">"
           ]
         }
       ],
