@@ -73,7 +73,7 @@ describe('buildEventsHistogramQuery', () => {
     expect(
       buildEventsHistogramQuery({
         ...mockOptions,
-        stackByField: 'source.ip'
+        stackByField: 'source.ip',
       })
     ).toEqual(expectedIpIncludingMissingDataDsl);
   });
@@ -83,7 +83,7 @@ describe('buildEventsHistogramQuery', () => {
       buildEventsHistogramQuery({
         ...mockOptions,
         includeMissingData: false,
-        stackByField: 'source.ip'
+        stackByField: 'source.ip',
       })
     ).toEqual(expectedIpNotIncludingMissingDataDsl);
   });

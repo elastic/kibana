@@ -25,6 +25,10 @@ describe('useMatrixHistogram', () => {
     startDate: new Date(Date.now()).toISOString(),
   };
 
+  afterEach(() => {
+    (useKibana().services.data.search.search as jest.Mock).mockClear();
+  });
+
   it('should update request when props has changed', async () => {
     const localProps = { ...props };
     const { rerender } = renderHook(() => useMatrixHistogram(localProps), {
@@ -65,6 +69,10 @@ describe('useMatrixHistogramCombined', () => {
     stackByField: 'event.module',
     startDate: new Date(Date.now()).toISOString(),
   };
+
+  afterEach(() => {
+    (useKibana().services.data.search.search as jest.Mock).mockClear();
+  });
 
   it('should update request when props has changed', async () => {
     const localProps = { ...props };
