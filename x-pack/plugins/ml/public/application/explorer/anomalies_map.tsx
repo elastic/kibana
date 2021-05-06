@@ -24,6 +24,7 @@ import {
   COLOR_MAP_TYPE,
 } from '../../../../maps/common/constants';
 import { useMlKibana } from '../contexts/kibana';
+import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
 import { EMSTermJoinConfig } from '../../../../maps/public';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
@@ -192,7 +193,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
       })
     );
 
-    setEMSSuggestions(suggestions.filter((s) => s !== null) as MLEMSTermJoinConfig[]);
+    setEMSSuggestions(suggestions.filter(isDefined));
   }, [...jobIds]);
 
   useEffect(
@@ -214,7 +215,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
 
   const layersWithAnomalies = layerList.filter((layer) => {
     // @ts-ignore _rows does not exist - can remove when VectorLayerDescriptor is updated
-    const rows = layer.joins ? layer.joins[0].right.__rows : [];
+    const rows = Array.isArray(layer.joins) ? layer.joins[0]?.right?.__rows : [];
     return rows.length;
   });
 
@@ -223,7 +224,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
     layersWithAnomalies[0].visible = true;
   }
 
-  if (EMSSuggestions?.length === 0 || !(layersWithAnomalies.length > 0)) {
+  if (EMSSuggestions?.length === 0 || layersWithAnomalies.length === 0) {
     return null;
   }
 
