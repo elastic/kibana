@@ -131,6 +131,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   } = alertParams;
   const { http, uiSettings } = useKibana().services;
   const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
+  const [hasError, setHasError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, MetricResult[]>>();
   const [startVisualizationAt, setStartVisualizationAt] = useState<Date>(new Date());
@@ -152,9 +153,11 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         setVisualizationData(
           await getVisualizationData(alertWithoutActions, visualizeOptions, http!)
         );
+        setHasError(false);
         setErrorMessage(undefined);
       } catch (e) {
-        setErrorMessage(e?.body?.message);
+        setHasError(true);
+        setErrorMessage(e?.body?.message || e?.message);
       } finally {
         setLoadingState(LoadingStateType.Idle);
       }
@@ -208,7 +211,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     );
   }
 
-  if (errorMessage) {
+  if (hasError) {
     return (
       <Fragment>
         <EuiSpacer size="l" />
