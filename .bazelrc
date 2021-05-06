@@ -25,3 +25,12 @@ build --build_metadata=TEST_GROUPS=//packages
 ## Reset remote cache and backend support
 build:offline --bes_backend="" --remote_cache=""
 run:offline --bes_backend="" --remote_cache=""
+
+# Load any settings specific to the current user.
+# .bazelrc.user should appear in .gitignore so that settings are not shared with team members
+# This needs to be last statement in this
+# config, as the user configuration should be able to overwrite flags from this file.
+# See https://docs.bazel.build/versions/master/best-practices.html#bazelrc
+# (Note that we use .bazelrc.user so the file appears next to .bazelrc in directory listing,
+# rather than user.bazelrc as suggested in the Bazel docs)
+try-import %workspace%/.bazelrc.user
