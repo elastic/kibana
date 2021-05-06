@@ -1616,7 +1616,7 @@
             "type": "Function",
             "label": "getDisplayNameTooltip",
             "signature": [
-              "(context: Context) => string"
+              "((context: Context) => string) | undefined"
             ],
             "description": [
               "\nReturns tooltip text which should be displayed when user hovers this object.\nShould return empty string if tooltip should not be displayed."

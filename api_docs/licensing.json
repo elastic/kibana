@@ -580,7 +580,7 @@
           "lineNumber": 8
         },
         "signature": [
-          "\"valid\" | \"unavailable\" | \"invalid\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
         ],
         "initialIsOpen": false
       },
@@ -1731,7 +1731,7 @@
           "lineNumber": 8
         },
         "signature": [
-          "\"valid\" | \"unavailable\" | \"invalid\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
         ],
         "initialIsOpen": false
       },
