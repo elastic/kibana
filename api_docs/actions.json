@@ -686,6 +686,23 @@
     "misc": [
       {
         "parentPluginId": "actions",
+        "id": "def-server.ACTION_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"action\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/actions/server/constants/saved_objects.ts",
+          "lineNumber": 8
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-server.ActionParamsType",
         "type": "Type",
         "tags": [],
@@ -1113,7 +1130,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 92
+        "lineNumber": 87
       },
       "deprecated": false,
       "children": [
@@ -1137,7 +1154,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 93
+            "lineNumber": 88
           },
           "deprecated": false,
           "children": [
@@ -1160,7 +1177,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 99
+                "lineNumber": 94
               },
               "deprecated": false,
               "isRequired": true
@@ -1181,7 +1198,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 103
+        "lineNumber": 98
       },
       "deprecated": false,
       "children": [
@@ -1197,7 +1214,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 104
+            "lineNumber": 99
           },
           "deprecated": false,
           "children": [
@@ -1213,7 +1230,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 104
+                "lineNumber": 99
               },
               "deprecated": false,
               "isRequired": true
@@ -1227,7 +1244,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 104
+                "lineNumber": 99
               },
               "deprecated": false,
               "children": [
@@ -1240,7 +1257,7 @@
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 104
+                    "lineNumber": 99
                   },
                   "deprecated": false
                 }
@@ -1261,7 +1278,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 105
+            "lineNumber": 100
           },
           "deprecated": false,
           "children": [
@@ -1277,7 +1294,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 106
+                "lineNumber": 101
               },
               "deprecated": false,
               "isRequired": true
@@ -1294,7 +1311,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 107
+                "lineNumber": 102
               },
               "deprecated": false,
               "isRequired": true
@@ -1308,7 +1325,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 108
+                "lineNumber": 103
               },
               "deprecated": false,
               "children": [
@@ -1321,7 +1338,7 @@
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 108
+                    "lineNumber": 103
                   },
                   "deprecated": false
                 }
@@ -1358,7 +1375,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 110
+            "lineNumber": 105
           },
           "deprecated": false,
           "children": [
@@ -1381,7 +1398,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 110
+                "lineNumber": 105
               },
               "deprecated": false,
               "isRequired": true
@@ -1417,7 +1434,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 111
+            "lineNumber": 106
           },
           "deprecated": false,
           "children": [
@@ -1440,7 +1457,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 111
+                "lineNumber": 106
               },
               "deprecated": false,
               "isRequired": true
@@ -1467,7 +1484,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 112
+            "lineNumber": 107
           },
           "deprecated": false
         },
@@ -1483,7 +1500,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 113
+            "lineNumber": 108
           },
           "deprecated": false,
           "children": [
@@ -1499,7 +1516,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 114
+                "lineNumber": 109
               },
               "deprecated": false,
               "isRequired": true
@@ -1516,7 +1533,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 115
+                "lineNumber": 110
               },
               "deprecated": false,
               "isRequired": true
@@ -1533,7 +1550,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 116
+                "lineNumber": 111
               },
               "deprecated": false,
               "isRequired": true
@@ -1550,7 +1567,7 @@
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 117
+                "lineNumber": 112
               },
               "deprecated": false,
               "isRequired": true

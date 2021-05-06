@@ -25,8 +25,8 @@
           "SeriesData"
         ],
         "source": {
-          "path": "src/plugins/vis_type_timeseries/common/types.ts",
-          "lineNumber": 76
+          "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
+          "lineNumber": 15
         },
         "deprecated": false,
         "children": [
@@ -41,8 +41,8 @@
               "TimeseriesVisData"
             ],
             "source": {
-              "path": "src/plugins/vis_type_timeseries/common/types.ts",
-              "lineNumber": 76
+              "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
+              "lineNumber": 15
             },
             "deprecated": false,
             "isRequired": true
@@ -61,11 +61,12 @@
         "signature": [
           "(data: ",
           "TimeseriesVisData",
-          ") => data is TableData"
+          ") => data is ",
+          "TableData"
         ],
         "source": {
-          "path": "src/plugins/vis_type_timeseries/common/types.ts",
-          "lineNumber": 73
+          "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
+          "lineNumber": 12
         },
         "deprecated": false,
         "children": [
@@ -80,8 +81,8 @@
               "TimeseriesVisData"
             ],
             "source": {
-              "path": "src/plugins/vis_type_timeseries/common/types.ts",
-              "lineNumber": 73
+              "path": "src/plugins/vis_type_timeseries/common/vis_data_utils.ts",
+              "lineNumber": 12
             },
             "deprecated": false,
             "isRequired": true
@@ -103,11 +104,12 @@
         "description": [],
         "signature": [
           "SeriesData",
-          " | TableData"
+          " | ",
+          "TableData"
         ],
         "source": {
-          "path": "src/plugins/vis_type_timeseries/common/types.ts",
-          "lineNumber": 36
+          "path": "src/plugins/vis_type_timeseries/common/types/vis_data.ts",
+          "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false

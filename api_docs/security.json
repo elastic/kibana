@@ -1226,7 +1226,7 @@
                 "plugin": "actions",
                 "link": {
                   "path": "x-pack/plugins/actions/server/plugin.ts",
-                  "lineNumber": 449
+                  "lineNumber": 444
                 }
               },
               {
@@ -1325,7 +1325,7 @@
                 "plugin": "actions",
                 "link": {
                   "path": "x-pack/plugins/actions/server/plugin.ts",
-                  "lineNumber": 448
+                  "lineNumber": 443
                 }
               },
               {

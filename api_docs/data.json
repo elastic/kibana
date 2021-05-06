@@ -7426,6 +7426,13 @@
                 }
               },
               {
+                "plugin": "discover",
+                "link": {
+                  "path": "src/plugins/discover/public/application/angular/context/api/anchor.ts",
+                  "lineNumber": 57
+                }
+              },
+              {
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts",
