@@ -7,13 +7,9 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import {
-  Config,
-  Lifecycle,
-  FailureMetadata,
-  DockerServersService,
-} from '../src/functional_test_runner/lib';
-import { Test, Suite } from '../src/functional_test_runner/fake_mocha_types';
+
+import { Config, Lifecycle, FailureMetadata, DockerServersService } from './lib';
+import { Test, Suite } from './fake_mocha_types';
 
 export { Lifecycle, Config, FailureMetadata };
 
