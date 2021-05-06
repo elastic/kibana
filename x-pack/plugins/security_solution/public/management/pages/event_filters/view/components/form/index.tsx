@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import {
@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash/fp';
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
@@ -29,7 +29,7 @@ import { AppAction } from '../../../../../../common/store/actions';
 import { ExceptionListItemSchema, ExceptionBuilder } from '../../../../../../shared_imports';
 
 import { useEventFiltersSelector } from '../../hooks';
-import { getFormEntry } from '../../../store/selector';
+import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
 import {
   FORM_DESCRIPTION,
   NAME_LABEL,
@@ -54,7 +54,9 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
   ({ allowSelectOs = false }) => {
     const { http, data } = useKibana().services;
     const dispatch = useDispatch<Dispatch<AppAction>>();
-    const exception = useEventFiltersSelector(getFormEntry);
+    const exception = useEventFiltersSelector(getFormEntryStateMutable);
+    const hasNameError = useEventFiltersSelector(getHasNameError);
+    const newComment = useEventFiltersSelector(getNewComment);
 
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
@@ -64,9 +66,6 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
       []
     );
-
-    const [hasNameError, setHasNameError] = useState(!exception || !exception.name);
-    const [comment, setComment] = useState<string>('');
 
     const handleOnBuilderChange = useCallback(
       (arg: ExceptionBuilder.OnChangeProps) => {
@@ -90,7 +89,6 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const handleOnChangeName = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!exception) return;
-        setHasNameError(!e.target.value);
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
@@ -104,16 +102,16 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const handleOnChangeComment = useCallback(
       (value: string) => {
-        setComment(value);
         if (!exception) return;
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
-            entry: { ...exception, comments: [{ comment: value }] },
+            entry: exception,
+            newComment: value,
           },
         });
       },
-      [dispatch, exception, setComment]
+      [dispatch, exception]
     );
 
     const exceptionBuilderComponentMemo = useMemo(
@@ -189,11 +187,12 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const commentsInputMemo = useMemo(
       () => (
         <AddExceptionComments
-          newCommentValue={comment}
+          exceptionItemComments={(exception as ExceptionListItemSchema)?.comments}
+          newCommentValue={newComment}
           newCommentOnChange={handleOnChangeComment}
         />
       ),
-      [comment, handleOnChangeComment]
+      [exception, handleOnChangeComment, newComment]
     );
 
     return !isIndexPatternLoading && exception ? (

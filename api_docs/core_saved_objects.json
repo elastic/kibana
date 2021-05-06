@@ -28,7 +28,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 221
+                  "lineNumber": 222
                 }
               },
               {
@@ -42,7 +42,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 222
+                  "lineNumber": 223
                 }
               },
               {
@@ -62,7 +62,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 223
+                  "lineNumber": 224
                 }
               }
             ],
@@ -91,7 +91,7 @@
             "label": "create",
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 220
+              "lineNumber": 221
             },
             "tags": [],
             "returnComment": []
@@ -118,7 +118,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 256
+                  "lineNumber": 257
                 }
               },
               {
@@ -138,7 +138,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 257
+                  "lineNumber": 258
                 }
               }
             ],
@@ -175,7 +175,7 @@
             "label": "bulkCreate",
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 255
+              "lineNumber": 256
             },
             "tags": [
               "property"
@@ -199,7 +199,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 284
+                  "lineNumber": 285
                 }
               },
               {
@@ -213,7 +213,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 285
+                  "lineNumber": 286
                 }
               },
               {
@@ -228,7 +228,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 286
+                  "lineNumber": 287
                 }
               }
             ],
@@ -243,7 +243,7 @@
             "label": "delete",
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 283
+              "lineNumber": 284
             },
             "tags": [],
             "returnComment": []
@@ -266,17 +266,17 @@
                     "section": "def-server.SavedObjectsFindOptions",
                     "text": "SavedObjectsFindOptions"
                   },
-                  ", \"type\" | \"filter\" | \"fields\" | \"search\" | \"page\" | \"perPage\" | \"sortField\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">"
+                  ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"preference\" | \"page\" | \"perPage\" | \"sortField\" | \"search\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\">"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 314
+                  "lineNumber": 315
                 }
               }
             ],
             "signature": [
-              "<T = unknown>(options: Pick<",
+              "<T = unknown, A = unknown>(options: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -284,7 +284,7 @@
                 "section": "def-server.SavedObjectsFindOptions",
                 "text": "SavedObjectsFindOptions"
               },
-              ", \"type\" | \"filter\" | \"fields\" | \"search\" | \"page\" | \"perPage\" | \"sortField\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">) => Promise<",
+              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"preference\" | \"page\" | \"perPage\" | \"sortField\" | \"search\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -292,7 +292,7 @@
                 "section": "def-public.SavedObjectsFindResponsePublic",
                 "text": "SavedObjectsFindResponsePublic"
               },
-              "<T>>"
+              "<T, unknown>>"
             ],
             "description": [
               "\nSearch for objects\n"
@@ -300,7 +300,7 @@
             "label": "find",
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 313
+              "lineNumber": 314
             },
             "tags": [
               "property"
@@ -324,7 +324,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 372
+                  "lineNumber": 381
                 }
               },
               {
@@ -338,7 +338,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 372
+                  "lineNumber": 381
                 }
               }
             ],
@@ -359,7 +359,7 @@
             "label": "get",
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 372
+              "lineNumber": 381
             },
             "tags": [],
             "returnComment": [
@@ -381,7 +381,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 395
+                  "lineNumber": 404
                 }
               }
             ],
@@ -402,7 +402,7 @@
             "label": "bulkGet",
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 395
+              "lineNumber": 404
             },
             "tags": [],
             "returnComment": [
@@ -414,7 +414,7 @@
             "type": "Function",
             "label": "update",
             "signature": [
-              "<T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: ",
+              "<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -422,7 +422,7 @@
                 "section": "def-public.SavedObjectsUpdateOptions",
                 "text": "SavedObjectsUpdateOptions"
               },
-              ") => Promise<",
+              "<unknown>) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -447,7 +447,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 427
+                  "lineNumber": 436
                 }
               },
               {
@@ -461,7 +461,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 428
+                  "lineNumber": 437
                 }
               },
               {
@@ -475,13 +475,13 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 429
+                  "lineNumber": 438
                 }
               },
               {
                 "id": "def-public.SavedObjectsClient.update.$4",
                 "type": "Object",
-                "label": "{ version, migrationVersion, references }",
+                "label": "{ version, references, upsert }",
                 "isRequired": true,
                 "signature": [
                   {
@@ -490,12 +490,13 @@
                     "docId": "kibCoreSavedObjectsPluginApi",
                     "section": "def-public.SavedObjectsUpdateOptions",
                     "text": "SavedObjectsUpdateOptions"
-                  }
+                  },
+                  "<unknown>"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 430
+                  "lineNumber": 439
                 }
               }
             ],
@@ -505,7 +506,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 426
+              "lineNumber": 435
             }
           },
           {
@@ -555,7 +556,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/saved_objects/saved_objects_client.ts",
-                  "lineNumber": 458
+                  "lineNumber": 467
                 }
               }
             ],
@@ -565,13 +566,13 @@
             ],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 458
+              "lineNumber": 467
             }
           }
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 165
+          "lineNumber": 166
         },
         "initialIsOpen": false
       },
@@ -903,7 +904,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/saved_objects/simple_saved_object.ts",
-              "lineNumber": 86
+              "lineNumber": 85
             }
           }
         ],
@@ -943,7 +944,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 89
+              "lineNumber": 88
             },
             "signature": [
               {
@@ -959,7 +960,7 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 88
+          "lineNumber": 87
         },
         "initialIsOpen": false
       },
@@ -1282,7 +1283,7 @@
             "section": "def-public.SavedObjectsFindResponsePublic",
             "text": "SavedObjectsFindResponsePublic"
           },
-          "<T> extends ",
+          "<T, A> extends ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1301,13 +1302,27 @@
         "children": [
           {
             "tags": [],
+            "id": "def-public.SavedObjectsFindResponsePublic.aggregations",
+            "type": "Uncategorized",
+            "label": "aggregations",
+            "description": [],
+            "source": {
+              "path": "src/core/public/saved_objects/saved_objects_client.ts",
+              "lineNumber": 107
+            },
+            "signature": [
+              "A | undefined"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-public.SavedObjectsFindResponsePublic.total",
             "type": "number",
             "label": "total",
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 107
+              "lineNumber": 108
             }
           },
           {
@@ -1318,7 +1333,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 108
+              "lineNumber": 109
             }
           },
           {
@@ -1329,13 +1344,13 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 109
+              "lineNumber": 110
             }
           }
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 106
+          "lineNumber": 105
         },
         "initialIsOpen": false
       },
@@ -1383,6 +1398,16 @@
         "id": "def-public.SavedObjectsUpdateOptions",
         "type": "Interface",
         "label": "SavedObjectsUpdateOptions",
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectsUpdateOptions",
+            "text": "SavedObjectsUpdateOptions"
+          },
+          "<Attributes>"
+        ],
         "description": [],
         "tags": [
           "public"
@@ -1404,19 +1429,16 @@
           },
           {
             "tags": [],
-            "id": "def-public.SavedObjectsUpdateOptions.migrationVersion",
-            "type": "Object",
-            "label": "migrationVersion",
-            "description": [
-              "{@inheritDoc SavedObjectsMigrationVersion}"
-            ],
+            "id": "def-public.SavedObjectsUpdateOptions.upsert",
+            "type": "Uncategorized",
+            "label": "upsert",
+            "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 83
+              "lineNumber": 82
             },
             "signature": [
-              "SavedObjectsMigrationVersion",
-              " | undefined"
+              "Attributes | undefined"
             ]
           },
           {
@@ -1427,7 +1449,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/saved_objects/saved_objects_client.ts",
-              "lineNumber": 84
+              "lineNumber": 83
             },
             "signature": [
               "SavedObjectReference",
@@ -1456,10 +1478,10 @@
         ],
         "source": {
           "path": "src/core/public/saved_objects/saved_objects_client.ts",
-          "lineNumber": 138
+          "lineNumber": 139
         },
         "signature": [
-          "{ get: <T>(type: string, id: string) => Promise<SimpleSavedObject<T>>; delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => Promise<{}>; create: <T>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>; bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>; find: <T>(options: Pick<SavedObjectFindOptionsServer, \"type\" | \"filter\" | \"fields\" | \"search\" | \"page\" | \"perPage\" | \"sortField\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">) => Promise<SavedObjectsFindResponsePublic<T>>; bulkGet: (objects?: { id: string; type: string; }[]) => Promise<SavedObjectsBatchResponse<unknown>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions) => Promise<SimpleSavedObject<T>>; bulkUpdate: <T>(objects?: SavedObjectsBulkUpdateObject<unknown>[]) => Promise<SavedObjectsBatchResponse<unknown>>; }"
+          "{ get: <T>(type: string, id: string) => Promise<SimpleSavedObject<T>>; delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => Promise<{}>; create: <T>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>; bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>; find: <T, A>(options: Pick<SavedObjectFindOptionsServer, \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"preference\" | \"page\" | \"perPage\" | \"sortField\" | \"search\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\">) => Promise<SavedObjectsFindResponsePublic<T, unknown>>; bulkGet: (objects?: { id: string; type: string; }[]) => Promise<SavedObjectsBatchResponse<unknown>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions<unknown>) => Promise<SimpleSavedObject<T>>; bulkUpdate: <T>(objects?: SavedObjectsBulkUpdateObject<unknown>[]) => Promise<SavedObjectsBatchResponse<unknown>>; }"
         ],
         "initialIsOpen": false
       }
@@ -1487,7 +1509,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 402
+              "lineNumber": 405
             },
             "signature": [
               "typeof ",
@@ -1508,7 +1530,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 403
+              "lineNumber": 406
             },
             "signature": [
               "typeof ",
@@ -1553,7 +1575,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 419
+                  "lineNumber": 422
                 }
               },
               {
@@ -1567,7 +1589,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 419
+                  "lineNumber": 422
                 }
               },
               {
@@ -1588,7 +1610,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 419
+                  "lineNumber": 422
                 }
               }
             ],
@@ -1596,7 +1618,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 419
+              "lineNumber": 422
             }
           },
           {
@@ -1652,7 +1674,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 430
+                  "lineNumber": 433
                 }
               },
               {
@@ -1673,7 +1695,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 431
+                  "lineNumber": 434
                 }
               }
             ],
@@ -1681,7 +1703,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 429
+              "lineNumber": 432
             }
           },
           {
@@ -1737,7 +1759,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 444
+                  "lineNumber": 447
                 }
               },
               {
@@ -1757,7 +1779,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 445
+                  "lineNumber": 448
                 }
               }
             ],
@@ -1765,7 +1787,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 443
+              "lineNumber": 446
             }
           },
           {
@@ -1798,7 +1820,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 457
+                  "lineNumber": 460
                 }
               },
               {
@@ -1812,7 +1834,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 457
+                  "lineNumber": 460
                 }
               },
               {
@@ -1832,7 +1854,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 457
+                  "lineNumber": 460
                 }
               }
             ],
@@ -1840,7 +1862,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 457
+              "lineNumber": 460
             }
           },
           {
@@ -1848,7 +1870,7 @@
             "type": "Function",
             "label": "find",
             "signature": [
-              "<T = unknown>(options: ",
+              "<T = unknown, A = unknown>(options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1864,7 +1886,7 @@
                 "section": "def-server.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
-              "<T>>"
+              "<T, A>>"
             ],
             "description": [
               "\nFind all SavedObjects matching the search query\n"
@@ -1887,7 +1909,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 466
+                  "lineNumber": 470
                 }
               }
             ],
@@ -1895,7 +1917,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 466
+              "lineNumber": 469
             }
           },
           {
@@ -1953,7 +1975,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 482
+                  "lineNumber": 487
                 }
               },
               {
@@ -1973,7 +1995,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 483
+                  "lineNumber": 488
                 }
               }
             ],
@@ -1981,7 +2003,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 481
+              "lineNumber": 486
             }
           },
           {
@@ -2018,7 +2040,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 496
+                  "lineNumber": 501
                 }
               },
               {
@@ -2034,7 +2056,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 497
+                  "lineNumber": 502
                 }
               },
               {
@@ -2054,7 +2076,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 498
+                  "lineNumber": 503
                 }
               }
             ],
@@ -2062,7 +2084,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 495
+              "lineNumber": 500
             }
           },
           {
@@ -2105,7 +2127,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 511
+                  "lineNumber": 516
                 }
               },
               {
@@ -2121,7 +2143,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 512
+                  "lineNumber": 517
                 }
               },
               {
@@ -2141,7 +2163,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 513
+                  "lineNumber": 518
                 }
               }
             ],
@@ -2149,7 +2171,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 510
+              "lineNumber": 515
             }
           },
           {
@@ -2165,7 +2187,7 @@
                 "section": "def-server.SavedObjectsUpdateOptions",
                 "text": "SavedObjectsUpdateOptions"
               },
-              ") => Promise<",
+              "<T>) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -2190,7 +2212,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 526
+                  "lineNumber": 531
                 }
               },
               {
@@ -2204,7 +2226,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 527
+                  "lineNumber": 532
                 }
               },
               {
@@ -2218,7 +2240,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 528
+                  "lineNumber": 533
                 }
               },
               {
@@ -2233,12 +2255,13 @@
                     "docId": "kibCoreSavedObjectsPluginApi",
                     "section": "def-server.SavedObjectsUpdateOptions",
                     "text": "SavedObjectsUpdateOptions"
-                  }
+                  },
+                  "<T>"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 529
+                  "lineNumber": 534
                 }
               }
             ],
@@ -2246,7 +2269,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 525
+              "lineNumber": 530
             }
           },
           {
@@ -2287,7 +2310,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 543
+                  "lineNumber": 548
                 }
               },
               {
@@ -2301,7 +2324,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 544
+                  "lineNumber": 549
                 }
               },
               {
@@ -2315,7 +2338,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 545
+                  "lineNumber": 550
                 }
               },
               {
@@ -2335,7 +2358,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 546
+                  "lineNumber": 551
                 }
               }
             ],
@@ -2343,7 +2366,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 542
+              "lineNumber": 547
             }
           },
           {
@@ -2384,7 +2407,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 560
+                  "lineNumber": 565
                 }
               },
               {
@@ -2398,7 +2421,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 561
+                  "lineNumber": 566
                 }
               },
               {
@@ -2412,7 +2435,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 562
+                  "lineNumber": 567
                 }
               },
               {
@@ -2432,7 +2455,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 563
+                  "lineNumber": 568
                 }
               }
             ],
@@ -2440,7 +2463,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 559
+              "lineNumber": 564
             }
           },
           {
@@ -2496,7 +2519,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 574
+                  "lineNumber": 579
                 }
               },
               {
@@ -2517,7 +2540,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 575
+                  "lineNumber": 580
                 }
               }
             ],
@@ -2525,7 +2548,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 573
+              "lineNumber": 578
             }
           },
           {
@@ -2566,7 +2589,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 584
+                  "lineNumber": 589
                 }
               },
               {
@@ -2580,7 +2603,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 585
+                  "lineNumber": 590
                 }
               },
               {
@@ -2601,7 +2624,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 586
+                  "lineNumber": 591
                 }
               }
             ],
@@ -2609,7 +2632,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 583
+              "lineNumber": 588
             }
           },
           {
@@ -2650,7 +2673,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 600
+                  "lineNumber": 605
                 }
               },
               {
@@ -2670,7 +2693,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 601
+                  "lineNumber": 606
                 }
               }
             ],
@@ -2678,7 +2701,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 599
+              "lineNumber": 604
             }
           },
           {
@@ -2719,7 +2742,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 614
+                  "lineNumber": 619
                 }
               },
               {
@@ -2740,7 +2763,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 614
+                  "lineNumber": 619
                 }
               }
             ],
@@ -2748,7 +2771,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 614
+              "lineNumber": 619
             }
           },
           {
@@ -2764,7 +2787,7 @@
                 "section": "def-server.SavedObjectsFindOptions",
                 "text": "SavedObjectsFindOptions"
               },
-              ", \"type\" | \"filter\" | \"fields\" | \"search\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"preference\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\">, dependencies?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -2799,12 +2822,12 @@
                     "section": "def-server.SavedObjectsFindOptions",
                     "text": "SavedObjectsFindOptions"
                   },
-                  ", \"type\" | \"filter\" | \"fields\" | \"search\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">"
+                  ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"preference\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\">"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 664
+                  "lineNumber": 669
                 }
               },
               {
@@ -2825,7 +2848,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-                  "lineNumber": 665
+                  "lineNumber": 670
                 }
               }
             ],
@@ -2833,13 +2856,13 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 663
+              "lineNumber": 668
             }
           }
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 401
+          "lineNumber": 404
         },
         "initialIsOpen": false
       },
@@ -5299,7 +5322,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 257
+                  "lineNumber": 258
                 }
               },
               {
@@ -5313,7 +5336,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 258
+                  "lineNumber": 259
                 }
               },
               {
@@ -5333,7 +5356,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 259
+                  "lineNumber": 260
                 }
               }
             ],
@@ -5345,7 +5368,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 256
+              "lineNumber": 257
             }
           },
           {
@@ -5403,7 +5426,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 350
+                  "lineNumber": 351
                 }
               },
               {
@@ -5423,7 +5446,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 351
+                  "lineNumber": 352
                 }
               }
             ],
@@ -5435,7 +5458,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 349
+              "lineNumber": 350
             }
           },
           {
@@ -5491,7 +5514,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 541
+                  "lineNumber": 542
                 }
               },
               {
@@ -5511,7 +5534,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 542
+                  "lineNumber": 543
                 }
               }
             ],
@@ -5519,7 +5542,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 540
+              "lineNumber": 541
             }
           },
           {
@@ -5552,7 +5575,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 627
+                  "lineNumber": 628
                 }
               },
               {
@@ -5566,7 +5589,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 627
+                  "lineNumber": 628
                 }
               },
               {
@@ -5586,7 +5609,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 627
+                  "lineNumber": 628
                 }
               }
             ],
@@ -5596,7 +5619,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 627
+              "lineNumber": 628
             }
           },
           {
@@ -5629,7 +5652,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 690
+                  "lineNumber": 691
                 }
               },
               {
@@ -5649,7 +5672,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 691
+                  "lineNumber": 692
                 }
               }
             ],
@@ -5659,7 +5682,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 689
+              "lineNumber": 690
             }
           },
           {
@@ -5667,7 +5690,7 @@
             "type": "Function",
             "label": "find",
             "signature": [
-              "<T = unknown>(options: ",
+              "<T = unknown, A = unknown>(options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -5683,7 +5706,7 @@
                 "section": "def-server.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
-              "<T>>"
+              "<T, A>>"
             ],
             "description": [],
             "children": [
@@ -5704,7 +5727,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 751
+                  "lineNumber": 753
                 }
               }
             ],
@@ -5716,7 +5739,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 751
+              "lineNumber": 752
             }
           },
           {
@@ -5774,7 +5797,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 906
+                  "lineNumber": 920
                 }
               },
               {
@@ -5794,7 +5817,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 907
+                  "lineNumber": 921
                 }
               }
             ],
@@ -5806,7 +5829,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 905
+              "lineNumber": 919
             }
           },
           {
@@ -5841,7 +5864,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 993
+                  "lineNumber": 1007
                 }
               },
               {
@@ -5855,7 +5878,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 994
+                  "lineNumber": 1008
                 }
               },
               {
@@ -5875,7 +5898,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 995
+                  "lineNumber": 1009
                 }
               }
             ],
@@ -5887,7 +5910,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 992
+              "lineNumber": 1006
             }
           },
           {
@@ -5928,7 +5951,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1035
+                  "lineNumber": 1049
                 }
               },
               {
@@ -5942,7 +5965,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1036
+                  "lineNumber": 1050
                 }
               },
               {
@@ -5962,7 +5985,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1037
+                  "lineNumber": 1051
                 }
               }
             ],
@@ -5974,7 +5997,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1034
+              "lineNumber": 1048
             }
           },
           {
@@ -5990,7 +6013,7 @@
                 "section": "def-server.SavedObjectsUpdateOptions",
                 "text": "SavedObjectsUpdateOptions"
               },
-              ") => Promise<",
+              "<T>) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -6015,7 +6038,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1160
+                  "lineNumber": 1174
                 }
               },
               {
@@ -6029,7 +6052,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1161
+                  "lineNumber": 1175
                 }
               },
               {
@@ -6043,7 +6066,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1162
+                  "lineNumber": 1176
                 }
               },
               {
@@ -6058,12 +6081,13 @@
                     "docId": "kibCoreSavedObjectsPluginApi",
                     "section": "def-server.SavedObjectsUpdateOptions",
                     "text": "SavedObjectsUpdateOptions"
-                  }
+                  },
+                  "<T>"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1163
+                  "lineNumber": 1177
                 }
               }
             ],
@@ -6073,7 +6097,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1159
+              "lineNumber": 1173
             }
           },
           {
@@ -6114,7 +6138,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1232
+                  "lineNumber": 1271
                 }
               },
               {
@@ -6128,7 +6152,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1233
+                  "lineNumber": 1272
                 }
               },
               {
@@ -6142,7 +6166,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1234
+                  "lineNumber": 1273
                 }
               },
               {
@@ -6162,7 +6186,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1235
+                  "lineNumber": 1274
                 }
               }
             ],
@@ -6170,7 +6194,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1231
+              "lineNumber": 1270
             }
           },
           {
@@ -6211,7 +6235,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1295
+                  "lineNumber": 1334
                 }
               },
               {
@@ -6225,7 +6249,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1296
+                  "lineNumber": 1335
                 }
               },
               {
@@ -6239,7 +6263,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1297
+                  "lineNumber": 1336
                 }
               },
               {
@@ -6259,7 +6283,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1298
+                  "lineNumber": 1337
                 }
               }
             ],
@@ -6267,7 +6291,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1294
+              "lineNumber": 1333
             }
           },
           {
@@ -6325,7 +6349,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1401
+                  "lineNumber": 1440
                 }
               },
               {
@@ -6345,7 +6369,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1402
+                  "lineNumber": 1441
                 }
               }
             ],
@@ -6357,7 +6381,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1400
+              "lineNumber": 1439
             }
           },
           {
@@ -6398,7 +6422,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1620
+                  "lineNumber": 1659
                 }
               },
               {
@@ -6412,7 +6436,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1621
+                  "lineNumber": 1660
                 }
               },
               {
@@ -6432,7 +6456,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1622
+                  "lineNumber": 1661
                 }
               }
             ],
@@ -6440,7 +6464,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1619
+              "lineNumber": 1658
             }
           },
           {
@@ -6485,7 +6509,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1731
+                  "lineNumber": 1770
                 }
               },
               {
@@ -6501,7 +6525,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1732
+                  "lineNumber": 1771
                 }
               },
               {
@@ -6525,7 +6549,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1733
+                  "lineNumber": 1772
                 }
               },
               {
@@ -6548,7 +6572,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1734
+                  "lineNumber": 1773
                 }
               }
             ],
@@ -6558,7 +6582,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1730
+              "lineNumber": 1769
             }
           },
           {
@@ -6599,7 +6623,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1891
+                  "lineNumber": 1930
                 }
               },
               {
@@ -6619,7 +6643,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1892
+                  "lineNumber": 1931
                 }
               }
             ],
@@ -6631,7 +6655,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1890
+              "lineNumber": 1929
             }
           },
           {
@@ -6672,7 +6696,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1967
+                  "lineNumber": 2003
                 }
               },
               {
@@ -6695,7 +6719,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 1968
+                  "lineNumber": 2004
                 }
               }
             ],
@@ -6705,7 +6729,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 1966
+              "lineNumber": 2002
             }
           },
           {
@@ -6721,7 +6745,7 @@
                 "section": "def-server.SavedObjectsFindOptions",
                 "text": "SavedObjectsFindOptions"
               },
-              ", \"type\" | \"filter\" | \"fields\" | \"search\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"preference\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\">, dependencies?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -6756,12 +6780,12 @@
                     "section": "def-server.SavedObjectsFindOptions",
                     "text": "SavedObjectsFindOptions"
                   },
-                  ", \"type\" | \"filter\" | \"fields\" | \"search\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">"
+                  ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"preference\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\">"
                 ],
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 2023
+                  "lineNumber": 2059
                 }
               },
               {
@@ -6782,7 +6806,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/service/lib/repository.ts",
-                  "lineNumber": 2024
+                  "lineNumber": 2060
                 }
               }
             ],
@@ -6790,13 +6814,13 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 2022
+              "lineNumber": 2058
             }
           }
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 158
+          "lineNumber": 159
         },
         "initialIsOpen": false
       },
@@ -6944,7 +6968,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 59
+                  "lineNumber": 80
                 }
               },
               {
@@ -6966,7 +6990,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 60
+                  "lineNumber": 81
                 }
               }
             ],
@@ -6974,7 +6998,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/serialization/serializer.ts",
-              "lineNumber": 58
+              "lineNumber": 79
             }
           },
           {
@@ -7023,7 +7047,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 102
+                  "lineNumber": 125
                 }
               }
             ],
@@ -7031,7 +7055,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/serialization/serializer.ts",
-              "lineNumber": 102
+              "lineNumber": 125
             }
           },
           {
@@ -7058,7 +7082,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 143
+                  "lineNumber": 166
                 }
               },
               {
@@ -7074,7 +7098,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 143
+                  "lineNumber": 166
                 }
               },
               {
@@ -7090,7 +7114,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 143
+                  "lineNumber": 166
                 }
               }
             ],
@@ -7098,7 +7122,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/serialization/serializer.ts",
-              "lineNumber": 143
+              "lineNumber": 166
             }
           },
           {
@@ -7125,7 +7149,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 156
+                  "lineNumber": 179
                 }
               },
               {
@@ -7141,7 +7165,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 156
+                  "lineNumber": 179
                 }
               },
               {
@@ -7157,7 +7181,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/saved_objects/serialization/serializer.ts",
-                  "lineNumber": 156
+                  "lineNumber": 179
                 }
               }
             ],
@@ -7165,7 +7189,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/serialization/serializer.ts",
-              "lineNumber": 156
+              "lineNumber": 179
             }
           }
         ],
@@ -7276,7 +7300,7 @@
               }
             ],
             "signature": [
-              "<T>({ page, perPage, }: ",
+              "<T, A>({ page, perPage, }: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7292,7 +7316,7 @@
                 "section": "def-server.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
-              "<T>"
+              "<T, A>"
             ],
             "description": [
               "\nCreates an empty response for a find operation. This is only intended to be used by saved objects client wrappers."
@@ -7831,7 +7855,7 @@
                 "section": "def-server.SavedObjectsFindResponse",
                 "text": "SavedObjectsFindResponse"
               },
-              "<unknown>, any, unknown>"
+              "<unknown, unknown>, any, unknown>"
             ]
           },
           {
@@ -8083,7 +8107,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 224
+              "lineNumber": 227
             },
             "signature": [
               "string | undefined"
@@ -8099,7 +8123,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 226
+              "lineNumber": 229
             },
             "signature": [
               "boolean | \"wait_for\" | undefined"
@@ -8108,7 +8132,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 222
+          "lineNumber": 225
         },
         "initialIsOpen": false
       },
@@ -8133,7 +8157,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 235
+              "lineNumber": 238
             },
             "signature": [
               "string[]"
@@ -8142,7 +8166,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 233
+          "lineNumber": 236
         },
         "initialIsOpen": false
       },
@@ -8167,7 +8191,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 142
+              "lineNumber": 164
             },
             "signature": [
               "string | undefined"
@@ -8176,7 +8200,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 140
+          "lineNumber": 162
         },
         "initialIsOpen": false
       },
@@ -8360,7 +8384,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 299
+              "lineNumber": 302
             }
           },
           {
@@ -8371,7 +8395,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 300
+              "lineNumber": 303
             }
           },
           {
@@ -8384,7 +8408,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 302
+              "lineNumber": 305
             },
             "signature": [
               "string[] | undefined"
@@ -8393,7 +8417,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 298
+          "lineNumber": 301
         },
         "initialIsOpen": false
       },
@@ -8469,7 +8493,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 310
+              "lineNumber": 313
             },
             "signature": [
               "SavedObject",
@@ -8479,7 +8503,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 309
+          "lineNumber": 312
         },
         "initialIsOpen": false
       },
@@ -8503,7 +8527,7 @@
             "section": "def-server.SavedObjectsUpdateOptions",
             "text": "SavedObjectsUpdateOptions"
           },
-          ", \"version\" | \"references\">"
+          "<T>, \"version\" | \"references\">"
         ],
         "description": [
           "\n"
@@ -8615,7 +8639,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 280
+              "lineNumber": 283
             },
             "signature": [
               "boolean | \"wait_for\" | undefined"
@@ -8624,7 +8648,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 278
+          "lineNumber": 281
         },
         "initialIsOpen": false
       },
@@ -8657,7 +8681,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 318
+              "lineNumber": 321
             },
             "signature": [
               {
@@ -8673,7 +8697,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 317
+          "lineNumber": 320
         },
         "initialIsOpen": false
       },
@@ -8696,7 +8720,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 189
+              "lineNumber": 190
             }
           },
           {
@@ -8707,13 +8731,13 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 190
+              "lineNumber": 191
             }
           }
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 188
+          "lineNumber": 189
         },
         "initialIsOpen": false
       },
@@ -8736,7 +8760,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 198
+              "lineNumber": 199
             },
             "signature": [
               "{ id: string; type: string; error: ",
@@ -8747,7 +8771,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 197
+          "lineNumber": 198
         },
         "initialIsOpen": false
       },
@@ -8899,7 +8923,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 390
+              "lineNumber": 393
             }
           },
           {
@@ -8912,13 +8936,13 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 394
+              "lineNumber": 397
             }
           }
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 385
+          "lineNumber": 388
         },
         "initialIsOpen": false
       },
@@ -9358,7 +9382,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 133
+              "lineNumber": 134
             },
             "signature": [
               "boolean | undefined"
@@ -9367,7 +9391,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 131
+          "lineNumber": 132
         },
         "initialIsOpen": false
       },
@@ -9409,7 +9433,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 244
+              "lineNumber": 247
             },
             "signature": [
               "boolean | \"wait_for\" | undefined"
@@ -9418,7 +9442,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 242
+          "lineNumber": 245
         },
         "initialIsOpen": false
       },
@@ -9443,7 +9467,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 253
+              "lineNumber": 256
             },
             "signature": [
               "string[]"
@@ -9452,7 +9476,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 251
+          "lineNumber": 254
         },
         "initialIsOpen": false
       },
@@ -9494,7 +9518,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 289
+              "lineNumber": 292
             },
             "signature": [
               "boolean | \"wait_for\" | undefined"
@@ -9510,7 +9534,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 291
+              "lineNumber": 294
             },
             "signature": [
               "boolean | undefined"
@@ -9519,7 +9543,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 287
+          "lineNumber": 290
         },
         "initialIsOpen": false
       },
@@ -10004,6 +10028,26 @@
             ]
           },
           {
+            "tags": [
+              "alpha"
+            ],
+            "id": "def-server.SavedObjectsFindOptions.aggs",
+            "type": "Object",
+            "label": "aggs",
+            "description": [
+              "\nA record of aggregations to perform.\nThe API currently only supports a limited set of metrics and bucket aggregation types.\nAdditional aggregation types can be contributed to Core.\n"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/types.ts",
+              "lineNumber": 140
+            },
+            "signature": [
+              "Record<string, ",
+              "AggregationContainer",
+              "> | undefined"
+            ]
+          },
+          {
             "tags": [],
             "id": "def-server.SavedObjectsFindOptions.namespaces",
             "type": "Array",
@@ -10011,7 +10055,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 119
+              "lineNumber": 141
             },
             "signature": [
               "string[] | undefined"
@@ -10027,7 +10071,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 127
+              "lineNumber": 149
             },
             "signature": [
               "Map<string, string[] | undefined> | undefined"
@@ -10043,7 +10087,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 129
+              "lineNumber": 151
             },
             "signature": [
               "string | undefined"
@@ -10059,7 +10103,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 133
+              "lineNumber": 155
             },
             "signature": [
               {
@@ -10129,7 +10173,7 @@
             "section": "def-server.SavedObjectsFindResponse",
             "text": "SavedObjectsFindResponse"
           },
-          "<T>"
+          "<T, A>"
         ],
         "description": [
           "\nReturn type of the Saved Objects `find()` method.\n\n*Note*: this type is different between the Public and Server Saved Objects\nclients.\n"
@@ -10140,13 +10184,27 @@
         "children": [
           {
             "tags": [],
+            "id": "def-server.SavedObjectsFindResponse.aggregations",
+            "type": "Uncategorized",
+            "label": "aggregations",
+            "description": [],
+            "source": {
+              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+              "lineNumber": 177
+            },
+            "signature": [
+              "A | undefined"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-server.SavedObjectsFindResponse.saved_objects",
             "type": "Array",
             "label": "saved_objects",
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 177
+              "lineNumber": 178
             },
             "signature": [
               {
@@ -10167,7 +10225,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 178
+              "lineNumber": 179
             }
           },
           {
@@ -10178,7 +10236,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 179
+              "lineNumber": 180
             }
           },
           {
@@ -10189,7 +10247,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 180
+              "lineNumber": 181
             }
           },
           {
@@ -10200,7 +10258,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 181
+              "lineNumber": 182
             },
             "signature": [
               "string | undefined"
@@ -11207,7 +11265,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 150
+              "lineNumber": 151
             }
           },
           {
@@ -11220,7 +11278,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 152
+              "lineNumber": 153
             },
             "signature": [
               "number | undefined"
@@ -11229,7 +11287,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 148
+          "lineNumber": 149
         },
         "initialIsOpen": false
       },
@@ -11269,7 +11327,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 113
+              "lineNumber": 114
             },
             "signature": [
               "boolean | undefined"
@@ -11285,7 +11343,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 115
+              "lineNumber": 116
             },
             "signature": [
               "SavedObjectsMigrationVersion",
@@ -11302,7 +11360,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 120
+              "lineNumber": 121
             },
             "signature": [
               "boolean | \"wait_for\" | undefined"
@@ -11318,7 +11376,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/lib/repository.ts",
-              "lineNumber": 124
+              "lineNumber": 125
             },
             "signature": [
               "Attributes | undefined"
@@ -11327,7 +11385,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 107
+          "lineNumber": 108
         },
         "initialIsOpen": false
       },
@@ -11441,9 +11499,11 @@
               "lineNumber": 27
             },
             "signature": [
-              "(msg: string, meta: ",
+              "<Meta extends ",
               "LogMeta",
-              ") => void"
+              " = ",
+              "LogMeta",
+              ">(msg: string, meta: Meta) => void"
             ]
           }
         ],
@@ -11489,7 +11549,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 360
+              "lineNumber": 363
             },
             "signature": [
               "string | undefined"
@@ -11505,7 +11565,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 364
+              "lineNumber": 367
             },
             "signature": [
               "string | undefined"
@@ -11514,7 +11574,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 356
+          "lineNumber": 359
         },
         "initialIsOpen": false
       },
@@ -11537,13 +11597,13 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 374
+              "lineNumber": 377
             }
           }
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 370
+          "lineNumber": 373
         },
         "initialIsOpen": false
       },
@@ -11731,7 +11791,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 262
+              "lineNumber": 265
             },
             "signature": [
               "boolean | undefined"
@@ -11740,7 +11800,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 260
+          "lineNumber": 263
         },
         "initialIsOpen": false
       },
@@ -11782,13 +11842,13 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 271
+              "lineNumber": 274
             }
           }
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 269
+          "lineNumber": 272
         },
         "initialIsOpen": false
       },
@@ -11981,7 +12041,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 336
+              "lineNumber": 339
             },
             "signature": [
               "SavedObject",
@@ -11998,7 +12058,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 346
+              "lineNumber": 349
             },
             "signature": [
               "\"conflict\" | \"exactMatch\" | \"aliasMatch\""
@@ -12014,7 +12074,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 350
+              "lineNumber": 353
             },
             "signature": [
               "string | undefined"
@@ -12023,7 +12083,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 335
+          "lineNumber": 338
         },
         "initialIsOpen": false
       },
@@ -12393,7 +12453,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 238
+              "lineNumber": 260
             }
           },
           {
@@ -12406,7 +12466,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 245
+              "lineNumber": 267
             }
           },
           {
@@ -12419,7 +12479,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 249
+              "lineNumber": 271
             },
             "signature": [
               {
@@ -12441,7 +12501,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 253
+              "lineNumber": 275
             },
             "signature": [
               "string | undefined"
@@ -12457,7 +12517,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 257
+              "lineNumber": 279
             },
             "signature": [
               "string | undefined"
@@ -12473,7 +12533,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 261
+              "lineNumber": 283
             },
             "signature": [
               {
@@ -12495,7 +12555,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 265
+              "lineNumber": 287
             },
             "signature": [
               {
@@ -12526,7 +12586,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 314
+              "lineNumber": 336
             },
             "signature": [
               "string | undefined"
@@ -12542,7 +12602,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 318
+              "lineNumber": 340
             },
             "signature": [
               {
@@ -12558,7 +12618,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 234
+          "lineNumber": 256
         },
         "initialIsOpen": false
       },
@@ -12583,7 +12643,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 330
+              "lineNumber": 352
             },
             "signature": [
               "boolean | undefined"
@@ -12599,7 +12659,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 334
+              "lineNumber": 356
             },
             "signature": [
               "string | undefined"
@@ -12615,7 +12675,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 339
+              "lineNumber": 361
             },
             "signature": [
               "string | undefined"
@@ -12631,7 +12691,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 344
+              "lineNumber": 366
             },
             "signature": [
               "((savedObject: ",
@@ -12649,7 +12709,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 349
+              "lineNumber": 371
             },
             "signature": [
               "((savedObject: ",
@@ -12667,7 +12727,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 358
+              "lineNumber": 380
             },
             "signature": [
               "((savedObject: ",
@@ -12685,7 +12745,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 369
+              "lineNumber": 391
             },
             "signature": [
               {
@@ -12708,7 +12768,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 412
+              "lineNumber": 434
             },
             "signature": [
               {
@@ -12724,7 +12784,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 326
+          "lineNumber": 348
         },
         "initialIsOpen": false
       },
@@ -12796,7 +12856,7 @@
             "section": "def-server.SavedObjectsUpdateOptions",
             "text": "SavedObjectsUpdateOptions"
           },
-          " extends ",
+          "<Attributes> extends ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -12822,7 +12882,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 211
+              "lineNumber": 212
             },
             "signature": [
               "string | undefined"
@@ -12838,7 +12898,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 213
+              "lineNumber": 214
             },
             "signature": [
               "SavedObjectReference",
@@ -12855,16 +12915,32 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 215
+              "lineNumber": 216
             },
             "signature": [
               "boolean | \"wait_for\" | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.SavedObjectsUpdateOptions.upsert",
+            "type": "Uncategorized",
+            "label": "upsert",
+            "description": [
+              "If specified, will be used to perform an upsert if the document doesn't exist"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+              "lineNumber": 218
+            },
+            "signature": [
+              "Attributes | undefined"
             ]
           }
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 209
+          "lineNumber": 210
         },
         "initialIsOpen": false
       },
@@ -12899,7 +12975,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 327
+              "lineNumber": 330
             },
             "signature": [
               "Partial<T>"
@@ -12913,7 +12989,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-              "lineNumber": 328
+              "lineNumber": 331
             },
             "signature": [
               "SavedObjectReference",
@@ -12923,7 +12999,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 325
+          "lineNumber": 328
         },
         "initialIsOpen": false
       }
@@ -12980,10 +13056,10 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/service/lib/repository.ts",
-          "lineNumber": 143
+          "lineNumber": 144
         },
         "signature": [
-          "{ get: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObject<T>>; delete: (type: string, id: string, options?: SavedObjectsDeleteOptions) => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SavedObject<T>>; bulkCreate: <T = unknown>(objects: SavedObjectsBulkCreateObject<T>[], options?: SavedObjectsCreateOptions) => Promise<SavedObjectsBulkResponse<T>>; checkConflicts: (objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions) => Promise<SavedObjectsCheckConflictsResponse>; deleteByNamespace: (namespace: string, options?: SavedObjectsDeleteByNamespaceOptions) => Promise<any>; find: <T = unknown>(options: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponse<T>>; bulkGet: <T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions) => Promise<SavedObjectsBulkResponse<T>>; resolve: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObjectsResolveResponse<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions) => Promise<SavedObjectsUpdateResponse<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions) => Promise<SavedObjectsAddToNamespacesResponse>; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions) => Promise<SavedObjectsDeleteFromNamespacesResponse>; bulkUpdate: <T = unknown>(objects: SavedObjectsBulkUpdateObject<T>[], options?: SavedObjectsBulkUpdateOptions) => Promise<SavedObjectsBulkUpdateResponse<T>>; removeReferencesTo: (type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions) => Promise<SavedObjectsRemoveReferencesToResponse>; incrementCounter: <T>(type: string, id: string, counterFields: (string | SavedObjectsIncrementCounterField)[], options?: SavedObjectsIncrementCounterOptions<T>) => Promise<SavedObject<T>>; openPointInTimeForType: (type: string | string[], { keepAlive, preference }?: SavedObjectsOpenPointInTimeOptions) => Promise<SavedObjectsOpenPointInTimeResponse>; closePointInTime: (id: string, options?: SavedObjectsBaseOptions | undefined) => Promise<SavedObjectsClosePointInTimeResponse>; createPointInTimeFinder: (findOptions: Pick<SavedObjectsFindOptions, \"type\" | \"filter\" | \"fields\" | \"search\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies | undefined) => ISavedObjectsPointInTimeFinder; }"
+          "{ get: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObject<T>>; delete: (type: string, id: string, options?: SavedObjectsDeleteOptions) => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SavedObject<T>>; bulkCreate: <T = unknown>(objects: SavedObjectsBulkCreateObject<T>[], options?: SavedObjectsCreateOptions) => Promise<SavedObjectsBulkResponse<T>>; checkConflicts: (objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions) => Promise<SavedObjectsCheckConflictsResponse>; deleteByNamespace: (namespace: string, options?: SavedObjectsDeleteByNamespaceOptions) => Promise<any>; find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponse<T, A>>; bulkGet: <T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions) => Promise<SavedObjectsBulkResponse<T>>; resolve: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObjectsResolveResponse<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>) => Promise<SavedObjectsUpdateResponse<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions) => Promise<SavedObjectsAddToNamespacesResponse>; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions) => Promise<SavedObjectsDeleteFromNamespacesResponse>; bulkUpdate: <T = unknown>(objects: SavedObjectsBulkUpdateObject<T>[], options?: SavedObjectsBulkUpdateOptions) => Promise<SavedObjectsBulkUpdateResponse<T>>; removeReferencesTo: (type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions) => Promise<SavedObjectsRemoveReferencesToResponse>; incrementCounter: <T>(type: string, id: string, counterFields: (string | SavedObjectsIncrementCounterField)[], options?: SavedObjectsIncrementCounterOptions<T>) => Promise<SavedObject<T>>; openPointInTimeForType: (type: string | string[], { keepAlive, preference }?: SavedObjectsOpenPointInTimeOptions) => Promise<SavedObjectsOpenPointInTimeResponse>; closePointInTime: (id: string, options?: SavedObjectsBaseOptions | undefined) => Promise<SavedObjectsClosePointInTimeResponse>; createPointInTimeFinder: (findOptions: Pick<SavedObjectsFindOptions, \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"preference\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\">, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies | undefined) => ISavedObjectsPointInTimeFinder; }"
         ],
         "initialIsOpen": false
       },
@@ -13018,7 +13094,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 149
+          "lineNumber": 171
         },
         "signature": [
           "false | true | \"wait_for\""
@@ -13099,7 +13175,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 213
+          "lineNumber": 235
         },
         "signature": [
           "{ get: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObject<T>>; delete: (type: string, id: string, options?: ",
@@ -13259,7 +13335,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-          "lineNumber": 380
+          "lineNumber": 383
         },
         "signature": [
           "SavedObjectsBaseOptions"
@@ -13279,7 +13355,7 @@
           "lineNumber": 21
         },
         "signature": [
-          "{ type: string | string[]; filter?: any; fields?: string[] | undefined; search?: string | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | \"_doc\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
+          "{ type: string | string[]; filter?: any; aggs?: Record<string, estypes.AggregationContainer> | undefined; fields?: string[] | undefined; preference?: string | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | \"_doc\" | undefined; search?: string | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -13295,7 +13371,7 @@
             "section": "def-server.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; }"
         ],
         "initialIsOpen": false
       },
@@ -13447,7 +13523,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 227
+          "lineNumber": 249
         },
         "signature": [
           "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""

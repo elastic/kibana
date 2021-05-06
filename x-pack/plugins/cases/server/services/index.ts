@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AggregationContainer } from '@elastic/elasticsearch/api/types';
 import {
   KibanaRequest,
   Logger,
@@ -17,6 +18,7 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsFindResult,
 } from 'kibana/server';
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import {
@@ -34,6 +36,7 @@ import {
   CaseResponse,
   caseTypeField,
   CasesFindRequest,
+  GetCaseIdsByAlertIdAggs,
 } from '../../common';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
@@ -111,6 +114,10 @@ interface FindSubCasesStatusStats {
 
 interface GetCommentArgs extends ClientArgs {
   commentId: string;
+}
+
+interface GetCaseIdsByAlertIdArgs extends ClientArgs {
+  alertId: string;
 }
 
 interface PostCaseArgs extends ClientArgs {
@@ -220,6 +227,7 @@ export interface CaseServiceSetup {
   getSubCases(args: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
+  getCaseIdsByAlertId(args: GetCaseIdsByAlertIdArgs): Promise<string[]>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
@@ -895,6 +903,56 @@ export class CaseService implements CaseServiceSetup {
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for ${JSON.stringify(id)}: ${error}`);
+      throw error;
+    }
+  }
+
+  private buildCaseIdsAggs = (size: number = 100): Record<string, AggregationContainer> => ({
+    references: {
+      nested: {
+        path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+      },
+      aggregations: {
+        caseIds: {
+          terms: {
+            field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+            size,
+          },
+        },
+      },
+    },
+  });
+
+  public async getCaseIdsByAlertId({
+    client,
+    alertId,
+  }: GetCaseIdsByAlertIdArgs): Promise<string[]> {
+    try {
+      this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
+
+      let response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        fields: [],
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: this.buildCaseIdsAggs(),
+        filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
+      });
+      if (response.total > 100) {
+        response = await client.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+          type: CASE_COMMENT_SAVED_OBJECT,
+          fields: [],
+          page: 1,
+          perPage: 1,
+          sortField: defaultSortField,
+          aggs: this.buildCaseIdsAggs(response.total),
+          filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
+        });
+      }
+      return response.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
+    } catch (error) {
+      this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
       throw error;
     }
   }

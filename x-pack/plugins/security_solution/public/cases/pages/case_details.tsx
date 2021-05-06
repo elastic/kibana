@@ -38,7 +38,7 @@ export const CaseDetailsPage = React.memo(() => {
         {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
           <CaseCallOut
             title={savedObjectReadOnlyErrorMessage.title}
-            messages={[{ ...savedObjectReadOnlyErrorMessage }]}
+            messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}
           />
         )}
         <CaseView

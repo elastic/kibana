@@ -22,7 +22,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/timelines/public/types.ts",
-            "lineNumber": 4
+            "lineNumber": 11
           },
           "signature": [
             "((props: ",
@@ -35,7 +35,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/timelines/public/types.ts",
-        "lineNumber": 3
+        "lineNumber": 10
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -57,7 +57,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/timelines/server/types.ts",
-        "lineNumber": 2
+        "lineNumber": 9
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -71,7 +71,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/timelines/server/types.ts",
-        "lineNumber": 4
+        "lineNumber": 11
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -91,7 +91,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/index.ts",
-          "lineNumber": 1
+          "lineNumber": 8
         },
         "signature": [
           "\"timelines\""
@@ -106,7 +106,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/timelines/common/index.ts",
-          "lineNumber": 2
+          "lineNumber": 9
         },
         "signature": [
           "\"timelines\""
