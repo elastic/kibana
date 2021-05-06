@@ -68,7 +68,7 @@ describe('SearchSource', () => {
   beforeEach(() => {
     const getConfigMock = jest
       .fn()
-      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source'])
+      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source', '_id'])
       .mockName('getConfig');
 
     mockSearchMethod = jest
@@ -432,9 +432,9 @@ describe('SearchSource', () => {
         searchSource.setField('index', ({
           ...indexPattern,
           getComputedFields: () => ({
-            storedFields: [],
+            storedFields: ['*'],
             scriptFields: [],
-            docvalueFields: [],
+            docvalueFields: ['foo-mar'],
           }),
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['*']);
