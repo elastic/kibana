@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -162,8 +162,9 @@ export const AddConnectorInline = ({
   );
 
   return (
-    <Fragment key={index}>
+    <>
       <EuiAccordion
+        key={index}
         initialIsOpen={true}
         id={index.toString()}
         className="actAccordionActionForm"
@@ -255,7 +256,7 @@ export const AddConnectorInline = ({
         )}
       </EuiAccordion>
       <EuiSpacer size="xs" />
-    </Fragment>
+    </>
   );
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -202,9 +202,9 @@ export const ActionTypeForm = ({
   );
 
   const accordionContent = checkEnabledResult.isEnabled ? (
-    <Fragment>
+    <>
       {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
-        <Fragment>
+        <>
           <EuiFlexGroup component="div">
             <EuiFlexItem grow={true}>
               <EuiFormControlLayout
@@ -240,7 +240,7 @@ export const ActionTypeForm = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
-        </Fragment>
+        </>
       )}
       <EuiFlexGroup component="div">
         <EuiFlexItem>
@@ -305,15 +305,16 @@ export const ActionTypeForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-    </Fragment>
+    </>
   ) : (
     checkEnabledResult.messageCard
   );
 
   return (
-    <Fragment key={index}>
+    <>
       <EuiAccordion
         initialIsOpen={true}
+        key={index}
         id={index.toString()}
         onToggle={setIsOpen}
         paddingSize="l"
@@ -347,7 +348,7 @@ export const ActionTypeForm = ({
                     )}
                     <EuiFlexItem grow={false}>
                       {checkEnabledResult.isEnabled === false && (
-                        <Fragment>
+                        <>
                           <EuiIconTip
                             type="alert"
                             color="danger"
@@ -359,7 +360,7 @@ export const ActionTypeForm = ({
                             )}
                             position="right"
                           />
-                        </Fragment>
+                        </>
                       )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -386,7 +387,7 @@ export const ActionTypeForm = ({
         {accordionContent}
       </EuiAccordion>
       <EuiSpacer size="m" />
-    </Fragment>
+    </>
   );
 };
 

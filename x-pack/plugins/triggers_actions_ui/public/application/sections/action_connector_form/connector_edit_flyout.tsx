@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useReducer, useState, Fragment } from 'react';
+import React, { useCallback, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -173,7 +173,7 @@ export const ConnectorEditFlyout = ({
       });
 
   const flyoutTitle = connector.isPreconfigured ? (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h3 id="flyoutTitle">
           <FormattedMessage
@@ -201,7 +201,7 @@ export const ConnectorEditFlyout = ({
           values={{ actionDescription: actionTypeModel.selectMessage }}
         />
       </EuiText>
-    </Fragment>
+    </>
   ) : (
     <EuiTitle size="s">
       <h3 id="flyoutTitle">
@@ -310,7 +310,7 @@ export const ConnectorEditFlyout = ({
               consumer={consumer}
             />
           ) : (
-            <Fragment>
+            <>
               <EuiText>
                 {i18n.translate(
                   'xpack.triggersActionsUI.sections.editConnectorForm.descriptionText',
@@ -325,7 +325,7 @@ export const ConnectorEditFlyout = ({
                   defaultMessage="Learn more about preconfigured connectors."
                 />
               </EuiLink>
-            </Fragment>
+            </>
           )
         ) : (
           <TestConnectorForm
@@ -355,7 +355,7 @@ export const ConnectorEditFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
               {canSave && actionTypeModel && !connector.isPreconfigured ? (
-                <Fragment>
+                <>
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="secondary"
@@ -388,7 +388,7 @@ export const ConnectorEditFlyout = ({
                       />
                     </EuiButton>
                   </EuiFlexItem>
-                </Fragment>
+                </>
               ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -98,7 +98,7 @@ describe('alert_edit', () => {
       validate: (): ValidationResult => {
         return { errors: {} };
       },
-      alertParamsExpression: () => <React.Fragment />,
+      alertParamsExpression: () => <></>,
       requiresAppContext: false,
     };
 

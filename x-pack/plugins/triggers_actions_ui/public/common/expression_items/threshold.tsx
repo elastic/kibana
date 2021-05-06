@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
@@ -134,7 +134,7 @@ export const ThresholdExpression = ({
           </EuiFlexItem>
           {Array.from(Array(numRequiredThresholds)).map((_notUsed, i) => {
             return (
-              <Fragment key={`threshold${i}`}>
+              <>
                 {i > 0 ? (
                   <EuiFlexItem
                     grow={false}
@@ -143,7 +143,7 @@ export const ThresholdExpression = ({
                     <EuiText>{andThresholdText}</EuiText>
                   </EuiFlexItem>
                 ) : null}
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} key={`threshold${i}`}>
                   <EuiFormRow
                     isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
                     error={errors[`threshold${i}`]}
@@ -167,7 +167,7 @@ export const ThresholdExpression = ({
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-              </Fragment>
+              </>
             );
           })}
         </EuiFlexGroup>

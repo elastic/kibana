@@ -153,7 +153,7 @@ describe('actions_connectors_list component with items', () => {
 
     const mockedActionParamsFields = React.lazy(async () => ({
       default() {
-        return <React.Fragment />;
+        return <></>;
       },
     }));
 

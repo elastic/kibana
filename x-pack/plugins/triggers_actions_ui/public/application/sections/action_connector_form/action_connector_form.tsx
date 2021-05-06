@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiForm,
   EuiCallOut,
@@ -137,7 +137,7 @@ export const ActionConnectorForm = ({
   const actionTypeRegistered = actionTypeRegistry.get(connector.actionTypeId);
   if (!actionTypeRegistered)
     return (
-      <Fragment>
+      <>
         <EuiCallOut
           title={i18n.translate(
             'xpack.triggersActionsUI.sections.actionConnectorForm.actions.connectorTypeConfigurationWarningTitleText',
@@ -169,7 +169,7 @@ export const ActionConnectorForm = ({
           </EuiText>
         </EuiCallOut>
         <EuiSpacer />
-      </Fragment>
+      </>
     );
 
   const FieldsComponent = actionTypeRegistered.actionConnectorFields;

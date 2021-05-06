@@ -206,13 +206,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   ....
 
   return (
-    <Fragment>
+    <>
       {hasExpressionErrors ? (
-        <Fragment>
+        <>
           <EuiSpacer />
           <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
           <EuiSpacer />
-        </Fragment>
+        </>
       ) : null}
       <EuiSpacer size="l" />
       <EuiFormLabel>
@@ -221,7 +221,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           id="xpack.stackAlerts.threshold.ui.selectIndex"
         />
   ....
-      </Fragment>
+      </>
   );
 };
 
@@ -322,7 +322,7 @@ Fields of this object `AlertTypeModel` will be mapped properly in the UI below.
 
 2. Define `alertParamsExpression` as `React.FunctionComponent` - this is the form for filling Alert params based on the current Alert type.
 ```
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WhenExpression, OfExpression } from '../../../../common/expression_items';
 import { builtInAggregationTypes } from '../../../../common/constants';
@@ -340,7 +340,7 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
 }) => {
   const [aggType, setAggType] = useState<string>('count');
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup gutterSize="s" wrap>
         <EuiFlexItem grow={false}>
           <WhenExpression
@@ -365,7 +365,7 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-    </Fragment>
+    </>
   );
 };
 
@@ -653,7 +653,7 @@ const ThresholdSpecifier = (
 }) => {
   if (!actionGroup) {
     // render empty if no condition action group is specified
-    return <Fragment />;
+    return null;
   }
 
   return (
@@ -1157,7 +1157,7 @@ Below is a list of steps that should be done to build and register a new action 
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [ActionTypeModel]:
 ```
-import React, { Fragment, lazy } from 'react';
+import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
@@ -1230,7 +1230,7 @@ export function getActionType(): ActionTypeModel {
 
 2. Define `actionConnectorFields` as `React.FunctionComponent` - this is the form for action connector.
 ```
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiTextArea } from '@elastic/eui';
@@ -1252,7 +1252,7 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
 >> = ({ action, editActionConfig, errors }) => {
   const { someConnectorField } = action.config;
   return (
-    <Fragment>
+    <>
       <EuiFieldText
         fullWidth
         isInvalid={errors.someConnectorField.length > 0 && someConnectorField !== undefined}
@@ -1267,7 +1267,7 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
           }
         }}
       />
-    </Fragment>
+    </>
   );
 };
 
@@ -1277,7 +1277,7 @@ export {ExampleConnectorFields as default};
 
 3. Define action type params fields using the property of `ActionTypeModel` `actionParamsFields`: 
 ```
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiTextArea } from '@elastic/eui';
@@ -1300,7 +1300,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
 }) => {
   const { message } = actionParams;
   return (
-    <Fragment>
+    <>
       <EuiTextArea
         fullWidth
         isInvalid={errors.message.length > 0 && message !== undefined}
@@ -1315,7 +1315,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
           }
         }}
       />
-    </Fragment>
+    </>
   );
 };
 

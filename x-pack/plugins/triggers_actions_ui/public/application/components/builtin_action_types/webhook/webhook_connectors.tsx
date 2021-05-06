@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -111,7 +111,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
   let headerControl;
   if (hasHeaders) {
     headerControl = (
-      <Fragment>
+      <>
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
@@ -189,7 +189,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </Fragment>
+      </>
     );
   }
 
@@ -221,7 +221,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<
   });
 
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -411,14 +411,14 @@ const WebhookActionConnectorFields: React.FunctionComponent<
         {hasHeaders && headerControl}
         <EuiSpacer size="m" />
       </div>
-    </Fragment>
+    </>
   );
 };
 
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
   if (isCreate) {
     return (
-      <Fragment>
+      <>
         <EuiSpacer size="s" />
         <EuiText size="s" data-test-subj="rememberValuesMessage">
           <FormattedMessage
@@ -427,11 +427,11 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
           />
         </EuiText>
         <EuiSpacer size="s" />
-      </Fragment>
+      </>
     );
   }
   return (
-    <Fragment>
+    <>
       <EuiSpacer size="m" />
       <EuiCallOut
         size="s"
@@ -446,7 +446,7 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
         )}
       />
       <EuiSpacer size="m" />
-    </Fragment>
+    </>
   );
 }
 

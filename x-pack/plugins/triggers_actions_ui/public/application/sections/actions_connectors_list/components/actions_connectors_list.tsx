@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
   EuiSpacer,
@@ -172,14 +172,14 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         return checkEnabledResult.isEnabled ? (
           link
         ) : (
-          <Fragment>
+          <>
             {link}
             <EuiIconTip
               type="questionInCircle"
               content={checkEnabledResult.message}
               position="right"
             />
-          </Fragment>
+          </>
         );
       },
     },

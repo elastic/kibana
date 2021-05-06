@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, lazy } from 'react';
+import React, { lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
@@ -34,7 +34,7 @@ const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
   const mockedActionParamsFields = lazy(async () => ({
     default() {
-      return <Fragment />;
+      return <></>;
     },
   }));
 
@@ -45,7 +45,7 @@ describe('action_form', () => {
     validate: (): ValidationResult => {
       return { errors: {} };
     },
-    alertParamsExpression: () => <Fragment />,
+    alertParamsExpression: () => <></>,
     requiresAppContext: false,
   };
 

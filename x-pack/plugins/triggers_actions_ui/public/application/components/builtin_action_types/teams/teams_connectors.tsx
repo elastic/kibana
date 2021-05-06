@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -20,7 +20,7 @@ const TeamsActionFields: React.FunctionComponent<
   const { docLinks } = useKibana().services;
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         id="webhookUrl"
         fullWidth
@@ -41,7 +41,7 @@ const TeamsActionFields: React.FunctionComponent<
           }
         )}
       >
-        <Fragment>
+        <>
           {getEncryptedFieldNotifyLabel(!action.id)}
           <EuiFieldText
             fullWidth
@@ -59,16 +59,16 @@ const TeamsActionFields: React.FunctionComponent<
               }
             }}
           />
-        </Fragment>
+        </>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };
 
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
   if (isCreate) {
     return (
-      <Fragment>
+      <>
         <EuiSpacer size="s" />
         <EuiText size="s" data-test-subj="rememberValuesMessage">
           <FormattedMessage
@@ -77,11 +77,11 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
           />
         </EuiText>
         <EuiSpacer size="s" />
-      </Fragment>
+      </>
     );
   }
   return (
-    <Fragment>
+    <>
       <EuiSpacer size="s" />
       <EuiCallOut
         size="s"
@@ -93,7 +93,7 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
         )}
       />
       <EuiSpacer size="m" />
-    </Fragment>
+    </>
   );
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -46,7 +46,7 @@ export const EmailParamsFields = ({
   }, [defaultMessage]);
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         fullWidth
         error={errors.to}
@@ -58,7 +58,7 @@ export const EmailParamsFields = ({
           }
         )}
         labelAppend={
-          <Fragment>
+          <>
             <span>
               {!addCC ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
@@ -77,7 +77,7 @@ export const EmailParamsFields = ({
                 </EuiButtonEmpty>
               ) : null}
             </span>
-          </Fragment>
+          </>
         }
       >
         <EuiComboBox
@@ -224,7 +224,7 @@ export const EmailParamsFields = ({
         )}
         errors={errors.message as string[]}
       />
-    </Fragment>
+    </>
   );
 };
 

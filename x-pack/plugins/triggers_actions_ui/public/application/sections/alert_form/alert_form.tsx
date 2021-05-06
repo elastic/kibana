@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -433,8 +433,9 @@ export const AlertForm = ({
   const alertTypeNodes = Object.entries(alertTypesByProducer)
     .sort((a, b) => alertTypeGroupCompare(a, b, solutions))
     .map(([solution, items], groupIndex) => (
-      <Fragment key={`group${groupIndex}`}>
+      <>
         <EuiFlexGroup
+          key={`group${groupIndex}`}
           gutterSize="none"
           alignItems="center"
           className="triggersActionsUI__alertTypeNodeHeading"
@@ -470,8 +471,9 @@ export const AlertForm = ({
                 </span>
               );
               return (
-                <Fragment key={index}>
+                <>
                   <EuiListGroupItem
+                    key={index}
                     data-test-subj={`${item.id}-SelectOption`}
                     color="primary"
                     label={
@@ -498,16 +500,16 @@ export const AlertForm = ({
                       }
                     }}
                   />
-                </Fragment>
+                </>
               );
             })}
         </EuiListGroup>
         <EuiSpacer />
-      </Fragment>
+      </>
     ));
 
   const alertTypeDetails = (
-    <Fragment>
+    <>
       <EuiHorizontalRule />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
@@ -605,11 +607,11 @@ export const AlertForm = ({
       selectedAlertType ? (
         <>
           {errors.actionConnectors.length >= 1 ? (
-            <Fragment>
+            <>
               <EuiSpacer />
               <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
               <EuiSpacer />
-            </Fragment>
+            </>
           ) : null}
           <ActionForm
             actions={alert.actions}
@@ -640,7 +642,7 @@ export const AlertForm = ({
           />
         </>
       ) : null}
-    </Fragment>
+    </>
   );
 
   const labelForAlertChecked = (
@@ -793,9 +795,9 @@ export const AlertForm = ({
       </EuiFlexGrid>
       <EuiSpacer size="m" />
       {alertTypeModel ? (
-        <Fragment>{alertTypeDetails}</Fragment>
+        <>{alertTypeDetails}</>
       ) : availableAlertTypes.length ? (
-        <Fragment>
+        <>
           <EuiHorizontalRule />
           <EuiFormRow
             fullWidth
@@ -857,14 +859,14 @@ export const AlertForm = ({
           </EuiFormRow>
           <EuiSpacer />
           {errors.alertTypeId.length >= 1 && alert.alertTypeId !== undefined ? (
-            <Fragment>
+            <>
               <EuiSpacer />
               <EuiCallOut color="danger" size="s" title={errors.alertTypeId} />
               <EuiSpacer />
-            </Fragment>
+            </>
           ) : null}
           {alertTypeNodes}
-        </Fragment>
+        </>
       ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (

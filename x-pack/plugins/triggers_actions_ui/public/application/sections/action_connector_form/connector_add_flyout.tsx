@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, Fragment, useReducer } from 'react';
+import React, { useCallback, useState, useReducer } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -199,7 +199,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     };
 
     saveButton = (
-      <Fragment>
+      <>
         {onTestConnector && (
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -236,7 +236,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
             />
           </EuiButton>
         </EuiFlexItem>
-      </Fragment>
+      </>
     );
   }
 
@@ -251,7 +251,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
           ) : null}
           <EuiFlexItem>
             {actionTypeModel && actionType ? (
-              <Fragment>
+              <>
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
                     <FormattedMessage
@@ -266,7 +266,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
                 <EuiText size="s" color="subdued">
                   {actionTypeModel.selectMessage}
                 </EuiText>
-              </Fragment>
+              </>
             ) : (
               <EuiTitle size="s">
                 <h3 id="selectConnectorFlyoutTitle">
@@ -285,7 +285,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
           !actionType && hasActionsUpgradeableByTrial ? (
             <UpgradeYourLicenseCallOut http={http} />
           ) : (
-            <Fragment />
+            <></>
           )
         }
       >

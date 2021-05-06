@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -40,7 +40,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   }, []);
 
   return (
-    <Fragment>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -271,7 +271,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           </EuiFlexGroup>
         </>
       ) : null}
-    </Fragment>
+    </>
   );
 };
 
@@ -284,7 +284,7 @@ function nullableString(str: string | null | undefined) {
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
   if (isCreate) {
     return (
-      <Fragment>
+      <>
         <EuiSpacer size="s" />
         <EuiText size="s" data-test-subj="rememberValuesMessage">
           <FormattedMessage
@@ -293,11 +293,11 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
           />
         </EuiText>
         <EuiSpacer size="s" />
-      </Fragment>
+      </>
     );
   }
   return (
-    <Fragment>
+    <>
       <EuiSpacer size="m" />
       <EuiCallOut
         size="s"
@@ -312,7 +312,7 @@ function getEncryptedFieldNotifyLabel(isCreate: boolean) {
         )}
       />
       <EuiSpacer size="m" />
-    </Fragment>
+    </>
   );
 }
 

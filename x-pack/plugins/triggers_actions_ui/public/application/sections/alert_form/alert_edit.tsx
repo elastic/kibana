@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -149,7 +149,7 @@ export const AlertEdit = ({
           <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               {hasActionsDisabled && (
-                <Fragment>
+                <>
                   <EuiCallOut
                     size="s"
                     color="danger"
@@ -161,7 +161,7 @@ export const AlertEdit = ({
                     )}
                   />
                   <EuiSpacer />
-                </Fragment>
+                </>
               )}
               <AlertForm
                 alert={alert}

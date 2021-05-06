@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -296,7 +296,7 @@ export const ActionForm = ({
       />
     </SectionLoading>
   ) : (
-    <Fragment>
+    <>
       <EuiTitle size="s">
         <h4>
           <FormattedMessage
@@ -394,7 +394,7 @@ export const ActionForm = ({
         })}
       <EuiSpacer size="m" />
       {isAddActionPanelOpen ? (
-        <Fragment>
+        <>
           <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
@@ -439,7 +439,7 @@ export const ActionForm = ({
               actionTypeNodes
             )}
           </EuiFlexGroup>
-        </Fragment>
+        </>
       ) : (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
@@ -468,7 +468,7 @@ export const ActionForm = ({
           actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}
-    </Fragment>
+    </>
   );
 };
 
