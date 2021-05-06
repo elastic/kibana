@@ -12,6 +12,7 @@ import { version, Version } from '../common/schemas';
 /**
  * Types the DefaultVersionNumber as:
  *   - If null or undefined, then a default of the number 1 will be used
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultVersionNumber = new t.Type<Version, Version | undefined, unknown>(
   'DefaultVersionNumber',
