@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from '../../../data/common';
+import { IndexPattern, Query } from '../../../data/common';
 import { Panel } from './panel_model';
 
 export { Metric, Series, Panel } from './panel_model';
@@ -25,11 +25,6 @@ export interface SanitizedFieldType {
 
 export type IndexPatternValue = { id: string } | string | undefined;
 
-export interface QueryObject {
-  language: string;
-  query: string | { [key: string]: any };
-}
-
 export interface Annotation {
   color?: string;
   fields?: string;
@@ -39,16 +34,16 @@ export interface Annotation {
   ignore_global_filters?: number;
   ignore_panel_filters?: number;
   index_pattern: IndexPatternValue;
-  query_string?: QueryObject;
+  query_string?: Query;
   template?: string;
   time_field?: string;
 }
 
 export interface VisPayload {
-  filters: any[];
+  filters: unknown[];
   panels: Panel[];
   // general
-  query: QueryObject[];
+  query: Query[];
   state: {
     sort?: {
       column: string;

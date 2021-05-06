@@ -26,9 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SerialDiffAgg = (props) => {
-  const { siblings, fields, indexPattern } = props;
-  const defaults = { lag: '' };
-  const model = { ...defaults, ...props.model };
+  const { siblings, fields, indexPattern, model } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);

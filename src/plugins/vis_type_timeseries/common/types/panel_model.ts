@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Query } from '../../../data/common';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../enums';
-import { IndexPatternValue, Annotation, QueryObject } from './index';
+import { IndexPatternValue, Annotation } from './index';
 import { ColorRules, BackgroundColorRules, BarColorRules, GaugeColorRules } from './color_rules';
 
 interface MetricVariable {
@@ -30,13 +31,13 @@ export interface Metric {
   id: string;
   alias?: string;
   metric_agg?: string;
-  numerator?: QueryObject;
-  denominator?: QueryObject;
+  numerator?: Query;
+  denominator?: Query;
   sigma?: string;
   unit?: string;
   model_type?: string;
   mode?: string;
-  lag?: number | '';
+  lag?: number;
   alpha?: number;
   beta?: number;
   gamma?: number;
@@ -59,7 +60,7 @@ export interface Metric {
 
 interface SplitFilters {
   color?: string;
-  filter?: QueryObject;
+  filter?: Query;
   id?: string;
   label?: string;
 }
@@ -73,15 +74,15 @@ export interface Series {
   chart_type: string;
   color: string;
   color_rules?: ColorRules[];
-  fill?: number | '';
-  filter?: QueryObject | '';
+  fill?: number;
+  filter?: Query;
   formatter: string;
   hidden?: boolean;
   hide_in_legend?: number;
   id: string;
   ignore_global_filter?: number;
   label?: string;
-  line_width?: number | '';
+  line_width?: number;
   metrics: Metric[];
   offset_time?: string;
   override_index_pattern?: number;
@@ -89,7 +90,7 @@ export interface Series {
     type: string;
     name: string;
   };
-  point_size?: number | '';
+  point_size?: number;
   separate_axis: number;
   seperate_axis: number;
   series_drop_last_bucket: number;
@@ -127,7 +128,7 @@ export interface Panel {
   bar_color_rules: BarColorRules[];
   drilldown_url?: string;
   drop_last_bucket: number;
-  filter?: QueryObject;
+  filter?: Query;
   gauge_color_rules?: GaugeColorRules[];
   gauge_inner_color?: string;
   gauge_inner_width?: string | number;

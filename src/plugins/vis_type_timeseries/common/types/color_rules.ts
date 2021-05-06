@@ -8,23 +8,23 @@
 
 interface BaseColorRules {
   id: string | null;
-  value?: number | null;
-  operator?: string | null;
+  value?: number;
+  operator?: string;
 }
 
 export type ColorRules = BaseColorRules & {
-  text?: string | null;
+  text?: string;
 };
 
 export type BackgroundColorRules = BaseColorRules & {
-  color?: string | null;
-  background_color?: string | null;
+  color?: string;
+  background_color?: string;
 };
 
 export type BarColorRules = BaseColorRules & {
-  bar_color?: string | null;
+  bar_color?: string;
 };
 
 export type GaugeColorRules = ColorRules & {
-  gauge?: string | null;
+  gauge?: string;
 };
