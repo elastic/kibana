@@ -22,7 +22,7 @@ Open *TSVB*, then make sure the required settings are configured.
 
 .. From the *Index pattern* dropdown, select the index pattern you want to visualize. 
 +
-To visualize an *es* index, open the *Index pattern select mode* menu, deselect *Use only {kib} index patterns*, then select the {es} index from the dropdown.
+To visualize an {es} index, open the *Index pattern select mode* menu, deselect *Use only {kib} index patterns*, then select the {es} index from the dropdown.
 
 .. From the *Time field* dropdown, select the field you want to visualize, then enter the field *Interval*.
 
