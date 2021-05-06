@@ -287,7 +287,6 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const threshold = 1;
 
   const typeThresholdField = ($el: Cypress.ObjectLike) => cy.wrap($el).type(rule.thresholdField);
-  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
