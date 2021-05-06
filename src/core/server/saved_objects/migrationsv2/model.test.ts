@@ -931,7 +931,7 @@ describe('migrations v2 model', () => {
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
           type: 'retryable_es_client_error',
-          message: 'random transform documents bulk error',
+          message: 'random documents bulk index error',
         });
         const newState = model(reindexSourceToTempIndexBulkState, res);
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
@@ -1250,7 +1250,7 @@ describe('migrations v2 model', () => {
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX should throw a throwBadResponse error if action failed', () => {
         const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
           type: 'retryable_es_client_error',
-          message: 'random transform documents bulk error',
+          message: 'random documents bulk index error',
         });
         const newState = model(
           transformedDocumentsBulkIndexState,
