@@ -19,7 +19,6 @@ import { transformConnectorsForExport } from './transform_connectors_for_export'
 import { ActionTypeRegistry } from '../action_type_registry';
 import {
   ACTION_SAVED_OBJECT_TYPE,
-  ALERT_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 
