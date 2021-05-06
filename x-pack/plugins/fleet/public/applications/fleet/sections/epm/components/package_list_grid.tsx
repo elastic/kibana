@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
@@ -25,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
-import { useLink } from '../../../hooks';
 import { useLocalSearch, searchIdField } from '../hooks';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
@@ -192,17 +190,10 @@ function MissingIntegrationContent({
   resetQuery,
   setSelectedCategory,
 }: MissingIntegrationContentProps) {
-  const history = useHistory();
-  const { getPath } = useLink();
-
   const handleCustomInputsLinkClick = useCallback(() => {
     resetQuery();
     setSelectedCategory('custom');
-
-    history.push({
-      pathname: getPath('integrations_all'),
-    });
-  }, [history, getPath, resetQuery, setSelectedCategory]);
+  }, [resetQuery, setSelectedCategory]);
 
   return (
     <EuiText>
