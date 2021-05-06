@@ -123,32 +123,32 @@ export const formulaOperation: OperationDefinition<
         : params?.formula
       : '';
 
-    return currentColumn.references.length
-      ? [
-          {
-            type: 'function',
-            function: 'mapColumn',
-            arguments: {
-              id: [columnId],
-              name: [label || ''],
-              exp: [
+    return [
+      {
+        type: 'function',
+        function: 'mapColumn',
+        arguments: {
+          id: [columnId],
+          name: [label || ''],
+          exp: [
+            {
+              type: 'expression',
+              chain: [
                 {
-                  type: 'expression',
-                  chain: [
-                    {
-                      type: 'function',
-                      function: 'math',
-                      arguments: {
-                        expression: [`"${currentColumn.references[0]}"`],
-                      },
-                    },
-                  ],
+                  type: 'function',
+                  function: 'math',
+                  arguments: {
+                    expression: [
+                      currentColumn.references.length ? `"${currentColumn.references[0]}"` : ``,
+                    ],
+                  },
                 },
               ],
             },
-          },
-        ]
-      : [];
+          ],
+        },
+      },
+    ];
   },
   buildColumn({ previousColumn, layer, indexPattern }, _, operationDefinitionMap) {
     let previousFormula = '';
@@ -212,6 +212,25 @@ export const formulaOperation: OperationDefinition<
     const { root, error } = tryToParse(column.params.formula || '');
     if (!root) return true;
     return Boolean(!error && !hasMathNode(root));
+  },
+  createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
+    const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
+    const tempLayer = {
+      ...layer,
+      columns: {
+        ...layer.columns,
+        [targetId]: { ...currentColumn },
+      },
+    };
+    const { newLayer } = regenerateLayerFromAst(
+      currentColumn.params.formula ?? '',
+      tempLayer,
+      targetId,
+      currentColumn,
+      indexPattern,
+      operationDefinitionMap
+    );
+    return newLayer;
   },
 
   paramEditor: FormulaEditor,
@@ -891,9 +910,7 @@ export function regenerateLayerFromAst(
     operationDefinitionMap
   );
 
-  const columns = {
-    ...layer.columns,
-  };
+  const columns = { ...layer.columns };
 
   const locations: Record<string, TinymathLocation> = {};
 

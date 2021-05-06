@@ -7,6 +7,7 @@
 
 import type { OperationMetadata } from '../../types';
 import {
+  copyColumn,
   insertNewColumn,
   replaceColumn,
   updateColumnParam,
@@ -23,7 +24,7 @@ import type { IndexPattern, IndexPatternLayer } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
-import { createMockedReferenceOperation } from './mocks';
+import { createMockedFullReference, createMockedManagedReference } from './mocks';
 
 jest.mock('../operations');
 jest.mock('../../id_generator');
@@ -89,11 +90,127 @@ describe('state_helpers', () => {
     (generateId as jest.Mock).mockImplementation(() => `id${++count}`);
 
     // @ts-expect-error we are inserting an invalid type
-    operationDefinitionMap.testReference = createMockedReferenceOperation();
+    operationDefinitionMap.testReference = createMockedFullReference();
+    // @ts-expect-error we are inserting an invalid type
+    operationDefinitionMap.managedReference = createMockedManagedReference();
   });
 
   afterEach(() => {
     delete operationDefinitionMap.testReference;
+    delete operationDefinitionMap.managedReference;
+  });
+
+  describe('copyColumn', () => {
+    it('should recursively modify a formula and update the math ast', () => {
+      const source = {
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'Formula',
+        operationType: 'formula' as const,
+        params: {
+          formula: 'moving_average(sum(bytes), window=5)',
+          isFormulaBroken: false,
+        },
+        references: ['formulaX1'],
+      };
+      const math = {
+        customLabel: true,
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'math',
+        operationType: 'math' as const,
+        params: { tinymathAst: 'formulaX2' },
+        references: ['formulaX2'],
+      };
+      const sum = {
+        customLabel: true,
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'formulaX0',
+        operationType: 'sum' as const,
+        scale: 'ratio' as const,
+        sourceField: 'bytes',
+      };
+      const movingAvg = {
+        customLabel: true,
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'formulaX2',
+        operationType: 'moving_average' as const,
+        params: { window: 5 },
+        references: ['formulaX0'],
+      };
+      expect(
+        copyColumn({
+          layer: {
+            indexPatternId: '',
+            columnOrder: [],
+            columns: {
+              source,
+              formulaX0: sum,
+              formulaX1: math,
+              formulaX2: movingAvg,
+              formulaX3: {
+                ...math,
+                label: 'formulaX3',
+                references: ['formulaX2'],
+                params: { tinymathAst: 'formulaX2' },
+              },
+            },
+          },
+          targetId: 'copy',
+          sourceColumn: source,
+          shouldDeleteSource: false,
+          indexPattern,
+          sourceColumnId: 'source',
+        })
+      ).toEqual({
+        indexPatternId: '',
+        columnOrder: [
+          'source',
+          'formulaX0',
+          'formulaX1',
+          'formulaX2',
+          'formulaX3',
+          'copyX0',
+          'copyX1',
+          'copyX2',
+          'copyX3',
+          'copy',
+        ],
+        columns: {
+          source,
+          formulaX0: sum,
+          formulaX1: math,
+          formulaX2: movingAvg,
+          formulaX3: {
+            ...math,
+            label: 'formulaX3',
+            references: ['formulaX2'],
+            params: { tinymathAst: 'formulaX2' },
+          },
+          copy: expect.objectContaining({ ...source, references: ['copyX3'] }),
+          copyX0: expect.objectContaining({ ...sum, label: 'copyX0' }),
+          copyX1: expect.objectContaining({
+            ...math,
+            label: 'copyX1',
+            references: ['copyX0'],
+            params: { tinymathAst: 'copyX0' },
+          }),
+          copyX2: expect.objectContaining({
+            ...movingAvg,
+            label: 'copyX2',
+            references: ['copyX1'],
+          }),
+          copyX3: expect.objectContaining({
+            ...math,
+            label: 'copyX3',
+            references: ['copyX2'],
+            params: { tinymathAst: 'copyX2' },
+          }),
+        },
+      });
+    });
   });
 
   describe('insertNewColumn', () => {

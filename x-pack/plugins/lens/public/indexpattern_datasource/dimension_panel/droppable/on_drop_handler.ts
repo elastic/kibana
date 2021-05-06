@@ -114,7 +114,7 @@ function onMoveCompatible(
 
   const modifiedLayer = copyColumn({
     layer,
-    columnId,
+    targetId: columnId,
     sourceColumnId: droppedItem.columnId,
     sourceColumn,
     shouldDeleteSource,

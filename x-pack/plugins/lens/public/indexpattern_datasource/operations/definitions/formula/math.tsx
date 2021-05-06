@@ -47,6 +47,7 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
         type: 'function',
         function: 'mapColumn',
         arguments: {
+          id: [columnId],
           name: [columnId],
           exp: [
             {
@@ -83,6 +84,9 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
   isTransferable: (column, newIndexPattern) => {
     // TODO has to check all children
     return true;
+  },
+  createCopy: (layer) => {
+    return { ...layer };
   },
 };
 

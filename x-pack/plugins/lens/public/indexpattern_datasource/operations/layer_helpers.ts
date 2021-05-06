@@ -33,7 +33,7 @@ interface ColumnChange {
 
 interface ColumnCopy {
   layer: IndexPatternLayer;
-  columnId: string;
+  targetId: string;
   sourceColumn: IndexPatternColumn;
   sourceColumnId: string;
   indexPattern: IndexPattern;
@@ -42,16 +42,19 @@ interface ColumnCopy {
 
 export function copyColumn({
   layer,
-  columnId,
+  targetId,
   sourceColumn,
   shouldDeleteSource,
   indexPattern,
   sourceColumnId,
 }: ColumnCopy): IndexPatternLayer {
-  let modifiedLayer = {
-    ...layer,
-    columns: copyReferencesRecursively(layer.columns, sourceColumn, columnId),
-  };
+  let modifiedLayer = copyReferencesRecursively(
+    layer,
+    sourceColumn,
+    sourceColumnId,
+    targetId,
+    indexPattern
+  );
 
   if (shouldDeleteSource) {
     modifiedLayer = deleteColumn({
@@ -65,16 +68,25 @@ export function copyColumn({
 }
 
 function copyReferencesRecursively(
-  columns: Record<string, IndexPatternColumn>,
+  layer: IndexPatternLayer,
   sourceColumn: IndexPatternColumn,
-  columnId: string
-) {
+  sourceId: string,
+  targetId: string,
+  indexPattern: IndexPattern
+): IndexPatternLayer {
+  let columns = { ...layer.columns };
   if ('references' in sourceColumn) {
-    if (columns[columnId]) {
-      return columns;
+    if (columns[targetId]) {
+      return layer;
     }
+
+    const def = operationDefinitionMap[sourceColumn.operationType];
+    if ('createCopy' in def) {
+      // Allow managed references to recursively insert new columns
+      return def.createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap);
+    }
+
     sourceColumn?.references.forEach((ref, index) => {
-      // TODO: Add an option to assign IDs without generating the new one
       const newId = generateId();
       const refColumn = { ...columns[ref] };
 
@@ -83,10 +95,10 @@ function copyReferencesRecursively(
       // and visible columns shouldn't be copied
       const refColumnWithInnerRefs =
         'references' in refColumn
-          ? copyReferencesRecursively(columns, refColumn, newId) // if a column has references, copy them too
+          ? copyReferencesRecursively(layer, refColumn, sourceId, newId, indexPattern).columns // if a column has references, copy them too
           : { [newId]: refColumn };
 
-      const newColumn = columns[columnId];
+      const newColumn = columns[targetId];
       let references = [newId];
       if (newColumn && 'references' in newColumn) {
         references = newColumn.references;
@@ -96,7 +108,7 @@ function copyReferencesRecursively(
       columns = {
         ...columns,
         ...refColumnWithInnerRefs,
-        [columnId]: {
+        [targetId]: {
           ...sourceColumn,
           references,
         },
@@ -105,10 +117,11 @@ function copyReferencesRecursively(
   } else {
     columns = {
       ...columns,
-      [columnId]: sourceColumn,
+      [targetId]: sourceColumn,
     };
   }
-  return columns;
+
+  return { ...layer, columns, columnOrder: getColumnOrder({ ...layer, columns }) };
 }
 
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
