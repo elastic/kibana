@@ -1,7 +1,39 @@
 {
   "id": "observability",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "id": "def-public.FormatterRuleRegistry",
+        "type": "Class",
+        "tags": [],
+        "label": "FormatterRuleRegistry",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.FormatterRuleRegistry",
+            "text": "FormatterRuleRegistry"
+          },
+          "<TFieldMap> extends ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "public",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-public.RuleRegistry",
+            "text": "RuleRegistry"
+          },
+          "<TFieldMap, FormattableRuleType<TFieldMap>>"
+        ],
+        "children": [],
+        "source": {
+          "path": "x-pack/plugins/observability/public/rules/formatter_rule_registry.ts",
+          "lineNumber": 27
+        },
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "id": "def-public.ActionMenu",
@@ -58,7 +90,13 @@
         "label": "createExploratoryViewUrl",
         "signature": [
           "(allSeries: Record<string, ",
-          "SeriesUrl",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.SeriesUrl",
+            "text": "SeriesUrl"
+          },
           ">, baseHref: string) => string"
         ],
         "description": [],
@@ -70,13 +108,19 @@
             "isRequired": true,
             "signature": [
               "Record<string, ",
-              "SeriesUrl",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.SeriesUrl",
+                "text": "SeriesUrl"
+              },
               ">"
             ],
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 36
+              "lineNumber": 38
             }
           },
           {
@@ -90,7 +134,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 36
+              "lineNumber": 38
             }
           }
         ],
@@ -98,7 +142,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-          "lineNumber": 36
+          "lineNumber": 38
         },
         "initialIsOpen": false
       },
@@ -115,7 +159,7 @@
         "children": [
           {
             "id": "def-public.FieldValueSuggestions.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "label": "props",
             "isRequired": true,
             "signature": [
@@ -496,7 +540,7 @@
         "type": "Function",
         "label": "useFetcher",
         "signature": [
-          "(fn: () => TReturn, fnDeps: any[], options: { preservePreviousData?: boolean | undefined; }) => ",
+          "(fn: ({}: { signal: AbortSignal; }) => TReturn, fnDeps: any[], options: { preservePreviousData?: boolean | undefined; }) => ",
           "FetcherResult",
           "<InferResponseType<TReturn>> & { refetch: () => void; }"
         ],
@@ -508,7 +552,7 @@
             "label": "fn",
             "isRequired": true,
             "signature": [
-              "() => TReturn"
+              "({}: { signal: AbortSignal; }) => TReturn"
             ],
             "description": [],
             "source": {
@@ -701,7 +745,7 @@
         "type": "Function",
         "label": "useUiTracker",
         "signature": [
-          "({\n  app: defaultApp,\n}: { app?: \"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
+          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"uptime\" | \"fleet\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -731,7 +775,7 @@
                   "lineNumber": 40
                 },
                 "signature": [
-                  "\"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
+                  "\"apm\" | \"uptime\" | \"fleet\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ]
               }
             ],
@@ -783,7 +827,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 111
+              "lineNumber": 115
             },
             "signature": [
               "{ services: ",
@@ -813,7 +857,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 115
+              "lineNumber": 119
             },
             "signature": [
               "{ transactions: ",
@@ -830,7 +874,35 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 110
+          "lineNumber": 114
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ConfigSchema",
+        "type": "Interface",
+        "label": "ConfigSchema",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ConfigSchema.unsafe",
+            "type": "Object",
+            "label": "unsafe",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/index.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              "{ alertingExperience: { enabled: boolean; }; }"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/index.ts",
+          "lineNumber": 24
         },
         "initialIsOpen": false
       },
@@ -898,7 +970,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 56
+              "lineNumber": 60
             },
             "signature": [
               {
@@ -927,7 +999,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 57
+              "lineNumber": 61
             },
             "signature": [
               {
@@ -943,7 +1015,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 53
+          "lineNumber": 57
         },
         "initialIsOpen": false
       },
@@ -1029,13 +1101,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 61
+              "lineNumber": 65
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 60
+          "lineNumber": 64
         },
         "initialIsOpen": false
       },
@@ -1064,6 +1136,42 @@
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
           "lineNumber": 31
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.HasDataResponse",
+        "type": "Interface",
+        "label": "HasDataResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.HasDataResponse.hasData",
+            "type": "boolean",
+            "label": "hasData",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 36
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.HasDataResponse.indices",
+            "type": "string",
+            "label": "indices",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 37
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 35
         },
         "initialIsOpen": false
       },
@@ -1099,7 +1207,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 65
+              "lineNumber": 69
             },
             "signature": [
               "Record<string, ",
@@ -1121,7 +1229,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 66
+              "lineNumber": 70
             },
             "signature": [
               "Record<string, ",
@@ -1138,7 +1246,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 64
+          "lineNumber": 68
         },
         "initialIsOpen": false
       },
@@ -1174,7 +1282,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 94
+              "lineNumber": 98
             },
             "signature": [
               "(by: string, direction: string) => Promise<",
@@ -1196,7 +1304,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 95
+              "lineNumber": 99
             },
             "signature": [
               {
@@ -1212,7 +1320,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 93
+          "lineNumber": 97
         },
         "initialIsOpen": false
       },
@@ -1231,7 +1339,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 73
+              "lineNumber": 77
             }
           },
           {
@@ -1242,7 +1350,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 74
+              "lineNumber": 78
             },
             "signature": [
               "string | null"
@@ -1256,7 +1364,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 75
+              "lineNumber": 79
             },
             "signature": [
               "string | null"
@@ -1270,7 +1378,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 76
+              "lineNumber": 80
             },
             "signature": [
               "string | null"
@@ -1284,7 +1392,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 77
+              "lineNumber": 81
             },
             "signature": [
               "number | null"
@@ -1298,7 +1406,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 78
+              "lineNumber": 82
             },
             "signature": [
               "number | null"
@@ -1312,7 +1420,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 79
+              "lineNumber": 83
             },
             "signature": [
               "number | null"
@@ -1326,7 +1434,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 80
+              "lineNumber": 84
             },
             "signature": [
               "number | null"
@@ -1340,7 +1448,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 81
+              "lineNumber": 85
             },
             "signature": [
               "number | null"
@@ -1354,7 +1462,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 82
+              "lineNumber": 86
             },
             "signature": [
               "number | null"
@@ -1368,7 +1476,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 83
+              "lineNumber": 87
             },
             "signature": [
               "{ timestamp: number; cpu: number | null; iowait: number | null; load: number | null; rx: number | null; tx: number | null; }[]"
@@ -1377,7 +1485,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 72
+          "lineNumber": 76
         },
         "initialIsOpen": false
       },
@@ -1396,7 +1504,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 125
+              "lineNumber": 129
             },
             "signature": [
               {
@@ -1416,7 +1524,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 126
+              "lineNumber": 130
             },
             "signature": [
               {
@@ -1436,7 +1544,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 127
+              "lineNumber": 131
             },
             "signature": [
               {
@@ -1450,13 +1558,13 @@
           },
           {
             "tags": [],
-            "id": "def-public.ObservabilityFetchDataResponse.uptime",
+            "id": "def-public.ObservabilityFetchDataResponse.synthetics",
             "type": "Object",
-            "label": "uptime",
+            "label": "synthetics",
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 128
+              "lineNumber": 132
             },
             "signature": [
               {
@@ -1476,7 +1584,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 129
+              "lineNumber": 133
             },
             "signature": [
               {
@@ -1491,7 +1599,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 124
+          "lineNumber": 128
         },
         "initialIsOpen": false
       },
@@ -1510,7 +1618,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 133
+              "lineNumber": 137
             }
           },
           {
@@ -1521,7 +1629,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 134
+              "lineNumber": 138
             }
           },
           {
@@ -1532,19 +1640,28 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 135
+              "lineNumber": 139
             }
           },
           {
             "tags": [],
-            "id": "def-public.ObservabilityHasDataResponse.uptime",
-            "type": "boolean",
-            "label": "uptime",
+            "id": "def-public.ObservabilityHasDataResponse.synthetics",
+            "type": "Object",
+            "label": "synthetics",
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 136
-            }
+              "lineNumber": 140
+            },
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.HasDataResponse",
+                "text": "HasDataResponse"
+              }
+            ]
           },
           {
             "tags": [],
@@ -1554,7 +1671,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 137
+              "lineNumber": 141
             },
             "signature": [
               {
@@ -1569,7 +1686,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 132
+          "lineNumber": 136
         },
         "initialIsOpen": false
       },
@@ -1588,7 +1705,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 30
+              "lineNumber": 41
             },
             "signature": [
               {
@@ -1602,13 +1719,43 @@
           },
           {
             "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsSetup.ruleRegistry",
+            "type": "Object",
+            "label": "ruleRegistry",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 42
+            },
+            "signature": [
+              "{ registry: ",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "public",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-public.RuleRegistry",
+                "text": "RuleRegistry"
+              },
+              "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.AlertTypeModel",
+                "text": "AlertTypeModel"
+              },
+              "<Record<string, unknown>>>; }"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-public.ObservabilityPublicPluginsSetup.home",
             "type": "Object",
             "label": "home",
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 31
+              "lineNumber": 43
             },
             "signature": [
               {
@@ -1624,7 +1771,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/plugin.ts",
-          "lineNumber": 29
+          "lineNumber": 40
         },
         "initialIsOpen": false
       },
@@ -1643,7 +1790,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 35
+              "lineNumber": 47
             },
             "signature": [
               {
@@ -1664,7 +1811,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 36
+              "lineNumber": 48
             },
             "signature": [
               {
@@ -1684,7 +1831,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 37
+              "lineNumber": 49
             },
             "signature": [
               {
@@ -1699,7 +1846,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/plugin.ts",
-          "lineNumber": 34
+          "lineNumber": 46
         },
         "initialIsOpen": false
       },
@@ -1735,6 +1882,133 @@
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
           "lineNumber": 20
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SeriesUrl",
+        "type": "Interface",
+        "label": "SeriesUrl",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SeriesUrl.time",
+            "type": "Object",
+            "label": "time",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 74
+            },
+            "signature": [
+              "{ to: string; from: string; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SeriesUrl.breakdown",
+            "type": "string",
+            "label": "breakdown",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 78
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SeriesUrl.filters",
+            "type": "Array",
+            "label": "filters",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 79
+            },
+            "signature": [
+              "UrlFilter",
+              "[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SeriesUrl.seriesType",
+            "type": "CompoundType",
+            "label": "seriesType",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 80
+            },
+            "signature": [
+              "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\" | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SeriesUrl.reportType",
+            "type": "CompoundType",
+            "label": "reportType",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 81
+            },
+            "signature": [
+              "\"logs\" | \"cpu\" | \"pld\" | \"kpi\" | \"upd\" | \"upp\" | \"svl\" | \"tpt\" | \"mem\" | \"nwk\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SeriesUrl.operationType",
+            "type": "CompoundType",
+            "label": "operationType",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 82
+            },
+            "signature": [
+              "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SeriesUrl.dataType",
+            "type": "CompoundType",
+            "label": "dataType",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 83
+            },
+            "signature": [
+              "AppDataType"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SeriesUrl.reportDefinitions",
+            "type": "Object",
+            "label": "reportDefinitions",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 84
+            },
+            "signature": [
+              "Record<string, string[]> | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+          "lineNumber": 73
         },
         "initialIsOpen": false
       },
@@ -1809,7 +2083,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 99
+              "lineNumber": 103
             },
             "signature": [
               "{ monitors: ",
@@ -1847,7 +2121,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 104
+              "lineNumber": 108
             },
             "signature": [
               "{ up: ",
@@ -1872,7 +2146,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 98
+          "lineNumber": 102
         },
         "initialIsOpen": false
       },
@@ -1908,7 +2182,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 121
+              "lineNumber": 125
             },
             "signature": [
               {
@@ -1923,7 +2197,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 120
+          "lineNumber": 124
         },
         "initialIsOpen": false
       },
@@ -1931,20 +2205,26 @@
         "id": "def-public.UXHasDataResponse",
         "type": "Interface",
         "label": "UXHasDataResponse",
+        "signature": [
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.UXHasDataResponse",
+            "text": "UXHasDataResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.HasDataResponse",
+            "text": "HasDataResponse"
+          }
+        ],
         "description": [],
         "tags": [],
         "children": [
-          {
-            "tags": [],
-            "id": "def-public.UXHasDataResponse.hasData",
-            "type": "boolean",
-            "label": "hasData",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 36
-            }
-          },
           {
             "tags": [],
             "id": "def-public.UXHasDataResponse.serviceName",
@@ -1953,7 +2233,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-              "lineNumber": 37
+              "lineNumber": 41
             },
             "signature": [
               "string | number | undefined"
@@ -1962,7 +2242,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 35
+          "lineNumber": 40
         },
         "initialIsOpen": false
       },
@@ -2170,7 +2450,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
-          "lineNumber": 9
+          "lineNumber": 8
         },
         "signature": [
           "\"observability:enableInspectEsQueries\""
@@ -2185,7 +2465,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 40
+          "lineNumber": 44
         },
         "signature": [
           "(fetchDataParams: ",
@@ -2208,7 +2488,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 44
+          "lineNumber": 48
         },
         "signature": [
           "(params: ",
@@ -2239,7 +2519,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 70
+          "lineNumber": 74
         },
         "signature": [
           "null | number"
@@ -2254,10 +2534,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 48
+          "lineNumber": 52
         },
         "signature": [
-          "\"uptime\" | \"apm\" | \"infra_metrics\" | \"infra_logs\" | \"ux\""
+          "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"ux\""
         ],
         "initialIsOpen": false
       },
@@ -2292,7 +2572,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
-          "lineNumber": 69
+          "lineNumber": 73
         },
         "signature": [
           "null | string"
@@ -2341,32 +2621,17 @@
     "objects": [],
     "setup": {
       "id": "def-public.ObservabilityPublicSetup",
-      "type": "Interface",
+      "type": "Type",
       "label": "ObservabilityPublicSetup",
-      "description": [],
       "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-public.ObservabilityPublicSetup.dashboard",
-          "type": "Object",
-          "label": "dashboard",
-          "description": [],
-          "source": {
-            "path": "x-pack/plugins/observability/public/plugin.ts",
-            "lineNumber": 26
-          },
-          "signature": [
-            "{ register: typeof ",
-            "registerDataHandler",
-            "; }"
-          ]
-        }
-      ],
+      "description": [],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 25
+        "lineNumber": 37
       },
+      "signature": [
+        "{ dashboard: { register: typeof registerDataHandler; }; ruleRegistry: FormatterRuleRegistry<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>; isAlertingExperienceEnabled: () => boolean; }"
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2378,7 +2643,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 40
+        "lineNumber": 52
       },
       "signature": [
         "void"
@@ -2575,6 +2840,102 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.kqlQuery",
+        "type": "Function",
+        "label": "kqlQuery",
+        "signature": [
+          "(kql: string | undefined) => ",
+          "QueryContainer",
+          "[]"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-server.kqlQuery.$1",
+            "type": "string",
+            "label": "kql",
+            "isRequired": false,
+            "signature": [
+              "string | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/queries.ts",
+              "lineNumber": 25
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/queries.ts",
+          "lineNumber": 25
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.rangeQuery",
+        "type": "Function",
+        "label": "rangeQuery",
+        "signature": [
+          "(start: number, end: number, field: string) => ",
+          "QueryContainer",
+          "[]"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-server.rangeQuery.$1",
+            "type": "number",
+            "label": "start",
+            "isRequired": true,
+            "signature": [
+              "number"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/queries.ts",
+              "lineNumber": 11
+            }
+          },
+          {
+            "id": "def-server.rangeQuery.$2",
+            "type": "number",
+            "label": "end",
+            "isRequired": true,
+            "signature": [
+              "number"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/queries.ts",
+              "lineNumber": 11
+            }
+          },
+          {
+            "id": "def-server.rangeQuery.$3",
+            "type": "string",
+            "label": "field",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/queries.ts",
+              "lineNumber": 11
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/queries.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.unwrapEsResponse",
         "type": "Function",
         "label": "unwrapEsResponse",
@@ -2609,9 +2970,161 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "id": "def-server.ObservabilityRouteCreateOptions",
+        "type": "Interface",
+        "label": "ObservabilityRouteCreateOptions",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.ObservabilityRouteCreateOptions.options",
+            "type": "Object",
+            "label": "options",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 34
+            },
+            "signature": [
+              "{ tags: string[]; }"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/types.ts",
+          "lineNumber": 33
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ObservabilityRouteHandlerResources",
+        "type": "Interface",
+        "label": "ObservabilityRouteHandlerResources",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.ObservabilityRouteHandlerResources.core",
+            "type": "Object",
+            "label": "core",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 23
+            },
+            "signature": [
+              "{ start: () => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
+              ">; setup: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ObservabilityRouteHandlerResources.ruleRegistry",
+            "type": "Object",
+            "label": "ruleRegistry",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "RuleRegistry",
+              "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ObservabilityRouteHandlerResources.request",
+            "type": "Object",
+            "label": "request",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 28
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ObservabilityRouteHandlerResources.context",
+            "type": "Object",
+            "label": "context",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "ObservabilityRequestHandlerContext"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ObservabilityRouteHandlerResources.logger",
+            "type": "Object",
+            "label": "logger",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/server/routes/types.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              "Logger"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/types.ts",
+          "lineNumber": 22
+        },
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
+      {
+        "id": "def-server.AbstractObservabilityServerRouteRepository",
+        "type": "Type",
+        "label": "AbstractObservabilityServerRouteRepository",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/types.ts",
+          "lineNumber": 39
+        },
+        "signature": [
+          "ServerRouteRepository<ObservabilityRouteHandlerResources, ObservabilityRouteCreateOptions, Record<string, ServerRoute<string, t.Mixed | undefined, ObservabilityRouteHandlerResources, any, ObservabilityRouteCreateOptions>>>"
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.Mappings",
         "type": "Type",
@@ -2636,6 +3149,23 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.ObservabilityAPIReturnType",
+        "type": "Type",
+        "label": "ObservabilityAPIReturnType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/types.ts",
+          "lineNumber": 54
+        },
+        "signature": [
+          "TEndpoint extends \"GET /api/observability/rules/alerts/top\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern\" ? ({ \"GET /api/observability/rules/alerts/top\": ServerRoute<\"GET /api/observability/rules/alerts/top\", t.TypeC<{ query: t.IntersectionC<[t.TypeC<{ start: t.Type<number, string, unknown>; end: t.Type<number, string, unknown>; }>, t.PartialC<{ kuery: t.StringC; size: t.Type<number, unknown, unknown>; }>]>; }>, ObservabilityRouteHandlerResources, any, ObservabilityRouteCreateOptions>; } & { \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ServerRoute<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", undefined, ObservabilityRouteHandlerResources, { title: string; timeFieldName: string; fields: ",
+          "IndexPatternFieldDescriptor",
+          "[]; }, ObservabilityRouteCreateOptions>; })[TEndpoint] extends ServerRoute<any, any, any, infer TReturnType, Record<string, any>> ? TReturnType : never : never"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.ObservabilityConfig",
         "type": "Type",
         "label": "ObservabilityConfig",
@@ -2643,10 +3173,60 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/server/index.ts",
-          "lineNumber": 25
+          "lineNumber": 34
         },
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
+          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertingExperience: Readonly<{} & { enabled: boolean; }>; }>; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ObservabilityRuleRegistryClient",
+        "type": "Type",
+        "label": "ObservabilityRuleRegistryClient",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/server/types.ts",
+          "lineNumber": 35
+        },
+        "signature": [
+          "ScopedRuleRegistryClient<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ObservabilityServerRouteRepository",
+        "type": "Type",
+        "label": "ObservabilityServerRouteRepository",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/server/routes/get_global_observability_server_route_repository.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "ServerRouteRepository",
+          "<",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ", { \"GET /api/observability/rules/alerts/top\": ",
+          "ServerRoute",
+          "<\"GET /api/observability/rules/alerts/top\", ",
+          "TypeC"
         ],
         "initialIsOpen": false
       },
@@ -2658,7 +3238,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts",
-          "lineNumber": 24
+          "lineNumber": 29
         },
         "signature": [
           "{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
@@ -2681,12 +3261,26 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/observability/server/plugin.ts",
-        "lineNumber": 20
+        "lineNumber": 22
       },
       "signature": [
         "{ getScopedAnnotationsClient: (requestContext: ",
-        "ObservabilityRequestHandlerContext",
-        ", request: ",
+        {
+          "pluginId": "core",
+          "scope": "server",
+          "docId": "kibCorePluginApi",
+          "section": "def-server.RequestHandlerContext",
+          "text": "RequestHandlerContext"
+        },
+        " & { licensing: ",
+        {
+          "pluginId": "licensing",
+          "scope": "server",
+          "docId": "kibLicensingPluginApi",
+          "section": "def-server.LicensingApiRequestHandlerContext",
+          "text": "LicensingApiRequestHandlerContext"
+        },
+        "; }, request: ",
         {
           "pluginId": "core",
           "scope": "server",
@@ -2697,9 +3291,7 @@
         "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
         "Annotation",
         "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
-        "GetResponse",
-        "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
-        "DeleteResponse"
+        "GetResponse"
       ],
       "lifecycle": "setup",
       "initialIsOpen": true

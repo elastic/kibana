@@ -233,7 +233,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-                  "lineNumber": 69
+                  "lineNumber": 71
                 }
               },
               {
@@ -253,7 +253,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-                  "lineNumber": 69
+                  "lineNumber": 71
                 }
               }
             ],
@@ -261,7 +261,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 69
+              "lineNumber": 71
             }
           },
           {
@@ -277,7 +277,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 71
+              "lineNumber": 73
             }
           }
         ],
@@ -831,7 +831,7 @@
               "lineNumber": 9
             },
             "signature": [
-              "{ exploreDataInChart: { enabled: boolean; }; }"
+              "{ exploreDataInChart: { enabled: boolean; }; exploreDataInContextMenu: { enabled: boolean; }; }"
             ]
           }
         ],

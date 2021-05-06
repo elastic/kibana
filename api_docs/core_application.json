@@ -1070,7 +1070,7 @@
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 695
+              "lineNumber": 700
             },
             "signature": [
               "Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>"
@@ -1086,7 +1086,7 @@
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 704
+              "lineNumber": 709
             },
             "signature": [
               "Observable",
@@ -1131,7 +1131,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 712
+                  "lineNumber": 717
                 }
               },
               {
@@ -1154,7 +1154,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 712
+                  "lineNumber": 717
                 }
               }
             ],
@@ -1162,7 +1162,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 712
+              "lineNumber": 717
             }
           },
           {
@@ -1189,7 +1189,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 750
+                  "lineNumber": 755
                 }
               }
             ],
@@ -1197,7 +1197,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 750
+              "lineNumber": 755
             }
           },
           {
@@ -1222,7 +1222,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 764
+                  "lineNumber": 769
                 }
               },
               {
@@ -1240,7 +1240,7 @@
                     "description": [],
                     "source": {
                       "path": "src/core/public/application/types.ts",
-                      "lineNumber": 764
+                      "lineNumber": 769
                     },
                     "signature": [
                       "string | undefined"
@@ -1254,7 +1254,7 @@
                     "description": [],
                     "source": {
                       "path": "src/core/public/application/types.ts",
-                      "lineNumber": 764
+                      "lineNumber": 769
                     },
                     "signature": [
                       "boolean | undefined"
@@ -1263,7 +1263,7 @@
                 ],
                 "source": {
                   "path": "src/core/public/application/types.ts",
-                  "lineNumber": 764
+                  "lineNumber": 769
                 }
               }
             ],
@@ -1271,7 +1271,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 764
+              "lineNumber": 769
             }
           },
           {
@@ -1284,7 +1284,7 @@
             ],
             "source": {
               "path": "src/core/public/application/types.ts",
-              "lineNumber": 769
+              "lineNumber": 774
             },
             "signature": [
               "Observable",
@@ -1294,7 +1294,7 @@
         ],
         "source": {
           "path": "src/core/public/application/types.ts",
-          "lineNumber": 691
+          "lineNumber": 696
         },
         "initialIsOpen": false
       },
@@ -1537,6 +1537,22 @@
             "source": {
               "path": "src/core/public/application/types.ts",
               "lineNumber": 687
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.NavigateToAppOptions.openInNewTab",
+            "type": "CompoundType",
+            "label": "openInNewTab",
+            "description": [
+              "\nif true, will open the app in new tab, will share session information via window.open if base"
+            ],
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 692
             },
             "signature": [
               "boolean | undefined"
