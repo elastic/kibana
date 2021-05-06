@@ -56,7 +56,9 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const exception = useEventFiltersSelector(getFormEntry);
 
-    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(['logs-endpoint.events.*']);
+    // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
+    const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
+    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(indexNames);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -76,12 +78,13 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
               ...arg.exceptionItems[0],
               name: exception?.name ?? '',
               comments: exception?.comments ?? [],
+              os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
             },
-            hasItemsError: arg.errorExists,
+            hasItemsError: arg.errorExists || !arg.exceptionItems[0].entries.length,
           },
         });
       },
-      [dispatch, exception?.name, exception?.comments]
+      [dispatch, exception?.name, exception?.comments, exception?.os_types]
     );
 
     const handleOnChangeName = useCallback(
@@ -125,7 +128,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           listNamespaceType={'agnostic'}
           ruleName={RULE_NAME}
           indexPatterns={indexPatterns}
-          isOrDisabled={false}
+          isOrDisabled={true} // TODO: pending to be validated
           isAndDisabled={false}
           isNestedDisabled={false}
           data-test-subj="alert-exception-builder"
@@ -161,15 +164,26 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           <EuiSuperSelect
             name="os"
             options={osOptions}
+            fullWidth
             valueOfSelected={
               exception?.os_types ? exception.os_types[0] : OS_TITLES[OperatingSystem.WINDOWS]
             }
-            // TODO: To be implemented when adding update/create from scratch action
-            // onChange={}}
+            onChange={(value) => {
+              if (!exception) return;
+              dispatch({
+                type: 'eventFiltersChangeForm',
+                payload: {
+                  entry: {
+                    ...exception,
+                    os_types: [value as 'windows' | 'linux' | 'macos'],
+                  },
+                },
+              });
+            }}
           />
         </EuiFormRow>
       ),
-      [exception?.os_types, osOptions]
+      [dispatch, exception, osOptions]
     );
 
     const commentsInputMemo = useMemo(
@@ -187,7 +201,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
         <EuiText size="s">{FORM_DESCRIPTION}</EuiText>
         <EuiSpacer size="s" />
         {nameInputMemo}
-        <EuiSpacer />
+        <EuiSpacer size="m" />
         {allowSelectOs ? (
           <>
             {osInputMemo}
@@ -195,7 +209,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           </>
         ) : null}
         {exceptionBuilderComponentMemo}
-        <EuiSpacer />
+        <EuiSpacer size="xl" />
         {commentsInputMemo}
       </EuiForm>
     ) : (

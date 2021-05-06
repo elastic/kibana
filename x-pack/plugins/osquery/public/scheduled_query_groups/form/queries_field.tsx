@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { findIndex, forEach, pullAt } from 'lodash';
+import { findIndex, forEach, pullAt, pullAllBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { PackagePolicyInput, PackagePolicyInputStream } from '../../../../fleet/common';
@@ -50,6 +50,7 @@ const getNewStream = ({ id, interval, query, scheduledQueryGroupId }: GetNewStre
 const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQueryGroupId }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
+  const [tableSelectedItems, setTableSelectedItems] = useState<PackagePolicyInputStream[]>([]);
 
   const handleShowAddFlyout = useCallback(() => setShowAddQueryFlyout(true), []);
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
@@ -126,6 +127,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
     [handleHideAddFlyout, scheduledQueryGroupId, setValue]
   );
 
+  const handleDeleteQueries = useCallback(() => {
+    setValue(
+      produce((draft) => {
+        pullAllBy(draft[0].streams, tableSelectedItems, 'vars.id.value');
+
+        return draft;
+      })
+    );
+    setTableSelectedItems([]);
+  }, [setValue, tableSelectedItems]);
+
   const handlePackUpload = useCallback(
     (newQueries) => {
       setValue(
@@ -148,26 +160,42 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, scheduledQu
     [scheduledQueryGroupId, setValue]
   );
 
+  const tableData = useMemo(() => ({ inputs: field.value }), [field.value]);
+
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
-            <FormattedMessage
-              id="xpack.osquery.scheduledQueryGroup.queriesForm.addQueryButtonLabel"
-              defaultMessage="Add query"
-            />
-          </EuiButton>
+          {!tableSelectedItems.length ? (
+            <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
+              <FormattedMessage
+                id="xpack.osquery.scheduledQueryGroup.queriesForm.addQueryButtonLabel"
+                defaultMessage="Add query"
+              />
+            </EuiButton>
+          ) : (
+            <EuiButton color="danger" onClick={handleDeleteQueries} iconType="trash">
+              <FormattedMessage
+                id="xpack.osquery.scheduledQueryGroup.table.deleteQueriesButtonLabel"
+                defaultMessage="Delete {queriesCount, plural, one {# query} other {# queries}}"
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                values={{
+                  queriesCount: tableSelectedItems.length,
+                }}
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
       {field.value && field.value[0].streams?.length ? (
         <ScheduledQueryGroupQueriesTable
           editMode={true}
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          data={{ inputs: field.value }}
+          data={tableData}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
+          selectedItems={tableSelectedItems}
+          setSelectedItems={setTableSelectedItems}
         />
       ) : null}
       <EuiSpacer />
