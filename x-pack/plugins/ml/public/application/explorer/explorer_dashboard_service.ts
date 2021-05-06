@@ -161,6 +161,9 @@ export const explorerService = {
   setViewByPerPage: (payload: number) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE, payload });
   },
+  setSwimLaneSeverity: (payload: number) => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIM_LANE_SEVERITY, payload });
+  },
 };
 
 export type ExplorerService = typeof explorerService;

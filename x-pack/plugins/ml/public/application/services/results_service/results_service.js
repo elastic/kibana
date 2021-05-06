@@ -463,7 +463,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Obtains the overall bucket scores for the specified job ID(s).
     // Pass ['*'] to search over all job IDs.
     // Returned response contains a results property as an object of max score by time.
-    getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval) {
+    getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval, overallScore) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
@@ -474,6 +474,7 @@ export function resultsServiceProvider(mlApiServices) {
             bucketSpan: interval,
             start: earliestMs,
             end: latestMs,
+            overallScore,
           })
           .then((resp) => {
             const dataByTime = get(resp, ['overall_buckets'], []);

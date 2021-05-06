@@ -98,7 +98,8 @@ export class AnomalyTimelineService {
   public async loadOverallData(
     selectedJobs: ExplorerJob[],
     chartWidth?: number,
-    bucketInterval?: TimeBucketsInterval
+    bucketInterval?: TimeBucketsInterval,
+    overallScore?: number
   ): Promise<OverallSwimlaneData> {
     const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
@@ -127,7 +128,8 @@ export class AnomalyTimelineService {
       1,
       overallBucketsBounds.min.valueOf(),
       overallBucketsBounds.max.valueOf(),
-      interval.asSeconds() + 's'
+      interval.asSeconds() + 's',
+      overallScore
     );
     const overallSwimlaneData = this.processOverallResults(
       resp.results,

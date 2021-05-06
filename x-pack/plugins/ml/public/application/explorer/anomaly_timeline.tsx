@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiPanel,
@@ -35,11 +35,7 @@ import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
-import { getFilteredSwimLaneData } from './anomaly_timeline/utils';
-import {
-  SelectSeverityUI,
-  SEVERITY_OPTIONS,
-} from '../components/controls/select_severity/select_severity';
+import { SeverityControl } from '../components/severity_control';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -64,7 +60,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
-    const [swimLaneSeverity, setSwimLaneSeverity] = useState<number>(0);
 
     const canEditDashboards = capabilities.dashboard?.createNew ?? false;
 
@@ -92,15 +87,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       swimlaneLimit,
       loading,
       overallAnnotations,
+      swimLaneSeverity,
+      overallSwimlaneData,
+      viewBySwimlaneData,
     } = explorerState;
-
-    const overallSwimlaneData = useMemo(() => {
-      return getFilteredSwimLaneData(explorerState.overallSwimlaneData, swimLaneSeverity);
-    }, [explorerState.overallSwimlaneData, swimLaneSeverity]);
-
-    const viewBySwimlaneData = useMemo(() => {
-      return getFilteredSwimLaneData(explorerState.viewBySwimlaneData, swimLaneSeverity);
-    }, [explorerState.viewBySwimlaneData, swimLaneSeverity]);
 
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
@@ -150,6 +140,14 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <SeverityControl
+                value={swimLaneSeverity ?? 0}
+                onChange={useCallback((update) => {
+                  explorerService.setSwimLaneSeverity(update);
+                }, [])}
+              />
+            </EuiFlexItem>
             {viewBySwimlaneOptions.length > 0 && (
               <>
                 <EuiFlexItem grow={false}>
@@ -172,13 +170,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                       onChange={(e) => explorerService.setViewBySwimlaneFieldName(e.target.value)}
                     />
                   </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SelectSeverityUI
-                    compressed={true}
-                    severity={SEVERITY_OPTIONS.find((v) => v.val === swimLaneSeverity)!}
-                    onChange={(v) => setSwimLaneSeverity(v.val)}
-                  />
                 </EuiFlexItem>
                 {selectedCells ? (
                   <EuiFlexItem grow={false}>
@@ -281,7 +272,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 })
               }
               timeBuckets={timeBuckets}
-              showLegend={true}
+              showLegend={false}
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}

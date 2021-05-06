@@ -40,7 +40,8 @@ export function resultsServiceProvider(
     topN: any,
     earliestMs: any,
     latestMs: any,
-    interval?: any
+    interval?: any,
+    overallScore?: number
   ): Promise<any>;
   getInfluencerValueMaxScoreByTime(
     jobIds: string[],
