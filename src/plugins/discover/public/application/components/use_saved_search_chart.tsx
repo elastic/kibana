@@ -18,7 +18,7 @@ import { DataPublicPluginStart, search } from '../../../../data/public';
 
 export type ChartSubject = BehaviorSubject<{
   state: string;
-  data?: any;
+  data?: unknown;
   bucketInterval?: TimechartBucketInterval;
 }>;
 
@@ -45,6 +45,7 @@ async function fetch(
     return discoverResponseHandler(tabifiedData, dimensions);
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return;
+    data.search.showError(error);
   }
 }
 
@@ -77,7 +78,7 @@ export function useSavedSearchChart({
       subject.next({ state: 'loading' });
 
       return fetch(searchSource, abortController, chartAggConfigs!, data, searchSessionId).then(
-        (result: any) => {
+        (result: unknown) => {
           subject.next({ state: 'complete', data: result, bucketInterval: newInterval });
         }
       );

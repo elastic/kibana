@@ -42,6 +42,7 @@ export function useSavedSearchTotalHits({
         },
         error: (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
+          data.search.showError(error);
           return error;
         },
       });

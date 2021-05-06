@@ -13,13 +13,14 @@ import { DiscoverServices } from '../../build_services';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 import { IndexPattern, ISearchSource } from '../../../../data/common';
 import { SavedSearch } from '../../saved_searches';
-import { GetStateReturn } from '../angular/discover_state';
+import { AppState, GetStateReturn } from '../angular/discover_state';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../inspector/common/adapters/request';
 import { fetchStatuses } from './constants';
 import { ChartSubject, useSavedSearchChart } from './use_saved_search_chart';
 import { TotalHitsSubject, useSavedSearchTotalHits } from './use_saved_search_total_hits';
 import { useSavedSearchDocuments } from './use_saved_search_documents';
+import { AutoRefreshDoneFn } from '../../../../data/public';
 
 export interface UseSavedSearch {
   chart$: ChartSubject;
@@ -46,7 +47,7 @@ export const useSavedSearch = ({
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  state: any;
+  state: AppState;
   indexPattern: IndexPattern;
   savedSearch: SavedSearch;
   searchSource: ISearchSource;
@@ -60,7 +61,7 @@ export const useSavedSearch = ({
   const refetch$ = useMemo(() => new Subject(), []);
   // handler emitted by `timefilter.getAutoRefreshFetch$()`
   // to notify when data completed loading and to start a new autorefresh loop
-  const autoRefreshDoneCb = useRef<undefined | any>(undefined);
+  const autoRefreshDoneCb = useRef<undefined | AutoRefreshDoneFn>(undefined);
 
   const { fetch$: chart$, fetch: fetchChart } = useSavedSearchChart({
     data,
@@ -117,7 +118,7 @@ export const useSavedSearch = ({
   const fetchAll = useCallback(() => {
     if (abortControllerRef.current) abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();
-    const requests: Array<Promise<any>> = [];
+    const requests: Array<Promise<unknown>> = [];
     const searchSessionId = searchSessionManager.getNextSearchSessionId();
 
     requests.push(fetch(abortControllerRef.current, searchSessionId));
@@ -162,6 +163,9 @@ export const useSavedSearch = ({
       triggerFetch = true;
     }
     if (!isEqual(state.sort, cachedState.sort)) {
+      triggerFetch = true;
+    }
+    if (!isEqual(state.index, cachedState.index)) {
       triggerFetch = true;
     }
     setCachedState(state);
