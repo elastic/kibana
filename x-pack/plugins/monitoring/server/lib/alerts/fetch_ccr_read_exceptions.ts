@@ -96,9 +96,9 @@ export async function fetchCCRReadExceptions(
   const { body: response } = await esClient.search(params);
   const stats: CCRReadExceptionsStats[] = [];
   // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
-  const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
+  const { buckets: remoteClusterBuckets = [] } = response.aggregations?.remote_clusters;
 
-  if (!remoteClusterBuckets.length) {
+  if (!remoteClusterBuckets?.length) {
     return stats;
   }
 
