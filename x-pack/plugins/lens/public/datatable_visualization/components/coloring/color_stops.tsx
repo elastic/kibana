@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { ColorStop, DEFAULT_COLOR } from './constants';
-import { isValidColor } from './utils';
+import { getDataMinMax, isValidColor } from './utils';
 import { TooltipWrapper } from '../../../shared_components';
 import { useDebounceWithOptions } from '../../../indexpattern_datasource/operations/definitions/helpers';
 
@@ -25,32 +25,33 @@ function shouldRoundDigits(value: number) {
 }
 
 interface CustomPropsForm {
-  controlStops: ColorStop[];
-  onChange: (controlStops: ColorStop[]) => void;
+  colorStops: ColorStop[];
+  onChange: (colorStops: ColorStop[]) => void;
   rangeType: 'number' | 'percent';
+  dataBounds: { min: number; max: number };
 }
-export const CustomStops = ({ controlStops, onChange, rangeType }: CustomPropsForm) => {
-  const shouldEnableDelete = controlStops.length > 2;
-  const remappedControlStops = controlStops;
+export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: CustomPropsForm) => {
+  const shouldEnableDelete = colorStops.length > 2;
+  const remappedControlStops = colorStops;
 
-  const [colorStops, setColorStops] = useState<ColorStop[]>(controlStops);
+  const [localColorStops, setLocalColorStops] = useState<ColorStop[]>(colorStops);
 
   useDebounceWithOptions(
     () => {
       if (
-        colorStops.every(
+        localColorStops.every(
           ({ color, stop }, i) =>
             isValidColor(color) &&
             !Number.isNaN(stop) &&
-            stop > (colorStops[i - 1]?.stop ?? -Infinity)
+            stop > (localColorStops[i - 1]?.stop ?? -Infinity)
         )
       ) {
-        onChange(colorStops);
+        onChange(localColorStops);
       }
     },
     { skipFirstRender: true },
     256,
-    [colorStops]
+    [localColorStops]
   );
 
   return (
@@ -59,10 +60,10 @@ export const CustomStops = ({ controlStops, onChange, rangeType }: CustomPropsFo
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
             {remappedControlStops.map(({ color, stop }, index) => {
-              const stopValue = colorStops[index]?.stop ?? stop;
-              const colorValue = colorStops[index]?.color ?? color;
+              const stopValue = localColorStops[index]?.stop ?? stop;
+              const colorValue = localColorStops[index]?.color ?? color;
               const nextStopValue =
-                colorStops[index + 1]?.stop ?? controlStops[index + 1]?.stop ?? Infinity;
+                localColorStops[index + 1]?.stop ?? colorStops[index + 1]?.stop ?? Infinity;
 
               const errorMessages = [];
               if (stopValue > nextStopValue) {
@@ -96,12 +97,12 @@ export const CustomStops = ({ controlStops, onChange, rangeType }: CustomPropsFo
                         value={stopValue}
                         onChange={({ target }) => {
                           const newStopString = target.value.trim();
-                          const newColorStops = [...controlStops];
+                          const newColorStops = [...colorStops];
                           newColorStops[index] = {
                             color: colorValue,
                             stop: Number(newStopString),
                           };
-                          setColorStops(newColorStops);
+                          setLocalColorStops(newColorStops);
                         }}
                         append={rangeType === 'percent' ? '%' : undefined}
                         aria-label={i18n.translate(
@@ -120,9 +121,9 @@ export const CustomStops = ({ controlStops, onChange, rangeType }: CustomPropsFo
                       <EuiColorPicker
                         key={stop}
                         onChange={(newColor) => {
-                          const newColorStops = [...controlStops];
+                          const newColorStops = [...colorStops];
                           newColorStops[index] = { color: newColor, stop: stopValue };
-                          setColorStops(newColorStops);
+                          setLocalColorStops(newColorStops);
                         }}
                         secondaryInputDisplay="top"
                         color={color}
@@ -158,8 +159,8 @@ export const CustomStops = ({ controlStops, onChange, rangeType }: CustomPropsFo
                             }
                           )}
                           onClick={() => {
-                            const newColorStops = controlStops.filter((_, i) => i !== index);
-                            setColorStops(newColorStops);
+                            const newColorStops = colorStops.filter((_, i) => i !== index);
+                            setLocalColorStops(newColorStops);
                           }}
                           data-test-subj="lnsDatatable_dynamicColoring_removeStop"
                           isDisabled={!shouldEnableDelete}
@@ -187,17 +188,23 @@ export const CustomStops = ({ controlStops, onChange, rangeType }: CustomPropsFo
                 }
               )}
               onClick={() => {
-                const newColorStops = [...controlStops];
+                const newColorStops = [...colorStops];
                 const length = newColorStops.length;
+                const { max } = getDataMinMax(rangeType, dataBounds);
                 // workout the steps from the last 2 items
                 const dataStep =
                   newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1;
-                const step = shouldRoundDigits(dataStep) ? Math.round(dataStep) : dataStep;
+                let step = shouldRoundDigits(dataStep) ? Math.round(dataStep) : dataStep;
+                if (max < colorStops[length - 1].stop + step) {
+                  const diffToMax = max - colorStops[length - 1].stop;
+                  // if the computed step goes way out of bound, fallback to 1, otherwise reach max
+                  step = diffToMax > 0 ? diffToMax : 1;
+                }
                 newColorStops.push({
                   color: DEFAULT_COLOR,
-                  stop: controlStops[length - 1].stop + step,
+                  stop: colorStops[length - 1].stop + step,
                 });
-                setColorStops(newColorStops);
+                setLocalColorStops(newColorStops);
               }}
             >
               {i18n.translate('xpack.lens.table.dynamicColoring.customPalette.addColorStop', {

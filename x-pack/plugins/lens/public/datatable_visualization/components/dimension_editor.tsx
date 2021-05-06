@@ -24,7 +24,7 @@ import { getOriginalId } from '../transpose_helpers';
 import { CustomizablePalette, applyPaletteParams } from './palette_configuration';
 import { PalettePanelContainer } from './palette_panel_container';
 import { findMinMaxByColumnId } from './shared_utils';
-import { defaultParams } from './coloring/constants';
+import { defaultParams, FIXED_PROGRESSION } from './coloring/constants';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -76,7 +76,7 @@ export function TableDimensionEditor(
     name: defaultParams.name,
   };
   // need to tell the helper that the colorStops are required to display
-  const { colorStops } = applyPaletteParams(
+  const displayStops = applyPaletteParams(
     props.paletteService,
     activePalette,
     minMaxByColumnId[accessor]
@@ -218,7 +218,8 @@ export function TableDimensionEditor(
                     ...activePalette,
                     params: {
                       ...activePalette.params,
-                      stops: colorStops,
+                      // that's ok, at first open we're going to throw them away and recompute
+                      stops: displayStops,
                     },
                   };
                 }
@@ -245,8 +246,8 @@ export function TableDimensionEditor(
                 <EuiFlexItem>
                   <EuiColorPaletteDisplay
                     data-test-subj="lnsDatatable_dynamicColoring_palette"
-                    palette={colorStops}
-                    type={'fixed'}
+                    palette={displayStops}
+                    type={FIXED_PROGRESSION}
                     onClick={() => {
                       setIsPaletteOpen(!isPaletteOpen);
                     }}

@@ -371,7 +371,7 @@ export const getDatatableVisualization = ({
                                   paletteConfig?.rangeMin != null ? [paletteConfig?.rangeMin] : [],
                                 rangeMax:
                                   paletteConfig?.rangeMax != null ? [paletteConfig?.rangeMax] : [],
-                                reverse: [paletteConfig?.reverse || false],
+                                reverse: [], // controlled at UI level
                                 continuity: [paletteConfig?.continuity || 'above'],
                                 range: [paletteConfig?.rangeType || 'percent'],
                                 color: (paletteConfig?.stops || []).map(({ color }) => color),

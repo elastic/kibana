@@ -27,69 +27,80 @@ export function shiftPalette(stops: ColorStop[], max: number) {
 // Utility to remap color stops within new domain
 export function remapStopsByNewInterval(
   controlStops: ColorStop[],
-  { newInterval, newMin }: { newInterval: number; newMin: number }
+  {
+    newInterval,
+    oldInterval,
+    newMin,
+    oldMin,
+  }: { newInterval: number; oldInterval: number; newMin: number; oldMin: number }
 ) {
-  const prevMin = controlStops[0].stop;
-  const oldInterval = controlStops[controlStops.length - 1].stop - prevMin;
   return (controlStops || []).map(({ color, stop }) => {
     return {
       color,
-      stop: newMin + ((stop - prevMin) * newInterval) / oldInterval,
+      stop: newMin + ((stop - oldMin) * newInterval) / oldInterval,
     };
   });
 }
 
-export function getCurrentMinMax(
+function getOverallMinMax(
   params: CustomPaletteParams | undefined,
   dataBounds: { min: number; max: number }
 ) {
-  const dataMin = params?.rangeType === 'number' ? dataBounds.min : DEFAULT_MIN_STOP;
-  const dataMax = params?.rangeType === 'number' ? dataBounds.max : DEFAULT_MAX_STOP;
-  const minStopValue = params?.controlStops?.[0]?.stop ?? dataMin;
-  const maxStopValue = params?.controlStops?.[params.controlStops.length - 1]?.stop ?? dataMax;
-  return { min: minStopValue, max: maxStopValue };
+  const { min: dataMin, max: dataMax } = getDataMinMax(params?.rangeType, dataBounds);
+  const minStopValue = params?.colorStops?.[0]?.stop ?? Infinity;
+  const maxStopValue = params?.colorStops?.[params.colorStops.length - 1]?.stop ?? -Infinity;
+  const overallMin = Math.min(dataMin, minStopValue);
+  const overallMax = Math.max(dataMax, maxStopValue);
+  return { min: overallMin, max: overallMax };
 }
 
-export function getPaletteColors(
+export function getDataMinMax(
+  rangeType: CustomPaletteParams['rangeType'] | undefined,
+  dataBounds: { min: number; max: number }
+) {
+  const dataMin = rangeType === 'number' ? dataBounds.min : DEFAULT_MIN_STOP;
+  const dataMax = rangeType === 'number' ? dataBounds.max : DEFAULT_MAX_STOP;
+  return { min: dataMin, max: dataMax };
+}
+
+/**
+ * This is a generic function to compute stops from the current parameters.
+ */
+export function getPaletteStops(
   palettes: PaletteRegistry,
   activePaletteParams: CustomPaletteParams,
   // used to customize color resolution
-  { prevPalette, dataBounds }: { prevPalette?: string; dataBounds: { min: number; max: number } }
+  {
+    prevPalette,
+    dataBounds,
+    mapFromMinValue,
+  }: { prevPalette?: string; dataBounds: { min: number; max: number }; mapFromMinValue?: boolean }
 ) {
-  // compute the stopFactor based on steps value. Fallback to default if not defined yet
-  // const steps = activePaletteParams.steps ?? DEFAULT_COLOR_STEPS;
-  const { min: minStopValue, max: maxStopValue } = getCurrentMinMax(
-    activePaletteParams,
-    dataBounds
-  );
-  const interval = maxStopValue - minStopValue;
-  const { stops, ...otherParams } = activePaletteParams || {};
+  const { min: minValue, max: maxValue } = getOverallMinMax(activePaletteParams, dataBounds);
+  const interval = maxValue - minValue;
+  const { stops: currentStops, ...otherParams } = activePaletteParams || {};
 
-  if (activePaletteParams.name === 'custom') {
+  if (activePaletteParams.name === 'custom' && activePaletteParams?.colorStops) {
     // need to generate the palette from the existing controlStops
-    return shiftPalette(activePaletteParams?.controlStops || [], maxStopValue);
+    return shiftPalette(activePaletteParams.colorStops, maxValue);
   }
-
-  const params: Omit<CustomPaletteParams, 'stops'> & {
-    stepped?: boolean;
-    stops?: number[];
-    colors?: string[];
-  } = {
-    ...otherParams,
-    colors: activePaletteParams.controlStops?.map(({ color }) => color),
-    stops: activePaletteParams.controlStops?.map(({ stop }) => stop),
-    stepped: false,
-  };
-
-  const colorStops = palettes
+  // generate a palette from predefined ones and customize the domain
+  const colorStopsFromPredefined = palettes
     .get(prevPalette || activePaletteParams?.name || defaultParams.name)
-    .getCategoricalColors((activePaletteParams?.steps || defaultParams.steps) + 1, params);
+    .getCategoricalColors(defaultParams.steps, otherParams);
 
-  const remappedColors = remapStopsByNewInterval(
-    colorStops.map((color, index) => ({ color, stop: index })),
-    { newInterval: interval, newMin: minStopValue }
+  const newStopsMin = mapFromMinValue ? minValue : interval / defaultParams.steps;
+
+  const stops = remapStopsByNewInterval(
+    colorStopsFromPredefined.map((color, index) => ({ color, stop: index })),
+    {
+      newInterval: interval,
+      oldInterval: colorStopsFromPredefined.length,
+      newMin: newStopsMin,
+      oldMin: 0,
+    }
   );
-  return remappedColors;
+  return stops;
 }
 
 export function reversePalette(paletteColorRepresentation: CustomPaletteParams['stops'] = []) {
@@ -115,6 +126,34 @@ export function mergePaletteParams(
   };
 }
 
+// ControlStops are ColorStops with continuity values
+export function getControlStops(
+  colorStops: ColorStop[],
+  params: CustomPaletteParams,
+  { dataBounds }: { dataBounds: { min: number; max: number } }
+) {
+  const newStops: ColorStop[] = [];
+  const { min: minRef, max: maxRef } = getDataMinMax(params.rangeType, dataBounds);
+  const minStop = colorStops[0].stop;
+  if (minStop > minRef) {
+    if (params.continuity === 'below' || params.continuity === 'all') {
+      newStops.push({
+        color: colorStops[0].color,
+        stop: colorStops[0]?.stop || minRef,
+      });
+    }
+  }
+  newStops.push(...colorStops);
+  if (minStop < maxRef) {
+    if (params.continuity == null || params.continuity === 'above' || params.continuity === 'all') {
+      newStops.push({
+        color: colorStops[colorStops.length - 1].color,
+        stop: maxRef,
+      });
+    }
+  }
+}
+
 export function remapForDisplay(
   stops: ColorStop[],
   params: CustomPaletteParams,
@@ -122,15 +161,14 @@ export function remapForDisplay(
 ) {
   const newStops: ColorStop[] = [];
   const minStop = stops[0].stop;
-  const minRef = params.rangeType !== 'number' ? 0 : dataBounds?.min || -Infinity;
-  const maxRef = params.rangeType !== 'number' ? 100 : dataBounds?.max || Infinity;
-  // original values are stored into controlStops
-  const controlStops = params?.controlStops || [];
+  const { min: minRef, max: maxRef } = getDataMinMax(params.rangeType, dataBounds);
+  // original values are stored into colorStops
+  const colorStops = params?.colorStops || [];
   if (minStop > minRef) {
     if (params.continuity === 'below' || params.continuity === 'all') {
       newStops.push({
-        color: (controlStops[0] || stops[0]).color,
-        stop: controlStops[0]?.stop || minRef,
+        color: (colorStops[0] || stops[0]).color,
+        stop: colorStops[0]?.stop || minRef,
       });
     }
   }
@@ -138,21 +176,30 @@ export function remapForDisplay(
   if (minStop < maxRef) {
     if (params.continuity == null || params.continuity === 'above' || params.continuity === 'all') {
       newStops.push({
-        color: (controlStops[controlStops.length - 1] || stops[stops.length - 1]).color,
+        color: (colorStops[colorStops.length - 1] || stops[stops.length - 1]).color,
         stop: maxRef,
       });
     }
   }
 
   const interval = maxRef - minRef;
-  const newMin = (controlStops[0].stop / interval) * DEFAULT_MAX_STOP;
+  const newMin = 0;
 
   return remapStopsByNewInterval(newStops, {
     newInterval: DEFAULT_MAX_STOP,
+    oldInterval: interval,
     newMin,
+    oldMin: minRef,
   });
 }
 
 export function isValidColor(colorString: string) {
   return colorString !== '' && isValidHex(colorString);
+}
+
+export function roundStopValues(colorStops: ColorStop[]) {
+  return colorStops.map(({ color, stop }) => {
+    const roundedStop = stop > 1 ? Math.round(stop) : stop;
+    return { color, stop: roundedStop };
+  });
 }

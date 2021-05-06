@@ -22,24 +22,39 @@ import { CustomPaletteParams } from '../expression';
 
 import './palette_configuration.scss';
 import {
-  getPaletteColors,
+  getDataMinMax,
+  getPaletteStops,
   mergePaletteParams,
   remapStopsByNewInterval,
   reversePalette,
+  roundStopValues,
 } from './coloring/utils';
 import {
   CUSTOM_PALETTE,
   defaultParams,
   DEFAULT_COLOR_STEPS,
-  DEFAULT_CUSTOM_STEPS,
-  DEFAULT_MAX_STOP,
-  DEFAULT_MIN_STOP,
-  FIXED_PROGRESSION,
   RequiredPaletteParamTypes,
 } from './coloring/constants';
 import { CustomStops } from './coloring/color_stops';
 
 const idPrefix = htmlIdGenerator()();
+
+/**
+ * Some name conventions here:
+ * * `displayStops` => It's an additional transformation of `stops` into a [0, N] domain for the EUIPaletteDisplay component.
+ * * `stops` => final steps used to table coloring. It is a rightShift of the colorStops
+ * * `colorStops` => user's color stop inputs.  Used to compute range min.
+ *
+ * When the user inputs the colorStops, they are designed to be the initial part of the color segment,
+ * so the next stops indicate where the previous stop ends.
+ * Both table coloring logic and EuiPaletteDisplay format implementation works differently than our current `colorStops`,
+ * by having the stop values at the end of each color segment rather than at the beginning: `stops` values are computed by a rightShift of `colorStops`.
+ * EuiPaletteDisplay has an additional requirement as it is always mapped against a domain [0, N]: from `stops` the `displayStops` are computed with
+ * some continuity enrichment and a remap against a [0, 100] domain to make the palette component work ok.
+ *
+ * These naming conventions would be useful to track the code flow in this feature as multiple transformations are happening
+ * for a single change.
+ */
 
 function getSwitchToCustomParams(
   palettes: PaletteRegistry,
@@ -49,10 +64,10 @@ function getSwitchToCustomParams(
 ) {
   // if it's already a custom palette just return the params
   if (activePalette?.params?.name === CUSTOM_PALETTE) {
-    const stops = getPaletteColors(
+    const stops = getPaletteStops(
       palettes,
       {
-        steps: DEFAULT_CUSTOM_STEPS,
+        steps: DEFAULT_COLOR_STEPS,
         ...activePalette.params,
         ...newParams,
       },
@@ -67,14 +82,14 @@ function getSwitchToCustomParams(
   }
   // prepare everything to switch to custom palette
   const newPaletteParams = {
-    steps: DEFAULT_CUSTOM_STEPS,
+    steps: DEFAULT_COLOR_STEPS,
     ...activePalette.params,
     ...newParams,
     name: CUSTOM_PALETTE,
   };
 
-  const stops = getPaletteColors(palettes, newPaletteParams, {
-    prevPalette: newPaletteParams.controlStops ? undefined : activePalette.name,
+  const stops = getPaletteStops(palettes, newPaletteParams, {
+    prevPalette: newPaletteParams.colorStops ? undefined : activePalette.name,
     dataBounds,
   });
   return mergePaletteParams(
@@ -92,38 +107,39 @@ export function applyPaletteParams(
   dataBounds: { min: number; max: number }
 ) {
   // make a copy of it as they have to be manipulated later on
-  let paletteColorRepresentation = getPaletteColors(palettes, activePalette?.params || {}, {
+  let displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
     dataBounds,
   });
 
-  if (activePalette?.params?.reverse && paletteColorRepresentation) {
-    paletteColorRepresentation = reversePalette(paletteColorRepresentation);
+  if (activePalette?.params?.reverse && displayStops) {
+    displayStops = reversePalette(displayStops);
   }
-  return {
-    colorStops: paletteColorRepresentation,
-    mode: FIXED_PROGRESSION,
-  };
+  return displayStops;
 }
 
-function getControlStops(
+function getColorStops(
   palettes: PaletteRegistry,
-  controlStops: Required<CustomPaletteParams>['stops'],
+  colorStops: Required<CustomPaletteParams>['stops'],
   activePalette: PaletteOutput<CustomPaletteParams>,
   dataBounds: { min: number; max: number }
 ) {
+  // just forward the current stops if custom
   if (activePalette?.name === CUSTOM_PALETTE) {
-    return controlStops;
+    return colorStops;
   }
-  // else create a small representation of the current palette.
-  const colorStops = getPaletteColors(
+  // for predefined palettes create some stops, then drop the last one.
+  // we're using these as starting point for the user
+  let freshColorStops = getPaletteStops(
     palettes,
-    { ...activePalette?.params, steps: 2 },
-    { dataBounds }
-  )
-    // do some rounding here
-    .map(({ color, stop }) => ({ color, stop: stop > 1 ? Math.round(stop) : stop }));
-
-  return colorStops.slice(0, 3);
+    { ...activePalette?.params },
+    // mapFromMinValue is a special flag to offset the stops values
+    // used here to avoid a new remap/left shift
+    { dataBounds, mapFromMinValue: true }
+  );
+  if (activePalette?.params?.reverse) {
+    freshColorStops = reversePalette(freshColorStops);
+  }
+  return freshColorStops;
 }
 
 export function CustomizablePalette({
@@ -137,23 +153,23 @@ export function CustomizablePalette({
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds: { min: number; max: number };
 }) {
-  // const { colorStops } = applyPaletteParams(palettes, activePalette);
   const rangeType = activePalette.params?.rangeType ?? defaultParams.rangeType;
-  const progressionType = activePalette.params?.progression ?? defaultParams.progression;
+  const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
   const stopsTooltipContent = [
     i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage', {
-      defaultMessage: "Percentage values are uniquely based on table's data.",
+      defaultMessage: "Percentage values are computed against table's current data.",
     }),
     i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpInclusive', {
       defaultMessage: 'Stop values are inclusive.',
     }),
   ];
-  const controlStops =
-    (activePalette?.params?.reverse
-      ? reversePalette(activePalette?.params?.controlStops)
-      : activePalette?.params?.controlStops) || [];
-  const controlPointsToShow = getControlStops(palettes, controlStops, activePalette, dataBounds);
+  const colorStopsToShow = getColorStops(
+    palettes,
+    activePalette?.params?.colorStops || [],
+    activePalette,
+    dataBounds
+  );
 
   return (
     <>
@@ -172,31 +188,25 @@ export function CustomizablePalette({
             activePalette={activePalette}
             setPalette={(newPalette) => {
               const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
-              const newParams = {
+              const newParams: CustomPaletteParams = {
                 ...activePalette.params,
                 name: newPalette.name,
-                steps: defaultParams.steps,
+                colorStops: undefined,
               };
 
-              const stops = getPaletteColors(
-                palettes,
-                newParams,
-                isNewPaletteCustom
-                  ? // pick the previous palette to calculate init colors in custom mode
-                    { prevPalette: activePalette.name, dataBounds }
-                  : { dataBounds }
-              );
+              if (isNewPaletteCustom) {
+                newParams.colorStops = getColorStops(palettes, [], activePalette, dataBounds);
+              }
+
+              newParams.stops = getPaletteStops(palettes, newParams, {
+                prevPalette:
+                  isNewPaletteCustom || isCurrentPaletteCustom ? undefined : activePalette.name,
+                dataBounds,
+              });
+
               setPalette({
                 ...newPalette,
-                params: {
-                  ...newParams,
-                  progression: progressionType,
-                  stops,
-                  // because of stepped custom palette we need to store two different set of stops
-                  controlStops: !isNewPaletteCustom
-                    ? []
-                    : getControlStops(palettes, stops, activePalette, dataBounds),
-                },
+                params: newParams,
               });
             }}
             showCustomPalette
@@ -302,30 +312,39 @@ export function CustomizablePalette({
                 idPrefix,
                 ''
               ) as RequiredPaletteParamTypes['rangeType'];
-              const newInterval =
-                newRangeType === 'percent'
-                  ? DEFAULT_MAX_STOP - DEFAULT_MIN_STOP
-                  : dataBounds.max - dataBounds.min;
-              const newMin = newRangeType === 'percent' ? DEFAULT_MIN_STOP : dataBounds.min;
-              const newControlStops = remapStopsByNewInterval(controlPointsToShow, {
-                newInterval,
-                newMin,
-              }).map(({ color, stop }) => {
-                const roundedStop = stop > 1 ? Math.round(stop) : stop;
-                return { color, stop: roundedStop };
-              });
-              const stops = getPaletteColors(
-                palettes,
-                { ...activePalette.params, controlStops: newControlStops, rangeType: newRangeType },
-                { dataBounds }
-              );
-              setPalette(
-                mergePaletteParams(activePalette, {
-                  rangeType: newRangeType,
-                  controlStops: newControlStops,
-                  stops,
-                })
-              );
+
+              const params: CustomPaletteParams = { rangeType: newRangeType };
+              if (isCurrentPaletteCustom) {
+                const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
+                const { min: oldMin, max: oldMax } = getDataMinMax(
+                  activePalette.params?.rangeType,
+                  dataBounds
+                );
+                const newColorStops = roundStopValues(
+                  remapStopsByNewInterval(colorStopsToShow, {
+                    oldInterval: oldMax - oldMin,
+                    newInterval: newMax - newMin,
+                    newMin,
+                    oldMin,
+                  })
+                );
+                const stops = getPaletteStops(
+                  palettes,
+                  { ...activePalette.params, colorStops: newColorStops, ...params },
+                  { dataBounds }
+                );
+                params.colorStops = newColorStops;
+                params.stops = stops;
+                params.rangeMin = newColorStops[0].stop;
+                params.rangeMax = newColorStops[newColorStops.length - 1].stop;
+              } else {
+                params.stops = getPaletteStops(
+                  palettes,
+                  { ...activePalette.params, ...params },
+                  { prevPalette: activePalette.name, dataBounds }
+                );
+              }
+              setPalette(mergePaletteParams(activePalette, params));
             }}
           />
         </EuiFormRow>
@@ -342,18 +361,19 @@ export function CustomizablePalette({
           }
         >
           <CustomStops
-            key={rangeType}
-            controlStops={controlPointsToShow}
+            key={`${activePalette.name}-${rangeType}`}
+            colorStops={colorStopsToShow}
             rangeType={rangeType}
-            onChange={(stops) => {
+            dataBounds={dataBounds}
+            onChange={(colorStops) => {
               const newParams = getSwitchToCustomParams(
                 palettes,
                 activePalette,
                 {
-                  controlStops: stops,
+                  colorStops,
                   steps: activePalette.params!.steps || DEFAULT_COLOR_STEPS,
-                  rangeMin: stops[0]?.stop,
-                  rangeMax: stops[stops.length - 1]?.stop,
+                  rangeMin: colorStops[0]?.stop,
+                  rangeMax: colorStops[colorStops.length - 1]?.stop,
                 },
                 dataBounds
               );
@@ -372,9 +392,30 @@ export function CustomizablePalette({
           <EuiSwitch
             data-test-subj="lnsDatatable_dynamicColoring_reverse"
             checked={Boolean(activePalette.params?.reverse ?? defaultParams.reverse)}
-            onChange={(newValue) =>
-              setPalette(mergePaletteParams(activePalette, { reverse: newValue.target.checked }))
-            }
+            onChange={(newValue) => {
+              const params: CustomPaletteParams = { reverse: newValue.target.checked };
+              if (isCurrentPaletteCustom) {
+                params.colorStops = reversePalette(colorStopsToShow);
+                params.stops = getPaletteStops(
+                  palettes,
+                  {
+                    ...(activePalette?.params || {}),
+                    colorStops: params.colorStops,
+                  },
+                  { dataBounds }
+                );
+              } else {
+                params.stops = reversePalette(
+                  activePalette?.params?.stops ||
+                    getPaletteStops(
+                      palettes,
+                      { ...activePalette.params, ...params },
+                      { prevPalette: activePalette.name, dataBounds }
+                    )
+                );
+              }
+              setPalette(mergePaletteParams(activePalette, params));
+            }}
             compressed
             showLabel={false}
             label={i18n.translate('xpack.lens.table.dynamicColoring.reverse.label', {

@@ -13,7 +13,7 @@ export interface ColorStop {
 }
 
 export const DEFAULT_PALETTE_NAME = 'positive';
-export const FIXED_PROGRESSION = 'fixed';
+export const FIXED_PROGRESSION = 'fixed' as const;
 export const STEPPED_PROGRESSION = 'stepped';
 export const CUSTOM_PALETTE = 'custom';
 export const DEFAULT_CONTINUITY = 'above';
@@ -21,8 +21,7 @@ export const DEFAULT_MIN_STOP = 0;
 export const DEFAULT_MAX_STOP = 100;
 export const MAX_COLOR_STEPS = 12;
 export const MIN_COLOR_STEPS = 1;
-export const DEFAULT_COLOR_STEPS = 10;
-export const DEFAULT_CUSTOM_STEPS = 4;
+export const DEFAULT_COLOR_STEPS = 5;
 export const DEFAULT_COLOR = '#6092C0'; // Same as EUI ColorStops default for new stops
 export const defaultParams: RequiredPaletteParamTypes = {
   name: DEFAULT_PALETTE_NAME,
@@ -33,6 +32,6 @@ export const defaultParams: RequiredPaletteParamTypes = {
   progression: FIXED_PROGRESSION,
   stops: [],
   steps: DEFAULT_COLOR_STEPS,
-  controlStops: [],
+  colorStops: [],
   continuity: DEFAULT_CONTINUITY,
 };

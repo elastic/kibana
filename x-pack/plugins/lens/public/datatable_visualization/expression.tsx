@@ -28,6 +28,7 @@ import { ColumnState } from './visualization';
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
 import type { DatatableRender } from './components/types';
 import { transposeTable } from './transpose_helpers';
+import { ColorStop } from './components/coloring/constants';
 
 export interface Args {
   title: string;
@@ -190,8 +191,8 @@ export interface CustomPaletteParams {
   progression?: 'fixed';
   rangeMin?: number;
   rangeMax?: number;
-  stops?: Array<{ color: string; stop: number }>;
-  controlStops?: Array<{ color: string; stop: number }>;
+  stops?: ColorStop[];
+  colorStops?: ColorStop[];
   steps?: number;
 }
 
