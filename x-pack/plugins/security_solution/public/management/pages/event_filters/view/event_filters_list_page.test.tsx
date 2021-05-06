@@ -109,10 +109,20 @@ describe('When on the Event Filters List Page', () => {
     it('should render expected fields on card', async () => {
       render();
       await dataReceived();
+      const eventMeta = ([] as HTMLElement[]).map.call(
+        renderResult.getByTestId('exceptionsViewerItemDetails').querySelectorAll('dd'),
+        (ele) => ele.textContent
+      );
 
-      // Take a snapshot of the card to ensure that all of the optional fields we need
-      // for Event filters use case (modified info ++ name) are displayed as we expect it.
-      expect(renderResult.getByTestId('eventFilterCard')).toMatchSnapshot();
+      expect(eventMeta).toEqual([
+        'some name',
+        'Linux',
+        'April 20th 2020 @ 11:25:31',
+        'some user',
+        'April 20th 2020 @ 11:25:31',
+        'some user',
+        'some description',
+      ]);
     });
 
     it('should show API error if one is encountered', async () => {
