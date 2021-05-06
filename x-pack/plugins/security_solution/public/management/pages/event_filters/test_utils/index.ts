@@ -106,6 +106,9 @@ export type EventFiltersListQueryHttpMockProviders = ResponseProvidersInterface<
   eventFiltersCreateList: () => ExceptionListItemSchema;
 }>;
 
+/**
+ * Mock `core.http` methods used by Event Filters List page
+ */
 export const eventFiltersListQueryHttpMock = httpHandlerMockFactory<EventFiltersListQueryHttpMockProviders>(
   [
     {

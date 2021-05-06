@@ -10,23 +10,36 @@ import React from 'react';
 import { fireEvent, act } from '@testing-library/react';
 import { EventFiltersListPage } from './event_filters_list_page';
 import { eventFiltersListQueryHttpMock } from '../test_utils';
-import { isLoadedResourceState } from '../../../state';
+import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 
-describe('When on the Event Filters Page', () => {
+// Needed to mock the data services used by the ExceptionItem component
+jest.mock('../../../../common/lib/kibana');
+
+describe('When on the Event Filters List Page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
-  let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 
+  const dataReceived = () =>
+    act(async () => {
+      await waitForAction('eventFiltersListPageDataChanged', {
+        validate(action) {
+          return isLoadedResourceState(action.payload);
+        },
+      });
+    });
+
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
-    ({ history, store, coreStart } = mockedContext);
+
+    ({ history, coreStart } = mockedContext);
     render = () => (renderResult = mockedContext.render(<EventFiltersListPage />));
     mockedApi = eventFiltersListQueryHttpMock(coreStart.http);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
+
     act(() => {
       mockedContext.setExperimentalFlag({ eventFilteringEnabled: true });
       history.push('/event_filters');
@@ -62,17 +75,60 @@ describe('When on the Event Filters Page', () => {
       act(() => {
         fireEvent.click(renderResult.getByTestId('eventFiltersListEmptyStateAddButton'));
       });
+
       expect(renderResult.getByTestId('eventFiltersCreateEditFlyout')).toBeTruthy();
+      expect(history.location.search).toEqual('?show=create');
     });
   });
 
   describe('And data exists', () => {
-    it.todo('should show loading indicator while retrieving data');
+    it('should show loading indicator while retrieving data', async () => {
+      let releaseApiResponse: () => void;
 
-    it.todo('should show items on the list');
+      mockedApi.responseProvider.eventFiltersList.mockDelay.mockReturnValue(
+        new Promise((r) => (releaseApiResponse = r))
+      );
+      render();
 
-    it.todo('should render expected fields on card');
+      expect(renderResult.getByTestId('eventFiltersContent-loader')).toBeTruthy();
 
-    it.todo('should show API error if one is encountered');
+      const wasReceived = dataReceived();
+      releaseApiResponse!();
+      await wasReceived;
+
+      expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
+    });
+
+    it('should show items on the list', async () => {
+      render();
+      await dataReceived();
+
+      expect(renderResult.getByTestId('eventFilterCard')).toBeTruthy();
+    });
+
+    it('should render expected fields on card', async () => {
+      render();
+      await dataReceived();
+
+      // Take a snapshot of the card to ensure that all of the optional fields we need
+      // for Event filters use case (modified info ++ name) are displayed as we expect it.
+      expect(renderResult.getByTestId('eventFilterCard')).toMatchSnapshot();
+    });
+
+    it('should show API error if one is encountered', async () => {
+      mockedApi.responseProvider.eventFiltersList.mockImplementation(() => {
+        throw new Error('oh no');
+      });
+      render();
+      await act(async () => {
+        await waitForAction('eventFiltersListPageDataChanged', {
+          validate(action) {
+            return isFailedResourceState(action.payload);
+          },
+        });
+      });
+
+      expect(renderResult.getByTestId('eventFiltersContent-error').textContent).toEqual(' oh no');
+    });
   });
 });
