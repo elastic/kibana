@@ -12,8 +12,8 @@ import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 
 const ofName = (name?: string) => {
-  return i18n.translate('xpack.lens.indexPattern.overallSumOf', {
-    defaultMessage: 'Overall sum of {name}',
+  return i18n.translate('xpack.lens.indexPattern.overallMaxOf', {
+    defaultMessage: 'Overall max of {name}',
     values: {
       name:
         name ??
@@ -24,19 +24,19 @@ const ofName = (name?: string) => {
   });
 };
 
-export type OverallSumIndexPatternColumn = FormattedIndexPatternColumn &
+export type OverallMaxIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: 'overall_sum';
+    operationType: 'overall_max';
   };
 
-export const overallSumOperation: OperationDefinition<
-  OverallSumIndexPatternColumn,
+export const overallMaxOperation: OperationDefinition<
+  OverallMaxIndexPatternColumn,
   'fullReference'
 > = {
-  type: 'overall_sum',
+  type: 'overall_max',
   priority: 1,
-  displayName: i18n.translate('xpack.lens.indexPattern.overallSum', {
-    defaultMessage: 'Overall sum',
+  displayName: i18n.translate('xpack.lens.indexPattern.overallMax', {
+    defaultMessage: 'Overall max',
   }),
   input: 'fullReference',
   hidden: true,
@@ -64,7 +64,7 @@ export const overallSumOperation: OperationDefinition<
   },
   toExpression: (layer, columnId) => {
     return optionallHistogramBasedOperationToExpression(layer, columnId, 'overall_metric', {
-      metric: ['sum'],
+      metric: ['max'],
     });
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
@@ -84,7 +84,7 @@ export const overallSumOperation: OperationDefinition<
           : undefined
       ),
       dataType: 'number',
-      operationType: 'overall_sum',
+      operationType: 'overall_max',
       isBucketed: false,
       scale: 'ratio',
       filter,

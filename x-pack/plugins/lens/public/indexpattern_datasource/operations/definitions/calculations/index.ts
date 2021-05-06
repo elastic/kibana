@@ -10,3 +10,6 @@ export { cumulativeSumOperation, CumulativeSumIndexPatternColumn } from './cumul
 export { derivativeOperation, DerivativeIndexPatternColumn } from './differences';
 export { movingAverageOperation, MovingAverageIndexPatternColumn } from './moving_average';
 export { overallSumOperation, OverallSumIndexPatternColumn } from './overall_sum';
+export { overallMinOperation, OverallMinIndexPatternColumn } from './overall_min';
+export { overallMaxOperation, OverallMaxIndexPatternColumn } from './overall_max';
+export { overallAverageOperation, OverallAverageIndexPatternColumn } from './overall_average';

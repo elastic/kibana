@@ -12,8 +12,8 @@ import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 
 const ofName = (name?: string) => {
-  return i18n.translate('xpack.lens.indexPattern.overallSumOf', {
-    defaultMessage: 'Overall sum of {name}',
+  return i18n.translate('xpack.lens.indexPattern.overallAverageOf', {
+    defaultMessage: 'Overall average of {name}',
     values: {
       name:
         name ??
@@ -24,19 +24,19 @@ const ofName = (name?: string) => {
   });
 };
 
-export type OverallSumIndexPatternColumn = FormattedIndexPatternColumn &
+export type OverallAverageIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: 'overall_sum';
+    operationType: 'overall_average';
   };
 
-export const overallSumOperation: OperationDefinition<
-  OverallSumIndexPatternColumn,
+export const overallAverageOperation: OperationDefinition<
+  OverallAverageIndexPatternColumn,
   'fullReference'
 > = {
-  type: 'overall_sum',
+  type: 'overall_average',
   priority: 1,
-  displayName: i18n.translate('xpack.lens.indexPattern.overallSum', {
-    defaultMessage: 'Overall sum',
+  displayName: i18n.translate('xpack.lens.indexPattern.overallAverage', {
+    defaultMessage: 'Overall average',
   }),
   input: 'fullReference',
   hidden: true,
@@ -64,7 +64,7 @@ export const overallSumOperation: OperationDefinition<
   },
   toExpression: (layer, columnId) => {
     return optionallHistogramBasedOperationToExpression(layer, columnId, 'overall_metric', {
-      metric: ['sum'],
+      metric: ['average'],
     });
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
@@ -84,7 +84,7 @@ export const overallSumOperation: OperationDefinition<
           : undefined
       ),
       dataType: 'number',
-      operationType: 'overall_sum',
+      operationType: 'overall_average',
       isBucketed: false,
       scale: 'ratio',
       filter,
