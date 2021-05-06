@@ -44,6 +44,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
   private readonly defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
+  private readonly defaultValues: Record<string, unknown>;
   private readonly log: Logger;
   private readonly cache: Cache;
 
@@ -53,10 +54,15 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.id = id;
     this.buildNum = buildNum;
     this.savedObjectsClient = savedObjectsClient;
-    this.defaults = defaults;
     this.overrides = overrides;
     this.log = log;
     this.cache = new Cache();
+    this.defaults = defaults;
+    const defaultValues: Record<string, unknown> = {};
+    Object.keys(this.defaults).forEach((key) => {
+      defaultValues[key] = this.defaults[key].value;
+    });
+    this.defaultValues = defaultValues;
   }
 
   getRegistered() {
@@ -73,11 +79,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async getAll<T = any>() {
-    const result: Record<string, any> = {};
-
-    Object.keys(this.defaults).forEach((key) => {
-      result[key] = this.defaults[key].value;
-    });
+    const result = { ...this.defaultValues };
 
     const userProvided = await this.getUserProvided();
     Object.keys(userProvided).forEach((key) => {
