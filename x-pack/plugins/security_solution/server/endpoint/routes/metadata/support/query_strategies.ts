@@ -39,8 +39,8 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
       const response = searchResponse as SearchResponse<HostMetadata>;
       return {
         resultLength:
-          ((response?.aggregations?.total as unknown) as { value: number; relation: string })
-            .value || 0,
+          ((response?.aggregations?.total as unknown) as { value?: number; relation: string })
+            ?.value || 0,
         resultList: response.hits.hits
           .map((hit) => hit.inner_hits?.most_recent.hits.hits)
           .flatMap((data) => data)
