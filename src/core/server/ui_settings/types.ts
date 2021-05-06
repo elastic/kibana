@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { RecursiveReadonly } from '@kbn/utility-types';
 
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { UiSettingsParams, UserProvidedValues, PublicUiSettingsParams } from '../../types';
@@ -40,7 +41,7 @@ export interface IUiSettingsClient {
   /**
    * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  getAll: <T = any>() => Promise<Record<string, T>>;
+  getAll: <T = any>() => Promise<RecursiveReadonly<Record<string, T>>>;
   /**
    * Retrieves a set of all uiSettings values set by the user.
    */
