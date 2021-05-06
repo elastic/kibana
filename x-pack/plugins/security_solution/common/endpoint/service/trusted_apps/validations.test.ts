@@ -24,7 +24,25 @@ describe('Validate Windows paths', () => {
         os: OperatingSystem.WINDOWS,
         field: ConditionEntryField.PATH,
         type: 'match',
+        value: 'c:\\hype-folder-name',
+      })
+    ).toEqual(true);
+
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'match',
         value: 'c:\\path.exe',
+      })
+    ).toEqual(true);
+
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: 'c:\\file-name.exe',
       })
     ).toEqual(true);
 
@@ -282,6 +300,24 @@ describe('Validate Linux/Mac paths', () => {
         value: '/usr/bin/var/x.dmg',
       })
     ).toEqual(true);
+
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/usr/hype-folder/x.dmg',
+      })
+    ).toEqual(true);
+
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/usr/hype-folder/x-y.dmg',
+      })
+    ).toEqual(true);
   });
 
   it('should return FALSE for paths with \\', () => {
@@ -383,6 +419,15 @@ describe('Validate Linux/Mac paths', () => {
         field: ConditionEntryField.PATH,
         type: 'wildcard',
         value: '/opt/bin/*.txt',
+      })
+    ).toEqual(true);
+
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/opt-in/b-in/*.txt',
       })
     ).toEqual(true);
   });

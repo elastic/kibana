@@ -62,7 +62,7 @@ const doesPathMatchRegex = ({ os, value }: { os: OperatingSystem; value: string 
     const filePathRegex = /^(?:[a-z]:|\\\\[^<>:"'/\\|?*]+\\[^<>:"'/\\|?*]+|%\w+%|)[\\](?:[^<>:"'/\\|?*]+[\\/])*([^<>:"'/\\|?*])+$/i;
     return filePathRegex.test(value);
   }
-  return /^(\/|(\/[\w]+)+|\/[\w]+\.[\w]+|(\/[\w]+)+\/[\w]+\.[\w]+)$/i.test(value);
+  return /^(\/|(\/[\w\-]+)+|\/[\w\-]+\.[\w]+|(\/[\w-]+)+\/[\w\-]+\.[\w]+)$/i.test(value);
 };
 
 // based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L149
