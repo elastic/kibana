@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { QueryActionsProvider } from './actions';
-export { FAILURE_REASONS, LOADING_STATUS } from '../../../components/context_app/constants';
-export { createInitialLoadingStatusState } from './state';
+import { TimeseriesVisData, TableData, SeriesData } from './types';
+import { PANEL_TYPES } from './enums';
+
+export const isVisTableData = (data: TimeseriesVisData): data is TableData =>
+  data.type === PANEL_TYPES.TABLE;
+
+export const isVisSeriesData = (data: TimeseriesVisData): data is SeriesData =>
+  data.type !== PANEL_TYPES.TABLE;

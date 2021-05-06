@@ -6,11 +6,31 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export function fetchAnchorProvider(indexPatterns, searchSource, useNewFieldsApi = false) {
-  return async function fetchAnchor(indexPatternId, anchorId, sort) {
+import {
+  ISearchSource,
+  IndexPatternsContract,
+  EsQuerySortValue,
+} from '../../../../../../data/public';
+import { EsHitRecord } from './context';
+
+export interface AnchorHitRecord extends EsHitRecord {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  $$_isAnchor: boolean;
+}
+
+export function fetchAnchorProvider(
+  indexPatterns: IndexPatternsContract,
+  searchSource: ISearchSource,
+  useNewFieldsApi: boolean = false
+) {
+  return async function fetchAnchor(
+    indexPatternId: string,
+    anchorId: string,
+    sort: EsQuerySortValue[]
+  ): Promise<AnchorHitRecord> {
     const indexPattern = await indexPatterns.get(indexPatternId);
     searchSource
       .setParent(undefined)
@@ -36,7 +56,7 @@ export function fetchAnchorProvider(indexPatterns, searchSource, useNewFieldsApi
     }
     const response = await searchSource.fetch();
 
-    if (_.get(response, ['hits', 'total'], 0) < 1) {
+    if (get(response, ['hits', 'total'], 0) < 1) {
       throw new Error(
         i18n.translate('discover.context.failedToLoadAnchorDocumentErrorDescription', {
           defaultMessage: 'Failed to load anchor document.',
@@ -45,8 +65,9 @@ export function fetchAnchorProvider(indexPatterns, searchSource, useNewFieldsApi
     }
 
     return {
-      ..._.get(response, ['hits', 'hits', 0]),
+      ...get(response, ['hits', 'hits', 0]),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       $$_isAnchor: true,
-    };
+    } as AnchorHitRecord;
   };
 }
