@@ -235,7 +235,7 @@ Configuring the *Suggestions* that *Lens* automatically populates is unsupported
 You can create *Bar*, *Line* and *Area* charts from multiple index patterns.
 
 Each *Layer* in a visualization is associated with an index pattern and mutiple *Layers* can be combined together within the same visualization. Each *Layer* also has a chart switcher button in order to select the best type of visualization for the specific dataset.
-At the same time it is possible to dynamically change the indexpattern for the *Layer* when required.
+You can also change the index pattern for a single *Layer*.
 
 [float]
 [[why-my-field-x-is-missing-from-the-fields-list]]
