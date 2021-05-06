@@ -73,7 +73,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     intervalInSeconds: number = 1,
     count: number = 0
   ): Promise<Alert> {
-    console.log('waitUntilNextExecution');
     await new Promise((resolve) => {
       setTimeout(resolve, intervalInSeconds * 1000);
     });
@@ -91,7 +90,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const nextAlert = body as Alert;
 
     if (nextAlert.executionStatus.lastExecutionDate !== alert.executionStatus.lastExecutionDate) {
-      console.log('next execution completed');
       await new Promise((resolve) => {
         setTimeout(resolve, BULK_INDEX_DELAY);
       });
