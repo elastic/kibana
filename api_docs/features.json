@@ -2014,6 +2014,22 @@
               "path": "x-pack/plugins/features/server/plugin.ts",
               "lineNumber": 48
             }
+          },
+          {
+            "id": "def-server.PluginSetupContract.enableReportingUiCapabilities",
+            "type": "Function",
+            "label": "enableReportingUiCapabilities",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/features/server/plugin.ts",
+              "lineNumber": 56
+            }
           }
         ],
         "source": {
@@ -2050,7 +2066,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 52
+              "lineNumber": 60
             }
           },
           {
@@ -2074,13 +2090,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/features/server/plugin.ts",
-              "lineNumber": 53
+              "lineNumber": 61
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/features/server/plugin.ts",
-          "lineNumber": 51
+          "lineNumber": 59
         },
         "initialIsOpen": false
       }

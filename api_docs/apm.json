@@ -58,6 +58,22 @@
     "enums": [],
     "misc": [],
     "objects": [],
+    "setup": {
+      "id": "def-public.ApmPluginSetup",
+      "type": "Type",
+      "label": "ApmPluginSetup",
+      "tags": [],
+      "description": [],
+      "source": {
+        "path": "x-pack/plugins/apm/public/plugin.ts",
+        "lineNumber": 48
+      },
+      "signature": [
+        "{ ruleRegistry: FormatterRuleRegistry<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { readonly 'service.environment': { readonly type: \"keyword\"; }; readonly 'transaction.type': { readonly type: \"keyword\"; }; readonly 'processor.event': { readonly type: \"keyword\"; }; }>; }"
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
     "start": {
       "id": "def-public.ApmPluginStart",
       "type": "Type",
@@ -66,7 +82,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 45
+        "lineNumber": 51
       },
       "signature": [
         "void"
@@ -140,7 +156,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 58
+                  "lineNumber": 60
                 }
               }
             ],
@@ -148,7 +164,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 58
+              "lineNumber": 60
             }
           },
           {
@@ -168,7 +184,7 @@
               "APMPluginStartDependencies",
               ", unknown>, plugins: Pick<",
               "APMPluginSetupDependencies",
-              ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">) => { config$: ",
+              ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"cloud\" | \"observability\" | \"apmOss\" | \"licensing\" | \"spaces\" | \"taskManager\" | \"alerting\">) => { config$: ",
               "Observable",
               "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
               "SearchAggregatedTransactionSetting"
@@ -195,7 +211,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 63
+                  "lineNumber": 65
                 }
               },
               {
@@ -206,12 +222,12 @@
                 "signature": [
                   "Pick<",
                   "APMPluginSetupDependencies",
-                  ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"apmOss\" | \"licensing\" | \"observability\" | \"spaces\" | \"cloud\" | \"taskManager\" | \"alerting\">"
+                  ", \"data\" | \"security\" | \"home\" | \"features\" | \"ml\" | \"actions\" | \"usageCollection\" | \"cloud\" | \"observability\" | \"apmOss\" | \"licensing\" | \"spaces\" | \"taskManager\" | \"alerting\">"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 64
+                  "lineNumber": 66
                 }
               }
             ],
@@ -219,7 +235,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 62
+              "lineNumber": 64
             }
           },
           {
@@ -256,7 +272,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 208
+                  "lineNumber": 200
                 }
               }
             ],
@@ -264,7 +280,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 208
+              "lineNumber": 200
             }
           },
           {
@@ -280,13 +296,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 227
+              "lineNumber": 219
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 48
+          "lineNumber": 50
         },
         "initialIsOpen": false
       }
@@ -361,7 +377,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 43
+              "lineNumber": 46
             },
             "signature": [
               {
@@ -382,7 +398,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 44
+              "lineNumber": 47
             },
             "signature": [
               "ApmPluginRequestHandlerContext"
@@ -396,7 +412,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 45
+              "lineNumber": 48
             },
             "signature": [
               "{ query: { _inspect: boolean; }; }"
@@ -410,7 +426,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 50
+              "lineNumber": 53
             },
             "signature": [
               "{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
@@ -426,7 +442,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 51
+              "lineNumber": 54
             },
             "signature": [
               "Logger"
@@ -440,7 +456,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 52
+              "lineNumber": 55
             },
             "signature": [
               "{ setup: ",
@@ -470,7 +486,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 56
+              "lineNumber": 59
             },
             "signature": [
               "{ data: { setup: ",
@@ -505,20 +521,35 @@
                 "section": "def-server.PluginStartContract",
                 "text": "PluginStartContract"
               },
-              ">; }; apmOss: { setup: ",
+              ">; }; observability: { setup: { getScopedAnnotationsClient: (requestContext: ",
               {
-                "pluginId": "apmOss",
+                "pluginId": "core",
                 "scope": "server",
-                "docId": "kibApmOssPluginApi",
-                "section": "def-server.APMOSSPluginSetup",
-                "text": "APMOSSPluginSetup"
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
               }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.APMRouteHandlerResources.apmRuleRegistry",
+            "type": "Object",
+            "label": "apmRuleRegistry",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/apm/server/routes/typings.ts",
+              "lineNumber": 65
+            },
+            "signature": [
+              "RuleRegistry",
+              "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { readonly 'service.environment': { readonly type: \"keyword\"; }; readonly 'transaction.type': { readonly type: \"keyword\"; }; readonly 'processor.event': { readonly type: \"keyword\"; }; }>"
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/routes/typings.ts",
-          "lineNumber": 42
+          "lineNumber": 45
         },
         "initialIsOpen": false
       }
@@ -600,7 +631,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/apm/server/routes/typings.ts",
-          "lineNumber": 23
+          "lineNumber": 26
         },
         "signature": [
           "{ response: any; duration: number; requestType: string; requestParams: Record<string, unknown>; esError: Error; }[]"

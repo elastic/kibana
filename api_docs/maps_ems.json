@@ -599,6 +599,21 @@
     "misc": [
       {
         "tags": [],
+        "id": "def-public.DEFAULT_EMS_DARKMAP_ID",
+        "type": "string",
+        "label": "DEFAULT_EMS_DARKMAP_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 18
+        },
+        "signature": [
+          "\"dark_map\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
         "id": "def-public.DEFAULT_EMS_FILE_API_URL",
         "type": "string",
         "label": "DEFAULT_EMS_FILE_API_URL",
@@ -638,7 +653,37 @@
           "lineNumber": 12
         },
         "signature": [
-          "\"https://maps.elastic.co/v7.12\""
+          "\"https://maps.elastic.co/v7.13\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.DEFAULT_EMS_ROADMAP_DESATURATED_ID",
+        "type": "string",
+        "label": "DEFAULT_EMS_ROADMAP_DESATURATED_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 17
+        },
+        "signature": [
+          "\"road_map_desaturated\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.DEFAULT_EMS_ROADMAP_ID",
+        "type": "string",
+        "label": "DEFAULT_EMS_ROADMAP_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 16
+        },
+        "signature": [
+          "\"road_map\""
         ],
         "initialIsOpen": false
       },
@@ -665,7 +710,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/maps_ems/config.ts",
-          "lineNumber": 54
+          "lineNumber": 57
         },
         "signature": [
           "{ readonly name: string; readonly format: Readonly<{} & { type: string; }>; readonly fields: Readonly<{} & { description: string; name: string; }>[]; readonly meta: Readonly<{} & { feature_collection_path: string; }>; readonly url: string; readonly attribution: string; }"
@@ -680,7 +725,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/maps_ems/config.ts",
-          "lineNumber": 86
+          "lineNumber": 89
         },
         "signature": [
           "{ readonly includeElasticMapsService: boolean; readonly proxyElasticMapsServiceInMaps: boolean; readonly regionmap: Readonly<{} & { includeElasticMapsService: boolean; layers: Readonly<{} & { name: string; format: Readonly<{} & { type: string; }>; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; url: string; attribution: string; }>[]; }>; readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly manifestServiceUrl: string; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }"
@@ -1016,6 +1061,21 @@
     "misc": [
       {
         "tags": [],
+        "id": "def-common.DEFAULT_EMS_DARKMAP_ID",
+        "type": "string",
+        "label": "DEFAULT_EMS_DARKMAP_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 18
+        },
+        "signature": [
+          "\"dark_map\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
         "id": "def-common.DEFAULT_EMS_FILE_API_URL",
         "type": "string",
         "label": "DEFAULT_EMS_FILE_API_URL",
@@ -1055,7 +1115,37 @@
           "lineNumber": 12
         },
         "signature": [
-          "\"https://maps.elastic.co/v7.12\""
+          "\"https://maps.elastic.co/v7.13\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.DEFAULT_EMS_ROADMAP_DESATURATED_ID",
+        "type": "string",
+        "label": "DEFAULT_EMS_ROADMAP_DESATURATED_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 17
+        },
+        "signature": [
+          "\"road_map_desaturated\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.DEFAULT_EMS_ROADMAP_ID",
+        "type": "string",
+        "label": "DEFAULT_EMS_ROADMAP_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+          "lineNumber": 16
+        },
+        "signature": [
+          "\"road_map\""
         ],
         "initialIsOpen": false
       },
