@@ -103,13 +103,6 @@ const createActions = (testBed: TestBed<TestSubject>) => {
   };
 };
 
-export const commonFormFields = {
-  if: undefined,
-  tag: undefined,
-  ignore_failure: undefined,
-  description: undefined,
-};
-
 export const setup = async (props: Props): Promise<SetupResult> => {
   const testBed = await testBedSetup(props);
   return {

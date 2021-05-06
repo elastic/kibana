@@ -82,47 +82,6 @@ describe('Processor: Bytes', () => {
     });
   });
 
-  test('saves with common fields set', async () => {
-    const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
-      form,
-      find,
-    } = testBed;
-
-    // This test ensures that the common fields that are used across all processors
-    // works and removes the need for those fields to be in every processors' test.
-
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(BYTES_TYPE);
-    // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
-
-    form.toggleEuiSwitch('ignoreFailureSwitch.input');
-
-    form.setInputValue('targetField.input', 'target_field');
-
-    form.setInputValue('tagField.input', 'some_tag');
-
-    // Trying to get the monaco text editor to work with CITs.
-    const jsonContent = JSON.stringify({ content: "ctx?.network?.name == 'Guest'" });
-    await find('mockCodeEditor').simulate('change', { jsonContent });
-
-    // Save the field
-    await saveNewProcessor();
-
-    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
-    expect(processors[0].bytes).toEqual({
-      field: 'field_1',
-      ignore_failure: true,
-      if: jsonContent,
-      tag: 'some_tag',
-      ignore_missing: undefined,
-      target_field: 'target_field',
-    });
-  });
-
   test('allows optional parameters to be set', async () => {
     const {
       actions: { addProcessor, addProcessorType, saveNewProcessor },
