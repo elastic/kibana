@@ -2587,7 +2587,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics@link:packages/kbn-analytics":
+"@kbn/analytics@link:bazel-bin/packages/kbn-analytics/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2615,11 +2615,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/config@link:packages/kbn-config":
+"@kbn/config@link:bazel-bin/packages/kbn-config/npm_module":
   version "0.0.0"
   uid ""
 
-"@kbn/crypto@link:packages/kbn-crypto":
+"@kbn/crypto@link:bazel-bin/packages/kbn-crypto/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2635,7 +2635,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es@link:packages/kbn-es":
+"@kbn/es@link:bazel-bin/packages/kbn-es/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2688,6 +2688,18 @@
   uid ""
 
 "@kbn/pm@link:packages/kbn-pm":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-constants@link:bazel-bin/packages/kbn-securitysolution-constants/npm_module":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-io-ts-utils@link:bazel-bin/packages/kbn-securitysolution-io-ts-utils/npm_module":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-utils@link:bazel-bin/packages/kbn-securitysolution-utils/npm_module":
   version "0.0.0"
   uid ""
 
@@ -27369,15 +27381,10 @@ underscore.string@~3.3.5:
     sprintf-js "^1.0.3"
     util-deprecate "^1.0.2"
 
-underscore@^1.8.3:
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.9.1.tgz#06dce34a0e68a7babc29b365b8e74b8925203961"
-  integrity sha512-5/4etnCkd9c8gwgowi5/om/mYO5ajCaOgdzj/oW+0eQV9WxKBDZw5+ycmKmeaTXjInS/W0BzpGLo2xR2aBwZdg==
-
-underscore@~1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.6.0.tgz#8b38b10cacdef63337b8b24e4ff86d45aea529a8"
-  integrity sha1-izixDKze9jM3uLJOT/htRa6lKag=
+underscore@^1.13.1, underscore@^1.8.3, underscore@~1.6.0:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.1.tgz#0c1c6bd2df54b6b69f2314066d65b6cde6fcf9d1"
+  integrity sha512-hzSoAVtJF+3ZtiFX0VgfFPHEDRm7Y/QPjGyNo4TVdnDTdft3tr8hEkD25a1jC+TjTuE7tkHGKkhwCgs9dgBB2g==
 
 undertaker-registry@^1.0.0:
   version "1.0.1"
@@ -28213,6 +28220,11 @@ vega-hierarchy@~4.0.9:
     d3-hierarchy "^2.0.0"
     vega-dataflow "^5.7.3"
     vega-util "^1.15.2"
+
+vega-interpreter@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/vega-interpreter/-/vega-interpreter-1.0.4.tgz#291ebf85bc2d1c3550a3da22ff75b3ba0d326a39"
+  integrity sha512-6tpYIa/pJz0cZo5fSxDSkZkAA51pID2LjOtQkOQvbzn+sJiCaWKPFhur8MBqbcmYZ9bnap1OYNwlrvpd2qBLvg==
 
 vega-label@~1.0.0:
   version "1.0.0"

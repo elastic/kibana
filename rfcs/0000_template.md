@@ -1,25 +1,47 @@
 - Start Date: (fill me in with today's date, YYYY-MM-DD)
-- RFC PR: (leave this empty)
-- Kibana Issue: (leave this empty)
+- TTL: (e.g. "April 20th, 2021", time the review is expected to be completed by. Don't use relative days.)
+- Champion: (usually you, person who writes and updates the draft and incorporates feedback)
+- Main reviewer: (somebody familiar with the subject matter, who has committed to provide timely and detailed reviews for this RFC)
+- Owner team: (team who will own implementation, if it is accepted)
+- Stakeholders: (people or groups who will be affected by the proposed changes)
+- RFC PR: (leave this empty, it will be a link to PR of this RFC)
+- PoC PR: (optional, link to a PoC implementation of the feature)
+- Kibana Issue: (link to issue where the proposed feature is tracked)
 
-# Summary
 
-Brief explanation of the feature.
+# Executive Summary
 
-# Basic example
+Summarize this RFC so those unfamiliar with the project and code can quickly understand
+what the problem is, why it is important,
+and the proposed solution. Below are some suggested sections for the Executive
+Summary. Tweak as you desire and try to keep it succinct.
 
-If the proposal involves a new or changed API, include a basic code example.
-Omit this section if it's not applicable.
+## Problem statement
 
-# Motivation
+What is the problem we are trying to solve? Supply any relevant background
+context. Why is this something we should focus on _now_.
 
-Why are we doing this? What use cases does it support? What is the expected
-outcome?
+Focus on explaining the problem so that if this RFC is not accepted, this
+information could be used to develop alternative solutions. In other words,
+don't couple this too closely with the solution you have in mind.
 
-Please focus on explaining the motivation so that if this RFC is not accepted,
-the motivation could be used to develop alternative solutions. In other words,
-enumerate the constraints you are trying to solve without coupling them too
-closely to the solution you have in mind.
+## Goals
+
+What are the goals of this project? How will we know if it was successful?
+
+## Proposal
+
+What are we doing to achieve the goals and solve the problem?
+
+
+# Who is affected and how
+
+Use this section to hone in on who will be affected and how. For example:
+
+- Are consumers of a specific plugin affected because of a public API change?
+- Will all Kibana Contributors be affected because of a change that may affect
+  the development experience?
+
 
 # Detailed design
 
@@ -29,7 +51,15 @@ implementation to implement. This should get into specifics and corner-cases,
 and include examples of how the feature is used. Any new terminology should be
 defined here.
 
-# Drawbacks
+Include architectural diagrams if you see fit, a picture is worth a thousand
+words.
+
+## Terminology
+
+A glossary of new terms can be very helpful.
+
+
+# Risks
 
 Why should we *not* do this? Please consider:
 
@@ -40,9 +70,11 @@ Why should we *not* do this? Please consider:
 
 There are tradeoffs to choosing any path. Attempt to identify them here.
 
+
 # Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
+
 
 # Adoption strategy
 
@@ -50,11 +82,13 @@ If we implement this proposal, how will existing Kibana developers adopt it? Is
 this a breaking change? Can we write a codemod? Should we coordinate with
 other projects or libraries?
 
+
 # How this scales
 
 Does this change affect Kibana's performance in a substantial way? Have we discovered
 the upper bounds before we see performance degradations? Will any load 
 tests be added to cover these scenarios?
+
 
 # How we teach this
 
@@ -66,6 +100,7 @@ re-organized or altered? Does it change how Kibana is taught to new developers
 at any level?
 
 How should this feature be taught to existing Kibana developers?
+
 
 # Unresolved questions
 

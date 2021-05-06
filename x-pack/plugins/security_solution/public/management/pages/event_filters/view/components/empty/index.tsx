@@ -11,8 +11,8 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
-  ${({ theme }) => css`
-    max-width: ${theme.eui.euiBreakpoints.m};
+  ${() => css`
+    max-width: 100%;
   `}
 `;
 
@@ -47,7 +47,7 @@ export const EventFiltersListEmptyState = memo<{
           data-test-subj="eventFiltersListAddButton"
         >
           <FormattedMessage
-            id="xpack.securitySolution.eventFilters.list.addButton"
+            id="xpack.securitySolution.eventFilters.listEmpty.addButton"
             defaultMessage="Add Endpoint Event Filter"
           />
         </EuiButton>
