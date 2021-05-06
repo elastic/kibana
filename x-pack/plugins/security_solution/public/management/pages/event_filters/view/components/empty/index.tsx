@@ -47,7 +47,7 @@ export const EventFiltersListEmptyState = memo<{
           data-test-subj="eventFiltersListAddButton"
         >
           <FormattedMessage
-            id="xpack.securitySolution.eventFilters.list.addButton"
+            id="xpack.securitySolution.eventFilters.listEmpty.addButton"
             defaultMessage="Add Endpoint Event Filter"
           />
         </EuiButton>
