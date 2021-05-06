@@ -11,7 +11,6 @@ import { HostStatus, MetadataQueryStrategyVersions } from '../../../../common/en
 import { EndpointAppContext } from '../../types';
 import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { getAgentIDsForEndpoints } from '../../services';
 
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const METADATA_REQUEST_V1_ROUTE = `${BASE_ENDPOINT_ROUTE}/v1/metadata`;
