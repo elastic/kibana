@@ -11,7 +11,7 @@ import { cloneDeepWith } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';

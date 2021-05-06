@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 import fs from 'fs';
 

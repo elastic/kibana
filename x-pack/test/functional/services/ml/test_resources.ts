@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProvidedType } from '@kbn/test/types/ftr';
+import { ProvidedType } from '@kbn/test';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
