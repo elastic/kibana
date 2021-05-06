@@ -61,8 +61,6 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
-import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
-import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
@@ -109,6 +107,7 @@ import * as i18n from './translations';
 import { isTab } from '../../../../../common/components/accessibility/helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
+import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -528,8 +527,7 @@ const RuleDetailsPageComponent = () => {
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
-      <ReadOnlyAlertsCallOut />
-      <ReadOnlyRulesCallOut />
+      <MissingPrivilegesCallOut />
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
