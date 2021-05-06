@@ -8,75 +8,8 @@
 import { isPathValid } from './validations';
 import { OperatingSystem, ConditionEntryField } from '../../types';
 
-describe('Validate Windows paths', () => {
-  it('should return TRUE when paths are exact', () => {
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: 'c:\\folder',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: 'c:\\hype-folder-name',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: 'c:\\path.exe',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: 'c:\\file-name.exe',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: 'c:\\folder\\path.exe',
-      })
-    ).toEqual(true);
-  });
-
-  it('should return FALSE when paths have /', () => {
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/folder/path.dmg',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/usr/bin',
-      })
-    ).toEqual(false);
-  });
-
-  it('should return FALSE when paths do not have a wildcard', () => {
+describe('Unacceptable Windows wildcard paths', () => {
+  it('should not accept paths that do not have a folder name with a wildcard ', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -85,7 +18,9 @@ describe('Validate Windows paths', () => {
         value: 'c:\\folder',
       })
     ).toEqual(false);
+  });
 
+  it('should not accept paths that do not have a file name with a wildcard ', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -94,7 +29,9 @@ describe('Validate Windows paths', () => {
         value: 'c:\\path.exe',
       })
     ).toEqual(false);
+  });
 
+  it('should not accept nested paths that do not have a wildcard', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -105,7 +42,31 @@ describe('Validate Windows paths', () => {
     ).toEqual(false);
   });
 
-  it('should return TRUE when paths have wildcards', () => {
+  it('should not accept paths with * wildcard and /', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: 'c:/**/path.exe',
+      })
+    ).toEqual(false);
+  });
+
+  it('should not accept paths with ? wildcard and /', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: 'C:/?indows/pat?',
+      })
+    ).toEqual(false);
+  });
+});
+
+describe('Acceptable Windows wildcard paths', () => {
+  it('should accept wildcards for folders', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -114,16 +75,9 @@ describe('Validate Windows paths', () => {
         value: 'c:\\**\\path.exe',
       })
     ).toEqual(true);
+  });
 
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'd:\\**\\path.exe',
-      })
-    ).toEqual(true);
-
+  it('should accept wildcards for folders and files', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -132,16 +86,29 @@ describe('Validate Windows paths', () => {
         value: 'e:\\**\\*.exe',
       })
     ).toEqual(true);
+  });
+
+  it('should accept paths with single wildcard', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: 'f:\\*',
+      })
+    ).toEqual(true);
 
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
         field: ConditionEntryField.PATH,
         type: 'wildcard',
-        value: 'f:\\**\\*.*',
+        value: 'f:\\?',
       })
     ).toEqual(true);
+  });
 
+  it('should accept paths that have wildcard in filenames', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -150,7 +117,9 @@ describe('Validate Windows paths', () => {
         value: 'a:\\*.*',
       })
     ).toEqual(true);
+  });
 
+  it('should accept paths with ? as wildcard', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -159,7 +128,9 @@ describe('Validate Windows paths', () => {
         value: 'C:\\?indows\\pat?',
       })
     ).toEqual(true);
+  });
 
+  it('should accept paths with both ? and * as wildcards', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -168,7 +139,9 @@ describe('Validate Windows paths', () => {
         value: 'C:\\*?',
       })
     ).toEqual(true);
+  });
 
+  it('should accept paths with multiple wildcards', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
@@ -187,350 +160,346 @@ describe('Validate Windows paths', () => {
       })
     ).toEqual(true);
   });
+});
 
-  it('should return FALSE when paths have / instead of \\ with wildcards', () => {
+describe('Acceptable Windows exact paths', () => {
+  it('should accept paths when it ends with a folder name', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
         field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'c:/**/path.exe',
+        type: 'match',
+        value: 'c:\\folder',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths when it ends with a file name', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: 'c:\\path.exe',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths when it ends with a filename in a folder', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: 'c:\\folder\\path.exe',
+      })
+    ).toEqual(true);
+  });
+});
+
+describe('Acceptable Windows exact paths with hyphens', () => {
+  it('should accept paths when paths have folder names with hyphens', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: 'c:\\hype-folder-name',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths when file names have hyphens', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: 'c:\\file-name.exe',
+      })
+    ).toEqual(true);
+  });
+});
+
+describe('Unacceptable Windows exact paths', () => {
+  it('should not accept paths with /', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.WINDOWS,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: 'c:/folder/path.exe',
       })
     ).toEqual(false);
+  });
 
+  it('should not accept paths not having a <char:> in the suffix', () => {
     expect(
       isPathValid({
         os: OperatingSystem.WINDOWS,
         field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'd:/**/path.exe',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'e:/**/*.exe',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'f:/**/*.*',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'a:/*.*',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'C:/?indows/pat?',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.WINDOWS,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'C:/*?',
+        type: 'match',
+        value: '\\folder\\path.exe',
       })
     ).toEqual(false);
   });
 });
 
-describe('Validate Linux/Mac paths', () => {
-  it('should return TRUE for exact paths', () => {
+///
+describe('Unacceptable Mac/Linux wildcard paths', () => {
+  it('should not accept paths that do not have a folder name with a wildcard ', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/folder',
+      })
+    ).toEqual(false);
+  });
+
+  it('should not accept paths that do not have a file name with a wildcard ', () => {
     expect(
       isPathValid({
         os: OperatingSystem.LINUX,
         field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/',
+        type: 'wildcard',
+        value: '/zip.zip',
       })
-    ).toEqual(true);
+    ).toEqual(false);
+  });
 
+  it('should not accept nested paths that do not have a wildcard', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/opt/pack.tar',
+      })
+    ).toEqual(false);
+  });
+
+  it('should not accept paths with * wildcard and \\', () => {
     expect(
       isPathValid({
         os: OperatingSystem.LINUX,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/usr',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.LINUX,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/usr/bin',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/usr/bin/x.js',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/usr/bin/var/x.dmg',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/usr/hype-folder/x.dmg',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/usr/hype-folder/x-y.dmg',
-      })
-    ).toEqual(true);
-  });
-
-  it('should return FALSE for paths with \\', () => {
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: 'c:\\',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: 'c:\\folder\\file.exe',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: 'd:\\file.exe',
-      })
-    ).toEqual(false);
-  });
-
-  it('should return TRUE for wildcard paths', () => {
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/use?/?',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/user/*/stuff/*',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/opt/*',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/opt/**',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/o??/**',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/opt/*.dmg',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/opt/bin/*',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/opt/bin/*.txt',
-      })
-    ).toEqual(true);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/opt-in/b-in/*.txt',
-      })
-    ).toEqual(true);
-  });
-
-  it('should return FALSE when paths do not have a wildcard', () => {
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/opt/bin',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/x.dmg',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: '/opt/x.dmg',
-      })
-    ).toEqual(false);
-  });
-
-  it('should return FALSE for wildcard paths with \\', () => {
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
         field: ConditionEntryField.PATH,
         type: 'wildcard',
         value: 'c:\\**\\path.exe',
       })
     ).toEqual(false);
+  });
 
+  it('should not accept paths with ? wildcard and \\', () => {
     expect(
       isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'd:\\**\\path.exe',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'e:\\**\\*.exe',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'f:\\**\\*.*',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
-        field: ConditionEntryField.PATH,
-        type: 'wildcard',
-        value: 'a:\\*.*',
-      })
-    ).toEqual(false);
-
-    expect(
-      isPathValid({
-        os: OperatingSystem.MAC,
+        os: OperatingSystem.LINUX,
         field: ConditionEntryField.PATH,
         type: 'wildcard',
         value: 'C:\\?indows\\pat?',
       })
     ).toEqual(false);
+  });
+});
+
+describe('Acceptable Mac/Linux wildcard paths', () => {
+  it('should accept wildcards for folders', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/**/file.',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept wildcards for folders and files', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/usr/bi?/*.js',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths with single wildcard', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/op*',
+      })
+    ).toEqual(true);
+
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/op?',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths that have wildcard in filenames', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/*.*',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths with ? as wildcard', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/usr/?inux/pat?',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths with both ? and * as wildcards', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/usr/*?',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths with multiple wildcards', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'wildcard',
+        value: '/usr/**',
+      })
+    ).toEqual(true);
 
     expect(
       isPathValid({
         os: OperatingSystem.MAC,
         field: ConditionEntryField.PATH,
         type: 'wildcard',
-        value: 'C:\\*?',
+        value: '/opt/??',
+      })
+    ).toEqual(true);
+  });
+});
+
+describe('Acceptable Mac/Linux exact paths', () => {
+  it('should accept paths when it is the root path', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths when it ends with a file name', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/usr/file.ts',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths when it ends with a filename in a folder', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/opt/z.dmg',
+      })
+    ).toEqual(true);
+  });
+});
+
+describe('Acceptable Mac/Linux exact paths with hyphens', () => {
+  it('should accept paths when paths have folder names with hyphens', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/hype-folder-name',
+      })
+    ).toEqual(true);
+  });
+
+  it('should accept paths when file names have hyphens', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/file-name.dmg',
+      })
+    ).toEqual(true);
+  });
+});
+
+describe('Unacceptable Mac/Linux exact paths', () => {
+  it('should not accept paths with \\', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: 'c:\\folder\\path.exe',
+      })
+    ).toEqual(false);
+  });
+
+  it('should not accept paths not starting with /', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: 'opt/bin',
+      })
+    ).toEqual(false);
+  });
+
+  it('should not accept paths ending with /', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.MAC,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/opt/bin/',
+      })
+    ).toEqual(false);
+  });
+
+  it('should not accept file extensions with hyphens', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/opt/bin/file.d-mg',
       })
     ).toEqual(false);
   });
