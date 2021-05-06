@@ -38,12 +38,7 @@ import { countOperation, CountIndexPatternColumn } from './count';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { FramePublicAPI, OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
-import {
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternLayer,
-  IndexPatternPrivateState,
-} from '../../types';
+import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
@@ -227,10 +222,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   getErrorMessage?: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern: IndexPattern,
-    // TODO - remove these again and remap the state on a higher level
-    state?: IndexPatternPrivateState,
-    layerId?: string
+    indexPattern: IndexPattern
   ) =>
     | Array<
         | string
@@ -238,10 +230,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
             message: string;
             fixAction?: {
               label: string;
-              newState: (
-                core: CoreStart,
-                frame: FramePublicAPI
-              ) => Promise<IndexPatternPrivateState>;
+              newState: (core: CoreStart, frame: FramePublicAPI) => Promise<IndexPatternLayer>;
             };
           }
       >
@@ -345,9 +334,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
   getErrorMessage?: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern: IndexPattern,
-    state?: IndexPatternPrivateState,
-    layerId?: string
+    indexPattern: IndexPattern
   ) =>
     | Array<
         | string
@@ -355,10 +342,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
             message: string;
             fixAction?: {
               label: string;
-              newState: (
-                core: CoreStart,
-                frame: FramePublicAPI
-              ) => Promise<IndexPatternPrivateState>;
+              newState: (core: CoreStart, frame: FramePublicAPI) => Promise<IndexPatternLayer>;
             };
           }
       >

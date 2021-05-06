@@ -1096,7 +1096,7 @@ export function getErrorMessages(
     .flatMap(([columnId, column]) => {
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
-        return def.getErrorMessage(layer, columnId, indexPattern, state, layerId);
+        return def.getErrorMessage(layer, columnId, indexPattern);
       }
     })
     .map((errorMessage) => {
@@ -1108,7 +1108,13 @@ export function getErrorMessages(
         fixAction: errorMessage.fixAction
           ? {
               ...errorMessage.fixAction,
-              newState: (frame: FramePublicAPI) => errorMessage.fixAction!.newState(core, frame),
+              newState: async (frame: FramePublicAPI) => ({
+                ...state,
+                layers: {
+                  ...state.layers,
+                  [layerId]: await errorMessage.fixAction!.newState(core, frame),
+                },
+              }),
             }
           : undefined,
       };

@@ -31,7 +31,7 @@ import { FiltersIndexPatternColumn, OperationDefinition, operationDefinitionMap 
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
-import type { IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
+import type { IndexPatternLayer, IndexPattern } from '../../../types';
 
 function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -60,8 +60,7 @@ function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
 function getDisallowedTermsMessage(
   layer: IndexPatternLayer,
   columnId: string,
-  state?: IndexPatternPrivateState,
-  layerId?: string
+  indexPattern: IndexPattern
 ) {
   const hasMultipleShifts =
     uniq(
@@ -77,123 +76,57 @@ function getDisallowedTermsMessage(
       defaultMessage:
         "Can't use multiple time shifts in a single layer together with dynamic top values. Either use the same time shift for all metrics or use filters instead of top values.",
     }),
-    fixAction:
-      state && layerId
-        ? {
-            label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
-              defaultMessage: 'Pin current top values',
+    fixAction: {
+      label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
+        defaultMessage: 'Pin current top values',
+      }),
+      newState: async (core: CoreStart, frame: FramePublicAPI) => {
+        const fieldName = (layer.columns[columnId] as TermsIndexPatternColumn).sourceField;
+        const response: FieldStatsResponse<string | number> = await core.http.post(
+          `/api/lens/index_stats/${indexPattern.id}/field`,
+          {
+            body: JSON.stringify({
+              fieldName,
+              dslQuery: esQuery.buildEsQuery(
+                indexPattern as IIndexPattern,
+                frame.query,
+                frame.filters,
+                esQuery.getEsQueryConfig(core.uiSettings)
+              ),
+              fromDate: frame.dateRange.fromDate,
+              toDate: frame.dateRange.toDate,
             }),
-            newState: async (core: CoreStart, frame: FramePublicAPI) => {
-              const indexPattern = state.indexPatterns[layer.indexPatternId];
-              const fieldName = (layer.columns[columnId] as TermsIndexPatternColumn).sourceField;
-              const response: FieldStatsResponse<string | number> = await core.http.post(
-                `/api/lens/index_stats/${indexPattern.id}/field`,
-                {
-                  body: JSON.stringify({
-                    fieldName,
-                    dslQuery: esQuery.buildEsQuery(
-                      indexPattern as IIndexPattern,
-                      frame.query,
-                      frame.filters,
-                      esQuery.getEsQueryConfig(core.uiSettings)
-                    ),
-                    fromDate: frame.dateRange.fromDate,
-                    toDate: frame.dateRange.toDate,
-                  }),
-                }
-              );
-              return {
-                ...state,
-                layers: {
-                  ...state.layers,
-                  [layerId]: {
-                    ...layer,
-                    columns: {
-                      ...layer.columns,
-                      [columnId]: {
-                        label: i18n.translate('xpack.lens.indexPattern.pinnedTopValuesLabel', {
-                          defaultMessage: 'Pinned top values of {field}',
-                          values: {
-                            field: fieldName,
-                          },
-                        }),
-                        customLabel: true,
-                        isBucketed: layer.columns[columnId].isBucketed,
-                        dataType: 'string',
-                        operationType: 'filters',
-                        params: {
-                          filters: response.topValues?.buckets.map(({ key }) => ({
-                            input: {
-                              query: `${fieldName}: "${key}"`,
-                              language: 'kuery',
-                            },
-                            label: String(key),
-                          })),
-                        },
-                      } as FiltersIndexPatternColumn,
-                    },
-                  },
-                },
-              };
-            },
           }
-        : undefined,
-  };
-}
-
-function getInvalidNestingOrderMessage(
-  layer: IndexPatternLayer,
-  columnId: string,
-  state?: IndexPatternPrivateState,
-  layerId?: string
-) {
-  const usesTimeShift = Object.values(layer.columns).some(
-    (col) => col.timeShift && col.timeShift !== ''
-  );
-  if (!usesTimeShift) {
-    return undefined;
-  }
-  const dateHistogramParent = layer.columnOrder
-    .slice(0, layer.columnOrder.indexOf(columnId))
-    .find((colId) => layer.columns[colId].operationType === 'date_histogram');
-
-  if (!dateHistogramParent) {
-    return undefined;
-  }
-  return {
-    message: i18n.translate('xpack.lens.indexPattern.termsInShiftedDateHistogramError', {
-      defaultMessage:
-        'Date histogram "{dateLabel}" is grouped by before "{dimensionLabel}". When using time shifts, make sure to group by top values first.',
-      values: {
-        dateLabel: layer.columns[dateHistogramParent].label,
-        dimensionLabel: layer.columns[columnId].label,
-      },
-    }),
-    fixAction:
-      state && layerId
-        ? {
-            label: i18n.translate(
-              'xpack.lens.indexPattern.termsInShiftedDateHistogramFixActionLabel',
-              {
-                defaultMessage: 'Reorder dimensions',
-              }
-            ),
-            newState: async () => ({
-              ...state,
-              layers: {
-                ...state.layers,
-                [layerId]: {
-                  ...layer,
-                  columns: {
-                    ...layer.columns,
-                    [dateHistogramParent]: layer.columns[columnId],
-                    [columnId]: layer.columns[dateHistogramParent],
-                  },
+        );
+        return {
+          ...layer,
+          columns: {
+            ...layer.columns,
+            [columnId]: {
+              label: i18n.translate('xpack.lens.indexPattern.pinnedTopValuesLabel', {
+                defaultMessage: 'Pinned top values of {field}',
+                values: {
+                  field: fieldName,
                 },
+              }),
+              customLabel: true,
+              isBucketed: layer.columns[columnId].isBucketed,
+              dataType: 'string',
+              operationType: 'filters',
+              params: {
+                filters: response.topValues?.buckets.map(({ key }) => ({
+                  input: {
+                    query: `${fieldName}: "${key}"`,
+                    language: 'kuery',
+                  },
+                  label: String(key),
+                })),
               },
-            }),
-          }
-        : undefined,
+            } as FiltersIndexPatternColumn,
+          },
+        };
+      },
+    },
   };
 }
 
@@ -236,14 +169,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
-  getErrorMessage: (layer, columnId, indexPattern, state, layerId) =>
+  getErrorMessage: (layer, columnId, indexPattern) =>
     [
       ...(getInvalidFieldMessage(
         layer.columns[columnId] as FieldBasedIndexPatternColumn,
         indexPattern
       ) || []),
-      getInvalidNestingOrderMessage(layer, columnId, state, layerId) || '',
-      getDisallowedTermsMessage(layer, columnId, state, layerId) || '',
+      getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
     ].filter(Boolean),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);

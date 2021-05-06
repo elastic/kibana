@@ -199,9 +199,12 @@ export class AggConfigs {
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
     const timeShifts = this.getTimeShifts();
-    const hasTimeShifts = Object.keys(timeShifts).length > 0;
+    const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
 
     if (this.hierarchical) {
+      if (hasMultipleTimeShifts) {
+        throw new Error('Multiple time shifts not supported for hierarchical metrics');
+      }
       // collect all metrics, and filter out the ones that we won't be copying
       nestedMetrics = this.aggs
         .filter(function (agg) {
@@ -228,7 +231,7 @@ export class AggConfigs {
         dslLvlCursor = prevDsl?.aggs || dslLvlCursor;
       }
 
-      if (hasTimeShifts) {
+      if (hasMultipleTimeShifts) {
         dslLvlCursor = this.insertTimeShiftSplit(config, timeShifts, dslLvlCursor);
       }
 
@@ -288,15 +291,6 @@ export class AggConfigs {
     const timeRange = this.timeRange;
     const filters: Record<string, unknown> = {};
     const timeField = this.timeFields[0];
-    filters['0'] = {
-      range: {
-        [timeField]: {
-          // only works if there is a time range
-          gte: timeRange.from,
-          lte: timeRange.to,
-        },
-      },
-    };
     Object.entries(timeShifts).forEach(([key, shift]) => {
       filters[key] = {
         range: {
@@ -368,6 +362,8 @@ export class AggConfigs {
       .forEach((timeShift) => {
         if (timeShift) {
           timeShifts[String(timeShift.asMilliseconds())] = timeShift;
+        } else {
+          timeShifts[0] = moment.duration(0);
         }
       });
     return timeShifts;
@@ -389,8 +385,7 @@ export class AggConfigs {
     const timeRange = this.timeRange;
     const timeFields = this.timeFields;
     const timeShifts = this.getTimeShifts();
-    const hasTimeShift = Object.values(this.getTimeShifts()).length > 0;
-    if (!hasTimeShift) {
+    if (!this.hasTimeShifts()) {
       return this.timeFields
         .map((fieldName) => getTime(this.indexPattern, timeRange, { fieldName, forceNow }))
         .filter(isRangeFilter);
@@ -406,43 +401,29 @@ export class AggConfigs {
         },
         query: {
           bool: {
-            should: [
-              ...Object.entries(timeShifts).map(([, shift]) => {
-                return {
-                  bool: {
-                    filter: timeFields
-                      .map(
-                        (fieldName) =>
-                          [
-                            getTime(this.indexPattern, timeRange, { fieldName, forceNow }),
-                            fieldName,
-                          ] as [RangeFilter | undefined, string]
-                      )
-                      .filter(([filter]) => isRangeFilter(filter))
-                      .map(([filter, field]) => ({
-                        range: {
-                          [field]: {
-                            gte: moment(filter?.range[field].gte).subtract(shift).toISOString(),
-                            lte: moment(filter?.range[field].lte).subtract(shift).toISOString(),
-                          },
-                        },
-                      })),
-                  },
-                };
-              }),
-              {
+            should: Object.entries(timeShifts).map(([, shift]) => {
+              return {
                 bool: {
                   filter: timeFields
-                    .map((fieldName) =>
-                      getTime(this.indexPattern, timeRange, { fieldName, forceNow })
+                    .map(
+                      (fieldName) =>
+                        [
+                          getTime(this.indexPattern, timeRange, { fieldName, forceNow }),
+                          fieldName,
+                        ] as [RangeFilter | undefined, string]
                     )
-                    .filter(isRangeFilter)
-                    .map((filter) => ({
-                      range: filter.range,
+                    .filter(([filter]) => isRangeFilter(filter))
+                    .map(([filter, field]) => ({
+                      range: {
+                        [field]: {
+                          gte: moment(filter?.range[field].gte).subtract(shift).toISOString(),
+                          lte: moment(filter?.range[field].lte).subtract(shift).toISOString(),
+                        },
+                      },
                     })),
                 },
-              },
-            ],
+              };
+            }),
             minimum_should_match: 1,
           },
         },
@@ -451,10 +432,11 @@ export class AggConfigs {
   }
 
   postFlightTransform(response: IEsSearchResponse<any>) {
-    const timeShifts = this.getTimeShifts();
-    if (Object.keys(timeShifts).length === 0) {
+    if (!this.hasTimeShifts()) {
       return response;
     }
+    const timeShifts = this.getTimeShifts();
+    const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
     const transformedRawResponse = cloneDeep(response.rawResponse);
     const aggCursor = transformedRawResponse.aggregations!;
 
@@ -534,23 +516,33 @@ export class AggConfigs {
       });
     };
     const transformTimeShift = (cursor: Record<string, Aggregate>, aggIndex: number): undefined => {
-      if (cursor.time_offset_split) {
-        const timeShiftedBuckets = (cursor.time_offset_split as FiltersAggregate).buckets as Record<
-          string,
-          FiltersBucketItem
-        >;
-        const subTree = timeShiftedBuckets['0'];
-        Object.entries(timeShifts).forEach(([key, shift]) => {
-          mergeAggLevel(
-            subTree as GenericBucket,
-            timeShiftedBuckets[key] as GenericBucket,
-            shift,
-            aggIndex
-          );
-        });
+      const shouldSplit = bucketAggs[aggIndex].splitForTimeShift(this);
+      if (shouldSplit) {
+        // multiple time shifts caused a filters agg in the tree we have to merge
+        if (hasMultipleTimeShifts && cursor.time_offset_split) {
+          const timeShiftedBuckets = (cursor.time_offset_split as FiltersAggregate)
+            .buckets as Record<string, FiltersBucketItem>;
+          const subTree = timeShiftedBuckets['0'] || {};
+          Object.entries(timeShifts)
+            .filter(([key]) => key !== '0')
+            .forEach(([key, shift]) => {
+              mergeAggLevel(
+                subTree as GenericBucket,
+                timeShiftedBuckets[key] as GenericBucket,
+                shift,
+                aggIndex
+              );
+            });
 
-        delete cursor.time_offset_split;
-        Object.assign(cursor, subTree);
+          delete cursor.time_offset_split;
+          Object.assign(cursor, subTree);
+        } else {
+          // otherwise we have to "merge" a single level to shift all keys
+          const [[, shift]] = Object.entries(timeShifts);
+          const subTree = {};
+          mergeAggLevel(subTree, cursor, shift, aggIndex);
+          Object.assign(cursor, subTree);
+        }
         return;
       }
       // recurse deeper into the response object

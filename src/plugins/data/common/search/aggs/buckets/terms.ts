@@ -180,12 +180,12 @@ export const getTermsBucketAgg = () =>
             return;
           }
 
-          if (aggs?.hasTimeShifts()) {
+          if (aggs?.hasTimeShifts() && aggs.timeRange) {
             const shift = orderAgg.getTimeShift();
             orderAgg = aggs.createAggConfig(
               {
                 type: 'filtered_metric',
-                id: 'shifted-order',
+                id: orderAgg.id,
                 params: {
                   customBucket: aggs
                     .createAggConfig(
@@ -198,10 +198,10 @@ export const getTermsBucketAgg = () =>
                             query: {
                               range: {
                                 [aggs.timeFields![0]]: {
-                                  from: moment(aggs.timeRange!.from)
+                                  gte: moment(aggs.timeRange.from)
                                     .subtract(shift || 0)
                                     .toISOString(),
-                                  to: moment(aggs.timeRange!.to)
+                                  lte: moment(aggs.timeRange.to)
                                     .subtract(shift || 0)
                                     .toISOString(),
                                 },
