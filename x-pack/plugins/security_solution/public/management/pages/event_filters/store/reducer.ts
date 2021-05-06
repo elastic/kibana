@@ -14,12 +14,14 @@ import { AppLocation, Immutable } from '../../../../../common/endpoint/types';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { MANAGEMENT_ROUTING_EVENT_FILTERS_PATH } from '../../../common/constants';
 import { extractEventFiltetrsPageLocation } from '../../../common/routing';
+import { isUninitialisedResourceState } from '../../../state/async_resource_state';
 
 import {
   EventFiltersInitForm,
   EventFiltersChangeForm,
   EventFiltersFormStateChanged,
   EventFiltersCreateSuccess,
+  EventFiltersUpdateSuccess,
   EventFiltersListPageDataChanged,
   EventFiltersListPageDataExistsChanged,
 } from './action';
@@ -101,6 +103,8 @@ const eventFiltersChangeForm: CaseReducer<EventFiltersChangeForm> = (state, acti
           : state.form.hasNameError,
       hasOSError:
         action.payload.hasOSError !== undefined ? action.payload.hasOSError : state.form.hasOSError,
+      newComment:
+        action.payload.newComment !== undefined ? action.payload.newComment : state.form.newComment,
     },
   };
 };
@@ -110,6 +114,8 @@ const eventFiltersFormStateChanged: CaseReducer<EventFiltersFormStateChanged> = 
     ...state,
     form: {
       ...state.form,
+      entry: isUninitialisedResourceState(action.payload) ? undefined : state.form.entry,
+      newComment: isUninitialisedResourceState(action.payload) ? '' : state.form.newComment,
       submissionResourceState: action.payload,
     },
   };
@@ -118,7 +124,19 @@ const eventFiltersFormStateChanged: CaseReducer<EventFiltersFormStateChanged> = 
 const eventFiltersCreateSuccess: CaseReducer<EventFiltersCreateSuccess> = (state, action) => {
   return {
     ...state,
-    entries: [action.payload.exception, ...state.entries],
+    // If we are on the List page, then force a refresh of data
+    listPage: getListPageIsActive(state)
+      ? {
+          ...state.listPage,
+          forceRefresh: true,
+        }
+      : state.listPage,
+  };
+};
+
+const eventFiltersUpdateSuccess: CaseReducer<EventFiltersUpdateSuccess> = (state, action) => {
+  return {
+    ...state,
     // If we are on the List page, then force a refresh of data
     listPage: getListPageIsActive(state)
       ? {
@@ -168,6 +186,8 @@ export const eventFiltersPageReducer: StateReducer = (
       return eventFiltersFormStateChanged(state, action);
     case 'eventFiltersCreateSuccess':
       return eventFiltersCreateSuccess(state, action);
+    case 'eventFiltersUpdateSuccess':
+      return eventFiltersUpdateSuccess(state, action);
     case 'userChangedUrl':
       return userChangedUrl(state, action);
   }

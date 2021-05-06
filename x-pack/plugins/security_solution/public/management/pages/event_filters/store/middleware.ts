@@ -16,10 +16,13 @@ import { EventFiltersHttpService } from '../service';
 
 import { EventFiltersListPageData, EventFiltersListPageState } from '../state';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
+
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   transformNewItemOutput,
+  transformOutput,
+  UpdateExceptionListItemSchema,
 } from '../../../../shared_imports';
 import {
   getCurrentListPageDataState,
@@ -28,6 +31,9 @@ import {
   getListPageDataExistsState,
   getListPageIsActive,
   listDataNeedsRefresh,
+  getFormEntry,
+  getSubmissionResource,
+  getNewComment,
 } from './selector';
 import { EventFiltersService, EventFiltersServiceGetListOptions } from '../types';
 import {
@@ -35,6 +41,17 @@ import {
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
+
+const addNewComments = (
+  entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema,
+  newComment: string
+): UpdateExceptionListItemSchema | CreateExceptionListItemSchema => {
+  if (newComment) {
+    if (!entry.comments) entry.comments = [];
+    entry.comments.push({ comment: newComment });
+  }
+  return entry;
+};
 
 type MiddlewareActionHandler = (
   store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
@@ -44,7 +61,7 @@ type MiddlewareActionHandler = (
 const eventFiltersCreate: MiddlewareActionHandler = async (store, eventFiltersService) => {
   const submissionResourceState = store.getState().form.submissionResourceState;
   try {
-    const formEntry = store.getState().form.entry;
+    const formEntry = getFormEntry(store.getState());
     if (!formEntry) return;
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
@@ -54,13 +71,82 @@ const eventFiltersCreate: MiddlewareActionHandler = async (store, eventFiltersSe
     });
 
     const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
+    const updatedCommentsEntry = addNewComments(
+      sanitizedEntry,
+      getNewComment(store.getState())
+    ) as CreateExceptionListItemSchema;
 
-    const exception = await eventFiltersService.addEventFilters(sanitizedEntry);
+    const exception = await eventFiltersService.addEventFilters(updatedCommentsEntry);
+
     store.dispatch({
       type: 'eventFiltersCreateSuccess',
+    });
+
+    store.dispatch({
+      type: 'eventFiltersFormStateChanged',
       payload: {
-        exception,
+        type: 'LoadedResourceState',
+        data: exception,
       },
+    });
+  } catch (error) {
+    store.dispatch({
+      type: 'eventFiltersFormStateChanged',
+      payload: {
+        type: 'FailedResourceState',
+        error: error.body || error,
+        lastLoadedState: getLastLoadedResourceState(submissionResourceState),
+      },
+    });
+  }
+};
+
+const eventFiltersUpdate = async (
+  store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
+  eventFiltersService: EventFiltersService
+) => {
+  const submissionResourceState = getSubmissionResource(store.getState());
+  try {
+    const formEntry = getFormEntry(store.getState());
+    if (!formEntry) return;
+    store.dispatch({
+      type: 'eventFiltersFormStateChanged',
+      payload: {
+        type: 'LoadingResourceState',
+        previousState: { type: 'UninitialisedResourceState' },
+      },
+    });
+
+    const sanitizedEntry: UpdateExceptionListItemSchema = transformOutput(
+      formEntry as UpdateExceptionListItemSchema
+    );
+    const updatedCommentsEntry = addNewComments(
+      sanitizedEntry,
+      getNewComment(store.getState())
+    ) as UpdateExceptionListItemSchema;
+
+    // Clean unnecessary fields for update action
+    [
+      'created_at',
+      'created_by',
+      'created_at',
+      'created_by',
+      'list_id',
+      'tie_breaker_id',
+      'updated_at',
+      'updated_by',
+    ].forEach((field) => {
+      delete updatedCommentsEntry[field as keyof UpdateExceptionListItemSchema];
+    });
+
+    updatedCommentsEntry.comments = updatedCommentsEntry.comments?.map((comment) => ({
+      comment: comment.comment,
+      id: comment.id,
+    }));
+
+    const exception = await eventFiltersService.updateOne(updatedCommentsEntry);
+    store.dispatch({
+      type: 'eventFiltersUpdateSuccess',
     });
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
@@ -73,6 +159,30 @@ const eventFiltersCreate: MiddlewareActionHandler = async (store, eventFiltersSe
         error.body ?? error,
         getLastLoadedResourceState(submissionResourceState)
       ),
+    });
+  }
+};
+
+const eventFiltersLoadById = async (
+  store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
+  eventFiltersService: EventFiltersService,
+  id: string
+) => {
+  const submissionResourceState = getSubmissionResource(store.getState());
+  try {
+    const entry = await eventFiltersService.getOne(id);
+    store.dispatch({
+      type: 'eventFiltersInitForm',
+      payload: { entry },
+    });
+  } catch (error) {
+    store.dispatch({
+      type: 'eventFiltersFormStateChanged',
+      payload: {
+        type: 'FailedResourceState',
+        error: error.body || error,
+        lastLoadedState: getLastLoadedResourceState(submissionResourceState),
+      },
     });
   }
 };
@@ -138,6 +248,14 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
         }),
       });
 
+      dispatch({
+        type: 'eventFiltersListPageDataExistsChanged',
+        payload: {
+          type: 'LoadedResourceState',
+          data: Boolean(results.total),
+        },
+      });
+
       // If no results were returned, then just check to make sure data actually exists for
       // event filters. This is used to drive the UI between showing "empty state" and "no items found"
       // messages to the user
@@ -161,11 +279,19 @@ export const createEventFiltersPageMiddleware = (
 
     if (action.type === 'eventFiltersCreateStart') {
       await eventFiltersCreate(store, eventFiltersService);
+    } else if (action.type === 'eventFiltersInitFromId') {
+      await eventFiltersLoadById(store, eventFiltersService, action.payload.id);
+    } else if (action.type === 'eventFiltersUpdateStart') {
+      await eventFiltersUpdate(store, eventFiltersService);
     }
 
     // Middleware that only applies to the List Page for Event Filters
     if (getListPageIsActive(store.getState())) {
-      if (action.type === 'userChangedUrl' || action.type === 'eventFiltersCreateSuccess') {
+      if (
+        action.type === 'userChangedUrl' ||
+        action.type === 'eventFiltersCreateSuccess' ||
+        action.type === 'eventFiltersUpdateSuccess'
+      ) {
         refreshListDataIfNeeded(store, eventFiltersService);
       }
     }

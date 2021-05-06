@@ -8,11 +8,11 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__';
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiConfirmModal, EuiPageHeader } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 import { RoleMappingsTable } from '../../../shared/role_mapping';
@@ -22,6 +22,7 @@ import { RoleMappings } from './role_mappings';
 
 describe('RoleMappings', () => {
   const initializeRoleMappings = jest.fn();
+  const handleResetMappings = jest.fn();
   const mockValues = {
     roleMappings: [wsRoleMapping],
     dataLoading: false,
@@ -31,6 +32,7 @@ describe('RoleMappings', () => {
   beforeEach(() => {
     setMockActions({
       initializeRoleMappings,
+      handleResetMappings,
     });
     setMockValues(mockValues);
   });
@@ -53,5 +55,34 @@ describe('RoleMappings', () => {
     const wrapper = shallow(<RoleMappings />);
 
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+  });
+
+  describe('resetMappingsWarningModal', () => {
+    let wrapper: ShallowWrapper;
+
+    beforeEach(() => {
+      wrapper = shallow(<RoleMappings />);
+      const button = wrapper.find(EuiPageHeader).prop('rightSideItems')![0] as any;
+      button.props.onClick();
+    });
+
+    it('renders reset warnings modal', () => {
+      expect(wrapper.find(EuiConfirmModal)).toHaveLength(1);
+    });
+
+    it('hides reset warnings modal', () => {
+      const modal = wrapper.find(EuiConfirmModal);
+      modal.prop('onCancel')();
+
+      expect(wrapper.find(EuiConfirmModal)).toHaveLength(0);
+    });
+
+    it('resets when confirmed', () => {
+      const event = {} as MouseEvent<HTMLButtonElement>;
+      const modal = wrapper.find(EuiConfirmModal);
+      modal.prop('onConfirm')!(event);
+
+      expect(handleResetMappings).toHaveBeenCalled();
+    });
   });
 });
