@@ -72,7 +72,7 @@ interface RuleTypeBase {
   actionGroups: Array<ActionGroup<string>>;
   defaultActionGroupId: string;
   producer: string;
-  minimumLicenseRequired: 'basic' | 'gold' | 'trial';
+  minimumLicenseRequired: 'basic' | 'gold' | 'platinum' | 'trial';
 }
 
 export type RuleType<
