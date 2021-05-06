@@ -194,7 +194,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-            "lineNumber": 35
+            "lineNumber": 38
           },
           "signature": [
             "(enabled: boolean) => void"
@@ -203,7 +203,7 @@
       ],
       "source": {
         "path": "src/plugins/telemetry_management_section/public/plugin.tsx",
-        "lineNumber": 34
+        "lineNumber": 37
       },
       "lifecycle": "setup",
       "initialIsOpen": true

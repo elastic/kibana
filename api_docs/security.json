@@ -449,7 +449,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 168
+        "lineNumber": 171
       },
       "signature": [
         "{ authc: AuthenticationServiceSetup; sessionTimeout: ISessionTimeout; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
@@ -471,12 +471,12 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/security/public/plugin.tsx",
-        "lineNumber": 169
+        "lineNumber": 172
       },
       "signature": [
         "{ navControlService: ",
         "SecurityNavControlServiceStart",
-        "; }"
+        "; authc: AuthenticationServiceSetup; }"
       ],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -490,8 +490,19 @@
         "id": "def-server.AuditEvent",
         "type": "Interface",
         "label": "AuditEvent",
+        "signature": [
+          {
+            "pluginId": "security",
+            "scope": "server",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-server.AuditEvent",
+            "text": "AuditEvent"
+          },
+          " extends ",
+          "LogMeta"
+        ],
         "description": [
-          "\nAudit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.6/index.html\n\nIf you add additional fields to the schema ensure you update the Kibana Filebeat module:\nhttps://github.com/elastic/beats/tree/master/filebeat/module/kibana\n"
+          "\nAudit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.9/index.html\n\nIf you add additional fields to the schema ensure you update the Kibana Filebeat module:\nhttps://github.com/elastic/beats/tree/master/filebeat/module/kibana\n"
         ],
         "tags": [
           "public"
@@ -502,65 +513,11 @@
             "id": "def-server.AuditEvent.message",
             "type": "string",
             "label": "message",
-            "description": [
-              "\nHuman readable message describing action, outcome and user.\n"
-            ],
+            "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 27
+              "lineNumber": 21
             }
-          },
-          {
-            "tags": [],
-            "id": "def-server.AuditEvent.event",
-            "type": "Object",
-            "label": "event",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 28
-            },
-            "signature": [
-              "{ action: string; category?: ",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.EventCategory",
-                "text": "EventCategory"
-              },
-              " | undefined; type?: ",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.EventType",
-                "text": "EventType"
-              },
-              " | undefined; outcome?: ",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.EventOutcome",
-                "text": "EventOutcome"
-              },
-              " | undefined; }"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.AuditEvent.user",
-            "type": "Object",
-            "label": "user",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 34
-            },
-            "signature": [
-              "{ name: string; roles?: readonly string[] | undefined; } | undefined"
-            ]
           },
           {
             "tags": [],
@@ -570,52 +527,10 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 38
+              "lineNumber": 22
             },
             "signature": [
               "{ space_id?: string | undefined; session_id?: string | undefined; saved_object?: { type: string; id: string; } | undefined; authentication_provider?: string | undefined; authentication_type?: string | undefined; authentication_realm?: string | undefined; lookup_realm?: string | undefined; add_to_spaces?: readonly string[] | undefined; delete_from_spaces?: readonly string[] | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.AuditEvent.error",
-            "type": "Object",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 80
-            },
-            "signature": [
-              "{ code?: string | undefined; message?: string | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.AuditEvent.http",
-            "type": "Object",
-            "label": "http",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 84
-            },
-            "signature": [
-              "{ request?: { method?: string | undefined; } | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.AuditEvent.url",
-            "type": "Object",
-            "label": "url",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-              "lineNumber": 89
-            },
-            "signature": [
-              "{ domain?: string | undefined; path?: string | undefined; port?: number | undefined; query?: string | undefined; scheme?: string | undefined; } | undefined"
             ]
           }
         ],
@@ -1183,45 +1098,26 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
+    "enums": [],
+    "misc": [
       {
-        "id": "def-server.EventCategory",
-        "type": "Enum",
-        "label": "EventCategory",
         "tags": [],
-        "description": [],
+        "id": "def-server.ROUTE_TAG_CAN_REDIRECT",
+        "type": "string",
+        "label": "ROUTE_TAG_CAN_REDIRECT",
+        "description": [
+          "\nIf the route is marked with this tag Security can safely assume that the calling party that sends\nrequest to this route can handle redirect responses. It's particularly important if we want the\nspecific route to be able to initiate or participate in the authentication handshake that may\ninvolve redirects and will eventually redirect authenticated user to this route."
+        ],
         "source": {
-          "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-          "lineNumber": 98
+          "path": "x-pack/plugins/security/server/routes/tags.ts",
+          "lineNumber": 21
         },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.EventOutcome",
-        "type": "Enum",
-        "label": "EventOutcome",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-          "lineNumber": 111
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.EventType",
-        "type": "Enum",
-        "label": "EventType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/security/server/audit/audit_events.ts",
-          "lineNumber": 104
-        },
+        "signature": [
+          "\"security:canRedirect\""
+        ],
         "initialIsOpen": false
       }
     ],
-    "misc": [],
     "objects": []
   },
   "common": {

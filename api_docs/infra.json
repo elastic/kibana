@@ -193,10 +193,25 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/infra/server/plugin.ts",
-          "lineNumber": 64
+          "lineNumber": 65
         },
         "signature": [
-          "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; timestamp?: string | undefined; container?: string | undefined; tiebreaker?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly inventory: Readonly<{} & { compositeSize: number; }>; }"
+          "{ readonly sources?: Readonly<{ default?: Readonly<{ fields?: Readonly<{ host?: string | undefined; message?: string[] | undefined; container?: string | undefined; timestamp?: string | undefined; tiebreaker?: string | undefined; pod?: string | undefined; } & {}> | undefined; logAlias?: string | undefined; metricAlias?: string | undefined; } & {}> | undefined; } & {}> | undefined; readonly enabled: boolean; readonly inventory: Readonly<{} & { compositeSize: number; }>; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.InfraRequestHandlerContext",
+        "type": "Type",
+        "label": "InfraRequestHandlerContext",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "lineNumber": 24
+        },
+        "signature": [
+          "InfraMlRequestHandlerContext & InfraSpacesRequestHandlerContext"
         ],
         "initialIsOpen": false
       }
@@ -217,7 +232,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/infra/server/plugin.ts",
-            "lineNumber": 75
+            "lineNumber": 76
           },
           "signature": [
             "(sourceId: string, sourceProperties: ",
@@ -228,7 +243,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/infra/server/plugin.ts",
-        "lineNumber": 74
+        "lineNumber": 75
       },
       "lifecycle": "setup",
       "initialIsOpen": true

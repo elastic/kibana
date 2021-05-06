@@ -78,7 +78,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 55
+                  "lineNumber": 58
                 }
               }
             ],
@@ -86,7 +86,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 55
+              "lineNumber": 58
             }
           },
           {
@@ -131,7 +131,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 62
+                  "lineNumber": 65
                 }
               }
             ],
@@ -139,7 +139,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 62
+              "lineNumber": 65
             }
           },
           {
@@ -183,7 +183,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 109
+                  "lineNumber": 113
                 }
               }
             ],
@@ -191,18 +191,50 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 109
+              "lineNumber": 113
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/task_manager/server/plugin.ts",
-          "lineNumber": 44
+          "lineNumber": 47
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
+      {
+        "id": "def-server.asInterval",
+        "type": "Function",
+        "label": "asInterval",
+        "signature": [
+          "(ms: number) => string"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-server.asInterval.$1",
+            "type": "number",
+            "label": "ms",
+            "isRequired": true,
+            "signature": [
+              "number"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
+              "lineNumber": 41
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
+          "lineNumber": 41
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.isUnrecoverableError",
         "type": "Function",
@@ -760,7 +792,7 @@
         "lineNumber": 31
       },
       "signature": [
-        "{ addMiddleware: (middleware: Middleware) => void; } & Pick<TaskTypeDictionary, \"registerTaskDefinitions\">"
+        "{ index: string; addMiddleware: (middleware: Middleware) => void; } & Pick<TaskTypeDictionary, \"registerTaskDefinitions\">"
       ],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -773,7 +805,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/task_manager/server/plugin.ts",
-        "lineNumber": 36
+        "lineNumber": 39
       },
       "signature": [
         "Pick<TaskScheduling, \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<TaskStore, \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: TaskStore['remove']; }"

@@ -626,6 +626,20 @@
             "signature": [
               "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\" | undefined"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedObjectMetadata.hiddenType",
+            "type": "CompoundType",
+            "label": "hiddenType",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
           }
         ],
         "source": {
@@ -651,7 +665,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             }
           },
           {
@@ -662,7 +676,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             }
           },
           {
@@ -673,7 +687,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "signature": [
               {
@@ -693,7 +707,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "signature": [
               {
@@ -708,7 +722,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 36
+          "lineNumber": 37
         },
         "initialIsOpen": false
       },
@@ -853,7 +867,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">, \"children\" | \"headers\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"description\" | \"title\" | \"id\" | \"name\" | \"field\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"width\" | \"render\" | \"align\" | \"abbr\" | \"footer\" | \"colSpan\" | \"rowSpan\" | \"scope\" | \"valign\" | \"dataType\" | \"isExpander\" | \"textOnly\" | \"truncateText\" | \"isMobileHeader\" | \"mobileOptions\" | \"hideForMobile\">"
+              ">, \"children\" | \"headers\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"description\" | \"title\" | \"id\" | \"name\" | \"field\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"data-test-subj\" | \"width\" | \"render\" | \"align\" | \"readOnly\" | \"abbr\" | \"footer\" | \"colSpan\" | \"rowSpan\" | \"scope\" | \"valign\" | \"dataType\" | \"isExpander\" | \"textOnly\" | \"truncateText\" | \"isMobileHeader\" | \"mobileOptions\" | \"hideForMobile\">"
             ]
           }
         ],
@@ -987,7 +1001,7 @@
                 "section": "def-server.SavedObjectsNamespaceType",
                 "text": "SavedObjectsNamespaceType"
               },
-              "; }"
+              "; hiddenType: boolean; }"
             ]
           },
           {
@@ -998,7 +1012,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-              "lineNumber": 19
+              "lineNumber": 20
             },
             "signature": [
               "SavedObjectReference",
@@ -1013,7 +1027,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-              "lineNumber": 20
+              "lineNumber": 21
             },
             "signature": [
               "string[] | undefined"
@@ -1110,7 +1124,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 27
+          "lineNumber": 28
         },
         "signature": [
           "SavedObject<T> & { meta: SavedObjectMetadata; }"
@@ -1273,7 +1287,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 51
+              "lineNumber": 52
             },
             "signature": [
               {
@@ -1294,7 +1308,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 52
+              "lineNumber": 53
             },
             "signature": [
               {
@@ -1310,7 +1324,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 50
+          "lineNumber": 51
         },
         "initialIsOpen": false
       },
@@ -1329,7 +1343,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 44
+              "lineNumber": 45
             }
           },
           {
@@ -1340,7 +1354,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 45
+              "lineNumber": 46
             }
           },
           {
@@ -1351,7 +1365,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 46
+              "lineNumber": 47
             },
             "signature": [
               {
@@ -1371,13 +1385,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 43
+          "lineNumber": 44
         },
         "initialIsOpen": false
       },
@@ -1459,6 +1473,20 @@
             "signature": [
               "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\" | undefined"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.SavedObjectMetadata.hiddenType",
+            "type": "CompoundType",
+            "label": "hiddenType",
+            "description": [],
+            "source": {
+              "path": "src/plugins/saved_objects_management/common/types.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
           }
         ],
         "source": {
@@ -1484,7 +1512,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             }
           },
           {
@@ -1495,7 +1523,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             }
           },
           {
@@ -1506,7 +1534,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "signature": [
               {
@@ -1526,7 +1554,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects_management/common/types.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "signature": [
               {
@@ -1541,7 +1569,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 36
+          "lineNumber": 37
         },
         "initialIsOpen": false
       }
@@ -1556,7 +1584,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 31
+          "lineNumber": 32
         },
         "signature": [
           "\"parent\" | \"child\""
@@ -1573,7 +1601,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects_management/common/types.ts",
-          "lineNumber": 27
+          "lineNumber": 28
         },
         "signature": [
           "SavedObject<T> & { meta: SavedObjectMetadata; }"
