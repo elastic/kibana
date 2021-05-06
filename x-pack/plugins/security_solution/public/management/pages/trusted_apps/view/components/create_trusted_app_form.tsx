@@ -174,7 +174,7 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
           'entries',
           'warnings',
           i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidPathMsg', {
-            defaultMessage: '[{row}] Invalid path value',
+            defaultMessage: '[{row}] Path may be formed incorrectly; verify path value',
             values: { row: index + 1 },
           })
         );
