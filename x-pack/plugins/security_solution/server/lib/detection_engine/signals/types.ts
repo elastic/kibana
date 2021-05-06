@@ -227,6 +227,7 @@ export interface SignalHit {
 
 export interface AlertAttributes<T extends RuleParams = RuleParams> {
   actions: RuleAlertAction[];
+  consumer: string;
   enabled: boolean;
   name: string;
   tags: string[];

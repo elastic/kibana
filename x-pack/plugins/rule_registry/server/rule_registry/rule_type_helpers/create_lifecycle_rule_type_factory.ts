@@ -10,7 +10,7 @@ import v4 from 'uuid/v4';
 import { Mutable } from 'utility-types';
 import { AlertInstance } from '../../../../alerting/server';
 import { ActionVariable, AlertInstanceState } from '../../../../alerting/common';
-import { RuleParams, RuleType } from '../../types';
+import { AlertAttributes, RuleParams, RuleType } from '../../types';
 import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../common';
 import { PrepopulatedRuleEventFields } from '../create_scoped_rule_registry_client/types';
 import { RuleRegistry } from '..';
@@ -67,6 +67,13 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRu
           state: previousState,
           rule,
         } = options;
+
+        const so = await options.services.savedObjectsClient.get<AlertAttributes>(
+          'alert',
+          rule.uuid
+        );
+
+        console.error('RULE REGISTRY CONSUMER', so.attributes.consumer);
 
         const decodedState = wrappedStateRt.decode(previousState);
 
@@ -169,7 +176,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRu
               '@timestamp': timestamp,
               'event.kind': 'state',
               'kibana.rac.alert.id': alertId,
-              // 'owner': ''
+              'kibana.rac.alert.owner': so.attributes.consumer,
             };
 
             const isNew = !state.trackedAlerts[alertId];

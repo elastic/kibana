@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '../../licensing/common/types';
-import { AlertType } from '../common/alert_types';
+import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   LicensingPluginSetup,
@@ -15,7 +15,7 @@ import {
 } from '../../licensing/server';
 
 export const APM_FEATURE = {
-  id: 'apm',
+  id: APM_SERVER_FEATURE_ID,
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
     defaultMessage: 'APM and User Experience',
   }),

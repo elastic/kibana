@@ -28,6 +28,7 @@ export const baseRuleFieldMap = {
   'kibana.rac.alert.severity.level': { type: 'keyword' },
   'kibana.rac.alert.severity.value': { type: 'long' },
   'kibana.rac.alert.status': { type: 'keyword' },
+  'kibana.rac.alert.owner': { type: 'keyword' },
 } as const;
 
 export type BaseRuleFieldMap = typeof baseRuleFieldMap;

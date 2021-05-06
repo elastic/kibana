@@ -22,6 +22,7 @@ import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
+import { APM_SERVER_FEATURE_ID } from '../../../common/alert_types';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -55,7 +56,7 @@ export function registerErrorCountAlertType({
           apmActionVariables.interval,
         ],
       },
-      producer: 'apm',
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       executor: async ({ services, params }) => {
         const config = await config$.pipe(take(1)).toPromise();

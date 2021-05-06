@@ -80,7 +80,7 @@ export const removeClashes = (doc: BaseSignalHit): BaseSignalHit => {
 export const buildSignal = (
   docs: BaseSignalHit[],
   rule: RulesSchema,
-  owner: typeof SERVER_APP_ID
+  owner: string // typeof SERVER_APP_ID
 ): Signal => {
   const _meta = {
     version: SIGNALS_TEMPLATE_VERSION,

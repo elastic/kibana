@@ -24,6 +24,7 @@ import {
   AlertType,
   ALERT_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
+  APM_SERVER_FEATURE_ID,
 } from '../../../common/alert_types';
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
@@ -70,7 +71,7 @@ export function registerTransactionDurationAnomalyAlertType({
           apmActionVariables.triggerValue,
         ],
       },
-      producer: 'apm',
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       executor: async ({ services, params }) => {
         if (!ml) {

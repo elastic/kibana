@@ -17,6 +17,8 @@ import { TypeOfFieldMap } from '../../../common';
 import { ScopedRuleRegistryClient, EventsOf } from './types';
 import { BaseRuleFieldMap } from '../../../common';
 import { RuleRegistry } from '..';
+import { SERVER_APP_ID } from '../../../../security_solution/server';
+import { APM_SERVER_FEATURE_ID } from '../../../../apm/server';
 
 const createPathReporterError = (either: Either<Errors, unknown>) => {
   const error = new Error(`Failed to validate alert event`);

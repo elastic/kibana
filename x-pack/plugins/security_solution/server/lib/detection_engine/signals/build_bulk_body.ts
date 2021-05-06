@@ -25,12 +25,11 @@ import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
 // format search_after result for signals index.
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
-  doc: SignalSourceHit,
-  owner: typeof SERVER_APP_ID
+  doc: SignalSourceHit
 ): SignalHit => {
   const rule = buildRuleWithOverrides(ruleSO, doc._source!);
   const signal: Signal = {
-    ...buildSignal([doc], rule, owner),
+    ...buildSignal([doc], rule, ruleSO.attributes.consumer),
     ...additionalSignalFields(doc),
   };
   const event = buildEventTypeSignal(doc);

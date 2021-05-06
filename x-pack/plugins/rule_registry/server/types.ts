@@ -18,8 +18,26 @@ import { RuleRegistry } from './rule_registry';
 import { RacClient } from './rac_client/rac_client';
 import { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
 import { BaseRuleFieldMap } from '../common';
+import { SERVER_APP_ID } from '../../security_solution/server';
+import { APM_SERVER_FEATURE_ID } from '../../apm/server';
 
 export type RuleParams = Type<any>;
+
+export interface AlertAttributes<T extends RuleParams = RuleParams> {
+  // actions: RuleAlertAction[];
+  consumer: string;
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
+  throttle: string;
+  params: T;
+}
 
 type TypeOfRuleParams<TRuleParams extends RuleParams> = TypeOf<TRuleParams>;
 

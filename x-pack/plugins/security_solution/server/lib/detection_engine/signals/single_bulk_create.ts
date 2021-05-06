@@ -123,7 +123,7 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody(ruleSO, doc, SERVER_APP_ID),
+    buildBulkBody(ruleSO, doc),
   ]);
   const start = performance.now();
   const { body: response } = await services.scopedClusterClient.asInternalUser.bulk({
@@ -142,7 +142,7 @@ export const singleBulkCreate = async ({
     .map((doc, index) => ({
       _id: response.items[index].create?._id ?? '',
       _index: response.items[index].create?._index ?? '',
-      ...buildBulkBody(ruleSO, doc, SERVER_APP_ID),
+      ...buildBulkBody(ruleSO, doc),
     }))
     .filter((_, index) => get(response.items[index], 'create.status') === 201);
   const createdItemsCount = createdItems.length;
