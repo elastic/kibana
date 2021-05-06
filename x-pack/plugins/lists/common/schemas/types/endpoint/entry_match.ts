@@ -10,6 +10,9 @@ import * as t from 'io-ts';
 import { NonEmptyString } from '../../../shared_imports';
 import { operatorIncluded } from '../../common/schemas';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const endpointEntryMatch = t.exact(
   t.type({
     field: NonEmptyString,
@@ -18,4 +21,8 @@ export const endpointEntryMatch = t.exact(
     value: NonEmptyString,
   })
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type EndpointEntryMatch = t.TypeOf<typeof endpointEntryMatch>;

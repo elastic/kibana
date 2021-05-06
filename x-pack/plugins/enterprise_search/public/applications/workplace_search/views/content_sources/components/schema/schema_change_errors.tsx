@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { SchemaErrorsAccordion } from '../../../../../shared/schema/schema_errors_accordion';
+import { SchemaErrorsAccordion } from '../../../../../shared/schema';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
 import { SCHEMA_ERRORS_HEADING } from './constants';
@@ -32,11 +32,7 @@ export const SchemaChangeErrors: React.FC = () => {
   return (
     <>
       <ViewContentHeader title={SCHEMA_ERRORS_HEADING} />
-      <SchemaErrorsAccordion
-        fieldCoercionErrors={fieldCoercionErrors}
-        schema={serverSchema}
-        itemId={sourceId}
-      />
+      <SchemaErrorsAccordion fieldCoercionErrors={fieldCoercionErrors} schema={serverSchema} />
     </>
   );
 };
