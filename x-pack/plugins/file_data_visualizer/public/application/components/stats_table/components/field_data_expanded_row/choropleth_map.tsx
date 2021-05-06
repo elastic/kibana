@@ -27,7 +27,7 @@ export const getChoroplethTopValuesLayer = (
 ): VectorLayerDescriptor => {
   return {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.ml.dataviz.choroplethMap.topValuesCount', {
+    label: i18n.translate('xpack.fileDataVisualizer.choroplethMap.topValuesCount', {
       defaultMessage: 'Top values count for {fieldName}',
       values: { fieldName },
     }),
