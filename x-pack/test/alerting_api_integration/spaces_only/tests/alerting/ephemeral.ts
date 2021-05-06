@@ -122,114 +122,98 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       );
     });
 
-    it('should ensure alerts are rescheduled and ran properly', async () => {
-      const nonEphemeralTasks = 3;
-      const actionPromises = [];
-      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + nonEphemeralTasks; i++) {
-        actionPromises.push(
-          supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: `My action${i}`,
-              connector_type_id: 'test.index-record',
-              config: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-              secrets: {
-                encrypted: 'This value should be encrypted',
-              },
-            })
-            .expect(200)
-        );
-      }
-      const createdActions = await Promise.all(actionPromises);
-      createdActions.forEach((createdAction) =>
-        objectRemover.add(Spaces.space1.id, createdAction.body.id, 'action', 'actions')
-      );
-
-      const pattern = {
-        instance: [true, true, true, false, true, true],
-      };
-      const { body: createdAlert1 } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+    it('should ensure ephemeral actions do not block future tasks from running', async () => {
+      const action = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
-        .send(
-          getTestAlertData({
-            rule_type_id: 'test.patternFiring',
-            params: { pattern },
-            schedule: { interval: '1m' },
-            throttle: null,
-            notify_when: 'onActiveAlert',
-            actions: createdActions.map((createdAction) => {
-              return {
-                id: createdAction.body.id,
-                group: 'default',
-                params: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference: 'one',
-                  message: 'test message1',
-                },
-              };
-            }),
-          })
-        )
+        .send({
+          name: `My action`,
+          connector_type_id: 'test.delayed',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert1.id, 'rule', 'alerting');
-      const { body: createdAlert2 } = await supertest
+      objectRemover.add(Spaces.space1.id, action.body.id, 'action', 'actions');
+
+      const reference = 'ephemeralRef';
+      const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            rule_type_id: 'test.patternFiring',
-            params: { pattern },
-            schedule: { interval: '1m' },
+            rule_type_id: 'test.always-firing',
+            params: { index: ES_TEST_INDEX_NAME, reference },
+            schedule: { interval: '1s' },
             throttle: null,
             notify_when: 'onActiveAlert',
             actions: [
               {
-                id: createdActions[0].body.id,
+                id: action.body.id,
                 group: 'default',
                 params: {
-                  index: ES_TEST_INDEX_NAME,
-                  reference: 'two',
-                  message: 'test message2',
+                  delayInMs: 1000,
+                },
+              },
+              {
+                id: action.body.id,
+                group: 'default',
+                params: {
+                  delayInMs: 1000,
                 },
               },
             ],
           })
         )
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert2.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-      const events = flatten(
-        await Promise.all(
-          createdActions.map(async (createdAction, index) => {
-            return await retry.try(async () => {
-              return await getEventLog({
-                getService,
-                spaceId: Spaces.space1.id,
-                type: 'action',
-                id: createdAction.body.id,
-                provider: 'actions',
-                actions: new Map([['execute', { gte: index === 0 ? 2 : 1 }]]),
-              });
-            });
-          })
-        )
-      );
+      // We want to verify that while the alert is processing all ephemeral tasks, task manager
+      // will pick up the alert (since it's set to a small interval) concurrently (so action execution does not block task manager)
 
-      const executeActionsEvents = getEventsByAction(events, 'execute');
-      expect(executeActionsEvents.length).equal(
-        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + 1
-      );
+      // By the time we see two actions finish (at least 2s after the alert fired), we should see
+      // at the very least 2 total executions of the alert too.
+      const actionEvents = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'action',
+          id: action.body.id,
+          provider: 'actions',
+          actions: new Map([['execute', { gte: 2 }]]),
+        });
+      });
+      // Purposely do not do this in a `retry.try` because the logs should already exist
+      const alertEvents = await getEventLog({
+        getService,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdAlert.id,
+        provider: 'alerting',
+        actions: new Map([['execute', { gte: 2 }]]),
+      });
+      const executeActionsEvents = getEventsByAction(actionEvents, 'execute');
+      expect(executeActionsEvents.length).equal(2);
 
-      const searchResult1 = await esTestIndexTool.search('action:test.index-record', 'one');
-      const searchResult2 = await esTestIndexTool.search('action:test.index-record', 'two');
-      expect(searchResult1.hits.total.value).equal(
-        nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE
+      const executeAlertEvents = getEventsByAction(alertEvents, 'execute');
+      expect(executeAlertEvents.length).equal(2);
+
+      // Disable the rule
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/_disable`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+
+      // Wait for the delayed actions to fire before finishing so the objectRemover does not crash the test server
+      const waitForInMs = 2500;
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          resolve(true);
+        }, waitForInMs)
       );
-      expect(searchResult2.hits.total.value).equal(1);
     });
   });
 }

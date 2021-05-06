@@ -38,6 +38,7 @@ const enabledActionTypes = [
   'test.failing',
   'test.index-record',
   'test.noop',
+  'test.delayed',
   'test.rate-limit',
   'test.throw',
 ];
