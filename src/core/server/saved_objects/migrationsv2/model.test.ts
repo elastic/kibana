@@ -820,9 +820,10 @@ describe('migrations v2 model', () => {
         });
         const newState = model(testState, res) as FatalState;
         expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(
-          `"Migrations failed. Reason: The following saved object documents are corrupt: a:b . To allow migrations to proceed, please delete these documents."`
-        );
+        expect(newState.reason).toMatchInlineSnapshot(`
+          "Migrations failed. Reason:  Corrupt saved object documents: a:b.
+           . To allow migrations to proceed, please delete these documents."
+        `);
       });
     });
 

@@ -16,7 +16,7 @@ import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationVersion } from '../types';
 import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
-import { excludeUnusedTypesQuery } from '../migrations/core';
+import { excludeUnusedTypesQuery, TransformErrorObjects } from '../migrations/core';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 
 /**
@@ -95,6 +95,31 @@ function getAliases(indices: FetchIndexResponse) {
     });
     return acc;
   }, {} as Record<string, string>);
+}
+
+/**
+ * Creates a record of alias -> index name pairs
+ */
+function extractTransformFailuresReason(
+  corruptDocumentIds: string[],
+  transformErrors: TransformErrorObjects[]
+): { corruptDocsReason: string; transformErrsReason: string } {
+  const corruptDocumentIdReason =
+    corruptDocumentIds.length > 0
+      ? ` Corrupt saved object documents: ${corruptDocumentIds.join(',')}.\n`
+      : ' ';
+  // we have both the saved object Id and the stack trace in each `transformErrors` item.
+  const transformErrorsReason =
+    transformErrors.length > 0
+      ? 'Transformation errors: ' +
+        transformErrors
+          .map((errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`)
+          .join('/n')
+      : '';
+  return {
+    corruptDocsReason: corruptDocumentIdReason,
+    transformErrsReason: transformErrorsReason,
+  };
 }
 
 const delayRetryState = <S extends State>(
@@ -500,26 +525,31 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           lastHitSortValue: res.right.lastHitSortValue,
         };
       } else {
-        // we don't have any more outdated documents but had issues with transforming docs, we fail the migration
+        // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          // if documents couldn't be transformed or there were transformation errors we fail the migration
-          const corruptDocumentIdReason =
-            stateP.corruptDocumentIds.length > 0
-              ? `The following saved object documents are corrupt: ${stateP.corruptDocumentIds.join(
-                  ','
-                )}`
-              : '';
-          const transformErrorsReason =
-            stateP.transformErrors.length > 0
-              ? 'The following saved object documents could not be transformed:/n' +
-                stateP.transformErrors
-                  .map((errObj) => `${errObj.rawId}: ${errObj.err.message}`)
-                  .join('/n')
-              : '';
+          // // If documents couldn't be transformed or there were transformation errors we fail the migration
+          // const corruptDocumentIdReason =
+          //   stateP.corruptDocumentIds.length > 0
+          //     ? ` Corrupt saved object documents: ${stateP.corruptDocumentIds.join(',')}.\n`
+          //     : ' ';
+          // // we have both the saved object Id and the stack trace in each `transformErrors` item.
+          // const transformErrorsReason =
+          //   stateP.transformErrors.length > 0
+          //     ? 'Transformation errors: ' +
+          //       stateP.transformErrors
+          //         .map(
+          //           (errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`
+          //         )
+          //         .join('/n')
+          //     : '';
+          const { corruptDocsReason, transformErrsReason } = extractTransformFailuresReason(
+            stateP.corruptDocumentIds,
+            stateP.transformErrors
+          );
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason: ${corruptDocumentIdReason} ${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`,
+            reason: `Migrations failed. Reason: ${corruptDocsReason} ${transformErrsReason}. To allow migrations to proceed, please delete these documents.`,
           };
         } else {
           // we don't have any more outdated documents and we haven't encountered any document transformation issues.
@@ -681,25 +711,29 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          // If documents couldn't be transformed or there were transformation errors we fail the migration
-          const corruptDocumentIdReason =
-            stateP.corruptDocumentIds.length > 0
-              ? ` Corrupt saved object documents: ${stateP.corruptDocumentIds.join(',')}.\n`
-              : ' ';
-          // we have both the saved object Id and the stack trace in each `transformErrors` item.
-          const transformErrorsReason =
-            stateP.transformErrors.length > 0
-              ? 'Transformation errors: ' +
-                stateP.transformErrors
-                  .map(
-                    (errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`
-                  )
-                  .join('/n')
-              : '';
+          const { corruptDocsReason, transformErrsReason } = extractTransformFailuresReason(
+            stateP.corruptDocumentIds,
+            stateP.transformErrors
+          );
+          // // If documents couldn't be transformed or there were transformation errors we fail the migration
+          // const corruptDocumentIdReason =
+          //   stateP.corruptDocumentIds.length > 0
+          //     ? ` Corrupt saved object documents: ${stateP.corruptDocumentIds.join(',')}.\n`
+          //     : ' ';
+          // // we have both the saved object Id and the stack trace in each `transformErrors` item.
+          // const transformErrorsReason =
+          //   stateP.transformErrors.length > 0
+          //     ? 'Transformation errors: ' +
+          //       stateP.transformErrors
+          //         .map(
+          //           (errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`
+          //         )
+          //         .join('/n')
+          //     : '';
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`,
+            reason: `Migrations failed. Reason:${corruptDocsReason}${transformErrsReason}. To allow migrations to proceed, please delete these documents.`,
           };
         } else {
           // If there are no more results we have transformed all outdated

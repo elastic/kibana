@@ -7,10 +7,16 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
+import * as Either from 'fp-ts/lib/Either';
 import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsSerializer } from '../../serialization';
-import { migrateRawDocs, migrateRawDocsSafely } from './migrate_raw_docs';
+import {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+  migrateRawDocs,
+  migrateRawDocsSafely,
+} from './migrate_raw_docs';
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 
 describe('migrateRawDocs', () => {
@@ -128,7 +134,6 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('converts raw docs to saved objects', async () => {
-    let result: any;
     const transform = jest.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
     ]);
@@ -140,11 +145,7 @@ describe('migrateRawDocsSafely', () => {
         { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
       ]
     );
-    try {
-      result = await task();
-    } catch (e) {
-      /** ignore */
-    }
+    const result = (await task()) as Either.Right<DocumentsTransformSuccess>;
     expect(result._tag).toEqual('Right');
     expect(result.right.processedDocs).toEqual([
       {
@@ -177,7 +178,6 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('returns a `left` tag when encountering a corrupt saved object document', async () => {
-    let result: any;
     const transform = jest.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
@@ -189,11 +189,7 @@ describe('migrateRawDocsSafely', () => {
         { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
       ]
     );
-    try {
-      result = await task();
-    } catch (e) {
-      result = e;
-    }
+    const result = (await task()) as Either.Left<DocumentsTransformFailed>;
     expect(transform).toHaveBeenCalledTimes(1);
     expect(result._tag).toEqual('Left');
     expect(Object.keys(result.left)).toEqual(['type', 'corruptDocumentIds', 'transformErrors']);
@@ -202,7 +198,6 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('handles when one document is transformed into multiple documents', async () => {
-    let result: any;
     const transform = jest.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
       { id: 'bar', type: 'foo', attributes: { name: 'baz' } },
@@ -212,11 +207,7 @@ describe('migrateRawDocsSafely', () => {
       transform,
       [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }]
     );
-    try {
-      result = await task();
-    } catch (err) {
-      /** ignore */
-    }
+    const result = (await task()) as Either.Right<DocumentsTransformSuccess>;
     expect(result._tag).toEqual('Right');
     expect(result.right.processedDocs).toEqual([
       {
@@ -241,7 +232,6 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test('instance of Either.left containing transform errors when the transform function throws a TransformSavedObjectDocument error', async () => {
-    let result: any;
     const transform = jest.fn<any, any>((doc: any) => {
       throw new TransformSavedObjectDocumentError(
         `${doc.id}`,
@@ -257,11 +247,7 @@ describe('migrateRawDocsSafely', () => {
       transform,
       [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }] // this is the raw doc
     );
-    try {
-      result = await task();
-    } catch (err) {
-      /* ignore */
-    }
+    const result = (await task()) as Either.Left<DocumentsTransformFailed>;
     expect(transform).toHaveBeenCalledTimes(1);
     expect(result._tag).toEqual('Left');
     expect(result.left.corruptDocumentIds.length).toEqual(0);
@@ -273,7 +259,6 @@ describe('migrateRawDocsSafely', () => {
   });
 
   test("instance of Either.left containing errors when the transform function throws an error that isn't a TransformSavedObjectDocument error", async () => {
-    let result: any;
     const transform = jest.fn<any, any>((doc: any) => {
       throw new Error('error during transform');
     });
@@ -282,11 +267,7 @@ describe('migrateRawDocsSafely', () => {
       transform,
       [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }] // this is the raw doc
     );
-    try {
-      result = await task();
-    } catch (err) {
-      /* ignore */
-    }
+    const result = (await task()) as Either.Left<DocumentsTransformFailed>;
     expect(transform).toHaveBeenCalledTimes(1);
     expect(result._tag).toEqual('Left');
     expect(result.left.corruptDocumentIds.length).toEqual(0);

@@ -32,7 +32,7 @@ export interface TransformErrorObjects {
   rawId: string;
   err: TransformSavedObjectDocumentError | Error;
 }
-type MigrateMethod = (
+type MigrateFn = (
   doc: SavedObjectUnsanitizedDoc<unknown>
 ) => Promise<Array<SavedObjectUnsanitizedDoc<unknown>>>;
 
@@ -101,8 +101,9 @@ export function migrateRawDocsSafely(
     const options = { namespaceTreatment: 'lax' as const };
     for (const raw of rawDocs) {
       if (serializer.isRawSavedObject(raw, options)) {
-        const savedObject = convertToRawAddMigrationVersion(raw, options, serializer);
+        // const savedObject = convertToRawAddMigrationVersion(raw, options, serializer);
         try {
+          const savedObject = convertToRawAddMigrationVersion(raw, options, serializer);
           processedDocs.push(
             ...(await migrateMapToRawDoc(migrateDocNonBlocking, savedObject, serializer))
           );
@@ -115,14 +116,7 @@ export function migrateRawDocsSafely(
               err,
             });
           } else {
-            transformErrors.push({
-              rawId: serializer.generateRawId(
-                savedObject.namespace,
-                savedObject.type,
-                savedObject.id
-              ),
-              err,
-            }); // cases we haven't accounted for yet
+            transformErrors.push({ rawId: raw._id, err }); // cases we haven't accounted for yet
           }
         }
       } else {
@@ -167,12 +161,12 @@ function transformNonBlocking(
 /**
  * Applies the specified migration function to every saved object document provided
  * and converts the saved object to a raw document
- * @param {MigrateMethod} transformNonBlocking
+ * @param {MigrateFn} transformNonBlocking
  * @param {SavedObjectsRawDoc[]} rawDoc
  * @returns {Promise<SavedObjectsRawDoc[]>}
  */
 async function migrateMapToRawDoc(
-  migrateMethod: MigrateMethod,
+  migrateMethod: MigrateFn,
   savedObject: SavedObjectSanitizedDoc<unknown>,
   serializer: SavedObjectsSerializer
 ): Promise<SavedObjectsRawDoc[]> {
