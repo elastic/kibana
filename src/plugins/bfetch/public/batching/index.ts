@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { inflateResponse } from './inflate_response';
+export {
+  createStreamingBatchedFunction,
+  StreamingBatchedFunctionParams,
+} from './create_streaming_batched_function';

@@ -9,17 +9,9 @@
 import { createStreamingBatchedFunction } from './create_streaming_batched_function';
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
 import { AbortError, defer, of } from '../../../kibana_utils/public';
-import { Subject } from 'rxjs';
-import { promisify } from 'util';
-import { deflate } from 'zlib';
-const pDeflate = promisify(deflate);
+import { Subject, of as rxof } from 'rxjs';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
-
-const compressResponse = async (resp: any) => {
-  const gzipped = await pDeflate(JSON.stringify(resp));
-  return gzipped.toString('base64') + '\n';
-};
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([
@@ -57,16 +49,12 @@ const setup = () => {
 };
 
 describe('createStreamingBatchedFunction()', () => {
-  let getCompressionDisabled: any;
-  beforeEach(() => {
-    getCompressionDisabled = jest.fn().mockResolvedValue(true);
-  });
   test('returns a function', () => {
     const { fetchStreaming } = setup();
     const fn = createStreamingBatchedFunction({
       url: '/test',
       fetchStreaming,
-      getCompressionDisabled,
+      compressionDisabled$: rxof(true),
     });
     expect(typeof fn).toBe('function');
   });
@@ -76,7 +64,7 @@ describe('createStreamingBatchedFunction()', () => {
     const fn = createStreamingBatchedFunction({
       url: '/test',
       fetchStreaming,
-      getCompressionDisabled,
+      compressionDisabled$: rxof(true),
     });
     const res = fn({});
     expect(typeof res.then).toBe('function');
@@ -90,7 +78,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
@@ -110,7 +98,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
@@ -125,7 +113,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       fn({ foo: 'bar' });
@@ -144,7 +132,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       fn({ foo: 'bar' });
@@ -166,7 +154,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
@@ -188,7 +176,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       const abortController = new AbortController();
@@ -211,7 +199,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       fn({ a: '1' });
@@ -236,7 +224,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       fn({ a: '1' });
@@ -259,7 +247,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       const promise1 = fn({ a: '1' });
@@ -277,7 +265,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       await flushPromises();
@@ -321,7 +309,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       const promise1 = fn({ a: '1' });
@@ -349,65 +337,18 @@ describe('createStreamingBatchedFunction()', () => {
       expect(await promise3).toEqual({ foo: 'bar 2' });
     });
 
-    test('handles compressed chunks', async () => {
-      const { fetchStreaming, stream } = setup();
-      const fn = createStreamingBatchedFunction({
-        url: '/test',
-        fetchStreaming,
-        maxItemAge: 5,
-        flushOnMaxItems: 3,
-        getCompressionDisabled: jest.fn().mockResolvedValue(false),
-      });
-
-      await flushPromises();
-
-      const promise1 = fn({ a: '1' });
-      const promise2 = fn({ b: '2' });
-      const promise3 = fn({ c: '3' });
-      await new Promise((r) => setTimeout(r, 6));
-
-      stream.next(
-        await compressResponse({
-          id: 1,
-          result: { foo: 'bar' },
-        })
-      );
-      stream.next(
-        await compressResponse({
-          id: 2,
-          result: { foo: 'bar 2' },
-        })
-      );
-
-      expect(await isPending(promise1)).toBe(true);
-      expect(await isPending(promise2)).toBe(false);
-      expect(await isPending(promise3)).toBe(false);
-      expect(await promise2).toEqual({ foo: 'bar' });
-      expect(await promise3).toEqual({ foo: 'bar 2' });
-    });
-
-    test('treats responses as compressed by defaut', async () => {
-      const { fetchStreaming, stream } = setup();
+    test('compression is false by default', async () => {
+      const { fetchStreaming } = setup();
       const fn = createStreamingBatchedFunction({
         url: '/test',
         flushOnMaxItems: 1,
         fetchStreaming,
       });
 
-      await flushPromises();
+      fn({ a: '1' });
 
-      const promise1 = fn({ a: '1' });
-      await new Promise((r) => setTimeout(r, 6));
-
-      stream.next(
-        await compressResponse({
-          id: 0,
-          result: { foo: 'bar' },
-        })
-      );
-
-      expect(await isPending(promise1)).toBe(false);
-      expect(await promise1).toEqual({ foo: 'bar' });
+      const dontCompress = await fetchStreaming.mock.calls[0][0].compressionDisabled$.toPromise();
+      expect(dontCompress).toBe(false);
     });
 
     test('resolves falsy results', async () => {
@@ -417,7 +358,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       const promise1 = fn({ a: '1' });
@@ -459,7 +400,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       const promise = fn({ a: '1' });
@@ -488,7 +429,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
 
       const promise1 = of(fn({ a: '1' }));
@@ -541,7 +482,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
-          getCompressionDisabled,
+          compressionDisabled$: rxof(true),
         });
 
         const abortController = new AbortController();
@@ -571,7 +512,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
-          getCompressionDisabled,
+          compressionDisabled$: rxof(true),
         });
 
         const abortController = new AbortController();
@@ -610,7 +551,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
-          getCompressionDisabled,
+          compressionDisabled$: rxof(true),
         });
 
         const promise1 = of(fn({ a: '1' }));
@@ -641,7 +582,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
-          getCompressionDisabled,
+          compressionDisabled$: rxof(true),
         });
 
         const promise1 = of(fn({ a: '1' }));
@@ -679,7 +620,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
-          getCompressionDisabled,
+          compressionDisabled$: rxof(true),
         });
 
         const promise1 = of(fn({ a: '1' }));
@@ -712,7 +653,7 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
-          getCompressionDisabled,
+          compressionDisabled$: rxof(true),
         });
 
         const promise1 = of(fn({ a: '1' }));
@@ -749,7 +690,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
-        getCompressionDisabled,
+        compressionDisabled$: rxof(true),
       });
       await flushPromises();
 

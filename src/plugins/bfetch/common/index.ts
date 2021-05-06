@@ -10,5 +10,4 @@ export * from './util';
 export * from './streaming';
 export * from './buffer';
 export * from './batch';
-export * from './compress';
 export * from './constants';

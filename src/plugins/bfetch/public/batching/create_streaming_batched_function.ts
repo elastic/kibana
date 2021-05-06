@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Observable, of } from 'rxjs';
 import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
@@ -13,9 +14,8 @@ import {
   createBatchedFunction,
   ErrorLike,
   normalizeError,
-  inflateResponse,
 } from '../../common';
-import { fetchStreaming, split } from '../streaming';
+import { fetchStreaming } from '../streaming';
 import { BatchedFunc, BatchItem } from './types';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
@@ -51,7 +51,7 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
   /**
    * Disabled zlib compression of response chunks.
    */
-  getCompressionDisabled?: () => Promise<boolean>;
+  compressionDisabled$?: Observable<boolean>;
 }
 
 /**
@@ -69,7 +69,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
-    getCompressionDisabled = () => Promise.resolve(false),
+    compressionDisabled$ = of(false),
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
@@ -119,18 +119,13 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           abortController.abort();
         });
         const batch = items.map((item) => item.payload);
-        const disabledCompression = await getCompressionDisabled();
 
         const { stream } = fetchStreamingInjected({
           url,
-          headers: disabledCompression
-            ? {}
-            : {
-                'X-Encode-Chunks': 'true',
-              },
           body: JSON.stringify({ batch }),
           method: 'POST',
           signal: abortController.signal,
+          compressionDisabled$,
         });
 
         const handleStreamError = (error: any) => {
@@ -139,12 +134,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           for (const { future } of items) future.reject(normalizedError);
         };
 
-        stream.pipe(split('\n')).subscribe({
+        stream.subscribe({
           next: (json: string) => {
             try {
-              const response = disabledCompression
-                ? JSON.parse(json)
-                : inflateResponse<Result>(json);
+              const response = JSON.parse(json);
               if (response.error) {
                 items[response.id].future.reject(response.error);
               } else if (response.result !== undefined) {

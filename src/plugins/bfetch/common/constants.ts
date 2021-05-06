@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const DISABLE_SEARCH_COMPRESSION = 'bfetch:disableCompression';
+export const DISABLE_BFETCH_COMPRESSION = 'bfetch:disableCompression';

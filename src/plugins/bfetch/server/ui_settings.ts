@@ -9,21 +9,21 @@
 import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { DISABLE_SEARCH_COMPRESSION } from '../common';
+import { DISABLE_BFETCH_COMPRESSION } from '../common';
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
-    [DISABLE_SEARCH_COMPRESSION]: {
-      name: i18n.translate('bfetch.disableSearchCompression', {
-        defaultMessage: 'Disable Search Compression',
+    [DISABLE_BFETCH_COMPRESSION]: {
+      name: i18n.translate('bfetch.disableBfetchCompression', {
+        defaultMessage: 'Disable Batch Compression',
       }),
       value: false,
-      description: i18n.translate('bfetch.disableSearchCompressionDesc', {
+      description: i18n.translate('bfetch.disableBfetchCompressionDesc', {
         defaultMessage:
-          'Disable search compression. This allows you debug individual search requests, but increases response size.',
+          'Disable batch compression. This allows you to debug individual requests, but increases response size.',
       }),
       schema: schema.boolean(),
-      category: ['search'],
+      category: [],
     },
   };
 }
