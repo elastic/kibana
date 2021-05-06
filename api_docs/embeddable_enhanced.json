@@ -143,7 +143,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-              "lineNumber": 36
+              "lineNumber": 35
             },
             "signature": [
               {
@@ -163,7 +163,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-              "lineNumber": 37
+              "lineNumber": 36
             },
             "signature": [
               {
@@ -178,7 +178,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-          "lineNumber": 35
+          "lineNumber": 34
         },
         "initialIsOpen": false
       },
@@ -197,7 +197,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-              "lineNumber": 41
+              "lineNumber": 40
             },
             "signature": [
               {
@@ -217,7 +217,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-              "lineNumber": 42
+              "lineNumber": 41
             },
             "signature": [
               {
@@ -232,7 +232,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-          "lineNumber": 40
+          "lineNumber": 39
         },
         "initialIsOpen": false
       }
@@ -311,7 +311,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-        "lineNumber": 46
+        "lineNumber": 45
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -325,7 +325,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-        "lineNumber": 49
+        "lineNumber": 48
       },
       "lifecycle": "start",
       "initialIsOpen": true

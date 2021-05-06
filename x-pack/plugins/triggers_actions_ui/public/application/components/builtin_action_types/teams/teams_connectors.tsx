@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { TeamsActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const TeamsActionFields: React.FunctionComponent<
   ActionConnectorFieldsProps<TeamsActionConnector>
@@ -42,7 +43,15 @@ const TeamsActionFields: React.FunctionComponent<
         )}
       >
         <>
-          {getEncryptedFieldNotifyLabel(!action.id)}
+          {getEncryptedFieldNotifyLabel(
+            !action.id,
+            1,
+            action.isMissingSecrets ?? false,
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
+              { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
+            )
+          )}
           <EuiFieldText
             fullWidth
             isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
@@ -64,38 +73,6 @@ const TeamsActionFields: React.FunctionComponent<
     </>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <>
-        <EuiSpacer size="s" />
-        <EuiText size="s" data-test-subj="rememberValuesMessage">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.rememberValueLabel"
-            defaultMessage="Remember this value. You must reenter it each time you edit the connector."
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-      </>
-    );
-  }
-  return (
-    <>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        iconType="iInCircle"
-        data-test-subj="reenterValuesMessage"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
-          { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
-        )}
-      />
-      <EuiSpacer size="m" />
-    </>
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { TeamsActionFields as default };

@@ -6,20 +6,33 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsImportWarning } from 'kibana/server';
 import { RawAction } from '../types';
 
-export function getImportResultMessage(connectors: Array<SavedObject<RawAction>>) {
+export function getImportWarnings(
+  connectors: Array<SavedObject<RawAction>>
+): SavedObjectsImportWarning[] {
   const connectorsWithSecrets = connectors.filter(
     (connector) => connector.attributes.isMissingSecrets
   );
-  return i18n.translate('xpack.actions.savedObjects.onImportText', {
+  if (connectorsWithSecrets.length === 0) {
+    return [];
+  }
+  const message = i18n.translate('xpack.actions.savedObjects.onImportText', {
     defaultMessage:
       '{connectorsWithSecretsLength} {connectorsWithSecretsLength, plural, one {connector has} other {connectors have}} secrets that require updates.',
     values: {
       connectorsWithSecretsLength: connectorsWithSecrets.length,
     },
   });
+  return [
+    {
+      type: 'action_required',
+      message,
+      actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
+      buttonLabel: GO_TO_CONNECTORS_BUTTON_LABLE,
+    } as SavedObjectsImportWarning,
+  ];
 }
 
 export const GO_TO_CONNECTORS_BUTTON_LABLE = 'Go to connectors';
