@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the DefaultExportFileName as:
  *   - If null or undefined, then a default of "export.ndjson" will be used
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultExportFileName = new t.Type<string, string | undefined, unknown>(
   'DefaultExportFileName',

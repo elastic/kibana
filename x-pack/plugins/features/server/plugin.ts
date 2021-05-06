@@ -128,7 +128,15 @@ export class FeaturesPlugin
 
   private registerOssFeatures(savedObjects: SavedObjectsServiceStart) {
     const registry = savedObjects.getTypeRegistry();
-    const savedObjectTypes = registry.getVisibleTypes().map((t) => t.name);
+    const savedObjectVisibleTypes = registry.getVisibleTypes().map((t) => t.name);
+    const savedObjectImportableAndExportableHiddenTypes = registry
+      .getImportableAndExportableTypes()
+      .filter((t) => registry.isHidden(t.name))
+      .map((t) => t.name);
+
+    const savedObjectTypes = Array.from(
+      new Set([...savedObjectVisibleTypes, ...savedObjectImportableAndExportableHiddenTypes])
+    );
 
     this.logger.debug(
       `Registering OSS features with SO types: ${savedObjectTypes.join(', ')}. "includeTimelion": ${
