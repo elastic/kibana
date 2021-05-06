@@ -56,7 +56,6 @@ export const isPathValid = ({
   return true;
 };
 
-// based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L140
 const doesPathMatchRegex = ({ os, value }: { os: OperatingSystem; value: string }): boolean => {
   if (os === OperatingSystem.WINDOWS) {
     const filePathRegex = /^(?:[a-z]:|\\\\[^<>:"'/\\|?*]+\\[^<>:"'/\\|?*]+|%\w+%|)[\\](?:[^<>:"'/\\|?*]+[\\/])*([^<>:"'/\\|?*])+$/i;
@@ -65,7 +64,6 @@ const doesPathMatchRegex = ({ os, value }: { os: OperatingSystem; value: string 
   return /^(\/|(\/[\w\-]+)+|\/[\w\-]+\.[\w]+|(\/[\w-]+)+\/[\w\-]+\.[\w]+)$/i.test(value);
 };
 
-// based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L149
 const isWindowsWildcardPathValid = (path: string): boolean => {
   const firstCharacter = path[0];
   const lastCharacter = path.slice(-1);
@@ -86,7 +84,6 @@ const isWindowsWildcardPathValid = (path: string): boolean => {
   }
 };
 
-// based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L167
 const isLinuxMacWildcardPathValid = (path: string): boolean => {
   const firstCharacter = path[0];
   const lastCharacter = path.slice(-1);
