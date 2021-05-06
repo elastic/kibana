@@ -17,6 +17,7 @@ import { derivative } from './derivative';
 import { movingAverage } from './moving_average';
 import { mapColumn } from './map_column';
 import { math } from './math';
+import { overallMetric } from './overall_metric';
 
 export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   clog,
@@ -25,6 +26,7 @@ export const functionSpecs: AnyExpressionFunctionDefinition[] = [
   variable,
   theme,
   cumulativeSum,
+  overallMetric,
   derivative,
   movingAverage,
   mapColumn,
@@ -37,6 +39,7 @@ export * from './var_set';
 export * from './var';
 export * from './theme';
 export * from './cumulative_sum';
+export * from './overall_metric';
 export * from './derivative';
 export * from './moving_average';
 export { mapColumn, MapColumnArguments } from './map_column';

@@ -33,6 +33,8 @@ import {
   DerivativeIndexPatternColumn,
   movingAverageOperation,
   MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  overallSumOperation,
 } from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
 import {
@@ -70,6 +72,7 @@ export type IndexPatternColumn =
   | CountIndexPatternColumn
   | LastValueIndexPatternColumn
   | CumulativeSumIndexPatternColumn
+  | OverallSumIndexPatternColumn
   | CounterRateIndexPatternColumn
   | DerivativeIndexPatternColumn
   | MovingAverageIndexPatternColumn
@@ -97,6 +100,7 @@ export {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
 } from './calculations';
 export { CountIndexPatternColumn } from './count';
 export { LastValueIndexPatternColumn } from './last_value';
@@ -125,6 +129,7 @@ const internalOperationDefinitions = [
   movingAverageOperation,
   mathOperation,
   formulaOperation,
+  overallSumOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -140,6 +145,7 @@ export {
   counterRateOperation,
   derivativeOperation,
   movingAverageOperation,
+  overallSumOperation,
 } from './calculations';
 export { formulaOperation } from './formula/formula';
 

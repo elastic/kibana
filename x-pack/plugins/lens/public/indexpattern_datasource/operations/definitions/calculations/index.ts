@@ -9,3 +9,4 @@ export { counterRateOperation, CounterRateIndexPatternColumn } from './counter_r
 export { cumulativeSumOperation, CumulativeSumIndexPatternColumn } from './cumulative_sum';
 export { derivativeOperation, DerivativeIndexPatternColumn } from './differences';
 export { movingAverageOperation, MovingAverageIndexPatternColumn } from './moving_average';
+export { overallSumOperation, OverallSumIndexPatternColumn } from './overall_sum';
