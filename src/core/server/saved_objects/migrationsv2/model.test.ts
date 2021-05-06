@@ -820,10 +820,9 @@ describe('migrations v2 model', () => {
         });
         const newState = model(testState, res) as FatalState;
         expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason).toMatchInlineSnapshot(`
-          "Migrations failed. Reason:  Corrupt saved object documents: a:b.
-           . To allow migrations to proceed, please delete these documents."
-        `);
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"Migrations failed. Reason: Corrupt saved object documents: a:b.  To allow migrations to proceed, please delete these documents."`
+        );
       });
     });
 
@@ -1069,7 +1068,7 @@ describe('migrations v2 model', () => {
         };
         const newState = model(transformErrorsState, res) as FatalState;
         expect(newState.controlState).toBe('FATAL');
-        expect(newState.reason.includes('Migrations failed. Reason: ')).toBe(true);
+        expect(newState.reason.includes('Migrations failed. Reason:')).toBe(true);
         expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
         expect(newState.reason.includes('Transformation errors: ')).toBe(true);
         expect(newState.reason.includes('randomvis: 7.12.0')).toBe(true);
