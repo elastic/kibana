@@ -53,6 +53,10 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
       return { ...response, inspect, hostDetails: { ...formattedHostItem } };
     }
     const endpoint: EndpointFields | null = await getHostEndpoint(ident, deps);
-    return { ...response, inspect, hostDetails: { ...formattedHostItem, endpoint } };
+    return {
+      ...response,
+      inspect,
+      hostDetails: endpoint != null ? { ...formattedHostItem, endpoint } : formattedHostItem,
+    };
   },
 };
