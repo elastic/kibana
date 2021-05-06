@@ -1005,6 +1005,28 @@ export const findCases = async ({
   return res;
 };
 
+export const getCaseIDsByAlert = async ({
+  supertest,
+  alertID,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  alertID: string;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<string[]> => {
+  const { body: res } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/alerts/${alertID}`)
+    .auth(auth.user.username, auth.user.password)
+    .query(query)
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
 export const getTags = async ({
   supertest,
   query = {},

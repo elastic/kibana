@@ -54,7 +54,7 @@ interface Props {
 }
 
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
-  const { agentName } = useApmServiceContext();
+  const { agentName, transactionType } = useApmServiceContext();
   const {
     core: { uiSettings },
     config,
@@ -65,7 +65,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   const overviewTab = {
     key: 'overview',
-    href: useServiceOverviewHref(serviceName),
+    href: useServiceOverviewHref({ serviceName, transactionType }),
     text: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
       defaultMessage: 'Overview',
     }),
@@ -76,7 +76,11 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   const transactionsTab = {
     key: 'transactions',
-    href: useTransactionsOverviewHref({ serviceName, latencyAggregationType }),
+    href: useTransactionsOverviewHref({
+      serviceName,
+      latencyAggregationType,
+      transactionType,
+    }),
     text: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
       defaultMessage: 'Transactions',
     }),
@@ -179,7 +183,12 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
         {tabs
           .filter((t) => !t.hidden)
           .map(({ href, key, text }) => (
-            <EuiTab href={href} isSelected={key === tab} key={key}>
+            <EuiTab
+              data-test-subj={`tab_${key}`}
+              href={href}
+              isSelected={key === tab}
+              key={key}
+            >
               {text}
             </EuiTab>
           ))}

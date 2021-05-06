@@ -23,7 +23,7 @@ import { CasesClientArgs } from '../types';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
-import { get, getReporters, getTags } from './get';
+import { CaseIDsByAlertIDParams, get, getCaseIDsByAlertID, getReporters, getTags } from './get';
 import { push } from './push';
 import { update } from './update';
 
@@ -51,6 +51,7 @@ export interface CasesSubClient {
   delete(ids: string[]): Promise<void>;
   getTags(params: AllTagsFindRequest): Promise<string[]>;
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
+  getCaseIDsByAlertID(params: CaseIDsByAlertIDParams): Promise<string[]>;
 }
 
 /**
@@ -70,6 +71,8 @@ export const createCasesSubClient = (
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
+    getCaseIDsByAlertID: (params: CaseIDsByAlertIDParams) =>
+      getCaseIDsByAlertID(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

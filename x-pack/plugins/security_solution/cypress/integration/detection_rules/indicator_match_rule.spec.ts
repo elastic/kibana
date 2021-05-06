@@ -54,10 +54,12 @@ import {
   TIMELINE_FIELD,
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
+import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeline';
 
 import {
   expandFirstAlert,
   goToManageAlertsDetectionRules,
+  investigateFirstAlertInTimeline,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
@@ -75,6 +77,7 @@ import {
   checkDuplicatedRule,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
+import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, reload } from '../../tasks/common';
 import {
   createAndActivateRule,
@@ -392,15 +395,15 @@ describe('indicator match', () => {
       beforeEach(() => {
         cleanKibana();
         loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      });
+
+      it('Creates and activates a new Indicator Match rule', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
         waitForRulesTableToBeLoaded();
         goToCreateNewRule();
         selectIndicatorMatchType();
-      });
-
-      it('Creates and activates a new Indicator Match rule', () => {
         fillDefineIndicatorMatchRuleAndContinue(newThreatIndicatorRule);
         fillAboutRuleAndContinue(newThreatIndicatorRule);
         fillScheduleRuleAndContinue(newThreatIndicatorRule);
@@ -446,7 +449,7 @@ describe('indicator match', () => {
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(INDEX_PATTERNS_DETAILS).should(
             'have.text',
-            newThreatIndicatorRule.index!.join('')
+            newThreatIndicatorRule.index.join('')
           );
           getDetails(CUSTOM_QUERY_DETAILS).should('have.text', '*:*');
           getDetails(RULE_TYPE_DETAILS).should('have.text', 'Indicator Match');
@@ -484,6 +487,35 @@ describe('indicator match', () => {
           .first()
           .should('have.text', newThreatIndicatorRule.severity.toLowerCase());
         cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThreatIndicatorRule.riskScore);
+      });
+
+      it('Investigate alert in timeline', () => {
+        const accessibilityText = `Press enter for options, or press space to begin dragging.`;
+        const threatIndicatorPath =
+          '../../../x-pack/test/security_solution_cypress/es_archives/threat_indicator/data.json';
+
+        loadPrepackagedTimelineTemplates();
+
+        goToManageAlertsDetectionRules();
+        createCustomIndicatorRule(newThreatIndicatorRule);
+
+        reload();
+        goToRuleDetails();
+        waitForAlertsToPopulate();
+        investigateFirstAlertInTimeline();
+
+        cy.get(PROVIDER_BADGE).should('have.length', 3);
+        cy.get(PROVIDER_BADGE).should(
+          'have.text',
+          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "${newThreatIndicatorRule.type}"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
+        );
+
+        cy.readFile(threatIndicatorPath).then((threatIndicator) => {
+          cy.get(INDICATOR_MATCH_ROW_RENDER).should(
+            'have.text',
+            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.type${newThreatIndicatorRule.type}${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
+          );
+        });
       });
     });
 
