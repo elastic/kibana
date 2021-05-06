@@ -36,6 +36,7 @@ import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const DEFAULT_STACK_BY = 'event.dataset';
 
@@ -128,6 +129,14 @@ const EventsByDatasetComponent: React.FC<Props> = ({
         : combinedQueries,
     [combinedQueries, kibana, indexPattern, query, filters]
   );
+
+  useInvalidFilterQuery({
+    filterQuery,
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    indexPattern,
+    queries: [query],
+    filters,
+  });
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({

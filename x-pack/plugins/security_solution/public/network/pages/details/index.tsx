@@ -49,6 +49,7 @@ import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 export { getBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
@@ -94,6 +95,14 @@ const NetworkDetailsComponent: React.FC = () => {
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
   const ip = decodeIpv6(detailName);
   const filterQuery = convertToBuildEsQuery({
+    config: esQuery.getEsQueryConfig(uiSettings),
+    indexPattern,
+    queries: [query],
+    filters,
+  });
+
+  useInvalidFilterQuery({
+    filterQuery,
     config: esQuery.getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
@@ -174,7 +183,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing}
+                  skip={isInitializing || filterQuery === undefined}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -189,7 +198,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   filterQuery={filterQuery}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing}
+                  skip={isInitializing || filterQuery === undefined}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -208,7 +217,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing}
+                  skip={isInitializing || filterQuery === undefined}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -223,7 +232,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   filterQuery={filterQuery}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing}
+                  skip={isInitializing || filterQuery === undefined}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -240,7 +249,7 @@ const NetworkDetailsComponent: React.FC = () => {
               flowTarget={flowTarget}
               indexNames={selectedPatterns}
               ip={ip}
-              skip={isInitializing}
+              skip={isInitializing || filterQuery === undefined}
               startDate={from}
               type={type}
               setQuery={setQuery}
@@ -253,7 +262,7 @@ const NetworkDetailsComponent: React.FC = () => {
               filterQuery={filterQuery}
               indexNames={selectedPatterns}
               ip={ip}
-              skip={isInitializing}
+              skip={isInitializing || filterQuery === undefined}
               startDate={from}
               type={type}
               setQuery={setQuery}
@@ -268,7 +277,7 @@ const NetworkDetailsComponent: React.FC = () => {
               indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
-              skip={isInitializing}
+              skip={isInitializing || filterQuery === undefined}
               startDate={from}
               type={type}
             />
@@ -280,7 +289,7 @@ const NetworkDetailsComponent: React.FC = () => {
               setQuery={setQuery}
               startDate={from}
               endDate={to}
-              skip={isInitializing}
+              skip={isInitializing || filterQuery === undefined}
               indexNames={selectedPatterns}
               ip={ip}
               type={type}

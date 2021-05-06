@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -55,7 +55,6 @@ import {
   defaultControlColumn,
   ControlColumnProps,
 } from '../../../timelines/components/timeline/body/control_columns';
-import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -176,14 +175,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
-  const { addError } = useAppToasts();
-
-  const handleQueryError = useCallback(
-    (error: Error) => {
-      addError(error, { title: error.name });
-    },
-    [addError]
-  );
 
   useEffect(() => {
     dispatch(timelineActions.updateIsLoading({ id, isLoading: isQueryLoading }));
@@ -216,7 +207,6 @@ const EventsViewerComponent: React.FC<Props> = ({
     kqlQuery: query,
     kqlMode,
     isEventViewer: true,
-    handleError: handleQueryError,
   });
 
   const canQueryTimeline = useMemo(
@@ -257,7 +247,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     sort: sortField,
     startDate: start,
     endDate: end,
-    skip: !canQueryTimeline,
+    skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined,
   });
 
   const totalCountMinusDeleted = useMemo(

@@ -22,6 +22,7 @@ import {
   Query,
 } from '../../../../../../../src/plugins/data/public';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const HorizontalSpacer = styled(EuiFlexItem)`
   width: 24px;
@@ -66,6 +67,22 @@ const EventCountsComponent: React.FC<Props> = ({
       }),
     [filters, indexPattern, uiSettings, query]
   );
+
+  useInvalidFilterQuery({
+    filterQuery: hostFilterQuery,
+    config: esQuery.getEsQueryConfig(uiSettings),
+    indexPattern,
+    queries: [query],
+    filters,
+  });
+
+  useInvalidFilterQuery({
+    filterQuery: networkFilterQuery,
+    config: esQuery.getEsQueryConfig(uiSettings),
+    indexPattern,
+    queries: [query],
+    filters,
+  });
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">

@@ -83,7 +83,7 @@ export const convertToBuildEsQuery = ({
   indexPattern: IIndexPattern;
   queries: Query[];
   filters: Filter[];
-}) => {
+}): string | undefined => {
   try {
     return JSON.stringify(
       esQuery.buildEsQuery(
@@ -97,7 +97,7 @@ export const convertToBuildEsQuery = ({
       )
     );
   } catch (exp) {
-    return '';
+    return undefined;
   }
 };
 

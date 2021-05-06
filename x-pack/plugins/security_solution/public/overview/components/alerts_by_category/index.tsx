@@ -33,6 +33,7 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -111,6 +112,14 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
       }),
     [filters, indexPattern, uiSettings, query]
   );
+
+  useInvalidFilterQuery({
+    filterQuery,
+    config: esQuery.getEsQueryConfig(uiSettings),
+    indexPattern,
+    queries: [query],
+    filters,
+  });
 
   useEffect(() => {
     return () => {

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { IpOverview } from '../../../../network/components/details';
@@ -104,9 +105,17 @@ export const ExpandableNetworkDetails = ({
     filters,
   });
 
+  useInvalidFilterQuery({
+    filterQuery,
+    config: esQuery.getEsQueryConfig(uiSettings),
+    indexPattern,
+    queries: [query],
+    filters,
+  });
+
   const [loading, { id, networkDetails }] = useNetworkDetails({
     docValueFields,
-    skip: isInitializing,
+    skip: isInitializing || filterQuery === undefined,
     filterQuery,
     indexNames: selectedPatterns,
     ip,

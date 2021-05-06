@@ -52,6 +52,7 @@ import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
+import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -131,6 +132,14 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
+  useInvalidFilterQuery({
+    filterQuery,
+    config: esQuery.getEsQueryConfig(uiSettings),
+    indexPattern,
+    queries: [query],
+    filters,
+  });
+
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
       ?.querySelector<HTMLButtonElement>('.inspectButtonComponent:last-of-type')
@@ -183,7 +192,7 @@ const HostsComponent = () => {
                 from={from}
                 setQuery={setQuery}
                 to={to}
-                skip={isInitializing}
+                skip={isInitializing || !filterQuery}
                 narrowDateRange={narrowDateRange}
               />
 
@@ -200,7 +209,7 @@ const HostsComponent = () => {
               deleteQuery={deleteQuery}
               docValueFields={docValueFields}
               to={to}
-              filterQuery={tabsFilterQuery}
+              filterQuery={tabsFilterQuery || ''} // TODO: is this the right thing to do
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
               setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}

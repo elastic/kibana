@@ -21,7 +21,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction, TimelineItem } from '../../../../../common/search_strategy';
@@ -210,6 +210,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlMode,
   });
 
+  useInvalidFilterQuery({
+    filterQuery: combinedQueries?.filterQuery,
+    config: esQueryConfig,
+    indexPattern,
+    queries: [kqlQuery],
+    filters,
+  });
+
   const isBlankTimeline: boolean =
     isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query);
 
@@ -255,7 +263,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     limit: itemsPerPage,
     filterQuery: combinedQueries?.filterQuery ?? '',
     startDate: start,
-    skip: !canQueryTimeline(),
+    skip: !canQueryTimeline() || combinedQueries?.filterQuery === undefined,
     sort: timelineQuerySortField,
     timerangeKind,
   });

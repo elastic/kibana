@@ -51,6 +51,7 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -104,6 +105,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     skip: selectedPatterns.length === 0,
   });
   const filterQuery = convertToBuildEsQuery({
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    indexPattern,
+    queries: [query],
+    filters: getFilters(),
+  });
+
+  useInvalidFilterQuery({
+    filterQuery,
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
     queries: [query],

@@ -51,6 +51,7 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { buildTimeRangeFilter } from './helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { columns, RenderCellValue } from '../../configurations/security_solution_detections';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -104,7 +105,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   } = useSourcererScope(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
-  const { addWarning, addError } = useAppToasts();
+  const { addWarning } = useAppToasts();
   const { initializeTimeline, setSelectAll } = useManageTimeline();
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
@@ -126,23 +127,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           kqlQuery: globalQuery,
           kqlMode: globalQuery.language,
           isEventViewer: true,
-          addError,
         });
       }
       return null;
     },
-    [
-      browserFields,
-      defaultFilters,
-      globalFilters,
-      globalQuery,
-      indexPatterns,
-      kibana,
-      to,
-      from,
-      addError,
-    ]
+    [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
   );
+
+  useInvalidFilterQuery({
+    filterQuery: getGlobalQuery([])?.filterQuery,
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+    indexPattern: indexPatterns,
+    queries: [globalQuery],
+    filters: [...(defaultFilters ?? []), ...globalFilters, ...buildTimeRangeFilter(from, to)],
+  });
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
