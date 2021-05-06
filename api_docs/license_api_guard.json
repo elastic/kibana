@@ -1,0 +1,199 @@
+{
+  "id": "licenseApiGuard",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "id": "def-server.License",
+        "type": "Class",
+        "tags": [],
+        "label": "License",
+        "description": [],
+        "children": [
+          {
+            "id": "def-server.License.setup",
+            "type": "Function",
+            "label": "setup",
+            "signature": [
+              "({ pluginName, logger }: SetupSettings) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-server.License.setup.$1",
+                "type": "Object",
+                "label": "{ pluginName, logger }",
+                "isRequired": true,
+                "signature": [
+                  "SetupSettings"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                  "lineNumber": 41
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 41
+            }
+          },
+          {
+            "id": "def-server.License.start",
+            "type": "Function",
+            "label": "start",
+            "signature": [
+              "({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-server.License.start.$1",
+                "type": "Object",
+                "label": "{ pluginId, minimumLicenseType, licensing }",
+                "isRequired": true,
+                "signature": [
+                  "StartSettings"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                  "lineNumber": 46
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 46
+            }
+          },
+          {
+            "id": "def-server.License.guardApiRoute",
+            "type": "Function",
+            "label": "guardApiRoute",
+            "signature": [
+              "<Context extends ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              },
+              ", Params, Query, Body>(handler: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              "<Params, Query, Body, Context, any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+              "Stream",
+              " | undefined>(options: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.CustomHttpResponseOptions",
+                "text": "CustomHttpResponseOptions"
+              },
+              "<T>) => ",
+              "KibanaResponse"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-server.License.guardApiRoute.$1",
+                "type": "Function",
+                "label": "handler",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  "<Params, Query, Body, Context, any, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+                  "Stream",
+                  " | undefined>(options: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.CustomHttpResponseOptions",
+                    "text": "CustomHttpResponseOptions"
+                  },
+                  "<T>) => ",
+                  "KibanaResponse",
+                  "<T>; badRequest: (options?: ",
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.ErrorHttpResponseOptions",
+                    "text": "ErrorHttpResponseOptions"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                  "lineNumber": 93
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 92
+            }
+          },
+          {
+            "id": "def-server.License.isEsSecurityEnabled",
+            "type": "boolean",
+            "label": "isEsSecurityEnabled",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 116
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/license_api_guard/server/license.ts",
+          "lineNumber": 33
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

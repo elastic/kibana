@@ -2362,7 +2362,7 @@
           "lineNumber": 10
         },
         "signature": [
-          "\"legacy\" | \"modern\""
+          "\"modern\" | \"legacy\""
         ],
         "initialIsOpen": false
       }

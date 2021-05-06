@@ -3,6 +3,439 @@
   "client": {
     "classes": [
       {
+        "id": "def-public.BaseVisType",
+        "type": "Class",
+        "tags": [],
+        "label": "BaseVisType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.BaseVisType",
+            "text": "BaseVisType"
+          },
+          "<TVisParams>"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 25
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 26
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 27
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.note",
+            "type": "string",
+            "label": "note",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 28
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.getSupportedTriggers",
+            "type": "Function",
+            "label": "getSupportedTriggers",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "(() => string[]) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.icon",
+            "type": "CompoundType",
+            "label": "icon",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.image",
+            "type": "string",
+            "label": "image",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 31
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.stage",
+            "type": "CompoundType",
+            "label": "stage",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 32
+            },
+            "signature": [
+              "\"experimental\" | \"beta\" | \"production\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.group",
+            "type": "Enum",
+            "label": "group",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 33
+            },
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisGroups",
+                "text": "VisGroups"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.titleInWizard",
+            "type": "string",
+            "label": "titleInWizard",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 34
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.options",
+            "type": "Object",
+            "label": "options",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 35
+            },
+            "signature": [
+              "VisTypeOptions"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.visConfig",
+            "type": "Any",
+            "label": "visConfig",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              "any"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.editorConfig",
+            "type": "Any",
+            "label": "editorConfig",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 37
+            },
+            "signature": [
+              "any"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.hidden",
+            "type": "boolean",
+            "label": "hidden",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 38
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.requiresSearch",
+            "type": "boolean",
+            "label": "requiresSearch",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 39
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.hierarchicalData",
+            "type": "CompoundType",
+            "label": "hierarchicalData",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 40
+            },
+            "signature": [
+              "boolean | ((vis: { params: TVisParams; }) => boolean)"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.setup",
+            "type": "Function",
+            "label": "setup",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 41
+            },
+            "signature": [
+              "((vis: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
+              },
+              "<TVisParams>) => Promise<",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
+              },
+              "<TVisParams>>) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.getUsedIndexPattern",
+            "type": "Function",
+            "label": "getUsedIndexPattern",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 42
+            },
+            "signature": [
+              "((visParams: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              },
+              "[] | Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              },
+              "[]>) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.inspectorAdapters",
+            "type": "CompoundType",
+            "label": "inspectorAdapters",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 43
+            },
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              " | (() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ") | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.toExpressionAst",
+            "type": "Function",
+            "label": "toExpressionAst",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 44
+            },
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisToExpressionAst",
+                "text": "VisToExpressionAst"
+              },
+              "<TVisParams>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.getInfoMessage",
+            "type": "Function",
+            "label": "getInfoMessage",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 45
+            },
+            "signature": [
+              "((vis: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
+              },
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ">) => React.ReactNode) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.BaseVisType.schemas",
+            "type": "Object",
+            "label": "schemas",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 46
+            },
+            "signature": [
+              "Schemas"
+            ]
+          },
+          {
+            "id": "def-public.BaseVisType.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.BaseVisType.Unnamed.$1",
+                "type": "Object",
+                "label": "opts",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.VisTypeDefinition",
+                    "text": "VisTypeDefinition"
+                  },
+                  "<TVisParams>"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+                  "lineNumber": 48
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+              "lineNumber": 48
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+          "lineNumber": 24
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.PersistedState",
         "type": "Class",
         "tags": [],
@@ -361,7 +794,13 @@
               "lineNumber": 74
             },
             "signature": [
-              "BaseVisType",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.BaseVisType",
+                "text": "BaseVisType"
+              },
               "<TVisParams>"
             ]
           },
@@ -806,7 +1245,7 @@
           {
             "id": "def-public.VisualizationContainer.$1",
             "type": "Object",
-            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n}",
+            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n  error,\n}",
             "isRequired": true,
             "signature": [
               "VisualizationContainerProps"
@@ -814,18 +1253,20 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
-              "lineNumber": 23
+              "lineNumber": 27
             }
           }
         ],
         "signature": [
-          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, }: VisualizationContainerProps) => JSX.Element"
+          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, error, }: ",
+          "VisualizationContainerProps",
+          ") => JSX.Element"
         ],
         "description": [],
         "label": "VisualizationContainer",
         "source": {
           "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
-          "lineNumber": 23
+          "lineNumber": 27
         },
         "tags": [],
         "returnComment": [],
@@ -984,7 +1425,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 30
+              "lineNumber": 25
             },
             "signature": [
               {
@@ -1005,7 +1446,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 31
+              "lineNumber": 26
             },
             "signature": [
               {
@@ -1026,7 +1467,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 32
+              "lineNumber": 27
             },
             "signature": [
               {
@@ -1042,7 +1483,7 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 29
+          "lineNumber": 24
         },
         "initialIsOpen": false
       },
@@ -1153,7 +1594,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 36
+              "lineNumber": 31
             },
             "signature": [
               "string[]"
@@ -1167,7 +1608,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 37
+              "lineNumber": 32
             },
             "signature": [
               "node_modules/utility-types/dist/utility-types",
@@ -1182,7 +1623,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 38
+              "lineNumber": 33
             }
           },
           {
@@ -1193,7 +1634,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 39
+              "lineNumber": 34
             }
           },
           {
@@ -1204,7 +1645,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 40
+              "lineNumber": 35
             }
           },
           {
@@ -1215,7 +1656,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 41
+              "lineNumber": 36
             },
             "signature": [
               {
@@ -1236,7 +1677,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 42
+              "lineNumber": 37
             }
           },
           {
@@ -1247,7 +1688,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 43
+              "lineNumber": 38
             },
             "signature": [
               "unknown"
@@ -1261,7 +1702,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 44
+              "lineNumber": 39
             },
             "signature": [
               "boolean | undefined"
@@ -1275,7 +1716,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 45
+              "lineNumber": 40
             },
             "signature": [
               "boolean | undefined"
@@ -1289,7 +1730,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 46
+              "lineNumber": 41
             },
             "signature": [
               "any"
@@ -1303,7 +1744,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 47
+              "lineNumber": 42
             },
             "signature": [
               "boolean | undefined"
@@ -1317,7 +1758,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 48
+              "lineNumber": 43
             },
             "signature": [
               "React.ReactNode"
@@ -1326,7 +1767,7 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 35
+          "lineNumber": 30
         },
         "initialIsOpen": false
       },
@@ -2220,13 +2661,7 @@
               "lineNumber": 44
             },
             "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisualizationStage",
-                "text": "VisualizationStage"
-              }
+              "\"experimental\" | \"beta\" | \"production\""
             ]
           },
           {
@@ -2281,7 +2716,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 83
+              "lineNumber": 78
             }
           },
           {
@@ -2294,7 +2729,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 87
+              "lineNumber": 82
             }
           },
           {
@@ -2307,7 +2742,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 91
+              "lineNumber": 86
             },
             "signature": [
               "string | undefined"
@@ -2323,7 +2758,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 95
+              "lineNumber": 90
             },
             "signature": [
               "string | undefined"
@@ -2339,7 +2774,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 99
+              "lineNumber": 94
             },
             "signature": [
               "(() => string[]) | undefined"
@@ -2355,7 +2790,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 105
+              "lineNumber": 100
             },
             "signature": [
               "((visParams: ",
@@ -2393,7 +2828,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 107
+              "lineNumber": 102
             },
             "signature": [
               "boolean | undefined"
@@ -2409,7 +2844,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 111
+              "lineNumber": 106
             },
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
@@ -2425,7 +2860,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 115
+              "lineNumber": 110
             },
             "signature": [
               "string | undefined"
@@ -2443,7 +2878,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 120
+              "lineNumber": 115
             },
             "signature": [
               "\"experimental\" | \"beta\" | \"production\" | undefined"
@@ -2461,7 +2896,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 126
+              "lineNumber": 121
             },
             "signature": [
               {
@@ -2484,7 +2919,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 132
+              "lineNumber": 127
             },
             "signature": [
               "string | undefined"
@@ -2500,7 +2935,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 138
+              "lineNumber": 133
             },
             "signature": [
               "boolean | undefined"
@@ -2514,7 +2949,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 139
+              "lineNumber": 134
             },
             "signature": [
               "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
@@ -2528,7 +2963,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 140
+              "lineNumber": 135
             },
             "signature": [
               {
@@ -2559,7 +2994,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 147
+              "lineNumber": 142
             },
             "signature": [
               "((vis: ",
@@ -2591,7 +3026,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 153
+              "lineNumber": 148
             },
             "signature": [
               {
@@ -2612,7 +3047,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 155
+              "lineNumber": 150
             },
             "signature": [
               "((vis: ",
@@ -2642,7 +3077,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 156
+              "lineNumber": 151
             },
             "signature": [
               "boolean | undefined"
@@ -2656,7 +3091,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 158
+              "lineNumber": 153
             },
             "signature": [
               "Partial<",
@@ -2674,7 +3109,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 164
+              "lineNumber": 159
             },
             "signature": [
               "DefaultEditorConfig<TVisParams> | CustomEditorConfig"
@@ -2690,7 +3125,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 170
+              "lineNumber": 165
             },
             "signature": [
               "Record<string, any>"
@@ -2699,7 +3134,7 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 79
+          "lineNumber": 74
         },
         "initialIsOpen": false
       },
@@ -2782,13 +3217,7 @@
               "lineNumber": 19
             },
             "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisualizationStage",
-                "text": "VisualizationStage"
-              }
+              "\"experimental\" | \"beta\" | \"production\""
             ]
           },
           {
@@ -3033,8 +3462,8 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 23
+          "path": "src/plugins/visualizations/public/vis_types/vis_groups_enum.ts",
+          "lineNumber": 9
         },
         "initialIsOpen": false
       }
@@ -3155,10 +3584,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/index.ts",
-          "lineNumber": 31
+          "lineNumber": 30
         },
         "signature": [
-          "{ readonly type: \"visualization\"; readonly id: string; destroy: () => void; readonly parent?: ",
+          "{ readonly type: \"visualization\"; readonly id: string; getDescription: () => string; destroy: () => void; readonly parent?: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -3182,7 +3611,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; render: (domNode: HTMLElement) => Promise<void>; getDescription: () => string; getInspectorAdapters: () => ",
+          "> | undefined; render: (domNode: HTMLElement) => Promise<void>; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
@@ -3209,7 +3638,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/index.ts",
-          "lineNumber": 30
+          "lineNumber": 29
         },
         "signature": [
           "{ readonly type: \"visualization\"; create: (input: ",
@@ -3340,7 +3769,7 @@
       ],
       "source": {
         "path": "src/plugins/visualizations/public/plugin.ts",
-        "lineNumber": 74
+        "lineNumber": 76
       },
       "signature": [
         "{ createBaseVisualization: <TVisParams>(config: ",
@@ -3377,9 +3806,21 @@
           "text": "VisualizationsStart"
         },
         " extends { get: <TVisParams>(visualization: string) => ",
-        "BaseVisType",
+        {
+          "pluginId": "visualizations",
+          "scope": "public",
+          "docId": "kibVisualizationsPluginApi",
+          "section": "def-public.BaseVisType",
+          "text": "BaseVisType"
+        },
         "<TVisParams> | undefined; all: () => ",
-        "BaseVisType",
+        {
+          "pluginId": "visualizations",
+          "scope": "public",
+          "docId": "kibVisualizationsPluginApi",
+          "section": "def-public.BaseVisType",
+          "text": "BaseVisType"
+        },
         "<",
         {
           "pluginId": "visualizations",
@@ -3408,7 +3849,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 77
+            "lineNumber": 79
           },
           "signature": [
             {
@@ -3431,7 +3872,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 78
+            "lineNumber": 80
           },
           "signature": [
             "(visType: string, visState: ",
@@ -3477,7 +3918,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 79
+            "lineNumber": 81
           },
           "signature": [
             "(savedVis: ",
@@ -3515,7 +3956,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 80
+            "lineNumber": 82
           },
           "signature": [
             "(vis: ",
@@ -3552,7 +3993,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 81
+            "lineNumber": 83
           },
           "signature": [
             "typeof ",
@@ -3567,7 +4008,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 82
+            "lineNumber": 84
           },
           "signature": [
             "{ createVisEmbeddableFromObject: (vis: ",
@@ -3609,7 +4050,7 @@
       ],
       "source": {
         "path": "src/plugins/visualizations/public/plugin.ts",
-        "lineNumber": 76
+        "lineNumber": 78
       },
       "lifecycle": "start",
       "initialIsOpen": true
