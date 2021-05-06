@@ -259,7 +259,7 @@ export async function mapToHostResultList(
   metadataRequestContext: MetadataRequestContext
 ): Promise<HostResultList> {
   const totalNumberOfHosts = hostListQueryResult.resultLength;
-  if (hostListQueryResult.resultList.length > 0) {
+  if ((hostListQueryResult.resultList?.length ?? 0) > 0) {
     return {
       request_page_size: queryParams.size,
       request_page_index: queryParams.from,
