@@ -36,7 +36,8 @@ interface ListProps {
   controls?: ReactNode;
   title: string;
   list: PackageList;
-  setSelectedCategory: (category: string) => void;
+  setSelectedCategory?: (category: string) => void;
+  showMissingIntegrationMessage?: boolean;
 }
 
 export function PackageListGrid({
@@ -44,7 +45,8 @@ export function PackageListGrid({
   controls,
   title,
   list,
-  setSelectedCategory,
+  setSelectedCategory = () => {},
+  showMissingIntegrationMessage = false,
 }: ListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
@@ -86,7 +88,12 @@ export function PackageListGrid({
             .includes(item[searchIdField])
         )
       : list;
-    gridContent = <GridColumn list={filteredList} />;
+    gridContent = (
+      <GridColumn
+        list={filteredList}
+        showMissingIntegrationMessage={showMissingIntegrationMessage}
+      />
+    );
   }
 
   return (
@@ -105,11 +112,15 @@ export function PackageListGrid({
         />
         <EuiSpacer />
         {gridContent}
-        <EuiSpacer size="xxl" />
-        <MissingIntegrationContent
-          resetQuery={resetQuery}
-          setSelectedCategory={setSelectedCategory}
-        />
+        {showMissingIntegrationMessage && (
+          <>
+            <EuiSpacer size="xxl" />
+            <MissingIntegrationContent
+              resetQuery={resetQuery}
+              setSelectedCategory={setSelectedCategory}
+            />
+          </>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -137,9 +148,10 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
 
 interface GridColumnProps {
   list: PackageList;
+  showMissingIntegrationMessage?: boolean;
 }
 
-function GridColumn({ list }: GridColumnProps) {
+function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
@@ -152,10 +164,17 @@ function GridColumn({ list }: GridColumnProps) {
         <EuiFlexItem grow={3}>
           <EuiText>
             <p>
-              <FormattedMessage
-                id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                defaultMessage="We didn't find any integrations matching your search term. Please try another keyword or browse using the categories on the left."
-              />
+              {showMissingIntegrationMessage ? (
+                <FormattedMessage
+                  id="xpack.fleet.epmList.missingIntegrationPlaceholder"
+                  defaultMessage="We didn't find any integrations matching your search term. Please try another keyword or browse using the categories on the left."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
+                  defaultMessage="No packages found"
+                />
+              )}
             </p>
           </EuiText>
         </EuiFlexItem>
