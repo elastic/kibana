@@ -242,7 +242,6 @@ You can also change the index pattern for a single *Layer*.
 ===== Why is my field X missing from the fields list?
 
 *Lens* does not support the visualization of full-text fields, therefore it is not showing them in the data summary.
-You will still see the `X.keyword` field, when available.
 
 [float]
 [[how-to-handle-gaps-in-time-series-visualizations]]
