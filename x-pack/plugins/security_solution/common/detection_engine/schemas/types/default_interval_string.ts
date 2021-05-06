@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the DefaultIntervalString as:
  *   - If null or undefined, then a default of the string "5m" will be used
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultIntervalString = new t.Type<string, string | undefined, unknown>(
   'DefaultIntervalString',

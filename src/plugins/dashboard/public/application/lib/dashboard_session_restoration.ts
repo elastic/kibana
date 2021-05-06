@@ -111,7 +111,7 @@ function getUrlGeneratorState({
     useHash: false,
     preserveSavedFilters: false,
     viewMode: appState.viewMode,
-    panels: appState.panels,
+    panels: getDashboardId() ? undefined : appState.panels,
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
     refreshInterval: shouldRestoreSearchSession
       ? {
