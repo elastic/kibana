@@ -256,7 +256,7 @@ image::images/lens_missing_values_strategy.png[Lens Missing values strategies me
 
 [float]
 [[is-it-possible-to-change-the-scale-of-Y-axis]]
-===== Is it possible to statically define the scale of the Y axis in a visualization?
+===== Is it possible to statically define the scale of the y-axis in a visualization?
 
 The ability to start the y-axis from another value than 0, or use a logarithmic scale, is unsupported in *Lens*.
 
