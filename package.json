@@ -567,7 +567,7 @@
     "@types/mustache": "^0.8.31",
     "@types/ncp": "^2.0.1",
     "@types/nock": "^10.0.3",
-    "@types/node": "14.14.14",
+    "@types/node": "14.14.44",
     "@types/node-fetch": "^2.5.7",
     "@types/node-forge": "^0.9.5",
     "@types/nodemailer": "^6.4.0",
