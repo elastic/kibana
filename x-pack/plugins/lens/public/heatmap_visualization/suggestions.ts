@@ -6,9 +6,10 @@
  */
 
 import { partition } from 'lodash';
+import { Position } from '@elastic/charts';
 import { Visualization } from '../types';
 import { HeatmapVisualizationState } from './types';
-import { CHART_SHAPES } from './constants';
+import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,
@@ -17,6 +18,11 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   mainPalette,
   subVisualizationId,
 }) => {
+  if (state?.shape === CHART_SHAPES.HEATMAP) {
+    // don't provide suggestion when heatmap is the current chart
+    return [];
+  }
+
   const isUnchanged = state && table.changeType === 'unchanged';
 
   if (
@@ -39,6 +45,17 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     title,
     shape: CHART_SHAPES.HEATMAP,
     layerId: table.layerId,
+    legend: {
+      isVisible: state?.legend?.isVisible ?? true,
+      position: state?.legend?.position ?? Position.Top,
+      type: LEGEND_FUNCTION,
+    },
+    gridConfig: {
+      type: HEATMAP_GRID_FUNCTION,
+      isCellLabelVisible: false,
+      isYAxisLabelVisible: true,
+      isXAxisLabelVisible: true,
+    },
   } as unknown) as HeatmapVisualizationState;
 
   if (metrics.length === 1 && metrics[0].operation.dataType === 'number') {
