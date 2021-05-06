@@ -2583,7 +2583,7 @@
     "@babel/runtime" "^7.7.2"
     regenerator-runtime "^0.13.3"
 
-"@kbn/ace@link:packages/kbn-ace":
+"@kbn/ace@link:bazel-bin/packages/kbn-ace/npm_module":
   version "0.0.0"
   uid ""
 
