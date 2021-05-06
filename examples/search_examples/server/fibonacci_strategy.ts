@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { of } from 'rxjs';
+import { from } from 'rxjs';
 import { ISearchStrategy } from '../../../src/plugins/data/server';
 import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
@@ -18,26 +18,29 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
   const responseMap = new Map<string, [number, number, number]>();
   return {
     search: (request) => {
-      const id = request.id ?? uuid();
-      const [prevLoaded, total, started] = responseMap.get(id) ?? [
-        0,
-        request.params?.n!,
-        Date.now(),
-      ];
-      const loaded = prevLoaded + 1;
-      const sequence = fibonacci(loaded);
-      if (loaded < total) {
-        responseMap.set(id, [loaded, total, started]);
-      } else {
-        responseMap.delete(id);
-      }
+      const search = async () => {
+        const id = request.id ?? uuid();
+        const [prevLoaded, total, started] = responseMap.get(id) ?? [
+          0,
+          request.params?.n!,
+          Date.now(),
+        ];
+        const loaded = prevLoaded + 1;
+        const sequence = fibonacci(loaded);
+        if (loaded < total) {
+          responseMap.set(id, [loaded, total, started]);
+        } else {
+          responseMap.delete(id);
+        }
 
-      const isRunning = loaded < total;
-      const isPartial = isRunning;
-      const took = Date.now() - started;
-      const values = sequence.slice(0, loaded);
+        const isRunning = loaded < total;
+        const isPartial = isRunning;
+        const took = Date.now() - started;
+        const values = sequence.slice(0, loaded);
 
-      return of({ id, loaded, total, isRunning, isPartial, rawResponse: { took, values } });
+        return { id, loaded, total, isRunning, isPartial, rawResponse: { took, values } };
+      };
+      return from(search());
     },
     cancel: async (id, options, deps) => {
       responseMap.delete(id);
