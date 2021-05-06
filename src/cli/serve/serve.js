@@ -15,6 +15,8 @@ import url from 'url';
 import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
 import { readKeystore } from '../keystore/read_keystore';
 
+Error.stackTraceLimit = 100;
+
 function canRequire(path) {
   try {
     require.resolve(path);
