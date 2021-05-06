@@ -120,6 +120,96 @@ describe('ExceptionBuilderComponent', () => {
     );
   });
 
+  test('it displays "is in list" operators if "allowLargeValueLists" is true', async () => {
+    wrapper = mount(
+      <EuiThemeProvider>
+        <ExceptionBuilderComponent
+          allowLargeValueLists={true}
+          autocompleteService={autocompleteStartMock}
+          exceptionListItems={[
+            {
+              ...getExceptionListItemSchemaMock(),
+              entries: [
+                { ...getEntryMatchAnyMock(), field: getField('ip').name, value: ['some ip'] },
+              ],
+            },
+          ]}
+          httpService={mockKibanaHttpService}
+          indexPatterns={{
+            fields,
+            id: '1234',
+            title: 'logstash-*',
+          }}
+          isAndDisabled={false}
+          isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listNamespaceType="single"
+          listType="detection"
+          ruleName="Test rule"
+          onChange={jest.fn()}
+        />
+      </EuiThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).prop('options')
+    ).toEqual([
+      { label: 'is' },
+      { label: 'is not' },
+      { label: 'is one of' },
+      { label: 'is not one of' },
+      { label: 'exists' },
+      { label: 'does not exist' },
+      { label: 'is in list' },
+      { label: 'is not in list' },
+    ]);
+  });
+
+  test('it does not display "is in list" operators if "allowLargeValueLists" is false', async () => {
+    wrapper = mount(
+      <EuiThemeProvider>
+        <ExceptionBuilderComponent
+          allowLargeValueLists={false}
+          autocompleteService={autocompleteStartMock}
+          exceptionListItems={[
+            {
+              ...getExceptionListItemSchemaMock(),
+              entries: [
+                { ...getEntryMatchAnyMock(), field: getField('ip').name, value: ['some ip'] },
+              ],
+            },
+          ]}
+          httpService={mockKibanaHttpService}
+          indexPatterns={{
+            fields,
+            id: '1234',
+            title: 'logstash-*',
+          }}
+          isAndDisabled={false}
+          isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listNamespaceType="single"
+          listType="detection"
+          ruleName="Test rule"
+          onChange={jest.fn()}
+        />
+      </EuiThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).prop('options')
+    ).toEqual([
+      { label: 'is' },
+      { label: 'is not' },
+      { label: 'is one of' },
+      { label: 'is not one of' },
+      { label: 'exists' },
+      { label: 'does not exist' },
+    ]);
+  });
+
   test('it displays "or", "and" and "add nested button" enabled', () => {
     wrapper = mount(
       <EuiThemeProvider>
