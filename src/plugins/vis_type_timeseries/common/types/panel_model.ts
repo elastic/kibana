@@ -136,6 +136,7 @@ export interface Panel {
   gauge_width?: string | number;
   hide_last_value_indicator: boolean;
   id: string;
+  ignore_daylight_time: boolean;
   ignore_global_filter?: number;
   ignore_global_filters?: number;
   index_pattern: IndexPatternValue;

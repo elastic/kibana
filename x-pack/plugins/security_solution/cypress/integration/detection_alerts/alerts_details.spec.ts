@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { JSON_LINES } from '../../screens/alerts_details';
+import { CELL_TEXT, JSON_LINES, TABLE_ROWS } from '../../screens/alerts_details';
 
 import {
   expandFirstAlert,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import { openJsonView, scrollJsonViewToBottom } from '../../tasks/alerts_details';
+import { openJsonView, openTable, scrollJsonViewToBottom } from '../../tasks/alerts_details';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad } from '../../tasks/es_archiver';
@@ -30,12 +30,11 @@ describe('Alert details with unmapped fields', () => {
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(unmappedRule);
-  });
-  beforeEach(() => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     expandFirstAlert();
   });
+
   it('Displays the unmapped field on the JSON view', () => {
     const expectedUnmappedField = { line: 2, text: '  "unmapped": "This is the unmapped field"' };
 
@@ -48,5 +47,22 @@ describe('Alert details with unmapped fields', () => {
         .eq(length - expectedUnmappedField.line)
         .should('have.text', expectedUnmappedField.text);
     });
+  });
+
+  it('Displays the unmapped field on the table', () => {
+    const expectedUnmmappedField = {
+      row: 55,
+      field: 'unmapped',
+      text: 'This is the unmapped field',
+    };
+
+    openTable();
+
+    cy.get(TABLE_ROWS)
+      .eq(expectedUnmmappedField.row)
+      .within(() => {
+        cy.get(CELL_TEXT).eq(0).should('have.text', expectedUnmmappedField.field);
+        cy.get(CELL_TEXT).eq(1).should('have.text', expectedUnmmappedField.text);
+      });
   });
 });
