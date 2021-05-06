@@ -118,7 +118,7 @@ export class RuleDataClient implements IRuleDataClient {
       path: `/_index_template/_simulate_index/${concreteIndexName}`,
     });
 
-    const mappings: TypeMapping = simulateResponse.mappings;
+    const mappings: TypeMapping = simulateResponse.template.mappings;
 
     await clusterClient.indices.putMapping({ index: `${alias}*`, body: mappings });
   }

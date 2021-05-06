@@ -30,6 +30,12 @@ import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY_VALUE,
+} from '../../../../rule_registry/common/technical_rule_data_field_names';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -238,10 +244,10 @@ export function registerTransactionDurationAnomalyAlertType({
                   : {}),
                 [TRANSACTION_TYPE]: transactionType,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-                'kibana.rac.alert.severity.level': severityLevel,
-                'kibana.rac.alert.severity.value': score,
-                'kibana.observability.evaluation.value': score,
-                'kibana.observability.evaluation.threshold': threshold,
+                [ALERT_SEVERITY_LEVEL]: severityLevel,
+                [ALERT_SEVERITY_VALUE]: score,
+                [ALERT_EVALUATION_VALUE]: score,
+                [ALERT_EVALUATION_THRESHOLD]: threshold,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {

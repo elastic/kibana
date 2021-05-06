@@ -136,6 +136,11 @@ export class APMPlugin
       const componentTemplateName = plugins.ruleRegistry.getFullAssetName(
         'apm-mappings'
       );
+
+      if (!plugins.ruleRegistry.isWriteEnabled()) {
+        return;
+      }
+
       await plugins.ruleRegistry.createOrUpdateComponentTemplate({
         name: componentTemplateName,
         body: {

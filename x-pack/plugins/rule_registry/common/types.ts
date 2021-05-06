@@ -7,6 +7,10 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
+export type PutIndexTemplateRequest = estypes.PutIndexTemplateRequest & {
+  body?: { composed_of?: string[] };
+};
+
 export interface ClusterPutComponentTemplateBody {
   template: {
     settings: {
