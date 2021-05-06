@@ -40,6 +40,9 @@ export const buildFrameworkRequest = async (
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts
+ */
 export const formatErrors = (errors: rt.Errors): string[] => {
   const err = errors.map((error) => {
     if (error.message != null) {
