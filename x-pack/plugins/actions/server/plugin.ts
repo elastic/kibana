@@ -35,6 +35,7 @@ import {
 } from './cleanup_failed_executions';
 
 import { ActionsConfig, getValidatedConfig } from './config';
+import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
@@ -157,7 +158,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get('actions');
-    this.actionsConfig = getValidatedConfig(this.logger, initContext.config.get<ActionsConfig>());
+    this.actionsConfig = getValidatedConfig(
+      this.logger,
+      resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
+    );
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
     this.kibanaIndexConfig = initContext.config.legacy.get();
@@ -177,7 +181,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
@@ -223,6 +226,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
+
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.actionTypeRegistry!);
 
     registerBuiltInActionTypes({
       logger: this.logger,

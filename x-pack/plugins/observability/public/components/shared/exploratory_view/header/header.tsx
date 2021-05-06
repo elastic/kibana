@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
@@ -34,7 +34,15 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
             {DataViewLabels[series.reportType] ??
               i18n.translate('xpack.observability.expView.heading.label', {
                 defaultMessage: 'Exploratory view',
+              })}{' '}
+            <EuiBetaBadge
+              style={{
+                verticalAlign: `middle`,
+              }}
+              label={i18n.translate('xpack.observability.expView.heading.experimental', {
+                defaultMessage: 'Experimental',
               })}
+            />
           </h2>
         </EuiText>
       </EuiFlexItem>

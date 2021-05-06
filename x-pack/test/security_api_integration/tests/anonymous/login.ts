@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -112,11 +111,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if `Authorization` header is present, but not valid', async () => {
-        const response = await supertest
+        const unauthenticatedResponse = await supertest
           .get('/security/account')
           .set('Authorization', 'Basic wow')
           .expect(401);
-        expect(response.headers['set-cookie']).to.be(undefined);
+
+        expect(unauthenticatedResponse.headers['set-cookie']).to.be(undefined);
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
     });
 
@@ -156,9 +160,14 @@ export default function ({ getService }: FtrProviderContext) {
         const apiResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Authorization', 'Basic a3JiNTprcmI1')
+          .set('Authorization', 'Basic ZHVtbXlfaGFja2VyOnBhc3M=')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(401);
+          .expect(401, {
+            statusCode: 401,
+            error: 'Unauthorized',
+            message:
+              '[security_exception]: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]',
+          });
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
@@ -203,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
       });
     });
   });

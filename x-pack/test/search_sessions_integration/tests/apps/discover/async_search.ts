@@ -16,7 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['discover', 'common', 'timePicker', 'header', 'context']);
   const searchSessions = getService('searchSessions');
-  const dataGrid = getService('dataGrid');
   const retry = getService('retry');
 
   describe('discover async search', () => {
@@ -67,14 +66,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('navigation to context cleans the session', async () => {
       await PageObjects.common.clearAllToasts();
-      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const table = await PageObjects.discover.getDocTable();
+      const isLegacy = await PageObjects.discover.useLegacyTable();
+      await table.clickRowToggle({ rowIndex: 0 });
 
       await retry.try(async () => {
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await table.getRowActions({ rowIndex: 0 });
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        await rowActions[1].click();
+        const idxToClick = isLegacy ? 0 : 1;
+        await rowActions[idxToClick].click();
       });
 
       await PageObjects.context.waitUntilContextLoadingHasFinished();

@@ -13,6 +13,10 @@ import { isObject } from 'lodash/fp';
 
 type ErrorFactory = (message: string) => Error;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts
+ * Bug fix for the TODO is in the format_errors package
+ */
 export const formatErrors = (errors: rt.Errors): string[] => {
   const err = errors.map((error) => {
     if (error.message != null) {
@@ -25,7 +29,13 @@ export const formatErrors = (errors: rt.Errors): string[] => {
         .map((entry) => entry.key)
         .join(',');
 
-      const nameContext = error.context.find((entry) => entry.type?.name?.length > 0);
+      const nameContext = error.context.find((entry) => {
+        // TODO: Put in fix for optional chaining https://github.com/cypress-io/cypress/issues/9298
+        if (entry.type && entry.type.name) {
+          return entry.type.name.length > 0;
+        }
+        return false;
+      });
       const suppliedValue =
         keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
       const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;

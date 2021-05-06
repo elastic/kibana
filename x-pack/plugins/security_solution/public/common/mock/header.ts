@@ -22,7 +22,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: '@timestamp',
     type: 'date',
     aggregatable: true,
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
   {
     category: 'event',
@@ -33,7 +33,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'event.severity',
     type: 'long',
     aggregatable: true,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'event',
@@ -44,7 +44,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'event.category',
     type: 'keyword',
     aggregatable: true,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'event',
@@ -55,7 +55,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'event.action',
     type: 'keyword',
     aggregatable: true,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'host',
@@ -66,7 +66,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'host.name',
     type: 'keyword',
     aggregatable: true,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'source',
@@ -76,7 +76,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'source.ip',
     type: 'ip',
     aggregatable: true,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'destination',
@@ -86,7 +86,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'destination.ip',
     type: 'ip',
     aggregatable: true,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     aggregatable: true,
@@ -97,7 +97,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     format: 'bytes',
     id: 'destination.bytes',
     type: 'number',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'user',
@@ -107,7 +107,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'user.name',
     type: 'keyword',
     aggregatable: true,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'base',
@@ -117,7 +117,7 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: '_id',
     type: 'keyword',
     aggregatable: true,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'base',
@@ -128,6 +128,6 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'message',
     type: 'text',
     aggregatable: false,
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
 ];
