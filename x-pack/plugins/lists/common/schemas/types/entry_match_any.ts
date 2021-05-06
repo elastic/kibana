@@ -12,6 +12,9 @@ import { operator } from '../common/schemas';
 
 import { nonEmptyOrNullableStringArray } from './non_empty_or_nullable_string_array';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const entriesMatchAny = t.exact(
   t.type({
     field: NonEmptyString,
@@ -20,4 +23,8 @@ export const entriesMatchAny = t.exact(
     value: nonEmptyOrNullableStringArray,
   })
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type EntryMatchAny = t.TypeOf<typeof entriesMatchAny>;
