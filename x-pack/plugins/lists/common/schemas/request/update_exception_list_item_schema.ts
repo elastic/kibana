@@ -6,6 +6,13 @@
  */
 
 import * as t from 'io-ts';
+import {
+  DefaultUpdateCommentsArray,
+  EntriesArray,
+  NamespaceType,
+  UpdateCommentsArray,
+  nonEmptyEntriesArray,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import {
   OsTypeArray,
@@ -21,13 +28,6 @@ import {
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import {
-  DefaultUpdateCommentsArray,
-  EntriesArray,
-  NamespaceType,
-  UpdateCommentsArray,
-  nonEmptyEntriesArray,
-} from '../types';
 
 export const updateExceptionListItemSchema = t.intersection([
   t.exact(

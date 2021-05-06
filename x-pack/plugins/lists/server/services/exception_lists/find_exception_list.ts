@@ -6,8 +6,8 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { NamespaceTypeArray } from '@kbn/securitysolution-io-ts-utils';
 
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import { SavedObjectType } from '../../../common/types';
 import {
   ExceptionListSoSchema,

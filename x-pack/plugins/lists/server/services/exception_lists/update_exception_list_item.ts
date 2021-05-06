@@ -6,10 +6,14 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import {
+  EntriesArray,
+  NamespaceType,
+  UpdateCommentsArrayOrUndefined,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import {
   DescriptionOrUndefined,
-  EntriesArray,
   ExceptionListItemSchema,
   ExceptionListItemTypeOrUndefined,
   ExceptionListSoSchema,
@@ -17,10 +21,8 @@ import {
   ItemIdOrUndefined,
   MetaOrUndefined,
   NameOrUndefined,
-  NamespaceType,
   OsTypeArray,
   TagsOrUndefined,
-  UpdateCommentsArrayOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
 

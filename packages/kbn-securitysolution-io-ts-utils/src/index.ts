@@ -48,6 +48,7 @@ export * from './name';
 export * from './non_empty_array';
 export * from './non_empty_or_nullable_string_array';
 export * from './non_empty_string';
+export * from './non_empty_string_array';
 export * from './normalized_ml_job_id';
 export * from './only_false_allowed';
 export * from './operator';

@@ -7,6 +7,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
+import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   Description,
@@ -17,7 +18,6 @@ import {
   ListId,
   MetaOrUndefined,
   Name,
-  NamespaceType,
   Tags,
   Version,
 } from '../../../common/schemas';

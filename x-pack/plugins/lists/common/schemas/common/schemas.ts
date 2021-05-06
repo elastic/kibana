@@ -10,11 +10,10 @@
 import * as t from 'io-ts';
 import {
   DefaultArray,
+  DefaultNamespace,
   DefaultStringArray,
   NonEmptyString,
 } from '@kbn/securitysolution-io-ts-utils';
-
-import { DefaultNamespace } from '../types/default_namespace';
 
 /**
  * @deprecated Use packages/kbn-securitysolution-io-ts-utils

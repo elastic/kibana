@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as t from 'io-ts';
@@ -13,7 +14,6 @@ import { Either } from 'fp-ts/lib/Either';
  *   - A string that is not empty (which will be turned into an array of size 1)
  *   - A comma separated string that can turn into an array by splitting on it
  *   - Example input converted to output: "a,b,c" -> ["a", "b", "c"]
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const NonEmptyStringArray = new t.Type<string[], string, unknown>(
   'NonEmptyStringArray',
@@ -37,12 +37,6 @@ export const NonEmptyStringArray = new t.Type<string[], string, unknown>(
   String
 );
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
 export type NonEmptyStringArray = t.OutputOf<typeof NonEmptyStringArray>;
 
-/**
- * @deprecated Use packages/kbn-securitysolution-io-ts-utils
- */
 export type NonEmptyStringArrayDecoded = t.TypeOf<typeof NonEmptyStringArray>;

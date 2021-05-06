@@ -6,15 +6,17 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import {
+  EmptyStringArrayDecoded,
+  NamespaceTypeArray,
+  NonEmptyStringArrayDecoded,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import {
   SavedObjectType,
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
 } from '../../../common/types';
-import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
 import {
   ExceptionListSoSchema,
   FoundExceptionListItemSchema,

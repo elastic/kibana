@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EntryMatchAny } from '@kbn/securitysolution-io-ts-utils';
+
 import { getEntryMatchExcludeMock, getEntryMatchMock } from '../schemas/types/entry_match.mock';
 import {
   getEntryMatchAnyExcludeMock,
@@ -20,7 +22,7 @@ import {
   getExceptionListItemSchemaMock,
   getExceptionListItemSchemaXMock,
 } from '../schemas/response/exception_list_item_schema.mock';
-import { EntryMatchAny, ExceptionListItemSchema } from '../schemas';
+import { ExceptionListItemSchema } from '../schemas';
 
 import {
   ExceptionItemSansLargeValueLists,

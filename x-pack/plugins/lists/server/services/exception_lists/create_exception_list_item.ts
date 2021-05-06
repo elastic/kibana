@@ -7,11 +7,14 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
-
 import {
   CreateCommentsArray,
-  Description,
   EntriesArray,
+  NamespaceType,
+} from '@kbn/securitysolution-io-ts-utils';
+
+import {
+  Description,
   ExceptionListItemSchema,
   ExceptionListItemType,
   ExceptionListSoSchema,
@@ -19,7 +22,6 @@ import {
   ListId,
   MetaOrUndefined,
   Name,
-  NamespaceType,
   OsTypeArray,
   Tags,
 } from '../../../common/schemas';

@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { commentsArray, entriesArray } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   _versionOrUndefined,
@@ -25,7 +26,6 @@ import {
   updated_at,
   updated_by,
 } from '../common/schemas';
-import { commentsArray, entriesArray } from '../types';
 
 export const exceptionListItemSchema = t.exact(
   t.type({

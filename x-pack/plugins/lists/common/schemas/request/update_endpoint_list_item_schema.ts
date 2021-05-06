@@ -6,6 +6,12 @@
  */
 
 import * as t from 'io-ts';
+import {
+  DefaultUpdateCommentsArray,
+  EntriesArray,
+  UpdateCommentsArray,
+  nonEmptyEntriesArray,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import {
   OsTypeArray,
@@ -20,12 +26,6 @@ import {
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import {
-  DefaultUpdateCommentsArray,
-  EntriesArray,
-  UpdateCommentsArray,
-  nonEmptyEntriesArray,
-} from '../types';
 
 export const updateEndpointListItemSchema = t.intersection([
   t.exact(

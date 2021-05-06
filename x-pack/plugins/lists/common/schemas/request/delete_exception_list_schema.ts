@@ -6,9 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
 
 import { id, list_id, namespace_type } from '../common/schemas';
-import { NamespaceType } from '../types';
 import { RequiredKeepUndefined } from '../../types';
 
 export const deleteExceptionListSchema = t.exact(

@@ -6,7 +6,14 @@
  */
 
 import * as t from 'io-ts';
-import { DefaultUuid } from '@kbn/securitysolution-io-ts-utils';
+import {
+  CreateCommentsArray,
+  DefaultCreateCommentsArray,
+  DefaultUuid,
+  EntriesArray,
+  NamespaceType,
+  nonEmptyEntriesArray,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import {
   ItemId,
@@ -22,13 +29,6 @@ import {
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import {
-  CreateCommentsArray,
-  DefaultCreateCommentsArray,
-  NamespaceType,
-  nonEmptyEntriesArray,
-} from '../types';
-import { EntriesArray } from '../types/entries';
 
 export const createExceptionListItemSchema = t.intersection([
   t.exact(

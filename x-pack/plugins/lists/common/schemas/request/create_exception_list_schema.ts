@@ -10,6 +10,7 @@ import {
   DefaultUuid,
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-utils';
 
 import {
@@ -25,7 +26,6 @@ import {
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { NamespaceType } from '../types';
 
 export const createExceptionListSchema = t.intersection([
   t.exact(

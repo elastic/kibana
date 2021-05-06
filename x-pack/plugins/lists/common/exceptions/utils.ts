@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { CreateExceptionListItemSchema, EntriesArray, ExceptionListItemSchema } from '../schemas';
+import { EntriesArray } from '@kbn/securitysolution-io-ts-utils';
+
+import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../schemas';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>

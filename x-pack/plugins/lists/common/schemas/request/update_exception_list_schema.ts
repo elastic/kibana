@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   OsTypeArray,
@@ -23,7 +24,6 @@ import {
   version,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { NamespaceType } from '../types';
 
 export const updateExceptionListSchema = t.intersection([
   t.exact(

@@ -6,8 +6,11 @@
  */
 
 import * as t from 'io-ts';
+import {
+  commentsArrayOrUndefined,
+  entriesArrayOrUndefined,
+} from '@kbn/securitysolution-io-ts-utils';
 
-import { commentsArrayOrUndefined, entriesArrayOrUndefined } from '../types';
 import {
   created_at,
   created_by,
