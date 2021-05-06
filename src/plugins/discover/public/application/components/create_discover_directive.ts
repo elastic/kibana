@@ -7,6 +7,7 @@
  */
 import { Discover } from './discover';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDiscoverDirective(reactDirective: any) {
   return reactDirective(Discover, [
     ['fetch', { watchDepth: 'reference' }],

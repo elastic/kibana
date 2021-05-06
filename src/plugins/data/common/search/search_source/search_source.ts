@@ -272,7 +272,9 @@ export class SearchSource {
    * Fetch this source from Elasticsearch, returning an observable over the response(s)
    * @param options
    */
-  fetch$(options: ISearchOptions = {}) {
+  fetch$(
+    options: ISearchOptions = {}
+  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
     const { getConfig } = this.dependencies;
     const syncSearchByDefault = getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES);
 
@@ -309,7 +311,11 @@ export class SearchSource {
    * @deprecated Use fetch$ instead
    */
   fetch(options: ISearchOptions = {}) {
-    return this.fetch$(options).toPromise();
+    return this.fetch$(options)
+      .toPromise()
+      .then((r) => {
+        return r.rawResponse as estypes.SearchResponse<any>;
+      });
   }
 
   /**
@@ -342,7 +348,7 @@ export class SearchSource {
    * PRIVATE APIS
    ******/
 
-  private inspectSearch(s$: Observable<estypes.SearchResponse<any>>, options: ISearchOptions) {
+  private inspectSearch(s$: Observable<IKibanaSearchResponse<any>>, options: ISearchOptions) {
     const { id, title, description, adapter } = options.inspector || { title: '' };
 
     const requestResponder = adapter?.start(title, {
@@ -385,7 +391,7 @@ export class SearchSource {
         last(undefined, null),
         tap((finalResponse) => {
           if (finalResponse) {
-            requestResponder?.stats(getResponseInspectorStats(finalResponse, this));
+            requestResponder?.stats(getResponseInspectorStats(finalResponse.rawResponse, this));
             requestResponder?.ok({ json: finalResponse });
           }
         }),
@@ -425,8 +431,8 @@ export class SearchSource {
           );
         }
       }
-      return response;
     }
+    return response;
   }
 
   /**
@@ -483,7 +489,7 @@ export class SearchSource {
           }
         });
       }),
-      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
+      map((response) => onResponse(searchRequest, response))
     );
   }
 
