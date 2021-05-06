@@ -12,7 +12,6 @@ import {
   EuiSwitch,
   htmlIdGenerator,
   EuiButtonGroup,
-  EuiRange,
   EuiSuperSelect,
   EuiToolTip,
   EuiIcon,
@@ -364,40 +363,6 @@ export function CustomizablePalette({
         </EuiFormRow>
       </div>
       <div className="lnsPalettePanel__section">
-        {showStepsInput && (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.table.dynamicColoring.progression.stops.label', {
-              defaultMessage: 'Color steps',
-            })}
-            display="columnCompressed"
-          >
-            <EuiRange
-              data-test-subj="lnsDatatable_dynamicColoring_progression_steps"
-              value={activePalette?.params?.steps || DEFAULT_COLOR_STEPS}
-              onChange={({
-                currentTarget,
-              }: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
-                setPalette(
-                  mergePaletteParams(activePalette, {
-                    stops: getPaletteColors(
-                      palettes,
-                      {
-                        ...activePalette.params,
-                        steps: Number(currentTarget.value),
-                      },
-                      { dataBounds }
-                    ),
-                    steps: Number(currentTarget.value),
-                  })
-                );
-              }}
-              min={MIN_COLOR_STEPS}
-              max={MAX_COLOR_STEPS}
-              compressed
-              showValue
-            />
-          </EuiFormRow>
-        )}
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.dynamicColoring.reverse.label', {
             defaultMessage: 'Reverse colors',
