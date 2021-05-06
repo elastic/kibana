@@ -55,7 +55,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
       label={
         <FormattedMessage
           id="xpack.ml.severitySelector.formControlLabel"
-          defaultMessage="Select severity threshold"
+          defaultMessage="Severity"
         />
       }
     >
