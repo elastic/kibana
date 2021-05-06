@@ -5,6 +5,6 @@
   "configPath": ["xpack", "timelines"],
   "server": true,
   "ui": true,
-  "requiredPlugins": [],
+  "requiredPlugins": ["data", "dataEnhanced"],
   "optionalPlugins": []
 }

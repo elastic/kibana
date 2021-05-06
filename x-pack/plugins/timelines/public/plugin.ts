@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
 import { TimelinesPluginSetup, TimelineProps } from './types';
 import { getTimelineLazy } from './methods';
+import { tGridActions, getReduxDeps } from './store/t_grid';
+import { initialTGridState, tGridReducer } from './store/t_grid/reducer';
 
 export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -23,13 +24,39 @@ export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
         return getTimelineLazy(props);
       },
       getTimelineStore: () => {
-        actions: tGridActions,
-        state: initTGridState,
-      }
+        return {
+          actions: tGridActions,
+          initialState: initialTGridState,
+          reducer: tGridReducer,
+        };
+      },
+      getCreatedTgridStore: (type: TimelineProps['type']) => {
+        return getReduxDeps(type);
+      },
     };
   }
 
-  public start() {}
+  public start() {
+    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+    if (!config.enabled) {
+      return {};
+    }
+    return {
+      getTimeline: (props: TimelineProps) => {
+        return getTimelineLazy(props);
+      },
+      getTimelineStore: () => {
+        return {
+          actions: tGridActions,
+          initialState: initialTGridState,
+          reducer: tGridReducer,
+        };
+      },
+      getCreatedTgridStore: (type: TimelineProps['type']) => {
+        return getReduxDeps(type);
+      },
+    };
+  }
 
   public stop() {}
 }

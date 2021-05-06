@@ -446,6 +446,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   private async store(coreStart: CoreStart, startPlugins: StartPlugins): Promise<SecurityAppStore> {
     if (!this._store) {
+      const tGridDeps =
+        startPlugins.timelines.getTimelineStore && startPlugins.timelines.getTimelineStore();
+      const tGridInitialState = tGridDeps && tGridDeps.initialState;
+      const tGridReducer = tGridDeps && tGridDeps.reducer;
       const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       const [
         { createStore, createInitialState },
@@ -466,7 +470,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
             {
-              strategy: 'securitySolutionIndexFields',
+              strategy: 'indexFields',
             }
           )
           .toPromise(),
@@ -487,9 +491,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const detectionsStart = detectionsSubPlugin.start(this.storage);
       const hostsStart = hostsSubPlugin.start(this.storage);
       const networkStart = networkSubPlugin.start(this.storage);
-      const timelinesStart = timelinesSubPlugin.start();
+      const timelinesStart = timelinesSubPlugin.start(tGridReducer, tGridInitialState);
       const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
-
       const timelineInitialState = {
         timeline: {
           ...timelinesStart.store.initialState.timeline!,
@@ -498,6 +501,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...detectionsStart.storageTimelines!.timelineById,
             ...hostsStart.storageTimelines!.timelineById,
             ...networkStart.storageTimelines!.timelineById,
+            ...tGridInitialState,
           },
         },
       };

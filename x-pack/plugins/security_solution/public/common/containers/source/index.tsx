@@ -151,7 +151,7 @@ export const useFetchIndex = (
             { indices: iNames, onlyCheckIfIndicesExist },
             {
               abortSignal: abortCtrl.current.signal,
-              strategy: 'securitySolutionIndexFields',
+              strategy: 'indexFields',
             }
           )
           .subscribe({
@@ -235,7 +235,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
             { indices: indicesName, onlyCheckIfIndicesExist: false },
             {
               abortSignal: abortCtrl.current.signal,
-              strategy: 'securitySolutionIndexFields',
+              strategy: 'indexFields',
             }
           )
           .subscribe({

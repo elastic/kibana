@@ -24,6 +24,22 @@ import {
   TimelineInput,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
+import { TGridActions } from '../../../../../timelines/public';
+export const applyDeltaToColumnWidth = TGridActions.applyDeltaToColumnWidth;
+export const upsertColumn = TGridActions.upsertColumn;
+export const toggleDetailPanel = TGridActions.toggleDetailPanel;
+export const removeColumn = TGridActions.removeColumn;
+export const updateIsLoading = TGridActions.updateIsLoading;
+export const updateColumns = TGridActions.updateIsLoading;
+export const updateItemsPerPage = TGridActions.updateItemsPerPage;
+export const updateItemsPerPageOptions = TGridActions.updateItemsPerPageOptions;
+export const updateSort = TGridActions.updateSort;
+export const setSelected = TGridActions.setSelected;
+export const clearSelected = TGridActions.clearSelected;
+export const setEventsLoading = TGridActions.setEventsLoading;
+export const clearEventsLoading = TGridActions.clearEventsLoading;
+export const setEventsDeleted = TGridActions.setEventsDeleted;
+export const clearEventsDeleted = TGridActions.clearEventsDeleted;
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
