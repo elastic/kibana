@@ -6,12 +6,13 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiCallOut, EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { PagerDutyActionConnector } from '.././types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const PagerDutyActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<PagerDutyActionConnector>
@@ -68,7 +69,15 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
         )}
       >
         <Fragment>
-          {getEncryptedFieldNotifyLabel(!action.id)}
+          {getEncryptedFieldNotifyLabel(
+            !action.id,
+            1,
+            action.isMissingSecrets ?? false,
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.reenterValueLabel',
+              { defaultMessage: 'This key is encrypted. Please reenter a value for this field.' }
+            )
+          )}
           <EuiFieldText
             fullWidth
             isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
@@ -90,38 +99,6 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
     </Fragment>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <EuiText size="s" data-test-subj="rememberValuesMessage">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.rememberValueLabel"
-            defaultMessage="Remember this value. You must reenter it each time you edit the connector."
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
-  return (
-    <Fragment>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        iconType="iInCircle"
-        data-test-subj="reenterValuesMessage"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.reenterValueLabel',
-          { defaultMessage: 'This key is encrypted. Please reenter a value for this field.' }
-        )}
-      />
-      <EuiSpacer size="m" />
-    </Fragment>
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { PagerDutyActionConnectorFields as default };
