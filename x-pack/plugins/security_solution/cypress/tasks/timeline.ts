@@ -57,7 +57,7 @@ import {
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
-import { TIMELINES_TABLE } from '../screens/timelines';
+import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
 import { drag, drop } from '../tasks/common';
 
@@ -127,7 +127,7 @@ export const addNotesToTimeline = (notes: string) => {
   goToNotesTab();
 };
 
-export const addFilter = (filter: TimelineFilter) => {
+export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
@@ -135,7 +135,7 @@ export const addFilter = (filter: TimelineFilter) => {
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
-  cy.get(SAVE_FILTER_BTN).click();
+  return cy.get(SAVE_FILTER_BTN).click();
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -208,8 +208,8 @@ export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
 
-export const markAsFavorite = () => {
-  cy.get(STAR_ICON).click();
+export const markAsFavorite = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  return cy.get(STAR_ICON).click();
 };
 
 export const openTimelineFieldsBrowser = () => {
@@ -234,25 +234,18 @@ export const openTimelineTemplateFromSettings = (id: string) => {
 };
 
 export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<HTMLElement>> => {
-  // Why are we checking for null if it is typed to 'string'? We don't currently validate the timeline response
-  // so technically we cannot guarantee that we will have the id. Changing the type to 'string | null' results in
-  // a lot of other changes being needed that would be best as part of a cleanup. Added a log, to give a dev a clue
-  // as to whether it's failing client or server side.
   if (timelineId == null) {
+    // Log out if for some reason this happens to be null just in case for our tests we experience
+    // value of null. Some tests return an "any" which is why this could happen.
     cy.log('"timelineId" is null or undefined');
   }
-
-  cy.root()
-    .pipe(($el) => {
-      $el.find(TIMELINE_TITLE_BY_ID(timelineId)).trigger('click');
-      return $el.find(QUERY_TAB_BUTTON).find('.euiBadge');
-    })
-    .should('be.visible');
-  return cy.root().find(TIMELINE_TITLE_BY_ID(timelineId));
+  // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
+  // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
+  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
 };
 
-export const pinFirstEvent = () => {
-  cy.get(PIN_EVENT).first().click({ force: true });
+export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  return cy.get(PIN_EVENT).first().click({ force: true });
 };
 
 export const populateTimeline = () => {
@@ -301,10 +294,33 @@ export const waitForTimelineChanges = () => {
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
 };
 
-export const waitForTimelinesPanelToBeLoaded = () => {
-  cy.get(TIMELINES_TABLE).should('exist');
-};
-
 export const waitForEventsPanelToBeLoaded = () => {
   cy.get(QUERY_TAB_BUTTON).find('.euiBadge').should('exist');
+};
+
+/**
+ * We keep clicking on the refresh button until we have the timeline we are looking
+ * for. NOTE: That because refresh happens so fast, the click handler in most cases
+ * is not on it reliably. You should not use a pipe off of this to get your timeline
+ * clicked as a pipe off the timeline link can product multiple URL loads which will
+ * add a different type of flake to your tests. You will usually have to use wait() for
+ * this like so:
+ *
+ * refreshTimelinesUntilTimeLinePresent(timelineId)
+ *   // This wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
+ *   // request responses and indeterminism.
+ *   .then(() => cy.wait(1000))
+ *   .then(() => ... your code here ...)
+ * @param id The timeline id to click the refresh button until we find it.
+ */
+export const refreshTimelinesUntilTimeLinePresent = (
+  id: string
+): Cypress.Chainable<JQuery<HTMLHtmlElement>> => {
+  return cy
+    .root()
+    .pipe(($el) => {
+      $el.find(REFRESH_BUTTON).trigger('click');
+      return $el.find(TIMELINE(id));
+    })
+    .should('be.visible');
 };

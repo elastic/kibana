@@ -36,7 +36,14 @@ export interface PluginsStart {
   management?: ManagementStart;
 }
 
+/**
+ * Setup contract for the Spaces plugin.
+ */
 export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
+
+/**
+ * Start contract for the Spaces plugin.
+ */
 export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {

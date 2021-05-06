@@ -165,7 +165,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.clickNewDashboard();
       });
 
-      it('can add a markdown panel by value', async () => {
+      // flaky https://github.com/elastic/kibana/issues/98249
+      it.skip('can add a markdown panel by value', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.waitForRenderComplete();
