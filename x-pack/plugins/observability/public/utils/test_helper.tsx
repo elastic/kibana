@@ -7,7 +7,7 @@
 
 import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
 import { of } from 'rxjs';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -39,12 +39,23 @@ const plugins = ({
 
 const observabilityRuleRegistry = createObservabilityRuleRegistryMock();
 
+function ObservabilityPageTemplate({ children }: PropsWithChildren<{}>) {
+  return <>{children}</>;
+}
+
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
       <KibanaContextProvider services={{ ...core }}>
         <PluginContext.Provider
-          value={{ appMountParameters, config, core, plugins, observabilityRuleRegistry }}
+          value={{
+            appMountParameters,
+            config,
+            core,
+            plugins,
+            observabilityRuleRegistry,
+            ObservabilityPageTemplate,
+          }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>
         </PluginContext.Provider>

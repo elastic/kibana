@@ -40,6 +40,7 @@ describe('useTimeRange', () => {
         },
       } as unknown) as ObservabilityPublicPluginsStart,
       observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+      ObservabilityPageTemplate: () => null,
     }));
     jest.spyOn(kibanaUISettings, 'useKibanaUISettings').mockImplementation(() => ({
       from: '2020-10-08T05:00:00.000Z',
@@ -82,6 +83,7 @@ describe('useTimeRange', () => {
             },
           } as unknown) as ObservabilityPublicPluginsStart,
           observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+          ObservabilityPageTemplate: () => null,
         }));
       });
       it('returns ranges and absolute times from kibana default settings', () => {

@@ -56,6 +56,7 @@ describe('UXSection', () => {
         },
       } as unknown) as ObservabilityPublicPluginsStart,
       observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+      ObservabilityPageTemplate: ({ children }) => <>{children}</>,
     }));
   });
   it('renders with core web vitals', () => {

@@ -59,6 +59,7 @@ describe('APMSection', () => {
           },
         },
       } as unknown) as ObservabilityPublicPluginsStart,
+      ObservabilityPageTemplate: ({ children }) => <>{children}</>,
     }));
   });
 

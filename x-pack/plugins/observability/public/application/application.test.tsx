@@ -59,6 +59,7 @@ describe('renderApp', () => {
         plugins,
         appMountParameters: params,
         observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+        ObservabilityPageTemplate: ({ children }) => <>{children}</>,
       });
       unmount();
     }).not.toThrowError();
