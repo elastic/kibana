@@ -2140,6 +2140,7 @@ export type SavedObjectAttributeSingle = string | number | boolean | null | unde
 // @public (undocumented)
 export interface SavedObjectExportBaseOptions {
     excludeExportDetails?: boolean;
+    includeNamespaces?: boolean;
     includeReferencesDeep?: boolean;
     namespace?: string;
     request: KibanaRequest;

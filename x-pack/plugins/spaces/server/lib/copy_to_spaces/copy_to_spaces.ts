@@ -9,6 +9,7 @@ import type { Readable } from 'stream';
 
 import type { CoreStart, KibanaRequest, SavedObject } from 'src/core/server';
 
+import { ALL_SPACES_ID } from '../../../common/constants';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { getIneligibleTypes } from './lib/get_ineligible_types';
@@ -27,14 +28,12 @@ export function copySavedObjectsToSpacesFactory(
   const savedObjectsExporter = createExporter(savedObjectsClient);
   const savedObjectsImporter = createImporter(savedObjectsClient);
 
-  const exportRequestedObjects = async (
-    sourceSpaceId: string,
-    options: Pick<CopyOptions, 'includeReferences' | 'objects'>
-  ) => {
+  const exportRequestedObjects = async (sourceSpaceId: string, options: CopyOptions) => {
     const objectStream = await savedObjectsExporter.exportByObjects({
       request,
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
+      includeNamespaces: !options.createNewCopies, // if we are not creating new copies, then include namespaces
       excludeExportDetails: true,
       objects: options.objects,
     });
@@ -76,13 +75,21 @@ export function copySavedObjectsToSpacesFactory(
     const exportedSavedObjects = await exportRequestedObjects(sourceSpaceId, options);
     const ineligibleTypes = getIneligibleTypes(getTypeRegistry());
     const filteredObjects = exportedSavedObjects.filter(
-      ({ type }) => !ineligibleTypes.includes(type)
+      ({ type, namespaces }) =>
+        // Don't attempt to copy ineligible types or objects that already exist in all spaces
+        !ineligibleTypes.includes(type) && !namespaces?.includes(ALL_SPACES_ID)
     );
 
     for (const spaceId of destinationSpaceIds) {
+      const objectsToImport: SavedObject[] = [];
+      for (const { namespaces, ...object } of filteredObjects) {
+        if (!namespaces?.includes(spaceId)) {
+          objectsToImport.push(object);
+        }
+      }
       response[spaceId] = await importObjectsToSpace(
         spaceId,
-        createReadableStreamFromArray(filteredObjects),
+        createReadableStreamFromArray(objectsToImport),
         options
       );
     }
