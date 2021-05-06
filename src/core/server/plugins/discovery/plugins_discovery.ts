@@ -50,13 +50,7 @@ export function discover(
       return pathAndErrors.sort((a, b) => {
         const pa = typeof a === 'string' ? a : a.path;
         const pb = typeof b === 'string' ? b : b.path;
-        if (pa < pb) {
-          return -1;
-        }
-        if (pa > pb) {
-          return 1;
-        }
-        return 0;
+        return pa < pb ? -1 : pa > pb ? 1 : 0;
       });
     }),
     concatMap((pluginPathOrError) => {
