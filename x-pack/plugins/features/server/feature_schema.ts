@@ -6,6 +6,7 @@
  */
 
 import Joi from 'joi';
+import { inspect } from 'util';
 
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
@@ -158,6 +159,11 @@ const elasticsearchFeatureSchema = Joi.object({
 export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   const validateResult = Joi.validate(feature, kibanaFeatureSchema);
   if (validateResult.error) {
+    console.log(
+      "---DEBUGGING FAILURES WE'RE ONLY ABLE TO REPRODUCE IN CI---",
+      inspect(feature, { depth: Infinity })
+    );
+
     throw validateResult.error;
   }
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
