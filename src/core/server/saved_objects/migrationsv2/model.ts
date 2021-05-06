@@ -98,7 +98,7 @@ function getAliases(indices: FetchIndexResponse) {
 }
 
 /**
- * Creates a record of alias -> index name pairs
+ * Constructs migration failure message strings from corrupt document ids and document transformation errors
  */
 function extractTransformFailuresReason(
   corruptDocumentIds: string[],
@@ -527,21 +527,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          // // If documents couldn't be transformed or there were transformation errors we fail the migration
-          // const corruptDocumentIdReason =
-          //   stateP.corruptDocumentIds.length > 0
-          //     ? ` Corrupt saved object documents: ${stateP.corruptDocumentIds.join(',')}.\n`
-          //     : ' ';
-          // // we have both the saved object Id and the stack trace in each `transformErrors` item.
-          // const transformErrorsReason =
-          //   stateP.transformErrors.length > 0
-          //     ? 'Transformation errors: ' +
-          //       stateP.transformErrors
-          //         .map(
-          //           (errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`
-          //         )
-          //         .join('/n')
-          //     : '';
           const { corruptDocsReason, transformErrsReason } = extractTransformFailuresReason(
             stateP.corruptDocumentIds,
             stateP.transformErrors
@@ -715,21 +700,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             stateP.corruptDocumentIds,
             stateP.transformErrors
           );
-          // // If documents couldn't be transformed or there were transformation errors we fail the migration
-          // const corruptDocumentIdReason =
-          //   stateP.corruptDocumentIds.length > 0
-          //     ? ` Corrupt saved object documents: ${stateP.corruptDocumentIds.join(',')}.\n`
-          //     : ' ';
-          // // we have both the saved object Id and the stack trace in each `transformErrors` item.
-          // const transformErrorsReason =
-          //   stateP.transformErrors.length > 0
-          //     ? 'Transformation errors: ' +
-          //       stateP.transformErrors
-          //         .map(
-          //           (errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`
-          //         )
-          //         .join('/n')
-          //     : '';
           return {
             ...stateP,
             controlState: 'FATAL',
