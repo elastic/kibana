@@ -15,6 +15,7 @@ import { NonEmptyString } from './non_empty_string';
  * Types the DefaultUuid as:
  *   - If null or undefined, then a default string uuid.v4() will be
  *     created otherwise it will be checked just against an empty string
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultUuid = new t.Type<string, string | undefined, unknown>(
   'DefaultUuid',

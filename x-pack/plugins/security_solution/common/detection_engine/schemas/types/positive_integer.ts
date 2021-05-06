@@ -12,6 +12,7 @@ import { Either } from 'fp-ts/lib/Either';
  * Types the positive integer are:
  *   - Natural Number (positive integer and not a float),
  *   - zero or greater
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const PositiveInteger = new t.Type<number, number, unknown>(
   'PositiveInteger',

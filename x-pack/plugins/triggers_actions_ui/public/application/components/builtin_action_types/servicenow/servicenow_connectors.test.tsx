@@ -97,6 +97,26 @@ describe('ServiceNowActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
   });
 
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      actionTypeId: '.servicenow',
+      isPreconfigured: false,
+      isMissingSecrets: true,
+      config: {},
+      secrets: {},
+    } as ServiceNowActionConnector;
+    const wrapper = mountWithIntl(
+      <ServiceNowConnectorFields
+        action={actionConnector}
+        errors={{ apiUrl: [], username: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+  });
+
   test('should display a message on edit to re-enter credentials', () => {
     const actionConnector = {
       secrets: {
