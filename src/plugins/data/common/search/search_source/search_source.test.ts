@@ -27,7 +27,7 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
-  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
+  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
@@ -432,9 +432,9 @@ describe('SearchSource', () => {
         searchSource.setField('index', ({
           ...indexPattern,
           getComputedFields: () => ({
-            storedFields: ['*'],
+            storedFields: [],
             scriptFields: [],
-            docvalueFields: ['foo-mar'],
+            docvalueFields: [],
           }),
         } as unknown) as IndexPattern);
         searchSource.setField('fields', ['*']);
