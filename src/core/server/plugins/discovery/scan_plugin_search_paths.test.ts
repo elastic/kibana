@@ -220,7 +220,7 @@ describe('scanPluginSearchPaths', () => {
     );
   });
 
-  it.only('works with symlinks', async () => {
+  it('works with symlinks', async () => {
     const pluginFolder = resolve(KIBANA_ROOT, '..', 'ext-plugins');
 
     mockFs(
