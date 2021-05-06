@@ -16,7 +16,9 @@ import {
 } from '../../common/assets';
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
-import { ClusterPutComponentTemplateBody } from '../../common/types';
+import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../common/types';
+
+const BOOTSTRAP_TIMEOUT = 60000;
 
 interface RuleDataPluginServiceConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
@@ -25,50 +27,126 @@ interface RuleDataPluginServiceConstructorOptions {
   kibanaIndex: string;
 }
 
+function createSignal() {
+  let resolver: () => void;
+
+  let ready: boolean = false;
+
+  const promise = new Promise<void>((resolve) => {
+    resolver = resolve;
+  });
+
+  function wait(): Promise<void> {
+    return promise.then(() => {
+      ready = true;
+    });
+  }
+
+  function complete() {
+    resolver();
+  }
+
+  return { wait, complete, isReady: () => ready };
+}
+
 export class RuleDataPluginService {
+  signal = createSignal();
+
   constructor(private readonly options: RuleDataPluginServiceConstructorOptions) {}
 
+  private assertWriteEnabled() {
+    if (!this.isWriteEnabled) {
+      throw new Error('Write operations are disabled');
+    }
+  }
+
+  private async getClusterClient() {
+    return await this.options.getClusterClient();
+  }
+
   async init() {
+    if (!this.isWriteEnabled) {
+      this.options.logger.info('Write is disabled, not installing assets');
+      this.signal.complete();
+      return;
+    }
+
     this.options.logger.info(`Installing assets in namespace ${this.getFullAssetName()}`);
 
-    await this.createOrUpdateLifecyclePolicy({
+    await this._createOrUpdateLifecyclePolicy({
       policy: this.getFullAssetName(DEFAULT_ILM_POLICY_ID),
       body: defaultLifecyclePolicy,
     });
 
-    await this.createOrUpdateComponentTemplate({
+    await this._createOrUpdateComponentTemplate({
       name: this.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
       body: technicalComponentTemplate,
     });
 
-    await this.createOrUpdateComponentTemplate({
+    await this._createOrUpdateComponentTemplate({
       name: this.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
       body: ecsComponentTemplate,
     });
 
     this.options.logger.info(`Installed all assets`);
+
+    this.signal.complete();
+  }
+
+  private async _createOrUpdateComponentTemplate(
+    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>
+  ) {
+    this.assertWriteEnabled();
+
+    const clusterClient = await this.getClusterClient();
+    this.options.logger.debug(`Installing component template ${template.name}`);
+    return clusterClient.cluster.putComponentTemplate(template);
+  }
+
+  private async _createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
+    this.assertWriteEnabled();
+
+    const clusterClient = await this.getClusterClient();
+    this.options.logger.debug(`Installing index template ${template.name}`);
+    return clusterClient.indices.putIndexTemplate(template);
+  }
+
+  private async _createOrUpdateLifecyclePolicy(policy: estypes.PutLifecycleRequest) {
+    this.assertWriteEnabled();
+    const clusterClient = await this.getClusterClient();
+
+    this.options.logger.debug(`Installing lifecycle policy ${policy.policy}`);
+    return clusterClient.ilm.putLifecycle(policy);
   }
 
   async createOrUpdateComponentTemplate(
     template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>
   ) {
-    this.options.logger.debug(`Installing component template ${template.name}`);
-    const clusterClient = await this.options.getClusterClient();
-    return clusterClient.cluster.putComponentTemplate(template);
+    await this.wait();
+    return this._createOrUpdateComponentTemplate(template);
   }
 
-  async createOrUpdateIndexTemplate(
-    template: estypes.PutIndexTemplateRequest & { body?: { composed_of?: string[] } }
-  ) {
-    this.options.logger.debug(`Installing index template ${template.name}`);
-    const clusterClient = await this.options.getClusterClient();
-    return clusterClient.indices.putIndexTemplate(template);
+  async createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
+    await this.wait();
+    return this._createOrUpdateIndexTemplate(template);
   }
 
   async createOrUpdateLifecyclePolicy(policy: estypes.PutLifecycleRequest) {
-    this.options.logger.debug(`Installing lifecycle policy ${policy.policy}`);
-    const clusterClient = await this.options.getClusterClient();
-    return clusterClient.ilm.putLifecycle(policy);
+    await this.wait();
+    return this._createOrUpdateLifecyclePolicy(policy);
+  }
+
+  isReady() {
+    return this.signal.isReady();
+  }
+
+  wait() {
+    return Promise.race([
+      this.signal.wait(),
+      new Promise((resolve, reject) => {
+        setTimeout(reject, BOOTSTRAP_TIMEOUT);
+      }),
+    ]);
   }
 
   isWriteEnabled(): boolean {

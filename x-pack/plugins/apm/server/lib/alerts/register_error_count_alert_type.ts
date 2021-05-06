@@ -7,6 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+} from '../../../../rule_registry/common/technical_rule_data_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
@@ -153,9 +157,8 @@ export function registerErrorCountAlertType({
                     ? { [SERVICE_ENVIRONMENT]: environment }
                     : {}),
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
-                  'kibana.observability.evaluation.value': errorCount,
-                  'kibana.observability.evaluation.threshold':
-                    alertParams.threshold,
+                  [ALERT_EVALUATION_VALUE]: errorCount,
+                  [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {
