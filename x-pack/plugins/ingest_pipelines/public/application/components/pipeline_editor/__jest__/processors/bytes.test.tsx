@@ -8,8 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-// Default parameter values automatically added to the Bytes processor when saved
-
 const BYTES_TYPE = 'bytes';
 
 describe('Processor: Bytes', () => {
