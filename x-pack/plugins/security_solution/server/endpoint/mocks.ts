@@ -132,10 +132,10 @@ export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestC
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mock<IScopedClusterClient>,
+  dataClient: jest.Mocked<IScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
-  const context = xpackMocks.createRequestHandlerContext();
+  const context = (xpackMocks.createRequestHandlerContext() as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>;
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;
