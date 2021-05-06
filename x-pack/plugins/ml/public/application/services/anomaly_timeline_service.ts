@@ -198,7 +198,8 @@ export class AnomalyTimelineService {
         searchBounds.max.valueOf(),
         intervalMs,
         perPage,
-        fromPage
+        fromPage,
+        swimLaneSeverity
       );
     } else {
       response = await this.mlResultsService.getInfluencerValueMaxScoreByTime(

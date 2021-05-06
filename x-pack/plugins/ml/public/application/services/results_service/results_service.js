@@ -30,7 +30,15 @@ export function resultsServiceProvider(mlApiServices) {
     // Pass an empty array or ['*'] to search over all job IDs.
     // Returned response contains a results property, with a key for job
     // which has results for the specified time range.
-    getScoresByBucket(jobIds, earliestMs, latestMs, intervalMs, perPage = 10, fromPage = 1) {
+    getScoresByBucket(
+      jobIds,
+      earliestMs,
+      latestMs,
+      intervalMs,
+      perPage = 10,
+      fromPage = 1,
+      swimLaneSeverity = 0
+    ) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -46,6 +54,13 @@ export function resultsServiceProvider(mlApiServices) {
                 gte: earliestMs,
                 lte: latestMs,
                 format: 'epoch_millis',
+              },
+            },
+          },
+          {
+            range: {
+              anomaly_score: {
+                gt: swimLaneSeverity,
               },
             },
           },

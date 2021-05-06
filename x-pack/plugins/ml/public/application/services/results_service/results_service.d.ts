@@ -22,7 +22,8 @@ export function resultsServiceProvider(
     latestMs: number,
     intervalMs: number,
     perPage?: number,
-    fromPage?: number
+    fromPage?: number,
+    swimLaneSeverity?: number
   ): Promise<any>;
   getTopInfluencers(
     selectedJobIds: string[],
