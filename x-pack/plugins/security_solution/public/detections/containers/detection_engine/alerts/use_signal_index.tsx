@@ -11,6 +11,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { isSecurityAppError } from '../../../../common/utils/api';
+import { useAlertsPrivileges } from './use_alerts_privileges';
 
 type Func = () => Promise<void>;
 
@@ -36,6 +37,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
     createDeSignalIndex: null,
   });
   const { addError } = useAppToasts();
+  const { hasIndexRead } = useAlertsPrivileges();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -102,12 +104,18 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       }
     };
 
-    fetchData();
+    if (hasIndexRead) {
+      fetchData();
+    } else {
+      // Skip data fetching as the current user doesn't have enough priviliges.
+      // Attempt to get the signal index will result in 500 error.
+      setLoading(false);
+    }
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [addError]);
+  }, [addError, hasIndexRead]);
 
   return { loading, ...signalIndex };
 };

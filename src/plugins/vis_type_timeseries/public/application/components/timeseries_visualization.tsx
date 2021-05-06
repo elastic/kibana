@@ -143,6 +143,7 @@ function TimeseriesVisualization({
                 `${isVisSeriesData(visData) ? model.id : 'series[0]'}.series[0].data`,
                 undefined
               )}
+              ignoreDaylightTime={model.ignore_daylight_time}
               panelInterval={getInterval(visData, model)}
               modelInterval={model.interval ?? AUTO_INTERVAL}
             />

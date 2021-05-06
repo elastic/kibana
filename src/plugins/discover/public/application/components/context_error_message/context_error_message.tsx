@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-// @ts-ignore
+// @ts-expect-error
 import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
 
 export interface ContextErrorMessageProps {
