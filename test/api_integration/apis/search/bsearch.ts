@@ -18,7 +18,7 @@ function parseBfetchResponse(resp: request.Response) {
     .trim()
     .split('\n')
     .map((item) => {
-      return inflateResponse<any>(item);
+      return JSON.parse(inflateResponse<any>(item));
     });
 }
 
