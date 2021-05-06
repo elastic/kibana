@@ -6,13 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import type {
+
+import { TypeOf } from '@kbn/config-schema';
+import {
   IScopedClusterClient,
   Logger,
   RequestHandler,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
+} from '../../../../../../../src/core/server';
 import {
   HostInfo,
   HostMetadata,
@@ -190,10 +191,18 @@ export async function getHostData(
     ?.getMetadataService()
     ?.queryStrategy(metadataRequestContext.savedObjectsClient, queryStrategyVersion);
   const query = getESQueryHostMetadataByID(id, queryStrategy!);
-  if (!metadataRequestContext.esClient) {
+
+  if (
+    !metadataRequestContext.esClient &&
+    !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
+  ) {
     return undefined;
   }
-  const response = await metadataRequestContext.esClient.asCurrentUser.search<HostMetadata>(query);
+
+  const es = (metadataRequestContext?.esClient ??
+    metadataRequestContext.requestHandlerContext?.core.elasticsearch
+      .client) as IScopedClusterClient;
+  const response = await es.asCurrentUser.search<HostMetadata>(query);
 
   const hostResult = queryStrategy!.queryResponseToHostResult(response.body);
 

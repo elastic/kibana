@@ -12,7 +12,10 @@ import {
 } from '../../mocks';
 import { createMockAgentService } from '../../../../../fleet/server/mocks';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
-import { KibanaResponseFactory, SavedObjectsClientContract } from 'kibana/server';
+import {
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '../../../../../../../src/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,

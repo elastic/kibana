@@ -6,14 +6,17 @@
  */
 
 import {
-  IClusterClient,
-  IScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/';
+  SavedObjectsErrorHelpers,
+} from '../../../../../../../src/core/server';
+import {
+  ClusterClientMock,
+  ScopedClusterClientMock,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -49,8 +52,8 @@ import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 describe('test endpoint route v1', () => {
   let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockClusterClient: ClusterClientMock;
+  let mockScopedClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockPackageService: jest.Mocked<PackageService>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -228,7 +231,7 @@ describe('test endpoint route v1', () => {
     expect(mockScopedClient.asCurrentUser.search).toBeCalled();
     // needs to have the KQL filter passed through
     expect(
-      mockScopedClient.asCurrentUser.search.mock.calls[0][0]?.body?.query.bool.must
+      (mockScopedClient.asCurrentUser.search as jest.Mock).mock.calls[0][0]?.body?.query.bool.must
     ).toContainEqual({
       bool: {
         must_not: {
