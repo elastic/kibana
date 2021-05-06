@@ -140,14 +140,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <SeverityControl
-                value={swimLaneSeverity ?? 0}
-                onChange={useCallback((update) => {
-                  explorerService.setSwimLaneSeverity(update);
-                }, [])}
-              />
-            </EuiFlexItem>
             {viewBySwimlaneOptions.length > 0 && (
               <>
                 <EuiFlexItem grow={false}>
@@ -210,6 +202,15 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiFlexItem>
               </>
             )}
+
+            <EuiFlexItem grow={false} style={{ minWidth: '300px' }}>
+              <SeverityControl
+                value={swimLaneSeverity ?? 0}
+                onChange={useCallback((update) => {
+                  explorerService.setSwimLaneSeverity(update);
+                }, [])}
+              />
+            </EuiFlexItem>
 
             {menuItems.length > 0 && (
               <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
