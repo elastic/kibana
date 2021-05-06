@@ -115,7 +115,14 @@ export function migrateRawDocsSafely(
               err,
             });
           } else {
-            transformErrors.push({ rawId: 'unknown', err }); // cases we haven't accounted for yet
+            transformErrors.push({
+              rawId: serializer.generateRawId(
+                savedObject.namespace,
+                savedObject.type,
+                savedObject.id
+              ),
+              err,
+            }); // cases we haven't accounted for yet
           }
         }
       } else {
