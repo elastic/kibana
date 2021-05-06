@@ -121,7 +121,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 35
+            "lineNumber": 36
           },
           "signature": [
             "string | undefined"
@@ -135,7 +135,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 36
+            "lineNumber": 37
           },
           "signature": [
             "string | undefined"
@@ -149,7 +149,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 37
+            "lineNumber": 38
           },
           "signature": [
             "string | undefined"
@@ -163,7 +163,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 38
+            "lineNumber": 39
           },
           "signature": [
             "string | undefined"
@@ -177,7 +177,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 39
+            "lineNumber": 40
           },
           "signature": [
             "string | undefined"
@@ -191,7 +191,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 40
+            "lineNumber": 41
           },
           "signature": [
             "string | undefined"
@@ -205,13 +205,13 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 41
+            "lineNumber": 42
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/cloud/public/plugin.ts",
-        "lineNumber": 34
+        "lineNumber": 35
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -239,7 +239,21 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 19
+            "lineNumber": 20
+          },
+          "signature": [
+            "string | undefined"
+          ]
+        },
+        {
+          "tags": [],
+          "id": "def-server.CloudSetup.deploymentId",
+          "type": "string",
+          "label": "deploymentId",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/cloud/server/plugin.ts",
+            "lineNumber": 21
           },
           "signature": [
             "string | undefined"
@@ -253,7 +267,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 20
+            "lineNumber": 22
           }
         },
         {
@@ -264,7 +278,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 21
+            "lineNumber": 23
           },
           "signature": [
             "{ url?: string | undefined; secretToken?: string | undefined; }"
@@ -273,7 +287,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/cloud/server/plugin.ts",
-        "lineNumber": 18
+        "lineNumber": 19
       },
       "lifecycle": "setup",
       "initialIsOpen": true

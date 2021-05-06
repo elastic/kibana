@@ -60,7 +60,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 65
+        "lineNumber": 68
       },
       "signature": [
         "CanvasApi"
@@ -76,7 +76,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 66
+        "lineNumber": 69
       },
       "signature": [
         "void"
@@ -99,6 +99,32 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "id": "def-common.UI_SETTINGS",
+        "type": "Object",
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.UI_SETTINGS.ENABLE_LABS_UI",
+            "type": "string",
+            "label": "ENABLE_LABS_UI",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/canvas/common/index.ts",
+              "lineNumber": 9
+            }
+          }
+        ],
+        "description": [],
+        "label": "UI_SETTINGS",
+        "source": {
+          "path": "x-pack/plugins/canvas/common/index.ts",
+          "lineNumber": 8
+        },
+        "initialIsOpen": false
+      }
+    ]
   }
 }

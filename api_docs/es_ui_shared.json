@@ -1282,7 +1282,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-              "lineNumber": 23
+              "lineNumber": 25
             }
           }
         ],
@@ -1297,13 +1297,17 @@
           },
           "<any>"
         ],
-        "description": [],
+        "description": [
+          "\nFor errors returned by the new elasticsearch js client.\n"
+        ],
         "label": "handleEsError",
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
-          "lineNumber": 23
+          "lineNumber": 25
         },
-        "tags": [],
+        "tags": [
+          "throws"
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },

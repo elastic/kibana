@@ -1026,7 +1026,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 210
+              "lineNumber": 215
             },
             "signature": [
               {
@@ -1048,7 +1048,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 212
+              "lineNumber": 217
             },
             "signature": [
               {
@@ -1070,7 +1070,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 214
+              "lineNumber": 219
             },
             "signature": [
               {
@@ -1092,7 +1092,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 216
+              "lineNumber": 221
             },
             "signature": [
               {
@@ -1114,7 +1114,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 218
+              "lineNumber": 223
             },
             "signature": [
               {
@@ -1138,7 +1138,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 225
+              "lineNumber": 230
             },
             "signature": [
               "{ getInjectedVar: (name: string, defaultValue?: any) => unknown; }"
@@ -1154,7 +1154,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 229
+              "lineNumber": 234
             },
             "signature": [
               {
@@ -1170,7 +1170,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 208
+          "lineNumber": 213
         },
         "initialIsOpen": false
       },
@@ -1195,7 +1195,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 255
+              "lineNumber": 260
             },
             "signature": [
               {
@@ -1217,7 +1217,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 257
+              "lineNumber": 262
             },
             "signature": [
               {
@@ -1239,7 +1239,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 259
+              "lineNumber": 264
             },
             "signature": [
               {
@@ -1261,7 +1261,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 261
+              "lineNumber": 266
             },
             "signature": [
               {
@@ -1283,7 +1283,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 263
+              "lineNumber": 268
             },
             "signature": [
               {
@@ -1305,7 +1305,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 265
+              "lineNumber": 270
             },
             "signature": [
               {
@@ -1327,7 +1327,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 267
+              "lineNumber": 272
             },
             "signature": [
               {
@@ -1349,7 +1349,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 269
+              "lineNumber": 274
             },
             "signature": [
               {
@@ -1371,7 +1371,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 271
+              "lineNumber": 276
             },
             "signature": [
               {
@@ -1393,7 +1393,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 273
+              "lineNumber": 278
             },
             "signature": [
               {
@@ -1415,7 +1415,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 275
+              "lineNumber": 280
             },
             "signature": [
               {
@@ -1439,7 +1439,7 @@
             ],
             "source": {
               "path": "src/core/public/index.ts",
-              "lineNumber": 282
+              "lineNumber": 287
             },
             "signature": [
               "{ getInjectedVar: (name: string, defaultValue?: any) => unknown; }"
@@ -1448,7 +1448,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 253
+          "lineNumber": 258
         },
         "initialIsOpen": false
       },
@@ -1567,7 +1567,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 349
+              "lineNumber": 408
             }
           },
           {
@@ -1578,7 +1578,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 350
+              "lineNumber": 409
             }
           },
           {
@@ -1589,16 +1589,52 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 351
+              "lineNumber": 410
             },
             "signature": [
-              "{ readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly luceneQuerySyntax: string; readonly queryDsl: string; readonly kueryQuerySyntax: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putWatch: string; simulatePipeline: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
+              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
             ]
           }
         ],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 348
+          "lineNumber": 407
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.DomainDeprecationDetails",
+        "type": "Interface",
+        "label": "DomainDeprecationDetails",
+        "signature": [
+          "DomainDeprecationDetails",
+          " extends ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.DeprecationsDetails",
+            "text": "DeprecationsDetails"
+          }
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.DomainDeprecationDetails.domainId",
+            "type": "string",
+            "label": "domainId",
+            "description": [],
+            "source": {
+              "path": "src/core/server/deprecations/types.ts",
+              "lineNumber": 15
+            }
+          }
+        ],
+        "source": {
+          "path": "src/core/server/deprecations/types.ts",
+          "lineNumber": 14
         },
         "initialIsOpen": false
       },
@@ -2034,22 +2070,6 @@
           },
           {
             "tags": [],
-            "id": "def-public.IUiSettingsClient.overrideLocalDefault",
-            "type": "Function",
-            "label": "overrideLocalDefault",
-            "description": [
-              "\nOverrides the default value for a setting in this specific browser tab. If the page\nis reloaded the default override is lost."
-            ],
-            "source": {
-              "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 60
-            },
-            "signature": [
-              "(key: string, newDefault: any) => void"
-            ]
-          },
-          {
-            "tags": [],
             "id": "def-public.IUiSettingsClient.remove",
             "type": "Function",
             "label": "remove",
@@ -2058,7 +2078,7 @@
             ],
             "source": {
               "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 67
+              "lineNumber": 61
             },
             "signature": [
               "(key: string) => Promise<boolean>"
@@ -2074,7 +2094,7 @@
             ],
             "source": {
               "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 73
+              "lineNumber": 67
             },
             "signature": [
               "(key: string) => boolean"
@@ -2090,7 +2110,7 @@
             ],
             "source": {
               "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 78
+              "lineNumber": 72
             },
             "signature": [
               "(key: string) => boolean"
@@ -2106,7 +2126,7 @@
             ],
             "source": {
               "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 85
+              "lineNumber": 79
             },
             "signature": [
               "(key: string) => boolean"
@@ -2122,7 +2142,7 @@
             ],
             "source": {
               "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 90
+              "lineNumber": 84
             },
             "signature": [
               "(key: string) => boolean"
@@ -2138,25 +2158,7 @@
             ],
             "source": {
               "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 96
-            },
-            "signature": [
-              "<T = any>() => ",
-              "Observable",
-              "<{ key: string; newValue: T; oldValue: T; }>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.IUiSettingsClient.getSaved$",
-            "type": "Function",
-            "label": "getSaved$",
-            "description": [
-              "\nReturns an Observable that notifies subscribers of each update to the uiSettings,\nincluding the key, newValue, and oldValue of the setting that changed."
-            ],
-            "source": {
-              "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 106
+              "lineNumber": 90
             },
             "signature": [
               "<T = any>() => ",
@@ -2174,7 +2176,7 @@
             ],
             "source": {
               "path": "src/core/public/ui_settings/types.ts",
-              "lineNumber": 116
+              "lineNumber": 100
             },
             "signature": [
               "() => ",
@@ -3955,7 +3957,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 142
+              "lineNumber": 164
             },
             "signature": [
               "string | undefined"
@@ -3964,7 +3966,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 140
+          "lineNumber": 162
         },
         "initialIsOpen": false
       },
@@ -4207,6 +4209,26 @@
             ]
           },
           {
+            "tags": [
+              "alpha"
+            ],
+            "id": "def-public.SavedObjectsFindOptions.aggs",
+            "type": "Object",
+            "label": "aggs",
+            "description": [
+              "\nA record of aggregations to perform.\nThe API currently only supports a limited set of metrics and bucket aggregation types.\nAdditional aggregation types can be contributed to Core.\n"
+            ],
+            "source": {
+              "path": "src/core/server/saved_objects/types.ts",
+              "lineNumber": 140
+            },
+            "signature": [
+              "Record<string, ",
+              "AggregationContainer",
+              "> | undefined"
+            ]
+          },
+          {
             "tags": [],
             "id": "def-public.SavedObjectsFindOptions.namespaces",
             "type": "Array",
@@ -4214,7 +4236,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 119
+              "lineNumber": 141
             },
             "signature": [
               "string[] | undefined"
@@ -4230,7 +4252,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 127
+              "lineNumber": 149
             },
             "signature": [
               "Map<string, string[] | undefined> | undefined"
@@ -4246,7 +4268,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 129
+              "lineNumber": 151
             },
             "signature": [
               "string | undefined"
@@ -4262,7 +4284,7 @@
             ],
             "source": {
               "path": "src/core/server/saved_objects/types.ts",
-              "lineNumber": 133
+              "lineNumber": 155
             },
             "signature": [
               {
@@ -5621,6 +5643,25 @@
     "enums": [],
     "misc": [
       {
+        "tags": [
+          "public"
+        ],
+        "id": "def-public.APP_WRAPPER_CLASS",
+        "type": "string",
+        "label": "APP_WRAPPER_CLASS",
+        "description": [
+          "\nThe class name for top level *and* nested application wrappers to ensure proper layout"
+        ],
+        "source": {
+          "path": "src/core/utils/app_wrapper_class.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "\"kbnAppWrapper\""
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.FatalErrorsStart",
         "type": "Type",
         "label": "FatalErrorsStart",
@@ -5737,7 +5778,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 84
+          "lineNumber": 117
         },
         "signature": [
           "symbol"
@@ -5866,7 +5907,7 @@
         ],
         "source": {
           "path": "src/core/server/saved_objects/types.ts",
-          "lineNumber": 227
+          "lineNumber": 249
         },
         "signature": [
           "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
@@ -5885,7 +5926,7 @@
         ],
         "source": {
           "path": "src/core/public/index.ts",
-          "lineNumber": 239
+          "lineNumber": 244
         },
         "signature": [
           "() => Promise<[",
@@ -6183,7 +6224,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 47
+              "lineNumber": 53
             },
             "signature": [
               {
@@ -6203,7 +6244,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 49
+              "lineNumber": 55
             },
             "signature": [
               "string[]"
@@ -6217,7 +6258,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 50
+              "lineNumber": 56
             }
           },
           {
@@ -6228,7 +6269,18 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 51
+              "lineNumber": 57
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.CspConfig.disableEmbedding",
+            "type": "boolean",
+            "label": "disableEmbedding",
+            "description": [],
+            "source": {
+              "path": "src/core/server/csp/csp_config.ts",
+              "lineNumber": 58
             }
           },
           {
@@ -6239,13 +6291,13 @@
             "description": [],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 52
+              "lineNumber": 59
             }
           }
         ],
         "source": {
           "path": "src/core/server/csp/csp_config.ts",
-          "lineNumber": 46
+          "lineNumber": 52
         },
         "initialIsOpen": false
       },
@@ -7474,7 +7526,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 274
+                  "lineNumber": 307
                 }
               },
               {
@@ -7488,7 +7540,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 274
+                  "lineNumber": 307
                 }
               }
             ],
@@ -7496,7 +7548,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 274
+              "lineNumber": 307
             }
           },
           {
@@ -7533,7 +7585,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 276
+                  "lineNumber": 309
                 }
               },
               {
@@ -7547,7 +7599,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 276
+                  "lineNumber": 309
                 }
               }
             ],
@@ -7555,7 +7607,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 276
+              "lineNumber": 309
             }
           },
           {
@@ -7571,13 +7623,13 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 278
+              "lineNumber": 311
             }
           }
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 268
+          "lineNumber": 301
         },
         "initialIsOpen": false
       },
@@ -8203,7 +8255,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 466
+              "lineNumber": 474
             },
             "signature": [
               {
@@ -8225,7 +8277,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 468
+              "lineNumber": 476
             },
             "signature": [
               {
@@ -8247,7 +8299,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 470
+              "lineNumber": 478
             },
             "signature": [
               {
@@ -8269,7 +8321,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 472
+              "lineNumber": 480
             },
             "signature": [
               {
@@ -8300,7 +8352,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 477
+              "lineNumber": 485
             },
             "signature": [
               {
@@ -8322,7 +8374,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 479
+              "lineNumber": 487
             },
             "signature": [
               {
@@ -8344,7 +8396,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 481
+              "lineNumber": 489
             },
             "signature": [
               {
@@ -8366,7 +8418,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 483
+              "lineNumber": 491
             },
             "signature": [
               {
@@ -8388,7 +8440,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 485
+              "lineNumber": 493
             },
             "signature": [
               {
@@ -8410,7 +8462,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 487
+              "lineNumber": 495
             },
             "signature": [
               {
@@ -8432,7 +8484,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 489
+              "lineNumber": 497
             },
             "signature": [
               {
@@ -8454,7 +8506,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 491
+              "lineNumber": 499
             },
             "signature": [
               {
@@ -8470,7 +8522,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 464
+          "lineNumber": 472
         },
         "initialIsOpen": false
       },
@@ -8495,7 +8547,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 514
+              "lineNumber": 522
             },
             "signature": [
               {
@@ -8517,7 +8569,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 516
+              "lineNumber": 524
             },
             "signature": [
               {
@@ -8539,7 +8591,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 518
+              "lineNumber": 526
             },
             "signature": [
               {
@@ -8561,7 +8613,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 520
+              "lineNumber": 528
             },
             "signature": [
               {
@@ -8583,7 +8635,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 522
+              "lineNumber": 530
             },
             "signature": [
               {
@@ -8605,7 +8657,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 524
+              "lineNumber": 532
             },
             "signature": [
               {
@@ -8620,7 +8672,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 512
+          "lineNumber": 520
         },
         "initialIsOpen": false
       },
@@ -9251,7 +9303,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 189
+              "lineNumber": 222
             }
           },
           {
@@ -9264,7 +9316,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 194
+              "lineNumber": 227
             },
             "signature": [
               "string | string[]"
@@ -9280,7 +9332,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 200
+              "lineNumber": 233
             },
             "signature": [
               "readonly string[]"
@@ -9296,7 +9348,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 207
+              "lineNumber": 240
             },
             "signature": [
               "readonly string[]"
@@ -9312,7 +9364,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 219
+              "lineNumber": 252
             },
             "signature": [
               "readonly string[]"
@@ -9321,7 +9373,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 185
+          "lineNumber": 218
         },
         "initialIsOpen": false
       },
@@ -10475,6 +10527,19 @@
           },
           {
             "tags": [],
+            "id": "def-server.ICspConfig.disableEmbedding",
+            "type": "boolean",
+            "label": "disableEmbedding",
+            "description": [
+              "\nWhether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled *and* no custom rules have been\ndefined, a restrictive 'frame-ancestors' rule will be added to the default CSP rules."
+            ],
+            "source": {
+              "path": "src/core/server/csp/csp_config.ts",
+              "lineNumber": 39
+            }
+          },
+          {
+            "tags": [],
             "id": "def-server.ICspConfig.header",
             "type": "string",
             "label": "header",
@@ -10483,7 +10548,7 @@
             ],
             "source": {
               "path": "src/core/server/csp/csp_config.ts",
-              "lineNumber": 39
+              "lineNumber": 45
             }
           }
         ],
@@ -12795,9 +12860,11 @@
             "type": "Function",
             "label": "trace",
             "signature": [
-              "(message: string, meta?: ",
+              "<Meta extends ",
               "LogMeta",
-              " | undefined) => void"
+              " = ",
+              "LogMeta",
+              ">(message: string, meta?: Meta | undefined) => void"
             ],
             "description": [
               "\nLog messages at the most detailed log level\n"
@@ -12816,24 +12883,23 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 23
+                  "lineNumber": 16
                 }
               },
               {
                 "id": "def-server.Logger.trace.$2",
-                "type": "Object",
+                "type": "Uncategorized",
                 "label": "meta",
                 "isRequired": false,
                 "signature": [
-                  "LogMeta",
-                  " | undefined"
+                  "Meta | undefined"
                 ],
                 "description": [
                   "-"
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 23
+                  "lineNumber": 16
                 }
               }
             ],
@@ -12841,7 +12907,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/logging/target/logger.d.ts",
-              "lineNumber": 23
+              "lineNumber": 16
             }
           },
           {
@@ -12849,9 +12915,11 @@
             "type": "Function",
             "label": "debug",
             "signature": [
-              "(message: string, meta?: ",
+              "<Meta extends ",
               "LogMeta",
-              " | undefined) => void"
+              " = ",
+              "LogMeta",
+              ">(message: string, meta?: Meta | undefined) => void"
             ],
             "description": [
               "\nLog messages useful for debugging and interactive investigation"
@@ -12870,24 +12938,23 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 29
+                  "lineNumber": 22
                 }
               },
               {
                 "id": "def-server.Logger.debug.$2",
-                "type": "Object",
+                "type": "Uncategorized",
                 "label": "meta",
                 "isRequired": false,
                 "signature": [
-                  "LogMeta",
-                  " | undefined"
+                  "Meta | undefined"
                 ],
                 "description": [
                   "-"
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 29
+                  "lineNumber": 22
                 }
               }
             ],
@@ -12895,7 +12962,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/logging/target/logger.d.ts",
-              "lineNumber": 29
+              "lineNumber": 22
             }
           },
           {
@@ -12903,9 +12970,11 @@
             "type": "Function",
             "label": "info",
             "signature": [
-              "(message: string, meta?: ",
+              "<Meta extends ",
               "LogMeta",
-              " | undefined) => void"
+              " = ",
+              "LogMeta",
+              ">(message: string, meta?: Meta | undefined) => void"
             ],
             "description": [
               "\nLogs messages related to general application flow"
@@ -12924,24 +12993,23 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 35
+                  "lineNumber": 28
                 }
               },
               {
                 "id": "def-server.Logger.info.$2",
-                "type": "Object",
+                "type": "Uncategorized",
                 "label": "meta",
                 "isRequired": false,
                 "signature": [
-                  "LogMeta",
-                  " | undefined"
+                  "Meta | undefined"
                 ],
                 "description": [
                   "-"
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 35
+                  "lineNumber": 28
                 }
               }
             ],
@@ -12949,7 +13017,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/logging/target/logger.d.ts",
-              "lineNumber": 35
+              "lineNumber": 28
             }
           },
           {
@@ -12957,9 +13025,11 @@
             "type": "Function",
             "label": "warn",
             "signature": [
-              "(errorOrMessage: string | Error, meta?: ",
+              "<Meta extends ",
               "LogMeta",
-              " | undefined) => void"
+              " = ",
+              "LogMeta",
+              ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
             "description": [
               "\nLogs abnormal or unexpected errors or messages"
@@ -12978,24 +13048,23 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 41
+                  "lineNumber": 34
                 }
               },
               {
                 "id": "def-server.Logger.warn.$2",
-                "type": "Object",
+                "type": "Uncategorized",
                 "label": "meta",
                 "isRequired": false,
                 "signature": [
-                  "LogMeta",
-                  " | undefined"
+                  "Meta | undefined"
                 ],
                 "description": [
                   "-"
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 41
+                  "lineNumber": 34
                 }
               }
             ],
@@ -13003,7 +13072,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/logging/target/logger.d.ts",
-              "lineNumber": 41
+              "lineNumber": 34
             }
           },
           {
@@ -13011,9 +13080,11 @@
             "type": "Function",
             "label": "error",
             "signature": [
-              "(errorOrMessage: string | Error, meta?: ",
+              "<Meta extends ",
               "LogMeta",
-              " | undefined) => void"
+              " = ",
+              "LogMeta",
+              ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
             "description": [
               "\nLogs abnormal or unexpected errors or messages that caused a failure in the application flow\n"
@@ -13032,24 +13103,23 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 48
+                  "lineNumber": 41
                 }
               },
               {
                 "id": "def-server.Logger.error.$2",
-                "type": "Object",
+                "type": "Uncategorized",
                 "label": "meta",
                 "isRequired": false,
                 "signature": [
-                  "LogMeta",
-                  " | undefined"
+                  "Meta | undefined"
                 ],
                 "description": [
                   "-"
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 48
+                  "lineNumber": 41
                 }
               }
             ],
@@ -13057,7 +13127,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/logging/target/logger.d.ts",
-              "lineNumber": 48
+              "lineNumber": 41
             }
           },
           {
@@ -13065,9 +13135,11 @@
             "type": "Function",
             "label": "fatal",
             "signature": [
-              "(errorOrMessage: string | Error, meta?: ",
+              "<Meta extends ",
               "LogMeta",
-              " | undefined) => void"
+              " = ",
+              "LogMeta",
+              ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
             ],
             "description": [
               "\nLogs abnormal or unexpected errors or messages that caused an unrecoverable failure\n"
@@ -13086,24 +13158,23 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 55
+                  "lineNumber": 48
                 }
               },
               {
                 "id": "def-server.Logger.fatal.$2",
-                "type": "Object",
+                "type": "Uncategorized",
                 "label": "meta",
                 "isRequired": false,
                 "signature": [
-                  "LogMeta",
-                  " | undefined"
+                  "Meta | undefined"
                 ],
                 "description": [
                   "-"
                 ],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 55
+                  "lineNumber": 48
                 }
               }
             ],
@@ -13111,7 +13182,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/logging/target/logger.d.ts",
-              "lineNumber": 55
+              "lineNumber": 48
             }
           },
           {
@@ -13137,7 +13208,7 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/logging/target/logger.d.ts",
-                  "lineNumber": 67
+                  "lineNumber": 60
                 }
               }
             ],
@@ -13145,13 +13216,13 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/logging/target/logger.d.ts",
-              "lineNumber": 67
+              "lineNumber": 60
             }
           }
         ],
         "source": {
           "path": "node_modules/@kbn/logging/target/logger.d.ts",
-          "lineNumber": 16
+          "lineNumber": 9
         },
         "initialIsOpen": false
       },
@@ -13341,41 +13412,6 @@
         "source": {
           "path": "src/core/server/logging/logging_service.ts",
           "lineNumber": 20
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LogMeta",
-        "type": "Interface",
-        "label": "LogMeta",
-        "signature": [
-          "LogMeta"
-        ],
-        "description": [
-          "\nContextual metadata\n"
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "id": "def-server.LogMeta.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "node_modules/@kbn/logging/target/logger.d.ts",
-              "lineNumber": 8
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "node_modules/@kbn/logging/target/logger.d.ts",
-          "lineNumber": 7
         },
         "initialIsOpen": false
       },
@@ -14059,7 +14095,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 255
+                  "lineNumber": 288
                 }
               },
               {
@@ -14073,7 +14109,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 255
+                  "lineNumber": 288
                 }
               }
             ],
@@ -14081,7 +14117,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 255
+              "lineNumber": 288
             }
           },
           {
@@ -14118,7 +14154,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 257
+                  "lineNumber": 290
                 }
               },
               {
@@ -14132,7 +14168,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 257
+                  "lineNumber": 290
                 }
               }
             ],
@@ -14140,7 +14176,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 257
+              "lineNumber": 290
             }
           },
           {
@@ -14156,13 +14192,13 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 259
+              "lineNumber": 292
             }
           }
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 249
+          "lineNumber": 282
         },
         "initialIsOpen": false
       },
@@ -14197,7 +14233,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 62
+              "lineNumber": 64
             },
             "signature": [
               "ConfigDeprecationProvider",
@@ -14214,7 +14250,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 66
+              "lineNumber": 68
             },
             "signature": [
               "{ [P in keyof T]?: boolean | undefined; } | undefined"
@@ -14230,7 +14266,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 72
+              "lineNumber": 74
             },
             "signature": [
               {
@@ -14242,11 +14278,34 @@
               },
               "<T>"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.PluginConfigDescriptor.exposeToUsage",
+            "type": "Object",
+            "label": "exposeToUsage",
+            "description": [
+              "\nExpose non-default configs to usage collection to be sent via telemetry.\nset a config to `true` to report the actual changed config value.\nset a config to `false` to report the changed config value as [redacted].\n\nAll changed configs except booleans and numbers will be reported\nas [redacted] unless otherwise specified.\n\n{@link MakeUsageFromSchema}"
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 85
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.MakeUsageFromSchema",
+                "text": "MakeUsageFromSchema"
+              },
+              "<T> | undefined"
+            ]
           }
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 58
+          "lineNumber": 60
         },
         "initialIsOpen": false
       },
@@ -14279,7 +14338,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 305
+              "lineNumber": 338
             },
             "signature": [
               "symbol"
@@ -14293,7 +14352,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 306
+              "lineNumber": 339
             },
             "signature": [
               "{ mode: ",
@@ -14313,7 +14372,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 329
+              "lineNumber": 362
             },
             "signature": [
               "LoggerFactory"
@@ -14329,7 +14388,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 333
+              "lineNumber": 366
             },
             "signature": [
               "{ legacy: { globalConfig$: ",
@@ -14347,7 +14406,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 304
+          "lineNumber": 337
         },
         "initialIsOpen": false
       },
@@ -14372,7 +14431,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 107
+              "lineNumber": 140
             }
           },
           {
@@ -14385,7 +14444,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 112
+              "lineNumber": 145
             }
           },
           {
@@ -14398,7 +14457,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 117
+              "lineNumber": 150
             }
           },
           {
@@ -14411,7 +14470,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 127
+              "lineNumber": 160
             },
             "signature": [
               "string | string[]"
@@ -14427,7 +14486,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 133
+              "lineNumber": 166
             },
             "signature": [
               "readonly string[]"
@@ -14443,7 +14502,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 145
+              "lineNumber": 178
             },
             "signature": [
               "readonly string[]"
@@ -14459,7 +14518,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 152
+              "lineNumber": 185
             },
             "signature": [
               "readonly string[]"
@@ -14475,7 +14534,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 158
+              "lineNumber": 191
             }
           },
           {
@@ -14488,7 +14547,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 163
+              "lineNumber": 196
             }
           },
           {
@@ -14503,7 +14562,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 171
+              "lineNumber": 204
             },
             "signature": [
               "string[] | undefined"
@@ -14519,7 +14578,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 177
+              "lineNumber": 210
             },
             "signature": [
               "readonly string[] | undefined"
@@ -14528,7 +14587,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 102
+          "lineNumber": 135
         },
         "initialIsOpen": false
       },
@@ -14595,7 +14654,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 432
+              "lineNumber": 440
             },
             "signature": [
               "{ savedObjects: { client: Pick<",
@@ -14643,7 +14702,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 431
+          "lineNumber": 439
         },
         "initialIsOpen": false
       },
@@ -16079,6 +16138,25 @@
         "initialIsOpen": false
       },
       {
+        "tags": [
+          "public"
+        ],
+        "id": "def-server.APP_WRAPPER_CLASS",
+        "type": "string",
+        "label": "APP_WRAPPER_CLASS",
+        "description": [
+          "\nThe class name for top level *and* nested application wrappers to ensure proper layout"
+        ],
+        "source": {
+          "path": "src/core/utils/app_wrapper_class.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "\"kbnAppWrapper\""
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.AppenderConfigType",
         "type": "Type",
         "label": "AppenderConfigType",
@@ -16215,6 +16293,93 @@
         },
         "signature": [
           "string | string[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.Ecs",
+        "type": "Type",
+        "label": "Ecs",
+        "tags": [
+          "public"
+        ],
+        "description": [
+          "\nRepresents the full ECS schema.\n"
+        ],
+        "source": {
+          "path": "node_modules/@kbn/logging/target/ecs/index.d.ts",
+          "lineNumber": 50
+        },
+        "signature": [
+          "EcsBase & EcsTracing & { ecs: EcsField; agent?: EcsAgent | undefined; as?: EcsAutonomousSystem | undefined; client?: EcsClient | undefined; cloud?: EcsCloud | undefined; container?: EcsContainer | undefined; destination?: EcsDestination | undefined; dns?: EcsDns | undefined; error?: EcsError | undefined; event?: EcsEvent | undefined; file?: EcsFile | undefined; group?: EcsGroup | undefined; host?: EcsHost | undefined; http?: EcsHttp | undefined; log?: EcsLog | undefined; network?: EcsNetwork | undefined; observer?: EcsObserver | undefined; organization?: EcsOrganization | undefined; package?: EcsPackage | undefined; process?: EcsProcess | undefined; registry?: EcsRegistry | undefined; related?: EcsRelated | undefined; rule?: EcsRule | undefined; server?: EcsServer | undefined; service?: EcsService | undefined; source?: EcsSource | undefined; threat?: EcsThreat | undefined; tls?: EcsTls | undefined; url?: EcsUrl | undefined; user?: EcsUser | undefined; user_agent?: EcsUserAgent | undefined; vulnerability?: EcsVulnerability | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.EcsEventCategory",
+        "type": "Type",
+        "label": "EcsEventCategory",
+        "tags": [
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",
+          "lineNumber": 36
+        },
+        "signature": [
+          "\"host\" | \"authentication\" | \"database\" | \"package\" | \"session\" | \"network\" | \"file\" | \"process\" | \"registry\" | \"web\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.EcsEventKind",
+        "type": "Type",
+        "label": "EcsEventKind",
+        "tags": [
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",
+          "lineNumber": 40
+        },
+        "signature": [
+          "\"alert\" | \"event\" | \"state\" | \"metric\" | \"signal\" | \"pipeline_error\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.EcsEventOutcome",
+        "type": "Type",
+        "label": "EcsEventOutcome",
+        "tags": [
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",
+          "lineNumber": 44
+        },
+        "signature": [
+          "\"success\" | \"failure\" | \"unknown\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.EcsEventType",
+        "type": "Type",
+        "label": "EcsEventType",
+        "tags": [
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",
+          "lineNumber": 48
+        },
+        "signature": [
+          "\"start\" | \"connection\" | \"end\" | \"user\" | \"info\" | \"error\" | \"group\" | \"protocol\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "initialIsOpen": false
       },
@@ -16572,6 +16737,44 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-server.LogMeta",
+        "type": "Type",
+        "label": "LogMeta",
+        "tags": [
+          "public"
+        ],
+        "description": [
+          "\nRepresents the ECS schema with the following reserved keys excluded:\n- `ecs`\n- `@timestamp`\n- `message`\n- `log.level`\n- `log.logger`\n"
+        ],
+        "source": {
+          "path": "node_modules/@kbn/logging/target/log_meta.d.ts",
+          "lineNumber": 44
+        },
+        "signature": [
+          "Pick<EcsBase, \"labels\" | \"tags\"> & EcsTracing & { agent?: EcsAgent | undefined; as?: EcsAutonomousSystem | undefined; client?: EcsClient | undefined; cloud?: EcsCloud | undefined; container?: EcsContainer | undefined; destination?: EcsDestination | undefined; dns?: EcsDns | undefined; error?: EcsError | undefined; event?: EcsEvent | undefined; file?: EcsFile | undefined; group?: EcsGroup | undefined; host?: EcsHost | undefined; http?: EcsHttp | undefined; log?: Pick<EcsLog, \"origin\" | \"original\" | \"file\" | \"syslog\"> | undefined; network?: EcsNetwork | undefined; observer?: EcsObserver | undefined; organization?: EcsOrganization | undefined; package?: EcsPackage | undefined; process?: EcsProcess | undefined; registry?: EcsRegistry | undefined; related?: EcsRelated | undefined; rule?: EcsRule | undefined; server?: EcsServer | undefined; service?: EcsService | undefined; source?: EcsSource | undefined; threat?: EcsThreat | undefined; tls?: EcsTls | undefined; url?: EcsUrl | undefined; user?: EcsUser | undefined; user_agent?: EcsUserAgent | undefined; vulnerability?: EcsVulnerability | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.MakeUsageFromSchema",
+        "type": "Type",
+        "label": "MakeUsageFromSchema",
+        "tags": [
+          "public"
+        ],
+        "description": [
+          "\nList of configuration values that will be exposed to usage collection.\nIf parent node or actual config path is set to `true` then the actual value\nof these configs will be reoprted.\nIf parent node or actual config path is set to `false` then the config\nwill be reported as [redacted].\n"
+        ],
+        "source": {
+          "path": "src/core/server/plugins/types.ts",
+          "lineNumber": 97
+        },
+        "signature": [
+          "{ [Key in keyof T]?: (T[Key] extends Maybe<object[]> ? false : T[Key] extends any[] | undefined ? boolean : T[Key] extends object | undefined ? boolean | MakeUsageFromSchema<T[Key]> : boolean) | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.MetricsServiceStart",
         "type": "Type",
         "label": "MetricsServiceStart",
@@ -16638,7 +16841,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 26
+          "lineNumber": 28
         },
         "signature": [
           "Type<T>"
@@ -16657,7 +16860,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 411
+          "lineNumber": 444
         },
         "signature": [
           "(core: ",
@@ -16700,7 +16903,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 81
+          "lineNumber": 114
         },
         "signature": [
           "string"
@@ -16717,7 +16920,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 84
+          "lineNumber": 117
         },
         "signature": [
           "symbol"
@@ -16856,7 +17059,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 292
+          "lineNumber": 325
         },
         "signature": [
           "{ readonly kibana: Readonly<{ readonly index: string; readonly autocompleteTerminateAfter: Readonly<{ clone: () => ",
@@ -16884,7 +17087,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 502
+          "lineNumber": 510
         },
         "signature": [
           "() => Promise<[",
