@@ -6,35 +6,10 @@
  */
 import { Type } from '@kbn/config-schema';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
-import { UMServerLibs } from '../lib';
-import { ActionGroup } from '../../../../alerting/server';
+import { UMServerLibs, UptimeESClient } from '../lib';
 import { ActionVariable } from '../../../../alerting/common';
 import { DynamicSettings } from '../../../common/runtime_types';
-
-// TODO: if we export the `RuleType` from the `rule_registry` plugin, we can delete this
-// and use the type they maintain instead. This will reduce risk of type issues in the future.
-interface UptimeAlertInstance {
-  validate: {
-    params: Type<any>;
-  };
-  defaultActionGroupId: string;
-  id: string;
-  name: string;
-  actionGroups: Array<ActionGroup<string>>;
-  actionVariables: {
-    context: ActionVariable[];
-  };
-  minimumLicenseRequired: 'basic' | 'gold' | 'trial';
-  executor: (params: {
-    params: any;
-    state: any;
-    uptimeEsClient: any;
-    dynamicSettings: DynamicSettings;
-    alertWithLifecycle: any;
-    savedObjectsClient: any;
-  }) => any;
-  producer: string;
-}
+import { RuleType } from '../../../../rule_registry/server';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,
@@ -42,7 +17,15 @@ interface UptimeAlertInstance {
  *
  * When we register all the alerts we can inject this field.
  */
-type DefaultUptimeAlertInstance = Omit<UptimeAlertInstance, 'producer'>;
+export type DefaultUptimeAlertInstance = Omit<
+  RuleType<
+    any,
+    Type<any>,
+    ActionVariable,
+    { alertWithLifecycle: any; dynamicSettings: DynamicSettings; uptimeEsClient: UptimeESClient }
+  >,
+  'producer'
+>;
 
 export type UptimeAlertTypeFactory = (
   server: UptimeCoreSetup,

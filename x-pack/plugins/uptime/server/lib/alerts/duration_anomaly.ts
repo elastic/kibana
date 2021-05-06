@@ -79,11 +79,15 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
     context: [],
     state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
   },
-  // TODO: really this should be platinum?
-  minimumLicenseRequired: 'trial',
-  async executor({ alertWithLifecycle, params, savedObjectsClient, state, uptimeEsClient }) {
+  minimumLicenseRequired: 'platinum',
+  async executor({
+    params,
+    services: { alertWithLifecycle, savedObjectsClient, uptimeEsClient },
+    state,
+  }) {
     const { anomalies } =
-      (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt)) ?? {};
+      (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt as string)) ??
+      {};
 
     const foundAnomalies = anomalies?.length > 0;
 

@@ -27,15 +27,13 @@ export const initUptimeServer = (
 
   uptimeAlertTypeFactories.forEach((alertTypeFactory) => {
     const alertType = alertTypeFactory(server, libs, plugins);
+
     return ruleRegistry.registerType(
       createUptimeLifecycleRuleType({
         ...alertType,
         producer: 'uptime',
-        executor: async ({
-          params,
-          state,
-          services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient },
-        }) => {
+        executor: async ({ services, ...rest }) => {
+          const { scopedClusterClient, savedObjectsClient } = services;
           const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
             savedObjectsClient
           );
@@ -46,12 +44,12 @@ export const initUptimeServer = (
           });
 
           return alertType.executor({
-            params,
-            state,
-            uptimeEsClient,
-            dynamicSettings,
-            alertWithLifecycle,
-            savedObjectsClient,
+            ...rest,
+            services: {
+              ...services,
+              uptimeEsClient,
+              dynamicSettings,
+            },
           });
         },
       })
