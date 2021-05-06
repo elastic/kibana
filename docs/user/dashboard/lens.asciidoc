@@ -246,7 +246,7 @@ You will still see the `X.keyword` field, when available.
 
 [float]
 [[how-to-handle-gaps-in-time-series-visualizations]]
-===== How to handle gaps in time series visualizations?
+===== How do I handle gaps in time series visualizations?
 
 *Lens* provides a set of features to handle missing values for *Area* and *Line* visualization.
 This is useful for sparse data in time series.
