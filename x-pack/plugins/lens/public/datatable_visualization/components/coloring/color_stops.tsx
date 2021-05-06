@@ -162,7 +162,7 @@ export const CustomStops = ({ controlStops, onChange, rangeType }: CustomPropsFo
                             setColorStops(newColorStops);
                           }}
                           data-test-subj="lnsDatatable_dynamicColoring_removeStop"
-                          disabled={!shouldEnableDelete}
+                          isDisabled={!shouldEnableDelete}
                         />
                       </TooltipWrapper>
                     </EuiFlexItem>
