@@ -35,8 +35,6 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
   FIXED_PROGRESSION,
-  MAX_COLOR_STEPS,
-  MIN_COLOR_STEPS,
   RequiredPaletteParamTypes,
 } from './coloring/constants';
 import { CustomStops } from './coloring/color_stops';
@@ -142,9 +140,6 @@ export function CustomizablePalette({
   // const { colorStops } = applyPaletteParams(palettes, activePalette);
   const rangeType = activePalette.params?.rangeType ?? defaultParams.rangeType;
   const progressionType = activePalette.params?.progression ?? defaultParams.progression;
-  const isCustomPalette = activePalette?.params?.name === CUSTOM_PALETTE;
-
-  const showStepsInput = !isCustomPalette;
 
   const stopsTooltipContent = [
     i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage', {
@@ -154,6 +149,11 @@ export function CustomizablePalette({
       defaultMessage: 'Stop values are inclusive.',
     }),
   ];
+  const controlStops =
+    (activePalette?.params?.reverse
+      ? reversePalette(activePalette?.params?.controlStops)
+      : activePalette?.params?.controlStops) || [];
+  const controlPointsToShow = getControlStops(palettes, controlStops, activePalette, dataBounds);
 
   return (
     <>
