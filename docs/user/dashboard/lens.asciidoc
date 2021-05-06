@@ -248,7 +248,6 @@ You can also change the index pattern for a single *Layer*.
 ===== How do I handle gaps in time series visualizations?
 
 *Lens* provides a set of features to handle missing values for *Area* and *Line* charts, which is useful for sparse data in time series data.
-This is useful for sparse data in time series.
 
 To select a different way to represent missing values, open the *Visual options* menu, then select how to handle missing values. The default is to hide the missing values.
 +
