@@ -107,6 +107,12 @@ New connectors can be created by clicking the *Create connector* button, which w
 image::images/connector-select-type.png[Connector select type]
 
 [float]
+[[importing-and-exporting-connectors]]
+=== Importing and exporting connectors
+
+To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
+
+[float]
 [[create-connectors]]
 === Preconfigured connectors
 
