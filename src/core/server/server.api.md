@@ -1273,7 +1273,7 @@ export interface IScopedClusterClient {
 // @public
 export interface IUiSettingsClient {
     get: <T = any>(key: string) => Promise<T>;
-    getAll: <T = any>() => Promise<RecursiveReadonly<Record<string, T>>>;
+    getAll: <T = any>() => Promise<Record<string, T>>;
     getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
     getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
