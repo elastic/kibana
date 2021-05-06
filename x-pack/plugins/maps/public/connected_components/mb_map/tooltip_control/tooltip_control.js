@@ -20,9 +20,6 @@ import { TooltipPopover } from './tooltip_popover';
 import { FeatureGeometryFilterForm } from '../features_tooltip';
 import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 
-const IS_LOCKED = true;
-const IS_NOT_LOCKED = false;
-
 function justifyAnchorLocation(mbLngLat, targetFeature) {
   let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
   if (targetFeature.geometry.type === 'Point') {
@@ -218,15 +215,16 @@ export class TooltipControl extends React.Component {
     const targetMbFeataure = mbFeatures[0];
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
+    const isLocked = true;
     const tooltipId = uuid();
-    const features = this._getTooltipFeatures(mbFeatures, IS_LOCKED, tooltipId);
+    const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
     }
     this.props.openOnClickTooltip({
       features,
       location: popupAnchorLocation,
-      isLocked: IS_LOCKED,
+      isLocked,
       id: tooltipId,
     });
   };
@@ -251,17 +249,18 @@ export class TooltipControl extends React.Component {
         return;
       }
     }
-
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
+
+    const isLocked = false;
     const tooltipId = uuid();
-    const features = this._getTooltipFeatures(mbFeatures, IS_NOT_LOCKED, tooltipId);
+    const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
     }
     this.props.openOnHoverTooltip({
       features: features,
       location: popupAnchorLocation,
-      isLocked: IS_NOT_LOCKED,
+      isLocked,
       id: tooltipId,
     });
   }, 100);
