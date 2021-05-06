@@ -22,7 +22,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ReadOnlyRulesCallOut } from '../../../components/callouts/read_only_rules_callout';
 import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
@@ -37,6 +36,7 @@ import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
+import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
 
 type Func = () => Promise<void>;
 
@@ -161,7 +161,7 @@ const RulesPageComponent: React.FC = () => {
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
-      <ReadOnlyRulesCallOut />
+      <MissingPrivilegesCallOut />
       <MlJobCompatibilityCallout />
       <ValueListsModal
         showModal={showValueListsModal}

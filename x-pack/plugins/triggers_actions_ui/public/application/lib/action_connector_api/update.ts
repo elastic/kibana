@@ -15,10 +15,16 @@ import type {
 
 const rewriteBodyRes: RewriteRequestCase<
   ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>
-> = ({ connector_type_id: actionTypeId, is_preconfigured: isPreconfigured, ...res }) => ({
+> = ({
+  connector_type_id: actionTypeId,
+  is_preconfigured: isPreconfigured,
+  is_missing_secrets: isMissingSecrets,
+  ...res
+}) => ({
   ...res,
   actionTypeId,
   isPreconfigured,
+  isMissingSecrets,
 });
 
 export async function updateActionConnector({
