@@ -92,10 +92,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     searchAbortController: SearchAbortController
   ) {
     const search = () =>
-    this.runSearch(
-      { id, ...request },
-      { ...options, abortSignal: searchAbortController.getSignal() }
-    );
+      this.runSearch(
+        { id, ...request },
+        { ...options, abortSignal: searchAbortController.getSignal() }
+      );
     const { sessionId, strategy } = options;
 
     // track if this search's session will be send to background

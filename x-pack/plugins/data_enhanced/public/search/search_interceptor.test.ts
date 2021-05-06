@@ -71,7 +71,6 @@ function mockFetchImplementation(responses: any[]) {
   });
 }
 
-
 describe('EnhancedSearchInterceptor', () => {
   let sessionService: jest.Mocked<ISessionService>;
   let sessionState$: BehaviorSubject<SearchSessionState>;
