@@ -386,6 +386,30 @@ describe('createStreamingBatchedFunction()', () => {
       expect(await promise3).toEqual({ foo: 'bar 2' });
     });
 
+    test('treats responses as compressed by defaut', async () => {
+      const { fetchStreaming, stream } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        flushOnMaxItems: 1,
+        fetchStreaming,
+      });
+
+      await flushPromises();
+
+      const promise1 = fn({ a: '1' });
+      await new Promise((r) => setTimeout(r, 6));
+
+      stream.next(
+        await compressResponse({
+          id: 0,
+          result: { foo: 'bar' },
+        })
+      );
+
+      expect(await isPending(promise1)).toBe(false);
+      expect(await promise1).toEqual({ foo: 'bar' });
+    });
+
     test('resolves falsy results', async () => {
       const { fetchStreaming, stream } = setup();
       const fn = createStreamingBatchedFunction({

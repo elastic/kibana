@@ -51,7 +51,7 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
   /**
    * Disabled zlib compression of response chunks.
    */
-  getCompressionDisabled: () => Promise<boolean>;
+  getCompressionDisabled?: () => Promise<boolean>;
 }
 
 /**
@@ -69,7 +69,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
-    getCompressionDisabled,
+    getCompressionDisabled = () => Promise.resolve(false),
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
