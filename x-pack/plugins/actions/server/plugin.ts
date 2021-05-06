@@ -64,11 +64,11 @@ import { defineRoutes } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
-  setupSavedObjects,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
-} from './saved_objects';
+} from './constants/saved_objects';
+import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
@@ -82,12 +82,7 @@ import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { AlertHistoryEsIndexConnectorId } from '../common';
-
-const EVENT_LOG_PROVIDER = 'actions';
-export const EVENT_LOG_ACTIONS = {
-  execute: 'execute',
-  executeViaHttp: 'execute-via-http',
-};
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 
 export interface PluginSetupContract {
   registerType<
