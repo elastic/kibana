@@ -10,6 +10,9 @@ import { BehaviorSubject } from 'rxjs';
 import { SearchStrategyDependencies } from '../../types';
 import { rollupSearchStrategyProvider } from './rollup_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import * as rollupWrongIndexException from '../../../../common/search/test_data/rollup_wrong_index_exception.json';
+import { KbnServerError } from '../../../../../kibana_utils/server';
 
 const mockRollupResponse = {
   body: {
@@ -22,11 +25,8 @@ const mockRollupResponse = {
   },
 };
 
-describe('ES search strategy', () => {
+describe('Rollup search strategy', () => {
   const mockApiCaller = jest.fn();
-  const mockGetCaller = jest.fn();
-  const mockSubmitCaller = jest.fn();
-  const mockDeleteCaller = jest.fn();
   const mockLogger: any = {
     debug: () => {},
   };
@@ -36,11 +36,6 @@ describe('ES search strategy', () => {
     },
     esClient: {
       asCurrentUser: {
-        asyncSearch: {
-          get: mockGetCaller,
-          submit: mockSubmitCaller,
-          delete: mockDeleteCaller,
-        },
         transport: { request: mockApiCaller },
       },
     },
@@ -58,9 +53,6 @@ describe('ES search strategy', () => {
 
   beforeEach(() => {
     mockApiCaller.mockClear();
-    mockGetCaller.mockClear();
-    mockSubmitCaller.mockClear();
-    mockDeleteCaller.mockClear();
   });
 
   it('calls the rollup API', async () => {
@@ -83,5 +75,33 @@ describe('ES search strategy', () => {
     const { method, path } = mockApiCaller.mock.calls[0][0];
     expect(method).toBe('POST');
     expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+  });
+
+  it('throws normalized error on ResponseError', async () => {
+    const errResponse = new ResponseError({
+      body: rollupWrongIndexException,
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+
+    mockApiCaller.mockRejectedValueOnce(errResponse);
+
+    const params = { index: 'non-rollup-index', body: {} };
+    const rollupSearch = await rollupSearchStrategyProvider(mockLegacyConfig$, mockLogger);
+
+    let err: KbnServerError | undefined;
+    try {
+      await rollupSearch.search({ params }, {}, mockDeps).toPromise();
+    } catch (e) {
+      err = e;
+    }
+
+    expect(mockApiCaller).toBeCalled();
+    expect(err).toBeInstanceOf(KbnServerError);
+    expect(err?.statusCode).toBe(400);
+    expect(err?.message).toBe(errResponse.message);
+    expect(err?.errBody).toBe(rollupWrongIndexException);
   });
 });

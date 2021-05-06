@@ -1,0 +1,13 @@
+{
+  "error": {
+    "root_cause": [
+      {
+        "type": "illegal_argument_exception",
+        "reason": "Must specify at least one concrete index."
+      }
+    ],
+    "type": "illegal_argument_exception",
+    "reason": "Must specify at least one concrete index."
+  },
+  "status": 400
+}

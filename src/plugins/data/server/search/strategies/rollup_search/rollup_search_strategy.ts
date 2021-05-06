@@ -53,6 +53,7 @@ export const rollupSearchStrategyProvider = (
     };
 
     try {
+      // TODO: use esClient.asCurrentUser.rollup.rollupSearch
       const promise = esClient.asCurrentUser.transport.request({
         method,
         path,

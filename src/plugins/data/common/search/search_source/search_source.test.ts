@@ -10,7 +10,12 @@ import { of } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
-import { AggConfigs, AggTypesRegistryStart, ES_SEARCH_STRATEGY } from '../../';
+import {
+  AggConfigs,
+  AggTypesRegistryStart,
+  ES_SEARCH_STRATEGY,
+  ROLLUP_SEARCH_STRATEGY,
+} from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from 'src/plugins/inspector/common';
 import { switchMap } from 'rxjs/operators';
@@ -27,6 +32,14 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
+  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
+  getComputedFields,
+  getSourceFiltering: () => mockSource,
+} as unknown) as IndexPattern;
+
+const rollupIndexPattern = ({
+  title: 'foo',
+  type: 'rollup',
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
@@ -889,6 +902,44 @@ describe('SearchSource', () => {
 
       test('should not override strategy if set ', async () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+        const options = { strategy: 'banana' };
+        await searchSource.fetch$(options).toPromise();
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe('banana');
+      });
+
+      test('should use rollup search if rollup index', async () => {
+        searchSource = new SearchSource({ index: rollupIndexPattern }, searchSourceDependencies);
+        const options = {};
+        await searchSource.fetch$(options).toPromise();
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe(ROLLUP_SEARCH_STRATEGY);
+      });
+
+      test('should not use rollup search if overriden', async () => {
+        searchSource = new SearchSource({ index: rollupIndexPattern }, searchSourceDependencies);
+        const options = { strategy: 'banana' };
+        await searchSource.fetch$(options).toPromise();
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe('banana');
+      });
+    });
+
+    describe('Rollup search', () => {
+      test('should use rollup search if rollup index', async () => {
+        searchSource = new SearchSource({ index: rollupIndexPattern }, searchSourceDependencies);
+        const options = {};
+        await searchSource.fetch$(options).toPromise();
+
+        const [, callOptions] = mockSearchMethod.mock.calls[0];
+        expect(callOptions.strategy).toBe(ROLLUP_SEARCH_STRATEGY);
+      });
+
+      test('should not use rollup search if overriden', async () => {
+        searchSource = new SearchSource({ index: rollupIndexPattern }, searchSourceDependencies);
         const options = { strategy: 'banana' };
         await searchSource.fetch$(options).toPromise();
 

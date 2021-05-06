@@ -30,7 +30,6 @@ const mockAsyncResponse = {
 };
 
 describe('ES search strategy', () => {
-  const mockApiCaller = jest.fn();
   const mockGetCaller = jest.fn();
   const mockSubmitCaller = jest.fn();
   const mockDeleteCaller = jest.fn();
@@ -48,7 +47,6 @@ describe('ES search strategy', () => {
           submit: mockSubmitCaller,
           delete: mockDeleteCaller,
         },
-        transport: { request: mockApiCaller },
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
@@ -64,7 +62,6 @@ describe('ES search strategy', () => {
   });
 
   beforeEach(() => {
-    mockApiCaller.mockClear();
     mockGetCaller.mockClear();
     mockSubmitCaller.mockClear();
     mockDeleteCaller.mockClear();
