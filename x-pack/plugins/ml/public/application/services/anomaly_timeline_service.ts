@@ -163,7 +163,8 @@ export class AnomalyTimelineService {
     fromPage: number,
     swimlaneContainerWidth?: number,
     influencersFilterQuery?: any,
-    bucketInterval?: TimeBucketsInterval
+    bucketInterval?: TimeBucketsInterval,
+    swimLaneSeverity?: number
   ): Promise<SwimlaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
 
@@ -210,7 +211,8 @@ export class AnomalyTimelineService {
         swimlaneLimit,
         perPage,
         fromPage,
-        influencersFilterQuery
+        influencersFilterQuery,
+        swimLaneSeverity
       );
     }
 

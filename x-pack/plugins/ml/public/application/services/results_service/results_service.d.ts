@@ -53,7 +53,8 @@ export function resultsServiceProvider(
     maxResults: number,
     perPage: number,
     fromPage: number,
-    influencersFilterQuery: InfluencersFilterQuery
+    influencersFilterQuery: InfluencersFilterQuery,
+    swimLaneSeverity?: number
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
   getRecordsForDetector(): Promise<any>;

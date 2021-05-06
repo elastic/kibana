@@ -508,7 +508,8 @@ export function resultsServiceProvider(mlApiServices) {
       maxResults = ANOMALY_SWIM_LANE_HARD_LIMIT,
       perPage = SWIM_LANE_DEFAULT_PAGE_SIZE,
       fromPage = 1,
-      influencersFilterQuery
+      influencersFilterQuery,
+      swimLaneSeverity
     ) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
@@ -528,7 +529,7 @@ export function resultsServiceProvider(mlApiServices) {
           {
             range: {
               influencer_score: {
-                gt: 0,
+                gt: swimLaneSeverity !== undefined ? swimLaneSeverity : 0,
               },
             },
           },

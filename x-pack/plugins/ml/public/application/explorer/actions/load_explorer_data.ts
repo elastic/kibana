@@ -286,7 +286,9 @@ const loadExplorerDataProvider = (
               viewByPerPage,
               viewByFromPage,
               swimlaneContainerWidth,
-              influencersFilterQuery
+              influencersFilterQuery,
+              undefined,
+              swimLaneSeverity
             ),
           }).pipe(
             map(({ viewBySwimlaneState, filteredTopInfluencers }) => {
