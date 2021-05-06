@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
 import {
@@ -247,7 +247,7 @@ function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalS
   const { filters: stateAFilters = [], ...stateAPartial } = stateA;
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return (
-    _.isEqual(stateAPartial, stateBPartial) &&
+    isEqual(stateAPartial, stateBPartial) &&
     esFilters.compareFilters(stateAFilters, stateBFilters, esFilters.COMPARE_ALL_OPTIONS)
   );
 }
