@@ -11,7 +11,7 @@ import React from 'react';
 
 import { ReindexStatus } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
-import { ReindexState } from '../polling_service';
+import { ReindexState } from '../use_reindex_status';
 import { ChecklistFlyoutStep } from './checklist_step';
 
 describe('ChecklistFlyout', () => {

@@ -21,7 +21,7 @@ import {
 
 import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
-import { ReindexState } from '../polling_service';
+import { ReindexState } from '../use_reindex_status';
 import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
 

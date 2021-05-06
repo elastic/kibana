@@ -14,12 +14,13 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
-import { ReindexState } from '../polling_service';
+import { ReindexState } from '../use_reindex_status';
 import { StepProgress, StepProgressStep } from './step_progress';
 
 const ErrorCallout: React.FunctionComponent<{ errorMessage: string | null }> = ({
@@ -266,5 +267,18 @@ export const ReindexProgress: React.FunctionComponent<{
     });
   }
 
-  return <StepProgress steps={steps} />;
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
+            defaultMessage="Reindexing process"
+          />
+        </h3>
+      </EuiTitle>
+
+      <StepProgress steps={steps} />
+    </>
+  );
 };

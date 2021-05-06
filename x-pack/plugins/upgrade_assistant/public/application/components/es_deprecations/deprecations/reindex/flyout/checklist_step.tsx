@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ReindexStatus } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
-import { ReindexState } from '../polling_service';
+import { ReindexState } from '../use_reindex_status';
 import { ReindexProgress } from './progress';
 
 const buttonLabel = (status?: ReindexStatus) => {

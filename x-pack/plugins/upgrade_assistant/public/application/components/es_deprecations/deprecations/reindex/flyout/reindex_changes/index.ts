@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ReindexFlyout } from './container_new';
+export { ReindexChangesSection } from './reindex_changes';
