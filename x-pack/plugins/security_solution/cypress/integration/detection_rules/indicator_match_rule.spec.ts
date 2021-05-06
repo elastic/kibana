@@ -449,7 +449,7 @@ describe('indicator match', () => {
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(INDEX_PATTERNS_DETAILS).should(
             'have.text',
-            newThreatIndicatorRule.index!.join('')
+            newThreatIndicatorRule.index.join('')
           );
           getDetails(CUSTOM_QUERY_DETAILS).should('have.text', '*:*');
           getDetails(RULE_TYPE_DETAILS).should('have.text', 'Indicator Match');
@@ -490,20 +490,15 @@ describe('indicator match', () => {
       });
 
       it('Investigate alert in timeline', () => {
-        const indicatorMatchRule = { ...newThreatIndicatorRule };
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
-        const indicatorMatchTimelineTemplatePath =
-          'server/lib/detection_engine/rules/prepackaged_timelines/threat.json';
         const threatIndicatorPath =
           '../../../x-pack/test/security_solution_cypress/es_archives/threat_indicator/data.json';
 
         loadPrepackagedTimelineTemplates();
-        cy.readFile(indicatorMatchTimelineTemplatePath).then((template) => {
-          indicatorMatchRule.timeline!.templateTimelineId = template.templateTimelineId;
-          indicatorMatchRule.timeline!.title = template.title;
-          goToManageAlertsDetectionRules();
-          createCustomIndicatorRule(indicatorMatchRule);
-        });
+
+        goToManageAlertsDetectionRules();
+        createCustomIndicatorRule(newThreatIndicatorRule);
+
         reload();
         goToRuleDetails();
         waitForAlertsToPopulate();
@@ -512,13 +507,13 @@ describe('indicator match', () => {
         cy.get(PROVIDER_BADGE).should('have.length', 3);
         cy.get(PROVIDER_BADGE).should(
           'have.text',
-          `threat.indicator.matched.atomic: "${indicatorMatchRule.atomic}"threat.indicator.matched.type: "${indicatorMatchRule.type}"threat.indicator.matched.field: "${indicatorMatchRule.indicatorMappingField}"`
+          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "${newThreatIndicatorRule.type}"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
         );
 
         cy.readFile(threatIndicatorPath).then((threatIndicator) => {
           cy.get(INDICATOR_MATCH_ROW_RENDER).should(
             'have.text',
-            `threat.indicator.matched.field${indicatorMatchRule.indicatorMappingField}${accessibilityText}matched${indicatorMatchRule.indicatorMappingField}${indicatorMatchRule.atomic}${accessibilityText}threat.indicator.matched.type${indicatorMatchRule.type}${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
+            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.type${newThreatIndicatorRule.type}${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
           );
         });
       });

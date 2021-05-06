@@ -96,7 +96,7 @@ describe('Detection rules, override', () => {
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(newOverrideRule.timeline!).then((response) => {
+    createTimeline(newOverrideRule.timeline).then((response) => {
       cy.wrap({
         ...newOverrideRule,
         timeline: {

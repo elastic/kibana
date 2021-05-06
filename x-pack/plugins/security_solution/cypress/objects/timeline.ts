@@ -15,9 +15,6 @@ export interface Timeline {
 export interface CompleteTimeline extends Timeline {
   notes: string;
   filter: TimelineFilter;
-}
-
-export interface TimelineTemplate extends CompleteTimeline {
   templateTimelineId?: string;
 }
 
@@ -33,13 +30,18 @@ export const filter: TimelineFilter = {
   value: 'exists',
 };
 
-export const timeline: TimelineTemplate = {
+export const timeline: CompleteTimeline = {
   title: 'Security Timeline',
   description: 'This is the best timeline',
   query: 'host.name: *',
   notes: 'Yes, the best timeline',
   filter,
-  templateTimelineId: '123456789',
+};
+
+export const indicatorMatchTimelineTemplate: CompleteTimeline = {
+  ...timeline,
+  title: 'Generic Threat Match Timeline',
+  templateTimelineId: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 };
 
 /**

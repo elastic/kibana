@@ -89,8 +89,8 @@ describe('Detection rules, threshold', () => {
 
   beforeEach(() => {
     cleanKibana();
-    createTimeline(newThresholdRule.timeline!).then((response) => {
-      rule.timeline!.id = response.body.data.persistTimeline.timeline.savedObjectId;
+    createTimeline(newThresholdRule.timeline).then((response) => {
+      rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
   });
 
