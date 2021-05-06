@@ -14,6 +14,8 @@ import {
   EuiButtonGroup,
   EuiRange,
   EuiSuperSelect,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
@@ -145,12 +147,14 @@ export function CustomizablePalette({
 
   const showStepsInput = !isCustomPalette;
 
-  const controlStops =
-    (activePalette?.params?.reverse
-      ? reversePalette(activePalette?.params?.controlStops)
-      : activePalette?.params?.controlStops) || [];
-
-  const controlPointsToShow = getControlStops(palettes, controlStops, activePalette, dataBounds);
+  const stopsTooltipContent = [
+    i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage', {
+      defaultMessage: "Percentage values are uniquely based on table's data.",
+    }),
+    i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpInclusive', {
+      defaultMessage: 'Stop values are inclusive.',
+    }),
+  ];
 
   return (
     <>
@@ -327,9 +331,16 @@ export function CustomizablePalette({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsLabel', {
-            defaultMessage: 'Color stops',
-          })}
+          label={
+            <EuiToolTip content={stopsTooltipContent.join('\n')}>
+              <span>
+                {i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsLabel', {
+                  defaultMessage: 'Color stops',
+                })}{' '}
+                <EuiIcon type="questionInCircle" color="subdued" />
+              </span>
+            </EuiToolTip>
+          }
         >
           <CustomStops
             key={rangeType}
