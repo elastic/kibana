@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`When on the Event Filters Page And data exists should render expected fields on card 1`] = `
+exports[`When on the Event Filters List Page And data exists should render expected fields on card 1`] = `
 .c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
