@@ -9,15 +9,9 @@ import { RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 
-import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import {
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-} from '../../../timelines/components/timeline/body/constants';
-import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-
-import * as i18n from './translations';
+import { columns } from '../../configurations/security_solution_detections/columns';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -98,87 +92,9 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const alertsHeaders: ColumnHeaderOptions[] = [
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: '@timestamp',
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH + 5,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'signal.rule.name',
-    label: i18n.ALERTS_HEADERS_RULE,
-    linkField: 'signal.rule.id',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'signal.rule.version',
-    label: i18n.ALERTS_HEADERS_VERSION,
-    width: 95,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'signal.rule.type',
-    label: i18n.ALERTS_HEADERS_METHOD,
-    width: 100,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'signal.rule.severity',
-    label: i18n.ALERTS_HEADERS_SEVERITY,
-    width: 105,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'signal.rule.risk_score',
-    label: i18n.ALERTS_HEADERS_RISK_SCORE,
-    width: 115,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.module',
-    linkField: 'rule.reference',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
-  },
-  {
-    category: 'event',
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.action',
-    type: 'string',
-    aggregatable: true,
-    width: 140,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'event.category',
-    width: 150,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'host.name',
-    width: 120,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'user.name',
-    width: 120,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'source.ip',
-    width: 120,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: 'destination.ip',
-    width: 140,
-  },
-];
-
 export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
-  columns: alertsHeaders,
+  columns,
   showCheckboxes: true,
   excludedRowRendererIds: Object.values(RowRendererId),
 };

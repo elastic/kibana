@@ -55,6 +55,8 @@ export class JobDetailsUI extends Component {
         </div>
       );
     } else {
+      const { showFullDetails, refreshJobList } = this.props;
+
       const {
         general,
         customUrl,
@@ -70,9 +72,9 @@ export class JobDetailsUI extends Component {
         modelSizeStats,
         jobTimingStats,
         datafeedTimingStats,
-      } = extractJobDetails(job, basePath);
+        alertRules,
+      } = extractJobDetails(job, basePath, refreshJobList);
 
-      const { showFullDetails, refreshJobList } = this.props;
       const tabs = [
         {
           id: 'job-settings',
@@ -83,7 +85,7 @@ export class JobDetailsUI extends Component {
           content: (
             <JobDetailsPane
               data-test-subj="mlJobDetails-job-settings"
-              sections={[general, customUrl, node, calendars]}
+              sections={[general, customUrl, node, calendars, alertRules]}
             />
           ),
           time: job.open_time,

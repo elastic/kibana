@@ -21,6 +21,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIcon,
   EuiIconTip,
   EuiPage,
   EuiPageBody,
@@ -28,6 +29,7 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   EuiLoadingContent,
   EuiPanel,
   EuiAccordion,
@@ -67,6 +69,9 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
+
+// Anomalies Map
+import { AnomaliesMap } from './anomalies_map';
 
 import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
@@ -328,6 +333,15 @@ export class ExplorerUI extends React.Component {
                     id="xpack.ml.explorer.topInfuencersTitle"
                     defaultMessage="Top influencers"
                   />
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.explorer.topInfluencersTooltip"
+                        defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
+                      />
+                    }
+                    position="right"
+                  />
                 </h2>
               </EuiTitle>
               {loading ? (
@@ -387,6 +401,9 @@ export class ExplorerUI extends React.Component {
                 </EuiPanel>
                 <EuiSpacer size="m" />
               </>
+            )}
+            {loading === false && tableData.anomalies?.length && (
+              <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
             )}
             {annotationsData.length > 0 && (
               <>
@@ -476,9 +493,21 @@ export class ExplorerUI extends React.Component {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} style={{ width: '170px' }}>
                     <EuiFormRow
-                      label={i18n.translate('xpack.ml.explorer.intervalLabel', {
-                        defaultMessage: 'Interval',
-                      })}
+                      label={
+                        <EuiToolTip
+                          content={i18n.translate('xpack.ml.explorer.intervalTooltip', {
+                            defaultMessage:
+                              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
+                          })}
+                        >
+                          <span>
+                            {i18n.translate('xpack.ml.explorer.intervalLabel', {
+                              defaultMessage: 'Interval',
+                            })}
+                            <EuiIcon type="questionInCircle" color="subdued" />
+                          </span>
+                        </EuiToolTip>
+                      }
                     >
                       <SelectInterval />
                     </EuiFormRow>
