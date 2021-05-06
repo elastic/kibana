@@ -889,7 +889,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
-              "lineNumber": 21
+              "lineNumber": 22
             }
           }
         ],
@@ -915,7 +915,7 @@
         "label": "createSavedQueryService",
         "source": {
           "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
-          "lineNumber": 20
+          "lineNumber": 21
         },
         "tags": [],
         "returnComment": [],
