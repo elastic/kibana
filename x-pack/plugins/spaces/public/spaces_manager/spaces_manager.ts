@@ -9,14 +9,13 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 
-import type { HttpSetup } from 'src/core/public';
+import type {
+  HttpSetup,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from 'src/core/public';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type {
-  GetAllSpacesOptions,
-  GetShareableReferencesResponse,
-  GetSpaceResult,
-} from '../../common';
+import type { GetAllSpacesOptions, GetSpaceResult } from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {
@@ -142,7 +141,7 @@ export class SpacesManager {
 
   public async getShareableReferences(
     objects: SavedObjectTarget[]
-  ): Promise<GetShareableReferencesResponse> {
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
     return this.http.post(`/api/spaces/_get_shareable_references`, {
       body: JSON.stringify({ objects }),
     });

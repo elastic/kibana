@@ -103,12 +103,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectError](./kibana-plugin-core-public.savedobjecterror.md) |  |
 |  [SavedObjectReference](./kibana-plugin-core-public.savedobjectreference.md) | A reference to another saved object. |
+|  [SavedObjectReferenceWithContext](./kibana-plugin-core-public.savedobjectreferencewithcontext.md) | A returned input object or one of its references, with additional context. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-public.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBatchResponse](./kibana-plugin-core-public.savedobjectsbatchresponse.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-public.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkCreateOptions](./kibana-plugin-core-public.savedobjectsbulkcreateoptions.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-public.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.md) |  |
+|  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-public.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-public.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindOptionsReference](./kibana-plugin-core-public.savedobjectsfindoptionsreference.md) |  |

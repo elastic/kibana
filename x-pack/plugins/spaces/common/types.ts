@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectsCollectMultiNamespaceReferencesObject } from 'kibana/server';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
 /**
@@ -50,19 +49,4 @@ export interface GetSpaceResult extends Space {
    * A set of flags indicating which purposes the user is authorized for.
    */
   authorizedPurposes?: Record<GetAllSpacesPurpose, boolean>;
-}
-
-export interface GetShareableReferencesResponse {
-  /** The count of references that are not tags. */
-  relativesCount: number;
-  /** The count of references that are tags. */
-  tagsCount: number;
-  /** The spaces that are selected (all objects are in these spaces). */
-  selectedSpaces: string[];
-  /** The spaces that are partially selected (some -- but not all -- objects are in these spaces). */
-  partiallySelectedSpaces: string[];
-  /** The spaces that are unknown to the current user. */
-  unknownSpacesCount: number;
-  /** The references that were found, with additional context -- including the input objects. */
-  objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
 }

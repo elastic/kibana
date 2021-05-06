@@ -223,7 +223,7 @@
         "type": "Interface",
         "label": "Space",
         "description": [
-          "\nA Kibana Space."
+          "\nA Space."
         ],
         "tags": [],
         "children": [
@@ -888,7 +888,7 @@
         "type": "Interface",
         "label": "Space",
         "description": [
-          "\nA Kibana Space."
+          "\nA Space."
         ],
         "tags": [],
         "children": [
@@ -1502,7 +1502,7 @@
             "section": "def-server.SavedObjectsRepository",
             "text": "SavedObjectsRepository"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
         ],
         "initialIsOpen": false
       },
