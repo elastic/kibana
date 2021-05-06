@@ -11,12 +11,7 @@ import React, { Component, ReactElement } from 'react';
 import { ToastsSetup } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import {
-  CSV_REPORT_TYPE,
-  CSV_JOB_TYPE,
-  PDF_REPORT_TYPE,
-  PNG_REPORT_TYPE,
-} from '../../common/constants';
+import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/constants';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
@@ -24,6 +19,11 @@ export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
+
+  /**
+   * Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
+   */
+  requiresSavedState: boolean;
   layoutId: string | undefined;
   objectId?: string;
   getJobParams: () => BaseParams;
@@ -90,7 +90,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
   }
 
   public render() {
-    if (this.mustSaveReport()) {
+    if (
+      this.props.requiresSavedState &&
+      (this.isNotSaved() || this.props.isDirty || this.state.isStale)
+    ) {
       return (
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFormRow
@@ -153,13 +156,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiCopy>
       </EuiForm>
     );
-  }
-
-  private mustSaveReport(): boolean {
-    if (this.props.reportType === CSV_REPORT_TYPE || this.props.reportType === CSV_JOB_TYPE) {
-      return this.state.isStale;
-    }
-    return this.isNotSaved() || this.props.isDirty || this.state.isStale;
   }
 
   private renderGenerateReportButton = (isDisabled: boolean) => {

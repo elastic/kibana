@@ -107,6 +107,7 @@ export const ReportingCsvShareProvider = ({
           title: panelTitle,
           content: (
             <ReportingPanelContent
+              requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
               reportType={CSV_JOB_TYPE}
