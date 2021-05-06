@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
-import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock, savedObjectsServiceMock } from '../../../../../src/core/server/mocks';
+import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerting/server/mocks';

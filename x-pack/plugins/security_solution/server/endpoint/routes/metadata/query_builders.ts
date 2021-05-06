@@ -6,7 +6,7 @@
  */
 
 import { SearchRequest, SortContainer } from '@elastic/elasticsearch/api/types';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '../../../../../../../src/core/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext, MetadataQueryStrategy } from '../../types';
 
