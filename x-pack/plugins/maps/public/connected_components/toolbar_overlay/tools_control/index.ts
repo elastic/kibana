@@ -9,7 +9,6 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { ToolsControl } from './tools_control';
-import { isDrawingFilter } from '../../../selectors/map_selectors';
 import { setDrawMode, updateDrawState } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { DrawState } from '../../../../common/descriptor_types';
@@ -17,16 +16,16 @@ import { DRAW_MODE } from '../../../../common';
 import { getDrawMode } from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {
+  const drawMode = getDrawMode(state);
   return {
-    isDrawingFilter: isDrawingFilter(state),
-    featureModeActive:
-      getDrawMode(state) === DRAW_MODE.DRAW_POINTS || getDrawMode(state) === DRAW_MODE.DRAW_SHAPES,
+    filterModeActive: drawMode === DRAW_MODE.DRAW_FILTERS,
+    featureModeActive: drawMode === DRAW_MODE.DRAW_POINTS || drawMode === DRAW_MODE.DRAW_SHAPES,
   };
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    initiateDraw: (drawState: DrawState) => {
+    updateCompletedShape: (drawState: DrawState) => {
       dispatch(updateDrawState(drawState));
     },
     cancelDraw: () => {

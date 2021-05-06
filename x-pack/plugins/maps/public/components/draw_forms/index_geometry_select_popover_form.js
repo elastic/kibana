@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiForm, EuiButton, EuiSpacer, EuiTextAlign, EuiFormErrorText } from '@elastic/eui';
-import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
+import { MultiIndexGeoFieldSelect } from '../multi_index_geo_field_select';
 import { i18n } from '@kbn/i18n';
 
 export class IndexGeometrySelectPopoverForm extends Component {

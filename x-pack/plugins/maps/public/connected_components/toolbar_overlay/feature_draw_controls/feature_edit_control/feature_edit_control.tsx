@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { DRAW_TYPE } from '../../../../../common/constants';
 // @ts-expect-error
-import { GeometryFilterForm } from '../../../../components/geometry_filter_form';
+import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 export interface Props {
   isDrawingFilter: boolean;

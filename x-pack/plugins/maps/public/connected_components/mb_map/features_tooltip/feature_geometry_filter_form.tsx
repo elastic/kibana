@@ -20,7 +20,7 @@ import {
 } from '../../../../common/elasticsearch_util';
 import { ES_SPATIAL_RELATIONS, GEO_JSON_TYPE } from '../../../../common/constants';
 // @ts-expect-error
-import { GeometryFilterForm } from '../../../components/geometry_filter_form';
+import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.

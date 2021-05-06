@@ -23,7 +23,7 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    initiateDraw: (drawFeatureState: DRAW_TYPE) => {
+    updateCompletedShape: (drawFeatureState: DRAW_TYPE) => {
       dispatch(updateDrawFeatureState(drawFeatureState));
     },
     cancelDraw: () => {

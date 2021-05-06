@@ -16,12 +16,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
-import { GeoFieldWithIndex } from './geo_field_with_index';
-import { ActionSelect } from './action_select';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
+import { MultiIndexGeoFieldSelect } from '../multi_index_geo_field_select';
+import { GeoFieldWithIndex } from '../geo_field_with_index';
+import { ActionSelect } from '../action_select';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../src/plugins/data/public';
 
-interface Props {
+export interface Props {
   className?: string;
   buttonLabel: string;
   geoFields: GeoFieldWithIndex[];
@@ -38,6 +38,8 @@ interface Props {
     indexPatternId: string;
     geoFieldName: string;
   }) => void;
+  activateDrawFilterMode: () => void;
+  deactivateDrawMode: () => void;
 }
 
 interface State {
@@ -52,6 +54,14 @@ export class DistanceFilterForm extends Component<Props, State> {
     selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     filterLabel: '',
   };
+
+  componentDidMount() {
+    // this.props.activateDrawFilterMode();
+  }
+
+  componentWillUnmount() {
+    this.props.deactivateDrawMode();
+  }
 
   _onGeoFieldChange = (selectedField: GeoFieldWithIndex | undefined) => {
     this.setState({ selectedField });

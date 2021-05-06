@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { ChangeEvent, Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -18,52 +17,76 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
-import { getEsSpatialRelationLabel } from '../../common/i18n_getters';
-import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
-import { ActionSelect } from './action_select';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
+import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
+import { getEsSpatialRelationLabel } from '../../../../common/i18n_getters';
+import { MultiIndexGeoFieldSelect } from '../../multi_index_geo_field_select';
+import { ActionSelect } from '../../action_select';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
+import { GeoFieldWithIndex } from '../../geo_field_with_index';
+import { Action, ActionExecutionContext } from '../../../../../../../src/plugins/ui_actions/public';
 
-export class GeometryFilterForm extends Component {
-  static propTypes = {
-    buttonLabel: PropTypes.string.isRequired,
-    geoFields: PropTypes.array.isRequired,
-    getFilterActions: PropTypes.func,
-    getActionContext: PropTypes.func,
-    intitialGeometryLabel: PropTypes.string.isRequired,
-    onSubmit: PropTypes.func.isRequired,
-    isFilterGeometryClosed: PropTypes.bool,
-    errorMsg: PropTypes.string,
-  };
+export interface Props {
+  buttonLabel: string;
+  geoFields: GeoFieldWithIndex[];
+  getFilterActions?: () => Promise<Action[]>;
+  getActionContext?: () => ActionExecutionContext;
+  intitialGeometryLabel: string;
+  onSubmit: (options: {
+    actionId: string;
+    geometryLabel?: string;
+    indexPatternId?: string;
+    geoFieldName?: string;
+    geoFieldType?: ES_GEO_FIELD_TYPE;
+    relation?: ES_SPATIAL_RELATIONS;
+  }) => void;
+  isFilterGeometryClosed?: boolean;
+  errorMsg?: string;
+  className: string;
+  isLoading?: boolean;
+  activateDrawFilterMode: () => void;
+  deactivateDrawMode: () => void;
+}
 
-  static defaultProps = {
-    isFilterGeometryClosed: true,
-  };
+interface State {
+  actionId: string;
+  selectedField: GeoFieldWithIndex | undefined;
+  geometryLabel: string;
+  relation: ES_SPATIAL_RELATIONS;
+}
 
-  state = {
+export class GeometryFilterForm extends Component<Props> {
+  state: State = {
     actionId: ACTION_GLOBAL_APPLY_FILTER,
     selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     geometryLabel: this.props.intitialGeometryLabel,
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
 
-  _onGeoFieldChange = (selectedField) => {
+  componentDidMount() {
+    this.props.activateDrawFilterMode();
+  }
+
+  componentWillUnmount() {
+    this.props.deactivateDrawMode();
+  }
+
+  _onGeoFieldChange = (selectedField: GeoFieldWithIndex | undefined) => {
     this.setState({ selectedField });
   };
 
-  _onGeometryLabelChange = (e) => {
+  _onGeometryLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       geometryLabel: e.target.value,
     });
   };
 
-  _onRelationChange = (e) => {
+  _onRelationChange = (e: ChangeEvent<HTMLSelectElement>) => {
     this.setState({
       relation: e.target.value,
     });
   };
 
-  _onActionIdChange = (value) => {
+  _onActionIdChange = (value: string) => {
     this.setState({ actionId: value });
   };
 
@@ -71,8 +94,10 @@ export class GeometryFilterForm extends Component {
     this.props.onSubmit({
       actionId: this.state.actionId,
       geometryLabel: this.state.geometryLabel,
-      indexPatternId: this.state.selectedField.indexPatternId,
-      geoFieldName: this.state.selectedField.geoFieldName,
+      indexPatternId: this.state.selectedField
+        ? this.state.selectedField.indexPatternId
+        : undefined,
+      geoFieldName: this.state.selectedField ? this.state.selectedField.geoFieldName : undefined,
       relation: this.state.relation,
     });
   };
@@ -82,9 +107,13 @@ export class GeometryFilterForm extends Component {
     if (!this.state.selectedField) {
       return null;
     }
+    let _isFilterGeometryClosed = true;
+    if (this.props.isFilterGeometryClosed !== undefined) {
+      _isFilterGeometryClosed = this.props.isFilterGeometryClosed;
+    }
 
     const spatialRelations =
-      this.props.isFilterGeometryClosed &&
+      _isFilterGeometryClosed &&
       this.state.selectedField.geoFieldType !== ES_GEO_FIELD_TYPE.GEO_POINT
         ? Object.values(ES_SPATIAL_RELATIONS)
         : Object.values(ES_SPATIAL_RELATIONS).filter((relation) => {
