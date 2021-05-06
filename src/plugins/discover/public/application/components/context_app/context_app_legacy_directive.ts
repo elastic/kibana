@@ -14,6 +14,7 @@ export function createContextAppLegacy(reactDirective: any) {
     ['filter', { watchDepth: 'reference' }],
     ['hits', { watchDepth: 'reference' }],
     ['indexPattern', { watchDepth: 'reference' }],
+    ['opts', { watchDepth: 'reference' }],
     ['sorting', { watchDepth: 'reference' }],
     ['columns', { watchDepth: 'collection' }],
     ['minimumVisibleRows', { watchDepth: 'reference' }],

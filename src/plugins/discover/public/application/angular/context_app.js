@@ -44,7 +44,8 @@ getAngularModule().directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, Private) {
-  const { filterManager, indexPatterns, uiSettings, navigation } = getServices();
+  const services = getServices();
+  const { filterManager, indexPatterns, uiSettings, navigation } = services;
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const queryParameterActions = getQueryParameterActions(filterManager, indexPatterns);
   const queryActions = Private(QueryActionsProvider);
@@ -55,6 +56,10 @@ function ContextAppController($scope, Private) {
   );
   this.state.useNewFieldsApi = useNewFieldsApi;
   this.topNavMenu = navigation.ui.TopNavMenu;
+  this.opts = {
+    config: uiSettings,
+    services,
+  };
 
   this.actions = _.mapValues(
     {

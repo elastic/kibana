@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import './context_app_legacy.scss';
 import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
+import { IUiSettingsClient } from 'kibana/public';
 import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
@@ -18,15 +20,23 @@ import { IIndexPattern, IndexPatternField } from '../../../../../data/common/ind
 import { LoadingStatus } from '../../angular/context_app_state';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
 import { TopNavMenuProps } from '../../../../../navigation/public';
+import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
+import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
+import { DiscoverServices } from '../../../build_services';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 export interface ContextAppProps {
   topNavMenu: React.ComponentType<TopNavMenuProps>;
   columns: string[];
-  hits: Array<Record<string, unknown>>;
+  hits: ElasticSearchHit[];
   indexPattern: IIndexPattern;
+  opts: {
+    config: IUiSettingsClient;
+    services: DiscoverServices;
+  };
   filter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
   minimumVisibleRows: number;
-  sorting: string[];
+  sorting: SortPairArr[];
   status: string;
   reason: string;
   defaultStepSize: number;
@@ -41,6 +51,7 @@ export interface ContextAppProps {
   useNewFieldsApi?: boolean;
 }
 
+const DataGridMemoized = React.memo(DiscoverGrid);
 const PREDECESSOR_TYPE = 'predecessors';
 const SUCCESSOR_TYPE = 'successors';
 
@@ -49,9 +60,11 @@ function isLoading(status: string) {
 }
 
 export function ContextAppLegacy(renderProps: ContextAppProps) {
+  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const status = renderProps.status;
   const isLoaded = status === LoadingStatus.LOADED;
   const isFailed = status === LoadingStatus.FAILED;
+  const isLegacy = renderProps.opts.config.get('doc_table:legacy');
 
   const actionBarProps = (type: string) => {
     const {
@@ -78,6 +91,37 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   };
 
   const docTableProps = () => {
+    const {
+      columns,
+      hits,
+      filter,
+      indexPattern,
+      sorting,
+      opts: { config, services },
+      useNewFieldsApi,
+    } = renderProps;
+    return {
+      ariaLabelledBy: 'surDocumentsAriaLabel',
+      columns,
+      rows: hits,
+      indexPattern,
+      expandedDoc,
+      isLoading: isLoading(status),
+      sampleSize: 0,
+      sort: sorting,
+      showTimeCol: !config.get('doc_table:hideTimeColumn', false) && !!indexPattern.timeFieldName,
+      services,
+      useNewFieldsApi,
+      setExpandedDoc,
+      onFilter: filter,
+      onAddColumn: (column) => {},
+      onRemoveColumn: (column) => {},
+      onSetColumns: (columnsToSet) => {},
+      onSort: (sort) => {},
+    } as DiscoverGridProps;
+  };
+
+  const legacyDocTableProps = () => {
     const {
       hits,
       filter,
@@ -131,16 +175,20 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       ) : (
         <div>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage>
-            <EuiPageContent paddingSize="s" className="dscCxtAppContent">
+          <EuiPage className={isLegacy ? '' : 'dscSurrDocsPage'}>
+            <EuiPageContent paddingSize="s" className="dscSurrDocsContent">
               <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
               {loadingFeedback()}
               <EuiHorizontalRule margin="xs" />
-              {isLoaded ? (
+              {isLegacy ? (
                 <div className="discover-table">
-                  <DocTableLegacy {...docTableProps()} />
+                  <DocTableLegacy {...legacyDocTableProps()} />
                 </div>
-              ) : null}
+              ) : (
+                <div className="dscSurrDocsGrid">
+                  <DataGridMemoized {...docTableProps()} />
+                </div>
+              )}
               <EuiHorizontalRule margin="xs" />
               <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
             </EuiPageContent>
