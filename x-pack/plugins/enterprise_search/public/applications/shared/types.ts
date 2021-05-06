@@ -31,7 +31,4 @@ export interface RoleMapping {
   authProvider: string[];
   roleType: string;
   rules: RoleRules;
-  toolTip?: {
-    content: string;
-  };
 }
