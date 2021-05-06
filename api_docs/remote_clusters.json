@@ -56,13 +56,13 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-            "lineNumber": 23
+            "lineNumber": 25
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-        "lineNumber": 22
+        "lineNumber": 24
       },
       "lifecycle": "setup",
       "initialIsOpen": true

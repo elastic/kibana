@@ -4,6 +4,42 @@
     "classes": [],
     "functions": [
       {
+        "id": "def-public.AddFromLibraryButton",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.AddFromLibraryButton.$1",
+            "type": "Object",
+            "label": "{ onClick, ...rest }",
+            "isRequired": true,
+            "signature": [
+              "Pick<",
+              "Props",
+              ", \"onClick\" | \"className\" | \"primary\" | \"iconSide\" | \"isDarkModeEnabled\">"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/add_from_library.tsx",
+              "lineNumber": 17
+            }
+          }
+        ],
+        "signature": [
+          "({ onClick, ...rest }: Pick<",
+          "Props",
+          ", \"onClick\" | \"className\" | \"primary\" | \"iconSide\" | \"isDarkModeEnabled\">) => JSX.Element"
+        ],
+        "description": [],
+        "label": "AddFromLibraryButton",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/add_from_library.tsx",
+          "lineNumber": 17
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
         "tags": [],
         "id": "def-public.LazyDashboardPicker",
         "type": "Function",
@@ -11,7 +47,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/public/components/index.tsx",
-          "lineNumber": 34
+          "lineNumber": 32
         },
         "signature": [
           "React.LazyExoticComponent<typeof ",
@@ -31,9 +67,9 @@
           "lineNumber": 28
         },
         "signature": [
-          "(props: ",
+          "React.LazyExoticComponent<({ solutions, ...props }: ",
           "Props",
-          ") => JSX.Element"
+          ") => JSX.Element>"
         ],
         "initialIsOpen": false
       },
@@ -45,12 +81,12 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/public/components/index.tsx",
-          "lineNumber": 32
+          "lineNumber": 30
         },
         "signature": [
-          "(props: ",
+          "React.LazyExoticComponent<(props: ",
           "Props",
-          ") => JSX.Element"
+          ") => JSX.Element>"
         ],
         "initialIsOpen": false
       },
@@ -62,13 +98,219 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/public/components/index.tsx",
-          "lineNumber": 36
+          "lineNumber": 34
         },
         "signature": [
           "React.LazyExoticComponent<typeof ",
           "default",
           ">"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PrimaryActionButton",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.PrimaryActionButton.$1",
+            "type": "Object",
+            "label": "{ isDarkModeEnabled, ...props }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_button.tsx",
+              "lineNumber": 19
+            }
+          }
+        ],
+        "signature": [
+          "({ isDarkModeEnabled, ...props }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "PrimaryActionButton",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_button.tsx",
+          "lineNumber": 19
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PrimaryActionPopover",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.PrimaryActionPopover.$1",
+            "type": "Object",
+            "label": "props",
+            "isRequired": true,
+            "signature": [
+              "Pick<",
+              "Props",
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"iconType\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"panelRef\" | \"data-test-subj\" | \"display\" | \"offset\" | \"iconSide\" | \"buttonRef\" | \"hasArrow\" | \"isDarkModeEnabled\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
+              "lineNumber": 15
+            }
+          }
+        ],
+        "signature": [
+          "(props: Pick<",
+          "Props",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"label\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"iconType\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"panelRef\" | \"data-test-subj\" | \"display\" | \"offset\" | \"iconSide\" | \"buttonRef\" | \"hasArrow\" | \"isDarkModeEnabled\" | \"anchorClassName\" | \"attachToAnchor\" | \"container\" | \"focusTrapProps\" | \"initialFocus\" | \"insert\" | \"ownFocus\" | \"panelClassName\" | \"panelPaddingSize\" | \"panelStyle\" | \"panelProps\" | \"popoverRef\" | \"repositionOnScroll\" | \"zIndex\" | \"onTrapDeactivation\" | \"buffer\" | \"arrowChildren\">) => JSX.Element"
+        ],
+        "description": [],
+        "label": "PrimaryActionPopover",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/primary_popover.tsx",
+          "lineNumber": 15
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.QuickButtonGroup",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.QuickButtonGroup.$1",
+            "type": "Object",
+            "label": "{ buttons }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 30
+            }
+          }
+        ],
+        "signature": [
+          "({ buttons }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "QuickButtonGroup",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+          "lineNumber": 30
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SolutionToolbar",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.SolutionToolbar.$1",
+            "type": "Object",
+            "label": "{ isDarkModeEnabled, children }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/solution_toolbar.tsx",
+              "lineNumber": 35
+            }
+          }
+        ],
+        "signature": [
+          "({ isDarkModeEnabled, children }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "SolutionToolbar",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/solution_toolbar.tsx",
+          "lineNumber": 35
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SolutionToolbarButton",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.SolutionToolbarButton.$1",
+            "type": "Object",
+            "label": "{ label, primary, className, ...rest }",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/button.tsx",
+              "lineNumber": 22
+            }
+          }
+        ],
+        "signature": [
+          "({ label, primary, className, ...rest }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "SolutionToolbarButton",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/button.tsx",
+          "lineNumber": 22
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SolutionToolbarPopover",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.SolutionToolbarPopover.$1",
+            "type": "CompoundType",
+            "label": "{\n  label,\n  iconType,\n  primary,\n  iconSide,\n  ...popover\n}",
+            "isRequired": true,
+            "signature": [
+              "Props"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/popover.tsx",
+              "lineNumber": 23
+            }
+          }
+        ],
+        "signature": [
+          "({ label, iconType, primary, iconSide, ...popover }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "SolutionToolbarPopover",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/popover.tsx",
+          "lineNumber": 23
+        },
+        "tags": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -121,6 +363,302 @@
       }
     ],
     "interfaces": [
+      {
+        "id": "def-public.PresentationCapabilitiesService",
+        "type": "Interface",
+        "label": "PresentationCapabilitiesService",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.PresentationCapabilitiesService.canAccessDashboards",
+            "type": "Function",
+            "label": "canAccessDashboards",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+              "lineNumber": 10
+            },
+            "signature": [
+              "() => boolean"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PresentationCapabilitiesService.canCreateNewDashboards",
+            "type": "Function",
+            "label": "canCreateNewDashboards",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+              "lineNumber": 11
+            },
+            "signature": [
+              "() => boolean"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PresentationCapabilitiesService.canSaveVisualizations",
+            "type": "Function",
+            "label": "canSaveVisualizations",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+              "lineNumber": 12
+            },
+            "signature": [
+              "() => boolean"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PresentationCapabilitiesService.canSetAdvancedSettings",
+            "type": "Function",
+            "label": "canSetAdvancedSettings",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+              "lineNumber": 13
+            },
+            "signature": [
+              "() => boolean"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/capabilities.ts",
+          "lineNumber": 9
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PresentationDashboardsService",
+        "type": "Interface",
+        "label": "PresentationDashboardsService",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.PresentationDashboardsService.findDashboards",
+            "type": "Function",
+            "label": "findDashboards",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+              "lineNumber": 13
+            },
+            "signature": [
+              "(query: string, fields: string[]) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<",
+              "PartialDashboardAttributes",
+              ">[]>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PresentationDashboardsService.findDashboardsByTitle",
+            "type": "Function",
+            "label": "findDashboardsByTitle",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+              "lineNumber": 17
+            },
+            "signature": [
+              "(title: string) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<",
+              "PartialDashboardAttributes",
+              ">[]>"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/dashboards.ts",
+          "lineNumber": 12
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PresentationLabsService",
+        "type": "Interface",
+        "label": "PresentationLabsService",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.PresentationLabsService.getProjectIDs",
+            "type": "Function",
+            "label": "getProjectIDs",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 23
+            },
+            "signature": [
+              "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PresentationLabsService.getProject",
+            "type": "Function",
+            "label": "getProject",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 24
+            },
+            "signature": [
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\") => ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.Project",
+                "text": "Project"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PresentationLabsService.getProjects",
+            "type": "Function",
+            "label": "getProjects",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\", ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "common",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-common.Project",
+                "text": "Project"
+              },
+              ">"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PresentationLabsService.setProjectStatus",
+            "type": "Function",
+            "label": "setProjectStatus",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 26
+            },
+            "signature": [
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PresentationLabsService.reset",
+            "type": "Function",
+            "label": "reset",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "() => void"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/services/labs.ts",
+          "lineNumber": 22
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.QuickButtonProps",
+        "type": "Interface",
+        "label": "QuickButtonProps",
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.QuickButtonProps",
+            "text": "QuickButtonProps"
+          },
+          " extends Pick<",
+          "EuiButtonGroupOptionProps",
+          ", \"iconType\">"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.QuickButtonProps.createType",
+            "type": "string",
+            "label": "createType",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 18
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuickButtonProps.onClick",
+            "type": "Function",
+            "label": "onClick",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 19
+            },
+            "signature": [
+              "() => void"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.QuickButtonProps.isDarkModeEnabled",
+            "type": "CompoundType",
+            "label": "isDarkModeEnabled",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+              "lineNumber": 20
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/solution_toolbar/items/quick_group.tsx",
+          "lineNumber": 17
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.SaveModalDashboardProps",
         "type": "Interface",
@@ -240,7 +778,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 59
+          "lineNumber": 78
         },
         "signature": [
           "ProjectConfig & { status: ProjectStatus; }"
@@ -255,10 +793,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 36
+          "lineNumber": 54
         },
         "signature": [
-          "\"labs:presentation:unifiedToolbar\""
+          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
         ],
         "initialIsOpen": false
       }
@@ -272,10 +810,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 13
+          "lineNumber": 14
         },
         "signature": [
-          "readonly [\"labs:presentation:unifiedToolbar\"]"
+          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
         ],
         "initialIsOpen": false
       }
@@ -326,7 +864,13 @@
             "lineNumber": 16
           },
           "signature": [
-            "PresentationLabsService"
+            {
+              "pluginId": "presentationUtil",
+              "scope": "public",
+              "docId": "kibPresentationUtilPluginApi",
+              "section": "def-public.PresentationLabsService",
+              "text": "PresentationLabsService"
+            }
           ]
         }
       ],
@@ -343,7 +887,23 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "tags": [],
+        "id": "def-server.SETTING_CATEGORY",
+        "type": "string",
+        "label": "SETTING_CATEGORY",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/server/ui_settings.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "\"Presentation Labs\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
@@ -354,13 +914,13 @@
         "type": "Function",
         "children": [],
         "signature": [
-          "() => readonly [\"labs:presentation:unifiedToolbar\"]"
+          "() => readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
         ],
         "description": [],
         "label": "getProjectIDs",
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 61
+          "lineNumber": 80
         },
         "tags": [],
         "returnComment": [],
@@ -381,7 +941,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 63
+              "lineNumber": 82
             }
           },
           {
@@ -401,7 +961,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 63
+              "lineNumber": 82
             }
           }
         ],
@@ -420,7 +980,7 @@
         "label": "isProjectEnabledByStatus",
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 63
+          "lineNumber": 82
         },
         "tags": [],
         "returnComment": [],
@@ -438,15 +998,15 @@
           {
             "tags": [],
             "id": "def-common.ProjectConfig.id",
-            "type": "string",
+            "type": "CompoundType",
             "label": "id",
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 51
+              "lineNumber": 69
             },
             "signature": [
-              "\"labs:presentation:unifiedToolbar\""
+              "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
             ]
           },
           {
@@ -457,7 +1017,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 52
+              "lineNumber": 70
             }
           },
           {
@@ -468,7 +1028,18 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 53
+              "lineNumber": 71
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ProjectConfig.isDisplayed",
+            "type": "boolean",
+            "label": "isDisplayed",
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 72
             }
           },
           {
@@ -479,7 +1050,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 54
+              "lineNumber": 73
             },
             "signature": [
               "(\"kibana\" | \"browser\" | \"session\")[]"
@@ -493,7 +1064,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 55
+              "lineNumber": 74
             }
           },
           {
@@ -504,7 +1075,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 56
+              "lineNumber": 75
             },
             "signature": [
               "(\"dashboard\" | \"canvas\" | \"presentation\")[]"
@@ -513,7 +1084,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 50
+          "lineNumber": 68
         },
         "initialIsOpen": false
       }
@@ -528,7 +1099,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 37
+          "lineNumber": 55
         },
         "signature": [
           "\"kibana\" | \"browser\" | \"session\""
@@ -543,7 +1114,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 40
+          "lineNumber": 58
         },
         "signature": [
           "{ kibana?: boolean | undefined; browser?: boolean | undefined; session?: boolean | undefined; }"
@@ -588,7 +1159,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 59
+          "lineNumber": 78
         },
         "signature": [
           "ProjectConfig & { status: ProjectStatus; }"
@@ -603,10 +1174,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 36
+          "lineNumber": 54
         },
         "signature": [
-          "\"labs:presentation:unifiedToolbar\""
+          "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
         ],
         "initialIsOpen": false
       },
@@ -618,7 +1189,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 44
+          "lineNumber": 62
         },
         "signature": [
           "{ defaultValue: boolean; isEnabled: boolean; isOverride: boolean; } & EnvironmentStatus"
@@ -633,7 +1204,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 38
+          "lineNumber": 56
         },
         "signature": [
           "\"dashboard\" | \"canvas\" | \"presentation\""
@@ -642,16 +1213,31 @@
       },
       {
         "tags": [],
-        "id": "def-common.UNIFIED_TOOLBAR",
+        "id": "def-common.TIME_TO_PRESENT",
         "type": "string",
-        "label": "UNIFIED_TOOLBAR",
+        "label": "TIME_TO_PRESENT",
+        "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 12
+        },
+        "signature": [
+          "\"labs:presentation:timeToPresent\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.USE_DATA_SERVICE",
+        "type": "string",
+        "label": "USE_DATA_SERVICE",
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
           "lineNumber": 11
         },
         "signature": [
-          "\"labs:presentation:unifiedToolbar\""
+          "\"labs:canvas:useDataService\""
         ],
         "initialIsOpen": false
       }
@@ -665,7 +1251,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 14
+          "lineNumber": 15
         },
         "signature": [
           "readonly [\"kibana\", \"browser\", \"session\"]"
@@ -680,10 +1266,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 13
+          "lineNumber": 14
         },
         "signature": [
-          "readonly [\"labs:presentation:unifiedToolbar\"]"
+          "readonly [\"labs:presentation:timeToPresent\", \"labs:canvas:useDataService\"]"
         ],
         "initialIsOpen": false
       },
@@ -693,33 +1279,33 @@
         "tags": [],
         "children": [
           {
-            "id": "def-common.projects.UNIFIED_TOOLBAR",
+            "id": "def-common.projects.TIME_TO_PRESENT",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-common.projects.UNIFIED_TOOLBAR.id",
+                "id": "def-common.projects.TIME_TO_PRESENT.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 23
+                  "lineNumber": 24
                 },
                 "signature": [
-                  "\"labs:presentation:unifiedToolbar\""
+                  "\"labs:presentation:timeToPresent\""
                 ]
               },
               {
                 "tags": [],
-                "id": "def-common.projects.UNIFIED_TOOLBAR.isActive",
+                "id": "def-common.projects.TIME_TO_PRESENT.isActive",
                 "type": "boolean",
                 "label": "isActive",
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 24
+                  "lineNumber": 25
                 },
                 "signature": [
                   "false"
@@ -727,13 +1313,27 @@
               },
               {
                 "tags": [],
-                "id": "def-common.projects.UNIFIED_TOOLBAR.environments",
+                "id": "def-common.projects.TIME_TO_PRESENT.isDisplayed",
+                "type": "boolean",
+                "label": "isDisplayed",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 26
+                },
+                "signature": [
+                  "false"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.TIME_TO_PRESENT.environments",
                 "type": "Array",
                 "label": "environments",
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 25
+                  "lineNumber": 27
                 },
                 "signature": [
                   "(\"kibana\" | \"browser\" | \"session\")[]"
@@ -741,46 +1341,151 @@
               },
               {
                 "tags": [],
-                "id": "def-common.projects.UNIFIED_TOOLBAR.name",
+                "id": "def-common.projects.TIME_TO_PRESENT.name",
                 "type": "string",
                 "label": "name",
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 26
+                  "lineNumber": 28
                 }
               },
               {
                 "tags": [],
-                "id": "def-common.projects.UNIFIED_TOOLBAR.description",
+                "id": "def-common.projects.TIME_TO_PRESENT.description",
                 "type": "string",
                 "label": "description",
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 29
+                  "lineNumber": 31
                 }
               },
               {
                 "tags": [],
-                "id": "def-common.projects.UNIFIED_TOOLBAR.solutions",
+                "id": "def-common.projects.TIME_TO_PRESENT.solutions",
                 "type": "Array",
                 "label": "solutions",
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 32
+                  "lineNumber": 34
                 },
                 "signature": [
-                  "(\"dashboard\" | \"canvas\")[]"
+                  "\"canvas\"[]"
                 ]
               }
             ],
             "description": [],
-            "label": "[UNIFIED_TOOLBAR]",
+            "label": "[TIME_TO_PRESENT]",
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 22
+              "lineNumber": 23
+            }
+          },
+          {
+            "id": "def-common.projects.USE_DATA_SERVICE",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-common.projects.USE_DATA_SERVICE.id",
+                "type": "string",
+                "label": "id",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 37
+                },
+                "signature": [
+                  "\"labs:canvas:useDataService\""
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.USE_DATA_SERVICE.isActive",
+                "type": "boolean",
+                "label": "isActive",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 38
+                },
+                "signature": [
+                  "true"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.USE_DATA_SERVICE.isDisplayed",
+                "type": "boolean",
+                "label": "isDisplayed",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 39
+                },
+                "signature": [
+                  "true"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.USE_DATA_SERVICE.environments",
+                "type": "Array",
+                "label": "environments",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 40
+                },
+                "signature": [
+                  "(\"kibana\" | \"browser\" | \"session\")[]"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.USE_DATA_SERVICE.name",
+                "type": "string",
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 41
+                }
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.USE_DATA_SERVICE.description",
+                "type": "string",
+                "label": "description",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 44
+                }
+              },
+              {
+                "tags": [],
+                "id": "def-common.projects.USE_DATA_SERVICE.solutions",
+                "type": "Array",
+                "label": "solutions",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/presentation_util/common/labs.ts",
+                  "lineNumber": 50
+                },
+                "signature": [
+                  "\"canvas\"[]"
+                ]
+              }
+            ],
+            "description": [],
+            "label": "[USE_DATA_SERVICE]",
+            "source": {
+              "path": "src/plugins/presentation_util/common/labs.ts",
+              "lineNumber": 36
             }
           }
         ],
@@ -790,7 +1495,7 @@
         "label": "projects",
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 21
+          "lineNumber": 22
         },
         "initialIsOpen": false
       },
@@ -802,7 +1507,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 15
+          "lineNumber": 16
         },
         "signature": [
           "readonly [\"canvas\", \"dashboard\", \"presentation\"]"
