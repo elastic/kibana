@@ -56,8 +56,8 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
   isInvalid: boolean;
-  errors: string[];
-  warnings: string[];
+  errors: React.ReactNode[];
+  warnings: React.ReactNode[];
 }
 interface ValidationResult {
   /** Overall indicator if form is valid */
@@ -75,7 +75,7 @@ const addResultToValidation = (
   validation: ValidationResult,
   field: keyof NewTrustedApp,
   type: 'warnings' | 'errors',
-  resultValue: string
+  resultValue: React.ReactNode
 ) => {
   if (!validation.result[field]) {
     validation.result[field] = {
@@ -84,7 +84,8 @@ const addResultToValidation = (
       warnings: [],
     };
   }
-  validation.result[field]![type].push(resultValue);
+  const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
+  validation.result[field]![type].push(errorMarkup);
   validation.result[field]!.isInvalid = true;
 };
 
