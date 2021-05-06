@@ -24,33 +24,35 @@ export const buildEventsHistogramQuery = ({
   threshold,
   includeMissingData = true,
 }: MatrixHistogramRequestOptions) => {
+  const [queryFilterFirstClause, ...queryFilterClauses] = createQueryFilterClauses(filterQuery);
+  const stackByIpField =
+    stackByField != null &&
+    showAllOthersBucket.includes(stackByField) &&
+    stackByField.endsWith('.ip');
+
   const filter = [
     ...[
-      ...createQueryFilterClauses(filterQuery),
       {
+        ...queryFilterFirstClause,
         bool: {
-          ...createQueryFilterClauses(filterQuery)[0].bool,
-          ...(stackByField != null &&
-          showAllOthersBucket.includes(stackByField) &&
-          stackByField.endsWith('.ip') &&
-          includeMissingData
-            ? {
-                must_not: [
+          ...(queryFilterFirstClause.bool || {}),
+          must_not: [
+            ...(queryFilterFirstClause.bool?.must_not || []),
+            ...(stackByIpField && includeMissingData
+              ? [
                   {
                     exists: {
                       field: stackByField,
                     },
                   },
-                ],
-              }
-            : {}),
+                ]
+              : []),
+          ],
         },
       },
+      ...queryFilterClauses,
     ],
-    ...(stackByField != null &&
-    showAllOthersBucket.includes(stackByField) &&
-    !includeMissingData &&
-    stackByField.endsWith('.ip')
+    ...(stackByIpField && !includeMissingData
       ? [
           {
             exists: {
