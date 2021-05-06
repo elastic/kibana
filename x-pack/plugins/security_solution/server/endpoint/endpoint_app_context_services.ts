@@ -185,7 +185,10 @@ export class EndpointAppContextService {
     return this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
   }
 
-  public getLicenseService(): LicenseService | undefined {
+  public getLicenseService(): LicenseService {
+    if (!this.license) {
+      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+    }
     return this.license;
   }
 }

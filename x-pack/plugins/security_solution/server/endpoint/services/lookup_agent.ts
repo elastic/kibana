@@ -23,8 +23,8 @@ export async function getAgentIDsForEndpoints(
   const query = getESQueryHostMetadataByIDs(endpointIDs, queryStrategy!);
   const esClient = requestHandlerContext.core.elasticsearch.client.asCurrentUser;
   // @ts-expect-error
-  const { body }: { body: SearchResponse<HostMetadata> } = await esClient.search(query);
-  const hosts = queryStrategy!.queryResponseToHostListResult(body);
+  const { body } = await esClient.search<HostMetadata>(query);
+  const hosts = queryStrategy!.queryResponseToHostListResult(body as SearchResponse<HostMetadata>);
 
   return hosts.resultList.map((x: HostMetadata): string => x.elastic.agent.id);
 }

@@ -102,6 +102,7 @@ export const isolationRequestHandler = function (
       const newIDs = await getAgentIDsForEndpoints(req.body.endpoint_ids, context, endpointContext);
       agentIDs = agentIDs.concat(newIDs);
     }
+    agentIDs = [...new Set(agentIDs)]; // dedupe
 
     // create an Action ID and dispatch it to ES & Fleet Server
     const esClient = context.core.elasticsearch.client.asCurrentUser;
