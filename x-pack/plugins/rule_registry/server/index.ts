@@ -13,6 +13,7 @@ export { RuleRegistryPluginSetupContract } from './plugin';
 export { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
 export { FieldMapOf } from './types';
 export { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
+export { RuleType } from './types';
 
 export const config = {
   schema: schema.object({
