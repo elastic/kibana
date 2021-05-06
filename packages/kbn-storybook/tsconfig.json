@@ -10,5 +10,5 @@
     "sourceRoot": "../../../../packages/kbn-storybook",
     "types": ["node"]
   },
-  "include": ["*.ts", "lib/**/*.ts", "lib/**/*.tsx"]
+  "include": ["*.ts", "lib/**/*.ts", "lib/**/*.tsx", "../../typings/index.d.ts"]
 }
