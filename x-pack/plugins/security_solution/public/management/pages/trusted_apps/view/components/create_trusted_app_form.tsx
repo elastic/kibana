@@ -27,9 +27,7 @@ import {
 } from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
-  isValidPath,
-  isWindowsWildcardPathValid,
-  isLinuxMacWildcardPathValid,
+  isPathValid,
 } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -134,13 +132,6 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
     );
   } else {
     values.entries.forEach((entry, index) => {
-      const isPathValid =
-        entry.type === 'wildcard'
-          ? values.os === OperatingSystem.WINDOWS
-            ? isWindowsWildcardPathValid(entry.value)
-            : isLinuxMacWildcardPathValid(entry.value)
-          : isValidPath({ value: entry.value, os: values.os });
-
       if (!entry.field || !entry.value.trim()) {
         isValid = false;
         addResultToValidation(
@@ -166,7 +157,9 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
             values: { row: index + 1 },
           })
         );
-      } else if (entry.field === ConditionEntryField.PATH && !isPathValid) {
+      } else if (
+        !isPathValid({ os: values.os, field: entry.field, type: entry.type, value: entry.value })
+      ) {
         // show soft warnings and thus allow entry
         isValid = true;
         addResultToValidation(

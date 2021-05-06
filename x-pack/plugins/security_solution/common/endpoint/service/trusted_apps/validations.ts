@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../../types';
+import {
+  ConditionEntry,
+  ConditionEntryField,
+  OperatingSystem,
+  TrustedAppEntryTypes,
+} from '../../types';
 
 const HASH_LENGTHS: readonly number[] = [
   32, // MD5
@@ -29,8 +34,30 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
     .map((entry) => entry[0]);
 };
 
+export const isPathValid = ({
+  os,
+  field,
+  type,
+  value,
+}: {
+  os: OperatingSystem;
+  field: ConditionEntryField;
+  type: TrustedAppEntryTypes;
+  value: string;
+}): boolean => {
+  if (field === ConditionEntryField.PATH) {
+    if (type === 'wildcard') {
+      return os === OperatingSystem.WINDOWS
+        ? isWindowsWildcardPathValid(value)
+        : isLinuxMacWildcardPathValid(value);
+    }
+    return doesPathMatchRegex({ value, os });
+  }
+  return true;
+};
+
 // based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L140
-export const isValidPath = ({ os, value }: { os: OperatingSystem; value: string }): boolean => {
+const doesPathMatchRegex = ({ os, value }: { os: OperatingSystem; value: string }): boolean => {
   if (os === OperatingSystem.WINDOWS) {
     const filePathRegex = /^(?:[a-z]:|\\\\[^<>:"'/\\|?*]+\\[^<>:"'/\\|?*]+|%\w+%|)[\\](?:[^<>:"'/\\|?*]+[\\/])*([^<>:"'/\\|?*])+$/i;
     return filePathRegex.test(value);
@@ -39,7 +66,7 @@ export const isValidPath = ({ os, value }: { os: OperatingSystem; value: string 
 };
 
 // based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L149
-export const isWindowsWildcardPathValid = (path: string): boolean => {
+const isWindowsWildcardPathValid = (path: string): boolean => {
   const firstCharacter = path[0];
   const lastCharacter = path.slice(-1);
   const trimmedValue = path.trim();
@@ -60,7 +87,7 @@ export const isWindowsWildcardPathValid = (path: string): boolean => {
 };
 
 // based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L167
-export const isLinuxMacWildcardPathValid = (path: string): boolean => {
+const isLinuxMacWildcardPathValid = (path: string): boolean => {
   const firstCharacter = path[0];
   const lastCharacter = path.slice(-1);
   const trimmedValue = path.trim();
