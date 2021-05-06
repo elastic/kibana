@@ -251,7 +251,7 @@ You will still see the `X.keyword` field, when available.
 *Lens* provides a set of features to handle missing values for *Area* and *Line* visualization.
 This is useful for sparse data in time series.
 
-To select a different way to represent missing values, click on the *brush* button above the visualization in the editor to see a selection of strategies to handle missing values. The default strategy is to hide the gaps.
+To select a different way to represent missing values, open the *Visual options* menu, then select how to handle missing values. The default is to hide the missing values.
 +
 [role="screenshot"]
 image::images/lens_missing_values_strategy.png[Lens Missing values strategies menu]
