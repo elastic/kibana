@@ -19,6 +19,7 @@ export interface CreateCaseModalProps {
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (theCase: Case) => Promise<void>;
+  owner: string;
 }
 
 const Container = styled.div`
@@ -44,6 +45,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   onSuccess,
   afterCaseCreated,
   onCloseFlyout,
+  owner,
 }) => {
   return (
     <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
@@ -54,7 +56,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <FormWrapper>
-          <FormContext onSuccess={onSuccess} afterCaseCreated={afterCaseCreated}>
+          <FormContext onSuccess={onSuccess} afterCaseCreated={afterCaseCreated} owner={owner}>
             <CreateCaseForm withSteps={false} />
             <Container>
               <SubmitCaseButton />

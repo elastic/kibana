@@ -13,6 +13,7 @@ export interface UseCreateCaseModalProps {
   onCaseCreated: (theCase: Case) => void;
   caseType?: CaseType;
   hideConnectorServiceNowSir?: boolean;
+  owner: string;
 }
 export interface UseCreateCaseModalReturnedValues {
   modal: JSX.Element;
@@ -25,6 +26,7 @@ export const useCreateCaseModal = ({
   caseType = CaseType.individual,
   onCaseCreated,
   hideConnectorServiceNowSir = false,
+  owner,
 }: UseCreateCaseModalProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
@@ -46,12 +48,13 @@ export const useCreateCaseModal = ({
           isModalOpen={isModalOpen}
           onCloseCaseModal={closeModal}
           onSuccess={onSuccess}
+          owner={owner}
         />
       ),
       isModalOpen,
       closeModal,
       openModal,
     }),
-    [caseType, closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal]
+    [caseType, closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal, owner]
   );
 };

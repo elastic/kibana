@@ -138,7 +138,7 @@ describe('Create case', () => {
     it('it renders', async () => {
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -162,7 +162,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -182,7 +182,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -217,7 +217,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -267,7 +267,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -292,7 +292,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -359,7 +359,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -427,7 +427,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -517,7 +517,7 @@ describe('Create case', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess}>
+          <FormContext onSuccess={onFormSubmitSuccess} owner={'securitySolution'}>
             <CreateCaseForm {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -615,7 +615,11 @@ describe('Create case', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
+        <FormContext
+          onSuccess={onFormSubmitSuccess}
+          afterCaseCreated={afterCaseCreated}
+          owner={'securitySolution'}
+        >
           <CreateCaseForm {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -652,7 +656,11 @@ describe('Create case', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
+        <FormContext
+          onSuccess={onFormSubmitSuccess}
+          afterCaseCreated={afterCaseCreated}
+          owner={'securitySolution'}
+        >
           <CreateCaseForm {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>

@@ -20,6 +20,7 @@ const defaultProps = {
   isModalOpen: true,
   onCloseCaseModal,
   onSuccess,
+  owner: 'securitySolution',
 };
 
 describe('CreateCaseModal', () => {

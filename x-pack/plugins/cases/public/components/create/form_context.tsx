@@ -37,6 +37,7 @@ interface Props {
   children?: JSX.Element | JSX.Element[];
   hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
+  owner: string;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -45,6 +46,7 @@ export const FormContext: React.FC<Props> = ({
   children,
   hideConnectorServiceNowSir,
   onSuccess,
+  owner,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
@@ -86,8 +88,7 @@ export const FormContext: React.FC<Props> = ({
           type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
-          // TODO: need to replace this with the value that the plugin registers in the feature registration
-          owner: 'securitySolution',
+          owner,
         });
 
         if (afterCaseCreated && updatedCase) {
@@ -107,13 +108,14 @@ export const FormContext: React.FC<Props> = ({
       }
     },
     [
-      caseType,
       connectors,
       postCase,
-      postComment,
-      onSuccess,
-      pushCaseToExternalService,
+      caseType,
+      owner,
       afterCaseCreated,
+      onSuccess,
+      postComment,
+      pushCaseToExternalService,
     ]
   );
 

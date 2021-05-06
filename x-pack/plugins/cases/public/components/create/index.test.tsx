@@ -91,7 +91,7 @@ describe('CreateCase case', () => {
   it('it renders', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} />
+        <CreateCase {...defaultProps} owner={'securitySolution'} />
       </TestProviders>
     );
 
@@ -102,7 +102,7 @@ describe('CreateCase case', () => {
   it('should call cancel on cancel click', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} />
+        <CreateCase {...defaultProps} owner={'securitySolution'} />
       </TestProviders>
     );
 
@@ -113,7 +113,7 @@ describe('CreateCase case', () => {
   it('should redirect to new case when posting the case', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} />
+        <CreateCase {...defaultProps} owner={'securitySolution'} />
       </TestProviders>
     );
 
