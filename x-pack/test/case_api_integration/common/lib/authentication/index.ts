@@ -24,11 +24,23 @@ export const createSpaces = async (getService: CommonFtrProviderContext['getServ
   }
 };
 
-const createUsersAndRoles = async (getService: CommonFtrProviderContext['getService']) => {
+export const createUsersAndRoles = async (
+  getService: CommonFtrProviderContext['getService'],
+  overrideSpaces?: string[]
+) => {
   const security = getService('security');
 
   const createRole = async ({ name, privileges }: Role) => {
-    return await security.role.create(name, privileges);
+    const modifiedPrivileges = {
+      ...privileges,
+      // for roles that don't have kibana set this will just return undefined
+      kibana: privileges.kibana?.map((kibanaEntry) => ({
+        ...kibanaEntry,
+        spaces: overrideSpaces != null ? overrideSpaces : kibanaEntry.spaces,
+      })),
+    };
+
+    return await security.role.create(name, modifiedPrivileges);
   };
 
   const createUser = async (user: User) => {
@@ -61,7 +73,8 @@ export const deleteSpaces = async (getService: CommonFtrProviderContext['getServ
     }
   }
 };
-const deleteUsersAndRoles = async (getService: CommonFtrProviderContext['getService']) => {
+
+export const deleteUsersAndRoles = async (getService: CommonFtrProviderContext['getService']) => {
   const security = getService('security');
 
   for (const user of users) {
