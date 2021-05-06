@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 import { getAllStats, getLocalStats } from '../../../../lib/telemetry';
 
 /**

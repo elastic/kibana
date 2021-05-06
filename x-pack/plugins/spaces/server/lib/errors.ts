@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 
 export function wrapError(error: any) {
   if (error.isBoom) {

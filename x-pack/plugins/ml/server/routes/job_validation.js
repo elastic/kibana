@@ -6,7 +6,7 @@
 
 
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';

@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 /*
  * Check the currently logged-in user's privileges for "read" privileges on the

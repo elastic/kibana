@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { initPutRolesApi } from './put';
 import { defaultValidationErrorHandler } from '../../../../../../../../src/core/server/http/http_tools';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';

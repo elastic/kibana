@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import Joi from 'joi';
 
 import { loadData } from './lib/load_data';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { Cluster } from '../../../models/cluster';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';

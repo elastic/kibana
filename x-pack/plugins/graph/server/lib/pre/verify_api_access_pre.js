@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export function verifyApiAccessPre(request, h) {
   const xpackInfo = request.server.plugins.xpack_main.info;
