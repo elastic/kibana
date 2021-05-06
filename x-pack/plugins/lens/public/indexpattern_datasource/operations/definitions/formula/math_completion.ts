@@ -371,6 +371,10 @@ export function getSuggestion(
           detail = 'Elasticsearch';
           // Always put ES functions first
           sortText = `0${label}`;
+          command = {
+            title: 'Trigger Suggestion Dialog',
+            id: 'editor.action.triggerSuggest',
+          };
         }
       }
       break;

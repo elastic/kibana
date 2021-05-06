@@ -591,6 +591,7 @@ function FormulaEditor({
                 ),
               ]
             );
+            editor.trigger('lens', 'editor.action.triggerSuggest', {});
           }, 0);
         }
       }
