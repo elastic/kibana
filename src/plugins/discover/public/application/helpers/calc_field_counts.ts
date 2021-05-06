@@ -7,6 +7,7 @@
  */
 
 import { IndexPattern } from '../../kibana_services';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
 
 /**
  * This function is recording stats of the available fields, for usage in sidebar and sharing
@@ -14,7 +15,7 @@ import { IndexPattern } from '../../kibana_services';
  */
 export function calcFieldCounts(
   counts = {} as Record<string, number>,
-  rows: Array<Record<string, unknown>>,
+  rows: ElasticSearchHit[],
   indexPattern: IndexPattern
 ) {
   for (const hit of rows) {
