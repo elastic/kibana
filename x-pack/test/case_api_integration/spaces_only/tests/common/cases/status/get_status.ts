@@ -73,12 +73,19 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace2,
       });
 
-      const statuses = await getAllCasesStatuses({ supertest, auth: authSpace1 });
+      const statusesSpace1 = await getAllCasesStatuses({ supertest, auth: authSpace1 });
+      const statusesSpace2 = await getAllCasesStatuses({ supertest, auth: authSpace2 });
 
-      expect(statuses).to.eql({
+      expect(statusesSpace1).to.eql({
         count_open_cases: 1,
         count_closed_cases: 0,
         count_in_progress_cases: 1,
+      });
+
+      expect(statusesSpace2).to.eql({
+        count_open_cases: 0,
+        count_closed_cases: 1,
+        count_in_progress_cases: 0,
       });
     });
   });

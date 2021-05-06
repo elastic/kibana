@@ -21,6 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
+  const authSpace2 = getAuthWithSuperUser('space2');
 
   describe('get_tags', () => {
     afterEach(async () => {
@@ -29,15 +30,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return case tags in space1', async () => {
       await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
-      await createCase(
-        supertest,
-        getPostCaseRequest({ tags: ['unique'] }),
-        200,
-        getAuthWithSuperUser('space2')
-      );
+      await createCase(supertest, getPostCaseRequest({ tags: ['unique'] }), 200, authSpace2);
 
-      const tags = await getTags({ supertest, auth: authSpace1 });
-      expect(tags).to.eql(['defacement']);
+      const tagsSpace1 = await getTags({ supertest, auth: authSpace1 });
+      const tagsSpace2 = await getTags({ supertest, auth: authSpace2 });
+
+      expect(tagsSpace1).to.eql(['defacement']);
+      expect(tagsSpace2).to.eql(['unique']);
     });
   });
 };
