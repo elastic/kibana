@@ -11,6 +11,9 @@ import { NonEmptyString } from '../../../shared_imports';
 
 import { nonEmptyEndpointNestedEntriesArray } from './non_empty_nested_entries_array';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const endpointEntryNested = t.exact(
   t.type({
     entries: nonEmptyEndpointNestedEntriesArray,
@@ -18,4 +21,8 @@ export const endpointEntryNested = t.exact(
     type: t.keyof({ nested: null }),
   })
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type EndpointEntryNested = t.TypeOf<typeof endpointEntryNested>;

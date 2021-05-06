@@ -16,6 +16,7 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 
+import { AggregationContainer } from '@elastic/elasticsearch/api/types';
 import { nodeBuilder, KueryNode } from '../../../../../../src/plugins/data/common';
 
 import { SecurityPluginSetup } from '../../../../security/server';
@@ -33,6 +34,7 @@ import {
   CasesFindRequest,
   CaseStatuses,
   OWNER_FIELD,
+  GetCaseIdsByAlertIdAggs,
 } from '../../../common/api';
 import {
   defaultSortField,
@@ -49,8 +51,13 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { ClientArgs } from '..';
-import { EnsureSOAuthCallback } from '../../client/utils';
+import { combineFilters, EnsureSOAuthCallback } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
+
+interface GetCaseIdsByAlertIdArgs extends ClientArgs {
+  alertId: string;
+  filter?: KueryNode;
+}
 
 interface PushedArgs {
   pushed_at: string;
@@ -209,6 +216,72 @@ export class CaseService {
     private readonly log: Logger,
     private readonly authentication?: SecurityPluginSetup['authc']
   ) {}
+
+  private buildCaseIdsAggs = (size: number = 100): Record<string, AggregationContainer> => ({
+    references: {
+      nested: {
+        path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+      },
+      aggregations: {
+        caseIds: {
+          terms: {
+            field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+            size,
+          },
+        },
+      },
+    },
+  });
+
+  public async getCaseIdsByAlertId({
+    soClient,
+    alertId,
+    filter,
+  }: GetCaseIdsByAlertIdArgs): Promise<
+    SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
+  > {
+    try {
+      this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
+      const combinedFilter = combineFilters([
+        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
+        filter,
+      ]);
+
+      let response = await soClient.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        fields: includeFieldsRequiredForAuthentication(),
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: this.buildCaseIdsAggs(),
+        filter: combinedFilter,
+      });
+      if (response.total > 100) {
+        response = await soClient.find<CommentAttributes, GetCaseIdsByAlertIdAggs>({
+          type: CASE_COMMENT_SAVED_OBJECT,
+          fields: includeFieldsRequiredForAuthentication(),
+          page: 1,
+          perPage: 1,
+          sortField: defaultSortField,
+          aggs: this.buildCaseIdsAggs(response.total),
+          filter: combinedFilter,
+        });
+      }
+      return response;
+    } catch (error) {
+      this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Extracts the case IDs from the alert aggregation
+   */
+  public static getCaseIDsFromAlertAggs(
+    result: SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
+  ): string[] {
+    return result.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
+  }
 
   /**
    * Returns a map of all cases combined with their sub cases if they are collections.

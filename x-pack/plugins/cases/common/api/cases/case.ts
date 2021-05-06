@@ -117,6 +117,10 @@ export const CasesFindRequestRt = rt.partial({
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
+export const CasesByAlertIDRequestRt = rt.partial({
+  owner: rt.union([rt.array(rt.string), rt.string]),
+});
+
 export const CaseResponseRt = rt.intersection([
   CaseAttributesRt,
   rt.type({
@@ -192,6 +196,7 @@ export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;

@@ -150,6 +150,14 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.GetCaseIDsByAlertID]: {
+    type: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'get-case-ids-by-alert-id',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+  },
   [ReadOperations.GetTags]: {
     type: EVENT_TYPES.access,
     name: ReadOperations.GetCase,

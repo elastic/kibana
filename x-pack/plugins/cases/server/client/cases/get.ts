@@ -22,6 +22,8 @@ import {
   throwErrors,
   AllReportersFindRequestRt,
   AllReportersFindRequest,
+  CasesByAlertIDRequest,
+  CasesByAlertIDRequestRt,
 } from '../../../common/api';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common';
 import { createCaseError } from '../../common/error';
@@ -33,6 +35,71 @@ import {
   ensureAuthorized,
   getAuthorizationFilter,
 } from '../utils';
+import { CaseService } from '../../services';
+
+export interface CaseIDsByAlertIDParams {
+  alertID: string;
+  options: CasesByAlertIDRequest;
+}
+
+/**
+ * Case Client wrapper function for retrieving the case IDs that have a particular alert ID
+ * attached to them. This handles RBAC before calling the saved object API.
+ */
+export const getCaseIDsByAlertID = async (
+  { alertID, options }: CaseIDsByAlertIDParams,
+  clientArgs: CasesClientArgs
+): Promise<string[]> => {
+  const { savedObjectsClient, caseService, logger, authorization, auditLogger } = clientArgs;
+
+  try {
+    const queryParams = pipe(
+      excess(CasesByAlertIDRequestRt).decode(options),
+      fold(throwErrors(Boom.badRequest), identity)
+    );
+
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      logSuccessfulAuthorization,
+    } = await getAuthorizationFilter({
+      authorization,
+      operation: Operations.getCaseIDsByAlertID,
+      auditLogger,
+    });
+
+    const filter = combineAuthorizedAndOwnerFilter(
+      queryParams.owner,
+      authorizationFilter,
+      Operations.getCaseIDsByAlertID.savedObjectType
+    );
+
+    const commentsWithAlert = await caseService.getCaseIdsByAlertId({
+      soClient: savedObjectsClient,
+      alertId: alertID,
+      filter,
+    });
+
+    ensureSavedObjectsAreAuthorized(
+      commentsWithAlert.saved_objects.map((comment) => ({
+        owner: comment.attributes.owner,
+        id: comment.id,
+      }))
+    );
+
+    logSuccessfulAuthorization();
+
+    return CaseService.getCaseIDsFromAlertAggs(commentsWithAlert);
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(
+        options
+      )}: ${error}`,
+      error,
+      logger,
+    });
+  }
+};
 
 interface GetParams {
   id: string;
