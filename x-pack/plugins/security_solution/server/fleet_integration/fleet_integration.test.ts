@@ -103,8 +103,8 @@ describe('ingest_integration tests ', () => {
       const artifacts = await getMockArtifacts({ compress: true });
       ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
       ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
-      ARTIFACT_TRUSTED_APPS_MACOS = artifacts[2];
-      ARTIFACT_TRUSTED_APPS_WINDOWS = artifacts[3];
+      ARTIFACT_TRUSTED_APPS_MACOS = artifacts[3];
+      ARTIFACT_TRUSTED_APPS_WINDOWS = artifacts[4];
     });
 
     beforeEach(() => {
