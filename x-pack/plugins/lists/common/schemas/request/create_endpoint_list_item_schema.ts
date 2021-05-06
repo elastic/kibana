@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { DefaultUuid } from '@kbn/securitysolution-io-ts-utils';
+import { DefaultUuid, nonEmptyEndpointEntriesArray } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   ItemId,
@@ -21,7 +21,6 @@ import {
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 import { CreateCommentsArray, DefaultCreateCommentsArray } from '../types';
-import { nonEmptyEndpointEntriesArray } from '../types/endpoint';
 import { EntriesArray } from '../types/entries';
 
 export const createEndpointListItemSchema = t.intersection([

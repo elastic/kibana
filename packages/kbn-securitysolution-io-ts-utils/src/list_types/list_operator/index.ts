@@ -8,14 +8,14 @@
 
 import * as t from 'io-ts';
 
-export const operator = t.keyof({ excluded: null, included: null });
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
+export const listOperator = t.keyof({ excluded: null, included: null });
+export type ListOperator = t.TypeOf<typeof listOperator>;
+export enum ListOperatorEnum {
   INCLUDED = 'included',
   EXCLUDED = 'excluded',
 }
 
-export enum OperatorTypeEnum {
+export enum ListOperatorTypeEnum {
   NESTED = 'nested',
   MATCH = 'match',
   MATCH_ANY = 'match_any',
