@@ -11,15 +11,10 @@ import { TopValues } from '../../../index_based/components/field_data_row/top_va
 import { ChoroplethMap } from '../../../index_based/components/field_data_row/choropleth_map';
 import { useMlKibana } from '../../../../../application/contexts/kibana';
 import { EMSTermJoinConfig } from '../../../../../../../maps/public';
+import { COMMON_EMS_LAYER_IDS } from '../../../../../../common/constants/embeddable_map';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
-
-const COMMON_EMS_LAYER_IDS = [
-  'world_countries',
-  'administrative_regions_lvl2',
-  'usa_zip_codes',
-  'usa_states',
-];
+// import { EmbeddedMapComponent } from '../../embedded_map';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();
