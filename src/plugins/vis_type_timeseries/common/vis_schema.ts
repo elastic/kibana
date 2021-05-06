@@ -215,6 +215,7 @@ export const panel = schema.object({
   background_color_rules: schema.maybe(schema.arrayOf(backgroundColorRulesItems)),
   drilldown_url: stringOptional,
   drop_last_bucket: numberIntegerOptional,
+  ignore_daylight_time: schema.boolean(),
   filter: schema.maybe(queryObject),
   gauge_color_rules: schema.maybe(schema.arrayOf(gaugeColorRulesItems)),
   gauge_width: schema.nullable(schema.oneOf([stringOptionalNullable, numberOptional])),
