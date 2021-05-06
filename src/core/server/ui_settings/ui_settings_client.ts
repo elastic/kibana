@@ -7,7 +7,6 @@
  */
 
 import { omit } from 'lodash';
-import { deepFreeze } from '@kbn/std';
 
 import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
@@ -87,7 +86,7 @@ export class UiSettingsClient implements IUiSettingsClient {
       }
     });
 
-    deepFreeze(result);
+    Object.freeze(result);
     return result as Record<string, T>;
   }
 
