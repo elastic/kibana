@@ -12,6 +12,7 @@ import { Either } from 'fp-ts/lib/Either';
  * Types the positive integer greater than zero is:
  *   - Natural Number (positive integer and not a float),
  *   - 1 or greater
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const PositiveIntegerGreaterThanZero = new t.Type<number, number, unknown>(
   'PositiveIntegerGreaterThanZero',
