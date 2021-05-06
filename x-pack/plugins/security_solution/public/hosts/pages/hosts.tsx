@@ -11,6 +11,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { isTab } from '@kbn/securitysolution-t-grid';
 
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
@@ -42,7 +43,6 @@ import * as i18n from './translations';
 import { filterHostData } from './navigation';
 import { hostsModel } from '../store';
 import { HostsTableType } from '../store/model';
-import { isTab } from '../../common/components/accessibility/helpers';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,

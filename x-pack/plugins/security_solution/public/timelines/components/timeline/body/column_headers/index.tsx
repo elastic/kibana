@@ -16,7 +16,12 @@ import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import {
+  ControlColumnProps,
+  HeaderActionProps,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 import { OnSelectAll } from '../../events';
 import {
   EventsTh,
@@ -27,8 +32,6 @@ import {
 } from '../../styles';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
-import { ControlColumnProps } from '../control_columns';
-import { HeaderActionProps } from '../actions/header_actions';
 
 interface Props {
   actionsColumnWidth: number;

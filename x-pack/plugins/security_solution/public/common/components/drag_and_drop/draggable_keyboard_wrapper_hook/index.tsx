@@ -7,10 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { FluidDragActions } from 'react-beautiful-dnd';
-
-import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
-
-import { draggableKeyDownHandler } from '../helpers';
+import { draggableKeyDownHandler, useAddToTimeline } from '@kbn/securitysolution-t-grid';
 
 interface Props {
   closePopover?: () => void;

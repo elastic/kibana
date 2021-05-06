@@ -18,17 +18,14 @@ export interface TimelinesPluginSetup {
     type: EmbeddedProps['type']
   ) => ReduxDeps | ((type: StandaloneProps['type']) => Store);
 }
-
 export interface ReduxDeps {
   actions: typeof tGridActions;
   reducer: typeof tGridReducer;
   initialState: TimelineState;
 }
-
 interface StandaloneProps {
   type: 'standalone';
 }
-
 interface EmbeddedProps {
   type: 'embedded';
 }

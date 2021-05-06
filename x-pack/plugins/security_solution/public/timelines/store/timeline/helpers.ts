@@ -8,7 +8,6 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import uuid from 'uuid';
-import { ToggleDetailPanel } from './actions';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { Sort } from '../../../timelines/components/timeline/body/sort';
@@ -20,7 +19,6 @@ import {
   IS_OPERATOR,
   EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
@@ -31,6 +29,8 @@ import {
   TimelineStatus,
   TimelineId,
   TimelineTabs,
+  SerializedFilterQuery,
+  ToggleDetailPanel,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 

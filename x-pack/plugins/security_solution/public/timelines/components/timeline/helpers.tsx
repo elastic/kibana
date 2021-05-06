@@ -14,7 +14,7 @@ import {
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../common/components/accessibility/helpers';
+} from '@kbn/securitysolution-t-grid';
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
 import {

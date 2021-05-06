@@ -14,6 +14,7 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 import { History } from 'history';
+import { LastUpdatedAt } from '@kbn/securitysolution-t-grid';
 
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
@@ -26,7 +27,6 @@ import { Loader } from '../../../../../../common/components/loader';
 import { Panel } from '../../../../../../common/components/panel';
 import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
-import { LastUpdatedAt } from '../../../../../../common/components/last_updated';
 import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';

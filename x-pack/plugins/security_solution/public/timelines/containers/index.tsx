@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
 
 import { ESQuery } from '../../../common/typed_json';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
-import { inputsModel, KueryFilterQueryKind } from '../../common/store';
+import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../../timelines/store/timeline';
@@ -32,7 +32,7 @@ import {
 } from '../../../common/search_strategy';
 import { InspectResponse } from '../../types';
 import * as i18n from './translations';
-import { TimelineId } from '../../../common/types/timeline';
+import { KueryFilterQueryKind, TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
 import {

@@ -32,7 +32,13 @@ import { Footer, footerHeight } from '../footer';
 import { calculateTotalPages } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { useManageTimeline } from '../../manage_timeline';
-import { TimelineEventsType, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import {
+  ControlColumnProps,
+  TimelineEventsType,
+  TimelineId,
+  TimelineTabs,
+  ToggleDetailPanel,
+} from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
@@ -48,10 +54,9 @@ import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
-import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
-import { defaultControlColumn, ControlColumnProps } from '../body/control_columns';
+import { defaultControlColumn } from '../body/control_columns';
 import { Sort } from '../body/sort';
 
 const TimelineHeaderContainer = styled.div`

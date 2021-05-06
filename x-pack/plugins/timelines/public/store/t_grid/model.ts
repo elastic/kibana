@@ -5,36 +5,14 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
-import { IFieldSubType } from '../../../../../../src/plugins/data/public';
 import { TimelineNonEcsData } from '../../../../security_solution/common/search_strategy';
 import {
+  ColumnHeaderOptions,
   RowRendererId,
   TimelineExpandedDetail,
   SortColumnTimeline,
 } from '../../../../security_solution/common/types/timeline';
 
-export type ColumnHeaderType = 'not-filtered' | 'text-filter';
-
-/** Uniquely identifies a column */
-export type ColumnId = string;
-
-/** The specification of a column header */
-export type ColumnHeaderOptions = Pick<
-  EuiDataGridColumn,
-  'display' | 'displayAsText' | 'id' | 'initialWidth'
-> & {
-  aggregatable?: boolean;
-  category?: string;
-  columnHeaderType: ColumnHeaderType;
-  description?: string;
-  example?: string;
-  format?: string;
-  linkField?: string;
-  placeholder?: string;
-  subType?: IFieldSubType;
-  type?: string;
-};
 export interface TGridModel {
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
@@ -59,6 +37,8 @@ export interface TGridModel {
   itemsPerPageOptions: number[];
   /** Events to be rendered as loading **/
   loadingEventIds: string[];
+  /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
+  showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: SortColumnTimeline[];
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/

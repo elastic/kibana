@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
-
-import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
-import {
-  EqlOptionsSelected,
-  TimelineNonEcsData,
-} from '../../../../common/search_strategy/timeline';
-import { SerializedFilterQuery } from '../../../common/store/types';
+import { EqlOptionsSelected } from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
+  ColumnHeaderOptions,
+  SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-
-import { ColumnHeaderOptions, TGridModel } from '../../../../../timelines/public';
+import { TGridModel } from '../../../../../timelines/public';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -84,8 +79,6 @@ export type TimelineModel = TGridModel & {
   savedQueryId?: string | null;
   /** When true, show the timeline flyover */
   show: boolean;
-  /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
-  showCheckboxes: boolean;
   /** status: active | draft */
   status: TimelineStatus;
   /** updated saved object timestamp */

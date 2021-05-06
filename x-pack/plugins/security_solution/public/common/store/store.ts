@@ -15,7 +15,6 @@ import {
   Dispatch,
   PreloadedState,
   CombinedState,
-  AnyAction,
 } from 'redux';
 
 import { createEpicMiddleware } from 'redux-observable';

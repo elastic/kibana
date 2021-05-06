@@ -6,6 +6,7 @@
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   Draggable,
@@ -26,7 +27,7 @@ import { TruncatableText } from '../truncatable_text';
 import { WithHoverActions } from '../with_hover_actions';
 import { useDraggableKeyboardWrapper } from './draggable_keyboard_wrapper_hook';
 import { DraggableWrapperHoverContent, useGetTimelineId } from './draggable_wrapper_hover_content';
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME, getDraggableId, getDroppableId } from './helpers';
+import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
 
 import * as i18n from './translations';

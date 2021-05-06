@@ -4,17 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  Action,
-  applyMiddleware,
-  compose,
-  createStore,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
-  CombinedState,
-} from 'redux';
+import { createStore } from 'redux';
 export * from './model';
 import * as tGridActions from './actions';
 export * as tGridActions from './actions';

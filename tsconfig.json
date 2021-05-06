@@ -19,7 +19,7 @@
     "x-pack/plugins/lists/**/*",
     "x-pack/plugins/security_solution/**/*",
     "x-pack/plugins/timelines/**/*"
-  ],
+, "packages/kbn-securitysolution-t-grid/src/components/last_updated"  ],
   "exclude": [
     "x-pack/plugins/security_solution/cypress/**/*"
   ],

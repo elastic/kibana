@@ -13,6 +13,10 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import {
+  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
+  IS_DRAGGING_CLASS_NAME,
+} from '@kbn/securitysolution-t-grid';
 import { timelineActions } from '../../../store/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
@@ -20,10 +24,8 @@ import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_
 import { AddDataProviderPopover } from './add_data_provider_popover';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
-  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
-  IS_DRAGGING_CLASS_NAME,
 } from '../../../../common/components/drag_and_drop/helpers';
 
 import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';

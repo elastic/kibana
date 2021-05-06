@@ -13,7 +13,7 @@ import {
   elementOrChildrenHasFocus,
   skipFocusInContainerTo,
   stopPropagationAndPreventDefault,
-} from '../../../common/components/accessibility/helpers';
+} from '@kbn/securitysolution-t-grid';
 import { TimelineId } from '../../../../common/types/timeline';
 import { BrowserField, BrowserFields } from '../../../common/containers/source';
 import { alertsHeaders } from '../../../common/components/alerts_viewer/default_headers';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { eventHit } from '../../../../../../common/utils/mock_event_details';
-import { EventHit } from '../../../../../../common/search_strategy';
+import { EventHit } from '../../../../../../../security_solution/common/search_strategy';
+import { eventHit } from '../../../../../../../security_solution/common/utils/mock_event_details';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { buildFieldsRequest, buildObjectForFieldPath, formatTimelineData } from './helpers';
 

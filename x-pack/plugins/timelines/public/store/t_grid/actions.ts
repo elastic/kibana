@@ -8,11 +8,11 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineNonEcsData } from '../../../../security_solution/common/search_strategy';
 import {
+  ColumnHeaderOptions,
   SortColumnTimeline,
   TimelineExpandedDetailType,
   TimelineTabs,
 } from '../../../../security_solution/common/types/timeline';
-import { ColumnHeaderOptions, TGridModel } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 

@@ -15,11 +15,13 @@ import {
 import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
+import {
+  stopPropagationAndPreventDefault,
+  TooltipWithKeyboardShortcut,
+  useAddToTimeline,
+} from '@kbn/securitysolution-t-grid';
 
-import { stopPropagationAndPreventDefault } from '../accessibility/helpers';
-import { TooltipWithKeyboardShortcut } from '../accessibility/tooltip_with_keyboard_shortcut';
 import { getAllFieldsByName } from '../../containers/source';
-import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../lib/clipboard/clipboard';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';

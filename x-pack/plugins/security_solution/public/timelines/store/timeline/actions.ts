@@ -13,7 +13,6 @@ import {
   DataProviderType,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { SerializedFilterQuery } from '../../../common/store/types';
 
 import { KqlMode, TimelineModel } from './model';
 import { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
@@ -22,6 +21,7 @@ import {
   RowRendererId,
   TimelineTabs,
   TimelineInput,
+  SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 import { TGridActions } from '../../../../../timelines/public';

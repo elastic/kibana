@@ -9,7 +9,8 @@ import { omit, union } from 'lodash/fp';
 
 import { ToggleDetailPanel } from './actions';
 import { TimelineById, TimelineId } from './types';
-import { TGridModel, ColumnHeaderOptions } from './model';
+import { TGridModel } from './model';
+import { ColumnHeaderOptions } from '../../../../security_solution/common/types/timeline';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;

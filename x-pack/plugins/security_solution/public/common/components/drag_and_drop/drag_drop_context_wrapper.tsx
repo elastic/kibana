@@ -11,6 +11,7 @@ import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
+import { IS_DRAGGING_CLASS_NAME, useAddToTimelineSensor } from '@kbn/securitysolution-t-grid';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
@@ -23,7 +24,6 @@ import {
   ADDED_TO_TIMELINE_MESSAGE,
   ADDED_TO_TIMELINE_TEMPLATE_MESSAGE,
 } from '../../hooks/translations';
-import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
 import { displaySuccessToast, useStateToaster } from '../toasters';
 import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import {
@@ -31,7 +31,6 @@ import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
   getTimelineIdFromColumnDroppableId,
-  IS_DRAGGING_CLASS_NAME,
   IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
   draggableIsField,

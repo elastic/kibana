@@ -23,45 +23,9 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId, ActionProps } from '../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
-import { Ecs } from '../../../../../../common/ecs';
-import { inputsModel } from '../../../../../common/store';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
-import { RowCellRender } from '../control_columns';
-
-interface Props {
-  ariaRowindex: number;
-  action?: RowCellRender;
-  width?: number;
-  columnId: string;
-  columnValues: string;
-  checked: boolean;
-  onRowSelected: OnRowSelected;
-  eventId: string;
-  loadingEventIds: Readonly<string[]>;
-  onEventDetailsPanelOpened: () => void;
-  showCheckboxes: boolean;
-  data: TimelineNonEcsData[];
-  ecsData: Ecs;
-  index: number;
-  eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  isEventPinned: boolean;
-  isEventViewer?: boolean;
-  onPinEvent: OnPinEvent;
-  onUnPinEvent: OnUnPinEvent;
-  refetch: inputsModel.Refetch;
-  rowIndex: number;
-  onRuleChange?: () => void;
-  showNotes: boolean;
-  tabType?: TimelineTabs;
-  timelineId: string;
-  toggleShowNotes: () => void;
-}
-
-export type ActionProps = Props;
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,

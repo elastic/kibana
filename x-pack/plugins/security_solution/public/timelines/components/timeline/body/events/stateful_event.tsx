@@ -8,10 +8,11 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { CellValueElementProps } from '../../cell_rendering';
-import { ControlColumnProps } from '../control_columns';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
+  CellValueElementProps,
+  ControlColumnProps,
+  RowRenderer,
   TimelineExpandedDetailType,
   TimelineId,
   TimelineTabs,
@@ -25,7 +26,6 @@ import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/mod
 import { OnPinEvent, OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
-import { RowRenderer } from '../renderers/row_renderer';
 import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';

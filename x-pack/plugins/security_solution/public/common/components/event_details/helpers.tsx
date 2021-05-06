@@ -15,7 +15,7 @@ import {
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../accessibility/helpers';
+} from '@kbn/securitysolution-t-grid';
 import { BrowserField, BrowserFields } from '../../containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import {

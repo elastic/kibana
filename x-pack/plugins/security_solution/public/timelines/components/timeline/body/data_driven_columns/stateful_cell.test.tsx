@@ -9,10 +9,9 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React, { useEffect } from 'react';
 
-import { CellValueElementProps } from '../../cell_rendering';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { CellValueElementProps, TimelineTabs } from '../../../../../../common/types/timeline';
 import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 
 import { StatefulCell } from './stateful_cell';

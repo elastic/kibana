@@ -14,7 +14,7 @@ import {
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../common/components/accessibility/helpers';
+} from '@kbn/securitysolution-t-grid';
 import { BrowserFields } from '../../../common/containers/source';
 
 import { getCategoryColumns } from './category_columns';

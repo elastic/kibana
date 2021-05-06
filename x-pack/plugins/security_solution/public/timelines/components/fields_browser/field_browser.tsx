@@ -19,11 +19,7 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import {
-  isEscape,
-  isTab,
-  stopPropagationAndPreventDefault,
-} from '../../../common/components/accessibility/helpers';
+import { isEscape, isTab, stopPropagationAndPreventDefault } from '@kbn/securitysolution-t-grid';
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { CategoriesPane } from './categories_pane';

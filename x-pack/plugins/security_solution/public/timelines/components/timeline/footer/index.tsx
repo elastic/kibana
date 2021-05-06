@@ -24,14 +24,13 @@ import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { LoadingPanel } from '../../loading';
+import { LoadingPanel, LastUpdatedAt } from '@kbn/securitysolution-t-grid';
 import { OnChangePage } from '../events';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
 import { useManageTimeline } from '../../manage_timeline';
-import { LastUpdatedAt } from '../../../../common/components/last_updated';
 import { timelineActions } from '../../../store/timeline';
 
 export const isCompactFooter = (width: number): boolean => width < 600;

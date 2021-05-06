@@ -2706,6 +2706,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-t-grid@link:bazel-bin/packages/kbn-securitysolution-t-grid/npm_module":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-utils@link:bazel-bin/packages/kbn-securitysolution-utils/npm_module":
   version "0.0.0"
   uid ""

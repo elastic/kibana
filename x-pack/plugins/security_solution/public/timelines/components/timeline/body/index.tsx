@@ -11,16 +11,20 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { CellValueElementProps } from '../cell_rendering';
-import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import { ControlColumnProps } from './control_columns';
-import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../../common/components/accessibility/helpers';
+} from '@kbn/securitysolution-t-grid';
+import { CellValueElementProps } from '../cell_rendering';
+import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
+import {
+  ControlColumnProps,
+  RowRendererId,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';

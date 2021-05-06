@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { isTab } from '@kbn/securitysolution-t-grid';
 import { esQuery } from '../../../../../../src/plugins/data/public';
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
@@ -46,7 +47,6 @@ import {
   showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
-import { isTab } from '../../common/components/accessibility/helpers';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../common/containers/sourcerer';

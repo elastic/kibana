@@ -50,7 +50,7 @@ import { hasMlAdminPermissions } from '../../../../../../common/machine_learning
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
-import { LastUpdatedAt } from '../../../../../common/components/last_updated';
+import { LastUpdatedAt } from '../../../../../../../../../packages/kbn-securitysolution-t-grid/src/components/last_updated';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { AllRulesTabs } from '.';
 

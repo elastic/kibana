@@ -16,7 +16,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
-import { EventsViewer } from './events_viewer';
+import { EventsViewer } from '../../../../../timelines/public/components/t_grid/integrated';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';

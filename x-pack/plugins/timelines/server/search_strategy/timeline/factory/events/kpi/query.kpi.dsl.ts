@@ -12,6 +12,7 @@ import {
   TimerangeInput,
   TimelineRequestBasicOptions,
 } from '../../../../../../../security_solution/common/search_strategy';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createQueryFilterClauses } from '../../../../../../../security_solution/server/utils/build_query';
 
 export const buildTimelineKpiQuery = ({

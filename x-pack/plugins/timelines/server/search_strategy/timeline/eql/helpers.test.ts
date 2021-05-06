@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../common/search_strategy';
+import { Direction } from '../../../../../security_solution/common/search_strategy';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';
 

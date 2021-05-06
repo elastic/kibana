@@ -35,17 +35,19 @@ import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../../manage_timeline';
-import { TimelineEventsType, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import {
+  ControlColumnProps,
+  KueryFilterQueryKind,
+  TimelineEventsType,
+  TimelineId,
+  TimelineTabs,
+  ToggleDetailPanel,
+} from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { PickEventType } from '../search_or_filter/pick_events';
-import {
-  inputsModel,
-  inputsSelectors,
-  KueryFilterQueryKind,
-  State,
-} from '../../../../common/store';
+import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
@@ -55,10 +57,9 @@ import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
-import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
-import { defaultControlColumn, ControlColumnProps } from '../body/control_columns';
+import { defaultControlColumn } from '../body/control_columns';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;

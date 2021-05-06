@@ -14,16 +14,16 @@ import { mockIndexNames, mockIndexPattern, TestProviders } from '../../mock';
 
 import { mockEventViewerResponse, mockEventViewerResponseWithEvents } from './mock';
 import { StatefulEventsViewer } from '.';
-import { EventsViewer } from './events_viewer';
+import { EventsViewer } from '../../../../../timelines/public/components/t_grid/integrated';
 import { defaultHeaders } from './default_headers';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { mockBrowserFields, mockDocValueFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { inputsModel } from '../../store/inputs';
-import { TimelineId } from '../../../../common/types/timeline';
+import { SortDirection, TimelineId } from '../../../../common/types/timeline';
 import { KqlMode } from '../../../timelines/store/timeline/model';
-import { SortDirection } from '../../../timelines/components/timeline/body/sort';
+
 import { AlertsTableFilterGroup } from '../../../detections/components/alerts_table/alerts_filter_group';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';

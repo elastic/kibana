@@ -9,15 +9,13 @@ import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
+import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
-import {
-  droppableTimelineProvidersPrefix,
-  IS_DRAGGING_CLASS_NAME,
-} from '../../../../common/components/drag_and_drop/helpers';
+import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
 
 import { Empty } from './empty';
 import { Providers } from './providers';

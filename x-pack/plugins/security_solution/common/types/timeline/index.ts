@@ -23,6 +23,11 @@ import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import { Direction, Maybe } from '../../search_strategy';
 
+export * from './actions';
+export * from './cells';
+export * from './columns';
+export * from './data_provider';
+export * from './rows';
 export * from './store';
 
 /*
@@ -492,6 +497,11 @@ export type TimelineExpandedDetailType =
 
 export type TimelineExpandedDetail = {
   [tab in TimelineTabs]?: TimelineExpandedDetailType;
+};
+
+export type ToggleDetailPanel = TimelineExpandedDetailType & {
+  tabType?: TimelineTabs;
+  timelineId: string;
 };
 
 export const pageInfoTimeline = runtimeTypes.type({

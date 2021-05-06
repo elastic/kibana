@@ -36,7 +36,6 @@ import {
   formatTimelineResultToModel,
 } from './helpers';
 import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
-import { KueryFilterQueryKind } from '../../../common/store';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
@@ -45,6 +44,7 @@ import {
   TimelineType,
   TimelineStatus,
   TimelineTabs,
+  KueryFilterQueryKind,
 } from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,

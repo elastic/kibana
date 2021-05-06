@@ -12,13 +12,11 @@ import { Resizable, ResizeCallback } from 're-resizable';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
-import {
-  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
-  getDraggableFieldId,
-} from '../../../../../common/components/drag_and_drop/helpers';
+import { getDraggableFieldId } from '../../../../../common/components/drag_and_drop/helpers';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';

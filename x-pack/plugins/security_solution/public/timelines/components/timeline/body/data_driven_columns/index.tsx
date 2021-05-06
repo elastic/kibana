@@ -8,17 +8,19 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { getOr } from 'lodash/fp';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { CellValueElementProps } from '../../cell_rendering';
-import { ControlColumnProps, RowCellRender } from '../control_columns';
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../../../../../common/components/drag_and_drop/helpers';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import {
+  CellValueElementProps,
+  ActionProps,
+  ControlColumnProps,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
-import { ActionProps } from '../actions';
 import { inputsModel } from '../../../../../common/store';
 import {
   EventsTd,
