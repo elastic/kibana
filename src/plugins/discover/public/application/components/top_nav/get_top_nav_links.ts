@@ -127,7 +127,7 @@ export const getTopNavLinks = ({
           title:
             savedSearch.title ||
             i18n.translate('discover.localMenu.fallbackReportTitle', {
-              defaultMessage: 'New search [{date}]',
+              defaultMessage: 'Discover search [{date}]',
               values: { date: moment().toISOString() },
             }),
         },
