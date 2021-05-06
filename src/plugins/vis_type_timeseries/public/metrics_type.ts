@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
+import uuid from 'uuid/v4';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES } from '../common/panel_types';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
@@ -25,11 +25,11 @@ export const metricsVisDefinition = {
   group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
-      id: uuid.v4(),
+      id: uuid(),
       type: PANEL_TYPES.TIMESERIES,
       series: [
         {
-          id: uuid.v4(),
+          id: uuid(),
           color: '#68BC00',
           split_mode: 'everything',
           palette: {
@@ -38,7 +38,7 @@ export const metricsVisDefinition = {
           },
           metrics: [
             {
-              id: uuid.v4(),
+              id: uuid(),
               type: 'count',
             },
           ],
