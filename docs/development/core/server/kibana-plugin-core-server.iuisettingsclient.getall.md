@@ -9,5 +9,5 @@ Retrieves a set of all uiSettings values set by the user with fallbacks to defau
 <b>Signature:</b>
 
 ```typescript
-getAll: <T = any>() => Promise<Record<string, T>>;
+getAll: <T = any>() => Promise<RecursiveReadonly<Record<string, T>>>;
 ```
