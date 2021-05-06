@@ -18,6 +18,7 @@ export {
   OsType,
   OsTypeArray,
   listOperator as operator,
+  NonEmptyEntriesArray,
 } from '@kbn/securitysolution-io-ts-utils';
 
 export const list_id = NonEmptyString;
