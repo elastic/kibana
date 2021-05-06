@@ -71,7 +71,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
         }}
         showLabels
         showValue
-        aria-label={i18n.translate('xpack.ml.severitySelector.formControlLabel', {
+        aria-label={i18n.translate('xpack.ml.severitySelector.formControlAriaLabel', {
           defaultMessage: 'Select severity threshold',
         })}
         showTicks
