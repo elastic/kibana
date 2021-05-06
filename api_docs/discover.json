@@ -794,9 +794,9 @@
             "lineNumber": 77
           },
           "signature": [
-            "{ addDocView(docViewRaw: ",
-            "DocViewInput",
-            " | ",
+            "{ addDocView(docViewRaw: ComponentDocViewInput | ",
+            "RenderDocViewInput",
+            " | DirectiveDocViewInput | ",
             "DocViewInputFn",
             "): void; }"
           ]

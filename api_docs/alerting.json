@@ -245,7 +245,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 85
+              "lineNumber": 86
             }
           },
           {
@@ -256,7 +256,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 86
+              "lineNumber": 87
             },
             "signature": [
               "Date"
@@ -270,7 +270,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 87
+              "lineNumber": 88
             },
             "signature": [
               "Date | null"
@@ -284,7 +284,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 88
+              "lineNumber": 89
             },
             "signature": [
               {
@@ -305,7 +305,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 89
+              "lineNumber": 90
             },
             "signature": [
               "Params"
@@ -319,7 +319,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 90
+              "lineNumber": 91
             },
             "signature": [
               "State"
@@ -333,7 +333,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 91
+              "lineNumber": 92
             }
           },
           {
@@ -344,7 +344,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 92
+              "lineNumber": 93
             },
             "signature": [
               "string | undefined"
@@ -358,7 +358,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 93
+              "lineNumber": 94
             }
           },
           {
@@ -369,7 +369,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 94
+              "lineNumber": 95
             },
             "signature": [
               "string[]"
@@ -383,7 +383,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "signature": [
               "string | null"
@@ -397,7 +397,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "signature": [
               "string | null"
@@ -406,7 +406,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 78
+          "lineNumber": 79
         },
         "initialIsOpen": false
       },
@@ -477,6 +477,20 @@
               },
               ">"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.AlertingApiRequestHandlerContext.areApiKeysEnabled",
+            "type": "Function",
+            "label": "areApiKeysEnabled",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/server/types.ts",
+              "lineNumber": 49
+            },
+            "signature": [
+              "() => Promise<boolean>"
+            ]
           }
         ],
         "source": {
@@ -500,7 +514,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 219
+              "lineNumber": 220
             },
             "signature": [
               {
@@ -520,7 +534,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 220
+              "lineNumber": 221
             },
             "signature": [
               {
@@ -535,7 +549,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 218
+          "lineNumber": 219
         },
         "initialIsOpen": false
       },
@@ -565,7 +579,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 73
+              "lineNumber": 74
             },
             "signature": [
               "(id: string) => Pick<",
@@ -576,7 +590,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 68
+          "lineNumber": 69
         },
         "initialIsOpen": false
       },
@@ -605,7 +619,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 120
+              "lineNumber": 121
             }
           },
           {
@@ -616,7 +630,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 121
+              "lineNumber": 122
             }
           },
           {
@@ -627,7 +641,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 122
+              "lineNumber": 123
             },
             "signature": [
               "{ params?: ",
@@ -643,7 +657,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 125
+              "lineNumber": 126
             },
             "signature": [
               {
@@ -664,7 +678,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 126
+              "lineNumber": 127
             },
             "signature": [
               "ActionGroupIds"
@@ -678,7 +692,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 127
+              "lineNumber": 128
             },
             "signature": [
               {
@@ -699,7 +713,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 128
+              "lineNumber": 129
             },
             "signature": [
               "ExecutorType",
@@ -722,7 +736,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 139
+              "lineNumber": 140
             }
           },
           {
@@ -733,7 +747,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 140
+              "lineNumber": 141
             },
             "signature": [
               "{ context?: ",
@@ -771,7 +785,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 145
+              "lineNumber": 146
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -780,7 +794,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 112
+          "lineNumber": 113
         },
         "initialIsOpen": false
       },
@@ -1172,7 +1186,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 178
+          "lineNumber": 179
         },
         "signature": [
           "Pick<Alert<Params>, \"id\"> & Partial<Pick<Alert<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"muteAll\" | \"apiKey\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>"
