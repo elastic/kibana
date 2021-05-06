@@ -30,6 +30,11 @@ describe('actions', () => {
     elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
   );
 
+  const nonRetryableError = new Error('crash');
+  const clientWithNonRetryableError = elasticsearchClientMock.createInternalClient(
+    elasticsearchClientMock.createErrorTransportRequestPromise(nonRetryableError)
+  );
+
   describe('fetchIndices', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
       const task = Actions.fetchIndices(client, ['my_index']);
@@ -52,6 +57,11 @@ describe('actions', () => {
       }
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
     });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock(clientWithNonRetryableError, 'my_index');
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
+    });
   });
 
   describe('cloneIndex', () => {
@@ -63,6 +73,11 @@ describe('actions', () => {
         /** ignore */
       }
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock(clientWithNonRetryableError, 'my_index');
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
     });
   });
 
@@ -144,6 +159,11 @@ describe('actions', () => {
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
     });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock(clientWithNonRetryableError, 'my_index');
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
+    });
   });
 
   describe('waitForPickupUpdatedMappingsTask', () => {
@@ -156,6 +176,11 @@ describe('actions', () => {
       }
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock(clientWithNonRetryableError, 'my_index');
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
     });
   });
 
@@ -170,6 +195,11 @@ describe('actions', () => {
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
     });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock(clientWithNonRetryableError, 'my_index');
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
+    });
   });
 
   describe('createIndex', () => {
@@ -182,6 +212,11 @@ describe('actions', () => {
       }
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+    });
+    it('re-throws non retry-able errors', async () => {
+      const task = Actions.setWriteBlock(clientWithNonRetryableError, 'my_index');
+      await task();
+      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
     });
   });
 

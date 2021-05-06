@@ -26,6 +26,8 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+export const DEFAULT_LISTS_INDEX = '.lists';
+export const DEFAULT_ITEMS_INDEX = '.items';
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100;
@@ -50,6 +52,7 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
+export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.indicator.
