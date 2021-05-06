@@ -6,14 +6,13 @@
  */
 
 import * as t from 'io-ts';
-
 import {
   descriptionOrUndefined,
   metaOrUndefined,
   nameOrUndefined,
   updated_at,
   updated_by,
-} from '../common/schemas';
+} from '@kbn/securitysolution-io-ts-utils';
 
 export const updateEsListSchema = t.exact(
   t.type({

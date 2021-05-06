@@ -11,20 +11,18 @@ import {
   DefaultCreateCommentsArray,
   DefaultUuid,
   EntriesArray,
-  nonEmptyEndpointEntriesArray,
-} from '@kbn/securitysolution-io-ts-utils';
-
-import {
-  ItemId,
   OsTypeArray,
   Tags,
   description,
   exceptionListItemType,
   meta,
   name,
+  nonEmptyEndpointEntriesArray,
   osTypeArrayOrUndefined,
   tags,
-} from '../common/schemas';
+} from '@kbn/securitysolution-io-ts-utils';
+
+import { ItemId } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const createEndpointListItemSchema = t.intersection([

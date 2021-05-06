@@ -9,9 +9,14 @@ import * as t from 'io-ts';
 import {
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
+  description,
+  id,
+  meta,
+  name,
+  type,
 } from '@kbn/securitysolution-io-ts-utils';
 
-import { description, deserializer, id, meta, name, serializer, type } from '../common/schemas';
+import { deserializer, serializer } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const createListSchema = t.intersection([

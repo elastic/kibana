@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Type } from '@kbn/securitysolution-io-ts-utils';
+
 import {
   EsDataTypeGeoPoint,
   EsDataTypeGeoShape,
@@ -12,7 +14,6 @@ import {
   EsDataTypeSingle,
   EsDataTypeUnion,
   SerializerOrUndefined,
-  Type,
   esDataTypeGeoShape,
   esDataTypeRangeTerm,
   esDataTypeSingle,

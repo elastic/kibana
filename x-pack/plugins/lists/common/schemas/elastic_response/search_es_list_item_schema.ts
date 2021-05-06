@@ -6,13 +6,18 @@
  */
 
 import * as t from 'io-ts';
+import {
+  created_at,
+  created_by,
+  metaOrUndefined,
+  updated_at,
+  updated_by,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import {
   binaryOrUndefined,
   booleanOrUndefined,
   byteOrUndefined,
-  created_at,
-  created_by,
   dateNanosOrUndefined,
   dateOrUndefined,
   dateRangeOrUndefined,
@@ -32,14 +37,11 @@ import {
   list_id,
   longOrUndefined,
   longRangeOrUndefined,
-  metaOrUndefined,
   serializerOrUndefined,
   shapeOrUndefined,
   shortOrUndefined,
   textOrUndefined,
   tie_breaker_id,
-  updated_at,
-  updated_by,
 } from '../common/schemas';
 
 export const searchEsListItemSchema = t.exact(

@@ -6,13 +6,13 @@
  */
 
 import Mustache from 'mustache';
+import { type } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   DeserializerOrUndefined,
   SearchEsListItemSchema,
   esDataTypeGeoPointRange,
   esDataTypeRange,
-  type,
 } from '../../../common/schemas';
 
 export const DEFAULT_GEO_POINT = '{{{lat}}},{{{lon}}}';

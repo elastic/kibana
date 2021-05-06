@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { OsTypeArray, validate } from '@kbn/securitysolution-io-ts-utils';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
@@ -38,7 +38,6 @@ import {
   isOperator,
 } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
-import { OsTypeArray } from '../../../../common/schemas';
 
 import {
   BuilderEntry,

@@ -7,19 +7,21 @@
 
 import uuid from 'uuid';
 import { ElasticsearchClient } from 'kibana/server';
+import {
+  Description,
+  IdOrUndefined,
+  MetaOrUndefined,
+  Name,
+  Type,
+} from '@kbn/securitysolution-io-ts-utils';
 
 import { encodeHitVersion } from '../utils/encode_hit_version';
 import {
-  Description,
   DeserializerOrUndefined,
-  IdOrUndefined,
   Immutable,
   IndexEsListSchema,
   ListSchema,
-  MetaOrUndefined,
-  Name,
   SerializerOrUndefined,
-  Type,
   Version,
 } from '../../../common/schemas';
 

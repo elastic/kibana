@@ -14,6 +14,8 @@ import {
   NamespaceType,
   NamespaceTypeArray,
   UpdateCommentsArrayOrUndefined,
+  exceptionListItemType,
+  exceptionListType,
 } from '@kbn/securitysolution-io-ts-utils';
 
 import {
@@ -27,8 +29,6 @@ import {
   ExceptionListSoSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
-  exceptionListItemType,
-  exceptionListType,
 } from '../../../common/schemas';
 
 export const getSavedObjectType = ({

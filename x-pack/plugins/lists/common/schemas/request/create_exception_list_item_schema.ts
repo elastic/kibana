@@ -12,22 +12,18 @@ import {
   DefaultUuid,
   EntriesArray,
   NamespaceType,
-  nonEmptyEntriesArray,
-} from '@kbn/securitysolution-io-ts-utils';
-
-import {
-  ItemId,
   OsTypeArray,
   Tags,
   description,
   exceptionListItemType,
-  list_id,
   meta,
   name,
-  namespace_type,
+  nonEmptyEntriesArray,
   osTypeArrayOrUndefined,
   tags,
-} from '../common/schemas';
+} from '@kbn/securitysolution-io-ts-utils';
+
+import { ItemId, list_id, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const createExceptionListItemSchema = t.intersection([

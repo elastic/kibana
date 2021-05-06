@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+import { IdOrUndefined, NamespaceType } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   SavedObjectsClientContract,
@@ -14,7 +14,6 @@ import {
 import {
   ExceptionListSchema,
   ExceptionListSoSchema,
-  IdOrUndefined,
   ListIdOrUndefined,
 } from '../../../common/schemas';
 

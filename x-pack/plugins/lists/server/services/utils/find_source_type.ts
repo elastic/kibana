@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { SearchEsListItemSchema, Type, type } from '../../../common/schemas';
+import { Type, type } from '@kbn/securitysolution-io-ts-utils';
+
+import { SearchEsListItemSchema } from '../../../common/schemas';
 
 export const findSourceType = (
   listItem: SearchEsListItemSchema,

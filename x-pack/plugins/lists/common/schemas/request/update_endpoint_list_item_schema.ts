@@ -9,22 +9,20 @@ import * as t from 'io-ts';
 import {
   DefaultUpdateCommentsArray,
   EntriesArray,
-  UpdateCommentsArray,
-  nonEmptyEntriesArray,
-} from '@kbn/securitysolution-io-ts-utils';
-
-import {
   OsTypeArray,
   Tags,
-  _version,
+  UpdateCommentsArray,
   description,
   exceptionListItemType,
   id,
   meta,
   name,
+  nonEmptyEntriesArray,
   osTypeArrayOrUndefined,
   tags,
-} from '../common/schemas';
+} from '@kbn/securitysolution-io-ts-utils';
+
+import { _version } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const updateEndpointListItemSchema = t.intersection([

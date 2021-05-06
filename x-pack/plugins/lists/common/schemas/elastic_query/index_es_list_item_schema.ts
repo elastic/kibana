@@ -6,18 +6,20 @@
  */
 
 import * as t from 'io-ts';
-
 import {
   created_at,
   created_by,
+  metaOrUndefined,
+  updated_at,
+  updated_by,
+} from '@kbn/securitysolution-io-ts-utils';
+
+import {
   deserializerOrUndefined,
   esDataTypeUnion,
   list_id,
-  metaOrUndefined,
   serializerOrUndefined,
   tie_breaker_id,
-  updated_at,
-  updated_by,
 } from '../common/schemas';
 
 export const indexEsListItemSchema = t.intersection([

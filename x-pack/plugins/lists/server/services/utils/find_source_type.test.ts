@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { Type } from '@kbn/securitysolution-io-ts-utils';
+
 import { getSearchEsListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
-import { SearchEsListItemSchema, Type } from '../../../common/schemas';
+import { SearchEsListItemSchema } from '../../../common/schemas';
 
 import { findSourceType } from './find_source_type';
 

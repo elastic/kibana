@@ -10,12 +10,13 @@ import { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from 'kibana/serve
 import {
   EntriesArray,
   NonEmptyNestedEntriesArray,
+  OsTypeArray,
   entriesNested,
   entry,
 } from '@kbn/securitysolution-io-ts-utils';
 
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
-import { ExceptionListSoSchema, OsTypeArray } from '../../common/schemas';
+import { ExceptionListSoSchema } from '../../common/schemas';
 
 const entryType = t.union([entry, entriesNested]);
 type EntryType = t.TypeOf<typeof entryType>;

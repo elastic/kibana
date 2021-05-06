@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { metaOrUndefined, updated_at, updated_by } from '@kbn/securitysolution-io-ts-utils';
 
-import { esDataTypeUnion, metaOrUndefined, updated_at, updated_by } from '../common/schemas';
+import { esDataTypeUnion } from '../common/schemas';
 
 export const updateEsListItemSchema = t.intersection([
   t.exact(

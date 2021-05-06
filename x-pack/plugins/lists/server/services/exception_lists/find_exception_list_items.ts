@@ -8,6 +8,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import {
   EmptyStringArrayDecoded,
+  Id,
   NamespaceTypeArray,
   NonEmptyStringArrayDecoded,
 } from '@kbn/securitysolution-io-ts-utils';
@@ -20,7 +21,6 @@ import {
 import {
   ExceptionListSoSchema,
   FoundExceptionListItemSchema,
-  Id,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,

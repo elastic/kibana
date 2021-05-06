@@ -8,25 +8,25 @@
 import * as t from 'io-ts';
 import {
   commentsArrayOrUndefined,
-  entriesArrayOrUndefined,
-} from '@kbn/securitysolution-io-ts-utils';
-
-import {
   created_at,
   created_by,
   description,
+  entriesArrayOrUndefined,
   exceptionListItemType,
   exceptionListType,
-  immutableOrUndefined,
-  itemIdOrUndefined,
-  list_id,
-  list_type,
   metaOrUndefined,
   name,
   osTypeArray,
   tags,
-  tie_breaker_id,
   updated_by,
+} from '@kbn/securitysolution-io-ts-utils';
+
+import {
+  immutableOrUndefined,
+  itemIdOrUndefined,
+  list_id,
+  list_type,
+  tie_breaker_id,
   versionOrUndefined,
 } from '../common/schemas';
 

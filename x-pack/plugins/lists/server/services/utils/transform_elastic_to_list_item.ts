@@ -6,8 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { Type } from '@kbn/securitysolution-io-ts-utils';
 
-import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
+import { ListItemArraySchema, SearchEsListItemSchema } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 import { encodeHitVersion } from './encode_hit_version';

@@ -6,11 +6,10 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import { Id, MetaOrUndefined } from '@kbn/securitysolution-io-ts-utils';
 
 import {
-  Id,
   ListItemSchema,
-  MetaOrUndefined,
   UpdateEsListItemSchema,
   _VersionOrUndefined,
 } from '../../../common/schemas';

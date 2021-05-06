@@ -7,18 +7,20 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
-import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
-
 import {
   Description,
-  ExceptionListSchema,
-  ExceptionListSoSchema,
   ExceptionListType,
-  Immutable,
-  ListId,
   MetaOrUndefined,
   Name,
+  NamespaceType,
   Tags,
+} from '@kbn/securitysolution-io-ts-utils';
+
+import {
+  ExceptionListSchema,
+  ExceptionListSoSchema,
+  Immutable,
+  ListId,
   Version,
 } from '../../../common/schemas';
 
