@@ -13,6 +13,7 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
 import { HOST_ISOLATION_CREATE_API } from '../../../../../common/endpoint/constants';
+import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -22,6 +23,7 @@ import {
   AlertsIndex,
   UpdateAlertStatusProps,
   HostIsolationResponse,
+  CasesFromAlertsResponse,
 } from './types';
 
 /**
@@ -109,24 +111,38 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
  *
  * @param agent id
  * @param optional comment for the isolation action
- * @param optional alert id to look up any corresponding case ids
+ * @param optional case ids if associated with an alert on the host
  *
  * @throws An error if response is not OK
  */
 export const createHostIsolation = async ({
   agentId,
   comment = '',
-  alertId,
+  caseIds,
 }: {
   agentId: string;
   comment?: string;
-  alertId?: string;
+  caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
   KibanaServices.get().http.fetch<HostIsolationResponse>(HOST_ISOLATION_CREATE_API, {
     method: 'POST',
     body: JSON.stringify({
       agent_ids: [agentId],
       comment,
-      alert_ids: [alertId],
+      case_ids: caseIds,
     }),
+  });
+
+/**
+ * Get list of associated case ids from alert id
+ *
+ * @param alert id
+ */
+export const getCaseIdsFromAlertId = async ({
+  alertId,
+}: {
+  alertId: string;
+}): Promise<CasesFromAlertsResponse> =>
+  KibanaServices.get().http.fetch<CasesFromAlertsResponse>(getCasesFromAlertsUrl(alertId), {
+    method: 'get',
   });

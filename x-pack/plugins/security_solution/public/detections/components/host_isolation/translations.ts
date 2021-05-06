@@ -31,12 +31,14 @@ export const CONFIRM = i18n.translate('xpack.securitySolution.endpoint.hostIsola
   defaultMessage: 'Confirm',
 });
 
-export const CASES_ASSOCIATED_WITH_ALERT = i18n.translate(
-  'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWihtAlert',
-  {
-    defaultMessage: ' cases associated with the rule ',
-  }
-);
+export const CASES_ASSOCIATED_WITH_ALERT = (caseCount: number): string =>
+  i18n.translate(
+    'xpack.securitySolution.endpoint.hostIsolation.isolateHost.casesAssociatedWithAlert',
+    {
+      defaultMessage: ' {caseCount, plural, one {case} other {cases}} associated with the rule ',
+      values: { caseCount },
+    }
+  );
 
 export const RETURN_TO_ALERT_DETAILS = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.returnToAlertDetails',

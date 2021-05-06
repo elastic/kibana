@@ -52,6 +52,8 @@ export interface HostIsolationResponse {
   action: string;
 }
 
+export type CasesFromAlertsResponse = string[];
+
 export interface Privilege {
   username: string;
   has_all_requested: boolean;
