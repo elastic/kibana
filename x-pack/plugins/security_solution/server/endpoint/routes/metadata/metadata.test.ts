@@ -278,7 +278,8 @@ describe('test endpoint route', () => {
       );
       expect(mockScopedClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
       expect(
-        mockScopedClient.asCurrentUser.search.mock.calls[0][0]?.body?.query.bool.must_not
+        (mockScopedClient.asCurrentUser.search as jest.Mock).mock.calls[0][0]?.body?.query.bool
+          .must_not
       ).toContainEqual({
         terms: {
           'elastic.agent.id': [
@@ -338,7 +339,7 @@ describe('test endpoint route', () => {
       expect(mockScopedClient.asCurrentUser.search).toBeCalled();
       expect(
         // KQL filter to be passed through
-        mockScopedClient.asCurrentUser.search.mock.calls[0][0]?.body?.query.bool.must
+        (mockScopedClient.asCurrentUser.search as jest.Mock).mock.calls[0][0]?.body?.query.bool.must
       ).toContainEqual({
         bool: {
           must_not: {
@@ -356,7 +357,7 @@ describe('test endpoint route', () => {
         },
       });
       expect(
-        mockScopedClient.asCurrentUser.search.mock.calls[0][0]?.body?.query.bool.must
+        (mockScopedClient.asCurrentUser.search as jest.Mock).mock.calls[0][0]?.body?.query.bool.must
       ).toContainEqual({
         bool: {
           must_not: [
