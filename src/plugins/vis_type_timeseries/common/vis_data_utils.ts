@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { Panel } from '../../../common/types';
+import { TimeseriesVisData, TableData, SeriesData } from './types';
+import { PANEL_TYPES } from './enums';
 
-export const PanelModelContext = React.createContext<Panel | null>(null);
+export const isVisTableData = (data: TimeseriesVisData): data is TableData =>
+  data.type === PANEL_TYPES.TABLE;
+
+export const isVisSeriesData = (data: TimeseriesVisData): data is SeriesData =>
+  data.type !== PANEL_TYPES.TABLE;
