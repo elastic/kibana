@@ -286,13 +286,16 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
+  const typeThresholdField = ($el: Cypress.ObjectLike) => cy.wrap($el).type(rule.thresholdField);
+  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
-      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
+      cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
       cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
     });
