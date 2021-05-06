@@ -140,6 +140,7 @@ function discoverController($route, $scope) {
 
   $scope.$on('$destroy', () => {
     savedSearch.destroy();
+    data.search.session.clear();
   });
 
   $scope.opts.navigateTo = (path) => {
