@@ -140,6 +140,7 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
+  cy.wait(300);
   cy.get(TIMELINE_DATA_PROVIDER_FIELD).type(`${filter.field}{downarrow}{enter}`);
   cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).type(filter.operator);
   cy.get(COMBO_BOX).contains(filter.operator).click();
