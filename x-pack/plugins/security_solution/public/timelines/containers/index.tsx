@@ -210,9 +210,7 @@ export const useTimelineEvents = ({
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
             strategy:
-              request.language === 'eql'
-                ? 'securitySolutionTimelineEqlSearchStrategy'
-                : 'securitySolutionTimelineSearchStrategy',
+              request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({

@@ -50,7 +50,7 @@ const AppRoot = React.memo(
         <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
             {(timelinesPluginSetup.getTimeline &&
-              timelinesPluginSetup.getTimeline({ timelineId: 'test' })) ??
+              timelinesPluginSetup.getTimeline({ type: 'standalone' })) ??
               null}
           </KibanaContextProvider>
         </Router>

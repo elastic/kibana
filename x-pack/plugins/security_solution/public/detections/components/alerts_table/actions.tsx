@@ -399,7 +399,7 @@ export const sendAlertToTimelineAction = async ({
               factoryQueryType: TimelineEventsQueries.details,
             },
             {
-              strategy: 'securitySolutionTimelineSearchStrategy',
+              strategy: 'timelineSearchStrategy',
             }
           )
           .toPromise(),

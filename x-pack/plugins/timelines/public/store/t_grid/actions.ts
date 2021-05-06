@@ -12,7 +12,7 @@ import {
   TimelineExpandedDetailType,
   TimelineTabs,
 } from '../../../../security_solution/common/types/timeline';
-import { ColumnHeaderOptions } from './model';
+import { ColumnHeaderOptions, TGridModel } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 

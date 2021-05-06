@@ -13,28 +13,40 @@ import { TimelineId } from '../store/t_grid/types';
 import * as actions from '../store/t_grid/actions';
 import { getReduxDeps } from '../store/t_grid';
 
-import { TGrid } from './tgrid';
 import { PLUGIN_NAME } from '../../common';
 import { TimelineProps } from '../types';
 
-export const Timeline = (props: TimelineProps) => {
+export const TGrid = (props: TimelineProps) => {
   const reduxStuff = getReduxDeps(props.type);
+  const dispatch = useDispatch();
+  const currentTime = useSelector((state) => state);
+  console.log(currentTime);
+  const testActionHandler = useCallback(
+    () =>
+      dispatch(
+        actions.setEventsLoading({
+          id: TimelineId.test,
+          eventIds: [`${Math.random()}`],
+          isLoading: false,
+        })
+      ),
+    [dispatch]
+  );
   if (props.type === 'standalone') {
     return (
-      <Provider store={reduxStuff}>
-        <I18nProvider>
-          <TGrid {...props} />
-        </I18nProvider>
-      </Provider>
+      <div data-test-subj="timeline-wrapper">
+        <EuiButton onClick={testActionHandler}>{'whatever'}</EuiButton>
+        <h1>{'current time: '}</h1>
+      </div>
     );
   } else {
     return (
-      <I18nProvider>
-        <TGrid {...props} />
-      </I18nProvider>
+      <div data-test-subj="timeline-wrapper">
+        <h1>{'current time: '}</h1>
+      </div>
     );
   }
 };
 
 // eslint-disable-next-line import/no-default-export
-export { Timeline as default };
+export { TGrid as default };

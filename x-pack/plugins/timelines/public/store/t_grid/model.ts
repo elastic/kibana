@@ -7,6 +7,7 @@
 
 import { EuiDataGridColumn } from '@elastic/eui';
 import { IFieldSubType } from '../../../../../../src/plugins/data/public';
+import { TimelineNonEcsData } from '../../../../security_solution/common/search_strategy';
 import {
   RowRendererId,
   TimelineExpandedDetail,
@@ -34,7 +35,6 @@ export type ColumnHeaderOptions = Pick<
   subType?: IFieldSubType;
   type?: string;
 };
-
 export interface TGridModel {
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
@@ -51,10 +51,17 @@ export interface TGridModel {
   /** TO DO sourcerer @X define this */
   indexNames: string[];
   isLoading: boolean;
+  /** If selectAll checkbox in header is checked **/
+  isSelectAllChecked: boolean;
   /** The number of items to show in a single page of results */
   itemsPerPage: number;
   /** Displays a series of choices that when selected, become the value of `itemsPerPage` */
   itemsPerPageOptions: number[];
+  /** Events to be rendered as loading **/
+  loadingEventIds: string[];
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: SortColumnTimeline[];
+  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
+  selectedEventIds: Record<string, TimelineNonEcsData[]>;
+  savedObjectId: string | null;
 }

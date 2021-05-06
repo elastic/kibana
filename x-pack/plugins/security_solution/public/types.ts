@@ -23,6 +23,7 @@ import {
 } from '../../triggers_actions_ui/public';
 import { CasesUiStart } from '../../cases/public';
 import { SecurityPluginSetup } from '../../security/public';
+import { TimelinesPluginSetup } from '../../timelines/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
@@ -56,6 +57,7 @@ export interface StartPlugins {
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
+  timelines: TimelinesPluginSetup;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
 }

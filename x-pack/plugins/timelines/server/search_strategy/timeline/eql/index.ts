@@ -22,7 +22,7 @@ import {
 } from '../../../../../security_solution/common/search_strategy/timeline/events/eql';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 
-export const securitySolutionTimelineEqlSearchStrategyProvider = (
+export const timelineEqlSearchStrategyProvider = (
   data: PluginStart
 ): ISearchStrategy<TimelineEqlRequestOptions, TimelineEqlResponse> => {
   const esEql = data.search.getSearchStrategy(EQL_SEARCH_STRATEGY);

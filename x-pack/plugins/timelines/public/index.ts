@@ -16,3 +16,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinesPlugin(initializerContext);
 }
 export * from './types';
+export * as TGridActions from './store/t_grid/actions';

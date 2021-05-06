@@ -52,11 +52,6 @@ export type TimelineModel = TGridModel & {
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
   highlightedDropAndProviderId: string;
-  /** If selectAll checkbox in header is checked **/
-  isSelectAllChecked: boolean;
-  /** Events to be rendered as loading **/
-  loadingEventIds: string[];
-  savedObjectId: string | null;
   /** When true, this timeline was marked as "favorite" by the user */
   isFavorite: boolean;
   /** When true, the timeline will update as new data arrives */
@@ -87,8 +82,6 @@ export type TimelineModel = TGridModel & {
   };
   showSaveModal?: boolean;
   savedQueryId?: string | null;
-  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
-  selectedEventIds: Record<string, TimelineNonEcsData[]>;
   /** When true, show the timeline flyover */
   show: boolean;
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
