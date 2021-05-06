@@ -39,17 +39,19 @@ export const isValidPath = ({ os, value }: { os: OperatingSystem; value: string 
 };
 
 // based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L149
-export const isWindowsWildcardPathValid = (path: string) => {
+export const isWindowsWildcardPathValid = (path: string): boolean => {
   const firstCharacter = path[0];
   const lastCharacter = path.slice(-1);
   const trimmedValue = path.trim();
+  const hasSlash = /\//.test(trimmedValue);
   if (path.length === 0) {
     return false;
   } else if (
+    hasSlash ||
     trimmedValue.length !== path.length ||
     firstCharacter === '^' ||
     lastCharacter === '\\' ||
-    (path.includes('\\') === false && path.includes('*') === false)
+    !hasWildcard({ path, isWindowsPath: true })
   ) {
     return false;
   } else {
@@ -58,7 +60,7 @@ export const isWindowsWildcardPathValid = (path: string) => {
 };
 
 // based on https://github.com/elastic/endgame-tacotruck/blob/f7e03397a57180f09ecff48ca7a846fd7ae91075/src/taco/selectors/validators.js#L167
-export const isLinuxMacWildcardPathValid = (path: string) => {
+export const isLinuxMacWildcardPathValid = (path: string): boolean => {
   const firstCharacter = path[0];
   const lastCharacter = path.slice(-1);
   const trimmedValue = path.trim();
@@ -70,7 +72,7 @@ export const isLinuxMacWildcardPathValid = (path: string) => {
     lastCharacter === '/' ||
     path.length > 1024 === true ||
     path.includes('//') === true ||
-    containsMoreThanOneWildcard(path) === true
+    !hasWildcard({ path, isWindowsPath: false })
   ) {
     return false;
   } else {
@@ -78,9 +80,15 @@ export const isLinuxMacWildcardPathValid = (path: string) => {
   }
 };
 
-const containsMoreThanOneWildcard = (path: string) => {
-  for (const pathComponent of path.split('/')) {
-    if (/\*.*\*/.test(pathComponent) === true) {
+const hasWildcard = ({
+  path,
+  isWindowsPath,
+}: {
+  path: string;
+  isWindowsPath: boolean;
+}): boolean => {
+  for (const pathComponent of path.split(isWindowsPath ? '\\' : '/')) {
+    if (/[\*|\?]+/.test(pathComponent) === true) {
       return true;
     }
   }
