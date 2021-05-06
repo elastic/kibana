@@ -584,7 +584,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 107
+                  "lineNumber": 99
                 }
               }
             ],
@@ -592,7 +592,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 107
+              "lineNumber": 99
             }
           },
           {
@@ -608,7 +608,7 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, { home, management, licensing, uiActions, share }: ",
+              "<object, unknown>, setupDeps: ",
               "ReportingPublicPluginSetupDendencies",
               ") => ",
               {
@@ -639,13 +639,13 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 112
+                  "lineNumber": 110
                 }
               },
               {
                 "id": "def-public.ReportingPublicPlugin.setup.$2",
                 "type": "Object",
-                "label": "{ home, management, licensing, uiActions, share }",
+                "label": "setupDeps",
                 "isRequired": true,
                 "signature": [
                   "ReportingPublicPluginSetupDendencies"
@@ -653,7 +653,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 113
+                  "lineNumber": 110
                 }
               }
             ],
@@ -661,7 +661,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 111
+              "lineNumber": 110
             }
           },
           {
@@ -705,7 +705,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 175
+                  "lineNumber": 190
                 }
               }
             ],
@@ -713,7 +713,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 175
+              "lineNumber": 190
             }
           },
           {
@@ -729,13 +729,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 194
+              "lineNumber": 209
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/public/plugin.ts",
-          "lineNumber": 85
+          "lineNumber": 81
         },
         "initialIsOpen": false
       }
@@ -772,7 +772,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/reporting/public/index.ts",
-        "lineNumber": 23
+        "lineNumber": 24
       },
       "signature": [
         "ReportingSetup"
@@ -790,6 +790,27 @@
         "label": "ReportingCore",
         "description": [],
         "children": [
+          {
+            "tags": [],
+            "id": "def-server.ReportingCore.getStartContract",
+            "type": "Function",
+            "label": "getStartContract",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 70
+            },
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingSetup",
+                "text": "ReportingSetup"
+              }
+            ]
+          },
           {
             "id": "def-server.ReportingCore.Unnamed",
             "type": "Function",
@@ -810,7 +831,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 69
+                  "lineNumber": 72
                 }
               },
               {
@@ -826,14 +847,14 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   "ByteSizeValue",
                   "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 69
+                  "lineNumber": 72
                 }
               }
             ],
@@ -841,7 +862,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 69
+              "lineNumber": 72
             }
           },
           {
@@ -866,7 +887,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 79
+                  "lineNumber": 90
                 }
               }
             ],
@@ -874,7 +895,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 79
+              "lineNumber": 90
             }
           },
           {
@@ -899,7 +920,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 93
+                  "lineNumber": 104
                 }
               }
             ],
@@ -907,7 +928,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 93
+              "lineNumber": 104
             }
           },
           {
@@ -923,7 +944,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 106
+              "lineNumber": 117
             }
           },
           {
@@ -939,7 +960,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 117
+              "lineNumber": 128
             }
           },
           {
@@ -955,7 +976,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 124
+              "lineNumber": 135
             }
           },
           {
@@ -992,7 +1013,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 131
+                  "lineNumber": 142
                 }
               }
             ],
@@ -1000,7 +1021,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 131
+              "lineNumber": 142
             }
           },
           {
@@ -1011,14 +1032,14 @@
               "() => void"
             ],
             "description": [
-              "\nRegisters reporting as an Elasticsearch feature for the purpose of toggling visibility based on roles."
+              "\nIf xpack.reporting.roles.enabled === true, register Reporting as a feature\nthat is controlled by user role names"
             ],
             "children": [],
             "tags": [],
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 139
+              "lineNumber": 151
             }
           },
           {
@@ -1041,7 +1062,23 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 159
+              "lineNumber": 185
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.getDeprecatedAllowedRoles",
+            "type": "Function",
+            "label": "getDeprecatedAllowedRoles",
+            "signature": [
+              "() => false | string[]"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 197
             }
           },
           {
@@ -1059,7 +1096,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 169
+              "lineNumber": 204
             }
           },
           {
@@ -1076,7 +1113,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 177
+              "lineNumber": 212
             }
           },
           {
@@ -1114,7 +1151,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 181
+                  "lineNumber": 216
                 }
               }
             ],
@@ -1122,7 +1159,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 181
+              "lineNumber": 216
             }
           },
           {
@@ -1140,7 +1177,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 185
+              "lineNumber": 220
             }
           },
           {
@@ -1158,7 +1195,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 189
+              "lineNumber": 224
             }
           },
           {
@@ -1176,7 +1213,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 199
+              "lineNumber": 234
             }
           },
           {
@@ -1193,30 +1230,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 208
-            }
-          },
-          {
-            "id": "def-server.ReportingCore.getElasticsearchService",
-            "type": "Function",
-            "label": "getElasticsearchService",
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchServiceSetup",
-                "text": "ElasticsearchServiceSetup"
-              }
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 216
+              "lineNumber": 243
             }
           },
           {
@@ -1263,7 +1277,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 225
+                  "lineNumber": 255
                 }
               }
             ],
@@ -1271,7 +1285,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 225
+              "lineNumber": 255
             }
           },
           {
@@ -1311,7 +1325,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 231
+                  "lineNumber": 261
                 }
               },
               {
@@ -1325,7 +1339,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 231
+                  "lineNumber": 261
                 }
               }
             ],
@@ -1333,7 +1347,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 231
+              "lineNumber": 261
             }
           },
           {
@@ -1366,7 +1380,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 245
+                  "lineNumber": 275
                 }
               },
               {
@@ -1380,7 +1394,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 245
+                  "lineNumber": 275
                 }
               },
               {
@@ -1394,7 +1408,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 245
+                  "lineNumber": 275
                 }
               }
             ],
@@ -1402,7 +1416,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 245
+              "lineNumber": 275
             }
           },
           {
@@ -1450,7 +1464,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 265
+                  "lineNumber": 295
                 }
               },
               {
@@ -1464,7 +1478,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 265
+                  "lineNumber": 295
                 }
               }
             ],
@@ -1472,7 +1486,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 265
+              "lineNumber": 295
             }
           },
           {
@@ -1496,7 +1510,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 275
+              "lineNumber": 305
             }
           },
           {
@@ -1520,7 +1534,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 280
+              "lineNumber": 310
             }
           },
           {
@@ -1543,7 +1557,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 285
+                  "lineNumber": 315
                 }
               }
             ],
@@ -1551,7 +1565,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 285
+              "lineNumber": 315
             }
           },
           {
@@ -1574,7 +1588,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 289
+                  "lineNumber": 319
                 }
               }
             ],
@@ -1582,7 +1596,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 289
+              "lineNumber": 319
             }
           },
           {
@@ -1598,7 +1612,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 293
+              "lineNumber": 323
             }
           }
         ],
@@ -1630,23 +1644,30 @@
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
-          "<object, object, ",
+          "<",
           {
             "pluginId": "reporting",
             "scope": "server",
             "docId": "kibReportingPluginApi",
-            "section": "def-server.ReportingSetupDeps",
-            "text": "ReportingSetupDeps"
+            "section": "def-server.ReportingSetup",
+            "text": "ReportingSetup"
           },
           ", ",
           {
             "pluginId": "reporting",
             "scope": "server",
             "docId": "kibReportingPluginApi",
-            "section": "def-server.ReportingStartDeps",
-            "text": "ReportingStartDeps"
+            "section": "def-server.ReportingSetup",
+            "text": "ReportingSetup"
           },
-          ">"
+          ", ",
+          {
+            "pluginId": "reporting",
+            "scope": "server",
+            "docId": "kibReportingPluginApi",
+            "section": "def-server.ReportingSetupDeps",
+            "text": "ReportingSetupDeps"
+          }
         ],
         "children": [
           {
@@ -1661,7 +1682,7 @@
               {
                 "id": "def-server.ReportingPlugin.Unnamed.$1",
                 "type": "Object",
-                "label": "context",
+                "label": "initContext",
                 "isRequired": true,
                 "signature": [
                   {
@@ -1671,14 +1692,14 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   "ByteSizeValue",
                   "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 31
+                  "lineNumber": 30
                 }
               }
             ],
@@ -1686,7 +1707,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 31
+              "lineNumber": 30
             }
           },
           {
@@ -1710,7 +1731,14 @@
                 "section": "def-server.ReportingSetupDeps",
                 "text": "ReportingSetupDeps"
               },
-              ") => {}"
+              ") => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingSetup",
+                "text": "ReportingSetup"
+              }
             ],
             "description": [],
             "children": [
@@ -1732,7 +1760,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 37
+                  "lineNumber": 34
                 }
               },
               {
@@ -1752,7 +1780,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 37
+                  "lineNumber": 34
                 }
               }
             ],
@@ -1760,7 +1788,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 37
+              "lineNumber": 34
             }
           },
           {
@@ -1784,7 +1812,14 @@
                 "section": "def-server.ReportingStartDeps",
                 "text": "ReportingStartDeps"
               },
-              ") => {}"
+              ") => ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportingSetup",
+                "text": "ReportingSetup"
+              }
             ],
             "description": [],
             "children": [
@@ -1858,7 +1893,7 @@
             "section": "def-server.ReportingConfig",
             "text": "ReportingConfig"
           },
-          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
           "ByteSizeValue",
           "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
         ],
@@ -2006,9 +2041,14 @@
               "lineNumber": 34
             },
             "signature": [
-              "Pick<",
-              "CollectorSet",
-              ", \"makeStatsCollector\" | \"makeUsageCollector\" | \"registerCollector\" | \"getCollectorByType\" | \"areAllCollectorsReady\" | \"bulkFetch\" | \"bulkFetchUsage\" | \"toObject\" | \"toApiFieldNames\"> | undefined"
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              },
+              " | undefined"
             ]
           }
         ],
@@ -2075,7 +2115,36 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "start": {
+      "id": "def-server.ReportingSetup",
+      "type": "Interface",
+      "label": "ReportingSetup",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-server.ReportingSetup.usesUiCapabilities",
+          "type": "Function",
+          "label": "usesUiCapabilities",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/reporting/server/types.ts",
+            "lineNumber": 43
+          },
+          "signature": [
+            "() => boolean"
+          ]
+        }
+      ],
+      "source": {
+        "path": "x-pack/plugins/reporting/server/types.ts",
+        "lineNumber": 42
+      },
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [

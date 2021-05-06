@@ -16,7 +16,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 18
+        "lineNumber": 20
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -30,7 +30,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 20
+        "lineNumber": 22
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -52,7 +52,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 16
+        "lineNumber": 17
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -66,7 +66,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 18
+        "lineNumber": 19
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -78,6 +78,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "tags": [],
+        "id": "def-common.BASE_PATH",
+        "type": "string",
+        "label": "BASE_PATH",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/osquery/common/constants.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"/app/osquery\""
+        ],
+        "initialIsOpen": false
+      },
       {
         "tags": [],
         "id": "def-common.DEFAULT_DARK_MODE",
@@ -105,6 +120,21 @@
         },
         "signature": [
           "10000"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.OSQUERY_INTEGRATION_NAME",
+        "type": "string",
+        "label": "OSQUERY_INTEGRATION_NAME",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/osquery/common/constants.ts",
+          "lineNumber": 10
+        },
+        "signature": [
+          "\"osquery_manager\""
         ],
         "initialIsOpen": false
       },

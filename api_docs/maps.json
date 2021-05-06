@@ -33,7 +33,13 @@
             "text": "MapEmbeddableInput"
           },
           ", ",
-          "MapEmbeddableOutput",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapEmbeddableOutput",
+            "text": "MapEmbeddableOutput"
+          },
           "> implements ",
           {
             "pluginId": "embeddable",
@@ -52,7 +58,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 94
+              "lineNumber": 93
             }
           },
           {
@@ -75,7 +81,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 111
+                  "lineNumber": 110
                 }
               },
               {
@@ -95,7 +101,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 111
+                  "lineNumber": 110
                 }
               },
               {
@@ -132,7 +138,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 111
+                  "lineNumber": 110
                 }
               }
             ],
@@ -140,7 +146,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 111
+              "lineNumber": 110
             }
           },
           {
@@ -178,7 +184,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 186
+                  "lineNumber": 185
                 }
               }
             ],
@@ -186,7 +192,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 185
+              "lineNumber": 184
             }
           },
           {
@@ -204,7 +210,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 191
+              "lineNumber": 190
             }
           },
           {
@@ -222,7 +228,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 199
+              "lineNumber": 198
             }
           },
           {
@@ -238,7 +244,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 204
+              "lineNumber": 203
             }
           },
           {
@@ -254,7 +260,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 208
+              "lineNumber": 207
             }
           },
           {
@@ -272,7 +278,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 212
+                  "lineNumber": 211
                 }
               }
             ],
@@ -285,7 +291,7 @@
             "label": "setRenderTooltipContent",
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 212
+              "lineNumber": 211
             },
             "tags": [],
             "returnComment": []
@@ -305,7 +311,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 216
+                  "lineNumber": 215
                 }
               }
             ],
@@ -318,7 +324,7 @@
             "label": "setEventHandlers",
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 216
+              "lineNumber": 215
             },
             "tags": [],
             "returnComment": []
@@ -343,7 +349,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 220
+              "lineNumber": 219
             }
           },
           {
@@ -359,7 +365,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 224
+              "lineNumber": 223
             }
           },
           {
@@ -386,13 +392,13 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                      "lineNumber": 256
+                      "lineNumber": 255
                     }
                   }
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 256
+                  "lineNumber": 255
                 }
               }
             ],
@@ -400,7 +406,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 256
+              "lineNumber": 255
             }
           },
           {
@@ -437,7 +443,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 278
+                  "lineNumber": 277
                 }
               }
             ],
@@ -445,7 +451,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 278
+              "lineNumber": 277
             }
           },
           {
@@ -468,7 +474,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 288
+                  "lineNumber": 287
                 }
               }
             ],
@@ -476,7 +482,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 288
+              "lineNumber": 287
             }
           },
           {
@@ -501,7 +507,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 306
+                  "lineNumber": 305
                 }
               }
             ],
@@ -509,7 +515,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 306
+              "lineNumber": 305
             }
           },
           {
@@ -535,7 +541,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 332
+                  "lineNumber": 331
                 }
               }
             ],
@@ -543,7 +549,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 332
+              "lineNumber": 331
             }
           },
           {
@@ -561,7 +567,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 349
+                  "lineNumber": 348
                 }
               },
               {
@@ -575,7 +581,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 349
+                  "lineNumber": 348
                 }
               },
               {
@@ -595,7 +601,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 349
+                  "lineNumber": 348
                 }
               }
             ],
@@ -614,7 +620,7 @@
             "label": "onSingleValueTrigger",
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 349
+              "lineNumber": 348
             },
             "tags": [],
             "returnComment": []
@@ -641,7 +647,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 363
+                  "lineNumber": 362
                 }
               },
               {
@@ -655,7 +661,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 363
+                  "lineNumber": 362
                 }
               }
             ],
@@ -674,7 +680,7 @@
             "label": "addFilters",
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 363
+              "lineNumber": 362
             },
             "tags": [],
             "returnComment": []
@@ -698,7 +704,7 @@
             "label": "getFilterActions",
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 375
+              "lineNumber": 374
             },
             "tags": [],
             "returnComment": []
@@ -722,7 +728,7 @@
             "label": "getActionContext",
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 396
+              "lineNumber": 395
             },
             "tags": [],
             "returnComment": []
@@ -740,7 +746,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 407
+              "lineNumber": 406
             }
           },
           {
@@ -756,7 +762,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 423
+              "lineNumber": 422
             }
           },
           {
@@ -772,19 +778,55 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 429
+              "lineNumber": 428
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-          "lineNumber": 91
+          "lineNumber": 90
         },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
+      {
+        "id": "def-public.EMSTermJoinConfig",
+        "type": "Interface",
+        "label": "EMSTermJoinConfig",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.EMSTermJoinConfig.layerId",
+            "type": "string",
+            "label": "layerId",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+              "lineNumber": 19
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.EMSTermJoinConfig.field",
+            "type": "string",
+            "label": "field",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+              "lineNumber": 20
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+          "lineNumber": 18
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.RenderTooltipContentParams",
         "type": "Interface",
@@ -985,6 +1027,62 @@
           "lineNumber": 31
         },
         "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SampleValuesConfig",
+        "type": "Interface",
+        "label": "SampleValuesConfig",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SampleValuesConfig.emsLayerIds",
+            "type": "Array",
+            "label": "emsLayerIds",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+              "lineNumber": 13
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SampleValuesConfig.sampleValues",
+            "type": "Array",
+            "label": "sampleValues",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+              "lineNumber": 14
+            },
+            "signature": [
+              "React.ReactText[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SampleValuesConfig.sampleValuesColumnName",
+            "type": "string",
+            "label": "sampleValuesColumnName",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+              "lineNumber": 15
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+          "lineNumber": 12
+        },
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -1018,6 +1116,21 @@
           "MapByValueInput",
           " | ",
           "MapByReferenceInput"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.MapEmbeddableOutput",
+        "type": "Type",
+        "label": "MapEmbeddableOutput",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/maps/public/embeddable/types.ts",
+          "lineNumber": 43
+        },
+        "signature": [
+          "EmbeddableOutput & { indexPatterns: IIndexPattern[]; }"
         ],
         "initialIsOpen": false
       }
@@ -1124,9 +1237,21 @@
           "label": "suggestEMSTermJoinConfig",
           "signature": [
             "(config: ",
-            "SampleValuesConfig",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.SampleValuesConfig",
+              "text": "SampleValuesConfig"
+            },
             ") => Promise<",
-            "EMSTermJoinConfig",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.EMSTermJoinConfig",
+              "text": "EMSTermJoinConfig"
+            },
             " | null>"
           ],
           "description": [],
@@ -1137,7 +1262,13 @@
               "label": "config",
               "isRequired": true,
               "signature": [
-                "SampleValuesConfig"
+                {
+                  "pluginId": "maps",
+                  "scope": "public",
+                  "docId": "kibMapsPluginApi",
+                  "section": "def-public.SampleValuesConfig",
+                  "text": "SampleValuesConfig"
+                }
               ],
               "description": [],
               "source": {
@@ -1193,7 +1324,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/maps/common/constants.ts",
-              "lineNumber": 64
+              "lineNumber": 66
             }
           }
         ],
@@ -1201,7 +1332,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 64
+          "lineNumber": 66
         },
         "initialIsOpen": false
       },
@@ -1225,7 +1356,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/maps/common/constants.ts",
-              "lineNumber": 61
+              "lineNumber": 63
             }
           }
         ],
@@ -1233,7 +1364,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 61
+          "lineNumber": 63
         },
         "initialIsOpen": false
       },
@@ -1250,7 +1381,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 58
+          "lineNumber": 60
         },
         "initialIsOpen": false
       }
@@ -1428,7 +1559,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 161
+          "lineNumber": 163
         },
         "initialIsOpen": false
       },
@@ -1440,7 +1571,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 209
+          "lineNumber": 211
         },
         "initialIsOpen": false
       },
@@ -1452,7 +1583,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 290
+          "lineNumber": 292
         },
         "initialIsOpen": false
       },
@@ -1464,7 +1595,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 154
+          "lineNumber": 156
         },
         "initialIsOpen": false
       },
@@ -1476,7 +1607,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 121
+          "lineNumber": 123
         },
         "initialIsOpen": false
       },
@@ -1488,7 +1619,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 129
+          "lineNumber": 131
         },
         "initialIsOpen": false
       },
@@ -1500,7 +1631,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 94
+          "lineNumber": 96
         },
         "initialIsOpen": false
       },
@@ -1512,7 +1643,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 253
+          "lineNumber": 255
         },
         "initialIsOpen": false
       },
@@ -1524,7 +1655,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 135
+          "lineNumber": 137
         },
         "initialIsOpen": false
       },
@@ -1536,7 +1667,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 178
+          "lineNumber": 180
         },
         "initialIsOpen": false
       },
@@ -1548,7 +1679,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 265
+          "lineNumber": 267
         },
         "initialIsOpen": false
       },
@@ -1560,7 +1691,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 222
+          "lineNumber": 224
         },
         "initialIsOpen": false
       },
@@ -1572,7 +1703,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 203
+          "lineNumber": 205
         },
         "initialIsOpen": false
       },
@@ -1584,7 +1715,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 68
+          "lineNumber": 70
         },
         "initialIsOpen": false
       },
@@ -1596,7 +1727,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 272
+          "lineNumber": 274
         },
         "initialIsOpen": false
       },
@@ -1608,7 +1739,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 285
+          "lineNumber": 287
         },
         "initialIsOpen": false
       },
@@ -1620,7 +1751,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 258
+          "lineNumber": 260
         },
         "initialIsOpen": false
       },
@@ -1632,7 +1763,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 172
+          "lineNumber": 174
         },
         "initialIsOpen": false
       },
@@ -1644,7 +1775,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 246
+          "lineNumber": 248
         },
         "initialIsOpen": false
       },
@@ -1656,7 +1787,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 77
+          "lineNumber": 79
         },
         "initialIsOpen": false
       },
@@ -1668,7 +1799,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 198
+          "lineNumber": 200
         },
         "initialIsOpen": false
       },
@@ -1680,7 +1811,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 217
+          "lineNumber": 219
         },
         "initialIsOpen": false
       },
@@ -1692,7 +1823,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 278
+          "lineNumber": 280
         },
         "initialIsOpen": false
       },
@@ -1704,7 +1835,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 231
+          "lineNumber": 233
         },
         "initialIsOpen": false
       }
@@ -1718,7 +1849,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 160
+          "lineNumber": 162
         },
         "signature": [
           "\"_of_\""
@@ -1802,7 +1933,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 214
+          "lineNumber": 216
         },
         "signature": [
           "string[]"
@@ -1817,7 +1948,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 192
+          "lineNumber": 194
         },
         "initialIsOpen": false
       },
@@ -1829,7 +1960,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 196
+          "lineNumber": 198
         },
         "signature": [
           "\"doc_count\""
@@ -1844,7 +1975,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 110
+          "lineNumber": 112
         },
         "signature": [
           "5"
@@ -1859,7 +1990,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 229
+          "lineNumber": 231
         },
         "signature": [
           "\"marker\""
@@ -1874,7 +2005,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 114
+          "lineNumber": 116
         },
         "signature": [
           "65535"
@@ -1889,7 +2020,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 113
+          "lineNumber": 115
         },
         "signature": [
           "100"
@@ -1904,7 +2035,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 112
+          "lineNumber": 114
         },
         "signature": [
           "10000"
@@ -1919,7 +2050,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 190
+          "lineNumber": 192
         },
         "signature": [
           "50"
@@ -1934,7 +2065,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 294
+          "lineNumber": 296
         },
         "signature": [
           "number[]"
@@ -2159,7 +2290,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 305
+          "lineNumber": 307
         },
         "signature": [
           "\"administrative_regions_lvl2\""
@@ -2174,7 +2305,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 306
+          "lineNumber": 308
         },
         "signature": [
           "\"usa_zip_codes\""
@@ -2189,7 +2320,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 304
+          "lineNumber": 306
         },
         "signature": [
           "\"world_countries\""
@@ -2204,7 +2335,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 127
+          "lineNumber": 129
         },
         "signature": [
           "string[]"
@@ -2219,7 +2350,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 116
+          "lineNumber": 118
         },
         "signature": [
           "\"__kbn__feature_id__\""
@@ -2234,7 +2365,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 117
+          "lineNumber": 119
         },
         "signature": [
           "\"__kbn_isvisibleduetojoin__\""
@@ -2249,7 +2380,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 298
+          "lineNumber": 300
         },
         "signature": [
           "(value: ",
@@ -2284,7 +2415,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 101
+          "lineNumber": 103
         },
         "signature": [
           "\"formatters\""
@@ -2299,7 +2430,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 187
+          "lineNumber": 189
         },
         "signature": [
           "\"gridCentroid\""
@@ -2314,7 +2445,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 186
+          "lineNumber": 188
         },
         "signature": [
           "\"gridSplit\""
@@ -2341,7 +2472,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 300
+          "lineNumber": 302
         },
         "signature": [
           "\"maps-drawing-data-ingest\""
@@ -2395,7 +2526,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 98
+          "lineNumber": 100
         },
         "signature": [
           "\"__kbnjoin__\""
@@ -2455,7 +2586,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 147
+          "lineNumber": 149
         },
         "signature": [
           "1"
@@ -2470,7 +2601,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 146
+          "lineNumber": 148
         },
         "signature": [
           "0"
@@ -2527,7 +2658,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 302
+          "lineNumber": 304
         },
         "signature": [
           "10485760"
@@ -2542,7 +2673,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 108
+          "lineNumber": 110
         },
         "signature": [
           "24"
@@ -2557,7 +2688,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 119
+          "lineNumber": 121
         },
         "signature": [
           "\"_\""
@@ -2572,7 +2703,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 100
+          "lineNumber": 102
         },
         "signature": [
           "\"meta\""
@@ -2587,7 +2718,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 107
+          "lineNumber": 109
         },
         "signature": [
           "0"
@@ -2641,13 +2772,28 @@
       },
       {
         "tags": [],
+        "id": "def-common.MVT_TOKEN_PARAM_NAME",
+        "type": "string",
+        "label": "MVT_TOKEN_PARAM_NAME",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/maps/common/constants.ts",
+          "lineNumber": 57
+        },
+        "signature": [
+          "\"token\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
         "id": "def-common.ORDINAL_DATA_TYPES",
         "type": "Array",
         "label": "ORDINAL_DATA_TYPES",
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 215
+          "lineNumber": 217
         },
         "signature": [
           "string[]"
@@ -2662,7 +2808,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 145
+          "lineNumber": 147
         },
         "signature": [
           "0"
@@ -2677,10 +2823,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 296
+          "lineNumber": 298
         },
         "signature": [
-          "undefined | null | string | number | false | true"
+          "undefined | null | string | number | false | true | string[]"
         ],
         "initialIsOpen": false
       },
@@ -2692,7 +2838,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 105
+          "lineNumber": 107
         },
         "initialIsOpen": false
       },
@@ -2704,7 +2850,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 102
+          "lineNumber": 104
         },
         "signature": [
           "\"source\""
@@ -2719,7 +2865,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 104
+          "lineNumber": 106
         },
         "initialIsOpen": false
       },
@@ -2731,7 +2877,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 103
+          "lineNumber": 105
         },
         "initialIsOpen": false
       },
@@ -2743,7 +2889,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 263
+          "lineNumber": 265
         },
         "signature": [
           "\"SPATIAL_FILTERS_LAYER_ID\""
@@ -2758,7 +2904,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 185
+          "lineNumber": 187
         },
         "signature": [
           "7"
@@ -2773,7 +2919,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 189
+          "lineNumber": 191
         },
         "signature": [
           "\"__percentage\""
@@ -2788,7 +2934,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 111
+          "lineNumber": 113
         },
         "signature": [
           "2"
@@ -2810,7 +2956,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/maps/common/constants.ts",
-              "lineNumber": 150
+              "lineNumber": 152
             },
             "signature": [
               "\"FeatureCollection\""
@@ -2824,7 +2970,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/maps/common/constants.ts",
-              "lineNumber": 151
+              "lineNumber": 153
             },
             "signature": [
               "never[]"
@@ -2835,7 +2981,7 @@
         "label": "EMPTY_FEATURE_COLLECTION",
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 149
+          "lineNumber": 151
         },
         "initialIsOpen": false
       }
