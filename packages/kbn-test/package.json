@@ -14,12 +14,7 @@
     "devOnly": true
   },
   "dependencies": {
-    "@kbn/es": "link:../kbn-es",
     "@kbn/i18n": "link:../kbn-i18n",
     "@kbn/optimizer": "link:../kbn-optimizer"
-  },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/expect": "link:../kbn-expect"
   }
 }

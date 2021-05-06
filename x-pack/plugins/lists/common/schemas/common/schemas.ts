@@ -12,14 +12,44 @@ import * as t from 'io-ts';
 import { DefaultNamespace } from '../types/default_namespace';
 import { DefaultArray, DefaultStringArray, NonEmptyString } from '../../shared_imports';
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const name = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Name = t.TypeOf<typeof name>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const nameOrUndefined = t.union([name, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const description = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Description = t.TypeOf<typeof description>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const descriptionOrUndefined = t.union([description, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type DescriptionOrUndefined = t.TypeOf<typeof descriptionOrUndefined>;
 
 export const list_id = NonEmptyString;
@@ -28,15 +58,47 @@ export const list_idOrUndefined = t.union([list_id, t.undefined]);
 export type ListIdOrUndefined = t.TypeOf<typeof list_idOrUndefined>;
 
 export const item = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const created_at = t.string; // TODO: Make this into an ISO Date string check
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const updated_at = t.string; // TODO: Make this into an ISO Date string check
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const updated_by = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const created_by = t.string;
+
 export const file = t.object;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const id = NonEmptyString;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Id = t.TypeOf<typeof id>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const idOrUndefined = t.union([id, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 
 export const binary = t.string;
@@ -93,6 +155,9 @@ export const valueOrUndefined = t.union([value, t.undefined]);
 export const tie_breaker_id = t.string; // TODO: Use UUID for this instead of a string for validation
 export const _index = t.string;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const type = t.keyof({
   binary: null,
   boolean: null,
@@ -122,9 +187,24 @@ export const type = t.keyof({
 export const typeOrUndefined = t.union([type, t.undefined]);
 export type Type = t.TypeOf<typeof type>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const meta = t.object;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Meta = t.TypeOf<typeof meta>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const metaOrUndefined = t.union([meta, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
 export const esDataTypeRange = t.exact(t.type({ gte: t.string, lte: t.string }));
@@ -207,28 +287,77 @@ export const esDataTypeUnion = t.union([
 
 export type EsDataTypeUnion = t.TypeOf<typeof esDataTypeUnion>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const tags = DefaultStringArray;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Tags = t.TypeOf<typeof tags>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const tagsOrUndefined = t.union([tags, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const exceptionListType = t.keyof({
   detection: null,
   endpoint: null,
   endpoint_events: null,
 });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUndefined>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export enum ExceptionListTypeEnum {
   DETECTION = 'detection',
   ENDPOINT = 'endpoint',
   ENDPOINT_EVENTS = 'endpoint_events',
 }
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const exceptionListItemType = t.keyof({ simple: null });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const exceptionListItemTypeOrUndefined = t.union([exceptionListItemType, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type ExceptionListItemType = t.TypeOf<typeof exceptionListItemType>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type ExceptionListItemTypeOrUndefined = t.TypeOf<typeof exceptionListItemTypeOrUndefined>;
 
 export const list_type = t.keyof({ item: null, list: null });
@@ -275,18 +404,37 @@ export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
 
 export const namespace_type = DefaultNamespace;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const operatorIncluded = t.keyof({ included: null });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const operator = t.keyof({ excluded: null, included: null });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Operator = t.TypeOf<typeof operator>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export enum OperatorEnum {
   INCLUDED = 'included',
   EXCLUDED = 'excluded',
 }
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export enum OperatorTypeEnum {
   NESTED = 'nested',
   MATCH = 'match',
   MATCH_ANY = 'match_any',
+  WILDCARD = 'wildcard',
   EXISTS = 'exists',
   LIST = 'list',
 }
@@ -319,15 +467,36 @@ export type Immutable = t.TypeOf<typeof immutable>;
 export const immutableOrUndefined = t.union([immutable, t.undefined]);
 export type ImmutableOrUndefined = t.TypeOf<typeof immutableOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const osType = t.keyof({
   linux: null,
   macos: null,
   windows: null,
 });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type OsType = t.TypeOf<typeof osType>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const osTypeArray = DefaultArray(osType);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type OsTypeArray = t.TypeOf<typeof osTypeArray>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const osTypeArrayOrUndefined = t.union([osTypeArray, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type OsTypeArrayOrUndefined = t.OutputOf<typeof osTypeArray>;

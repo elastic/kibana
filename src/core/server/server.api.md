@@ -176,6 +176,9 @@ import { URL } from 'url';
 export { AddConfigDeprecation }
 
 // @public
+export const APP_WRAPPER_CLASS = "kbnAppWrapper";
+
+// @public
 export interface AppCategory {
     ariaLabel?: string;
     euiIconType?: string;
@@ -2230,7 +2233,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 }
 
 // @public (undocumented)
-export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
     attributes: Partial<T>;
     id: string;
     namespace?: string;
@@ -2289,7 +2292,7 @@ export class SavedObjectsClient {
     openPointInTimeForType(type: string | string[], options?: SavedObjectsOpenPointInTimeOptions): Promise<SavedObjectsOpenPointInTimeResponse>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
-    update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+    update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
 // @public
@@ -2899,7 +2902,7 @@ export class SavedObjectsRepository {
     openPointInTimeForType(type: string | string[], { keepAlive, preference }?: SavedObjectsOpenPointInTimeOptions): Promise<SavedObjectsOpenPointInTimeResponse>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
-    update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+    update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
 // @public
@@ -2998,9 +3001,10 @@ export interface SavedObjectsTypeMappingDefinition {
 }
 
 // @public (undocumented)
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    upsert?: Attributes;
     version?: string;
 }
 

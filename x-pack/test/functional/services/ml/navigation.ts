@@ -115,6 +115,13 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
     },
 
+    async navigateToTrainedModels() {
+      await this.navigateToMl();
+      await this.navigateToDataFrameAnalytics();
+      await testSubjects.click('mlTrainedModelsTab');
+      await testSubjects.existOrFail('mlModelsTableContainer');
+    },
+
     async navigateToDataVisualizer() {
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },

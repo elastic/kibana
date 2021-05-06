@@ -73,6 +73,7 @@ describe('Parser', () => {
       expect(parse('"foo bar"')).toEqual(variableEqual('foo bar'));
       expect(parse('"foo bar fizz buzz"')).toEqual(variableEqual('foo bar fizz buzz'));
       expect(parse('"foo   bar   baby"')).toEqual(variableEqual('foo   bar   baby'));
+      expect(parse(`"f'oo"`)).toEqual(variableEqual(`f'oo`));
     });
 
     it('strings with single quotes', () => {
@@ -88,6 +89,7 @@ describe('Parser', () => {
       expect(parse("' foo bar'")).toEqual(variableEqual(" foo bar"));
       expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
       expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
+      expect(parse(`'f"oo'`)).toEqual(variableEqual(`f"oo`));
       /* eslint-enable prettier/prettier */
     });
 
@@ -138,9 +140,17 @@ describe('Parser', () => {
       );
     });
 
+    it('named argument is empty string', () => {
+      expect(parse('foo(q="")')).toEqual(functionEqual('foo', [namedArgumentEqual('q', '')]));
+      expect(parse(`foo(q='')`)).toEqual(functionEqual('foo', [namedArgumentEqual('q', '')]));
+    });
+
     it('named and positional', () => {
       expect(parse('foo(ref, q="bar")')).toEqual(
         functionEqual('foo', [variableEqual('ref'), namedArgumentEqual('q', 'bar')])
+      );
+      expect(parse(`foo(ref, q='ba"r')`)).toEqual(
+        functionEqual('foo', [variableEqual('ref'), namedArgumentEqual('q', `ba"r`)])
       );
     });
 
@@ -181,6 +191,21 @@ describe('Parser', () => {
 
     it('invalid named', () => {
       expect(() => parse('foo(offset-type="1d")')).toThrow('but "(" found');
+    });
+
+    it('named with complex strings', () => {
+      expect(parse(`foo(filter='😀 > "\ttab"')`)).toEqual(
+        functionEqual('foo', [namedArgumentEqual('filter', `😀 > "\ttab"`)])
+      );
+    });
+
+    it('named with escape characters', () => {
+      expect(parse(`foo(filter='Women\\'s Clothing')`)).toEqual(
+        functionEqual('foo', [namedArgumentEqual('filter', `Women's Clothing`)])
+      );
+      expect(parse(`foo(filter="\\"Quoted inner string\\"")`)).toEqual(
+        functionEqual('foo', [namedArgumentEqual('filter', `"Quoted inner string"`)])
+      );
     });
   });
 
