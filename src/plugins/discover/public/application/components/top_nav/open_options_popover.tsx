@@ -74,7 +74,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
           href={addBasePath(`/app/management/kibana/settings?query=${DOC_TABLE_LEGACY}`)}
         >
           {i18n.translate('discover.openOptionsPopover.goToAdvancedSettings', {
-            defaultMessage: 'Go to Advanced Settings',
+            defaultMessage: 'Get started',
           })}
         </EuiButton>
       </div>
