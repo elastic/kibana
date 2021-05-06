@@ -79,6 +79,10 @@ const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
         appState.mlExplorerSwimlane.viewByPerPage = state.viewByPerPage;
       }
 
+      if (state.swimLaneSeverity !== undefined) {
+        appState.mlExplorerSwimlane.severity = state.swimLaneSeverity;
+      }
+
       if (state.filterActive) {
         appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
         appState.mlExplorerFilter.filterActive = state.filterActive;
