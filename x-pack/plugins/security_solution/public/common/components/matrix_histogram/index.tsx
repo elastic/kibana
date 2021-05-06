@@ -17,7 +17,7 @@ import { HeaderSection } from '../header_section';
 import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
-import { useMatrixHistogram } from '../../containers/matrix_histogram';
+import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
 import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
 import { InspectButtonContainer } from '../inspect';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
@@ -40,7 +40,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     id: string;
     legendPosition?: Position;
     mapping?: MatrixHistogramMappingTypes;
-    onoError?: () => void;
+    onError?: () => void;
     showSpacer?: boolean;
     setQuery: GlobalTimeArgs['setQuery'];
     setAbsoluteRangeDatePickerTarget?: InputsModelId;
@@ -146,29 +146,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     isPtrIncluded,
     docValueFields,
-    includeMissingData: true,
   };
 
-  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogram({
-    ...matrixHistogramRequest,
-    includeMissingData: true,
-  });
-
-  const [loadingWithoutMissingData, withoutMissingResult] = useMatrixHistogram({
-    ...matrixHistogramRequest,
-    includeMissingData: false,
-    /* we include missing data in a single query by default,
-     * but we do extra query for missing data if value type is ip, due to https://github.com/elastic/kibana/issues/89205
-     **/
-    skip: !selectedStackByOption.value?.endsWith('.ip'),
-  });
-
-  const combinedData = useMemo(
-    () =>
-      !loading && !loadingWithoutMissingData
-        ? [...data, ...(withoutMissingResult?.data ?? [])]
-        : null,
-    [data, loading, loadingWithoutMissingData, withoutMissingResult?.data]
+  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogramCombined(
+    matrixHistogramRequest
   );
 
   const titleWithStackByField = useMemo(
@@ -190,17 +171,14 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     totalCount,
     hideHistogramIfEmpty,
   ]);
-  const barChartData = useMemo(() => getCustomChartData(combinedData, mapping), [
-    combinedData,
-    mapping,
-  ]);
+  const barChartData = useMemo(() => getCustomChartData(data, mapping), [data, mapping]);
 
   useEffect(() => {
     if (!loading && !isInitialLoading) {
       setQuery({ id, inspect, loading, refetch });
     }
 
-    if (isInitialLoading && !!barChartData && combinedData) {
+    if (isInitialLoading && !!barChartData && data) {
       setIsInitialLoading(false);
     }
   }, [
@@ -211,7 +189,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     refetch,
     isInitialLoading,
     barChartData,
-    combinedData,
+    data,
     setIsInitialLoading,
   ]);
 
@@ -237,6 +215,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             title={titleWithStackByField}
             titleSize={titleSize}
             subtitle={subtitleWithCounts}
+            inspectMultiple
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>

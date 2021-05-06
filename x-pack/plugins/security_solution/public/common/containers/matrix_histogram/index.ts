@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { getOr, isEmpty, noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -226,7 +226,7 @@ export const useMatrixHistogram = ({
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [matrixHistogramRequest, hostsSearch, skip, includeMissingData, stackByField]);
+  }, [matrixHistogramRequest, hostsSearch, skip]);
 
   const runMatrixHistogramSearch = useCallback(
     (to: string, from: string) => {
@@ -243,4 +243,76 @@ export const useMatrixHistogram = ({
   );
 
   return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
+};
+
+/* function needed to split ip histogram data requests due to elasticsearch bug https://github.com/elastic/kibana/issues/89205
+ * using includeMissingData parameter to do the "missing data" query separately
+ **/
+export const useMatrixHistogramCombined = (
+  matrixHistogramQueryProps: MatrixHistogramQueryProps
+): [boolean, UseMatrixHistogramArgs] => {
+  const [mainLoading, mainResponse] = useMatrixHistogram({
+    ...matrixHistogramQueryProps,
+    includeMissingData: true,
+  });
+
+  const skipMissingData = useMemo(() => !matrixHistogramQueryProps.stackByField.endsWith('.ip'), [
+    matrixHistogramQueryProps.stackByField,
+  ]);
+  /* we include missing data in a single query by default,
+   * but we do extra query for missing data if value type is ip, due to https://github.com/elastic/kibana/issues/89205
+   **/
+  const [missingDataLoading, missingDataResponse] = useMatrixHistogram({
+    ...matrixHistogramQueryProps,
+    includeMissingData: false,
+    skip: skipMissingData,
+  });
+
+  const combinedLoading = useMemo<boolean>(() => mainLoading || missingDataLoading, [
+    mainLoading,
+    missingDataLoading,
+  ]);
+
+  const combinedResponse = useMemo<UseMatrixHistogramArgs>(() => {
+    if (skipMissingData) return mainResponse;
+
+    const { data, inspect, totalCount, refetch, buckets } = mainResponse;
+    const {
+      data: extraData,
+      inspect: extraInspect,
+      totalCount: extraTotalCount,
+      refetch: extraRefetch,
+    } = missingDataResponse;
+
+    const combinedRefetch = () => {
+      refetch();
+      extraRefetch();
+    };
+
+    if (combinedLoading) {
+      return {
+        data: [],
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        refetch: combinedRefetch,
+        totalCount: -1,
+        buckets: [],
+      };
+    }
+
+    return {
+      data: [...data, ...extraData],
+      inspect: {
+        dsl: [...inspect.dsl, ...extraInspect.dsl],
+        response: [...inspect.response, ...extraInspect.response],
+      },
+      totalCount: totalCount + extraTotalCount,
+      refetch: combinedRefetch,
+      buckets,
+    };
+  }, [combinedLoading, mainResponse, missingDataResponse]);
+
+  return [combinedLoading, combinedResponse];
 };

@@ -49,7 +49,6 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
       }
     | undefined;
   inspect?: Maybe<Inspect>;
-  includeMissingData?: boolean;
   isPtrIncluded?: boolean;
   includeMissingData?: boolean;
 }
