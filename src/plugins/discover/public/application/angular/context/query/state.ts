@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { QueryActionsProvider } from './actions';
-export { FAILURE_REASONS, LOADING_STATUS } from '../../../components/context_app/constants';
-export { createInitialLoadingStatusState } from './state';
+import { LoadingStatus, LoadingStatusState } from '../../context_app_state';
+
+export function createInitialLoadingStatusState(): LoadingStatusState {
+  return {
+    anchor: LoadingStatus.UNINITIALIZED,
+    predecessors: LoadingStatus.UNINITIALIZED,
+    successors: LoadingStatus.UNINITIALIZED,
+  };
+}
