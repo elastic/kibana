@@ -183,7 +183,6 @@ type TestSubject =
   | 'pipelineEditorOnFailureToggle'
   | 'addProcessorsButtonLevel1'
   | 'editProcessorForm'
-  | 'mockCodeEditor'
   | 'editProcessorForm.submitButton'
   | 'addProcessorForm.submitButton'
   | 'addProcessorForm'

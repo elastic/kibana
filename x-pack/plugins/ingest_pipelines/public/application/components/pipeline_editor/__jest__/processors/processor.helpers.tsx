@@ -146,6 +146,7 @@ type TestSubject =
   | 'addProcessorForm.submitButton'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'mockCodeEditor'
   | 'tagField.input'
   | 'ignoreMissingSwitch.input'
   | 'ignoreFailureSwitch.input'
