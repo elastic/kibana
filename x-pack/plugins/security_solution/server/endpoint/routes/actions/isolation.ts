@@ -20,7 +20,7 @@ import {
 import { getAgentIDsForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 
-export const UserCanIsolate = (roles: readonly string[] | undefined): boolean => {
+export const userCanIsolate = (roles: readonly string[] | undefined): boolean => {
   // only superusers can write to the fleet index (or look up endpoint data to convert endp ID to agent ID)
   if (!roles || roles.length === 0) {
     return false;
@@ -40,7 +40,7 @@ export function registerHostIsolationRoutes(
     {
       path: ISOLATE_HOST_ROUTE,
       validate: HostIsolationRequestSchema,
-      options: { authRequired: true },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     isolationRequestHandler(endpointContext, true)
   );
@@ -50,7 +50,7 @@ export function registerHostIsolationRoutes(
     {
       path: UNISOLATE_HOST_ROUTE,
       validate: HostIsolationRequestSchema,
-      options: { authRequired: true },
+      options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     isolationRequestHandler(endpointContext, false)
   );
@@ -79,7 +79,7 @@ export const isolationRequestHandler = function (
 
     // only allow admin users
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    if (!UserCanIsolate(user?.roles)) {
+    if (!userCanIsolate(user?.roles)) {
       return res.forbidden({
         body: {
           message: 'You do not have permission to perform this action',

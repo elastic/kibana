@@ -107,24 +107,4 @@ export function registerEndpointRoutes(
     },
     getMetadataRequestHandler(endpointAppContext, logger)
   );
-
-  router.get(
-    {
-      path: `/api/endpoint/to_agent_id`,
-      validate: { query: schema.object({ ids: schema.string() }) },
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    async (context, req, res) => {
-      const agents = await getAgentIDsForEndpoints(
-        req.query.ids.split(','),
-        context,
-        endpointAppContext
-      );
-      return res.ok({
-        body: {
-          ids: agents,
-        },
-      });
-    }
-  );
 }
