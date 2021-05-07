@@ -458,6 +458,28 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
+      test('excludes metafields from the request', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+
+        searchSource.setField('fields', ['foo-bar', 'foo--bar', 'field1', 'field2']);
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+
+        searchSource.removeField('fields');
+        searchSource.setField('fieldsFromSource', ['foo-bar', 'foo--bar', 'field1', 'field2']);
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+      });
+
       test('returns all scripted fields when one fields entry is *', async () => {
         searchSource.setField('index', ({
           ...indexPattern,
