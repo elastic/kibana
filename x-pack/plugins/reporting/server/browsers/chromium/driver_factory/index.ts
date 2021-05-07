@@ -83,7 +83,7 @@ export class HeadlessChromiumDriverFactory {
         } as puppeteer.LaunchOptions);
 
         page = await browser.newPage();
-        await page.emulateTimezone(browserTimezone ?? null);
+        await page.emulateTimezone(browserTimezone);
 
         // Log version info for debugging / maintenance
         const client = await page.target().createCDPSession();
