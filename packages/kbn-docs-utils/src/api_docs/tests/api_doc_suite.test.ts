@@ -200,8 +200,7 @@ describe('objects', () => {
 
     const fn = obj?.children?.find((c) => c.label === 'notAnArrowFn');
     expect(fn?.signature).toBeDefined();
-    // Should just be typeof notAnArrowFn.
-    expect(linkCount(fn?.signature!)).toBe(1);
+    expect(linkCount(fn?.signature!)).toBe(3);
     // Comment should be the inline one.
     expect(fn?.description).toMatchInlineSnapshot(`
       Array [
@@ -228,6 +227,25 @@ describe('objects', () => {
 });
 
 describe('Misc types', () => {
+  it('Type using ReactElement has the right signature', () => {
+    const api = doc.client.find((c) => c.label === 'AReactElementFn');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(api?.signature!).toMatchInlineSnapshot(`
+      Array [
+        "() => React.ReactElement<",
+        Object {
+          "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
+          "section": "def-public.MyProps",
+          "text": "MyProps",
+        },
+        ">",
+      ]
+    `);
+  });
+
   it('Type referencing not exported type has the link removed', () => {
     const api = doc.client.find((c) => c.label === 'IRefANotExportedType');
     expect(api).toBeDefined();
@@ -274,7 +292,7 @@ describe('Misc types', () => {
     expect(fnType?.type).toBe(TypeKind.TypeKind);
     expect(fnType?.signature!).toMatchInlineSnapshot(`
       Array [
-        "(t: T) => ",
+        "<T>(t: T) => ",
         Object {
           "docId": "kibPluginAPluginApi",
           "pluginId": "pluginA",
