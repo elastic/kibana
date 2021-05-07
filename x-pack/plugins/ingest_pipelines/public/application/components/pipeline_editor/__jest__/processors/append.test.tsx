@@ -96,7 +96,6 @@ describe('Processor: Append', () => {
       form,
       find,
       component,
-      commonFormFields,
     } = testBed;
 
     // Open flyout to add new processor
@@ -121,7 +120,6 @@ describe('Processor: Append', () => {
       field: 'field_1',
       ignore_failure: true,
       value: ['Some_Value'],
-      ...commonFormFields,
     });
   });
 });

@@ -144,6 +144,7 @@ type TestSubject =
   | 'addProcessorForm.submitButton'
   | 'addProcessorButton'
   | 'addProcessorForm.submitButton'
+  | 'appendValueField.input'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
   | 'mockCodeEditor'

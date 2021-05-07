@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue, commonFormFields } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 const BYTES_TYPE = 'bytes';
 
