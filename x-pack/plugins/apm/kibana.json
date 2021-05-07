@@ -9,7 +9,8 @@
     "licensing",
     "triggersActionsUi",
     "embeddable",
-    "infra"
+    "infra",
+    "observability"
   ],
   "optionalPlugins": [
     "spaces",
@@ -18,7 +19,6 @@
     "taskManager",
     "actions",
     "alerting",
-    "observability",
     "security",
     "ml",
     "home",

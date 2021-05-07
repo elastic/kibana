@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
@@ -34,19 +33,25 @@ interface UseActionDetails {
 }
 
 export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseActionDetails) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
-  const [actionDetailsRequest, setHostRequest] = useState<ActionDetailsRequestOptions | null>(null);
-
-  const response = useQuery(
-    ['action', { actionId }],
+  return useQuery(
+    ['actionDetails', { actionId, filterQuery }],
     async () => {
-      if (!actionDetailsRequest) return Promise.resolve();
-
       const responseData = await data.search
-        .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(actionDetailsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
+        .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+          {
+            actionId,
+            factoryQueryType: OsqueryQueries.actionDetails,
+            filterQuery: createFilter(filterQuery),
+          },
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
         .toPromise();
 
       return {
@@ -55,24 +60,13 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
       };
     },
     {
-      enabled: !skip && !!actionDetailsRequest,
+      enabled: !skip,
+      onError: (error: Error) =>
+        toasts.addError(error, {
+          title: i18n.translate('xpack.osquery.action_details.fetchError', {
+            defaultMessage: 'Error while fetching action details',
+          }),
+        }),
     }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        actionId,
-        factoryQueryType: OsqueryQueries.actionDetails,
-        filterQuery: createFilter(filterQuery),
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [actionId, filterQuery]);
-
-  return response;
 };

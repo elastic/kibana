@@ -65,6 +65,7 @@ export const CommonProcessorFields: FunctionComponent = () => {
   return (
     <section>
       <UseField
+        data-test-subj="ifField"
         config={ifConfig}
         component={TextEditor}
         componentProps={{
@@ -82,6 +83,7 @@ export const CommonProcessorFields: FunctionComponent = () => {
         data-test-subj="ifConfigField"
       />
 
+<<<<<<< HEAD
       <UseField config={tagConfig} component={Field} path="fields.tag" data-test-subj="tagField" />
 
       <UseField
@@ -89,6 +91,15 @@ export const CommonProcessorFields: FunctionComponent = () => {
         component={ToggleField}
         path="fields.ignore_failure"
         data-test-subj="ignoreFailureSwitch"
+=======
+      <UseField data-test-subj="tagField" config={tagConfig} component={Field} path="fields.tag" />
+
+      <UseField
+        data-test-subj="ignoreFailureSwitch"
+        config={ignoreFailureConfig}
+        component={ToggleField}
+        path="fields.ignore_failure"
+>>>>>>> 21c54d38c357acc2e9d48085757c5dd5e69cc2a7
       />
     </section>
   );

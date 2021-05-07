@@ -7,7 +7,8 @@
  */
 
 import type supertest from 'supertest';
-import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
+import type { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import {
   createTestServers,
@@ -17,7 +18,6 @@ import {
   HttpMethod,
   getSupertest,
 } from '../../../../test_helpers/kbn_server';
-import { LegacyAPICaller } from '../../../elasticsearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
@@ -26,7 +26,7 @@ let kbn: TestKibanaUtils;
 
 interface AllServices {
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: LegacyAPICaller;
+  esClient: KibanaClient;
   uiSettings: IUiSettingsClient;
   supertest: (method: HttpMethod, path: string) => supertest.Test;
 }
@@ -55,7 +55,7 @@ export function getServices() {
     return services;
   }
 
-  const callCluster = esServer.es.getCallCluster();
+  const esClient = esServer.es.getClient();
 
   const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
     httpServerMock.createKibanaRequest()
@@ -65,7 +65,7 @@ export function getServices() {
 
   services = {
     supertest: (method: HttpMethod, path: string) => getSupertest(kbn.root, method, path),
-    callCluster,
+    esClient,
     savedObjectsClient,
     uiSettings,
   };

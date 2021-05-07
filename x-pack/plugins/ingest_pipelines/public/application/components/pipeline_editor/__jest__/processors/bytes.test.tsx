@@ -8,8 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue, commonFormFields } from './processor.helpers';
 
-// Default parameter values automatically added to the Bytes processor when saved
-
 const BYTES_TYPE = 'bytes';
 
 describe('Processor: Bytes', () => {
@@ -81,7 +79,6 @@ describe('Processor: Bytes', () => {
     const processors = getProcessorValue(onUpdate, BYTES_TYPE);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
-      ...commonFormFields,
     });
   });
 
@@ -111,7 +108,6 @@ describe('Processor: Bytes', () => {
       field: 'field_1',
       target_field: 'target_field',
       ignore_missing: true,
-      ...commonFormFields,
     });
   });
 });

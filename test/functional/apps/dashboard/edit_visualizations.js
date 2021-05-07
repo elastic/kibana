@@ -14,16 +14,14 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
 
   const originalMarkdownText = 'Original markdown text';
   const modifiedMarkdownText = 'Modified markdown text';
 
   const createMarkdownVis = async (title) => {
-    await testSubjects.click('dashboardAddNewPanelButton');
-    await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-    await PageObjects.visualize.clickMarkdownWidget();
+    await dashboardAddPanel.clickMarkdownQuickButton();
     await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
     await PageObjects.visEditor.clickGo();
     if (title) {

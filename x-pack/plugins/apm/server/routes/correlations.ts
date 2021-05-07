@@ -14,7 +14,8 @@ import { getOverallErrorTimeseries } from '../lib/correlations/errors/get_overal
 import { getCorrelationsForSlowTransactions } from '../lib/correlations/latency/get_correlations_for_slow_transactions';
 import { getOverallLatencyDistribution } from '../lib/correlations/latency/get_overall_latency_distribution';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { createRoute } from './create_route';
+import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const INVALID_LICENSE = i18n.translate(
@@ -25,7 +26,7 @@ const INVALID_LICENSE = i18n.translate(
   }
 );
 
-export const correlationsLatencyDistributionRoute = createRoute({
+const correlationsLatencyDistributionRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/correlations/latency/overall_distribution',
   params: t.type({
     query: t.intersection([
@@ -40,18 +41,19 @@ export const correlationsLatencyDistributionRoute = createRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
+  handler: async (resources) => {
+    const { context, params } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const setup = await setupRequest(context, request);
+    const setup = await setupRequest(resources);
     const {
       environment,
       kuery,
       serviceName,
       transactionType,
       transactionName,
-    } = context.params.query;
+    } = params.query;
 
     return getOverallLatencyDistribution({
       environment,
@@ -64,7 +66,7 @@ export const correlationsLatencyDistributionRoute = createRoute({
   },
 });
 
-export const correlationsForSlowTransactionsRoute = createRoute({
+const correlationsForSlowTransactionsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/correlations/latency/slow_transactions',
   params: t.type({
     query: t.intersection([
@@ -85,11 +87,13 @@ export const correlationsForSlowTransactionsRoute = createRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
+  handler: async (resources) => {
+    const { context, params } = resources;
+
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const setup = await setupRequest(context, request);
+    const setup = await setupRequest(resources);
     const {
       environment,
       kuery,
@@ -100,7 +104,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
       fieldNames,
       maxLatency,
       distributionInterval,
-    } = context.params.query;
+    } = params.query;
 
     return getCorrelationsForSlowTransactions({
       environment,
@@ -117,7 +121,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
   },
 });
 
-export const correlationsErrorDistributionRoute = createRoute({
+const correlationsErrorDistributionRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/correlations/errors/overall_timeseries',
   params: t.type({
     query: t.intersection([
@@ -132,18 +136,20 @@ export const correlationsErrorDistributionRoute = createRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
+  handler: async (resources) => {
+    const { params, context } = resources;
+
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const setup = await setupRequest(context, request);
+    const setup = await setupRequest(resources);
     const {
       environment,
       kuery,
       serviceName,
       transactionType,
       transactionName,
-    } = context.params.query;
+    } = params.query;
 
     return getOverallErrorTimeseries({
       environment,
@@ -156,7 +162,7 @@ export const correlationsErrorDistributionRoute = createRoute({
   },
 });
 
-export const correlationsForFailedTransactionsRoute = createRoute({
+const correlationsForFailedTransactionsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/correlations/errors/failed_transactions',
   params: t.type({
     query: t.intersection([
@@ -174,11 +180,12 @@ export const correlationsForFailedTransactionsRoute = createRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
+  handler: async (resources) => {
+    const { context, params } = resources;
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
-    const setup = await setupRequest(context, request);
+    const setup = await setupRequest(resources);
     const {
       environment,
       kuery,
@@ -186,7 +193,7 @@ export const correlationsForFailedTransactionsRoute = createRoute({
       transactionType,
       transactionName,
       fieldNames,
-    } = context.params.query;
+    } = params.query;
 
     return getCorrelationsForFailedTransactions({
       environment,
@@ -199,3 +206,9 @@ export const correlationsForFailedTransactionsRoute = createRoute({
     });
   },
 });
+
+export const correlationsRouteRepository = createApmServerRouteRepository()
+  .add(correlationsLatencyDistributionRoute)
+  .add(correlationsForSlowTransactionsRoute)
+  .add(correlationsErrorDistributionRoute)
+  .add(correlationsForFailedTransactionsRoute);

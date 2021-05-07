@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardExpect = getService('dashboardExpect');
-  const testSubjects = getService('testSubjects');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects([
     'common',
@@ -47,8 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('adding a metric visualization', async function () {
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(originalPanelCount).to.eql(0);
-      await testSubjects.exists('dashboardAddNewPanelButton');
-      await testSubjects.click('dashboardAddNewPanelButton');
       await dashboardVisualizations.createAndEmbedMetric('Embedding Vis Test');
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.metricValuesExist(['0']);
@@ -59,8 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('adding a markdown', async function () {
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(originalPanelCount).to.eql(1);
-      await testSubjects.exists('dashboardAddNewPanelButton');
-      await testSubjects.click('dashboardAddNewPanelButton');
       await dashboardVisualizations.createAndEmbedMarkdown({
         name: 'Embedding Markdown Test',
         markdown: 'Nice to meet you, markdown is my name',

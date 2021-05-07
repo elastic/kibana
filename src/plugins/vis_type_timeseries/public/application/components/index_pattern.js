@@ -18,7 +18,6 @@ import {
   EuiComboBox,
   EuiRange,
   EuiIconTip,
-  EuiText,
   EuiFormLabel,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
@@ -33,12 +32,11 @@ import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
-import { PANEL_TYPES } from '../../../common/panel_types';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
+import { AUTO_INTERVAL } from '../../../common/constants';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 import { getUISettings } from '../../services';
-import { AUTO_INTERVAL } from '../../../common/constants';
 import { UI_SETTINGS } from '../../../../data/common';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
@@ -77,8 +75,8 @@ export const IndexPattern = ({
   const intervalName = `${prefix}interval`;
   const maxBarsName = `${prefix}max_bars`;
   const dropBucketName = `${prefix}drop_last_bucket`;
-  const defaultIndex = useContext(DefaultIndexPatternContext);
   const updateControlValidity = useContext(FormValidationContext);
+  const defaultIndex = useContext(DefaultIndexPatternContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
   const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
@@ -114,7 +112,7 @@ export const IndexPattern = ({
   const defaults = {
     [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
-    [dropBucketName]: 1,
+    [dropBucketName]: 0,
     [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };
@@ -126,6 +124,10 @@ export const IndexPattern = ({
     ({ value }) => model[TIME_RANGE_MODE_KEY] === value
   );
   const isTimeSeries = model.type === PANEL_TYPES.TIMESERIES;
+  const isDataTimerangeModeInvalid =
+    !disabled &&
+    selectedTimeRangeOption &&
+    !isTimerangeModeEnabled(selectedTimeRangeOption.value, uiRestrictions);
 
   useEffect(() => {
     updateControlValidity(intervalName, intervalValidation.isValid);
@@ -143,13 +145,38 @@ export const IndexPattern = ({
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('timeRange')}
-              label={i18n.translate('visTypeTimeseries.indexPattern.timeRange.label', {
-                defaultMessage: 'Data timerange mode',
+              label={
+                <>
+                  <FormattedMessage
+                    id="visTypeTimeseries.indexPattern.timeRange.label"
+                    defaultMessage="Data timerange mode"
+                  />{' '}
+                  <EuiIconTip
+                    position="right"
+                    content={
+                      <FormattedMessage
+                        id="visTypeTimeseries.indexPattern.timeRange.hint"
+                        defaultMessage='This setting controls the timespan used for matching documents.
+                        "Entire timerange" will match all the documents selected in the timepicker.
+                        "Last value" will match only the documents for the specified interval from the end of the timerange.'
+                      />
+                    }
+                    type="questionInCircle"
+                  />
+                </>
+              }
+              isInvalid={isDataTimerangeModeInvalid}
+              error={i18n.translate('visTypeTimeseries.indexPattern.timeRange.error', {
+                defaultMessage: 'You cannot use "{mode}" with the current index type.',
+                values: {
+                  mode: selectedTimeRangeOption?.label,
+                },
               })}
             >
               <EuiComboBox
                 data-test-subj="dataTimeRangeMode"
                 isClearable={false}
+                isInvalid={isDataTimerangeModeInvalid}
                 placeholder={i18n.translate(
                   'visTypeTimeseries.indexPattern.timeRange.selectTimeRange',
                   {
@@ -157,6 +184,9 @@ export const IndexPattern = ({
                   }
                 )}
                 options={timeRangeOptions}
+                error={i18n.translate('visTypeTimeseries.indexPattern.timeRange.entireTimeRange', {
+                  defaultMessage: 'Entire time range',
+                })}
                 selectedOptions={selectedTimeRangeOption ? [selectedTimeRangeOption] : []}
                 onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
                 singleSelection={{ asPlainText: true }}
@@ -171,13 +201,6 @@ export const IndexPattern = ({
                 })}
               />
             </EuiFormRow>
-            <EuiText size="xs" style={{ margin: 0 }}>
-              {i18n.translate('visTypeTimeseries.indexPattern.timeRange.hint', {
-                defaultMessage: `This setting controls the timespan used for matching documents.
-                "Entire timerange" will match all the documents selected in the timepicker.
-                "Last value" will match only the documents for the specified interval from the end of the timerange.`,
-              })}
-            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -192,22 +215,18 @@ export const IndexPattern = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('timeField')}
+          <FieldSelect
             label={i18n.translate('visTypeTimeseries.indexPattern.timeFieldLabel', {
               defaultMessage: 'Time field',
             })}
-          >
-            <FieldSelect
-              restrict={RESTRICT_FIELDS}
-              value={model[timeFieldName]}
-              disabled={disabled}
-              onChange={handleSelectChange(timeFieldName)}
-              indexPattern={model[indexPatternName]}
-              fields={fields}
-              placeholder={defaultIndex?.timeFieldName}
-            />
-          </EuiFormRow>
+            restrict={RESTRICT_FIELDS}
+            value={model[timeFieldName]}
+            disabled={disabled}
+            onChange={handleSelectChange(timeFieldName)}
+            indexPattern={model[indexPatternName]}
+            fields={fields}
+            placeholder={!model[indexPatternName] ? defaultIndex?.timeFieldName : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow

@@ -18,18 +18,18 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
-import { extractFieldLabel } from '../../../common/calculate_label';
+import { extractFieldLabel } from '../../../common/fields_utils';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { PanelSchema } from '../../../common/types';
+import type { Panel } from '../../../common/types';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
+  panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
   const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
@@ -58,8 +58,8 @@ export async function getTableData(
   });
 
   const calculatePivotLabel = async () => {
-    if (panel.pivot_id && panelIndex.indexPattern?.title) {
-      const fields = await extractFields(panelIndex.indexPattern.title);
+    if (panel.pivot_id && panelIndex.indexPattern?.id) {
+      const fields = await extractFields({ id: panelIndex.indexPattern.id });
 
       return extractFieldLabel(fields, panel.pivot_id);
     }
@@ -68,7 +68,6 @@ export async function getTableData(
 
   const meta = {
     type: panel.type,
-    pivot_label: panel.pivot_label || (await calculatePivotLabel()),
     uiRestrictions: capabilities.uiRestrictions,
   };
 
@@ -77,14 +76,17 @@ export async function getTableData(
       req,
       panel,
       services.esQueryConfig,
-      panelIndex.indexPattern,
+      panelIndex,
       capabilities,
       services.uiSettings
     );
 
     const [resp] = await searchStrategy.search(requestContext, req, [
       {
-        body,
+        body: {
+          ...body,
+          runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+        },
         index: panelIndex.indexPatternString,
       },
     ]);
@@ -101,10 +103,11 @@ export async function getTableData(
 
     return {
       ...meta,
+      pivot_label: panel.pivot_label || (await calculatePivotLabel()),
       series,
     };
   } catch (err) {
-    if (err.body || err.name === 'KQLSyntaxError') {
+    if (err.body) {
       err.response = err.body;
 
       return {
@@ -112,5 +115,6 @@ export async function getTableData(
         ...handleErrorResponse(panel)(err),
       };
     }
+    return meta;
   }
 }

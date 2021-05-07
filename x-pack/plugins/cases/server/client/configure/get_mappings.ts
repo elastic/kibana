@@ -7,9 +7,8 @@
 
 import { SavedObjectsClientContract, Logger } from 'src/core/server';
 import { ActionsClient } from '../../../../actions/server';
-import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
+import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { ConnectorMappingsServiceSetup } from '../../services';
 import { CasesClientHandler } from '..';
 import { createCaseError } from '../../common/error';
@@ -48,7 +47,11 @@ export const getMappings = async ({
     });
     let theMapping;
     // Create connector mappings if there are none
-    if (myConnectorMappings.total === 0) {
+    if (
+      myConnectorMappings.total === 0 ||
+      (myConnectorMappings.total > 0 &&
+        !myConnectorMappings.saved_objects[0].attributes.hasOwnProperty('mappings'))
+    ) {
       const res = await casesClient.getFields({
         actionsClient,
         connectorId,

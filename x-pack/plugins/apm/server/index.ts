@@ -120,5 +120,9 @@ export function mergeConfigs(
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
-export { APMPlugin, APMPluginSetup } from './plugin';
+export { APMPlugin } from './plugin';
+export { APMPluginSetup } from './types';
+export { APMServerRouteRepository } from './routes/get_global_apm_server_route_repository';
+export { InspectResponse, APMRouteHandlerResources } from './routes/typings';
+
 export type { ProcessorEvent } from '../common/processor_event';

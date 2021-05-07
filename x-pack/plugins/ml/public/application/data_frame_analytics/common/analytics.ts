@@ -366,7 +366,7 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
       if (response.regression.hasOwnProperty(statType)) {
         let currentStatValue =
           response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
-        if (currentStatValue && !isNaN(currentStatValue)) {
+        if (currentStatValue && Number.isFinite(currentStatValue)) {
           currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
         }
         results[statType as keyof RegressionEvaluateExtractedResponse] = currentStatValue;
@@ -523,6 +523,9 @@ export const loadEvalData = async ({
       [jobType]: {
         actual_field: dependentVariable,
         predicted_field: predictedField,
+        ...(jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+          ? { top_classes_field: `${resultsField}.top_classes` }
+          : {}),
         metrics: metrics[jobType as keyof EvaluateMetrics],
       },
     },

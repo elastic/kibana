@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { estypes } from '@elastic/elasticsearch';
 import { RuntimeMappings } from './fields';
 
 import { EsErrorBody } from '../util/errors';
@@ -75,7 +76,7 @@ export interface DataFrameAnalyticsConfig {
   };
   source: {
     index: IndexName | IndexName[];
-    query?: any;
+    query?: estypes.QueryContainer;
     runtime_mappings?: RuntimeMappings;
   };
   analysis: AnalysisConfig;

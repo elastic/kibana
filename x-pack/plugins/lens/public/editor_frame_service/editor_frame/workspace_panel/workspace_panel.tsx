@@ -43,7 +43,6 @@ import {
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
-import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import {
   UiActionsStart,
@@ -52,7 +51,7 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import { getOriginalRequestErrorMessage } from '../../error_helper';
+import { getOriginalRequestErrorMessages } from '../../error_helper';
 import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
 import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 
@@ -368,7 +367,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 });
 
-export const InnerVisualizationWrapper = ({
+export const VisualizationWrapper = ({
   expression,
   framePublicAPI,
   timefilter,
@@ -432,7 +431,7 @@ export const InnerVisualizationWrapper = ({
           .map(({ longMessage }) => (
             <p
               key={longMessage}
-              className="eui-textBreakAll"
+              className="eui-textBreakWord"
               data-test-subj="configuration-failure-error"
             >
               {longMessage}
@@ -465,7 +464,7 @@ export const InnerVisualizationWrapper = ({
             actions={showExtraErrorsAction}
             body={
               <>
-                <p className="eui-textBreakAll" data-test-subj="configuration-failure-error">
+                <p className="eui-textBreakWord" data-test-subj="configuration-failure-error">
                   {localState.configurationValidationError[0].longMessage}
                 </p>
 
@@ -507,7 +506,7 @@ export const InnerVisualizationWrapper = ({
             }
             body={
               <>
-                <p className="eui-textBreakAll" data-test-subj="missing-refs-failure">
+                <p className="eui-textBreakWord" data-test-subj="missing-refs-failure">
                   <FormattedMessage
                     id="xpack.lens.editorFrame.indexPatternNotFound"
                     defaultMessage="Index pattern not found"
@@ -563,14 +562,19 @@ export const InnerVisualizationWrapper = ({
         onData$={onData$}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
+          const errorsFromRequest = getOriginalRequestErrorMessages(error);
+          const visibleErrorMessages = errorsFromRequest.length
+            ? errorsFromRequest
+            : errorMessage
+            ? [errorMessage]
+            : [];
 
           return (
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiEmptyPrompt
                   actions={
-                    visibleErrorMessage ? (
+                    visibleErrorMessages.length && !localState.expandError ? (
                       <EuiButtonEmpty
                         onClick={() => {
                           setLocalState((prevState: WorkspaceState) => ({
@@ -594,9 +598,13 @@ export const InnerVisualizationWrapper = ({
                         />
                       </p>
 
-                      {localState.expandError ? (
-                        <p className="eui-textBreakAll">{visibleErrorMessage}</p>
-                      ) : null}
+                      {localState.expandError
+                        ? visibleErrorMessages.map((visibleErrorMessage) => (
+                            <p className="eui-textBreakWord" key={visibleErrorMessage}>
+                              {visibleErrorMessage}
+                            </p>
+                          ))
+                        : null}
                     </>
                   }
                   iconColor="danger"
@@ -610,5 +618,3 @@ export const InnerVisualizationWrapper = ({
     </div>
   );
 };
-
-export const VisualizationWrapper = debouncedComponent(InnerVisualizationWrapper);

@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
-import { enableInspectEsQueries } from '../../../../observability/public';
+import React from 'react';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { px, unit } from '../../style/variables';
+import { enableInspectEsQueries } from '../../../../observability/public';
+import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
+import { useKibanaUrl } from '../../hooks/useKibanaUrl';
+import { useBreakPoints } from '../../hooks/use_break_points';
+import { px } from '../../style/variables';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';
 import { TimeComparison } from './time_comparison';
-import { useBreakPoints } from '../../hooks/use_break_points';
-import { useKibanaUrl } from '../../hooks/useKibanaUrl';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
+import { TransactionTypeSelect } from './transaction_type_select';
 
 const EuiFlexGroupSpaced = euiStyled(EuiFlexGroup)`
   margin: ${({ theme }) =>
@@ -27,13 +32,8 @@ const EuiFlexGroupSpaced = euiStyled(EuiFlexGroup)`
 `;
 
 interface Props {
-  prepend?: React.ReactNode | string;
   showTimeComparison?: boolean;
-  showCorrelations?: boolean;
-}
-
-function getRowDirection(showColumn: boolean) {
-  return showColumn ? 'column' : 'row';
+  showTransactionTypeSelector?: boolean;
 }
 
 function DebugQueryCallout() {
@@ -83,37 +83,53 @@ function DebugQueryCallout() {
 }
 
 export function SearchBar({
-  prepend,
   showTimeComparison = false,
-  showCorrelations = false,
+  showTransactionTypeSelector = false,
 }: Props) {
-  const { isMedium, isLarge } = useBreakPoints();
-  const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
-
+  const { isSmall, isMedium, isLarge, isXl, isXXL } = useBreakPoints();
   return (
     <>
       <DebugQueryCallout />
-      <EuiFlexGroupSpaced gutterSize="m" direction={getRowDirection(isLarge)}>
+      <EuiFlexGroupSpaced
+        gutterSize="s"
+        responsive={false}
+        direction={isXXL ? 'row' : 'column'}
+      >
         <EuiFlexItem>
-          <KueryBar prepend={prepend} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiFlexGroup
-            justifyContent="flexEnd"
+            direction={isSmall ? 'columnReverse' : 'row'}
             gutterSize="s"
-            direction={getRowDirection(isMedium)}
+            responsive={false}
+          >
+            {showTransactionTypeSelector && (
+              <EuiFlexItem grow={false}>
+                <TransactionTypeSelect />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <KueryBar />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={showTimeComparison && !isXXL}>
+          <EuiFlexGroup
+            direction={isSmall || isMedium ? 'columnReverse' : 'row'}
+            justifyContent={isLarge || isXl ? 'flexEnd' : undefined}
+            gutterSize="s"
+            responsive={false}
           >
             {showTimeComparison && (
-              <EuiFlexItem style={{ ...itemsStyle, minWidth: px(300) }}>
+              <EuiFlexItem grow={isXXL} style={{ minWidth: px(300) }}>
                 <TimeComparison />
               </EuiFlexItem>
             )}
-            <EuiFlexItem style={itemsStyle}>
+            <EuiFlexItem grow={false}>
               <DatePicker />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroupSpaced>
+      <EuiSpacer size="s" />
     </>
   );
 }

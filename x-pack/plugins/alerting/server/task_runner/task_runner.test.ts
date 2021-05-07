@@ -153,7 +153,7 @@ describe('Task Runner', () => {
       actionsClient
     );
     taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
-      (actionTypeId, params) => params
+      (actionTypeId, actionId, params) => params
     );
   });
 

@@ -73,7 +73,7 @@ export interface SearchSessionIndicatorUiConfig {
 }
 
 /**
- * Responsible for tracking a current search session. Supports only a single session at a time.
+ * Responsible for tracking a current search session. Supports a single session at a time.
  */
 export class SessionService {
   public readonly state$: Observable<SearchSessionState>;

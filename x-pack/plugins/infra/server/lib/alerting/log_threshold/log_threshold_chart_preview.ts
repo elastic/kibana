@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { InfraSource } from '../../sources';
 import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
@@ -26,19 +25,18 @@ import {
   GroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
 
 const COMPOSITE_GROUP_SIZE = 40;
 
 export async function getChartPreviewData(
   requestContext: InfraPluginRequestHandlerContext,
-  sourceConfiguration: InfraSource,
+  resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration,
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number
 ) {
-  const indexPattern = sourceConfiguration.configuration.logAlias;
-  const timestampField = sourceConfiguration.configuration.fields.timestamp;
-
+  const { indices, timestampField, runtimeMappings } = resolvedLogSourceConfiguration;
   const { groupBy, timeSize, timeUnit } = alertParams;
   const isGrouped = groupBy && groupBy.length > 0 ? true : false;
 
@@ -51,8 +49,8 @@ export async function getChartPreviewData(
   const { rangeFilter } = buildFiltersFromCriteria(expandedAlertParams, timestampField);
 
   const query = isGrouped
-    ? getGroupedESQuery(expandedAlertParams, timestampField, indexPattern)
-    : getUngroupedESQuery(expandedAlertParams, timestampField, indexPattern);
+    ? getGroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings)
+    : getUngroupedESQuery(expandedAlertParams, timestampField, indices, runtimeMappings);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');

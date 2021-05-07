@@ -550,6 +550,11 @@ export interface VisualizationType {
    * The group the visualization belongs to
    */
   groupLabel: string;
+  /**
+   * The priority of the visualization in the list (global priority)
+   * Higher number means higher priority. When omitted defaults to 0
+   */
+  sortPriority?: number;
 }
 
 export interface Visualization<T = unknown> {

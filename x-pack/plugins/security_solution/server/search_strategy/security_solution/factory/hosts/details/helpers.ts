@@ -8,6 +8,7 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import {
   AggregationRequest,
@@ -16,7 +17,6 @@ import {
   HostItem,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
 
 export const HOST_FIELDS = [
   '_id',
@@ -55,6 +55,11 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
       host_ip: {
         terms: {
           script: {
+            // We might be able to remove this when PR is fixed in Elasticsearch: https://github.com/elastic/elasticsearch/issues/72276
+            // Currently we cannot use "value_type" with an aggregation when we have a mapping conflict which is why this painless script exists
+            // See public ticket: https://github.com/elastic/kibana/pull/78912
+            // See private ticket: https://github.com/elastic/security-team/issues/333
+            // for more details on the use cases and causes of the conflicts and why this is here.
             source: "doc['host.ip']",
             lang: 'painless',
           },

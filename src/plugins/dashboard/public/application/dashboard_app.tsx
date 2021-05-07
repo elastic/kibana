@@ -10,7 +10,7 @@ import { History } from 'history';
 import { merge, Subject, Subscription } from 'rxjs';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { debounceTime, tap } from 'rxjs/operators';
+import { debounceTime, finalize, switchMap, tap } from 'rxjs/operators';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardConstants } from '../dashboard_constants';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
@@ -30,7 +30,7 @@ import {
   useSavedDashboard,
 } from './hooks';
 
-import { IndexPattern } from '../services/data';
+import { IndexPattern, waitUntilNextSessionCompletes$ } from '../services/data';
 import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardContainerInput } from '.';
 import { leaveConfirmStrings } from '../dashboard_strings';
@@ -209,12 +209,24 @@ export function DashboardApp({
     );
 
     subscriptions.add(
-      merge(
-        data.query.timefilter.timefilter.getAutoRefreshFetch$(),
-        searchSessionIdQuery$
-      ).subscribe(() => {
+      searchSessionIdQuery$.subscribe(() => {
         triggerRefresh$.next({ force: true });
       })
+    );
+
+    subscriptions.add(
+      data.query.timefilter.timefilter
+        .getAutoRefreshFetch$()
+        .pipe(
+          tap(() => {
+            triggerRefresh$.next({ force: true });
+          }),
+          switchMap((done) =>
+            // best way on a dashboard to estimate that panels are updated is to rely on search session service state
+            waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
+          )
+        )
+        .subscribe()
     );
 
     dashboardStateManager.registerChangeListener(() => {
@@ -291,7 +303,7 @@ export function DashboardApp({
   }, [data.search.session]);
 
   return (
-    <div className="app-container dshAppContainer">
+    <>
       {savedDashboard && dashboardStateManager && dashboardContainer && viewMode && (
         <>
           <DashboardTopNav
@@ -322,6 +334,6 @@ export function DashboardApp({
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

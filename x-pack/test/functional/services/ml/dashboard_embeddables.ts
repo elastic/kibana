@@ -8,14 +8,17 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
+import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
   { getService }: FtrProviderContext,
-  mlCommonUI: MlCommonUI
+  mlCommonUI: MlCommonUI,
+  mlDashboardJobSelectionTable: MlDashboardJobSelectionTable
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   return {
     async assertAnomalyChartsEmbeddableInitializerExists() {
@@ -90,6 +93,18 @@ export function MachineLearningDashboardEmbeddablesProvider(
 
     async assertAnomalyChartsExists() {
       await testSubjects.existOrFail(`mlExplorerChartsContainer`);
+    },
+
+    async openJobSelectionFlyout() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await dashboardAddPanel.clickEditorMenuButton();
+        await testSubjects.existOrFail('dashboardEditorContextMenu', { timeout: 2000 });
+
+        await dashboardAddPanel.clickEmbeddableFactoryGroupButton('ml');
+        await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');
+
+        await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
+      });
     },
   };
 }

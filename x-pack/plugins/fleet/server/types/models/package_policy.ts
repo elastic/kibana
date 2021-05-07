@@ -24,6 +24,7 @@ const ConfigRecordSchema = schema.recordOf(
   schema.object({
     type: schema.maybe(schema.string()),
     value: schema.maybe(schema.any()),
+    frozen: schema.maybe(schema.boolean()),
   })
 );
 
@@ -78,6 +79,7 @@ const PackagePolicyBaseSchema = {
 
 export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
+  force: schema.maybe(schema.boolean()),
 });
 
 export const UpdatePackagePolicySchema = schema.object({

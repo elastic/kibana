@@ -9,9 +9,9 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { Breakdowns } from './breakdowns';
 import { mockIndexPattern, mockUrlStorage, render } from '../../rtl_helpers';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 import { getDefaultConfigs } from '../../configurations/default_configs';
-import { USER_AGENT_OS } from '../../configurations/data/elasticsearch_fieldnames';
+import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('Breakdowns', function () {
   const dataViewSeries = getDefaultConfigs({
@@ -41,6 +41,7 @@ describe('Breakdowns', function () {
 
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       breakdown: 'user_agent.name',
+      dataType: 'ux',
       reportType: 'pld',
       time: { from: 'now-15m', to: 'now' },
     });

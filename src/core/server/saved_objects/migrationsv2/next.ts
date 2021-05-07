@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as Option from 'fp-ts/lib/Option';
-import { UnwrapPromise } from '@kbn/utility-types';
-import { pipe } from 'fp-ts/lib/pipeable';
-import {
+import type { UnwrapPromise } from '@kbn/utility-types';
+import type {
   AllActionStates,
-  ReindexSourceToTempState,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndex,
   MarkVersionIndexReady,
   InitState,
   LegacyCreateReindexTargetState,
@@ -20,24 +20,27 @@ import {
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacySetWriteBlockState,
-  OutdatedDocumentsSearch,
   OutdatedDocumentsTransform,
   SetSourceWriteBlockState,
   State,
   UpdateTargetMappingsState,
   UpdateTargetMappingsWaitForTaskState,
   CreateReindexTempState,
-  ReindexSourceToTempWaitForTaskState,
   MarkVersionIndexReadyConflict,
   CreateNewTargetState,
   CloneTempToSource,
   SetTempWriteBlock,
+  WaitForYellowSourceState,
+  TransformRawDocs,
+  OutdatedDocumentsSearchOpenPit,
+  OutdatedDocumentsSearchRead,
+  OutdatedDocumentsSearchClosePit,
+  RefreshTarget,
+  OutdatedDocumentsRefresh,
 } from './types';
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
-import { SavedObjectsRawDoc } from '..';
 
-export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
 type ActionMap = ReturnType<typeof nextActionMap>;
 
 /**
@@ -54,41 +57,83 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   return {
     INIT: (state: InitState) =>
       Actions.fetchIndices(client, [state.currentAlias, state.versionAlias]),
+    WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
+      Actions.waitForIndexStatusYellow(client, state.sourceIndex.value),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
       Actions.setWriteBlock(client, state.sourceIndex.value),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
       Actions.createIndex(client, state.targetIndex, state.targetIndexMappings),
     CREATE_REINDEX_TEMP: (state: CreateReindexTempState) =>
       Actions.createIndex(client, state.tempIndex, state.tempIndexMappings),
-    REINDEX_SOURCE_TO_TEMP: (state: ReindexSourceToTempState) =>
-      Actions.reindex(client, state.sourceIndex.value, state.tempIndex, Option.none, false),
+    REINDEX_SOURCE_TO_TEMP_OPEN_PIT: (state: ReindexSourceToTempOpenPit) =>
+      Actions.openPit(client, state.sourceIndex.value),
+    REINDEX_SOURCE_TO_TEMP_READ: (state: ReindexSourceToTempRead) =>
+      Actions.readWithPit(
+        client,
+        state.sourceIndexPitId,
+        /* When reading we use a source query to exclude saved objects types which
+         * are no longer used. These saved objects will still be kept in the outdated
+         * index for backup purposes, but won't be available in the upgraded index.
+         */
+        state.unusedTypesQuery,
+        state.batchSize,
+        state.lastHitSortValue
+      ),
+    REINDEX_SOURCE_TO_TEMP_CLOSE_PIT: (state: ReindexSourceToTempClosePit) =>
+      Actions.closePit(client, state.sourceIndexPitId),
+    REINDEX_SOURCE_TO_TEMP_INDEX: (state: ReindexSourceToTempIndex) =>
+      Actions.transformDocs(
+        client,
+        transformRawDocs,
+        state.outdatedDocuments,
+        state.tempIndex,
+        /**
+         * Since we don't run a search against the target index, we disable "refresh" to speed up
+         * the migration process.
+         * Although any further step must run "refresh" for the target index
+         * before we reach out to the OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT step.
+         * Right now, it's performed during REFRESH_TARGET step.
+         */
+        false
+      ),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock(client, state.tempIndex),
-    REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK: (state: ReindexSourceToTempWaitForTaskState) =>
-      Actions.waitForReindexTask(client, state.reindexSourceToTargetTaskId, '60s'),
     CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
       Actions.cloneIndex(client, state.tempIndex, state.targetIndex),
+    REFRESH_TARGET: (state: RefreshTarget) => Actions.refreshIndex(client, state.targetIndex),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
       Actions.updateAndPickupMappings(client, state.targetIndex, state.targetIndexMappings),
     UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask(client, state.updateTargetMappingsTaskId, '60s'),
-    OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
-      Actions.searchForOutdatedDocuments(client, {
-        batchSize: state.batchSize,
-        targetIndex: state.targetIndex,
-        outdatedDocumentsQuery: state.outdatedDocumentsQuery,
-      }),
+    OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
+      Actions.openPit(client, state.targetIndex),
+    OUTDATED_DOCUMENTS_SEARCH_READ: (state: OutdatedDocumentsSearchRead) =>
+      Actions.readWithPit(
+        client,
+        state.pitId,
+        // search for outdated documents only
+        state.outdatedDocumentsQuery,
+        state.batchSize,
+        state.lastHitSortValue
+      ),
+    OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
+      Actions.closePit(client, state.pitId),
+    OUTDATED_DOCUMENTS_REFRESH: (state: OutdatedDocumentsRefresh) =>
+      Actions.refreshIndex(client, state.targetIndex),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
-      pipe(
-        TaskEither.tryCatch(
-          () => transformRawDocs(state.outdatedDocuments),
-          (e) => {
-            throw e;
-          }
-        ),
-        TaskEither.chain((docs) =>
-          Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, docs)
-        )
+      Actions.transformDocs(
+        client,
+        transformRawDocs,
+        state.outdatedDocuments,
+        state.targetIndex,
+        /**
+         * Since we don't run a search against the target index, we disable "refresh" to speed up
+         * the migration process.
+         * Although any further step must run "refresh" for the target index
+         * before we reach out to the MARK_VERSION_INDEX_READY step.
+         * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
+         */
+        false
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
@@ -104,7 +149,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         state.legacyIndex,
         state.sourceIndex.value,
         state.preMigrationScript,
-        false
+        false,
+        state.unusedTypesQuery
       ),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask(client, state.legacyReindexTaskId, '60s'),

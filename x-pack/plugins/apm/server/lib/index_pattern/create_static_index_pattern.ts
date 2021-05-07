@@ -12,20 +12,18 @@ import {
 } from '../../../../../../src/plugins/apm_oss/server';
 import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
-import { APMRequestHandlerContext } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../../routes/typings';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 
 export async function createStaticIndexPattern(
   setup: Setup,
-  context: APMRequestHandlerContext,
+  config: APMRouteHandlerResources['config'],
   savedObjectsClient: InternalSavedObjectsClient,
   spaceId: string | undefined
 ): Promise<boolean> {
   return withApmSpan('create_static_index_pattern', async () => {
-    const { config } = context;
-
     // don't autocreate APM index pattern if it's been disabled via the config
     if (!config['xpack.apm.autocreateApmIndexPattern']) {
       return false;
@@ -39,7 +37,7 @@ export async function createStaticIndexPattern(
     }
 
     try {
-      const apmIndexPatternTitle = getApmIndexPatternTitle(context);
+      const apmIndexPatternTitle = getApmIndexPatternTitle(config);
       await withApmSpan('create_index_pattern_saved_object', () =>
         savedObjectsClient.create(
           'index-pattern',

@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { QueryPerformance } from '../query_performance';
 import { ResultSettingsLogic } from '../result_settings_logic';
 
 import { SampleResponseLogic } from './sample_response_logic';
@@ -48,7 +49,7 @@ export const SampleResponse: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {/* TODO <QueryPerformance queryPerformanceRating={queryPerformanceRating} /> */}
+          <QueryPerformance />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

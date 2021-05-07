@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BroadcastChannel } from 'broadcast-channel';
+import type { BroadcastChannel as BroadcastChannelType } from 'broadcast-channel';
 
 import type { HttpSetup, NotificationsSetup, Toast, ToastInput } from 'src/core/public';
 
@@ -45,7 +45,7 @@ export interface ISessionTimeout {
 }
 
 export class SessionTimeout implements ISessionTimeout {
-  private channel?: BroadcastChannel<SessionInfo>;
+  private channel?: BroadcastChannelType<SessionInfo>;
   private sessionInfo?: SessionInfo;
   private fetchTimer?: number;
   private warningTimer?: number;
@@ -64,15 +64,26 @@ export class SessionTimeout implements ISessionTimeout {
       return;
     }
 
-    // subscribe to a broadcast channel for session timeout messages
-    // this allows us to synchronize the UX across tabs and avoid repetitive API calls
-    const name = `${this.tenant}/session_timeout`;
-    this.channel = new BroadcastChannel(name, { webWorkerSupport: false });
-    this.channel.onmessage = this.handleSessionInfoAndResetTimers;
-
-    // Triggers an initial call to the endpoint to get session info;
-    // when that returns, it will set the timeout
-    return this.fetchSessionInfoAndResetTimers();
+    import('broadcast-channel')
+      .then(({ BroadcastChannel }) => {
+        // subscribe to a broadcast channel for session timeout messages
+        // this allows us to synchronize the UX across tabs and avoid repetitive API calls
+        const name = `${this.tenant}/session_timeout`;
+        this.channel = new BroadcastChannel(name, { webWorkerSupport: false });
+        this.channel.onmessage = this.handleSessionInfoAndResetTimers;
+      })
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Failed to load broadcast channel. Session management will not be kept in sync when multiple tabs are loaded.`,
+          e
+        );
+      })
+      .finally(() => {
+        // Triggers an initial call to the endpoint to get session info;
+        // when that returns, it will set the timeout
+        return this.fetchSessionInfoAndResetTimers();
+      });
   }
 
   stop() {

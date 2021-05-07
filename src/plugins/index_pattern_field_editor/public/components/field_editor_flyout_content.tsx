@@ -143,7 +143,7 @@ const FieldEditorFlyoutContentComponent = ({
 
   const [isValidating, setIsValidating] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [confirmContent, setConfirmContent] = useState<string>();
+  const [confirmContent, setConfirmContent] = useState<string>('');
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
   const { fields } = indexPattern;
