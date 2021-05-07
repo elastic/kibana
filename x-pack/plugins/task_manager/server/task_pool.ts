@@ -80,6 +80,10 @@ export class TaskPool {
     return this.maxWorkers ? Math.round((this.occupiedWorkers * 100) / this.maxWorkers) : 100;
   }
 
+  public get max() {
+    return this.maxWorkers;
+  }
+
   /**
    * Gets how many workers are currently available.
    */

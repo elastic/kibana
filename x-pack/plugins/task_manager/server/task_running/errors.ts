@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EphemeralTaskDelayedDueToCapacity } from '../task_events';
+
 // Unrecoverable
 const CODE_UNRECOVERABLE = 'TaskManager/unrecoverable';
 
@@ -14,12 +16,31 @@ export interface DecoratedError extends Error {
   [code]?: string;
 }
 
+export class EphemeralTaskDelayedDueToCapacityError extends Error {
+  private _task: EphemeralTaskDelayedDueToCapacity;
+
+  constructor(message: string, task: EphemeralTaskDelayedDueToCapacity) {
+    super(message);
+    this._task = task;
+  }
+
+  public get task() {
+    return this._task;
+  }
+}
+
 function isTaskManagerError(error: unknown): error is DecoratedError {
   return Boolean(error && (error as DecoratedError)[code]);
 }
 
 export function isUnrecoverableError(error: Error | DecoratedError) {
   return isTaskManagerError(error) && error[code] === CODE_UNRECOVERABLE;
+}
+
+export function isEphemeralTaskDelayedDueToCapacityError(
+  error: Error | EphemeralTaskDelayedDueToCapacityError
+) {
+  return Boolean(error && (error as EphemeralTaskDelayedDueToCapacityError).task);
 }
 
 export function throwUnrecoverableError(error: Error) {

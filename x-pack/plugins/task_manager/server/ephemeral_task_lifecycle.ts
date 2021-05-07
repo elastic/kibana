@@ -12,7 +12,7 @@ import { Logger } from '../../../../src/core/server';
 import { Result, asErr, asOk } from './lib/result_type';
 import { TaskManagerConfig } from './config';
 
-import { TaskEventType } from './task_events';
+import { asEphemeralTaskDelayedDueToCapacityEvent, TaskEventType } from './task_events';
 import { Middleware } from './lib/middleware';
 import { EphemeralTaskInstance } from './task';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -30,7 +30,7 @@ export interface EphemeralTaskLifecycleOpts {
   lifecycleEvent: Observable<TaskLifecycleEvent>;
 }
 
-type EphemeralTaskInstanceRequest = Omit<EphemeralTaskInstance, 'startedAt'>;
+export type EphemeralTaskInstanceRequest = Omit<EphemeralTaskInstance, 'startedAt'>;
 
 /**
  * The public interface into the task manager system.
@@ -78,9 +78,31 @@ export class EphemeralTaskLifecycle {
               // (e.type === TaskEventType.TASK_POLLING_CYCLE ||
               //   // or the "load" in the TaskPool has changed (meaning a task has just completed)
               //   (e.type === TaskEventType.TASK_MANAGER_STAT && e.id === 'load')) &&
-              this.getCapacity() > 0
+              this.getCapacity() === 0
             );
           }
+        )
+      )
+      .subscribe(async (e) => {
+        for (const task of this.ephemeralTaskQueue.values()) {
+          const event = asEphemeralTaskDelayedDueToCapacityEvent(task.id, asOk(task));
+          this.emitEvent(event);
+          this.ephemeralTaskQueue.delete(task);
+        }
+      });
+
+    this.lifecycleEvent
+      .pipe(
+        filter(
+          // we want to know when the queue has ephemeral task run requests
+          (e) =>
+            this.ephemeralTaskQueue.size > 0 &&
+            e.type === TaskEventType.TASK_POLLING_CYCLE &&
+            // and when a polling cycle has just completed,
+            // (e.type === TaskEventType.TASK_POLLING_CYCLE ||
+            //   // or the "load" in the TaskPool has changed (meaning a task has just completed)
+            //   (e.type === TaskEventType.TASK_MANAGER_STAT && e.id === 'load')) &&
+            this.getCapacity() > 0
         )
       )
       .subscribe(async (e) => {

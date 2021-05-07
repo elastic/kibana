@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { omit } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import {
@@ -23,7 +23,10 @@ import {
   RawAlert,
 } from '../types';
 import { NormalizedAlertType } from '../alert_type_registry';
-import { EphemeralTask } from '../../../task_manager/server';
+import {
+  EphemeralTask,
+  EphemeralTaskDelayedDueToCapacityError,
+} from '../../../task_manager/server';
 
 export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,
@@ -63,6 +66,11 @@ interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   alertInstanceId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
+}
+
+interface EphemeralFailureResult {
+  tag: string;
+  value: EphemeralTask;
 }
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
@@ -219,7 +227,28 @@ export function createExecutionHandler<
     }
 
     if (supportsEphemeralTasks && tasks.length) {
-      actionsClient.executeEphemeralTasks(tasks);
+      actionsClient
+        .executeEphemeralTasks(tasks)
+        .then((results: Array<PromiseSettledResult<EphemeralTask>>) => {
+          for (const result of results) {
+            if (result.status === 'rejected') {
+              const taskInstance = ((result.reason as EphemeralTaskDelayedDueToCapacityError)?.task
+                ?.event as EphemeralFailureResult)?.value;
+              if (taskInstance) {
+                actionsClient.enqueueExecution({
+                  id: taskInstance.params.taskParams?.actionId,
+                  params: omit(taskInstance.params, ['taskParams']),
+                  spaceId,
+                  apiKey: apiKey ?? null,
+                  source: asSavedObjectExecutionSource({
+                    id: alertId,
+                    type: 'alert',
+                  }),
+                });
+              }
+            }
+          }
+        });
     }
   };
 }

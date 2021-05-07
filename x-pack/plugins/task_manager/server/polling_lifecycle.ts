@@ -25,6 +25,7 @@ import {
   asTaskPollingCycleEvent,
   TaskManagerStat,
   asTaskManagerStatEvent,
+  EphemeralTaskDelayedDueToCapacity,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -60,6 +61,7 @@ export type TaskLifecycleEvent =
   | TaskClaim
   | TaskRunRequest
   | TaskPollingCycle
+  | EphemeralTaskDelayedDueToCapacity
   | TaskManagerStat;
 
 /**

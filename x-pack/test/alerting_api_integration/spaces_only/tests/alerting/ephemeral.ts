@@ -215,6 +215,66 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         }, waitForInMs)
       );
     });
+
+    // it.only('should ensure ephemeral actions are not lost if TM is at capacity', async () => {
+    //   const action = await supertest
+    //     .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+    //     .set('kbn-xsrf', 'foo')
+    //     .send({
+    //       name: `My action`,
+    //       connector_type_id: 'test.delayed',
+    //       config: {
+    //         unencrypted: `This value shouldn't get encrypted`,
+    //       },
+    //       secrets: {
+    //         encrypted: 'This value should be encrypted',
+    //       },
+    //     })
+    //     .expect(200);
+
+    //   const actionCount = 5;
+    //   const alertCount = 50;
+    //   const reference = 'ephemeralRef';
+    //   await Promise.all(
+    //     range(0, 10).map(async (index) => {
+    //       await supertest
+    //         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+    //         .set('kbn-xsrf', 'foo')
+    //         .send(
+    //           getTestAlertData({
+    //             rule_type_id: 'test.always-firing',
+    //             params: { index: ES_TEST_INDEX_NAME, reference },
+    //             schedule: { interval: '1m' },
+    //             throttle: null,
+    //             notify_when: 'onActiveAlert',
+    //             actions: range(0, actionCount).map((idx) => {
+    //               return {
+    //                 id: action.body.id,
+    //                 group: 'default',
+    //                 params: {
+    //                   delayInMs: 1000,
+    //                 },
+    //               };
+    //             }),
+    //           })
+    //         )
+    //         .expect(200);
+    //     })
+    //   );
+
+    //   const actionEvents = await retry.try(async () => {
+    //     return await getEventLog({
+    //       getService,
+    //       spaceId: Spaces.space1.id,
+    //       type: 'action',
+    //       id: action.body.id,
+    //       provider: 'actions',
+    //       actions: new Map([['execute', { gte: actionCount * alertCount }]]),
+    //     });
+    //   });
+    //   const executeActionsEvents = getEventsByAction(actionEvents, 'execute');
+    //   expect(executeActionsEvents.length).equal(actionCount * alertCount);
+    // });
   });
 }
 
