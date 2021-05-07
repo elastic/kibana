@@ -141,7 +141,7 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(loadedConnectors);
+        setConnectors(loadedConnectors.filter((connector) => !connector.isMissingSecrets));
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(

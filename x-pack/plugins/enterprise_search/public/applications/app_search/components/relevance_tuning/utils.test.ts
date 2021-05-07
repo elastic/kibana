@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { SchemaType } from '../../../shared/schema/types';
+
 import { Boost, BoostType } from './types';
 import {
   filterIfTerm,
@@ -70,17 +73,17 @@ describe('removeBoostStateProps', () => {
 
 describe('parseBoostCenter', () => {
   it('should parse the value to a number when the type is number', () => {
-    expect(parseBoostCenter('number', 5)).toEqual(5);
-    expect(parseBoostCenter('number', '5')).toEqual(5);
+    expect(parseBoostCenter(SchemaType.Number, 5)).toEqual(5);
+    expect(parseBoostCenter(SchemaType.Number, '5')).toEqual(5);
   });
 
   it('should not try to parse the value when the type is text', () => {
-    expect(parseBoostCenter('text', 5)).toEqual(5);
-    expect(parseBoostCenter('text', '4')).toEqual('4');
+    expect(parseBoostCenter(SchemaType.Text, 5)).toEqual(5);
+    expect(parseBoostCenter(SchemaType.Text, '4')).toEqual('4');
   });
 
   it('should leave text invalid numbers alone', () => {
-    expect(parseBoostCenter('number', 'foo')).toEqual('foo');
+    expect(parseBoostCenter(SchemaType.Number, 'foo')).toEqual('foo');
   });
 });
 
