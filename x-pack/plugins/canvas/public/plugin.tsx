@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+import { ReportingStart } from '../../reporting/public';
 import {
   CoreSetup,
   CoreStart,
@@ -21,12 +22,13 @@ import { getSessionStorage } from './lib/storage';
 import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
-import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
+import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
 export { CoreStart, CoreSetup };
@@ -48,9 +50,12 @@ export interface CanvasSetupDeps {
 export interface CanvasStartDeps {
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
+  reporting?: ReportingStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 /**

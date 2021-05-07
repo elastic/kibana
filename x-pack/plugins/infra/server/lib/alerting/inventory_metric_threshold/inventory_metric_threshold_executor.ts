@@ -68,21 +68,27 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     sourceId || 'default'
   );
 
-  const logQueryFields = await libs.getLogQueryFields(
-    sourceId || 'default',
-    services.savedObjectsClient
-  );
+  const logQueryFields = await libs
+    .getLogQueryFields(
+      sourceId || 'default',
+      services.savedObjectsClient,
+      services.scopedClusterClient.asCurrentUser
+    )
+    .catch(() => undefined);
+
+  const compositeSize = libs.configuration.inventory.compositeSize;
 
   const results = await Promise.all(
-    criteria.map((c) =>
-      evaluateCondition(
-        c,
+    criteria.map((condition) =>
+      evaluateCondition({
+        condition,
         nodeType,
         source,
         logQueryFields,
-        services.scopedClusterClient.asCurrentUser,
-        filterQuery
-      )
+        esClient: services.scopedClusterClient.asCurrentUser,
+        compositeSize,
+        filterQuery,
+      })
     )
   );
 

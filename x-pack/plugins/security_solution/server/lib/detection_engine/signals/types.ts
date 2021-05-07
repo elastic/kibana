@@ -25,12 +25,13 @@ import {
   RuleAlertAction,
   SearchTypes,
 } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes } from '../types';
+import { RefreshTypes } from '../types';
 import { ListClient } from '../../../../../lists/server';
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
+import { RuleParams } from '../schemas/rule_schemas';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -159,7 +160,7 @@ export type BaseSignalHit = estypes.Hit<SignalSource>;
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
 export type RuleExecutorOptions = AlertExecutorOptions<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext
@@ -170,7 +171,7 @@ export type RuleExecutorOptions = AlertExecutorOptions<
 export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
 ): obj is AlertType<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -180,7 +181,7 @@ export const isAlertExecutor = (
 };
 
 export type SignalRuleAlertTypeDefinition = AlertType<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -223,7 +224,7 @@ export interface SignalHit {
   [key: string]: SearchTypes;
 }
 
-export interface AlertAttributes {
+export interface AlertAttributes<T extends RuleParams = RuleParams> {
   actions: RuleAlertAction[];
   enabled: boolean;
   name: string;
@@ -235,10 +236,7 @@ export interface AlertAttributes {
     interval: string;
   };
   throttle: string;
-}
-
-export interface RuleAlertAttributes extends AlertAttributes {
-  params: RuleTypeParams;
+  params: T;
 }
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
@@ -263,7 +261,7 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   }>;
-  ruleParams: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
@@ -272,25 +270,16 @@ export interface SearchAfterAndBulkCreateParams {
   id: string;
   inputIndexPattern: string[];
   signalsIndex: string;
-  name: string;
-  actions: RuleAlertAction[];
-  createdAt: string;
-  createdBy: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
   pageSize: number;
   filter: unknown;
   refresh: RefreshTypes;
-  tags: string[];
-  throttle: string;
   buildRuleMessage: BuildRuleMessage;
   enrichment?: SignalsEnrichment;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
+  warning: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;

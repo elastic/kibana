@@ -38,4 +38,5 @@ export {
   UseExceptionListItemsSuccess,
   UseExceptionListsSuccess,
 } from './exceptions/types';
-export { BuilderEntryItem } from './exceptions/components/builder/entry_renderer';
+export * as ExceptionBuilder from './exceptions/components/builder/index';
+export { transformNewItemOutput, transformOutput } from './exceptions/transforms';

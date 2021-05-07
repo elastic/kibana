@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
@@ -189,6 +188,8 @@ export default function ({ getService }: FtrProviderContext) {
             x: sampleCell.x + cellSize,
             y: sampleCell.y + cellSize,
           });
+          await ml.swimLane.waitForSwimLanesToLoad();
+
           // TODO extend cell data with X and Y values, and cell width
           await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
             x: [1454846400000, 1454860800000],
@@ -215,6 +216,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
+          await ml.swimLane.waitForSwimLanesToLoad();
+
           await ml.navigation.assertCurrentURLNotContain(
             'selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10'
           );
@@ -231,8 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('updates pagination');
           await ml.swimLane.setPageSize(viewBySwimLaneTestSubj, 5);
 
-          const axisLabels = await ml.swimLane.getAxisLabels(viewBySwimLaneTestSubj, 'y');
-          expect(axisLabels.length).to.eql(5);
+          await ml.swimLane.assertAxisLabelCount(viewBySwimLaneTestSubj, 'y', 5);
 
           await ml.swimLane.selectPage(viewBySwimLaneTestSubj, 3);
 
@@ -255,6 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
             x: sampleCell.x + cellSize,
             y: sampleCell.y + cellSize,
           });
+          await ml.swimLane.waitForSwimLanesToLoad();
 
           await ml.testExecution.logTestStep('check page content');
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
@@ -274,6 +277,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
+          await ml.swimLane.waitForSwimLanesToLoad();
+
           await ml.anomaliesTable.assertTableRowsCount(25);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
@@ -299,6 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
             x2: sampleCell2!.x + cellSize,
             y2: sampleCell2!.y + cellSize,
           });
+          await ml.swimLane.waitForSwimLanesToLoad();
 
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
             x: [1454817600000, 1454846400000],
@@ -311,9 +317,22 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
+          await ml.swimLane.waitForSwimLanesToLoad();
+
           await ml.anomaliesTable.assertTableRowsCount(25);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
+        });
+
+        it('allows to change the anomalies table pagination', async () => {
+          await ml.testExecution.logTestStep('displays the anomalies table with default config');
+          await ml.anomaliesTable.assertTableExists();
+          await ml.anomaliesTable.assertRowsNumberPerPage(25);
+          await ml.anomaliesTable.assertTableRowsCount(25);
+
+          await ml.testExecution.logTestStep('updates table pagination');
+          await ml.anomaliesTable.setRowsNumberPerPage(10);
+          await ml.anomaliesTable.assertTableRowsCount(10);
         });
 
         it('adds swim lane embeddable to a dashboard', async () => {

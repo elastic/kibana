@@ -29,15 +29,18 @@ export interface UMServerLibs extends UMDomainLibs {
 }
 
 export interface CountResponse {
-  body: {
-    count: number;
-    _shards: {
-      total: number;
-      successful: number;
-      skipped: number;
-      failed: number;
+  result: {
+    body: {
+      count: number;
+      _shards: {
+        total: number;
+        successful: number;
+        skipped: number;
+        failed: number;
+      };
     };
   };
+  indices: string;
 }
 
 export type UptimeESClient = ReturnType<typeof createUptimeESClient>;
@@ -51,7 +54,7 @@ export function createUptimeESClient({
   request?: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
 }) {
-  const { _debug = false } = (request?.query as { _debug: boolean }) ?? {};
+  const { _inspect = false } = (request?.query as { _inspect: boolean }) ?? {};
 
   return {
     baseESClient: esClient,
@@ -72,7 +75,7 @@ export function createUptimeESClient({
       } catch (e) {
         esError = e;
       }
-      if (_debug && request) {
+      if (_inspect && request) {
         debugESCall({ startTime, request, esError, operationName: 'search', params: esParams });
       }
 
@@ -99,7 +102,7 @@ export function createUptimeESClient({
         esError = e;
       }
 
-      if (_debug && request) {
+      if (_inspect && request) {
         debugESCall({ startTime, request, esError, operationName: 'count', params: esParams });
       }
 
@@ -107,7 +110,7 @@ export function createUptimeESClient({
         throw esError;
       }
 
-      return res;
+      return { result: res, indices: dynamicSettings.heartbeatIndices };
     },
     getSavedObjectsClient() {
       return savedObjectsClient;

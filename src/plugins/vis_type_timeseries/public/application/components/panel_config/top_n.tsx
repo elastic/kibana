@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import {
@@ -23,7 +24,6 @@ import {
   EuiHorizontalRule,
   EuiCode,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
@@ -33,7 +33,6 @@ import { ColorRules } from '../color_rules';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
@@ -120,6 +119,7 @@ export class TopNPanelConfig extends Component<
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
+              allowIndexSwitchingMode={true}
             />
 
             <EuiHorizontalRule />
@@ -138,29 +138,31 @@ export class TopNPanelConfig extends Component<
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
-                    onChange={(filter: PanelConfigProps['model']['filter']) =>
-                      this.props.onChange({ filter })
-                    }
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    onChange={(filter: PanelConfigProps['model']['filter']) => {
+                      this.props.onChange({ filter });
+                    }}
+                    indexPatterns={[model.index_pattern]}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.topN.optionsTab.ignoreGlobalFilterLabel"
-                    defaultMessage="Ignore global filter?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.topN.optionsTab.ignoreGlobalFilterLabel',
+                    {
+                      defaultMessage: 'Ignore global filter?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filter}
+                    name="ignore_global_filter"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -225,6 +227,7 @@ export class TopNPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="topNEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.topN.dataTab.dataButtonLabel"
@@ -234,6 +237,7 @@ export class TopNPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+            data-test-subj="topNEditorPanelOptionsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.topN.optionsTab.panelOptionsButtonLabel"

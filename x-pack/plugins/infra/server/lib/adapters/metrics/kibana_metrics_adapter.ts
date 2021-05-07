@@ -21,6 +21,7 @@ import {
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { isVisSeriesData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
@@ -59,7 +60,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     return Promise.all(requests)
       .then((results) => {
-        return results.map((result) => {
+        return results.filter(isVisSeriesData).map((result) => {
           const metricIds = Object.keys(result).filter(
             (k) => !['type', 'uiRestrictions'].includes(k)
           );

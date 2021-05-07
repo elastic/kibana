@@ -42,7 +42,7 @@ export enum AddSourceSteps {
   ConfigureCustomStep = 'Configure Custom',
   ConfigureOauthStep = 'Configure Oauth',
   SaveCustomStep = 'Save Custom',
-  ReAuthenticateStep = 'ReAuthenticate',
+  ReauthenticateStep = 'Reauthenticate',
 }
 
 export interface OauthParams {
@@ -418,8 +418,12 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/api/workplace_search/org/sources/${sourceId}/reauth_prepare`
         : `/api/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
+      const query = {
+        kibana_host: kibanaHost,
+      } as HttpFetchQuery;
+
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get(route, { query });
         actions.setSourceConnectData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -573,6 +577,6 @@ const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
   if (isCustom) return AddSourceSteps.ConfigureCustomStep;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
-  if (reAuthenticate) return AddSourceSteps.ReAuthenticateStep;
+  if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
   return AddSourceSteps.ConfigIntroStep;
 };

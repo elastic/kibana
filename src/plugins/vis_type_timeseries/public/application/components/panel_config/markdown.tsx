@@ -31,14 +31,13 @@ import type { Writable } from '@kbn/utility-types';
 
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 // @ts-expect-error not typed yet
 import { MarkdownEditor } from '../markdown_editor';
-// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
@@ -143,6 +142,7 @@ export class MarkdownPanelConfig extends Component<
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
+              allowIndexSwitchingMode={true}
             />
 
             <EuiHorizontalRule />
@@ -161,29 +161,31 @@ export class MarkdownPanelConfig extends Component<
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
-                    onChange={(filter: PanelConfigProps['model']['filter']) =>
-                      this.props.onChange({ filter })
-                    }
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    onChange={(filter) => {
+                      this.props.onChange({ filter });
+                    }}
+                    indexPatterns={[model.index_pattern]}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.markdown.optionsTab.ignoreGlobalFilterLabel"
-                    defaultMessage="Ignore global filter?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.markdown.optionsTab.ignoreGlobalFilterLabel',
+                    {
+                      defaultMessage: 'Ignore global filter?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filter}
+                    name="ignore_global_filter"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -218,35 +220,34 @@ export class MarkdownPanelConfig extends Component<
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.markdown.optionsTab.showScrollbarsLabel"
-                    defaultMessage="Show scrollbars?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.markdown.optionsTab.showScrollbarsLabel',
+                    {
+                      defaultMessage: 'Show scrollbars?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.markdown_scrollbars}
+                    name="markdown_scrollbars"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <YesNo
-                  value={model.markdown_scrollbars}
-                  name="markdown_scrollbars"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.markdown.optionsTab.openLinksInNewTab"
-                    defaultMessage="Open links in new tab?"
+                <EuiFormRow
+                  label={i18n.translate('visTypeTimeseries.markdown.optionsTab.openLinksInNewTab', {
+                    defaultMessage: 'Open links in new tab?',
+                  })}
+                >
+                  <YesNo
+                    value={model.markdown_openLinksInNewTab}
+                    name="markdown_openLinksInNewTab"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <YesNo
-                  value={model.markdown_openLinksInNewTab}
-                  name="markdown_openLinksInNewTab"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel htmlFor={htmlId('valign')}>

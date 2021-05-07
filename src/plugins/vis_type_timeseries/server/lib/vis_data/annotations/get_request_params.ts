@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AnnotationItemsSchema, PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
+import type { Annotation, Panel } from '../../../../common/types';
 import { buildAnnotationRequest } from './build_request_body';
-import { getIndexPatternObject } from '../../search_strategies/lib/get_index_pattern';
 import {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
@@ -24,35 +23,33 @@ export type AnnotationServices = VisTypeTimeseriesRequestServices & {
 
 export async function getAnnotationRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
-  annotation: AnnotationItemsSchema,
+  panel: Panel,
+  annotation: Annotation,
   {
     esShardTimeout,
     esQueryConfig,
     capabilities,
-    indexPatternsService,
     uiSettings,
+    cachedIndexPatternFetcher,
   }: AnnotationServices
 ) {
-  const {
-    indexPatternObject,
-    indexPatternString,
-  } = await getIndexPatternObject(annotation.index_pattern!, { indexPatternsService });
+  const annotationIndex = await cachedIndexPatternFetcher(annotation.index_pattern);
 
   const request = await buildAnnotationRequest(
     req,
     panel,
     annotation,
     esQueryConfig,
-    indexPatternObject,
+    annotationIndex,
     capabilities,
     uiSettings
   );
 
   return {
-    index: indexPatternString,
+    index: annotationIndex.indexPatternString,
     body: {
       ...request,
+      runtime_mappings: annotationIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
     },
   };

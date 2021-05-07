@@ -39,6 +39,7 @@ import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/ty
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { ABOUT_TRUSTED_APPS } from './translations';
 import { EmptyState } from './components/empty_state';
+import { SearchBar } from './components/search_bar';
 
 export const TrustedAppsPage = memo(() => {
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
@@ -57,6 +58,7 @@ export const TrustedAppsPage = memo(() => {
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
     view_type: viewType,
   }));
+  const handleOnSearch = useTrustedAppsNavigateCallback((query: string) => ({ filter: query }));
 
   const showCreateFlyout = !!location.show;
 
@@ -94,12 +96,14 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
+      <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
       {doEntriesExist ? (
         <EuiFlexGroup
           direction="column"
           gutterSize="none"
           data-test-subj="trustedAppsListPageContent"
         >
+          <EuiSpacer size="m" />
           <EuiFlexItem grow={false}>
             <ControlPanel
               totalItemCount={totalItemsCount}

@@ -79,6 +79,7 @@ export const createTrustedAppsListData = (
     pageIndex: fullPagination.pageIndex,
     totalItemsCount: fullPagination.totalItemCount,
     timestamp,
+    filter: '',
   };
 };
 

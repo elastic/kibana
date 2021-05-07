@@ -8,8 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { TSVB_EDITOR_NAME } from './application';
-import { PANEL_TYPES } from '../common/panel_types';
+import { TSVB_EDITOR_NAME } from './application/editor_controller';
+import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
+import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
@@ -53,13 +54,15 @@ export const metricsVisDefinition = {
       ],
       time_field: '',
       index_pattern: '',
+      use_kibana_indexes: true,
       interval: '',
       axis_position: 'left',
       axis_formatter: 'number',
       axis_scale: 'normal',
       show_legend: 1,
       show_grid: 1,
-      tooltip_mode: 'show_all',
+      tooltip_mode: TOOLTIP_MODES.SHOW_ALL,
+      drop_last_bucket: 0,
     },
   },
   editorConfig: {
@@ -72,12 +75,25 @@ export const metricsVisDefinition = {
   },
   toExpressionAst,
   getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.applyFilter];
+    return [VIS_EVENT_TO_TRIGGER.brush];
   },
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
+    const indexPatternValue = params.index_pattern;
 
-    return params.index_pattern ? await indexPatterns.find(params.index_pattern) : [];
+    if (indexPatternValue) {
+      if (isStringTypeIndexPattern(indexPatternValue)) {
+        return await indexPatterns.find(indexPatternValue);
+      }
+
+      if (indexPatternValue.id) {
+        return [await indexPatterns.get(indexPatternValue.id)];
+      }
+    }
+
+    const defaultIndex = await indexPatterns.getDefault();
+
+    return defaultIndex ? [defaultIndex] : [];
   },
 };

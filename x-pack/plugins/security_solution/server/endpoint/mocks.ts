@@ -56,6 +56,7 @@ export const createMockEndpointAppContextService = (
   return ({
     start: jest.fn(),
     stop: jest.fn(),
+    getExperimentalFeatures: jest.fn(),
     getAgentService: jest.fn(),
     getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
@@ -86,6 +87,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
       Parameters<FleetStartContract['registerExternalCallback']>
     >(),
     exceptionListsClient: listMock.getExceptionListClient(),
+    packagePolicyService: createPackagePolicyServiceMock(),
   };
 };
 
@@ -108,6 +110,7 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
  */
 export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
   return {
+    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },

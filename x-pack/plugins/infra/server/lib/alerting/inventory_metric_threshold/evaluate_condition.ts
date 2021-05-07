@@ -33,15 +33,25 @@ type ConditionResult = InventoryMetricConditions & {
   isError: boolean;
 };
 
-export const evaluateCondition = async (
-  condition: InventoryMetricConditions,
-  nodeType: InventoryItemType,
-  source: InfraSource,
-  logQueryFields: LogQueryFields,
-  esClient: ElasticsearchClient,
-  filterQuery?: string,
-  lookbackSize?: number
-): Promise<Record<string, ConditionResult>> => {
+export const evaluateCondition = async ({
+  condition,
+  nodeType,
+  source,
+  logQueryFields,
+  esClient,
+  compositeSize,
+  filterQuery,
+  lookbackSize,
+}: {
+  condition: InventoryMetricConditions;
+  nodeType: InventoryItemType;
+  source: InfraSource;
+  logQueryFields: LogQueryFields | undefined;
+  esClient: ElasticsearchClient;
+  compositeSize: number;
+  filterQuery?: string;
+  lookbackSize?: number;
+}): Promise<Record<string, ConditionResult>> => {
   const { comparator, warningComparator, metric, customMetric } = condition;
   let { threshold, warningThreshold } = condition;
 
@@ -61,6 +71,7 @@ export const evaluateCondition = async (
     timerange,
     source,
     logQueryFields,
+    compositeSize,
     filterQuery,
     customMetric
   );
@@ -104,7 +115,8 @@ const getData = async (
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
   source: InfraSource,
-  logQueryFields: LogQueryFields,
+  logQueryFields: LogQueryFields | undefined,
+  compositeSize: number,
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput
 ) => {
@@ -128,7 +140,13 @@ const getData = async (
     includeTimeseries: Boolean(timerange.lookbackSize),
   };
   try {
-    const { nodes } = await getNodes(client, snapshotRequest, source, logQueryFields);
+    const { nodes } = await getNodes(
+      client,
+      snapshotRequest,
+      source,
+      compositeSize,
+      logQueryFields
+    );
 
     if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
 

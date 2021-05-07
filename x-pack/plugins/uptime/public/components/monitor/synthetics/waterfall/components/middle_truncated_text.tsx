@@ -50,7 +50,6 @@ const LastChunk = styled.span`
 
 const StyledButton = styled(EuiButtonEmpty)`
   &&& {
-    height: auto;
     border: none;
 
     .euiButtonContent {
@@ -60,7 +59,7 @@ const StyledButton = styled(EuiButtonEmpty)`
   }
 `;
 
-export const getChunks = (text: string) => {
+export const getChunks = (text: string = '') => {
   const END_CHARS = 12;
   const chars = text.split('');
   const splitPoint = chars.length - END_CHARS > 0 ? chars.length - END_CHARS : null;

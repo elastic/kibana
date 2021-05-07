@@ -98,23 +98,6 @@ export const CALCULATE_DURATION_UNTIL = 'until';
 export const ML_SUPPORTED_LICENSES = ['trial', 'platinum', 'enterprise'];
 
 /**
- * Metadata service URLs for the different cloud services that have constant URLs (e.g., unlike GCP, which is a constant prefix).
- *
- * @type {Object}
- */
-export const CLOUD_METADATA_SERVICES = {
-  // We explicitly call out the version, 2016-09-02, rather than 'latest' to avoid unexpected changes
-  AWS_URL: 'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document',
-
-  // 2017-04-02 is the first GA release of this API
-  AZURE_URL: 'http://169.254.169.254/metadata/instance?api-version=2017-04-02',
-
-  // GCP documentation shows both 'metadata.google.internal' (mostly) and '169.254.169.254' (sometimes)
-  // To bypass potential DNS changes, the IP was used because it's shared with other cloud services
-  GCP_URL_PREFIX: 'http://169.254.169.254/computeMetadata/v1/instance',
-};
-
-/**
  * Constants used by Logstash monitoring code
  */
 export const LOGSTASH = {
@@ -477,7 +460,7 @@ export const ALERT_DETAILS = {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.threshold.label', {
-          defaultMessage: `Notify when a shard exceeds this size`,
+          defaultMessage: `Notify when average shard size exceeds this value`,
         }),
         type: AlertParamType.Number,
         append: 'GB',
@@ -494,7 +477,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Shard size',
     }),
     description: i18n.translate('xpack.monitoring.alerts.shardSize.description', {
-      defaultMessage: 'Alert if an index (primary) shard is oversize.',
+      defaultMessage: 'Alert if the average shard size is larger than the configured threshold.',
     }),
   },
 };

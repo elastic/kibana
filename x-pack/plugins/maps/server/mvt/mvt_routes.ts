@@ -21,7 +21,7 @@ import {
 } from '../../common/constants';
 import { getGridTile, getTile } from './get_tile';
 
-const CACHE_TIMEOUT = 0; // Todo. determine good value. Unsure about full-implications (e.g. wrt. time-based data).
+const CACHE_TIMEOUT_SECONDS = 60 * 60;
 
 export function initMVTRoutes({
   router,
@@ -32,17 +32,20 @@ export function initMVTRoutes({
 }) {
   router.get(
     {
-      path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}`,
+      path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
       validate: {
-        query: schema.object({
+        params: schema.object({
           x: schema.number(),
           y: schema.number(),
           z: schema.number(),
+        }),
+        query: schema.object({
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
           geoFieldType: schema.string(),
           searchSessionId: schema.maybe(schema.string()),
+          token: schema.maybe(schema.string()),
         }),
       },
     },
@@ -51,7 +54,7 @@ export function initMVTRoutes({
       request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
-      const { query } = request;
+      const { query, params } = request;
 
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => {
@@ -64,9 +67,9 @@ export function initMVTRoutes({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
-        x: query.x as number,
-        y: query.y as number,
-        z: query.z as number,
+        x: parseInt((params as any).x, 10) as number,
+        y: parseInt((params as any).y, 10) as number,
+        z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
@@ -80,18 +83,21 @@ export function initMVTRoutes({
 
   router.get(
     {
-      path: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}`,
+      path: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
       validate: {
-        query: schema.object({
+        params: schema.object({
           x: schema.number(),
           y: schema.number(),
           z: schema.number(),
+        }),
+        query: schema.object({
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
           requestType: schema.string(),
           geoFieldType: schema.string(),
           searchSessionId: schema.maybe(schema.string()),
+          token: schema.maybe(schema.string()),
         }),
       },
     },
@@ -100,7 +106,7 @@ export function initMVTRoutes({
       request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
-      const { query } = request;
+      const { query, params } = request;
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => {
         abortController.abort();
@@ -112,9 +118,9 @@ export function initMVTRoutes({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
-        x: query.x as number,
-        y: query.y as number,
-        z: query.z as number,
+        x: parseInt((params as any).x, 10) as number,
+        y: parseInt((params as any).y, 10) as number,
+        z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS,
@@ -133,7 +139,8 @@ function sendResponse(response: KibanaResponseFactory, tile: any) {
     'content-disposition': 'inline',
     'content-length': tile ? `${tile.length}` : `0`,
     'Content-Type': 'application/x-protobuf',
-    'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
+    'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,
+    'Last-Modified': `${new Date().toUTCString()}`,
   };
 
   if (tile) {

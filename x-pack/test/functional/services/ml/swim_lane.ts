@@ -17,6 +17,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   /**
    * Y axis labels width + padding
@@ -88,6 +89,16 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
         expectedValues,
         `Expected swim lane ${axis} labels to be ${expectedValues}, got ${actualValues}`
       );
+    },
+
+    async assertAxisLabelCount(testSubj: string, axis: 'x' | 'y', expectedCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const actualValues = await this.getAxisLabels(testSubj, axis);
+        expect(actualValues.length).to.eql(
+          expectedCount,
+          `Expected swim lane ${axis} label count to be ${expectedCount}, got ${actualValues}`
+        );
+      });
     },
 
     async getCells(testSubj: string): Promise<HeatmapDebugState['heatmap']['cells']> {
@@ -207,6 +218,17 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('mlSwimLanePageSizePanel');
       await testSubjects.click(`mlSwimLanePageSizePanel > ${rowsCount} rows`);
       await this.assertPageSize(testSubj, rowsCount);
+    },
+
+    async waitForSwimLanesToLoad() {
+      // when updating the swim lanes, the old lanes might still be displayed
+      // for some time, before the loading indicator is displayed
+
+      // wait for loading indicator to be displayed, but don't fail in case it's already gone
+      if (await testSubjects.exists('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 })) {
+        // only wait for loading indicator to disappear if it was actually displayed
+        await testSubjects.missingOrFail('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 });
+      }
     },
   };
 }

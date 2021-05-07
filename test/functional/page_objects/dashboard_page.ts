@@ -24,7 +24,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const renderable = getService('renderable');
   const listingTable = getService('listingTable');
   const elasticChart = getService('elasticChart');
-  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'discover']);
 
   interface SaveDashboardOptions {
     /**
@@ -220,14 +220,21 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     /**
      * Asserts that the toolbar pagination (count and arrows) is either displayed or not displayed.
-     * @param { displayed: boolean }
+
      */
-    public async expectToolbarPaginationDisplayed({ displayed = true }) {
-      const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
-      if (displayed) {
+    public async expectToolbarPaginationDisplayed() {
+      const isLegacyDefault = PageObjects.discover.useLegacyTable();
+      if (isLegacyDefault) {
+        const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
         await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
       } else {
-        await Promise.all(subjects.map(async (subj) => await testSubjects.missingOrFail(subj)));
+        const subjects = ['pagination-button-previous', 'pagination-button-next'];
+
+        await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
+        const paginationListExists = await find.existsByCssSelector('.euiPagination__list');
+        if (!paginationListExists) {
+          throw new Error(`expected discover data grid pagination list to exist`);
+        }
       }
     }
 

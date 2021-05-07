@@ -21,8 +21,12 @@ import {
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
 import { isEmpty } from 'lodash';
-import { Alert, AlertTaskState, BASE_ALERT_API_PATH } from '../../../../plugins/alerting/common';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import {
+  Alert,
+  AlertTaskState,
+  LEGACY_BASE_ALERT_API_PATH,
+} from '../../../../plugins/alerting/common';
 
 type Props = RouteComponentProps & {
   http: CoreStart['http'];
@@ -34,10 +38,10 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
 
   useEffect(() => {
     if (!alert) {
-      http.get(`${BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
+      http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
     }
     if (!alertState) {
-      http.get(`${BASE_ALERT_API_PATH}/alert/${id}/state`).then(setAlertState);
+      http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`).then(setAlertState);
     }
   }, [alert, alertState, http, id]);
 

@@ -9,7 +9,6 @@ import {
   EuiCallOut,
   EuiCode,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiPage,
   EuiPanel,
   EuiSpacer,
@@ -28,7 +27,6 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { SearchBar } from '../../shared/search_bar';
-import { TransactionTypeSelect } from '../../shared/transaction_type_select';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 import { useTransactionListFetcher } from './use_transaction_list';
@@ -82,33 +80,9 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
-      <SearchBar showCorrelations />
+      <SearchBar showTransactionTypeSelector />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiSpacer size="s" />
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-              >
-                <EuiFlexItem>
-                  <EuiTitle size="s">
-                    <h2>
-                      {i18n.translate('xpack.apm.transactionOverviewTitle', {
-                        defaultMessage: 'Transactions',
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={2}>
-                  <TransactionTypeSelect />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
           <TransactionCharts />
           <EuiSpacer size="s" />
           <EuiPanel>

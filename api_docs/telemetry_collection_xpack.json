@@ -11,167 +11,27 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [
+    "interfaces": [],
+    "enums": [],
+    "misc": [
       {
+        "parentPluginId": "telemetryCollectionXpack",
         "id": "def-server.ESLicense",
-        "type": "Interface",
+        "type": "Type",
+        "tags": [],
         "label": "ESLicense",
         "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.status",
-            "type": "string",
-            "label": "status",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.uid",
-            "type": "string",
-            "label": "uid",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.hkey",
-            "type": "string",
-            "label": "hkey",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 14
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 15
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.issue_date",
-            "type": "string",
-            "label": "issue_date",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.issue_date_in_millis",
-            "type": "number",
-            "label": "issue_date_in_millis",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 17
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.expiry_date",
-            "type": "string",
-            "label": "expiry_date",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 18
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.expiry_date_in_millis",
-            "type": "number",
-            "label": "expiry_date_in_millis",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 19
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.max_nodes",
-            "type": "number",
-            "label": "max_nodes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 20
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.issued_to",
-            "type": "string",
-            "label": "issued_to",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 21
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.issuer",
-            "type": "string",
-            "label": "issuer",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 22
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.start_date_in_millis",
-            "type": "number",
-            "label": "start_date_in_millis",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 23
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ESLicense.max_resource_units",
-            "type": "number",
-            "label": "max_resource_units",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 24
-            }
-          }
+        "signature": [
+          "estypes.LicenseInformation"
         ],
         "source": {
           "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-          "lineNumber": 11
+          "lineNumber": 10
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
     "objects": []
   },
   "common": {

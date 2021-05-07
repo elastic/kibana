@@ -18,7 +18,10 @@ import {
   SavedObjectSaveOpts,
   OnSaveProps,
 } from '../../../../saved_objects/public';
-import { SavedObjectSaveModalDashboard } from '../../../../presentation_util/public';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '../../../../presentation_util/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
 
 import {
@@ -52,6 +55,8 @@ interface TopNavConfigParams {
   embeddableId?: string;
 }
 
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize) return false;
 
@@ -82,6 +87,7 @@ export const getTopNavConfig = (
     setActiveUrl,
     toastNotifications,
     visualizeCapabilities,
+    dashboardCapabilities,
     i18n: { Context: I18nContext },
     dashboard,
     savedObjectsTagging,
@@ -205,9 +211,9 @@ export const getTopNavConfig = (
     }
   };
 
+  const allowByValue = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
   const saveButtonLabel =
-    embeddableId ||
-    (!savedVis.id && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && originatingApp)
+    embeddableId || (!savedVis.id && allowByValue && originatingApp)
       ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
@@ -219,9 +225,11 @@ export const getTopNavConfig = (
           defaultMessage: 'Save',
         });
 
-  const showSaveAndReturn =
-    originatingApp &&
-    (savedVis?.id || dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables);
+  const showSaveAndReturn = originatingApp && (savedVis?.id || allowByValue);
+
+  const showSaveButton =
+    visualizeCapabilities.save ||
+    (allowByValue && !showSaveAndReturn && dashboardCapabilities.showWriteControls);
 
   const topNavMenu: TopNavMenuData[] = [
     {
@@ -300,7 +308,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(visualizeCapabilities.save
+    ...(showSaveButton
       ? [
           {
             id: 'save',
@@ -417,35 +425,47 @@ export const getTopNavConfig = (
               const useByRefFlow =
                 !!originatingApp || !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
 
-              const saveModal = useByRefFlow ? (
-                <SavedObjectSaveModalOrigin
-                  documentInfo={savedVis || { title: '' }}
-                  onSave={onSave}
-                  options={tagOptions}
-                  getAppNameFromId={stateTransfer.getAppNameFromId}
-                  objectType={'visualization'}
-                  onClose={() => {}}
-                  originatingApp={originatingApp}
-                  returnToOriginSwitchLabel={
-                    originatingApp && embeddableId
-                      ? i18n.translate('visualize.topNavMenu.updatePanel', {
-                          defaultMessage: 'Update panel on {originatingAppName}',
-                          values: {
-                            originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
-                          },
-                        })
-                      : undefined
-                  }
-                />
-              ) : (
-                <SavedObjectSaveModalDashboard
-                  documentInfo={savedVis || { title: '' }}
-                  onSave={onSave}
-                  tagOptions={tagOptions}
-                  objectType={'visualization'}
-                  onClose={() => {}}
-                />
-              );
+              let saveModal;
+
+              if (useByRefFlow) {
+                saveModal = (
+                  <SavedObjectSaveModalOrigin
+                    documentInfo={savedVis || { title: '' }}
+                    onSave={onSave}
+                    options={tagOptions}
+                    getAppNameFromId={stateTransfer.getAppNameFromId}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                    originatingApp={originatingApp}
+                    returnToOriginSwitchLabel={
+                      originatingApp && embeddableId
+                        ? i18n.translate('visualize.topNavMenu.updatePanel', {
+                            defaultMessage: 'Update panel on {originatingAppName}',
+                            values: {
+                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
+                            },
+                          })
+                        : undefined
+                    }
+                  />
+                );
+              } else {
+                saveModal = (
+                  <SavedObjectSaveModalDashboard
+                    documentInfo={{
+                      id: visualizeCapabilities.save ? savedVis?.id : undefined,
+                      title: savedVis?.title || '',
+                      description: savedVis?.description || '',
+                    }}
+                    canSaveByReference={Boolean(visualizeCapabilities.save)}
+                    onSave={onSave}
+                    tagOptions={tagOptions}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                  />
+                );
+              }
+
               showSaveModal(
                 saveModal,
                 I18nContext,
@@ -455,7 +475,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(visualizeCapabilities.save && showSaveAndReturn
+    ...(showSaveAndReturn
       ? [
           {
             id: 'saveAndReturn',
@@ -471,7 +491,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges,
+            disableButton: hasUnappliedChanges || !dashboardCapabilities.showWriteControls,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(

@@ -160,10 +160,10 @@ The users will be created with the password specified in kibana.dev.yml for `ela
 
 ## Debugging Elasticsearch queries
 
-All APM api endpoints accept `_debug=true` as a query param that will result in the underlying ES query being outputted in the Kibana backend process.
+All APM api endpoints accept `_inspect=true` as a query param that will result in the underlying ES query being outputted in the Kibana backend process.
 
 Example:
-`/api/apm/services/my_service?_debug=true`
+`/api/apm/services/my_service?_inspect=true`
 
 ## Storybook
 

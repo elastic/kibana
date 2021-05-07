@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
 import { CriteriaFields } from '../types';
-import { HostItem } from '../../../../graphql/types';
 
 export const hostToCriteria = (hostItem: HostItem): CriteriaFields[] => {
   if (hostItem.host != null && hostItem.host.name != null) {

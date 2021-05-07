@@ -64,6 +64,14 @@ Object {
     "ipAllowlist": Array [],
   },
   "rewriteBasePath": false,
+  "securityResponseHeaders": Object {
+    "disableEmbedding": false,
+    "permissionsPolicy": null,
+    "referrerPolicy": "no-referrer-when-downgrade",
+    "strictTransportSecurity": null,
+    "xContentTypeOptions": "nosniff",
+  },
+  "shutdownTimeout": "PT30S",
   "socketTimeout": 120000,
   "ssl": Object {
     "cipherSuites": Array [

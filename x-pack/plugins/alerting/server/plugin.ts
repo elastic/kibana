@@ -37,25 +37,7 @@ import {
 } from '../../../../src/core/server';
 import type { AlertingRequestHandlerContext } from './types';
 
-import {
-  aggregateAlertRoute,
-  createAlertRoute,
-  deleteAlertRoute,
-  findAlertRoute,
-  getAlertRoute,
-  getAlertStateRoute,
-  getAlertInstanceSummaryRoute,
-  listAlertTypesRoute,
-  updateAlertRoute,
-  enableAlertRoute,
-  disableAlertRoute,
-  updateApiKeyRoute,
-  muteAllAlertRoute,
-  unmuteAllAlertRoute,
-  muteAlertInstanceRoute,
-  unmuteAlertInstanceRoute,
-  healthRoute,
-} from './routes';
+import { defineRoutes } from './routes';
 import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
@@ -266,23 +248,7 @@ export class AlertingPlugin {
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
-    aggregateAlertRoute(router, this.licenseState);
-    createAlertRoute(router, this.licenseState);
-    deleteAlertRoute(router, this.licenseState);
-    findAlertRoute(router, this.licenseState);
-    getAlertRoute(router, this.licenseState);
-    getAlertStateRoute(router, this.licenseState);
-    getAlertInstanceSummaryRoute(router, this.licenseState);
-    listAlertTypesRoute(router, this.licenseState);
-    updateAlertRoute(router, this.licenseState);
-    enableAlertRoute(router, this.licenseState);
-    disableAlertRoute(router, this.licenseState);
-    updateApiKeyRoute(router, this.licenseState);
-    muteAllAlertRoute(router, this.licenseState);
-    unmuteAllAlertRoute(router, this.licenseState);
-    muteAlertInstanceRoute(router, this.licenseState);
-    unmuteAlertInstanceRoute(router, this.licenseState);
-    healthRoute(router, this.licenseState, plugins.encryptedSavedObjects);
+    defineRoutes(router, this.licenseState, plugins.encryptedSavedObjects);
 
     return {
       registerType<
@@ -398,7 +364,7 @@ export class AlertingPlugin {
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup
+    core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
@@ -410,6 +376,10 @@ export class AlertingPlugin {
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
         getFrameworkHealth: async () =>
           await getHealth(savedObjects.createInternalRepository(['alert'])),
+        areApiKeysEnabled: async () => {
+          const [, { security }] = await core.getStartServices();
+          return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
+        },
       };
     };
   };

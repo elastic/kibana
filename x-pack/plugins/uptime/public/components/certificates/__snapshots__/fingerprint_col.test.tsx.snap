@@ -37,7 +37,7 @@ exports[`FingerprintCol renders expected elements for valid props 1`] = `
     >
       <button
         aria-label="Click to copy fingerprint value"
-        class="euiButtonIcon euiButtonIcon--primary"
+        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         title="Click to copy fingerprint value"
         type="button"
       >
@@ -76,7 +76,7 @@ exports[`FingerprintCol renders expected elements for valid props 1`] = `
     >
       <button
         aria-label="Click to copy fingerprint value"
-        class="euiButtonIcon euiButtonIcon--primary"
+        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         title="Click to copy fingerprint value"
         type="button"
       >

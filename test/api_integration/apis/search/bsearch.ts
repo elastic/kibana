@@ -46,12 +46,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.status).to.be(200);
         expect(jsonBody.id).to.be(0);
-        expect(jsonBody.result.isPartial).to.be(false);
-        expect(jsonBody.result.isRunning).to.be(false);
+        expect(jsonBody.result).to.have.property('isPartial');
+        expect(jsonBody.result).to.have.property('isRunning');
         expect(jsonBody.result).to.have.property('rawResponse');
       });
 
-      it('should return a batch of successful resposes', async () => {
+      it('should return a batch of successful responses', async () => {
         const resp = await supertest.post(`/internal/bsearch`).send({
           batch: [
             {
@@ -83,8 +83,8 @@ export default function ({ getService }: FtrProviderContext) {
         const parsedResponse = parseBfetchResponse(resp);
         expect(parsedResponse).to.have.length(2);
         parsedResponse.forEach((responseJson) => {
-          expect(responseJson.result.isPartial).to.be(false);
-          expect(responseJson.result.isRunning).to.be(false);
+          expect(responseJson.result).to.have.property('isPartial');
+          expect(responseJson.result).to.have.property('isRunning');
           expect(responseJson.result).to.have.property('rawResponse');
         });
       });
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return 400 when index type is provided in OSS', async () => {
+      it('should return 400 when index type is provided in "es" strategy', async () => {
         const resp = await supertest.post(`/internal/bsearch`).send({
           batch: [
             {
@@ -129,6 +129,9 @@ export default function ({ getService }: FtrProviderContext) {
                     },
                   },
                 },
+              },
+              options: {
+                strategy: 'es',
               },
             },
           ],
@@ -151,11 +154,14 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
         });
-        it('should return 400 for Painless error', async () => {
+        it('should return 400 "search_phase_execution_exception" for Painless error in "es" strategy', async () => {
           const resp = await supertest.post(`/internal/bsearch`).send({
             batch: [
               {
                 request: painlessErrReq,
+                options: {
+                  strategy: 'es',
+                },
               },
             ],
           });

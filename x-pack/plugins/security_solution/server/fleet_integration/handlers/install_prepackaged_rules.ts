@@ -12,7 +12,7 @@ import { SecurityPluginSetup } from '../../../../security/server';
 import { AppClientFactory } from '../../client';
 import { createDetectionIndex } from '../../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
-import { buildFrameworkRequest } from '../../lib/timeline/routes/utils/common';
+import { buildFrameworkRequest } from '../../lib/timeline/utils/common';
 
 export interface InstallPrepackagedRulesProps {
   logger: Logger;

@@ -474,53 +474,6 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
-    it('should add the suffix to the remap column id if provided by the operation', async () => {
-      const queryBaseState: IndexPatternBaseState = {
-        currentIndexPatternId: '1',
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columnOrder: ['def', 'abc'],
-            columns: {
-              abc: {
-                label: '23rd percentile',
-                dataType: 'number',
-                isBucketed: false,
-                sourceField: 'bytes',
-                operationType: 'percentile',
-                params: {
-                  percentile: 23,
-                },
-              },
-              def: {
-                label: 'Terms',
-                dataType: 'string',
-                isBucketed: true,
-                operationType: 'terms',
-                sourceField: 'source',
-                params: {
-                  size: 5,
-                  orderBy: {
-                    type: 'alphabetical',
-                  },
-                  orderDirection: 'asc',
-                },
-              },
-            },
-          },
-        },
-      };
-
-      const state = enrichBaseState(queryBaseState);
-
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(Object.keys(JSON.parse(ast.chain[1].arguments.idMap[0] as string))).toEqual([
-        'col-0-def',
-        // col-1 is the auto naming of esasggs, abc is the specified column id, .23 is the generated suffix
-        'col-1-abc.23',
-      ]);
-    });
-
     it('should wrap filtered metrics in filtered metric aggregation', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',
@@ -906,6 +859,44 @@ describe('IndexPattern Data Source', () => {
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[2]).toEqual('mock');
+      });
+
+      it('should keep correct column mapping keys with reference columns present', async () => {
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col2', 'col1'],
+              columns: {
+                col1: {
+                  label: 'Count of records',
+                  dataType: 'date',
+                  isBucketed: false,
+                  sourceField: 'timefield',
+                  operationType: 'unique_count',
+                },
+                col2: {
+                  label: 'Reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  // @ts-expect-error not a valid type
+                  operationType: 'testReference',
+                  references: ['col1'],
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
+          'col-0-col1': expect.objectContaining({
+            id: 'col1',
+          }),
+        });
       });
     });
   });

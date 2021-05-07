@@ -14,7 +14,7 @@ import {
   HostsUncommonProcessesEdges,
   HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { HostHits } from '../../../../../../common/search_strategy';
 
 export const uncommonProcessesFields = [

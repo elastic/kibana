@@ -955,7 +955,7 @@ describe('workspace_panel', () => {
         visualizationState: {},
       });
       initComponent();
-      expect(instance.find(DragDrop).prop('dropType')).toBeTruthy();
+      expect(instance.find(DragDrop).prop('dropTypes')).toBeTruthy();
     });
 
     it('should refuse to drop if there are no suggestions', () => {

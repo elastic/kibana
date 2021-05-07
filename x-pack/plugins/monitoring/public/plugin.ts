@@ -27,7 +27,6 @@ import {
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_DETAILS,
 } from '../common/constants';
-
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
 import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
@@ -43,6 +42,8 @@ interface MonitoringSetupPluginDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
+
+const HASH_CHANGE = 'hashchange';
 
 export class MonitoringPlugin
   implements
@@ -106,7 +107,6 @@ export class MonitoringPlugin
           usageCollection: plugins.usageCollection,
         };
 
-        this.setInitialTimefilter(deps);
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
           if (location.pathname === '' && location.hash === '') {
@@ -114,7 +114,11 @@ export class MonitoringPlugin
           }
         });
 
+        const removeHashChange = this.setInitialTimefilter(deps);
         return () => {
+          if (removeHashChange) {
+            removeHashChange();
+          }
           removeHistoryListener();
           monitoringApp.destroy();
         };
@@ -131,8 +135,24 @@ export class MonitoringPlugin
 
   private setInitialTimefilter({ data }: MonitoringStartPluginDependencies) {
     const { timefilter } = data.query.timefilter;
-    const refreshInterval = { value: 10000, pause: false };
-    timefilter.setRefreshInterval(refreshInterval);
+    const { pause: pauseByDefault } = timefilter.getRefreshIntervalDefaults();
+    if (pauseByDefault) {
+      return;
+    }
+    /**
+     * We can't use timefilter.getRefreshIntervalUpdate$ last value,
+     * since it's not a BehaviorSubject. This means we need to wait for
+     * hash change because of angular's applyAsync
+     */
+    const onHashChange = () => {
+      const { value, pause } = timefilter.getRefreshInterval();
+      if (!value && pause) {
+        window.removeEventListener(HASH_CHANGE, onHashChange);
+        timefilter.setRefreshInterval({ value: 10000, pause: false });
+      }
+    };
+    window.addEventListener(HASH_CHANGE, onHashChange, false);
+    return () => window.removeEventListener(HASH_CHANGE, onHashChange);
   }
 
   private getExternalConfig() {

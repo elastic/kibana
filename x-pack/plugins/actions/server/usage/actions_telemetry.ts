@@ -11,6 +11,7 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
 } from 'kibana/server';
+import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { ActionResult } from '../types';
 
 export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: string) {
@@ -79,7 +80,11 @@ export async function getInUseTotalCount(
     options?: SavedObjectsBaseOptions | undefined
   ) => Promise<SavedObjectsBulkResponse<ActionResult<Record<string, unknown>>>>,
   kibanaIndex: string
-): Promise<{ countTotal: number; countByType: Record<string, number> }> {
+): Promise<{
+  countTotal: number;
+  countByType: Record<string, number>;
+  countByAlertHistoryConnectorType: number;
+}> {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.connectorIds = new HashMap(); state.total = 0;',
@@ -167,7 +172,13 @@ export async function getInUseTotalCount(
     fields: ['id', 'actionTypeId'],
   }));
   const actions = await actionsBulkGet(bulkFilter);
-  const countByType = actions.saved_objects.reduce(
+
+  // filter out preconfigured connectors, which are not saved objects and return
+  // an error in the bulk response
+  const actionsWithActionTypeId = actions.saved_objects.filter(
+    (action) => action?.attributes?.actionTypeId != null
+  );
+  const countByActionTypeId = actionsWithActionTypeId.reduce(
     (actionTypeCount: Record<string, number>, action) => {
       const alertTypeId = replaceFirstAndLastDotSymbols(action.attributes.actionTypeId);
       const currentCount =
@@ -177,7 +188,16 @@ export async function getInUseTotalCount(
     },
     {}
   );
-  return { countTotal: aggs.total, countByType };
+
+  const preconfiguredAlertHistoryConnector = actions.saved_objects.filter(
+    (action) => action.id === AlertHistoryEsIndexConnectorId
+  );
+
+  return {
+    countTotal: aggs.total,
+    countByType: countByActionTypeId,
+    countByAlertHistoryConnectorType: preconfiguredAlertHistoryConnector.length,
+  };
 }
 
 function replaceFirstAndLastDotSymbols(strToReplace: string) {

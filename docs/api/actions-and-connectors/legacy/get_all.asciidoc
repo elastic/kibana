@@ -4,7 +4,7 @@
 <titleabbrev>Legacy Get all connector</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<get-all-connectors-api>> instead.
+deprecated::[7.13.0,Use <<get-all-connectors-api>> instead.]
 
 Retrieves all connectors.
 
@@ -56,7 +56,8 @@ The API returns the following:
       "refresh": false,
       "executionTimeField": null
     },
-    "isPreconfigured": false
+    "isPreconfigured": false,
+    "isMissingSecrets": false
   }
 ]
 --------------------------------------------------

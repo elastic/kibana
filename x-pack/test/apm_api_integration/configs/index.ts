@@ -15,6 +15,12 @@ const apmFtrConfigs = {
   trial: {
     license: 'trial' as const,
   },
+  rules: {
+    license: 'trial' as const,
+    kibanaConfig: {
+      'xpack.ruleRegistry.unsafe.write.enabled': 'true',
+    },
+  },
 };
 
 export type APMFtrConfigName = keyof typeof apmFtrConfigs;

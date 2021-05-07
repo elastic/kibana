@@ -45,7 +45,9 @@ const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as j
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
-    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
+    'Add a trusted application to improve performance or alleviate conflicts with other ' +
+    'applications running on your hosts. Trusted applications are applied to hosts running the Endpoint Security ' +
+    'integration on their agents.';
 
   const generator = new EndpointDocGenerator('policy-list');
 
@@ -715,12 +717,16 @@ describe('When on the Trusted Apps Page', () => {
       it('should hide agents policy if feature flag is disabled', async () => {
         useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
         const renderResult = await renderAndClickAddButton();
-        expect(renderResult).toMatchSnapshot();
+        expect(
+          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
+        ).toBeNull();
       });
       it('should display agents policy if feature flag is enabled', async () => {
         useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
         const renderResult = await renderAndClickAddButton();
-        expect(renderResult).toMatchSnapshot();
+        expect(
+          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
+        ).toBeTruthy();
       });
     });
   });
@@ -854,6 +860,31 @@ describe('When on the Trusted Apps Page', () => {
       });
 
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
+    });
+  });
+
+  describe('and the search is dispatched', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+    beforeEach(async () => {
+      mockListApis(coreStart.http);
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps?filter=test');
+      });
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+    });
+
+    it('search bar is filled with query params', () => {
+      expect(renderResult.getByDisplayValue('test')).not.toBeNull();
+    });
+
+    it('search action is dispatched', async () => {
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('trustedAppSearchButton'));
+        expect(await waitForAction('userChangedUrl')).not.toBeNull();
+      });
     });
   });
 });

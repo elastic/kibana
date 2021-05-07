@@ -107,7 +107,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     if (expectedResult === 'chrome') {
       await find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .app-wrapper:not(.hidden-chrome)',
+        '[data-test-subj="kibanaChrome"] .kbnAppWrapper:not(.kbnAppWrapper--hiddenChrome)',
         20000
       );
       log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
@@ -286,6 +286,11 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickSaveEditUser() {
       await find.clickByButtonText('Update user');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickSaveCreateUser() {
+      await find.clickByButtonText('Create user');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

@@ -12,14 +12,13 @@ import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/types';
+import { Schema, SchemaConflicts } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_SNIPPET_SIZE } from './constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
-  OpenModal,
   ServerFieldResultSettingObject,
 } from './types';
 
@@ -27,29 +26,21 @@ import {
   areFieldsAtDefaultSettings,
   areFieldsEmpty,
   clearAllFields,
-  clearAllServerFields,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   resetAllFields,
-  resetAllServerFields,
   splitResultFields,
 } from './utils';
 
 interface ResultSettingsActions {
-  openConfirmResetModal(): void;
-  openConfirmSaveModal(): void;
-  closeModals(): void;
   initializeResultFields(
     serverResultFields: ServerFieldResultSettingObject,
     schema: Schema,
     schemaConflicts?: SchemaConflicts
   ): {
-    serverResultFields: ServerFieldResultSettingObject;
     resultFields: FieldResultSettingObject;
     schema: Schema;
     schemaConflicts: SchemaConflicts;
-    nonTextResultFields: FieldResultSettingObject;
-    textResultFields: FieldResultSettingObject;
   };
   clearAllFields(): void;
   resetAllFields(): void;
@@ -67,49 +58,54 @@ interface ResultSettingsActions {
   updateRawSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   updateSnippetSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   initializeResultSettingsData(): void;
-  saveResultSettings(
-    resultFields: ServerFieldResultSettingObject
-  ): { resultFields: ServerFieldResultSettingObject };
+  confirmResetAllFields(): void;
+  saveResultSettings(): void;
 }
 
 interface ResultSettingsValues {
   dataLoading: boolean;
   saving: boolean;
-  openModal: OpenModal;
-  nonTextResultFields: FieldResultSettingObject;
-  textResultFields: FieldResultSettingObject;
   resultFields: FieldResultSettingObject;
-  serverResultFields: ServerFieldResultSettingObject;
   lastSavedResultFields: FieldResultSettingObject;
   schema: Schema;
   schemaConflicts: SchemaConflicts;
   // Selectors
+  textResultFields: FieldResultSettingObject;
+  nonTextResultFields: FieldResultSettingObject;
+  serverResultFields: ServerFieldResultSettingObject;
   resultFieldsAtDefaultSettings: boolean;
   resultFieldsEmpty: boolean;
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
+  queryPerformanceScore: number;
 }
+
+const SAVE_CONFIRMATION_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.confirmSaveMessage',
+  {
+    defaultMessage:
+      'The changes will start immediately. Make sure your applications are ready to accept the new search results!',
+  }
+);
+
+const RESET_CONFIRMATION_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.confirmResetMessage',
+  {
+    defaultMessage:
+      'This will revert your settings back to the default: all fields set to raw. The default will take over immediately and impact your search results.',
+  }
+);
 
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
   path: ['enterprise_search', 'app_search', 'result_settings_logic'],
   actions: () => ({
-    openConfirmResetModal: () => true,
-    openConfirmSaveModal: () => true,
-    closeModals: () => true,
     initializeResultFields: (serverResultFields, schema, schemaConflicts) => {
       const resultFields = convertServerResultFieldsToResultFields(serverResultFields, schema);
-      Object.keys(schema).forEach((fieldName) => {
-        if (!serverResultFields.hasOwnProperty(fieldName)) {
-          serverResultFields[fieldName] = {};
-        }
-      });
 
       return {
-        serverResultFields,
         resultFields,
         schema,
         schemaConflicts,
-        ...splitResultFields(resultFields, schema),
       };
     },
     clearAllFields: () => true,
@@ -124,7 +120,8 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     updateRawSizeForField: (fieldName, size) => ({ fieldName, size }),
     updateSnippetSizeForField: (fieldName, size) => ({ fieldName, size }),
     initializeResultSettingsData: () => true,
-    saveResultSettings: (resultFields) => ({ resultFields }),
+    confirmResetAllFields: () => true,
+    saveResultSettings: () => true,
   }),
   reducers: () => ({
     dataLoading: [
@@ -140,41 +137,6 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         saving: () => true,
       },
     ],
-    openModal: [
-      OpenModal.None,
-      {
-        initializeResultFields: () => OpenModal.None,
-        closeModals: () => OpenModal.None,
-        resetAllFields: () => OpenModal.None,
-        openConfirmResetModal: () => OpenModal.ConfirmResetModal,
-        openConfirmSaveModal: () => OpenModal.ConfirmSaveModal,
-        saving: () => OpenModal.None,
-      },
-    ],
-    nonTextResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { nonTextResultFields }) => nonTextResultFields,
-        clearAllFields: (nonTextResultFields) => clearAllFields(nonTextResultFields),
-        resetAllFields: (nonTextResultFields) => resetAllFields(nonTextResultFields),
-        updateField: (nonTextResultFields, { fieldName, settings }) =>
-          nonTextResultFields.hasOwnProperty(fieldName)
-            ? { ...nonTextResultFields, [fieldName]: settings }
-            : nonTextResultFields,
-      },
-    ],
-    textResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { textResultFields }) => textResultFields,
-        clearAllFields: (textResultFields) => clearAllFields(textResultFields),
-        resetAllFields: (textResultFields) => resetAllFields(textResultFields),
-        updateField: (textResultFields, { fieldName, settings }) =>
-          textResultFields.hasOwnProperty(fieldName)
-            ? { ...textResultFields, [fieldName]: settings }
-            : textResultFields,
-      },
-    ],
     resultFields: [
       {},
       {
@@ -185,22 +147,6 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           resultFields.hasOwnProperty(fieldName)
             ? { ...resultFields, [fieldName]: settings }
             : resultFields,
-      },
-    ],
-    serverResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { serverResultFields }) => serverResultFields,
-        clearAllFields: (serverResultFields) => clearAllServerFields(serverResultFields),
-        resetAllFields: (serverResultFields) => resetAllServerFields(serverResultFields),
-        updateField: (serverResultFields, { fieldName, settings }) => {
-          return serverResultFields.hasOwnProperty(fieldName)
-            ? {
-                ...serverResultFields,
-                [fieldName]: convertToServerFieldResultSetting(settings),
-              }
-            : serverResultFields;
-        },
       },
     ],
     lastSavedResultFields: [
@@ -223,6 +169,31 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
   }),
   selectors: ({ selectors }) => ({
+    textResultFields: [
+      () => [selectors.resultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: Schema) => {
+        const { textResultFields } = splitResultFields(resultFields, schema);
+        return textResultFields;
+      },
+    ],
+    nonTextResultFields: [
+      () => [selectors.resultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: Schema) => {
+        const { nonTextResultFields } = splitResultFields(resultFields, schema);
+        return nonTextResultFields;
+      },
+    ],
+    serverResultFields: [
+      () => [selectors.resultFields],
+      (resultFields: FieldResultSettingObject) => {
+        return Object.entries(resultFields).reduce((serverResultFields, [fieldName, settings]) => {
+          return {
+            ...serverResultFields,
+            [fieldName]: convertToServerFieldResultSetting(settings as FieldResultSetting),
+          };
+        }, {});
+      },
+    ],
     resultFieldsAtDefaultSettings: [
       () => [selectors.resultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
@@ -248,6 +219,31 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           {}
         ),
     ],
+    queryPerformanceScore: [
+      () => [selectors.serverResultFields, selectors.schema],
+      (serverResultFields: ServerFieldResultSettingObject, schema: Schema) => {
+        return Object.entries(serverResultFields).reduce((acc, [fieldName, resultField]) => {
+          let newAcc = acc;
+          if (resultField.raw) {
+            if (schema[fieldName] !== 'text') {
+              newAcc += 0.2;
+            } else if (
+              typeof resultField.raw === 'object' &&
+              resultField.raw.size &&
+              resultField.raw.size <= 250
+            ) {
+              newAcc += 1.0;
+            } else {
+              newAcc += 1.5;
+            }
+          }
+          if (resultField.snippet) {
+            newAcc += 2.0;
+          }
+          return newAcc;
+        }, 0);
+      },
+    ],
   }),
   listeners: ({ actions, values }) => ({
     clearRawSizeForField: ({ fieldName }) => {
@@ -260,10 +256,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       // We cast this because it could be an empty object, which we can still treat as a FieldResultSetting safely
       const field = values.resultFields[fieldName] as FieldResultSetting;
       const raw = !field.raw;
+
       actions.updateField(fieldName, {
         ...omit(field, ['rawSize']),
         raw,
-        ...(raw ? { rawSize: field.rawSize } : {}),
+        ...(raw && field.rawSize ? { rawSize: field.rawSize } : {}),
       });
     },
     toggleSnippetForField: ({ fieldName }) => {
@@ -309,35 +306,42 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         flashAPIErrors(e);
       }
     },
-    saveResultSettings: async ({ resultFields }) => {
-      actions.saving();
-
-      const { http } = HttpLogic.values;
-      const { engineName } = EngineLogic.values;
-      const url = `/api/app_search/engines/${engineName}/result_settings`;
-
-      actions.saving();
-
-      let response;
-      try {
-        response = await http.put(url, {
-          body: JSON.stringify({
-            result_fields: resultFields,
-          }),
-        });
-      } catch (e) {
-        flashAPIErrors(e);
+    confirmResetAllFields: () => {
+      if (window.confirm(RESET_CONFIRMATION_MESSAGE)) {
+        actions.resetAllFields();
       }
+    },
+    saveResultSettings: async () => {
+      if (window.confirm(SAVE_CONFIRMATION_MESSAGE)) {
+        actions.saving();
 
-      actions.initializeResultFields(response.result_fields, values.schema);
-      setSuccessMessage(
-        i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
-          {
-            defaultMessage: 'Result settings have been saved successfully.',
-          }
-        )
-      );
+        const { http } = HttpLogic.values;
+        const { engineName } = EngineLogic.values;
+        const url = `/api/app_search/engines/${engineName}/result_settings`;
+
+        actions.saving();
+
+        let response;
+        try {
+          response = await http.put(url, {
+            body: JSON.stringify({
+              result_fields: values.reducedServerResultFields,
+            }),
+          });
+        } catch (e) {
+          flashAPIErrors(e);
+        }
+
+        actions.initializeResultFields(response.result_fields, values.schema);
+        setSuccessMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
+            {
+              defaultMessage: 'Result settings have been saved successfully.',
+            }
+          )
+        );
+      }
     },
   }),
 });

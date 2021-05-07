@@ -16,6 +16,8 @@ import {
   EuiToolTip,
   EuiTitle,
   EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -69,6 +71,18 @@ export interface DiscoverFieldProps {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 
   multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
+
+  /**
+   * Callback to edit a runtime field from index pattern
+   * @param fieldName name of the field to edit
+   */
+  onEditField?: (fieldName: string) => void;
+
+  /**
+   * Callback to delete a runtime field from index pattern
+   * @param fieldName name of the field to delete
+   */
+  onDeleteField?: (fieldName: string) => void;
 }
 
 export function DiscoverField({
@@ -82,6 +96,8 @@ export function DiscoverField({
   selected,
   trackUiMetric,
   multiFields,
+  onEditField,
+  onDeleteField,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -282,6 +298,60 @@ export function DiscoverField({
     );
   };
 
+  const isRuntimeField = Boolean(indexPattern.getFieldByName(field.name)?.runtimeField);
+  const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
+  const canEditField = onEditField && (!isUnknownField || isRuntimeField);
+  const canDeleteField = onDeleteField && isRuntimeField;
+  const popoverTitle = (
+    <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem grow={true}>
+          <h5>{field.displayName}</h5>
+        </EuiFlexItem>
+        {canEditField && (
+          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelEditItem">
+            <EuiButtonIcon
+              onClick={() => {
+                if (onEditField) {
+                  togglePopover();
+                  onEditField(field.name);
+                }
+              }}
+              iconType="pencil"
+              data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
+              aria-label={i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
+                defaultMessage: 'Edit index pattern field',
+              })}
+            />
+          </EuiFlexItem>
+        )}
+        {canDeleteField && (
+          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelDeleteItem">
+            <EuiToolTip
+              content={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
+                defaultMessage: 'Delete index pattern field',
+              })}
+            >
+              <EuiButtonIcon
+                onClick={() => {
+                  if (onDeleteField) {
+                    onDeleteField(field.name);
+                  }
+                }}
+                iconType="trash"
+                data-test-subj={`discoverFieldListPanelDelete-${field.name}`}
+                color="danger"
+                aria-label={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
+                  defaultMessage: 'Delete index pattern field',
+                })}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPopoverTitle>
+  );
+
   return (
     <EuiPopover
       display="block"
@@ -305,9 +375,7 @@ export function DiscoverField({
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
-      <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
-        {field.displayName}
-      </EuiPopoverTitle>
+      {popoverTitle}
       <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {

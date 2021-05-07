@@ -36,7 +36,6 @@ import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
@@ -59,10 +58,10 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { ArtifactClient, EndpointArtifactClient, ManifestManager } from './endpoint/services';
+import { registerHostIsolationRoutes } from './endpoint/routes/actions';
+import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { registerDownloadArtifactRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
@@ -78,6 +77,7 @@ import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -104,6 +104,7 @@ export interface StartPlugins {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
@@ -161,19 +162,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const config = this.config;
     const globalConfig = this.context.config.legacy.get();
 
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
     initSavedObjects(core.savedObjects);
-    initUiSettings(core.uiSettings);
+    initUiSettings(core.uiSettings, experimentalFeatures);
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
-      experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
+      experimentalFeatures,
     };
 
     initUsageCollectors({
       core,
       endpointAppContext: endpointContext,
       kibanaIndex: globalConfig.kibana.index,
+      signalsIndex: config.signalsIndex,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });
@@ -204,7 +207,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
-    registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
+    registerHostIsolationRoutes(router, endpointContext);
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
@@ -300,8 +303,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    const libs = compose(core, plugins, endpointContext);
-    initServer(libs);
+    compose(core, plugins, endpointContext);
 
     core.getStartServices().then(([_, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
@@ -339,36 +341,44 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins) {
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
+    const logger = this.logger;
     let manifestManager: ManifestManager | undefined;
 
     this.licensing$ = plugins.licensing.license$;
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
+      const taskManager = plugins.taskManager;
+      const experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
       const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
-      const artifactClient = (new EndpointArtifactClient(
+      const artifactClient = new EndpointArtifactClient(
         plugins.fleet.createArtifactsClient('endpoint')
-      ) as unknown) as ArtifactClient;
-
-      manifestManager = new ManifestManager(
-        {
-          savedObjectsClient,
-          artifactClient,
-          exceptionListClient,
-          packagePolicyService: plugins.fleet.packagePolicyService,
-          logger: this.logger,
-          cache: this.artifactsCache,
-        },
-        parseExperimentalConfigValue(this.config.enableExperimental).fleetServerEnabled
       );
 
-      if (this.manifestTask) {
-        this.manifestTask.start({
-          taskManager: plugins.taskManager,
+      manifestManager = new ManifestManager({
+        savedObjectsClient,
+        artifactClient,
+        exceptionListClient,
+        packagePolicyService: plugins.fleet.packagePolicyService,
+        logger,
+        cache: this.artifactsCache,
+        experimentalFeatures,
+      });
+
+      // Migrate artifacts to fleet and then start the minifest task after that is done
+      plugins.fleet.fleetSetupCompleted().then(() => {
+        migrateArtifactsToFleet(savedObjectsClient, artifactClient, logger).finally(() => {
+          logger.info('Dependent plugin setup complete - Starting ManifestTask');
+
+          if (this.manifestTask) {
+            this.manifestTask.start({
+              taskManager,
+            });
+          } else {
+            logger.debug('User artifacts task not available.');
+          }
         });
-      } else {
-        this.logger.debug('User artifacts task not available.');
-      }
+      });
 
       // License related start
       licenseService.start(this.licensing$);
@@ -376,7 +386,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         plugins.fleet!.packagePolicyService,
         core.savedObjects,
         core.elasticsearch,
-        this.logger
+        logger
       );
       this.policyWatcher.start(licenseService);
     }
@@ -390,7 +400,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       security: this.setupPlugins!.security!,
       alerting: plugins.alerting,
       config: this.config!,
-      logger: this.logger,
+      logger,
       manifestManager,
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,

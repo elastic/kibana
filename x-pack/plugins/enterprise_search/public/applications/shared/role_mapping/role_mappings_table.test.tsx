@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { wsRoleMapping, asRoleMapping } from './__mocks__/roles';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiFieldSearch, EuiTableRow } from '@elastic/eui';
-
-import { wsRoleMapping, asRoleMapping } from './__mocks__/roles';
 
 import { ALL_LABEL, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
 

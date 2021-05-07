@@ -85,7 +85,7 @@ class FilterEditorUI extends Component<Props, State> {
   public render() {
     return (
       <div>
-        <EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="m">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
               <FormattedMessage

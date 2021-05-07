@@ -22,6 +22,8 @@ import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
+import { RowRenderer } from '../../../timelines/components/timeline/body/renderers/row_renderer';
+import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -41,6 +43,8 @@ export interface OwnProps {
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
@@ -67,8 +71,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   pageFilters,
-  query,
   onRuleChange,
+  query,
+  renderCellValue,
+  rowRenderers,
   start,
   scopeId,
   showCheckboxes,
@@ -129,6 +135,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             kqlMode={kqlMode}
             query={query}
             onRuleChange={onRuleChange}
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
             start={start}
             sort={sort}
             utilityBar={utilityBar}
@@ -201,6 +209,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
+    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       prevProps.scopeId === nextProps.scopeId &&
@@ -215,6 +224,8 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       prevProps.kqlMode === nextProps.kqlMode &&
       deepEqual(prevProps.query, nextProps.query) &&
+      prevProps.renderCellValue === nextProps.renderCellValue &&
+      prevProps.rowRenderers === nextProps.rowRenderers &&
       deepEqual(prevProps.sort, nextProps.sort) &&
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&

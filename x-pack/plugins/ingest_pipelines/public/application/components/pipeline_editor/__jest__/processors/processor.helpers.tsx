@@ -140,7 +140,11 @@ type TestSubject =
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
   | 'messageField.input'
+  | 'mockCodeEditor'
+  | 'tagField.input'
   | 'ignoreMissingSwitch.input'
+  | 'ignoreFailureSwitch.input'
+  | 'ifField.textarea'
   | 'targetField.input'
   | 'keepOriginalField.input'
   | 'removeIfSuccessfulField.input';

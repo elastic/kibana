@@ -22,12 +22,17 @@ import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
+import { aggregationTypeTransform, EntityField } from '../../../../common/util/anomaly_utils';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import { RecordForInfluencer } from './results_service';
+import { isRuntimeMappings } from '../../../../common';
+import { ErrorType } from '../../../../common/util/errors';
 
-interface ResultResponse {
+export interface ResultResponse {
   success: boolean;
+  error?: ErrorType;
 }
 
 export interface MetricData extends ResultResponse {
@@ -138,9 +143,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           },
         },
         size: 0,
-        _source: {
-          excludes: [],
-        },
+        _source: false,
         aggs: {
           byTime: {
             date_histogram: {
@@ -150,6 +153,9 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
             },
           },
         },
+        ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
+          ? { runtime_mappings: datafeedConfig?.runtime_mappings }
+          : {}),
       };
 
       if (shouldCriteria.length > 0) {
@@ -632,6 +638,136 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         earliestMs,
         latestMs
       );
+    },
+
+    // Queries Elasticsearch to obtain the record level results containing the specified influencer(s),
+    // for the specified job(s), time range, and record score threshold.
+    // influencers parameter must be an array, with each object in the array having 'fieldName'
+    // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
+    // so this returns record level results which have at least one of the influencers.
+    // Pass an empty array or ['*'] to search over all job IDs.
+    getRecordsForInfluencer$(
+      jobIds: string[],
+      influencers: EntityField[],
+      threshold: number,
+      earliestMs: number,
+      latestMs: number,
+      maxResults: number,
+      influencersFilterQuery: InfluencersFilterQuery
+    ): Observable<{ records: RecordForInfluencer[]; success: boolean }> {
+      const obj = { success: true, records: [] as RecordForInfluencer[] };
+
+      // Build the criteria to use in the bool filter part of the request.
+      // Add criteria for the time range, record score, plus any specified job IDs.
+      const boolCriteria: any[] = [
+        {
+          range: {
+            timestamp: {
+              gte: earliestMs,
+              lte: latestMs,
+              format: 'epoch_millis',
+            },
+          },
+        },
+        {
+          range: {
+            record_score: {
+              gte: threshold,
+            },
+          },
+        },
+      ];
+
+      if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
+        let jobIdFilterStr = '';
+        each(jobIds, (jobId, i) => {
+          if (i > 0) {
+            jobIdFilterStr += ' OR ';
+          }
+          jobIdFilterStr += 'job_id:';
+          jobIdFilterStr += jobId;
+        });
+        boolCriteria.push({
+          query_string: {
+            analyze_wildcard: false,
+            query: jobIdFilterStr,
+          },
+        });
+      }
+
+      if (influencersFilterQuery !== undefined) {
+        boolCriteria.push(influencersFilterQuery);
+      }
+
+      // Add a nested query to filter for each of the specified influencers.
+      if (influencers.length > 0) {
+        boolCriteria.push({
+          bool: {
+            should: influencers.map((influencer) => {
+              return {
+                nested: {
+                  path: 'influencers',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          match: {
+                            'influencers.influencer_field_name': influencer.fieldName,
+                          },
+                        },
+                        {
+                          match: {
+                            'influencers.influencer_field_values': influencer.fieldValue,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              };
+            }),
+            minimum_should_match: 1,
+          },
+        });
+      }
+
+      return mlApiServices.results
+        .anomalySearch$(
+          {
+            size: maxResults !== undefined ? maxResults : 100,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:record',
+                        analyze_wildcard: false,
+                      },
+                    },
+                    {
+                      bool: {
+                        must: boolCriteria,
+                      },
+                    },
+                  ],
+                },
+              },
+              sort: [{ record_score: { order: 'desc' } }],
+            },
+          },
+          jobIds
+        )
+        .pipe(
+          map((resp) => {
+            if (resp.hits.total.value > 0) {
+              each(resp.hits.hits, (hit) => {
+                obj.records.push(hit._source);
+              });
+            }
+            return obj;
+          })
+        );
     },
   };
 }

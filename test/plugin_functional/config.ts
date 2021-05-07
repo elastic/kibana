@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [
+      require.resolve('./test_suites/usage_collection'),
       require.resolve('./test_suites/core'),
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/panel_actions'),
@@ -56,6 +57,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
+        '--corePluginDeprecations.oldProperty=hello',
+        '--corePluginDeprecations.secret=100',
+        '--corePluginDeprecations.noLongerUsed=still_using',
+        // for testing set buffer duration to 0 to immediately flush counters into saved objects.
+        '--usageCollection.usageCounters.bufferDuration=0',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

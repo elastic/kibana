@@ -38,10 +38,9 @@ import { FullTimeRangeSelector } from '../../components/full_time_range_selector
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useMlContext } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { useTimefilter } from '../../contexts/kibana';
+import { useNotifications, useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
-import { getToastNotifications } from '../../util/dependency_cache';
 import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
@@ -132,7 +131,8 @@ export const Page: FC = () => {
     autoRefreshSelector: true,
   });
 
-  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, getToastNotifications()), [
+  const { toasts } = useNotifications();
+  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, toasts), [
     currentIndexPattern,
   ]);
 

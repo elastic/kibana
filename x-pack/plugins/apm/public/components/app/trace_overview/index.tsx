@@ -49,7 +49,7 @@ export function TraceOverview() {
 
   return (
     <>
-      <SearchBar showCorrelations />
+      <SearchBar />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiPanel>

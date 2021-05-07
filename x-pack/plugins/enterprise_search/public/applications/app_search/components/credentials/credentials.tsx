@@ -57,7 +57,7 @@ export const Credentials: React.FC = () => {
       <EuiPageHeader pageTitle={CREDENTIALS_TITLE} />
       <EuiPageContentBody>
         {shouldShowCredentialsForm && <CredentialsFlyout />}
-        <EuiPanel className="eui-textCenter">
+        <EuiPanel hasBorder className="eui-textCenter">
           <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiEndpoint', {
@@ -116,7 +116,9 @@ export const Credentials: React.FC = () => {
         </EuiPageContentHeader>
         <EuiSpacer size="m" />
         <FlashMessages />
-        <EuiPanel>{!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}</EuiPanel>
+        <EuiPanel hasBorder>
+          {!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}
+        </EuiPanel>
       </EuiPageContentBody>
     </>
   );

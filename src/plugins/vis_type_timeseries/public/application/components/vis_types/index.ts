@@ -13,7 +13,7 @@ import { PersistedState } from 'src/plugins/visualizations/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 
 import { TimeseriesVisParams } from '../../../types';
-import { TimeseriesVisData } from '../../../../common/types';
+import type { TimeseriesVisData, PanelData } from '../../../../common/types';
 
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.
@@ -44,7 +44,7 @@ export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVi
 
 export interface TimeseriesVisProps {
   model: TimeseriesVisParams;
-  onBrush: (gte: string, lte: string) => void;
+  onBrush: (gte: string, lte: string, series: PanelData[]) => Promise<void>;
   onUiState: (
     field: string,
     value: {

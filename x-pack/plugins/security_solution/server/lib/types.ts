@@ -10,20 +10,16 @@ export { ConfigType as Configuration } from '../config';
 import type { SecuritySolutionRequestHandlerContext } from '../types';
 
 import { FrameworkAdapter, FrameworkRequest } from './framework';
-import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
 import { SourceStatus } from './source_status';
 import { Sources } from './sources';
-import { Note } from './note/saved_object';
-import { PinnedEvent } from './pinned_event/saved_object';
-import { Timeline } from './timeline/saved_object';
+import { Notes } from './timeline/saved_object/notes';
+import { PinnedEvent } from './timeline/saved_object/pinned_events';
+import { Timeline } from './timeline/saved_object/timelines';
 import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
-
-export * from './hosts';
 
 export interface AppDomainLibs {
   fields: IndexFields;
-  hosts: Hosts;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
@@ -31,7 +27,7 @@ export interface AppBackendLibs extends AppDomainLibs {
   sources: Sources;
   sourceStatus: SourceStatus;
   timeline: Timeline;
-  note: Note;
+  note: Notes;
   pinnedEvent: PinnedEvent;
 }
 
@@ -142,54 +138,9 @@ export interface Hits<T, U> {
     hits: U[];
   };
 }
-export type SortRequestDirection = 'asc' | 'desc';
-
-interface SortRequestField {
-  [field: string]: SortRequestDirection;
-}
-
-export type SortRequest = SortRequestField[];
 
 export interface MSearchHeader {
   index: string[] | string;
   allowNoIndices?: boolean;
   ignoreUnavailable?: boolean;
-}
-
-export interface AggregationRequest {
-  [aggField: string]: {
-    terms?: {
-      field?: string;
-      missing?: string;
-      size?: number;
-      script?: {
-        source: string;
-        lang: string;
-      };
-      order?: {
-        [aggSortField: string]: SortRequestDirection;
-      };
-    };
-    max?: {
-      field: string;
-    };
-    aggs?: {
-      [aggSortField: string]: {
-        [aggType: string]: {
-          field: string;
-        };
-      };
-    };
-    top_hits?: {
-      size?: number;
-      sort?: Array<{
-        [aggSortField: string]: {
-          order: SortRequestDirection;
-        };
-      }>;
-      _source: {
-        includes: string[];
-      };
-    };
-  };
 }

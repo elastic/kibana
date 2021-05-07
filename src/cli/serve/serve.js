@@ -12,10 +12,7 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath } from '@kbn/utils';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
-import { fromRoot } from '../../core/server/utils';
-import { bootstrap } from '../../core/server';
+import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
@@ -31,8 +28,20 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+
+const getBootstrapScript = (isDev) => {
+  if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
+    // need dynamic require to exclude it from production build
+    // eslint-disable-next-line import/no-dynamic-require
+    const { bootstrapDevMode } = require(DEV_MODE_PATH);
+    return bootstrapDevMode;
+  } else {
+    const { bootstrap } = require('../../core/server');
+    return bootstrap;
+  }
+};
 
 const pathCollector = function () {
   const paths = [];
@@ -55,9 +64,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     delete rawConfig.xpack;
   }
 
-  if (opts.dev) {
-    set('env', 'development');
+  // only used to set cliArgs.envName, we don't want to inject that into the config
+  delete extraCliOptions.env;
 
+  if (opts.dev) {
     if (!has('elasticsearch.username')) {
       set('elasticsearch.username', 'kibana_system');
     }
@@ -79,6 +89,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
           throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
         }
       }
+
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
@@ -173,7 +184,7 @@ export default function (program) {
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
-  if (!IS_KIBANA_DISTRIBUTABLE) {
+  if (!isKibanaDistributable()) {
     command
       .option('--oss', 'Start Kibana without X-Pack')
       .option(
@@ -210,31 +221,41 @@ export default function (program) {
     }
 
     const unknownOptions = this.getUnknownOptions();
-    await bootstrap({
-      configs: [].concat(opts.config || []),
-      cliArgs: {
-        dev: !!opts.dev,
-        envName: unknownOptions.env ? unknownOptions.env.name : undefined,
-        // no longer supported
-        quiet: !!opts.quiet,
-        silent: !!opts.silent,
-        watch: !!opts.watch,
-        runExamples: !!opts.runExamples,
-        // We want to run without base path when the `--run-examples` flag is given so that we can use local
-        // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
-        // We can tell users they only have to run with `yarn start --run-examples` to get those
-        // local links to work.  Similar to what we do for "View in Console" links in our
-        // elastic.co links.
-        basePath: opts.runExamples ? false : !!opts.basePath,
-        optimize: !!opts.optimize,
-        disableOptimizer: !opts.optimizer,
-        oss: !!opts.oss,
-        cache: !!opts.cache,
-        dist: !!opts.dist,
-      },
-      features: {
-        isCliDevModeSupported: DEV_MODE_SUPPORTED,
-      },
+    const configs = [].concat(opts.config || []);
+    const cliArgs = {
+      dev: !!opts.dev,
+      envName: unknownOptions.env ? unknownOptions.env.name : undefined,
+      // no longer supported
+      quiet: !!opts.quiet,
+      silent: !!opts.silent,
+      verbose: !!opts.verbose,
+      watch: !!opts.watch,
+      runExamples: !!opts.runExamples,
+      // We want to run without base path when the `--run-examples` flag is given so that we can use local
+      // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
+      // We can tell users they only have to run with `yarn start --run-examples` to get those
+      // local links to work.  Similar to what we do for "View in Console" links in our
+      // elastic.co links.
+      basePath: opts.runExamples ? false : !!opts.basePath,
+      optimize: !!opts.optimize,
+      disableOptimizer: !opts.optimizer,
+      oss: !!opts.oss,
+      cache: !!opts.cache,
+      dist: !!opts.dist,
+    };
+
+    // In development mode, the main process uses the @kbn/dev-cli-mode
+    // bootstrap script instead of core's. The DevCliMode instance
+    // is in charge of starting up the optimizer, and spawning another
+    // `/script/kibana` process with the `isDevCliChild` varenv set to true.
+    // This variable is then used to identify that we're the 'real'
+    // Kibana server process, and will be using core's bootstrap script
+    // to effectively start Kibana.
+    const bootstrapScript = getBootstrapScript(cliArgs.dev);
+
+    await bootstrapScript({
+      configs,
+      cliArgs,
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });

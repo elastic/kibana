@@ -10,6 +10,7 @@ import { MlApiServices } from '../ml_api_service';
 import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { EntityField } from '../../../../common/util/anomaly_utils';
+import { RuntimeMappings } from '../../../../common/types/fields';
 
 type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(
@@ -54,7 +55,6 @@ export function resultsServiceProvider(
     influencersFilterQuery: InfluencersFilterQuery
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
-  getRecordsForInfluencer(): Promise<RecordForInfluencer[]>;
   getRecordsForDetector(): Promise<any>;
   getRecords(): Promise<any>;
   getEventRateData(
@@ -64,6 +64,7 @@ export function resultsServiceProvider(
     earliestMs: number,
     latestMs: number,
     intervalMs: number,
+    runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions
   ): Promise<any>;
   getEventDistributionData(

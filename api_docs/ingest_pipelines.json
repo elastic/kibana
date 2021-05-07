@@ -3,6 +3,7 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "ingestPipelines",
         "id": "def-public.IngestPipelinesUrlGenerator",
         "type": "Class",
         "tags": [],
@@ -26,75 +27,71 @@
           },
           "<\"INGEST_PIPELINES_APP_URL_GENERATOR\">"
         ],
+        "source": {
+          "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+          "lineNumber": 55
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "ingestPipelines",
             "id": "def-public.IngestPipelinesUrlGenerator.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
-            "children": [
-              {
-                "type": "Function",
-                "label": "getAppBasePath",
-                "isRequired": true,
-                "signature": [
-                  "(absolute: boolean) => Promise<string>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
-                  "lineNumber": 57
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
               "lineNumber": 57
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ingestPipelines",
+                "id": "def-public.IngestPipelinesUrlGenerator.Unnamed.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "getAppBasePath",
+                "description": [],
+                "signature": [
+                  "(absolute: boolean) => Promise<string>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+                  "lineNumber": 57
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
-            "tags": [],
+            "parentPluginId": "ingestPipelines",
             "id": "def-public.IngestPipelinesUrlGenerator.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [],
+            "signature": [
+              "\"INGEST_PIPELINES_APP_URL_GENERATOR\""
+            ],
             "source": {
               "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
               "lineNumber": 59
             },
-            "signature": [
-              "\"INGEST_PIPELINES_APP_URL_GENERATOR\""
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "ingestPipelines",
             "id": "def-public.IngestPipelinesUrlGenerator.createUrl",
             "type": "Function",
-            "children": [
-              {
-                "type": "CompoundType",
-                "label": "state",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "ingestPipelines",
-                    "scope": "public",
-                    "docId": "kibIngestPipelinesPluginApi",
-                    "section": "def-public.IngestPipelinesUrlGeneratorState",
-                    "text": "IngestPipelinesUrlGeneratorState"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
-                  "lineNumber": 61
-                }
-              }
-            ],
+            "tags": [],
+            "label": "createUrl",
+            "description": [],
             "signature": [
               "(state: ",
               {
@@ -106,20 +103,39 @@
               },
               ") => Promise<string>"
             ],
-            "description": [],
-            "label": "createUrl",
             "source": {
               "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
               "lineNumber": 61
             },
-            "tags": [],
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ingestPipelines",
+                "id": "def-public.IngestPipelinesUrlGenerator.createUrl.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "ingestPipelines",
+                    "scope": "public",
+                    "docId": "kibIngestPipelinesPluginApi",
+                    "section": "def-public.IngestPipelinesUrlGeneratorState",
+                    "text": "IngestPipelinesUrlGeneratorState"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+                  "lineNumber": 61
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
-          "lineNumber": 55
-        },
         "initialIsOpen": false
       }
     ],
@@ -127,44 +143,45 @@
     "interfaces": [],
     "enums": [
       {
+        "parentPluginId": "ingestPipelines",
         "id": "def-public.INGEST_PIPELINES_PAGES",
         "type": "Enum",
-        "label": "INGEST_PIPELINES_PAGES",
         "tags": [],
+        "label": "INGEST_PIPELINES_PAGES",
         "description": [],
         "source": {
           "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
           "lineNumber": 22
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "ingestPipelines",
         "id": "def-public.INGEST_PIPELINES_APP_ULR_GENERATOR",
         "type": "string",
+        "tags": [],
         "label": "INGEST_PIPELINES_APP_ULR_GENERATOR",
         "description": [],
+        "signature": [
+          "\"INGEST_PIPELINES_APP_URL_GENERATOR\""
+        ],
         "source": {
           "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
           "lineNumber": 20
         },
-        "signature": [
-          "\"INGEST_PIPELINES_APP_URL_GENERATOR\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "ingestPipelines",
         "id": "def-public.IngestPipelinesUrlGeneratorState",
         "type": "Type",
-        "label": "IngestPipelinesUrlGeneratorState",
         "tags": [],
+        "label": "IngestPipelinesUrlGeneratorState",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
-          "lineNumber": 49
-        },
         "signature": [
           "PipelinesListUrlGeneratorState",
           " | ",
@@ -174,6 +191,11 @@
           " | ",
           "PipelineCreateUrlGeneratorState"
         ],
+        "source": {
+          "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+          "lineNumber": 49
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

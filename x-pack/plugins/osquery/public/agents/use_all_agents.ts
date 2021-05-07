@@ -5,94 +5,65 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { createFilter } from '../common/helpers';
+import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
 import { useKibana } from '../common/lib/kibana';
-import {
-  PageInfoPaginated,
-  OsqueryQueries,
-  AgentsRequestOptions,
-  AgentsStrategyResponse,
-  Direction,
-} from '../../common/search_strategy';
-import { ESTermQuery } from '../../common/typed_json';
-import { Agent } from '../../common/shared_imports';
-
-import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
-
-export interface AgentsArgs {
-  agents: Agent[];
-  id: string;
-  inspect: InspectResponse;
-  isInspected: boolean;
-  pageInfo: PageInfoPaginated;
-  totalCount: number;
-}
 
 interface UseAllAgents {
-  activePage: number;
-  direction: Direction;
-  limit: number;
-  sortField: string;
-  filterQuery?: ESTermQuery | string;
-  skip?: boolean;
+  osqueryPolicies: string[];
+  osqueryPoliciesLoading: boolean;
 }
 
-export const useAllAgents = ({
-  activePage,
-  direction,
-  limit,
-  sortField,
-  filterQuery,
-  skip = false,
-}: UseAllAgents) => {
-  const { data } = useKibana().services;
+interface RequestOptions {
+  perPage?: number;
+  page?: number;
+}
 
-  const [agentsRequest, setHostRequest] = useState<AgentsRequestOptions | null>(null);
+// TODO: break out the paginated vs all cases into separate hooks
+export const useAllAgents = (
+  { osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents,
+  searchValue = '',
+  opts: RequestOptions = { perPage: 9000 }
+) => {
+  const { perPage } = opts;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
+    ['agents', osqueryPolicies, searchValue, perPage],
+    () => {
+      const kueryFragments: string[] = [];
+      if (osqueryPolicies.length) {
+        kueryFragments.push(`${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`);
+      }
 
-  const response = useQuery(
-    ['agents', { activePage, direction, limit, sortField }],
-    async () => {
-      if (!agentsRequest) return Promise.resolve();
+      if (searchValue) {
+        kueryFragments.push(
+          `local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*`
+        );
+      }
 
-      const responseData = await data.search
-        .search<AgentsRequestOptions, AgentsStrategyResponse>(agentsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
-        .toPromise();
-
-      return {
-        ...responseData,
-        agents: responseData.edges,
-        inspect: getInspectResponse(responseData),
-      };
+      return http.get(agentRouteService.getListPath(), {
+        query: {
+          kuery: kueryFragments.map((frag) => `(${frag})`).join(' and '),
+          perPage,
+          showInactive: true,
+        },
+      });
     },
     {
-      enabled: !skip && !!agentsRequest,
+      enabled: !osqueryPoliciesLoading,
+      onError: (error) =>
+        toasts.addError(error as Error, {
+          title: i18n.translate('xpack.osquery.agents.fetchError', {
+            defaultMessage: 'Error while fetching agents',
+          }),
+        }),
     }
   );
 
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        factoryQueryType: OsqueryQueries.agents,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [activePage, direction, filterQuery, limit, sortField]);
-
-  return response;
+  return { agentsLoading, agents: agentData?.list };
 };

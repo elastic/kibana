@@ -24,16 +24,21 @@ storiesOf('components/SearchSessionIndicator', module).add('default', () => {
   return (
     <>
       <div>
-        <SearchSessionIndicator state={SearchSessionState.Loading} />
+        <SearchSessionIndicator state={SearchSessionState.Loading} startedTime={new Date()} />
       </div>
       <div>
-        <SearchSessionIndicator state={SearchSessionState.Completed} />
+        <SearchSessionIndicator
+          state={SearchSessionState.Completed}
+          startedTime={new Date()}
+          completedTime={new Date()}
+        />
       </div>
       <div>
         <SearchSessionIndicator
           state={SearchSessionState.BackgroundLoading}
           searchSessionName={searchSessionName}
           saveSearchSessionNameFn={saveSearchSessionNameFn}
+          startedTime={new Date()}
         />
       </div>
       <div>
@@ -41,6 +46,8 @@ storiesOf('components/SearchSessionIndicator', module).add('default', () => {
           state={SearchSessionState.BackgroundCompleted}
           searchSessionName={searchSessionName}
           saveSearchSessionNameFn={saveSearchSessionNameFn}
+          startedTime={new Date()}
+          completedTime={new Date()}
         />
       </div>
       <div>
@@ -48,15 +55,23 @@ storiesOf('components/SearchSessionIndicator', module).add('default', () => {
           state={SearchSessionState.Restored}
           searchSessionName={searchSessionName}
           saveSearchSessionNameFn={saveSearchSessionNameFn}
+          startedTime={new Date()}
+          completedTime={new Date()}
         />
       </div>
       <div>
-        <SearchSessionIndicator state={SearchSessionState.Canceled} />
+        <SearchSessionIndicator
+          state={SearchSessionState.Canceled}
+          startedTime={new Date()}
+          canceledTime={new Date()}
+        />
       </div>
       <div>
         <SearchSessionIndicator
           state={SearchSessionState.Completed}
           saveDisabled={true}
+          startedTime={new Date()}
+          completedTime={new Date()}
           saveDisabledReasonText={
             'Search results have expired and it is no longer possible to save this search session'
           }

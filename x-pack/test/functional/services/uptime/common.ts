@@ -42,7 +42,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       await browser.pressKeys(browser.keys.ENTER);
     },
     async setFilterText(filterQuery: string) {
-      await this.setKueryBarText('xpack.uptime.filterBar', filterQuery);
+      await this.setKueryBarText('queryInput', filterQuery);
     },
     async goToNextPage() {
       await testSubjects.click('xpack.uptime.monitorList.nextButton', 5000);

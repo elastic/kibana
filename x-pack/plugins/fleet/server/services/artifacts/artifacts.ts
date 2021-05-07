@@ -11,13 +11,14 @@ import { promisify } from 'util';
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
 
-import uuid from 'uuid';
 import type { ElasticsearchClient } from 'kibana/server';
 
 import type { ListResult } from '../../../common';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
+
+import { isElasticsearchVersionConflictError } from '../../errors/utils';
 
 import { isElasticsearchItemNotFoundError } from './utils';
 import type {
@@ -28,7 +29,11 @@ import type {
   ListArtifactsProps,
   NewArtifact,
 } from './types';
-import { esSearchHitToArtifact, newArtifactToElasticsearchProperties } from './mappings';
+import {
+  esSearchHitToArtifact,
+  newArtifactToElasticsearchProperties,
+  uniqueIdFromArtifact,
+} from './mappings';
 
 const deflateAsync = promisify(deflate);
 
@@ -57,7 +62,7 @@ export const createArtifact = async (
   esClient: ElasticsearchClient,
   artifact: NewArtifact
 ): Promise<Artifact> => {
-  const id = uuid.v4();
+  const id = uniqueIdFromArtifact(artifact);
   const newArtifactData = newArtifactToElasticsearchProperties(artifact);
 
   try {
@@ -67,11 +72,14 @@ export const createArtifact = async (
       body: newArtifactData,
       refresh: 'wait_for',
     });
-
-    return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
   } catch (e) {
-    throw new ArtifactsElasticsearchError(e);
+    // we ignore 409 errors from the create (document already exists)
+    if (!isElasticsearchVersionConflictError(e)) {
+      throw new ArtifactsElasticsearchError(e);
+    }
   }
+
+  return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
 };
 
 export const deleteArtifact = async (esClient: ElasticsearchClient, id: string): Promise<void> => {
@@ -97,6 +105,7 @@ export const listArtifacts = async (
       sort: `${sortField}:${sortOrder}`,
       q: kuery,
       from: (page - 1) * perPage,
+      ignore_unavailable: true,
       size: perPage,
     });
 

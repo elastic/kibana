@@ -5,14 +5,27 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
+
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { addIdToItem } from '../../../../common/shared_imports';
+import { addIdToItem, removeIdFromItem, validate } from '../../../../common/shared_imports';
 import {
+  CreateExceptionListItemSchema,
+  EntriesArray,
   Entry,
+  EntryNested,
+  ExceptionListItemSchema,
   ExceptionListType,
   ListSchema,
+  NamespaceType,
+  OperatorEnum,
   OperatorTypeEnum,
+  createExceptionListItemSchema,
   entriesList,
+  entriesNested,
+  entry,
+  exceptionListItemSchema,
+  nestedEntryItem,
 } from '../../../../common';
 import {
   EXCEPTION_OPERATORS,
@@ -24,8 +37,235 @@ import {
   isOperator,
 } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
+import { OsTypeArray } from '../../../../common/schemas';
 
-import { BuilderEntry, FormattedBuilderEntry } from './types';
+import {
+  BuilderEntry,
+  CreateExceptionListItemBuilderSchema,
+  EmptyEntry,
+  EmptyNestedEntry,
+  ExceptionsBuilderExceptionItem,
+  FormattedBuilderEntry,
+} from './types';
+
+export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
+  return (item as EntryNested).entries != null;
+};
+
+export const filterExceptionItems = (
+  exceptions: ExceptionsBuilderExceptionItem[]
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
+    (acc, exception) => {
+      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+        const strippedSingleEntry = removeIdFromItem(singleEntry);
+
+        if (entriesNested.is(strippedSingleEntry)) {
+          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
+            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
+            return validatedNestedEntry != null;
+          });
+          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+            removeIdFromItem(singleNestedEntry)
+          );
+
+          const [validatedNestedEntry] = validate(
+            { ...strippedSingleEntry, entries: noIdNestedEntries },
+            entriesNested
+          );
+
+          if (validatedNestedEntry != null) {
+            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
+          }
+          return nestedAcc;
+        } else {
+          const [validatedEntry] = validate(strippedSingleEntry, entry);
+
+          if (validatedEntry != null) {
+            return [...nestedAcc, singleEntry];
+          }
+          return nestedAcc;
+        }
+      }, []);
+
+      const item = { ...exception, entries };
+
+      if (exceptionListItemSchema.is(item)) {
+        return [...acc, item];
+      } else if (createExceptionListItemSchema.is(item)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { meta: _, ...rest } = item;
+        const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
+        return [...acc, itemSansMetaId];
+      } else {
+        return acc;
+      }
+    },
+    []
+  );
+};
+
+export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
+  return entries.map((singleEntry) => {
+    if (singleEntry.type === 'nested') {
+      return addIdToItem({
+        ...singleEntry,
+        entries: singleEntry.entries.map((nestedEntry) => addIdToItem(nestedEntry)),
+      });
+    } else {
+      return addIdToItem(singleEntry);
+    }
+  });
+};
+
+export const getNewExceptionItem = ({
+  listId,
+  namespaceType,
+  ruleName,
+}: {
+  listId: string;
+  namespaceType: NamespaceType;
+  ruleName: string;
+}): CreateExceptionListItemBuilderSchema => {
+  return {
+    comments: [],
+    description: `${ruleName} - exception list item`,
+    entries: addIdToEntries([
+      {
+        field: '',
+        operator: 'included',
+        type: 'match',
+        value: '',
+      },
+    ]),
+    item_id: undefined,
+    list_id: listId,
+    meta: {
+      temporaryUuid: uuid.v4(),
+    },
+    name: `${ruleName} - exception list item`,
+    namespace_type: namespaceType,
+    tags: [],
+    type: 'simple',
+  };
+};
+
+/**
+ * Returns the operator type, may not need this if using io-ts types
+ *
+ * @param item a single ExceptionItem entry
+ */
+export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
+  switch (item.type) {
+    case 'match':
+      return OperatorTypeEnum.MATCH;
+    case 'match_any':
+      return OperatorTypeEnum.MATCH_ANY;
+    case 'list':
+      return OperatorTypeEnum.LIST;
+    default:
+      return OperatorTypeEnum.EXISTS;
+  }
+};
+
+/**
+ * Determines operator selection (is/is not/is one of, etc.)
+ * Default operator is "is"
+ *
+ * @param item a single ExceptionItem entry
+ */
+export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption => {
+  if (item.type === 'nested') {
+    return isOperator;
+  } else {
+    const operatorType = getOperatorType(item);
+    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
+      return item.operator === operatorOption.operator && operatorType === operatorOption.type;
+    });
+
+    return foundOperator ?? isOperator;
+  }
+};
+
+/**
+ * Returns the fields corresponding value for an entry
+ *
+ * @param item a single ExceptionItem entry
+ */
+export const getEntryValue = (item: BuilderEntry): string | string[] | undefined => {
+  switch (item.type) {
+    case OperatorTypeEnum.MATCH:
+    case OperatorTypeEnum.MATCH_ANY:
+      return item.value;
+    case OperatorTypeEnum.EXISTS:
+      return undefined;
+    case OperatorTypeEnum.LIST:
+      return item.list.id;
+    default:
+      return undefined;
+  }
+};
+
+/**
+ * Determines whether an entire entry, exception item, or entry within a nested
+ * entry needs to be removed
+ *
+ * @param exceptionItem
+ * @param entryIndex index of given entry, for nested entries, this will correspond
+ * to their parent index
+ * @param nestedEntryIndex index of nested entry
+ *
+ */
+export const getUpdatedEntriesOnDelete = (
+  exceptionItem: ExceptionsBuilderExceptionItem,
+  entryIndex: number,
+  nestedParentIndex: number | null
+): ExceptionsBuilderExceptionItem => {
+  const itemOfInterest: BuilderEntry = exceptionItem.entries[nestedParentIndex ?? entryIndex];
+
+  if (nestedParentIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
+    const updatedEntryEntries = [
+      ...itemOfInterest.entries.slice(0, entryIndex),
+      ...itemOfInterest.entries.slice(entryIndex + 1),
+    ];
+
+    if (updatedEntryEntries.length === 0) {
+      return {
+        ...exceptionItem,
+        entries: [
+          ...exceptionItem.entries.slice(0, nestedParentIndex),
+          ...exceptionItem.entries.slice(nestedParentIndex + 1),
+        ],
+      };
+    } else {
+      const { field } = itemOfInterest;
+      const updatedItemOfInterest: EntryNested | EmptyNestedEntry = {
+        entries: updatedEntryEntries,
+        field,
+        id: itemOfInterest.id ?? `${entryIndex}`,
+        type: OperatorTypeEnum.NESTED,
+      };
+
+      return {
+        ...exceptionItem,
+        entries: [
+          ...exceptionItem.entries.slice(0, nestedParentIndex),
+          updatedItemOfInterest,
+          ...exceptionItem.entries.slice(nestedParentIndex + 1),
+        ],
+      };
+    }
+  } else {
+    return {
+      ...exceptionItem,
+      entries: [
+        ...exceptionItem.entries.slice(0, entryIndex),
+        ...exceptionItem.entries.slice(entryIndex + 1),
+      ],
+    };
+  }
+};
 
 /**
  * Returns filtered index patterns based on the field - if a user selects to
@@ -40,9 +280,10 @@ export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IIndexPattern, t: ExceptionListType) => IIndexPattern
+  preFilter?: (i: IIndexPattern, t: ExceptionListType, o?: OsTypeArray) => IIndexPattern,
+  osTypes?: OsTypeArray
 ): IIndexPattern => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type) : patterns;
+  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
@@ -387,3 +628,173 @@ export const getOperatorOptions = (
       : EXCEPTION_OPERATORS_SANS_LISTS;
   }
 };
+
+/**
+ * Fields of type 'text' do not generate autocomplete values, we want
+ * to find it's corresponding keyword type (if available) which does
+ * generate autocomplete values
+ *
+ * @param fields IFieldType fields
+ * @param selectedField the field name that was selected
+ * @param isTextType we only want a corresponding keyword field if
+ * the selected field is of type 'text'
+ *
+ */
+export const getCorrespondingKeywordField = ({
+  fields,
+  selectedField,
+}: {
+  fields: IFieldType[];
+  selectedField: string | undefined;
+}): IFieldType | undefined => {
+  const selectedFieldBits =
+    selectedField != null && selectedField !== '' ? selectedField.split('.') : [];
+  const selectedFieldIsTextType = selectedFieldBits.slice(-1)[0] === 'text';
+
+  if (selectedFieldIsTextType && selectedFieldBits.length > 0) {
+    const keywordField = selectedFieldBits.slice(0, selectedFieldBits.length - 1).join('.');
+    const [foundKeywordField] = fields.filter(
+      ({ name }) => keywordField !== '' && keywordField === name
+    );
+    return foundKeywordField;
+  }
+
+  return undefined;
+};
+
+/**
+ * Formats the entry into one that is easily usable for the UI, most of the
+ * complexity was introduced with nested fields
+ *
+ * @param patterns IIndexPattern containing available fields on rule index
+ * @param item exception item entry
+ * @param itemIndex entry index
+ * @param parent nested entries hold copy of their parent for use in various logic
+ * @param parentIndex corresponds to the entry index, this might seem obvious, but
+ * was added to ensure that nested items could be identified with their parent entry
+ */
+export const getFormattedBuilderEntry = (
+  indexPattern: IIndexPattern,
+  item: BuilderEntry,
+  itemIndex: number,
+  parent: EntryNested | undefined,
+  parentIndex: number | undefined
+): FormattedBuilderEntry => {
+  const { fields } = indexPattern;
+  const field = parent != null ? `${parent.field}.${item.field}` : item.field;
+  const [foundField] = fields.filter(({ name }) => field != null && field === name);
+  const correspondingKeywordField = getCorrespondingKeywordField({
+    fields,
+    selectedField: field,
+  });
+
+  if (parent != null && parentIndex != null) {
+    return {
+      correspondingKeywordField,
+      entryIndex: itemIndex,
+      field:
+        foundField != null
+          ? { ...foundField, name: foundField.name.split('.').slice(-1)[0] }
+          : foundField,
+      id: item.id ?? `${itemIndex}`,
+      nested: 'child',
+      operator: getExceptionOperatorSelect(item),
+      parent: { parent, parentIndex },
+      value: getEntryValue(item),
+    };
+  } else {
+    return {
+      correspondingKeywordField,
+      entryIndex: itemIndex,
+      field: foundField,
+      id: item.id ?? `${itemIndex}`,
+      nested: undefined,
+      operator: getExceptionOperatorSelect(item),
+      parent: undefined,
+      value: getEntryValue(item),
+    };
+  }
+};
+
+/**
+ * Formats the entries to be easily usable for the UI, most of the
+ * complexity was introduced with nested fields
+ *
+ * @param patterns IIndexPattern containing available fields on rule index
+ * @param entries exception item entries
+ * @param addNested boolean noting whether or not UI is currently
+ * set to add a nested field
+ * @param parent nested entries hold copy of their parent for use in various logic
+ * @param parentIndex corresponds to the entry index, this might seem obvious, but
+ * was added to ensure that nested items could be identified with their parent entry
+ */
+export const getFormattedBuilderEntries = (
+  indexPattern: IIndexPattern,
+  entries: BuilderEntry[],
+  parent?: EntryNested,
+  parentIndex?: number
+): FormattedBuilderEntry[] => {
+  return entries.reduce<FormattedBuilderEntry[]>((acc, item, index) => {
+    const isNewNestedEntry = item.type === 'nested' && item.entries.length === 0;
+    if (item.type !== 'nested' && !isNewNestedEntry) {
+      const newItemEntry: FormattedBuilderEntry = getFormattedBuilderEntry(
+        indexPattern,
+        item,
+        index,
+        parent,
+        parentIndex
+      );
+      return [...acc, newItemEntry];
+    } else {
+      const parentEntry: FormattedBuilderEntry = {
+        correspondingKeywordField: undefined,
+        entryIndex: index,
+        field: isNewNestedEntry
+          ? undefined
+          : {
+              aggregatable: false,
+              esTypes: ['nested'],
+              name: item.field ?? '',
+              searchable: false,
+              type: 'string',
+            },
+        id: item.id ?? `${index}`,
+        nested: 'parent',
+        operator: isOperator,
+        parent: undefined,
+        value: undefined,
+      };
+
+      // User has selected to add a nested field, but not yet selected the field
+      if (isNewNestedEntry) {
+        return [...acc, parentEntry];
+      }
+
+      if (isEntryNested(item)) {
+        const nestedItems = getFormattedBuilderEntries(indexPattern, item.entries, item, index);
+
+        return [...acc, parentEntry, ...nestedItems];
+      }
+
+      return [...acc];
+    }
+  }, []);
+};
+
+export const getDefaultEmptyEntry = (): EmptyEntry => ({
+  field: '',
+  id: uuid.v4(),
+  operator: OperatorEnum.INCLUDED,
+  type: OperatorTypeEnum.MATCH,
+  value: '',
+});
+
+export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
+  entries: [],
+  field: '',
+  id: uuid.v4(),
+  type: OperatorTypeEnum.NESTED,
+});
+
+export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
+  items.some((item) => item.entries.some(({ type }) => type === OperatorTypeEnum.LIST));

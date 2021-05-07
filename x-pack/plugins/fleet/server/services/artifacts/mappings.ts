@@ -72,3 +72,13 @@ export const relativeDownloadUrlFromArtifact = <
     decodedSha256
   );
 };
+
+export const uniqueIdFromArtifact = <
+  T extends Pick<Artifact, 'identifier' | 'decodedSha256' | 'packageName'>
+>({
+  identifier,
+  decodedSha256,
+  packageName,
+}: T): string => {
+  return `${packageName}:${identifier}-${decodedSha256}`;
+};

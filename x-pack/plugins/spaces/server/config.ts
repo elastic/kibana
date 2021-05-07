@@ -24,11 +24,11 @@ export function createConfig$(context: PluginInitializerContext) {
   return context.config.create<TypeOf<typeof ConfigSchema>>();
 }
 
-const disabledDeprecation: ConfigDeprecation = (config, fromPath, log) => {
+const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation) => {
   if (config.xpack?.spaces?.enabled === false) {
-    log(
-      `Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`
-    );
+    addDeprecation({
+      message: `Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`,
+    });
   }
   return config;
 };

@@ -74,6 +74,7 @@ export const getMetricsHostsAnomaliesRequestPayloadRT = rt.type({
     }),
     rt.partial({
       query: rt.string,
+      hostName: rt.string,
       metric: metricRT,
       // Pagination properties
       pagination: paginationRT,
