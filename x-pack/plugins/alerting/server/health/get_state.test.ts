@@ -14,6 +14,7 @@ import {
 } from './get_state';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { HealthStatus } from '../types';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -38,6 +39,8 @@ const getHealthCheckTask = (overrides = {}): ConcreteTaskInstance => ({
   ...overrides,
 });
 
+const logger = loggingSystemMock.create().get();
+
 describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
   beforeEach(() => jest.useFakeTimers());
 
@@ -47,7 +50,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    getHealthStatusStream(mockTaskManager, pollInterval).subscribe();
+    getHealthStatusStream(mockTaskManager, logger, pollInterval).subscribe();
 
     // shouldn't fire before poll interval passes
     // should fire once each poll interval
