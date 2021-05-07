@@ -41,7 +41,10 @@ export function getResponseDurationLensConfig({ seriesId, indexPattern }: Config
       'host.os.platform',
       'labels.net_connection_carrier_isoCountryCode',
     ],
-    filters: buildPhraseFilter('transaction.type', 'request', indexPattern),
+    filters: [
+      ...buildPhraseFilter('transaction.type', 'request', indexPattern),
+      ...buildPhraseFilter('agent.name', 'opentelemetry/swift', indexPattern),
+    ],
     labels: {
       ...FieldLabels,
       [TRANSACTION_DURATION]: 'Response time',

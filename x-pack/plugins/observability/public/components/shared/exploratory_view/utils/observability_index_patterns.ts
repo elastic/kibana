@@ -23,7 +23,7 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   ux: rumFieldFormats,
   apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
-  mobile: null,
+  mobile: apmFieldFormats,
 };
 
 function getFieldFormatsForApp(app: AppDataType) {
