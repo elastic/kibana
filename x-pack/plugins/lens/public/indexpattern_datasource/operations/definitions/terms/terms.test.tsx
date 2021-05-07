@@ -31,6 +31,7 @@ const defaultProps = {
   operationDefinitionMap: {},
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
 };
 
 describe('terms', () => {

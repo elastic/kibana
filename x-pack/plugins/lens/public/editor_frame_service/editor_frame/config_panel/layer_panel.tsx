@@ -413,6 +413,11 @@ export function LayerPanel(
         isFullscreen={isFullscreen}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
+          if (layerDatasource.canCloseDimensionEditor) {
+            if (!layerDatasource.canCloseDimensionEditor(layerDatasourceState)) {
+              return false;
+            }
+          }
           if (layerDatasource.updateStateOnCloseDimension) {
             const newState = layerDatasource.updateStateOnCloseDimension({
               state: layerDatasourceState,
@@ -427,6 +432,7 @@ export function LayerPanel(
           if (isFullscreen) {
             toggleFullscreen();
           }
+          return true;
         }}
         panel={
           <div>

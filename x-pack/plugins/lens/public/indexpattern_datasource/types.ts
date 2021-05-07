@@ -88,6 +88,8 @@ export interface IndexPatternPrivateState {
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
   existenceFetchTimeout?: boolean;
+
+  isDimensionClosePrevented?: boolean;
 }
 
 export interface IndexPatternRef {

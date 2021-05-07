@@ -246,6 +246,7 @@ function FormulaEditor({
   data,
   toggleFullscreen,
   isFullscreen,
+  setIsCloseable,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
@@ -253,7 +254,7 @@ function FormulaEditor({
     monaco.editor.createModel(text ?? '', LANGUAGE_ID)
   );
   const overflowDiv1 = React.useRef<HTMLElement>();
-  const updateAfterTyping = React.useRef<monaco.IDisposable>();
+  const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
@@ -270,13 +271,13 @@ function FormulaEditor({
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
     const model = editorModel.current;
-    const disposable1 = updateAfterTyping.current;
+    const allDisposables = disposables.current;
     const editor1ref = editor1.current;
     return () => {
       model.dispose();
       overflowDiv1.current?.parentNode?.removeChild(overflowDiv1.current);
-      disposable1?.dispose();
       editor1ref?.dispose();
+      allDisposables?.forEach((d) => d.dispose());
     };
   }, []);
 
@@ -599,28 +600,6 @@ function FormulaEditor({
     []
   );
 
-  const registerOnTypeHandler = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
-      // Toggle between two different callbacks when the editors change
-      if (updateAfterTyping.current) {
-        updateAfterTyping.current.dispose();
-      }
-      updateAfterTyping.current = editor.onDidChangeModelContent((e) => {
-        onTypeHandler(e, editor);
-      });
-    },
-    [onTypeHandler]
-  );
-
-  // Toggle between the handlers whenever the full screen mode is changed,
-  // because Monaco only maintains cursor position in the active model
-  // while it has focus.
-  useEffect(() => {
-    if (updateAfterTyping.current) {
-      if (editor1.current) registerOnTypeHandler(editor1.current);
-    }
-  }, [isFullscreen, registerOnTypeHandler]);
-
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
     value: text ?? '',
@@ -708,7 +687,23 @@ function FormulaEditor({
           }}
           editorDidMount={(editor) => {
             editor1.current = editor;
-            registerOnTypeHandler(editor);
+            disposables.current.push(
+              editor.onDidFocusEditorWidget(() => {
+                setIsCloseable(false);
+              })
+            );
+            disposables.current.push(
+              editor.onDidBlurEditorWidget(() => {
+                setIsCloseable(true);
+              })
+            );
+            // If we ever introduce a second Monaco editor, we need to toggle
+            // the typing handler to the active editor to maintain the cursor
+            disposables.current.push(
+              editor.onDidChangeModelContent((e) => {
+                onTypeHandler(e, editor);
+              })
+            );
           }}
         />
         <EuiSpacer />
