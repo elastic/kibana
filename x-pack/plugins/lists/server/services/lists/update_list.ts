@@ -15,12 +15,8 @@ import {
 
 import { decodeVersion } from '../utils/decode_version';
 import { encodeHitVersion } from '../utils/encode_hit_version';
-import {
-  ListSchema,
-  UpdateEsListSchema,
-  VersionOrUndefined,
-  _VersionOrUndefined,
-} from '../../../common/schemas';
+import { ListSchema, VersionOrUndefined, _VersionOrUndefined } from '../../../common/schemas';
+import { UpdateEsListSchema } from '../../schemas/elastic_query';
 
 import { getList } from '.';
 

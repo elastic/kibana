@@ -19,11 +19,11 @@ import {
 
 import {
   ExceptionListSchema,
-  ExceptionListSoSchema,
   ListIdOrUndefined,
   VersionOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { getSavedObjectType, transformSavedObjectUpdateToExceptionList } from './utils';
 import { getExceptionList } from './get_exception_list';

@@ -19,7 +19,6 @@ import {
   exceptionListSavedObjectType,
 } from '../../../common/types';
 import {
-  ExceptionListSoSchema,
   FoundExceptionListItemSchema,
   PageOrUndefined,
   PerPageOrUndefined,
@@ -27,6 +26,7 @@ import {
   SortOrderOrUndefined,
 } from '../../../common/schemas';
 import { escapeQuotes } from '../utils/escape_query';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';

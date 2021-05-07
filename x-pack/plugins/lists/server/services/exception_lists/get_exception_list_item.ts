@@ -11,11 +11,8 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server/';
-import {
-  ExceptionListItemSchema,
-  ExceptionListSoSchema,
-  ItemIdOrUndefined,
-} from '../../../common/schemas';
+import { ExceptionListItemSchema, ItemIdOrUndefined } from '../../../common/schemas';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { getSavedObjectType, transformSavedObjectToExceptionListItem } from './utils';
 

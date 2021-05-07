@@ -7,7 +7,6 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { SearchEsListSchema } from '../../../common/schemas';
 import {
   DATE_NOW,
   DESCRIPTION,
@@ -21,7 +20,9 @@ import {
   USER,
   VERSION,
 } from '../../../common/constants.mock';
-import { getShardMock } from '../../get_shard.mock';
+import { getShardMock } from '../common/get_shard.mock';
+
+import { SearchEsListSchema } from './search_es_list_schema';
 
 export const getSearchEsListMock = (): SearchEsListSchema => ({
   created_at: DATE_NOW,

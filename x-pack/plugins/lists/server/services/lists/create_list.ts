@@ -19,11 +19,11 @@ import { encodeHitVersion } from '../utils/encode_hit_version';
 import {
   DeserializerOrUndefined,
   Immutable,
-  IndexEsListSchema,
   ListSchema,
   SerializerOrUndefined,
   Version,
 } from '../../../common/schemas';
+import { IndexEsListSchema } from '../../schemas/elastic_query';
 
 export interface CreateListOptions {
   id: IdOrUndefined;

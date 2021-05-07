@@ -10,7 +10,6 @@ import { NamespaceTypeArray } from '@kbn/securitysolution-io-ts-utils';
 
 import { SavedObjectType } from '../../../common/types';
 import {
-  ExceptionListSoSchema,
   FilterOrUndefined,
   FoundExceptionListSchema,
   PageOrUndefined,
@@ -18,6 +17,7 @@ import {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionList } from './utils';
 

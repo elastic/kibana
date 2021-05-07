@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { IndexEsListItemSchema } from '../../../common/schemas';
 import { DATE_NOW, LIST_ID, META, TIE_BREAKER, USER, VALUE } from '../../../common/constants.mock';
+
+import { IndexEsListItemSchema } from './index_es_list_item_schema';
 
 export const getIndexESListItemMock = (ip = VALUE): IndexEsListItemSchema => ({
   created_at: DATE_NOW,

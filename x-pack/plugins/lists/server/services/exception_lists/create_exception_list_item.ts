@@ -19,12 +19,8 @@ import {
   Tags,
 } from '@kbn/securitysolution-io-ts-utils';
 
-import {
-  ExceptionListItemSchema,
-  ExceptionListSoSchema,
-  ItemId,
-  ListId,
-} from '../../../common/schemas';
+import { ExceptionListItemSchema, ItemId, ListId } from '../../../common/schemas';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import {
   getSavedObjectType,

@@ -16,7 +16,7 @@ import {
 } from '@kbn/securitysolution-io-ts-utils';
 
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
-import { ExceptionListSoSchema } from '../../common/schemas';
+import { ExceptionListSoSchema } from '../schemas/saved_objects';
 
 const entryType = t.union([entry, entriesNested]);
 type EntryType = t.TypeOf<typeof entryType>;

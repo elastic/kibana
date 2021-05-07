@@ -21,10 +21,10 @@ import {
 
 import {
   ExceptionListItemSchema,
-  ExceptionListSoSchema,
   ItemIdOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import {
   getSavedObjectType,

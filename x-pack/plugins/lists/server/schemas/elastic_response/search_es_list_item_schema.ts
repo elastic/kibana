@@ -21,7 +21,6 @@ import {
   dateNanosOrUndefined,
   dateOrUndefined,
   dateRangeOrUndefined,
-  deserializerOrUndefined,
   doubleOrUndefined,
   doubleRangeOrUndefined,
   floatOrUndefined,
@@ -34,15 +33,18 @@ import {
   ipOrUndefined,
   ipRangeOrUndefined,
   keywordOrUndefined,
-  list_id,
   longOrUndefined,
   longRangeOrUndefined,
-  serializerOrUndefined,
   shapeOrUndefined,
   shortOrUndefined,
   textOrUndefined,
-  tie_breaker_id,
 } from '../common/schemas';
+import {
+  deserializerOrUndefined,
+  list_id,
+  serializerOrUndefined,
+  tie_breaker_id,
+} from '../../../common/schemas';
 
 export const searchEsListItemSchema = t.exact(
   t.type({

@@ -14,13 +14,13 @@ import {
   updated_by,
 } from '@kbn/securitysolution-io-ts-utils';
 
+import { esDataTypeUnion } from '../common/schemas';
 import {
   deserializerOrUndefined,
-  esDataTypeUnion,
   list_id,
   serializerOrUndefined,
   tie_breaker_id,
-} from '../common/schemas';
+} from '../../../common/schemas';
 
 export const indexEsListItemSchema = t.intersection([
   t.exact(

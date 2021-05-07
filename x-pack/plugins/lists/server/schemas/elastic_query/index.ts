@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * from './update_es_list_schema';
+export * from './create_es_bulk_type';
+export * from './index_es_list_item_schema';
 export * from './index_es_list_schema';
 export * from './update_es_list_item_schema';
-export * from './index_es_list_item_schema';
-export * from './create_es_bulk_type';
+export * from './update_es_list_schema';

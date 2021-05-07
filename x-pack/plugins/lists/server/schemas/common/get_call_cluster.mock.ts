@@ -8,7 +8,8 @@
 import { CreateDocumentResponse } from 'elasticsearch';
 import { LegacyAPICaller } from 'kibana/server';
 
-import { LIST_INDEX } from './constants.mock';
+import { LIST_INDEX } from '../../../common/constants.mock';
+
 import { getShardMock } from './get_shard.mock';
 
 export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => ({

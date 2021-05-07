@@ -28,7 +28,7 @@ import {
   list_type,
   tie_breaker_id,
   versionOrUndefined,
-} from '../common/schemas';
+} from '../../../common/schemas';
 
 /**
  * Superset saved object of both lists and list items since they share the same saved object type.

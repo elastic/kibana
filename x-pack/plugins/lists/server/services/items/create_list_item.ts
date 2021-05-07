@@ -11,12 +11,12 @@ import { IdOrUndefined, MetaOrUndefined, Type } from '@kbn/securitysolution-io-t
 
 import {
   DeserializerOrUndefined,
-  IndexEsListItemSchema,
   ListItemSchema,
   SerializerOrUndefined,
 } from '../../../common/schemas';
 import { transformListItemToElasticQuery } from '../utils';
 import { encodeHitVersion } from '../utils/encode_hit_version';
+import { IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemOptions {
   deserializer: DeserializerOrUndefined;

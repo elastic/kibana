@@ -26,10 +26,10 @@ import {
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
-  ExceptionListSoSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
 } from '../../../common/schemas';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 export const getSavedObjectType = ({
   namespaceType,

@@ -23,9 +23,9 @@ import {
   serializerOrUndefined,
   tie_breaker_id,
   version,
-} from '../common/schemas';
+} from '../../../common/schemas';
 
-export const searchEsListSchema = t.exact(
+export const indexEsListSchema = t.exact(
   t.type({
     created_at,
     created_by,
@@ -43,4 +43,4 @@ export const searchEsListSchema = t.exact(
   })
 );
 
-export type SearchEsListSchema = t.TypeOf<typeof searchEsListSchema>;
+export type IndexEsListSchema = t.OutputOf<typeof indexEsListSchema>;

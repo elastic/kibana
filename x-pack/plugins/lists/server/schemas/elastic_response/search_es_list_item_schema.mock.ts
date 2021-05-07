@@ -7,7 +7,6 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { SearchEsListItemSchema } from '../../../common/schemas';
 import {
   DATE_NOW,
   LIST_ID,
@@ -18,7 +17,9 @@ import {
   USER,
   VALUE,
 } from '../../../common/constants.mock';
-import { getShardMock } from '../../get_shard.mock';
+import { getShardMock } from '../common/get_shard.mock';
+
+import { SearchEsListItemSchema } from './search_es_list_item_schema';
 
 export const getSearchEsListItemsAsAllUndefinedMock = (): SearchEsListItemSchema => ({
   binary: undefined,
