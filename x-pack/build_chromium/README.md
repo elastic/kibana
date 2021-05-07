@@ -80,7 +80,7 @@ If you wish to use a remote VM to build, you'll need access to our GCP account.
 **NOTE:** The builds should be done in Ubuntu on x64 architecture. ARM builds
 are created in x64 using cross-compiling. CentOS is not supported for building Chromium.
 
-1. Login inoto Google Cloud Console
+1. Login to Google Cloud Console
 2. Click the "Compute Engine" tab.
 3. Create a Linux VM:
    - 8 CPU
