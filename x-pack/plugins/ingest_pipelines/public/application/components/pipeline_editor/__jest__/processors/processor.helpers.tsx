@@ -133,13 +133,6 @@ export const getProcessorValue = (onUpdate: jest.Mock, type: string) => {
   return processors;
 };
 
-export const commonFormFields = {
-  if: undefined,
-  tag: undefined,
-  ignore_failure: undefined,
-  description: undefined,
-};
-
 type TestSubject =
   | 'addProcessorForm.submitButton'
   | 'addProcessorButton'

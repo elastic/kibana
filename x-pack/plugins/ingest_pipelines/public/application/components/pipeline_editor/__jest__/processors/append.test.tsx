@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue, commonFormFields } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 const APPEND_TYPE = 'append';
 
@@ -86,7 +86,6 @@ describe('Processor: Append', () => {
     expect(processors[0].append).toEqual({
       field: 'field_1',
       value: ['Some_Value'],
-      ...commonFormFields,
     });
   });
 
