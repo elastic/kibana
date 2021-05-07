@@ -65,6 +65,7 @@ cp scripts/exportAssets.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linu
 cp scripts/configureKibana.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/util.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/kibana-post-start.sh %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
+cp scripts/rmOldKibanaIndices.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp -a plugins/ %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/
 
 mkdir -p %{buildroot}/usr/local/www/probe/
