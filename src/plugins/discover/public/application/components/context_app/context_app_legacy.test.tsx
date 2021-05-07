@@ -7,14 +7,34 @@
  */
 
 import React from 'react';
-import { ContextAppLegacy } from './context_app_legacy';
-import { IIndexPattern } from '../../../../../data/common/index_patterns';
 import { mountWithIntl } from '@kbn/test/jest';
+import { uiSettingsMock as mockUiSettings } from '../../../__mocks__/ui_settings';
+import { IndexPattern } from '../../../../../data/common/index_patterns';
+import { ContextAppLegacy } from './context_app_legacy';
 import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
 import { ContextErrorMessage } from '../context_error_message';
 import { TopNavMenuMock } from './__mocks__/top_nav_menu';
+import { AppState, GetStateReturn } from '../../angular/context_state';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { SortDirection } from 'src/plugins/data/common';
+
+jest.mock('../../../kibana_services', () => {
+  return {
+    getServices: () => ({
+      metadata: {
+        branch: 'test',
+      },
+      capabilities: {
+        discover: {
+          save: true,
+        },
+      },
+      uiSettings: mockUiSettings,
+    }),
+  };
+});
 
 describe('ContextAppLegacy test', () => {
   const hit = {
@@ -35,16 +55,18 @@ describe('ContextAppLegacy test', () => {
   };
   const indexPattern = {
     id: 'test_index_pattern',
-  } as IIndexPattern;
+  } as IndexPattern;
   const defaultProps = {
     columns: ['_source'],
     filter: () => {},
-    hits: [hit],
-    sorting: ['order_date', 'desc'],
+    hits: ([hit] as unknown) as ElasticSearchHit[],
+    sorting: [['order_date', 'desc']] as Array<[string, SortDirection]>,
     minimumVisibleRows: 5,
     indexPattern,
-    status: 'loaded',
-    reason: 'no reason',
+    appState: ({} as unknown) as AppState,
+    stateContainer: ({} as unknown) as GetStateReturn,
+    anchorStatus: 'loaded',
+    anchorReason: 'no reason',
     defaultStepSize: 5,
     predecessorCount: 10,
     successorCount: 10,
@@ -55,6 +77,7 @@ describe('ContextAppLegacy test', () => {
     predecessorStatus: 'loaded',
     successorStatus: 'loaded',
     topNavMenu: TopNavMenuMock,
+    useNewFieldsApi: false,
   };
   const topNavProps = {
     appName: 'context',
@@ -80,7 +103,7 @@ describe('ContextAppLegacy test', () => {
 
   it('renders loading indicator', () => {
     const props = { ...defaultProps };
-    props.status = 'loading';
+    props.anchorStatus = 'loading';
     const component = mountWithIntl(<ContextAppLegacy {...props} />);
     expect(component.find(DocTableLegacy).length).toBe(0);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
@@ -91,8 +114,8 @@ describe('ContextAppLegacy test', () => {
 
   it('renders error message', () => {
     const props = { ...defaultProps };
-    props.status = 'failed';
-    props.reason = 'something went wrong';
+    props.anchorStatus = 'failed';
+    props.anchorReason = 'something went wrong';
     const component = mountWithIntl(<ContextAppLegacy {...props} />);
     expect(component.find(DocTableLegacy).length).toBe(0);
     expect(component.find(TopNavMenuMock).length).toBe(0);

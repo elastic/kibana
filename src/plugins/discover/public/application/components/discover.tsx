@@ -34,7 +34,7 @@ import { esFilters, IndexPatternField, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { popularizeField } from '../helpers/popularize_field';
 import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
@@ -96,7 +96,7 @@ export function Discover({
   }, [opts.chartAggConfigs]);
 
   const contentCentered = resultState === 'uninitialized';
-  const isLegacy = services.uiSettings.get('doc_table:legacy');
+  const isLegacy = services.uiSettings.get(DOC_TABLE_LEGACY);
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const updateQuery = useCallback(
     (_payload, isUpdate?: boolean) => {

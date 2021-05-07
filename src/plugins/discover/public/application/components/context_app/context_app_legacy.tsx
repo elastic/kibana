@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import './context_app_legacy.scss';
 import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
+import { DOC_TABLE_LEGACY } from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
@@ -36,8 +37,10 @@ export interface ContextAppProps {
   filter: DocViewFilterFn;
   minimumVisibleRows: number;
   sorting: Array<[string, SortDirection]>;
-  status: string;
-  reason: string;
+  anchorStatus: string;
+  anchorReason: string;
+  predecessorStatus: string;
+  successorStatus: string;
   defaultStepSize: number;
   predecessorCount: number;
   successorCount: number;
@@ -45,9 +48,7 @@ export interface ContextAppProps {
   successorAvailable: number;
   onChangePredecessorCount: (count: number) => void;
   onChangeSuccessorCount: (count: number) => void;
-  predecessorStatus: string;
-  successorStatus: string;
-  useNewFieldsApi: boolean;
+  useNewFieldsApi?: boolean;
 }
 
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -63,16 +64,16 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   const { uiSettings: config, capabilities, indexPatterns } = services;
   const {
     indexPattern,
-    status: anchorStatus,
+    anchorStatus,
     predecessorStatus,
     successorStatus,
+    appState,
     stateContainer,
-    appState: state,
-    useNewFieldsApi,
     hits: rows,
     sorting,
     filter,
     minimumVisibleRows,
+    useNewFieldsApi,
   } = renderProps;
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
@@ -81,7 +82,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     anchorStatus === LoadingStatus.LOADED &&
     predecessorStatus === LoadingStatus.LOADED &&
     successorStatus === LoadingStatus.LOADED;
-  const isLegacy = config.get('doc_table:legacy');
+  const isLegacy = config.get(DOC_TABLE_LEGACY);
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
@@ -89,8 +90,8 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     indexPattern,
     indexPatterns,
     setAppState: stateContainer.setAppState,
-    state,
-    useNewFieldsApi,
+    state: appState,
+    useNewFieldsApi: !!useNewFieldsApi,
   });
 
   const actionBarProps = (type: string) => {
@@ -180,7 +181,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   return (
     <I18nProvider>
       {isFailed ? (
-        <ContextErrorMessage status={anchorStatus} reason={renderProps.reason} />
+        <ContextErrorMessage status={anchorStatus} reason={renderProps.anchorReason} />
       ) : (
         <React.Fragment>
           <TopNavMenu {...getNavBarProps()} />
@@ -190,9 +191,11 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
               {loadingFeedback()}
               <EuiHorizontalRule margin="xs" />
               {isLegacy ? (
-                <div className="discover-table">
-                  <DocTableLegacy {...legacyDocTableProps()} />
-                </div>
+                isAnchorLoaded && (
+                  <div className="discover-table">
+                    <DocTableLegacy {...legacyDocTableProps()} />
+                  </div>
+                )
               ) : (
                 <div className="dscDocsGrid">
                   <DataGridMemoized {...docTableProps()} />
