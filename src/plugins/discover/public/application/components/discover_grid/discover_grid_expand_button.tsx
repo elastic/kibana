@@ -19,7 +19,11 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const { expanded, setExpanded, rows, isDarkMode } = useContext(DiscoverGridContext);
   const current = rows[rowIndex];
   useEffect(() => {
-    if (expanded && current && expanded._id === current._id) {
+    if (current.isAnchor) {
+      setCellProps({
+        className: 'dscDiscoverGrid__cell--highlight',
+      });
+    } else if (expanded && current && expanded._id === current._id) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,

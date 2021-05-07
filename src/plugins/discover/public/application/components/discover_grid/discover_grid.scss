@@ -80,6 +80,10 @@
   @include euiTextTruncate;
 }
 
+.dscDiscoverGrid__cell--highlight {
+  background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+}
+
 .dscDiscoverGrid__descriptionListDescription {
   word-break: normal !important;
 }

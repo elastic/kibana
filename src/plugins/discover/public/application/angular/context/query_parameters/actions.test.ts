@@ -29,7 +29,7 @@ beforeEach(() => {
       anchorId: '',
       columns: [],
       filters: [],
-      sort: ['field', SortDirection.asc],
+      sort: [['field', SortDirection.asc]],
       tieBreakerField: '',
     },
     loadingStatus: {
@@ -39,8 +39,7 @@ beforeEach(() => {
     },
     rows: {
       all: [],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      anchor: { $$_isAnchor: true, fields: [], sort: [], _source: [], _id: '' },
+      anchor: { isAnchor: true, fields: [], sort: [], _source: [], _id: '' },
       predecessors: [],
       successors: [],
     },
@@ -129,7 +128,7 @@ describe('context query_parameter actions', function () {
         indexPatternId: 'INDEX_PATTERN',
         predecessorCount: 100,
         successorCount: 100,
-        sort: ['field', SortDirection.asc],
+        sort: [['field', SortDirection.asc]],
         tieBreakerField: '',
       });
 

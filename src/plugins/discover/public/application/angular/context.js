@@ -51,6 +51,14 @@ getAngularModule().config(($routeProvider) => {
 function ContextAppRouteController($routeParams, $scope, $route) {
   const filterManager = getServices().filterManager;
   const indexPattern = $route.current.locals.indexPattern.ip;
+  const stateContainer = getState({
+    defaultStepSize: getServices().uiSettings.get(CONTEXT_DEFAULT_SIZE_SETTING),
+    timeFieldName: indexPattern.timeFieldName,
+    storeInSessionStorage: getServices().uiSettings.get('state:storeInSessionStorage'),
+    history: getServices().history(),
+    toasts: getServices().core.notifications.toasts,
+    uiSettings: getServices().core.uiSettings,
+  });
   const {
     startSync: startStateSync,
     stopSync: stopStateSync,
@@ -59,14 +67,8 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     setFilters,
     setAppState,
     flushToUrl,
-  } = getState({
-    defaultStepSize: getServices().uiSettings.get(CONTEXT_DEFAULT_SIZE_SETTING),
-    timeFieldName: indexPattern.timeFieldName,
-    storeInSessionStorage: getServices().uiSettings.get('state:storeInSessionStorage'),
-    history: getServices().history(),
-    toasts: getServices().core.notifications.toasts,
-    uiSettings: getServices().core.uiSettings,
-  });
+  } = stateContainer;
+  this.stateContainer = stateContainer;
   this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;

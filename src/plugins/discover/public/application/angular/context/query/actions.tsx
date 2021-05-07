@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { getServices } from '../../../../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { MarkdownSimple, toMountPoint } from '../../../../../../kibana_react/public';
-import { AnchorHitRecord, fetchAnchorProvider } from '../api/anchor';
+import { fetchAnchorProvider } from '../api/anchor';
 import { EsHitRecord, EsHitRecordList, fetchContextProvider, SurrDocType } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
 import {
@@ -77,11 +77,12 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
     }
 
     setLoadingStatus(state)('anchor');
+    const [[, sortDir]] = sort;
 
     return Promise.try(() =>
-      fetchAnchor(indexPatternId, anchorId, [fromPairs([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor(indexPatternId, anchorId, [fromPairs(sort), { [tieBreakerField]: sortDir }])
     ).then(
-      (anchorDocument: AnchorHitRecord) => {
+      (anchorDocument: EsHitRecord) => {
         setLoadedStatus(state)('anchor');
         state.rows.anchor = anchorDocument;
         return anchorDocument;
@@ -120,7 +121,7 @@ export function QueryActionsProvider(Promise: DiscoverPromise) {
     }
 
     setLoadingStatus(state)(type);
-    const [sortField, sortDir] = sort;
+    const [[sortField, sortDir]] = sort;
 
     return Promise.try(() =>
       fetchSurroundingDocs(

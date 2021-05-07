@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, useContext, useMemo } from 'react';
+import React, { useCallback, useState, useContext, useMemo, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -13,6 +13,7 @@ import {
   EuiCopy,
   EuiPopover,
   EuiCheckbox,
+  EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
@@ -27,11 +28,19 @@ export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
   const routing = doc._routing ? doc._routing : '';
   return [doc._index, doc._id, routing].join('::');
 };
-export const SelectButton = ({ rowIndex }: { rowIndex: number }) => {
+export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const ctx = useContext(DiscoverGridContext);
   const doc = useMemo(() => ctx.rows[rowIndex], [ctx.rows, rowIndex]);
   const id = useMemo(() => getDocId(doc), [doc]);
   const checked = useMemo(() => ctx.selectedDocs.includes(id), [ctx.selectedDocs, id]);
+
+  useEffect(() => {
+    if (doc.isAnchor) {
+      setCellProps({
+        className: 'dscDiscoverGrid__cell--highlight',
+      });
+    }
+  }, [doc, setCellProps]);
 
   return (
     <EuiCheckbox

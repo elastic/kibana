@@ -8,7 +8,14 @@
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { popularizeField } from '../../../helpers/popularize_field';
 import { IndexPattern, IndexPatternsContract } from '../../../../kibana_services';
-import { AppState } from '../../discover_state';
+import {
+  AppState as DiscoverState,
+  GetStateReturn as DiscoverGetStateReturn,
+} from '../../discover_state';
+import {
+  AppState as ContextState,
+  GetStateReturn as ContextGetStateReturn,
+} from '../../context_state';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
 /**
@@ -67,8 +74,8 @@ export function getStateColumnActions({
   indexPattern: IndexPattern;
   indexPatterns: IndexPatternsContract;
   useNewFieldsApi: boolean;
-  setAppState: (state: Partial<AppState>) => void;
-  state: AppState;
+  setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
+  state: DiscoverState | ContextState;
 }) {
   function onAddColumn(columnName: string) {
     if (capabilities.discover.save) {

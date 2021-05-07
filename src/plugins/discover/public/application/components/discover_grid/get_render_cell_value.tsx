@@ -38,7 +38,11 @@ export const getRenderCellValueFn = (
   const ctx = useContext(DiscoverGridContext);
 
   useEffect(() => {
-    if (ctx.expanded && row && ctx.expanded._id === row._id) {
+    if (row?.isAnchor) {
+      setCellProps({
+        className: 'dscDiscoverGrid__cell--highlight',
+      });
+    } else if (ctx.expanded && row && ctx.expanded._id === row._id) {
       setCellProps({
         style: {
           backgroundColor: ctx.isDarkMode

@@ -1,16 +1,16 @@
 @import '../../../../../../core/public/mixins';
 
-.dscSurrDocsPage {
-    @include kibanaFullBodyHeight(52px); // action bar height
+.dscDocsPage {
+    @include kibanaFullBodyHeight(54px); // action bar height
 }
 
-.dscSurrDocsContent {
+.dscDocsContent {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-.dscSurrDocsGrid {
+.dscDocsGrid {
     flex: 1 1 100%;
-    overflow: hidden;
+    overflow: auto;
 }

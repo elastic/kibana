@@ -34,6 +34,8 @@ getAngularModule().directive('contextApp', function ContextApp() {
       anchorId: '=',
       columns: '=',
       indexPattern: '=',
+      appState: '=',
+      stateContainer: '=',
       filters: '=',
       predecessorCount: '=',
       successorCount: '=',
@@ -44,8 +46,7 @@ getAngularModule().directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, Private) {
-  const services = getServices();
-  const { filterManager, indexPatterns, uiSettings, navigation } = services;
+  const { filterManager, indexPatterns, uiSettings, navigation } = getServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const queryParameterActions = getQueryParameterActions(filterManager, indexPatterns);
   const queryActions = Private(QueryActionsProvider);
@@ -56,11 +57,6 @@ function ContextAppController($scope, Private) {
   );
   this.state.useNewFieldsApi = useNewFieldsApi;
   this.topNavMenu = navigation.ui.TopNavMenu;
-  this.opts = {
-    config: uiSettings,
-    services,
-  };
-
   this.actions = _.mapValues(
     {
       ...queryParameterActions,

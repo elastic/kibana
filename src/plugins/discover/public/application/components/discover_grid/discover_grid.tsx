@@ -88,9 +88,9 @@ export interface DiscoverGridProps {
    */
   onSetColumns: (columns: string[]) => void;
   /**
-   * function to change sorting of the documents
+   * function to change sorting of the documents, skipped when isSortEnabled is set to false
    */
-  onSort: (sort: string[][]) => void;
+  onSort?: (sort: string[][]) => void;
   /**
    * Array of documents provided by Elasticsearch
    */
@@ -123,6 +123,10 @@ export interface DiscoverGridProps {
    * Determines whether the time columns should be displayed (legacy settings)
    */
   showTimeCol: boolean;
+  /**
+   * Manage user sorting control
+   */
+  isSortEnabled?: boolean;
   /**
    * Current sort setting
    */
@@ -158,6 +162,7 @@ export const DiscoverGrid = ({
   settings,
   showTimeCol,
   sort,
+  isSortEnabled = true,
   useNewFieldsApi,
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -210,9 +215,11 @@ export const DiscoverGrid = ({
 
   const onTableSort = useCallback(
     (sortingColumnsData) => {
-      onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+      if (isSortEnabled && onSort) {
+        onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+      }
     },
-    [onSort]
+    [onSort, isSortEnabled]
   );
 
   /**
@@ -237,8 +244,16 @@ export const DiscoverGrid = ({
   const randomId = useMemo(() => htmlIdGenerator()(), []);
 
   const euiGridColumns = useMemo(
-    () => getEuiGridColumns(displayedColumns, settings, indexPattern, showTimeCol, defaultColumns),
-    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns]
+    () =>
+      getEuiGridColumns(
+        displayedColumns,
+        settings,
+        indexPattern,
+        showTimeCol,
+        defaultColumns,
+        isSortEnabled
+      ),
+    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns, isSortEnabled]
   );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
@@ -250,10 +265,12 @@ export const DiscoverGrid = ({
     }),
     [displayedColumns, indexPattern, showTimeCol, onSetColumns]
   );
-  const sorting = useMemo(() => ({ columns: sortingColumns, onSort: onTableSort }), [
-    sortingColumns,
-    onTableSort,
-  ]);
+  const sorting = useMemo(() => {
+    if (isSortEnabled) {
+      return { columns: sortingColumns, onSort: onTableSort };
+    }
+    return { columns: sortingColumns, onSort: () => {} };
+  }, [sortingColumns, onTableSort, isSortEnabled]);
   const lead = useMemo(() => getLeadControlColumns(), []);
 
   const additionalControls = useMemo(
@@ -332,10 +349,12 @@ export const DiscoverGrid = ({
                 ? {
                     ...toolbarVisibility,
                     showColumnSelector: false,
+                    showSortSelector: isSortEnabled,
                     additionalControls,
                   }
                 : {
                     ...toolbarVisibility,
+                    showSortSelector: isSortEnabled,
                     additionalControls,
                   }
             }

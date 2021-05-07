@@ -14,7 +14,6 @@ import { generateIntervals } from './utils/generate_intervals';
 import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
 import { getEsQuerySort } from './utils/get_es_query_sort';
 import { getServices } from '../../../../kibana_services';
-import { AnchorHitRecord } from './anchor';
 
 export type SurrDocType = 'successors' | 'predecessors';
 export interface EsHitRecord {
@@ -24,6 +23,7 @@ export interface EsHitRecord {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _source: Record<string, any>;
   _id: string;
+  isAnchor?: boolean;
 }
 export type EsHitRecordList = EsHitRecord[];
 
@@ -53,7 +53,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
   async function fetchSurroundingDocs(
     type: SurrDocType,
     indexPatternId: string,
-    anchor: AnchorHitRecord,
+    anchor: EsHitRecord,
     timeField: string,
     tieBreakerField: string,
     sortDir: SortDirection,
