@@ -448,9 +448,19 @@ describe('interfaces and classes', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
 
+    // This covers FunctionType nodes.
     const fnWithGeneric = exampleInterface?.children?.find((c) => c.label === 'aFnWithGen');
     expect(fnWithGeneric).toBeDefined();
+    expect(fnWithGeneric?.children).toBeDefined();
+    expect(fnWithGeneric?.children!.length).toBe(1);
     expect(fnWithGeneric?.type).toBe(TypeKind.FunctionKind);
+
+    const param = fnWithGeneric?.children?.find((c) => c.label === 't');
+    expect(fnWithGeneric?.returnComment![0]).toBe('nothing!');
+    expect(param).toBeDefined();
+    expect(param?.description).toBeDefined();
+    expect(param?.description?.length).toBe(1);
+    expect(param!.description![0]).toBe('This a parameter.');
   });
 
   it('interfaces with internal tags are not exported', () => {
