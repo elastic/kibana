@@ -8,14 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-// Default parameter values automatically added to the URI parts processor when saved
-const defaultFailParameters = {
-  ignore_failure: undefined,
-  if: undefined,
-  tag: undefined,
-  description: undefined,
-};
-
 const FAIL_TYPE = 'fail';
 describe('Processor: Fail', () => {
   let onUpdate: jest.Mock;
@@ -44,7 +36,7 @@ describe('Processor: Fail', () => {
     testBed.component.update();
   });
 
-  test('prevents form submission if required fields are not provided', async () => {
+  test('prevents form submission if required message field is not provided', async () => {
     const {
       actions: { addProcessor, saveNewProcessor, addProcessorType },
       form,
@@ -52,11 +44,6 @@ describe('Processor: Fail', () => {
 
     // Open flyout to add new processor
     addProcessor();
-    // Click submit button without entering any fields
-    await saveNewProcessor();
-
-    // Expect form error as a processor type is required
-    expect(form.getErrorsMessages()).toEqual(['A type is required.']);
 
     // Add type (the other fields are not visible until a type is selected)
     await addProcessorType(FAIL_TYPE);
@@ -86,33 +73,6 @@ describe('Processor: Fail', () => {
     const processors = getProcessorValue(onUpdate, FAIL_TYPE);
     expect(processors[0].fail).toEqual({
       message: 'Test Error Message',
-      ...defaultFailParameters,
-    });
-  });
-
-  test('allows optional parameters to be set', async () => {
-    const {
-      actions: { addProcessor, addProcessorType, saveNewProcessor },
-      form,
-    } = testBed;
-
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(FAIL_TYPE);
-    // Add "message" value (required)
-    form.setInputValue('messageField.input', 'Test Error Message');
-
-    // Save the field with new changes
-    await saveNewProcessor();
-
-    const processors = getProcessorValue(onUpdate, FAIL_TYPE);
-    expect(processors[0].fail).toEqual({
-      message: 'Test Error Message',
-      ignore_failure: undefined,
-      if: undefined,
-      tag: undefined,
-      description: undefined,
     });
   });
 });
