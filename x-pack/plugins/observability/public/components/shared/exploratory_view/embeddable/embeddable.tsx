@@ -65,7 +65,7 @@ export default function Embeddable({
 
   useEffect(() => {
     loadIndexPattern({ dataType });
-  }, [dataType]);
+  }, [dataType, loadIndexPattern]);
 
   if (!indexPattern || loading) {
     return <EuiLoadingSpinner />;
