@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(jsonBody[0].result).to.have.property('rawResponse');
       });
 
-      it('should return a batch of successful resposes', async () => {
+      it('should return a batch of successful responses', async () => {
         const resp = await supertest.post(`/internal/bsearch`).send({
           batch: [
             {
@@ -92,8 +92,8 @@ export default function ({ getService }: FtrProviderContext) {
         const parsedResponse = parseBfetchResponse(resp);
         expect(parsedResponse).to.have.length(2);
         parsedResponse.forEach((responseJson) => {
-          expect(responseJson.result.isPartial).to.be(false);
-          expect(responseJson.result.isRunning).to.be(false);
+          expect(responseJson.result).to.have.property('isPartial');
+          expect(responseJson.result).to.have.property('isRunning');
           expect(responseJson.result).to.have.property('rawResponse');
         });
       });
