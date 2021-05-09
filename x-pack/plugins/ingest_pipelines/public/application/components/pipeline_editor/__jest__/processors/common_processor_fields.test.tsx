@@ -39,7 +39,7 @@ describe('Processor: Common Fields For All Processors', () => {
 
   test('prevents form submission if required type field is not provided', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
+      actions: { addProcessor, saveNewProcessor },
       form,
     } = testBed;
 
