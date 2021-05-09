@@ -96,28 +96,32 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await testSubjects.missingOrFail('transformPivotPreviewHistogramButton');
     },
 
-    async parseEuiDataGrid(tableSubj: string) {
+    async parseEuiDataGrid(tableSubj: string, maxColumnsToParse: number) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
 
-      // find columns to help determine number of rows
-      const columns = $('.euiDataGridHeaderCell__content')
-        .toArray()
-        .map((cell) => $(cell).text());
-
-      // Get the content of each cell and divide them up into rows
+      // Get the content of each cell and divide them up into rows.
+      // Virtualized cells outside the view area are not present in the DOM until they
+      // are scroilled into view, so we're limiting the number of parsed columns.
+      // To determine row and column of a cell, we're utilizing the screen reader
+      // help text, which enumerates the rows and columns 1-based.
       const cells = $.findTestSubjects('dataGridRowCell')
         .find('.euiDataGridRowCell__truncate')
         .toArray()
-        .map((cell) =>
-          $(cell)
-            .text()
-            .trim()
-            .replace(/Row: \d+, Column: \d+:$/g, '')
-        );
+        .map((cell) => {
+          const cellText = $(cell).text();
+          const pattern = /^(.*)Row: (\d+), Column: (\d+):$/;
+          const matches = cellText.match(pattern);
+          expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
+          return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
+        })
+        .filter((cell) => cell?.column <= maxColumnsToParse)
+        .sort(function (a, b) {
+          return a.row - b.row || a.column - b.column;
+        })
+        .map((cell) => cell.text);
 
-      const rows = chunk(cells, columns.length);
-
+      const rows = chunk(cells, maxColumnsToParse);
       return rows;
     },
 
@@ -128,7 +132,8 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
+        // only parse columns up to the one we want to assert
+        const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -149,7 +154,8 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
+        // only parse columns up to the one we want to assert
+        const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -167,7 +173,8 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rowsData = await this.parseEuiDataGrid('transformIndexPreview');
+        // only parse the first column as this is sufficient to get assert the row count
+        const rowsData = await this.parseEuiDataGrid('transformIndexPreview', 1);
 
         expect(rowsData).to.length(
           expectedNumberOfRows,
