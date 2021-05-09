@@ -220,7 +220,7 @@
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
             ],
             "signature": [
-              "IconType"
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
@@ -419,7 +419,7 @@
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
             ],
             "signature": [
-              "IconType"
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
@@ -547,7 +547,7 @@
         "label": "TutorialDirectoryHeaderLinkComponent",
         "description": [],
         "signature": [
-          "(props: { children?: React.ReactNode; }, context: any) => React.ReactElement<any, any> | null"
+          "React.FunctionComponent<{}>"
         ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -564,7 +564,7 @@
         "label": "TutorialDirectoryNoticeComponent",
         "description": [],
         "signature": [
-          "(props: { children?: React.ReactNode; }, context: any) => React.ReactElement<any, any> | null"
+          "React.FunctionComponent<{}>"
         ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -581,7 +581,7 @@
         "label": "TutorialModuleNoticeComponent",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<{ moduleName: string; }>, context: any) => React.ReactElement<any, any> | null"
+          "React.FunctionComponent<{ moduleName: string; }>"
         ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
@@ -598,13 +598,7 @@
         "label": "TutorialSetup",
         "description": [],
         "signature": [
-          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: ",
-          "FC",
-          "<{}>) => void; registerDirectoryHeaderLink: (id: string, component: ",
-          "FC",
-          "<{}>) => void; registerModuleNotice: (id: string, component: ",
-          "FC",
-          "<{ moduleName: string; }>) => void; }"
+          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; }"
         ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
@@ -963,7 +957,7 @@
               "plugin": "cloud",
               "link": {
                 "path": "x-pack/plugins/cloud/public/plugin.ts",
-                "lineNumber": 67
+                "lineNumber": 66
               }
             },
             {
@@ -1115,7 +1109,23 @@
         "label": "SampleDataRegistrySetup",
         "description": [],
         "signature": [
-          "{ registerSampleDataset: (specProvider: SampleDatasetProvider) => void; getSampleDatasets: () => SampleDatasetSchema<unknown>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: AppLinkSchema[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: SampleDatasetDashboardPanel) => void; }"
+          "{ registerSampleDataset: (specProvider: ",
+          {
+            "pluginId": "home",
+            "scope": "server",
+            "docId": "kibHomePluginApi",
+            "section": "def-server.SampleDatasetProvider",
+            "text": "SampleDatasetProvider"
+          },
+          ") => void; getSampleDatasets: () => ",
+          "SampleDatasetSchema",
+          "<unknown>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+          "SavedObject",
+          "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
+          "AppLinkSchema",
+          "[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
+          "SampleDatasetDashboardPanel",
+          ") => void; }"
         ],
         "source": {
           "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
@@ -1473,7 +1483,8 @@
             "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
             "AppLinkSchema",
             "[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
-            "SampleDatasetDashboardPanel"
+            "SampleDatasetDashboardPanel",
+            ") => void; }"
           ],
           "source": {
             "path": "src/plugins/home/server/plugin.ts",

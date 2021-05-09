@@ -799,7 +799,9 @@
               "path": "src/plugins/index_pattern_management/public/service/creation/config.ts",
               "lineNumber": 33
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "indexPatternManagement",
@@ -904,19 +906,54 @@
         "[]>; }; list: { getIndexPatternTags: (indexPattern: ",
         {
           "pluginId": "data",
-          "scope": "public",
-          "docId": "kibDataPluginApi",
-          "section": "def-public.IIndexPattern",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IIndexPattern",
           "text": "IIndexPattern"
         },
         " | ",
         {
           "pluginId": "core",
           "scope": "public",
-          "docId": "kibCorePluginApi",
+          "docId": "kibCoreSavedObjectsPluginApi",
           "section": "def-public.SimpleSavedObject",
           "text": "SimpleSavedObject"
-        }
+        },
+        "<",
+        {
+          "pluginId": "data",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IIndexPattern",
+          "text": "IIndexPattern"
+        },
+        ">, isDefault: boolean) => ",
+        "IndexPatternTag",
+        "[]; getFieldInfo: (indexPattern: ",
+        {
+          "pluginId": "data",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IIndexPattern",
+          "text": "IIndexPattern"
+        },
+        ", field: ",
+        {
+          "pluginId": "data",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IFieldType",
+          "text": "IFieldType"
+        },
+        ") => string[]; areScriptedFieldsEnabled: (indexPattern: ",
+        {
+          "pluginId": "data",
+          "scope": "common",
+          "docId": "kibDataIndexPatternsPluginApi",
+          "section": "def-common.IIndexPattern",
+          "text": "IIndexPattern"
+        },
+        ") => boolean; }; }"
       ],
       "source": {
         "path": "src/plugins/index_pattern_management/public/plugin.ts",

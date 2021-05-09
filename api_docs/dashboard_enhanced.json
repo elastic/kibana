@@ -118,7 +118,9 @@
               "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
               "lineNumber": 40
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "dashboardEnhanced",
@@ -253,12 +255,13 @@
             "label": "CollectConfig",
             "description": [],
             "signature": [
+              "() => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "common",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
+                "section": "def-common.UiComponentInstance",
+                "text": "UiComponentInstance"
               },
               "<",
               {
@@ -290,7 +293,9 @@
               "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
               "lineNumber": 54
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "dashboardEnhanced",
@@ -510,12 +515,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "dashboard",
+                "pluginId": "share",
                 "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardUrlGenerator",
-                "text": "DashboardUrlGenerator"
-              }
+                "docId": "kibSharePluginApi",
+                "section": "def-public.UrlGeneratorContract",
+                "text": "UrlGeneratorContract"
+              },
+              "<\"DASHBOARD_APP_URL_GENERATOR\">"
             ],
             "source": {
               "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -550,12 +556,13 @@
             "label": "start",
             "description": [],
             "signature": [
+              "() => ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "public",
                 "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.StartServicesGetter",
-                "text": "StartServicesGetter"
+                "section": "def-public.StartServices",
+                "text": "StartServices"
               },
               "<{ uiActionsEnhanced: ",
               {
@@ -588,13 +595,16 @@
                 "docId": "kibCorePluginApi",
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
-              }
+              },
+              ">"
             ],
             "source": {
               "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
               "lineNumber": 27
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -664,13 +674,17 @@
             "label": "share",
             "description": [],
             "signature": [
+              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginSetup",
-                "text": "SharePluginSetup"
-              }
+                "section": "def-public.ShareMenuProvider",
+                "text": "ShareMenuProvider"
+              },
+              ") => void; } & { urlGenerators: ",
+              "UrlGeneratorsSetup",
+              "; }"
             ],
             "source": {
               "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
@@ -768,13 +782,17 @@
             "label": "share",
             "description": [],
             "signature": [
+              "{ toggleShareContextMenu: (options: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginStart",
-                "text": "SharePluginStart"
-              }
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { urlGenerators: ",
+              "UrlGeneratorsStart",
+              "; }"
             ],
             "source": {
               "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",

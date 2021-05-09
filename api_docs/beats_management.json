@@ -57,7 +57,8 @@
           "<string[]>; encryptionKey: ",
           "Type",
           "<string>; enrollmentTokensTtlInSeconds: ",
-          "Type"
+          "Type",
+          "<number>; }>"
         ],
         "source": {
           "path": "x-pack/plugins/beats_management/common/index.ts",

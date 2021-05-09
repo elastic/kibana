@@ -49,7 +49,8 @@
           "<boolean>; accessCheckTimeout: ",
           "Type",
           "<number>; accessCheckTimeoutWarning: ",
-          "Type"
+          "Type",
+          "<number>; }>"
         ],
         "source": {
           "path": "x-pack/plugins/enterprise_search/server/index.ts",

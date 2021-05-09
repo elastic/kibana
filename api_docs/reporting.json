@@ -633,7 +633,10 @@
             "text": "ReportingSetup"
           },
           ", ",
-          "ReportingPublicPluginSetupDendencies"
+          "ReportingPublicPluginSetupDendencies",
+          ", ",
+          "ReportingPublicPluginStartDendencies",
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/reporting/public/plugin.ts",
@@ -874,7 +877,13 @@
       "label": "ReportingStart",
       "description": [],
       "signature": [
-        "ReportingSetup"
+        {
+          "pluginId": "reporting",
+          "scope": "public",
+          "docId": "kibReportingPluginApi",
+          "section": "def-public.ReportingSetup",
+          "text": "ReportingSetup"
+        }
       ],
       "source": {
         "path": "x-pack/plugins/reporting/public/index.ts",
@@ -921,7 +930,9 @@
               "path": "x-pack/plugins/reporting/server/core.ts",
               "lineNumber": 70
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "reporting",
@@ -1876,7 +1887,16 @@
             "docId": "kibReportingPluginApi",
             "section": "def-server.ReportingSetupDeps",
             "text": "ReportingSetupDeps"
-          }
+          },
+          ", ",
+          {
+            "pluginId": "reporting",
+            "scope": "server",
+            "docId": "kibReportingPluginApi",
+            "section": "def-server.ReportingStartDeps",
+            "text": "ReportingStartDeps"
+          },
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/plugin.ts",
@@ -2267,13 +2287,11 @@
             "label": "taskManager",
             "description": [],
             "signature": [
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.TaskManagerSetupContract",
-                "text": "TaskManagerSetupContract"
-              }
+              "{ index: string; addMiddleware: (middleware: ",
+              "Middleware",
+              ") => void; } & Pick<",
+              "TaskTypeDictionary",
+              ", \"registerTaskDefinitions\">"
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
@@ -2350,13 +2368,11 @@
             "label": "taskManager",
             "description": [],
             "signature": [
-              {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.TaskManagerStartContract",
-                "text": "TaskManagerStartContract"
-              }
+              "Pick<",
+              "TaskScheduling",
+              ", \"schedule\" | \"runNow\" | \"ensureScheduled\"> & Pick<",
+              "TaskStore",
+              ", \"remove\" | \"get\" | \"fetch\"> & { removeIfExists: (id: string) => Promise<void>; }"
             ],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
@@ -2398,7 +2414,9 @@
             "path": "x-pack/plugins/reporting/server/types.ts",
             "lineNumber": 43
           },
-          "deprecated": false
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
         }
       ],
       "lifecycle": "start",

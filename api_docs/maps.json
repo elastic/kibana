@@ -48,7 +48,12 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.ReferenceOrValueEmbeddable",
             "text": "ReferenceOrValueEmbeddable"
-          }
+          },
+          "<",
+          "MapByValueInput",
+          ", ",
+          "MapByReferenceInput",
+          ">"
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -1273,7 +1278,22 @@
         "label": "MapEmbeddableOutput",
         "description": [],
         "signature": [
-          "EmbeddableOutput & { indexPatterns: IIndexPattern[]; }"
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          " & { indexPatterns: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          "[]; }"
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/types.ts",
@@ -3206,7 +3226,7 @@
         "label": "RawValue",
         "description": [],
         "signature": [
-          "undefined | null | string | number | false | true | string[]"
+          "string | number | boolean | string[] | null | undefined"
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",

@@ -509,7 +509,9 @@
               "path": "src/plugins/share/public/types.ts",
               "lineNumber": 38
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "share",
@@ -549,7 +551,7 @@
           },
           " extends Pick<",
           "EuiContextMenuPanelItemDescriptorEntry",
-          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"disabled\" | \"data-test-subj\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
+          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
         ],
         "source": {
           "path": "src/plugins/share/public/types.ts",
@@ -699,7 +701,32 @@
               "path": "src/plugins/share/public/types.ts",
               "lineNumber": 74
             },
-            "deprecated": false
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "share",
+                "id": "def-public.context",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "share",
+                    "scope": "public",
+                    "docId": "kibSharePluginApi",
+                    "section": "def-public.ShareContext",
+                    "text": "ShareContext"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/share/public/types.ts",
+                  "lineNumber": 74
+                },
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1243,7 +1270,7 @@
         "label": "DownloadableContent",
         "description": [],
         "signature": [
-          "{ content: string; type: string; } | Blob"
+          "Blob | { content: string; type: string; }"
         ],
         "source": {
           "path": "src/plugins/share/public/lib/download_as.ts",
@@ -1287,7 +1314,9 @@
           "section": "def-public.ShareMenuProvider",
           "text": "ShareMenuProvider"
         },
-        ") => void; } & { urlGenerators: UrlGeneratorsSetup; }"
+        ") => void; } & { urlGenerators: ",
+        "UrlGeneratorsSetup",
+        "; }"
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
@@ -1313,7 +1342,9 @@
           "section": "def-public.ShowShareMenuOptions",
           "text": "ShowShareMenuOptions"
         },
-        ") => void; } & { urlGenerators: UrlGeneratorsStart; }"
+        ") => void; } & { urlGenerators: ",
+        "UrlGeneratorsStart",
+        "; }"
       ],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",

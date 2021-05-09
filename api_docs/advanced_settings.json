@@ -58,7 +58,9 @@
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                   "lineNumber": 30
                 },
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": []
               },
               {
                 "parentPluginId": "advancedSettings",
@@ -74,7 +76,9 @@
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                   "lineNumber": 31
                 },
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": []
               },
               {
                 "parentPluginId": "advancedSettings",
@@ -90,7 +94,9 @@
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                   "lineNumber": 32
                 },
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": []
               }
             ]
           },
@@ -151,7 +157,55 @@
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                   "lineNumber": 73
                 },
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "advancedSettings",
+                    "id": "def-public.id",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "\"advanced_settings_page_title\" | \"advanced_settings_page_subtitle\" | \"advanced_settings_page_footer\""
+                    ],
+                    "source": {
+                      "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                      "lineNumber": 47
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "advancedSettings",
+                    "id": "def-public.component",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "component",
+                    "description": [],
+                    "signature": [
+                      "React.ComponentClass<Record<string, any> | undefined, any> | React.FunctionComponent<Record<string, any> | undefined>"
+                    ],
+                    "source": {
+                      "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                      "lineNumber": 47
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "advancedSettings",
+                    "id": "def-public.allowOverride",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "allowOverride",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                      "lineNumber": 47
+                    },
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           },
@@ -198,7 +252,26 @@
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                   "lineNumber": 78
                 },
-                "deprecated": false
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "advancedSettings",
+                    "id": "def-public.id",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "\"advanced_settings_page_title\" | \"advanced_settings_page_subtitle\" | \"advanced_settings_page_footer\""
+                    ],
+                    "source": {
+                      "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                      "lineNumber": 67
+                    },
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           }
@@ -217,15 +290,36 @@
           "\nExports the field component as a React.lazy component. We're explicitly naming it lazy here\nso any plugin that would import that can clearly see it's lazy loaded and can only be used\ninside a suspense context."
         ],
         "signature": [
-          "React.LazyExoticComponent<typeof ",
+          "React.ExoticComponent<FieldProps & React.RefAttributes<",
           "Field",
-          ">"
+          ">> & { readonly _result: typeof ",
+          "Field",
+          "; }"
         ],
         "source": {
           "path": "src/plugins/advanced_settings/public/index.ts",
           "lineNumber": 20
         },
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "advancedSettings",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "source": {
+              "path": "node_modules/@types/react/index.d.ts",
+              "lineNumber": 359
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
