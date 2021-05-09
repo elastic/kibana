@@ -106,12 +106,12 @@ function extractTransformFailuresReason(
 ): { corruptDocsReason: string; transformErrsReason: string } {
   const corruptDocumentIdReason =
     corruptDocumentIds.length > 0
-      ? `Corrupt saved object documents: ${corruptDocumentIds.join(',')}.`
-      : ' ';
+      ? ` Corrupt saved object documents: ${corruptDocumentIds.join(',')}`
+      : '';
   // we have both the saved object Id and the stack trace in each `transformErrors` item.
   const transformErrorsReason =
     transformErrors.length > 0
-      ? 'Transformation errors: ' +
+      ? ' Transformation errors: ' +
         transformErrors
           .map((errObj) => `${errObj.rawId}: ${errObj.err.message}\n ${errObj.err.stack ?? ''}`)
           .join('/n')
@@ -534,7 +534,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `Migrations failed. Reason: ${corruptDocsReason} ${transformErrsReason} To allow migrations to proceed, please delete these documents.`,
+            reason: `Migrations failed. Reason:${corruptDocsReason}${transformErrsReason}. To allow migrations to proceed, please delete these documents.`,
           };
         } else {
           // we don't have any more outdated documents and we haven't encountered any document transformation issues.
