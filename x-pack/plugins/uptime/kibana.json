@@ -18,7 +18,8 @@
     "features",
     "licensing",
     "triggersActionsUi",
-    "usageCollection"
+    "usageCollection",
+    "lens"
   ],
   "server": true,
   "ui": true,

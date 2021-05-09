@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { LocationDurationLine } from '../../../../common/types';
+import { EuiFlexItem, EuiPanel, EuiButton } from '@elastic/eui';
 import { MLIntegrationComponent } from '../ml/ml_integeration';
 import { AnomalyRecords } from '../../../state/actions';
-import { DurationChartComponent } from '../../common/charts';
+import { AllSeries, ExploratoryViewEmbeddable } from '../../../../../observability/public';
 
 interface DurationChartProps {
   loading: boolean;
   hasMLJob: boolean;
   anomalies: AnomalyRecords | null;
-  locationDurationLines: LocationDurationLine[];
   exploratoryViewLink: string;
+  exploratoryViewAttributes: AllSeries;
 }
 
 /**
@@ -28,46 +27,45 @@ interface DurationChartProps {
  * @param props The props required for this component to render properly
  */
 export const MonitorDurationComponent = ({
-  locationDurationLines,
   anomalies,
   loading,
   hasMLJob,
+  exploratoryViewLink,
+  exploratoryViewAttributes,
 }: DurationChartProps) => {
   return (
-    <EuiPanel paddingSize="m">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>
-              {hasMLJob ? (
+    <EuiPanel paddingSize="m" style={{ paddingBottom: 0 }}>
+      <ExploratoryViewEmbeddable
+        attributes={exploratoryViewAttributes}
+        title={
+          hasMLJob ? (
+            <FormattedMessage
+              id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
+              defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
+              values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+              defaultMessage="Monitor duration"
+            />
+          )
+        }
+        appendTitle={
+          <>
+            <EuiFlexItem grow={false}>
+              <MLIntegrationComponent />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" isDisabled={loading} href={exploratoryViewLink}>
                 <FormattedMessage
-                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
-                  defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
-                  values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
+                  id="xpack.uptime.monitorDuration.analyze"
+                  defaultMessage="Analyze"
                 />
-              ) : (
-                <FormattedMessage
-                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-                  defaultMessage="Monitor duration"
-                />
-              )}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <MLIntegrationComponent />
-        </EuiFlexItem>
-        {/* <EuiFlexItem grow={false}>*/}
-        {/*  <EuiButton size="s" isDisabled={loading} href={exploratoryViewLink}>*/}
-        {/*    <FormattedMessage id="xpack.uptime.monitorDuration.analyze" defaultMessage="Analyze" />*/}
-        {/*  </EuiButton>*/}
-        {/* </EuiFlexItem>*/}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <DurationChartComponent
-        locationDurationLines={locationDurationLines}
-        loading={loading}
-        anomalies={anomalies}
+              </EuiButton>
+            </EuiFlexItem>
+          </>
+        }
       />
     </EuiPanel>
   );

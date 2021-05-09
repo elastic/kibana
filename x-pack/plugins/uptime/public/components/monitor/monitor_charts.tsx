@@ -13,7 +13,7 @@ import { MonitorDuration } from './monitor_duration/monitor_duration_container';
 interface MonitorChartsProps {
   monitorId: string;
 }
-export const MONITOR_CHART_HEIGHT = '248px';
+export const MONITOR_CHART_HEIGHT = '350px';
 
 export const MonitorCharts = ({ monitorId }: MonitorChartsProps) => {
   return (

@@ -23,7 +23,6 @@ import {
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,
 } from './monitors';
-import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
 import { createGetIndexPatternRoute, createGetIndexStatusRoute } from './index_state';
 import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
@@ -48,7 +47,6 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetSnapshotCount,
   createLogPageViewRoute,
   createGetPingHistogramRoute,
-  createGetMonitorDurationRoute,
   createJourneyRoute,
   createJourneyScreenshotRoute,
   createNetworkEventsRoute,

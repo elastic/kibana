@@ -8,23 +8,18 @@
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../hooks';
-import {
-  getAnomalyRecordsAction,
-  getMLCapabilitiesAction,
-  getMonitorDurationAction,
-} from '../../../state/actions';
+import { getAnomalyRecordsAction, getMLCapabilitiesAction } from '../../../state/actions';
 import {
   anomaliesSelector,
   hasMLFeatureSelector,
   hasMLJobSelector,
-  selectDurationLines,
 } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { JobStat } from '../../../../../ml/public';
 import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../common/types';
 import { getMLJobId } from '../../../../common/lib';
-import { createExploratoryViewUrl } from '../../../../../observability/public';
+import { createExploratoryViewUrl, AllSeries } from '../../../../../observability/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
@@ -34,8 +29,6 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
     absoluteDateRangeStart,
     absoluteDateRangeEnd,
   } = useGetUrlParams();
-
-  const { durationLines, loading } = useSelector(selectDurationLines);
 
   const isMLAvailable = useSelector(hasMLFeatureSelector);
 
@@ -53,21 +46,20 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
 
   const { basePath } = useUptimeSettingsContext();
 
-  const exploratoryViewLink = createExploratoryViewUrl(
-    {
-      [`monitor-duration`]: {
-        reportType: 'upd',
-        time: { from: dateRangeStart, to: dateRangeEnd },
-        reportDefinitions: {
-          'monitor.id': [monitorId] as string[],
-        },
-        breakdown: 'observer.geo.name',
-        operationType: 'average',
-        dataType: 'synthetics',
+  const exploratoryViewAttributes: AllSeries = {
+    [`monitor-duration`]: {
+      reportType: 'upd',
+      time: { from: dateRangeStart, to: dateRangeEnd },
+      reportDefinitions: {
+        'monitor.id': [monitorId] as string[],
       },
+      breakdown: 'observer.geo.name',
+      operationType: 'average',
+      dataType: 'synthetics',
     },
-    basePath
-  );
+  };
+
+  const exploratoryViewLink = createExploratoryViewUrl(exploratoryViewAttributes, basePath);
 
   useEffect(() => {
     if (isMLAvailable) {
@@ -84,11 +76,6 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId, isMLAvailable]);
 
   useEffect(() => {
-    const params = { monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd };
-    dispatch(getMonitorDurationAction(params));
-  }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId]);
-
-  useEffect(() => {
     dispatch(getMLCapabilitiesAction.get());
   }, [dispatch]);
 
@@ -96,9 +83,9 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
     <MonitorDurationComponent
       anomalies={anomalies}
       hasMLJob={hasMLJob}
-      loading={loading || jobsLoading}
+      loading={jobsLoading}
       exploratoryViewLink={exploratoryViewLink}
-      locationDurationLines={durationLines?.locationDurationLines ?? []}
+      exploratoryViewAttributes={exploratoryViewAttributes}
     />
   );
 };

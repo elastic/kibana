@@ -13,7 +13,6 @@ import { fetchMonitorStatusEffect } from './monitor_status';
 import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
 import { fetchIndexPatternEffect } from './index_pattern';
 import { fetchPingsEffect, fetchPingHistogramEffect } from './ping';
-import { fetchMonitorDurationEffect } from './monitor_duration';
 import { fetchMLJobEffect } from './ml_anomaly';
 import { fetchIndexStatusEffect } from './index_status';
 import { fetchCertificatesEffect } from '../certificates/certificates';
@@ -32,7 +31,6 @@ export function* rootEffect() {
   yield fork(fetchPingsEffect);
   yield fork(fetchPingHistogramEffect);
   yield fork(fetchMLJobEffect);
-  yield fork(fetchMonitorDurationEffect);
   yield fork(fetchIndexStatusEffect);
   yield fork(fetchCertificatesEffect);
   yield fork(fetchAlertsEffect);

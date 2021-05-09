@@ -60,6 +60,9 @@ export { useChartTheme } from './hooks/use_chart_theme';
 export { useTheme } from './hooks/use_theme';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+export type { AllSeries } from './components/shared/exploratory_view/hooks/use_url_storage';
 export type { SeriesUrl } from './components/shared/exploratory_view/types';
+
+export { ExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 
 export { FormatterRuleRegistry } from './rules/formatter_rule_registry';

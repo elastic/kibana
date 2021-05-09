@@ -15,7 +15,6 @@ import { dynamicSettingsReducer } from './dynamic_settings';
 import { indexPatternReducer } from './index_pattern';
 import { pingReducer } from './ping';
 import { pingListReducer } from './ping_list';
-import { monitorDurationReducer } from './monitor_duration';
 import { indexStatusReducer } from './index_status';
 import { mlJobsReducer } from './ml_anomaly';
 import { certificatesReducer } from '../certificates/certificates';
@@ -35,7 +34,6 @@ export const rootReducer = combineReducers({
   ping: pingReducer,
   pingList: pingListReducer,
   ml: mlJobsReducer,
-  monitorDuration: monitorDurationReducer,
   indexStatus: indexStatusReducer,
   certificates: certificatesReducer,
   selectedFilters: selectedFiltersReducer,

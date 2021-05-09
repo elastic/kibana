@@ -224,7 +224,7 @@ export const KIP_OVER_TIME_LABEL = i18n.translate(
 export const MONITORS_DURATION_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.monitorDurationLabel',
   {
-    defaultMessage: 'Monitor duration',
+    defaultMessage: 'Duration in ms',
   }
 );
 

@@ -32,7 +32,6 @@ export const requests = {
   getIndexPattern,
   getLatestMonitor,
   getMonitorAvailability,
-  getMonitorDurationChart,
   getMonitorDetails,
   getMonitorLocations,
   getMonitorStates,

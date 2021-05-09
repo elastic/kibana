@@ -16,7 +16,7 @@ export const syntheticsFieldFormats: FieldFormat[] = [
         inputFormat: 'microseconds',
         outputFormat: 'asMilliseconds',
         outputPrecision: 0,
-        showSuffix: true,
+        showSuffix: false,
       },
     },
   },

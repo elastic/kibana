@@ -33,6 +33,24 @@ export function OperationTypeSelect({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultOperationType]);
 
+  return (
+    <OperationTypeComponent
+      onChange={onChange}
+      showLabel={true}
+      operationType={operationType || defaultOperationType}
+    />
+  );
+}
+
+export function OperationTypeComponent({
+  operationType,
+  onChange,
+  showLabel = false,
+}: {
+  operationType?: OperationType;
+  onChange: (value: OperationType) => void;
+  showLabel?: boolean;
+}) {
   const options = [
     {
       value: 'average' as OperationType,
@@ -74,13 +92,17 @@ export function OperationTypeSelect({
 
   return (
     <EuiSuperSelect
-      fullWidth
-      prepend={i18n.translate('xpack.observability.expView.operationType.label', {
-        defaultMessage: 'Calculation',
-      })}
-      data-test-subj="operationTypeSelect"
       compressed
-      valueOfSelected={operationType || defaultOperationType}
+      fullWidth
+      prepend={
+        showLabel
+          ? i18n.translate('xpack.observability.expView.operationType.label', {
+              defaultMessage: 'Calculation',
+            })
+          : undefined
+      }
+      data-test-subj="operationTypeSelect"
+      valueOfSelected={operationType}
       options={options}
       onChange={onChange}
     />
