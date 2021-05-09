@@ -142,7 +142,7 @@ export class BfetchServerPlugin
   public stop() {}
 
   private getCompressionDisabled(request: KibanaRequest) {
-    return !request.headers['x-chunk-encoding'];
+    return request.headers['x-chunk-encoding'] !== 'deflate';
   }
 
   private addStreamingResponseRoute = ({

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, share, switchMap } from 'rxjs/operators';
 import { inflateResponse } from '.';
 import { fromStreamingXhr } from './from_streaming_xhr';
@@ -18,7 +18,7 @@ export interface FetchStreamingParams {
   method?: 'GET' | 'POST';
   body?: string;
   signal?: AbortSignal;
-  compressionDisabled$: Observable<boolean>;
+  compressionDisabled$?: Observable<boolean>;
 }
 
 /**
@@ -31,7 +31,7 @@ export function fetchStreaming({
   method = 'POST',
   body = '',
   signal,
-  compressionDisabled$,
+  compressionDisabled$ = of(false),
 }: FetchStreamingParams) {
   const xhr = new window.XMLHttpRequest();
 
@@ -63,6 +63,14 @@ export function fetchStreaming({
     }),
     share()
   );
+
+  // start execution
+  const msgStreamSub = msgStream.subscribe({
+    error: (e) => {},
+    complete: () => {
+      msgStreamSub.unsubscribe();
+    },
+  });
 
   return {
     xhr,

@@ -156,7 +156,7 @@ test('promise resolves when compressed chunked request completes', async () => {
   expect(result).toStrictEqual(JSON.stringify(msg));
 });
 
-test('streams incoming text as it comes through', async () => {
+test('streams incoming text as it comes through, according to separators', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
@@ -173,15 +173,21 @@ test('streams incoming text as it comes through', async () => {
   env.xhr.onprogress!({} as any);
 
   await tick();
-  expect(spy).toHaveBeenCalledTimes(1);
-  expect(spy).toHaveBeenCalledWith('foo');
+  expect(spy).toHaveBeenCalledTimes(0);
 
   (env.xhr as any).responseText = 'foo\nbar';
   env.xhr.onprogress!({} as any);
 
   await tick();
+  expect(spy).toHaveBeenCalledTimes(1);
+  expect(spy).toHaveBeenCalledWith('foo');
+
+  (env.xhr as any).responseText = 'foo\nbar\n';
+  env.xhr.onprogress!({} as any);
+
+  await tick();
   expect(spy).toHaveBeenCalledTimes(2);
-  expect(spy).toHaveBeenCalledWith('\nbar');
+  expect(spy).toHaveBeenCalledWith('bar');
 
   (env.xhr as any).readyState = 4;
   (env.xhr as any).status = 200;
