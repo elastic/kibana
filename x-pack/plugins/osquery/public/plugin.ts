@@ -32,38 +32,58 @@ import {
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
+import type { SecurityPluginStart } from '../../security/public';
 
 export function toggleOsqueryPlugin(
   updater$: Subject<AppUpdater>,
   http: CoreStart['http'],
-  registerExtension?: StartPlugins['fleet']['registerExtension']
+  registerExtension?: StartPlugins['fleet']['registerExtension'],
+  authc?: SecurityPluginStart['authc']
 ) {
-  http
-    .fetch<GetPackagesResponse>(epmRouteService.getListPath(), { query: { experimental: true } })
-    .then(({ response }) => {
-      const installed = response.find(
-        (integration) =>
-          integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
-      );
-
-      if (installed && registerExtension) {
-        registerExtension({
-          package: OSQUERY_INTEGRATION_NAME,
-          view: 'package-detail-custom',
-          component: LazyOsqueryManagedCustomButtonExtension,
-        });
-      }
-
-      updater$.next(() => ({
-        navLinkStatus: installed ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
-      }));
-    })
-    .catch(() => {
+  const toggleOsqueryPluginAsync = async () => {
+    let currentUser;
+    try {
+      currentUser = await authc?.getCurrentUser();
+    } catch (error) {
       updater$.next(() => ({
         status: AppStatus.inaccessible,
         navLinkStatus: AppNavLinkStatus.hidden,
       }));
-    });
+      return;
+    }
+
+    if (currentUser) {
+      http
+        .fetch<GetPackagesResponse>(epmRouteService.getListPath(), {
+          query: { experimental: true },
+        })
+        .then(({ response }) => {
+          const installed = response.find(
+            (integration) =>
+              integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
+          );
+
+          if (installed && registerExtension) {
+            registerExtension({
+              package: OSQUERY_INTEGRATION_NAME,
+              view: 'package-detail-custom',
+              component: LazyOsqueryManagedCustomButtonExtension,
+            });
+          }
+
+          updater$.next(() => ({
+            navLinkStatus: installed ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+          }));
+        })
+        .catch(() => {
+          updater$.next(() => ({
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          }));
+        });
+    }
+  };
+  toggleOsqueryPluginAsync();
 }
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
@@ -133,7 +153,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       const { registerExtension } = plugins.fleet;
 
       if (config.enabled) {
-        toggleOsqueryPlugin(this.appUpdater$, core.http, registerExtension);
+        toggleOsqueryPlugin(
+          this.appUpdater$,
+          core.http,
+          registerExtension,
+          plugins.security?.authc
+        );
       }
 
       registerExtension({
