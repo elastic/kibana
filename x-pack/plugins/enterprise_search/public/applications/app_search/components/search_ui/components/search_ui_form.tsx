@@ -74,7 +74,7 @@ const URL_FIELD_PLACEHOLDER = i18n.translate(
 );
 const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.generatePreviewButtonLabel',
-  { defaultMessage: 'Generate a Preview' }
+  { defaultMessage: 'Generate preview' }
 );
 
 interface Option<T> extends Omit<EuiComboBoxOptionOption<T>, 'value'> {
