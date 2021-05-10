@@ -29,7 +29,7 @@ import {
   obsSec,
 } from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
-import { secOnlyNoSpaceAuth } from '../../../utils';
+import { secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -42,10 +42,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get a case', async () => {
-      const newCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      const newCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        superUserNoSpaceAuth
+      );
 
       for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
         const theCase = await getCase({
@@ -99,10 +101,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should not get a case when the user does not have access to owner', async () => {
-      const newCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      const newCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        superUserNoSpaceAuth
+      );
 
       for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
         await getCase({
@@ -115,10 +119,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a 404 when attempting to access a space', async () => {
-      const newCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      const newCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        superUserNoSpaceAuth
+      );
 
       await getCase({
         supertest: supertestWithoutAuth,

@@ -150,10 +150,12 @@ export default ({ getService }: FtrProviderContext): void => {
       noKibanaPrivileges.username
     } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT read a comment`, async () => {
       // super user creates a case and comment in the appropriate space
-      const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      const caseInfo = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        superUserNoSpaceAuth
+      );
 
       await createComment({
         supertest: supertestWithoutAuth,
@@ -170,14 +172,16 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a 404 when attempting to access a space', async () => {
-      const caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      const caseInfo = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        superUserNoSpaceAuth
+      );
 
       await createComment({
         supertest: supertestWithoutAuth,
-        auth: { user: superUser, space: null },
+        auth: superUserNoSpaceAuth,
         params: { ...postCommentUserReq, owner: 'securitySolutionFixture' },
         caseId: caseInfo.id,
       });

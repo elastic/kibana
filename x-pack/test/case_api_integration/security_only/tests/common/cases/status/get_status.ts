@@ -15,7 +15,6 @@ import {
   updateCase,
   getAllCasesStatuses,
   deleteAllCaseItems,
-  getAuthWithSuperUser,
 } from '../../../../../common/lib/utils';
 import {
   globalRead,
@@ -26,6 +25,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../../common/lib/authentication/users';
+import { superUserNoSpaceAuth } from '../../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -37,7 +37,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     const supertestWithoutAuth = getService('supertestWithoutAuth');
-    const superUserAuth = getAuthWithSuperUser(null);
 
     it('should return the correct status stats', async () => {
       /**
@@ -47,19 +46,19 @@ export default ({ getService }: FtrProviderContext): void => {
        *  open: 1, in-prog: 1
        */
       const [inProgressSec, closedSec, , inProgressObs] = await Promise.all([
-        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserAuth),
-        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserAuth),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          superUserAuth
+          superUserNoSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          superUserAuth
+          superUserNoSpaceAuth
         ),
       ]);
 
@@ -84,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         },
-        auth: superUserAuth,
+        auth: superUserNoSpaceAuth,
       });
 
       for (const scenario of [
@@ -110,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it(`should return a 403 when retrieving the statuses when the user ${
       noKibanaPrivileges.username
     } with role(s) ${noKibanaPrivileges.roles.join()}`, async () => {
-      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserAuth);
+      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth);
 
       await getAllCasesStatuses({
         supertest: supertestWithoutAuth,
@@ -120,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a 404 when attempting to access a space', async () => {
-      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserAuth);
+      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth);
 
       await getAllCasesStatuses({
         supertest: supertestWithoutAuth,

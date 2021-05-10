@@ -19,7 +19,12 @@ import {
   obsSecRead,
   noKibanaPrivileges,
 } from '../../../../../common/lib/authentication/users';
-import { secOnlyNoSpaceAuth, obsOnlyNoSpaceAuth, obsSecNoSpaceAuth } from '../../../../utils';
+import {
+  secOnlyNoSpaceAuth,
+  obsOnlyNoSpaceAuth,
+  obsSecNoSpaceAuth,
+  superUserNoSpaceAuth,
+} from '../../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -83,10 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
         200,
-        {
-          user: superUser,
-          space: null,
-        }
+        superUserNoSpaceAuth
       );
 
       // user should not be able to get all tags at the appropriate space
@@ -103,10 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
         200,
-        {
-          user: superUser,
-          space: null,
-        }
+        superUserNoSpaceAuth
       );
 
       await getTags({

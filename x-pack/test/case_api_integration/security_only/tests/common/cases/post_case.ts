@@ -18,7 +18,7 @@ import {
   noKibanaPrivileges,
 } from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { secOnlyNoSpaceAuth } from '../../../utils';
+import { secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -57,10 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           403,
-          {
-            user,
-            space: null,
-          }
+          superUserNoSpaceAuth
         );
       });
     }

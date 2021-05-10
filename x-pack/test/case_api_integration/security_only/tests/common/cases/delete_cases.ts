@@ -23,14 +23,12 @@ import {
   obsOnlyRead,
   obsSecRead,
   noKibanaPrivileges,
-  superUser,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth } from '../../../utils';
+import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const supertest = getService('supertest');
   const es = getService('es');
 
   describe('delete_cases', () => {
@@ -49,7 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       await deleteCases({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseIDs: [postedCase.id],
         expectedHttpCode: 204,
         auth: secOnlyNoSpaceAuth,
@@ -99,14 +97,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         caseId: caseSec.id,
         expectedHttpCode: 200,
-        auth: { user: superUser, space: null },
+        auth: superUserNoSpaceAuth,
       });
 
       await getCase({
         supertest: supertestWithoutAuth,
         caseId: caseObs.id,
         expectedHttpCode: 200,
-        auth: { user: superUser, space: null },
+        auth: superUserNoSpaceAuth,
       });
     });
 
@@ -114,10 +112,12 @@ export default ({ getService }: FtrProviderContext): void => {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT delete a case`, async () => {
-        const postedCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-          user: superUser,
-          space: null,
-        });
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest(),
+          200,
+          superUserNoSpaceAuth
+        );
 
         await deleteCases({
           supertest: supertestWithoutAuth,
@@ -129,10 +129,12 @@ export default ({ getService }: FtrProviderContext): void => {
     }
 
     it('should return a 404 when attempting to access a space', async () => {
-      const postedCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      const postedCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        superUserNoSpaceAuth
+      );
 
       await deleteCases({
         supertest: supertestWithoutAuth,

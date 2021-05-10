@@ -26,7 +26,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth } from '../../../utils';
+import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -67,18 +67,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should update multiple cases when the user has the correct permissions', async () => {
       const [case1, case2, case3] = await Promise.all([
-        createCase(supertestWithoutAuth, postCaseReq, 200, {
-          user: superUser,
-          space: null,
-        }),
-        createCase(supertestWithoutAuth, postCaseReq, 200, {
-          user: superUser,
-          space: null,
-        }),
-        createCase(supertestWithoutAuth, postCaseReq, 200, {
-          user: superUser,
-          space: null,
-        }),
+        createCase(supertestWithoutAuth, postCaseReq, 200, superUserNoSpaceAuth),
+        createCase(supertestWithoutAuth, postCaseReq, 200, superUserNoSpaceAuth),
+        createCase(supertestWithoutAuth, postCaseReq, 200, superUserNoSpaceAuth),
       ]);
 
       const patchedCases = await updateCase({
@@ -140,28 +131,19 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          {
-            user: superUser,
-            space: null,
-          }
+          superUserNoSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          {
-            user: superUser,
-            space: null,
-          }
+          superUserNoSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          {
-            user: superUser,
-            space: null,
-          }
+          superUserNoSpaceAuth
         ),
       ]);
 
@@ -202,10 +184,12 @@ export default ({ getService }: FtrProviderContext): void => {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT update a case`, async () => {
-        const postedCase = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-          user: superUser,
-          space: null,
-        });
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest(),
+          200,
+          superUserNoSpaceAuth
+        );
 
         await updateCase({
           supertest: supertestWithoutAuth,

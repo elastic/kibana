@@ -22,7 +22,12 @@ import {
   obsSec,
 } from '../../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../../common/lib/authentication';
-import { secOnlyNoSpaceAuth, obsOnlyNoSpaceAuth } from '../../../../utils';
+import {
+  secOnlyNoSpaceAuth,
+  obsOnlyNoSpaceAuth,
+  superUserNoSpaceAuth,
+  obsSecNoSpaceAuth,
+} from '../../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -82,10 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
       noKibanaPrivileges.username
     } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT get all reporters`, async () => {
       // super user creates a case at the appropriate space
-      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth);
 
       // user should not be able to get all reporters at the appropriate space
       await getReporters({
@@ -121,10 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const reporters = await getReporters({
         supertest: supertestWithoutAuth,
-        auth: {
-          user: obsSec,
-          space: null,
-        },
+        auth: obsSecNoSpaceAuth,
         query: { owner: 'securitySolutionFixture' },
       });
 

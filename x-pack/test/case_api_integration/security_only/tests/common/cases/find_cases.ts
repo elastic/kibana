@@ -24,7 +24,12 @@ import {
   globalRead,
   obsSecRead,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, obsSecNoSpaceAuth, secOnlyNoSpaceAuth } from '../../../utils';
+import {
+  obsOnlyNoSpaceAuth,
+  obsSecNoSpaceAuth,
+  secOnlyNoSpaceAuth,
+  superUserNoSpaceAuth,
+} from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -89,10 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it(`User ${
       noKibanaPrivileges.username
     } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT read a case`, async () => {
-      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth);
 
       await findCases({
         supertest: supertestWithoutAuth,
@@ -105,10 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a 404 when attempting to access a space', async () => {
-      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-        user: superUser,
-        space: null,
-      });
+      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth);
 
       await findCases({
         supertest: supertestWithoutAuth,
@@ -120,19 +119,13 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
       await Promise.all([
         // super user creates a case with owner securitySolutionFixture
-        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
-          user: superUser,
-          space: null,
-        }),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth),
         // super user creates a case with owner observabilityFixture
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          {
-            user: superUser,
-            space: null,
-          }
+          superUserNoSpaceAuth
         ),
       ]);
 
