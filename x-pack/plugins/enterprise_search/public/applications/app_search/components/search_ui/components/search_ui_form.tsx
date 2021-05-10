@@ -156,7 +156,7 @@ export const SearchUIForm: React.FC = () => {
           fill
           iconType="popout"
           iconSide="right"
-          data-test-subj="generateReferenceUiPreview"
+          data-test-subj="generateSearchUiPreview"
         >
           {GENERATE_PREVIEW_BUTTON_LABEL}
         </EuiButton>
