@@ -16,7 +16,6 @@ import {
   SavedObjectUnsanitizedDoc,
 } from '../../serialization';
 import { MigrateAndConvertFn } from './document_migrator';
-import { SavedObjectsMigrationLogger } from '.';
 
 /**
  * Error thrown when saved object migrations encounter a corrupt saved object.
@@ -46,8 +45,7 @@ export class CorruptSavedObjectError extends Error {
 export async function migrateRawDocs(
   serializer: SavedObjectsSerializer,
   migrateDoc: MigrateAndConvertFn,
-  rawDocs: SavedObjectsRawDoc[],
-  log: SavedObjectsMigrationLogger
+  rawDocs: SavedObjectsRawDoc[]
 ): Promise<SavedObjectsRawDoc[]> {
   const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
   const processedDocs = [];

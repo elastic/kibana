@@ -36,6 +36,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
   const kibanaVersion = useKibanaVersion();
+
   return (
     <EuiPanel>
       <EuiDescriptionList compressed>

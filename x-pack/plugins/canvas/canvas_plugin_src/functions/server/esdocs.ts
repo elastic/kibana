@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import squel from 'squel';
+import squel from 'safe-squel';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 /* eslint-disable */
 import { queryEsSQL } from '../../../server/lib/query_es_sql';

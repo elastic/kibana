@@ -36,6 +36,7 @@ import {
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
+  SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
   SOURCE_NAME_LABEL,
@@ -128,7 +129,7 @@ export const SourceSettings: React.FC = () => {
 
   return (
     <>
-      <ViewContentHeader title="Source settings" />
+      <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
           <EuiFlexGroup>

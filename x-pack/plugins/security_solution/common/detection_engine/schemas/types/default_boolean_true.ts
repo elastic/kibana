@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the DefaultBooleanTrue as:
  *   - If null or undefined, then a default true will be set
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultBooleanTrue = new t.Type<boolean, boolean | undefined, unknown>(
   'DefaultBooleanTrue',

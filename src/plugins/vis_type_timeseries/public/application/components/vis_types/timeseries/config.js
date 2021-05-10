@@ -36,9 +36,6 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const defaults = {
-    fill: '',
-    line_width: '',
-    point_size: '',
     value_template: '{{value}}',
     offset_time: '',
     axis_min: '',
@@ -329,12 +326,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
     ? props.model.series_index_pattern
     : props.indexPatternForQuery;
 
-  const initialPalette = {
-    ...model.palette,
+  const initialPalette = model.palette ?? {
+    type: 'palette',
+    name: 'default',
+  };
+
+  const palette = {
+    ...initialPalette,
     name:
       model.split_color_mode === 'kibana'
         ? 'kibana_palette'
-        : model.split_color_mode || model.palette.name,
+        : model.split_color_mode || initialPalette.name,
   };
 
   return (
@@ -427,7 +429,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             >
               <PalettePicker
                 palettes={palettesRegistry}
-                activePalette={initialPalette}
+                activePalette={palette}
                 setPalette={handlePaletteChange}
                 color={model.color}
               />

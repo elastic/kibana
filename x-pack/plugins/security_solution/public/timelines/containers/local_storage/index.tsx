@@ -5,16 +5,43 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { TimelinesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import { TimelineModel } from '../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 
 export const LOCAL_STORAGE_TIMELINE_KEY = 'timelines';
 const EMPTY_TIMELINE = {} as {
   [K in TimelineIdLiteral]: TimelineModel;
 };
+
+/**
+ * Migrates the value of the column's `width` property to `initialWidth`
+ * when `width` is valid, and `initialWidth` is invalid
+ */
+export const migrateColumnWidthToInitialWidth = (
+  column: ColumnHeaderOptions & { width?: number }
+) => ({
+  ...column,
+  initialWidth:
+    Number.isInteger(column.width) && !Number.isInteger(column.initialWidth)
+      ? column.width
+      : column.initialWidth,
+});
+
+/**
+ * Migrates the value of the column's `label` property to `displayAsText`
+ * when `label` is valid, and `displayAsText` is `undefined`
+ */
+export const migrateColumnLabelToDisplayAsText = (
+  column: ColumnHeaderOptions & { label?: string }
+) => ({
+  ...column,
+  displayAsText:
+    !isEmpty(column.label) && column.displayAsText == null ? column.label : column.displayAsText,
+});
 
 export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: TimelineIdLiteral[]) => {
   const allTimelines = storage.get(LOCAL_STORAGE_TIMELINE_KEY);
@@ -37,6 +64,13 @@ export const getTimelinesInStorageByIds = (storage: Storage, timelineIds: Timeli
         ...timelineModel,
         ...(timelineModel.sort != null && !Array.isArray(timelineModel.sort)
           ? { sort: [timelineModel.sort] }
+          : {}),
+        ...(Array.isArray(timelineModel.columns)
+          ? {
+              columns: timelineModel.columns
+                .map(migrateColumnWidthToInitialWidth)
+                .map(migrateColumnLabelToDisplayAsText),
+            }
           : {}),
       },
     };

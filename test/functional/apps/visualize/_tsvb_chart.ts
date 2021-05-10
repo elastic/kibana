@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
         await PageObjects.visualBuilder.clickDataTab('metric');
       });
 
@@ -106,6 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkTopNTabIsPresent();
         await PageObjects.visualBuilder.clickPanelOptions('topN');
         await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
         await PageObjects.visualBuilder.clickDataTab('topN');
       });
 
@@ -129,6 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
         await PageObjects.visualBuilder.clickDataTab('metric');
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 22, 2019 @ 00:00:00.000',
@@ -215,6 +218,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const finalLegendItems = ['jpg: 106', 'css: 22', 'png: 14', 'gif: 8', 'php: 6'];
 
         log.debug('Group metrics by terms: extension.raw');
+        await PageObjects.visualBuilder.clickPanelOptions('timeSeries');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
+        await PageObjects.visualBuilder.clickDataTab('timeSeries');
         await PageObjects.visualBuilder.setMetricsGroupByTerms('extension.raw');
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems1 = await PageObjects.visualBuilder.getLegendItemsContent();

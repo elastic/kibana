@@ -35,6 +35,7 @@ import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
+import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -89,6 +90,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       loading,
       overallAnnotations,
     } = explorerState;
+
+    const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
     const menuItems = useMemo(() => {
       const items = [];
@@ -223,6 +226,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiPopover>
               </EuiFlexItem>
             )}
+
+            <EuiFlexItem grow={false}>
+              <AnomalyTimelineHelpPopover />
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
@@ -241,7 +248,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             isLoading={loading}
             noDataWarning={<NoOverallData />}
             showTimeline={false}
-            annotationsData={overallAnnotations.annotationsData}
+            annotationsData={annotations}
           />
 
           <EuiSpacer size="m" />
@@ -259,7 +266,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 })
               }
               timeBuckets={timeBuckets}
-              showLegend={false}
+              showLegend={true}
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}
