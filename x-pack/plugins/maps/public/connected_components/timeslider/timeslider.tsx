@@ -7,15 +7,13 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiDualRange, EuiIcon, EuiText } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { i18n } from '@kbn/i18n';
 import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
 import { TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
-import { NextTimesliceIcon } from './next_timeslice_icon';
-import { PreviousTimesliceIcon } from './previous_timeslice_icon';
 
 export interface Props {
   closeTimeslider: () => void;
@@ -143,7 +141,7 @@ class KeyedTimeslider extends Component<Props, State> {
             <div className="mapTimeslider__controls">
               <EuiButtonIcon
                 onClick={this._onPrevious}
-                iconType={PreviousTimesliceIcon}
+                iconType="arrowLeft"
                 color="text"
                 aria-label={i18n.translate('xpack.maps.timeslider.previousTimeWindowLabel', {
                   defaultMessage: 'Previous time window',
@@ -151,7 +149,7 @@ class KeyedTimeslider extends Component<Props, State> {
               />
               <EuiButtonIcon
                 onClick={this._onNext}
-                iconType={NextTimesliceIcon}
+                iconType="arrowRight"
                 color="text"
                 aria-label={i18n.translate('xpack.maps.timeslider.nextTimeWindowLabel', {
                   defaultMessage: 'Next time window',
