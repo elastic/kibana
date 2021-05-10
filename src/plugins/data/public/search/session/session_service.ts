@@ -213,6 +213,10 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
+
+    // cancel previous session if needed
+    this.clear();
+
     this.state.transitions.start({ appName: this.currentApp });
     return this.getSessionId()!;
   }
@@ -241,7 +245,12 @@ export class SessionService {
       );
       return;
     }
-
+    const { sessionId, isRestore, isStored } = this.state.get();
+    if (sessionId && !isRestore && !isStored) {
+      this.sessionsClient
+        .cancel(this.state.get().sessionId!)
+        .catch(() => {});
+    }
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;

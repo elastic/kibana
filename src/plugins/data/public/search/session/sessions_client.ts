@@ -92,6 +92,10 @@ export class SessionsClient {
     });
   }
 
+  public cancel(sessionId: string): Promise<void> {
+    return this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/cancel`);
+  }
+
   public delete(sessionId: string): Promise<void> {
     return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
