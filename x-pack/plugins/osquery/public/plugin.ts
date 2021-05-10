@@ -47,9 +47,7 @@ export function toggleOsqueryPlugin(
   }
 
   http
-    .fetch<GetPackagesResponse>(epmRouteService.getListPath(), {
-      query: { experimental: true },
-    })
+    .fetch<GetPackagesResponse>(epmRouteService.getListPath(), { query: { experimental: true } })
     .then(({ response }) => {
       const installed = response.find(
         (integration) =>

@@ -10,8 +10,7 @@
   "kibanaVersion": "kibana",
   "optionalPlugins": [
     "home",
-    "lens",
-    "security"
+    "lens"
   ],
   "requiredBundles": [
     "esUiShared",
