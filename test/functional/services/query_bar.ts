@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -45,7 +45,8 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async clearQuery(): Promise<void> {
       await this.setQuery('');
-      await PageObjects.common.pressTabKey();
+      await PageObjects.common.pressTabKey(); // move outside of input into language switcher
+      await PageObjects.common.pressTabKey(); // move outside of language switcher so time picker appears
     }
 
     public async submitQuery(): Promise<void> {

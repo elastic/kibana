@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -28,6 +29,24 @@ export const translatedEntryMatchMatcher = t.keyof({
   exact_caseless: null,
 });
 export type TranslatedEntryMatchMatcher = t.TypeOf<typeof translatedEntryMatchMatcher>;
+
+export const translatedEntryMatchWildcardMatcher = t.keyof({
+  wildcard_cased: null,
+  wildcard_caseless: null,
+});
+export type TranslatedEntryMatchWildcardMatcher = t.TypeOf<
+  typeof translatedEntryMatchWildcardMatcher
+>;
+
+export const translatedEntryMatchWildcard = t.exact(
+  t.type({
+    field: t.string,
+    operator,
+    type: translatedEntryMatchWildcardMatcher,
+    value: t.string,
+  })
+);
+export type TranslatedEntryMatchWildcard = t.TypeOf<typeof translatedEntryMatchWildcard>;
 
 export const translatedEntryMatch = t.exact(
   t.type({
@@ -60,6 +79,7 @@ export type TranslatedEntryNested = t.TypeOf<typeof translatedEntryNested>;
 export const translatedEntry = t.union([
   translatedEntryNested,
   translatedEntryMatch,
+  translatedEntryMatchWildcard,
   translatedEntryMatchAny,
 ]);
 export type TranslatedEntry = t.TypeOf<typeof translatedEntry>;

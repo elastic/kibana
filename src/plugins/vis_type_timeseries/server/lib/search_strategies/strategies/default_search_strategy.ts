@@ -1,28 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { AbstractSearchStrategy, ReqFacade } from './abstract_search_strategy';
+import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
-import { VisPayload } from '../../../../common/types';
+
+import type { IndexPatternsService } from '../../../../../data/server';
+import type { FetchedIndexPattern } from '../../../../common/types';
+import type {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesRequest,
+} from '../../../types';
+import { MAX_BUCKETS_SETTING } from '../../../../common/constants';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
-  checkForViability(req: ReqFacade<VisPayload>) {
-    return Promise.resolve({
+  async checkForViability(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesRequest
+  ) {
+    const uiSettings = requestContext.core.uiSettings.client;
+
+    return {
       isViable: true,
-      capabilities: new DefaultSearchCapabilities(req),
-    });
+      capabilities: new DefaultSearchCapabilities({
+        timezone: req.body.timerange?.timezone,
+        maxBucketsLimit: await uiSettings.get(MAX_BUCKETS_SETTING),
+      }),
+    };
   }
 
-  async getFieldsForWildcard<TPayload = unknown>(
-    req: ReqFacade<TPayload>,
-    indexPattern: string,
+  async getFieldsForWildcard(
+    fetchedIndexPattern: FetchedIndexPattern,
+    indexPatternsService: IndexPatternsService,
     capabilities?: unknown
   ) {
-    return super.getFieldsForWildcard(req, indexPattern, capabilities);
+    return super.getFieldsForWildcard(fetchedIndexPattern, indexPatternsService, capabilities);
   }
 }

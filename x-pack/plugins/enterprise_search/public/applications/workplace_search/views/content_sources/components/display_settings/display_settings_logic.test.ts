@@ -1,32 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LogicMounter } from '../../../../../__mocks__/kea.mock';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  mockKibanaValues,
+} from '../../../../../__mocks__';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
-import { mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
+import { nextTick } from '@kbn/test/jest';
 
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
   SourceLogic: { values: { contentSource } },
 }));
 
-import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+import { AppLogic } from '../../../../app_logic';
 
-import { nextTick } from '@kbn/test/jest';
-
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 import { LEAVE_UNASSIGNED_FIELD } from './constants';
-
 import { DisplaySettingsLogic, defaultSearchResultConfig } from './display_settings_logic';
 
 describe('DisplaySettingsLogic', () => {
   const { http } = mockHttpValues;
+  const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(DisplaySettingsLogic);
 
@@ -42,6 +46,7 @@ describe('DisplaySettingsLogic', () => {
     serverRoute: '',
     editFieldIndex: null,
     dataLoading: true,
+    navigatingBetweenTabs: false,
     addFieldModalVisible: false,
     titleFieldHover: false,
     urlFieldHover: false,
@@ -205,6 +210,12 @@ describe('DisplaySettingsLogic', () => {
       });
     });
 
+    it('setNavigatingBetweenTabs', () => {
+      DisplaySettingsLogic.actions.setNavigatingBetweenTabs(true);
+
+      expect(DisplaySettingsLogic.values.navigatingBetweenTabs).toEqual(true);
+    });
+
     it('addDetailField', () => {
       const newField = { label: 'Monkey', fieldName: 'primate' };
       DisplaySettingsLogic.actions.setServerResponseData(serverProps);
@@ -351,6 +362,31 @@ describe('DisplaySettingsLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+    });
+
+    describe('handleSelectedTabChanged', () => {
+      beforeEach(() => {
+        DisplaySettingsLogic.actions.onInitializeDisplaySettings(serverProps);
+      });
+
+      it('calls sets navigatingBetweenTabs', async () => {
+        const setNavigatingBetweenTabsSpy = jest.spyOn(
+          DisplaySettingsLogic.actions,
+          'setNavigatingBetweenTabs'
+        );
+        DisplaySettingsLogic.actions.handleSelectedTabChanged('search_results');
+        await nextTick();
+
+        expect(setNavigatingBetweenTabsSpy).toHaveBeenCalledWith(true);
+        expect(navigateToUrl).toHaveBeenCalledWith('/p/sources/123/display_settings/');
+      });
+
+      it('calls calls correct route for "result_detail"', async () => {
+        DisplaySettingsLogic.actions.handleSelectedTabChanged('result_detail');
+        await nextTick();
+
+        expect(navigateToUrl).toHaveBeenCalledWith('/p/sources/123/display_settings/result_detail');
       });
     });
   });

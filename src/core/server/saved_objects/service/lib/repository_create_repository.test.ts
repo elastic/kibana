@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsRepository } from './repository';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { KibanaMigrator } from '../../migrations';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
 
 jest.mock('./repository');
 
 const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');
 
 describe('SavedObjectsRepository#createRepository', () => {
+  let logger: MockedLogger;
   const callAdminCluster = jest.fn();
 
   const typeRegistry = new SavedObjectTypeRegistry();
@@ -59,6 +61,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   const RepositoryConstructor = (SavedObjectsRepository as unknown) as jest.Mock<SavedObjectsRepository>;
 
   beforeEach(() => {
+    logger = loggerMock.create();
     RepositoryConstructor.mockClear();
   });
 
@@ -69,6 +72,7 @@ describe('SavedObjectsRepository#createRepository', () => {
         typeRegistry,
         '.kibana-test',
         callAdminCluster,
+        logger,
         ['unMappedType1', 'unmappedType2']
       );
     } catch (e) {
@@ -84,6 +88,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       typeRegistry,
       '.kibana-test',
       callAdminCluster,
+      logger,
       [],
       SavedObjectsRepository
     );
@@ -102,6 +107,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       typeRegistry,
       '.kibana-test',
       callAdminCluster,
+      logger,
       ['hiddenType', 'hiddenType', 'hiddenType'],
       SavedObjectsRepository
     );

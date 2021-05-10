@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MetricsAPIRequest } from '../../../../common/http_api';
@@ -116,5 +117,57 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
     expect(() =>
       convertHistogramBucketsToTimeseries(keys, { ...options }, bucketsWithMultipleKeyedPercentiles)
     ).toThrow();
+  });
+
+  it('should tranform top_metric aggregations', () => {
+    const topMetricOptions: MetricsAPIRequest = {
+      ...options,
+      metrics: [
+        { id: 'metric_0', aggregations: { metric_0: { avg: { field: 'system.cpu.user.pct' } } } },
+        {
+          id: '__metadata__',
+          aggregations: {
+            __metadata__: {
+              top_metrics: {
+                metrics: [{ field: 'host.name' }, { field: 'host.ip' }],
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    const bucketsWithTopAggregation = [
+      {
+        key: 1577836800000,
+        key_as_string: '2020-01-01T00:00:00.000Z',
+        doc_count: 1,
+        metric_0: { value: 1 },
+        __metadata__: {
+          top: [
+            {
+              sort: ['2021-03-30T13:46:27.684Z'],
+              metrics: {
+                'host.name': 'testHostName',
+                'host.ip': 'testHostIp',
+              },
+            },
+          ],
+        },
+      },
+      {
+        key: 1577836860000,
+        key_as_string: '2020-01-01T00:01:00.000Z',
+        doc_count: 1,
+        metric_0: { value: null },
+        __metadata__: {
+          top: [],
+        },
+      },
+    ];
+
+    expect(
+      convertHistogramBucketsToTimeseries(keys, topMetricOptions, bucketsWithTopAggregation)
+    ).toMatchSnapshot();
   });
 });

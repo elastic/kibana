@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { AppLogic } from '../../../app_logic';
 import { GroupsLogic } from '../groups_logic';
@@ -40,7 +40,7 @@ export const TableFilters: React.FC = () => {
             <EuiFieldSearch
               value={filterValue}
               onChange={handleSearchChange}
-              fullWidth={true}
+              fullWidth
               placeholder={FILTER_GROUPS_PLACEHOLDER}
             />
           </EuiFlexItem>

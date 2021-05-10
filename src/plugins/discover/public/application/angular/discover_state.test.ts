@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from 'kibana/public';
 import {
   getState,
   GetStateReturn,
@@ -14,10 +15,16 @@ import {
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { SavedSearch } from '../../saved_searches';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 
 let history: History;
 let state: GetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
+
+const uiSettingsMock = {
+  get: <T>(key: string) =>
+    ((key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown) as T,
+} as IUiSettingsClient;
 
 describe('Test discover state', () => {
   beforeEach(async () => {
@@ -26,6 +33,7 @@ describe('Test discover state', () => {
     state = getState({
       getStateDefaults: () => ({ index: 'test' }),
       history,
+      uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
     await state.startSync();
@@ -71,6 +79,48 @@ describe('Test discover state', () => {
     expect(state.getPreviousAppState()).toEqual(stateA);
   });
 });
+describe('Test discover initial state sort handling', () => {
+  test('Non-empty sort in URL should not fallback to state defaults', async () => {
+    history = createBrowserHistory();
+    history.push('/#?_a=(sort:!(!(order_date,desc)))');
+
+    state = getState({
+      getStateDefaults: () => ({ sort: [['fallback', 'desc']] }),
+      history,
+      uiSettings: uiSettingsMock,
+    });
+    await state.replaceUrlAppState({});
+    await state.startSync();
+    expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "order_date",
+          "desc",
+        ],
+      ]
+    `);
+  });
+  test('Empty sort in URL should allow fallback state defaults', async () => {
+    history = createBrowserHistory();
+    history.push('/#?_a=(sort:!())');
+
+    state = getState({
+      getStateDefaults: () => ({ sort: [['fallback', 'desc']] }),
+      history,
+      uiSettings: uiSettingsMock,
+    });
+    await state.replaceUrlAppState({});
+    await state.startSync();
+    expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "fallback",
+          "desc",
+        ],
+      ]
+    `);
+  });
+});
 
 describe('Test discover state with legacy migration', () => {
   test('migration of legacy query ', async () => {
@@ -81,6 +131,7 @@ describe('Test discover state with legacy migration', () => {
     state = getState({
       getStateDefaults: () => ({ index: 'test' }),
       history,
+      uiSettings: uiSettingsMock,
     });
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
@@ -106,6 +157,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
     data: mockDataPlugin,
     appStateContainer: getState({
       history: createBrowserHistory(),
+      uiSettings: uiSettingsMock,
     }).appStateContainer,
     getSavedSearch: () => mockSavedSearch,
   });

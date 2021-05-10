@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -30,7 +31,7 @@ interface Props {
   onFilter: (filter: string) => void;
   onTimeChange: (start: string, end: string) => void;
   data: MetricsExplorerResponse | null;
-  source: InfraSourceConfiguration | undefined;
+  source: MetricsSourceConfigurationProperties | undefined;
   timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = ({

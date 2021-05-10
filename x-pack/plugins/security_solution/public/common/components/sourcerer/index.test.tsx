@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,7 +12,6 @@ import { Sourcerer } from './index';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
-  apolloClientObservable,
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
@@ -52,22 +52,10 @@ describe('Sourcerer component', () => {
   });
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   // Using props callback instead of simulating clicks,
@@ -99,13 +87,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(
-      state2,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -153,7 +135,6 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
       kibanaObservable,
       storage
     );
@@ -184,7 +165,6 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
       kibanaObservable,
       storage
     );
@@ -208,7 +188,6 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
       kibanaObservable,
       storage
     );
@@ -250,7 +229,6 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
       kibanaObservable,
       storage
     );

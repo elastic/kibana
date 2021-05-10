@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { groupBy, flatten, pick, map } from 'lodash';
 import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   by: string[];
-  expression: Array<(datatable: Datatable) => Promise<Datatable>>;
+  expression: Array<(datatable: Datatable) => Observable<Datatable>>;
 }
 
 type Output = Datatable | Promise<Datatable>;
@@ -72,7 +75,7 @@ export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments,
 
         if (args.expression) {
           expressionResultPromises = args.expression.map((expression) =>
-            expression(originalDatatable)
+            expression(originalDatatable).pipe(take(1)).toPromise()
           );
         } else {
           expressionResultPromises.push(Promise.resolve(originalDatatable));

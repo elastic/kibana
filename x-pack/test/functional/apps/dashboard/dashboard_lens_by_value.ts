@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens', 'header']);
 
   const find = getService('find');
   const esArchiver = getService('esArchiver');
+  const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
 
   describe('dashboard lens by value', function () {
     before(async () => {
@@ -25,7 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can add a lens panel by value', async () => {
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await PageObjects.lens.createAndAddLensFromDashboard({});
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.eql(1);
@@ -67,6 +67,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(newPanelCount).to.eql(originalPanelCount);
       const titles = await PageObjects.dashboard.getPanelTitles();
       expect(titles.indexOf(newTitle)).to.not.be(-1);
+    });
+
+    it('is no longer linked to a dashboard after visiting the visuali1ze listing page', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickLensWidget();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+      await PageObjects.lens.notLinkedToOriginatingApp();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // return to origin should not be present in save modal
+      await testSubjects.click('lnsApp_saveButton');
+      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
+      expect(redirectToOriginCheckboxExists).to.be(false);
     });
   });
 }

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RouteDefinitionParams } from '../..';
-import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import { ElasticsearchRole, transformElasticsearchRoleToRole } from './model';
+import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import type { ElasticsearchRole } from './model';
+import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetAllRolesRoutes({ router, authz }: RouteDefinitionParams) {
   router.get(
@@ -24,7 +26,12 @@ export function defineGetAllRolesRoutes({ router, authz }: RouteDefinitionParams
         return response.ok({
           body: Object.entries(elasticsearchRoles)
             .map(([roleName, elasticsearchRole]) =>
-              transformElasticsearchRoleToRole(elasticsearchRole, roleName, authz.applicationName)
+              transformElasticsearchRoleToRole(
+                // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications` and `transient_metadata`.
+                elasticsearchRole,
+                roleName,
+                authz.applicationName
+              )
             )
             .sort((roleA, roleB) => {
               if (roleA.name < roleB.name) {

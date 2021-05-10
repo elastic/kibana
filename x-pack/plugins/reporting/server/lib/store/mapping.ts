@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const mapping = {
@@ -42,7 +43,7 @@ export const mapping = {
   browser_type: { type: 'keyword' },
   jobtype: { type: 'keyword' },
   payload: { type: 'object', enabled: false },
-  priority: { type: 'byte' },
+  priority: { type: 'byte' }, // NOTE: this is unused, but older data may have a mapping for this field
   timeout: { type: 'long' },
   process_expiration: { type: 'date' },
   created_by: { type: 'keyword' }, // `null` if security is disabled

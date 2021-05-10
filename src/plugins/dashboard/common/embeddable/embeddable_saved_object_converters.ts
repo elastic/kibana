@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { omit } from 'lodash';
@@ -16,6 +16,7 @@ export function convertSavedDashboardPanelToPanelState(
   return {
     type: savedDashboardPanel.type,
     gridData: savedDashboardPanel.gridData,
+    panelRefName: savedDashboardPanel.panelRefName,
     explicitInput: {
       id: savedDashboardPanel.panelIndex,
       ...(savedDashboardPanel.id !== undefined && { savedObjectId: savedDashboardPanel.id }),
@@ -29,9 +30,6 @@ export function convertPanelStateToSavedDashboardPanel(
   panelState: DashboardPanelState,
   version: string
 ): SavedDashboardPanel {
-  const customTitle: string | undefined = panelState.explicitInput.title
-    ? (panelState.explicitInput.title as string)
-    : undefined;
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
     version,
@@ -39,7 +37,8 @@ export function convertPanelStateToSavedDashboardPanel(
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
     embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-    ...(customTitle && { title: customTitle }),
+    ...(panelState.explicitInput.title !== undefined && { title: panelState.explicitInput.title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
+    ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
   };
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -23,10 +24,11 @@ export const endpointFilters = schema.object({
   host_status: schema.nullable(
     schema.arrayOf(
       schema.oneOf([
-        schema.literal(HostStatus.ONLINE.toString()),
+        schema.literal(HostStatus.HEALTHY.toString()),
         schema.literal(HostStatus.OFFLINE.toString()),
-        schema.literal(HostStatus.UNENROLLING.toString()),
-        schema.literal(HostStatus.ERROR.toString()),
+        schema.literal(HostStatus.UPDATING.toString()),
+        schema.literal(HostStatus.UNHEALTHY.toString()),
+        schema.literal(HostStatus.INACTIVE.toString()),
       ])
     )
   ),

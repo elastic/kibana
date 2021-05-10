@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -27,7 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+
+      await kibanaServer.importExport.load('discover');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -45,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
-        expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
+        expect(rowData).to.contain('Sep 22, 2015 @ 23:50:13.253');
       });
 
       it('save query should show toast message and display query name', async function () {
@@ -92,31 +94,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
-        await retry.waitFor('doc table to contain the right search result', async () => {
-          const rowData = await PageObjects.discover.getDocTableField(1);
-          log.debug(`The first timestamp value in doc table: ${rowData}`);
-          return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
-        });
+        await retry.waitForWithTimeout(
+          'doc table to contain the right search result',
+          1000,
+          async () => {
+            const rowData = await PageObjects.discover.getDocTableField(1);
+            log.debug(`The first timestamp value in doc table: ${rowData}`);
+            return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
+          }
+        );
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
         // this is the number of renderings of the histogram needed when new data is fetched
         // this needs to be improved
-        const renderingCountInc = 3;
+        const renderingCountInc = 1;
         const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete', async () => {
-          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
-          log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + renderingCountInc;
+          const actualCount = await elasticChart.getVisualizationRenderingCount();
+          const expectedCount = prevRenderingCount + renderingCountInc;
+          log.debug(
+            `renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`
+          );
+          return actualCount === expectedCount;
         });
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete after being brushed', async () => {
-          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
-          log.debug(`Number of renderings after brushing: ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + 6;
+          const actualCount = await elasticChart.getVisualizationRenderingCount();
+          const expectedCount = prevRenderingCount + renderingCountInc * 2;
+          log.debug(
+            `renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`
+          );
+          return actualCount === expectedCount;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(26);
@@ -169,7 +181,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('query #2, which has an empty time range', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/89550
+    describe.skip('query #2, which has an empty time range', () => {
       const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
       const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
@@ -290,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('_score');
-        await PageObjects.discover.clickFieldSort('_score');
+        await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
         await PageObjects.discover.clickFieldListItemAdd('_score');
@@ -301,7 +314,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('referer');
-        await PageObjects.discover.clickFieldSort('referer');
+        await PageObjects.discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
         expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
         const url = await browser.getCurrentUrl();

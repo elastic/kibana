@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -37,16 +38,20 @@ const MyDescriptionListDescription = styled(EuiDescriptionListDescription)`
 
 const ExceptionDetailsComponent = ({
   showComments,
+  showModified = false,
+  showName = false,
   onCommentsClick,
   exceptionItem,
 }: {
   showComments: boolean;
+  showModified?: boolean;
+  showName?: boolean;
   exceptionItem: ExceptionListItemSchema;
   onCommentsClick: () => void;
 }): JSX.Element => {
   const descriptionListItems = useMemo(
-    (): DescriptionListItem[] => getDescriptionListContent(exceptionItem),
-    [exceptionItem]
+    (): DescriptionListItem[] => getDescriptionListContent(exceptionItem, showModified, showName),
+    [exceptionItem, showModified, showName]
   );
 
   const commentsSection = useMemo((): JSX.Element => {

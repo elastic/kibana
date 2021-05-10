@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -21,6 +21,7 @@ import {
   ConfigDeprecationWithContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
+  DeprecatedConfigDetails,
 } from './deprecation';
 import { LegacyObjectToConfigAdapter } from './legacy';
 
@@ -43,6 +44,7 @@ export class ConfigService {
   private readonly handledPaths: Set<ConfigPath> = new Set();
   private readonly schemas = new Map<string, Type<unknown>>();
   private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
+  private readonly handledDeprecatedConfigs = new Map<string, DeprecatedConfigDetails[]>();
 
   constructor(
     private readonly rawConfigProvider: RawConfigurationProvider,
@@ -89,6 +91,13 @@ export class ConfigService {
         path: flatPath,
       })),
     ]);
+  }
+
+  /**
+   * returns all handled deprecated configs
+   */
+  public getHandledDeprecatedConfigs() {
+    return [...this.handledDeprecatedConfigs.entries()];
   }
 
   /**
@@ -186,8 +195,16 @@ export class ConfigService {
     const rawConfig = await this.rawConfigProvider.getConfig$().pipe(take(1)).toPromise();
     const deprecations = await this.deprecations.pipe(take(1)).toPromise();
     const deprecationMessages: string[] = [];
-    const logger = (msg: string) => deprecationMessages.push(msg);
-    applyDeprecations(rawConfig, deprecations, logger);
+    const createAddDeprecation = (domainId: string) => (context: DeprecatedConfigDetails) => {
+      if (!context.silent) {
+        deprecationMessages.push(context.message);
+      }
+      const handledDeprecatedConfig = this.handledDeprecatedConfigs.get(domainId) || [];
+      handledDeprecatedConfig.push(context);
+      this.handledDeprecatedConfigs.set(domainId, handledDeprecatedConfig);
+    };
+
+    applyDeprecations(rawConfig, deprecations, createAddDeprecation);
     deprecationMessages.forEach((msg) => {
       this.deprecationLog.warn(msg);
     });

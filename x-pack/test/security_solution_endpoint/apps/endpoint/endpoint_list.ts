@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -31,41 +32,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
     [
       'rezzani-7.example.com',
-      'Error',
+      'Unhealthy',
       'Default',
       'Failure',
       'windows 10.0',
       '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
       '6.8.0',
-      'Jan 24, 2020 @ 16:06:09.541',
+      'Apr 19, 2021 @ 14:10:05.309',
       '',
     ],
     [
       'cadmann-4.example.com',
-      'Error',
+      'Unhealthy',
       'Default',
       'Failure',
       'windows 10.0',
       '10.192.213.130, 10.70.28.129',
       '6.6.1',
-      'Jan 24, 2020 @ 16:06:09.541',
+      'Apr 19, 2021 @ 14:10:05.309',
       '',
     ],
     [
       'thurlow-9.example.com',
-      'Error',
+      'Unhealthy',
       'Default',
       'Success',
       'windows 10.0',
       '10.46.229.234',
       '6.0.0',
-      'Jan 24, 2020 @ 16:06:09.541',
+      'Apr 19, 2021 @ 14:10:05.309',
       '',
     ],
   ];
 
   describe('endpoint list', function () {
-    this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
     describe('when initially navigating to page', () => {
@@ -242,11 +242,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
       });
-      it('for the kql query: HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
+      it('for the kql filtering for policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
         const adminSearchBar = await testSubjects.find('adminSearchBar');
         await adminSearchBar.clearValueWithKeyboard();
         await adminSearchBar.type(
-          'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
+          // schema depends on applied package
+          'Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" ' +
+            'or ' +
+            'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
         );
         const querySubmitButton = await testSubjects.find('querySubmitButton');
         await querySubmitButton.click();
@@ -264,24 +267,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ],
           [
             'cadmann-4.example.com',
-            'Error',
+            'Unhealthy',
             'Default',
             'Failure',
             'windows 10.0',
             '10.192.213.130, 10.70.28.129',
             '6.6.1',
-            'Jan 24, 2020 @ 16:06:09.541',
+            'Apr 19, 2021 @ 14:10:05.309',
             '',
           ],
           [
             'thurlow-9.example.com',
-            'Error',
+            'Unhealthy',
             'Default',
             'Success',
             'windows 10.0',
             '10.46.229.234',
             '6.0.0',
-            'Jan 24, 2020 @ 16:06:09.541',
+            'Apr 19, 2021 @ 14:10:05.309',
             '',
           ],
         ];

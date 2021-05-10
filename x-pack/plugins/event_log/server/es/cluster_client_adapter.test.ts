@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticsearchClient } from 'src/core/server';
@@ -11,7 +12,6 @@ import {
   IClusterClientAdapter,
   EVENT_BUFFER_LENGTH,
 } from './cluster_client_adapter';
-import { contextMock } from './context.mock';
 import { findOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { times } from 'lodash';
@@ -30,7 +30,7 @@ beforeEach(() => {
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     elasticsearchClientPromise: Promise.resolve(clusterClient),
-    context: contextMock.create(),
+    wait: () => Promise.resolve(true),
   });
 });
 
@@ -326,7 +326,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -390,11 +398,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -407,7 +417,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -473,11 +491,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -490,7 +510,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -506,7 +534,7 @@ describe('queryEventsBySavedObject', () => {
     expect(query).toMatchObject({
       index: 'index-name',
       body: {
-        sort: { 'event.end': { order: 'desc' } },
+        sort: [{ 'event.end': { order: 'desc' } }],
       },
     });
   });
@@ -516,7 +544,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -590,11 +626,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -607,7 +645,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -689,11 +735,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,

@@ -1,29 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { each, cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
-import realHits from 'fixtures/real_hits.js';
-// @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+// @ts-expect-error
+import realHits from '../../../__fixtures__/real_hits.js';
+// @ts-expect-error
+import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../core/types';
-import { FieldFilterState } from './lib/field_filter';
-import { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
+import {
+  DiscoverSidebarResponsive,
+  DiscoverSidebarResponsiveProps,
+} from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { configMock } from '../../../__mocks__/config';
+import { indexPatternsMock } from '../../../__mocks__/index_patterns';
+import { DiscoverSidebar } from './discover_sidebar';
 
 const mockServices = ({
   history: () => ({
@@ -56,10 +60,10 @@ jest.mock('./lib/get_index_pattern_field_list', () => ({
   getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
 }));
 
-function getCompProps() {
+function getCompProps(): DiscoverSidebarResponsiveProps {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
-    (cfg: any) => cfg,
+    (cfg: unknown) => cfg,
     'time',
     stubbedLogstashFields(),
     coreMock.createSetup()
@@ -85,25 +89,26 @@ function getCompProps() {
   }
   return {
     columns: ['extension'],
+    config: configMock,
     fieldCounts,
     hits,
     indexPatternList,
+    indexPatterns: indexPatternsMock,
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
     services: mockServices,
-    setIndexPattern: jest.fn(),
+    setAppState: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
-    fieldFilter: {} as FieldFilterState,
-    setFieldFilter: jest.fn(),
+    onEditRuntimeField: jest.fn(),
   };
 }
 
 describe('discover responsive sidebar', function () {
-  let props: DiscoverSidebarProps;
-  let comp: ReactWrapper<DiscoverSidebarProps>;
+  let props: DiscoverSidebarResponsiveProps;
+  let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
 
   beforeAll(() => {
     props = getCompProps();
@@ -130,5 +135,15 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'field-extension-showDetails').simulate('click');
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
+  });
+  it('renders sidebar with unmapped fields config', function () {
+    const unmappedFieldsConfig = {
+      showUnmappedFields: false,
+    };
+    const componentProps = { ...props, unmappedFieldsConfig };
+    const component = mountWithIntl(<DiscoverSidebarResponsive {...componentProps} />);
+    const discoverSidebar = component.find(DiscoverSidebar);
+    expect(discoverSidebar).toHaveLength(1);
+    expect(discoverSidebar.props().unmappedFieldsConfig).toEqual(unmappedFieldsConfig);
   });
 });

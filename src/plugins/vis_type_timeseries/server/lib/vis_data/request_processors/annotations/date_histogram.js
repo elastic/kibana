@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+import { validateField } from '../../../../../common/fields_utils';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -18,13 +19,18 @@ export function dateHistogram(
   panel,
   annotation,
   esQueryConfig,
-  indexPatternObject,
+  annotationIndex,
   capabilities,
   uiSettings
 ) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const timeField = annotation.time_field;
+    const timeField = annotation.time_field || annotationIndex.indexPattern?.timeFieldName || '';
+
+    if (panel.use_kibana_indexes) {
+      validateField(timeField, annotationIndex);
+    }
+
     const { bucketSize, intervalString } = getBucketSize(
       req,
       'auto',
@@ -32,7 +38,7 @@ export function dateHistogram(
       barTargetUiSettings
     );
     const { from, to } = getTimerange(req);
-    const timezone = capabilities.searchTimezone;
+    const { timezone } = capabilities;
 
     overwrite(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,

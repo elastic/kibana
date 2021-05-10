@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -379,6 +379,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('Split table');
+        // split by column to make all tables rows visible
+        await PageObjects.visEditor.clickSplitDirection('Columns');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('extension.raw');
         await PageObjects.visEditor.setSize(2);

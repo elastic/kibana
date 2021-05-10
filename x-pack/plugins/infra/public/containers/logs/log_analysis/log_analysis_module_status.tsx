@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useReducer } from 'react';
@@ -104,10 +105,10 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
             reasons: [
               ...Object.values(datafeedSetupResults)
                 .filter(hasError)
-                .map((datafeed) => datafeed.error.msg),
+                .map((datafeed) => datafeed.error.error?.reason),
               ...Object.values(jobSetupResults)
                 .filter(hasError)
-                .map((job) => job.error.msg),
+                .map((job) => job.error.error?.reason),
             ],
           };
 

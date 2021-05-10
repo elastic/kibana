@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -16,17 +18,16 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import {
+
+import type {
   NewPackagePolicyInput,
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
 } from '../../../../types';
-import {
-  PackagePolicyInputValidationResults,
-  hasInvalidButRequiredVar,
-  countValidationErrors,
-} from '../services';
+import type { PackagePolicyInputValidationResults } from '../services';
+import { hasInvalidButRequiredVar, countValidationErrors } from '../services';
+
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 

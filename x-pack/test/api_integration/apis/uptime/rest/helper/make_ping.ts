@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
 import { merge } from 'lodash';
 import { makeTls, TlsProps } from './make_tls';
 
-const INDEX_NAME = 'heartbeat-8-generated-test';
+const DEFAULT_INDEX_NAME = 'heartbeat-8-generated-test';
+const DATA_STREAM_INDEX_NAME = 'synthetics-http-default';
 
 export const makePing = async (
   es: any,
@@ -16,7 +18,8 @@ export const makePing = async (
   fields: { [key: string]: any },
   mogrify: (doc: any) => any,
   refresh: boolean = true,
-  tls: boolean | TlsProps = false
+  tls: boolean | TlsProps = false,
+  isFleetManaged: boolean | undefined = false
 ) => {
   const timestamp = new Date();
   const baseDoc: any = {
@@ -114,7 +117,7 @@ export const makePing = async (
   const doc = mogrify(merge(baseDoc, fields));
 
   await es.index({
-    index: INDEX_NAME,
+    index: isFleetManaged ? DATA_STREAM_INDEX_NAME : DEFAULT_INDEX_NAME,
     refresh,
     body: doc,
   });

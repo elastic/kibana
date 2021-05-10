@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -18,14 +18,13 @@ export default function ({ getService, getPageObjects }) {
 
   describe('mgmt saved objects', function describeIndexTests() {
     beforeEach(async function () {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.emptyKibanaIndex();
       await esArchiver.load('discover');
       await PageObjects.settings.navigateTo();
     });
 
     afterEach(async function () {
       await esArchiver.unload('discover');
-      await esArchiver.load('empty_kibana');
     });
 
     it('should import saved objects mgmt', async function () {

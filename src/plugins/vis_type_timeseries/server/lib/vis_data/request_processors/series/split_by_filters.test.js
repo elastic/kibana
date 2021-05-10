@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { splitByFilters } from './split_by_filters';
@@ -12,7 +12,11 @@ describe('splitByFilters(req, panel, series)', () => {
   let panel;
   let series;
   let req;
+  let config;
+  let seriesIndex;
+
   beforeEach(() => {
+    config = {};
     panel = {
       time_field: 'timestamp',
     };
@@ -36,24 +40,25 @@ describe('splitByFilters(req, panel, series)', () => {
       metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }],
     };
     req = {
-      payload: {
+      body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
         },
       },
     };
+    seriesIndex = {};
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    splitByFilters(req, panel, series)(next)({});
+    splitByFilters(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns a valid terms agg', () => {
     const next = (doc) => doc;
-    const doc = splitByFilters(req, panel, series)(next)({});
+    const doc = splitByFilters(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -97,7 +102,7 @@ describe('splitByFilters(req, panel, series)', () => {
   test('calls next and does not add a terms agg', () => {
     series.split_mode = 'everything';
     const next = jest.fn((doc) => doc);
-    const doc = splitByFilters(req, panel, series)(next)({});
+    const doc = splitByFilters(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});
   });

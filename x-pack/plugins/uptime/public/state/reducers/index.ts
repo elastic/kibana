@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { combineReducers } from 'redux';
 import { monitorReducer } from './monitor';
 import { overviewFiltersReducer } from './overview_filters';
-import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
 import { monitorListReducer } from './monitor_list';
@@ -27,7 +27,6 @@ import { networkEventsReducer } from './network_events';
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
   overviewFilters: overviewFiltersReducer,
-  snapshot: snapshotReducer,
   ui: uiReducer,
   monitorList: monitorListReducer,
   monitorStatus: monitorStatusReducer,

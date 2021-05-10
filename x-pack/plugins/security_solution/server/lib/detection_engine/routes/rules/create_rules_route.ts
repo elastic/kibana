@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -19,8 +20,6 @@ import { createRulesSchema } from '../../../../../common/detection_engine/schema
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
-import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -44,7 +43,7 @@ export const createRulesRoute = (
       }
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
@@ -77,7 +76,7 @@ export const createRulesRoute = (
         throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(
-          clusterClient.callAsCurrentUser,
+          esClient.asCurrentUser,
           internalRule.params.outputIndex
         );
         if (!indexExists) {
@@ -90,12 +89,9 @@ export const createRulesRoute = (
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        /**
-         * TODO: Remove this use of `as` by utilizing the proper type
-         */
-        const createdRule = (await alertsClient.create({
+        const createdRule = await alertsClient.create({
           data: internalRule,
-        })) as Alert<RuleTypeParams>;
+        });
 
         const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,

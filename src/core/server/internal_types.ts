@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Type } from '@kbn/config-schema';
@@ -29,6 +29,7 @@ import { InternalStatusServiceSetup } from './status';
 import { InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
+import { InternalDeprecationsServiceSetup } from './deprecations';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -45,6 +46,7 @@ export interface InternalCoreSetup {
   httpResources: InternalHttpResourcesSetup;
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
+  deprecations: InternalDeprecationsServiceSetup;
 }
 
 /**

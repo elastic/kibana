@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ratios } from './filter_ratios';
 
-describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => {
+describe('ratios(req, panel, series, esQueryConfig, seriesIndex)', () => {
   let panel;
   let series;
   let req;
   let esQueryConfig;
-  let indexPatternObject;
+  let indexPattern;
   beforeEach(() => {
     panel = {
       time_field: 'timestamp',
@@ -35,7 +35,7 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
       ],
     };
     req = {
-      payload: {
+      body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
@@ -47,18 +47,18 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
       queryStringOptions: { analyze_wildcard: true },
       ignoreFilterIfFieldNotInIndex: false,
     };
-    indexPatternObject = {};
+    indexPattern = {};
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    ratios(req, panel, series, esQueryConfig, indexPattern)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns filter ratio aggs', () => {
     const next = (doc) => doc;
-    const doc = ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    const doc = ratios(req, panel, series, esQueryConfig, indexPattern)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -135,7 +135,7 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
   test('returns empty object when field is not set', () => {
     delete series.metrics[0].field;
     const next = (doc) => doc;
-    const doc = ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    const doc = ratios(req, panel, series, esQueryConfig, indexPattern)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
 import { UptimeESClient } from '../lib';
-import { ESSearchBody } from '../../../../../typings/elasticsearch';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
@@ -43,7 +43,7 @@ const getMonitorAlerts = async ({
       monitorAlerts.push(currAlert);
       continue;
     }
-    const esParams: ESSearchBody = {
+    const esParams = {
       query: {
         bool: {
           filter: [
@@ -120,7 +120,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
     sort: [
       {
         '@timestamp': {
-          order: 'desc',
+          order: 'desc' as const,
         },
       },
     ],

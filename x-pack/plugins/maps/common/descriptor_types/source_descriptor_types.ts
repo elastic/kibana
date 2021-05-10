@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
@@ -16,11 +18,6 @@ import {
   MVT_FIELD_TYPE,
   SOURCE_TYPES,
 } from '../constants';
-
-export type AttributionDescriptor = {
-  attributionText?: string;
-  attributionUrl?: string;
-};
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -93,8 +90,8 @@ export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   geoField: string;
-  filterByMapBounds?: boolean;
-  tooltipProperties?: string[];
+  filterByMapBounds: boolean;
+  tooltipProperties: string[];
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
@@ -127,14 +124,11 @@ export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
   layers: string;
   styles: string;
-  attributionText: string;
-  attributionUrl: string;
 };
 
-export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
-  AttributionDescriptor & {
-    urlTemplate: string;
-  };
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
+  urlTemplate: string;
+};
 
 export type MVTFieldDescriptor = {
   name: string;
@@ -172,6 +166,8 @@ export type InlineFieldDescriptor = {
 export type GeojsonFileSourceDescriptor = {
   __fields?: InlineFieldDescriptor[];
   __featureCollection: FeatureCollection;
+  areResultsTrimmed: boolean;
+  tooltipContent: string | null;
   name: string;
   type: string;
 };

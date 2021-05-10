@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import getopts from 'getopts';
@@ -18,6 +18,9 @@ export function readCliArgs(argv: string[]) {
       'oss',
       'no-oss',
       'skip-archives',
+      'skip-initialize',
+      'skip-generic-folders',
+      'skip-platform-folders',
       'skip-os-packages',
       'rpm',
       'deb',
@@ -93,7 +96,10 @@ export function readCliArgs(argv: string[]) {
     versionQualifier: flags['version-qualifier'],
     buildOssDist: flags.oss !== false,
     buildDefaultDist: !flags.oss,
+    initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
+    createGenericFolders: !Boolean(flags['skip-generic-folders']),
+    createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),

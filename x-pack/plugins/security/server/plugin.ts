@@ -1,45 +1,57 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { combineLatest, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { TypeOf } from '@kbn/config-schema';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
-import {
+
+import type { TypeOf } from '@kbn/config-schema';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type {
   CoreSetup,
   CoreStart,
   KibanaRequest,
   Logger,
+  Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
-import {
+} from 'src/core/server';
+import type { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-
-import { AuthenticationService, AuthenticationServiceStart } from './authentication';
-import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
-import { AnonymousAccessService, AnonymousAccessServiceStart } from './anonymous_access';
-import { ConfigSchema, ConfigType, createConfig } from './config';
-import { defineRoutes } from './routes';
-import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
-import { AuthenticatedUser } from '../common/model';
-import { setupSavedObjects } from './saved_objects';
-import { AuditService, SecurityAuditLogger, AuditServiceSetup } from './audit';
-import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
-import { securityFeatures } from './features';
+import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { SecurityLicense } from '../common/licensing';
+import { SecurityLicenseService } from '../common/licensing';
+import type { AuthenticatedUser } from '../common/model';
+import type { AnonymousAccessServiceStart } from './anonymous_access';
+import { AnonymousAccessService } from './anonymous_access';
+import type { AuditServiceSetup } from './audit';
+import { AuditService, SecurityAuditLogger } from './audit';
+import type { AuthenticationServiceStart } from './authentication';
+import { AuthenticationService } from './authentication';
+import type { AuthorizationServiceSetup } from './authorization';
+import { AuthorizationService } from './authorization';
+import type { ConfigSchema, ConfigType } from './config';
+import { createConfig } from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { Session, SessionManagementService } from './session_management';
-import { registerSecurityUsageCollector } from './usage_collector';
+import type { SecurityFeatureUsageServiceStart } from './feature_usage';
+import { SecurityFeatureUsageService } from './feature_usage';
+import { securityFeatures } from './features';
+import { defineRoutes } from './routes';
+import { setupSavedObjects } from './saved_objects';
+import type { Session } from './session_management';
+import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
+import { registerSecurityUsageCollector } from './usage_collector';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -47,7 +59,7 @@ export type SpacesService = Pick<
 >;
 
 export type FeaturesService = Pick<
-  FeaturesSetupContract,
+  FeaturesPluginSetup,
   'getKibanaFeatures' | 'getElasticsearchFeatures'
 >;
 
@@ -100,7 +112,13 @@ export interface PluginStartDependencies {
 /**
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
-export class Plugin {
+export class SecurityPlugin
+  implements
+    Plugin<
+      RecursiveReadonly<SecurityPluginSetup>,
+      RecursiveReadonly<SecurityPluginStart>,
+      PluginSetupDependencies
+    > {
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetup;
   private auditSetup?: AuditServiceSetup;
@@ -228,7 +246,12 @@ export class Plugin {
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
-    this.authenticationService.setup({ http: core.http, license });
+    this.authenticationService.setup({
+      http: core.http,
+      config,
+      license,
+      buildNumber: this.initializerContext.env.packageInfo.buildNum,
+    });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
 

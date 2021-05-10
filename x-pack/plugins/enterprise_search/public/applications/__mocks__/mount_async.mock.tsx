@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
+import { mountWithIntl } from './mount_with_i18n.mock';
 
-import { mountWithIntl } from './';
+import React from 'react';
+
+import { mount, ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 /**
  * This helper is intended for components that have async effects

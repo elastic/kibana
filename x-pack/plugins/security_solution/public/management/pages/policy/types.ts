@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ILicense } from '../../../../../licensing/common/types';
@@ -118,6 +119,12 @@ export type RansomwareProtectionOSes = KeysByValueCriteria<
   UIPolicyConfig,
   { ransomware: ProtectionFields }
 >;
+
+export type PolicyProtection =
+  | keyof Pick<UIPolicyConfig['windows'], 'malware' | 'ransomware'>
+  | keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+
+export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

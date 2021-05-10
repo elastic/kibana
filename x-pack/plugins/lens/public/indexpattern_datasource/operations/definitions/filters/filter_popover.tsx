@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import './filter_popover.scss';
 
 import React, { MouseEventHandler, useEffect, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
 import { IndexPattern } from '../../../types';
-import { QueryStringInput, Query } from '../../../../../../../../src/plugins/data/public';
+import { Query } from '../../../../../../../../src/plugins/data/public';
 import { LabelInput } from '../shared_components';
+import { QueryInput } from '../../../query_input';
 
 export const FilterPopover = ({
   filter,
@@ -90,56 +91,5 @@ export const FilterPopover = ({
         dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>
-  );
-};
-
-export const QueryInput = ({
-  value,
-  onChange,
-  indexPattern,
-  isInvalid,
-  onSubmit,
-}: {
-  value: Query;
-  onChange: (input: Query) => void;
-  indexPattern: IndexPattern;
-  isInvalid: boolean;
-  onSubmit: () => void;
-}) => {
-  const [inputValue, setInputValue] = useState(value);
-
-  useDebounce(() => onChange(inputValue), 256, [inputValue]);
-
-  const handleInputChange = (input: Query) => {
-    setInputValue(input);
-  };
-
-  return (
-    <QueryStringInput
-      dataTestSubj="indexPattern-filters-queryStringInput"
-      size="s"
-      isInvalid={isInvalid}
-      bubbleSubmitEvent={false}
-      indexPatterns={[indexPattern]}
-      query={inputValue}
-      onChange={handleInputChange}
-      onSubmit={() => {
-        if (inputValue.query) {
-          onSubmit();
-        }
-      }}
-      placeholder={
-        inputValue.language === 'kuery'
-          ? i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderKql', {
-              defaultMessage: '{example}',
-              values: { example: 'method : "GET" or status : "404"' },
-            })
-          : i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderLucene', {
-              defaultMessage: '{example}',
-              values: { example: 'method:GET OR status:404' },
-            })
-      }
-      languageSwitcherPopoverAnchorPosition="rightDown"
-    />
   );
 };

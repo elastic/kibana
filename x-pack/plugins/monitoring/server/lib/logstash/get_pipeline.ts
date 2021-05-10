@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import boom from '@hapi/boom';
@@ -92,7 +93,7 @@ export function _enrichStateWithStatsAggregation(
   const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
 
   const verticesWithStatsBuckets =
-    statsAggregation.aggregations.pipelines.scoped.vertices.vertex_id.buckets;
+    statsAggregation.aggregations?.pipelines.scoped.vertices.vertex_id.buckets ?? [];
   verticesWithStatsBuckets.forEach((vertexStatsBucket: any) => {
     // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
     const vertexId = vertexStatsBucket.key;
@@ -141,7 +142,7 @@ export async function getPipeline(
     getPipelineStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
   ]);
 
-  if (stateDocument === null) {
+  if (stateDocument === null || !statsAggregation) {
     return boom.notFound(
       `Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`
     );

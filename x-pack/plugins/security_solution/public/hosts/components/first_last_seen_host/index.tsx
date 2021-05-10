@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
@@ -10,7 +11,7 @@ import React, { useMemo } from 'react';
 import { useFirstLastSeenHost } from '../../containers/hosts/first_last_seen';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { DocValueFields } from '../../../../common/search_strategy';
+import { Direction, DocValueFields } from '../../../../common/search_strategy';
 
 export enum FirstLastSeenHostType {
   FIRST_SEEN = 'first-seen',
@@ -30,6 +31,7 @@ export const FirstLastSeenHost = React.memo<FirstLastSeenHostProps>(
       docValueFields,
       hostName,
       indexNames,
+      order: type === FirstLastSeenHostType.FIRST_SEEN ? Direction.asc : Direction.desc,
     });
     const valueSeen = useMemo(
       () => (type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen),

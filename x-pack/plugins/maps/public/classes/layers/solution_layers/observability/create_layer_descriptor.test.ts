@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { emsWorldLayerId } from '../../../../../common';
 
 jest.mock('../../../../kibana_services', () => {
   return {
@@ -70,7 +73,7 @@ describe('createLayerDescriptor', () => {
       maxZoom: 24,
       minZoom: 0,
       sourceDescriptor: {
-        id: 'world_countries',
+        id: emsWorldLayerId,
         tooltipProperties: ['name', 'iso2'],
         type: 'EMS_FILE',
       },
@@ -175,7 +178,6 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
-      joins: [],
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,

@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { first } from 'rxjs/operators';
 import { Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import type { CoreSetup, CoreStart } from 'src/core/server';
 
@@ -22,7 +22,6 @@ import type {
   ListsRequestHandlerContext,
   PluginsStart,
 } from './types';
-import { createConfig$ } from './create_config';
 import { getSpaceId } from './get_space_id';
 import { getUser } from './get_user';
 import { initSavedObjects } from './saved_objects';
@@ -31,17 +30,17 @@ import { ExceptionListClient } from './services/exception_lists/exception_list_c
 export class ListPlugin
   implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, {}, PluginsStart> {
   private readonly logger: Logger;
+  private readonly config: ConfigType;
   private spaces: SpacesServiceStart | undefined | null;
-  private config: ConfigType | undefined | null;
   private security: SecurityPluginStart | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
+    this.config = this.initializerContext.config.get<ConfigType>();
   }
 
   public async setup(core: CoreSetup): Promise<ListPluginSetup> {
-    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
-    this.config = config;
+    const { config } = this;
 
     initSavedObjects(core.savedObjects);
 
@@ -59,10 +58,10 @@ export class ListPlugin
           user,
         });
       },
-      getListClient: (callCluster, spaceId, user): ListClient => {
+      getListClient: (esClient, spaceId, user): ListClient => {
         return new ListClient({
-          callCluster,
           config,
+          esClient,
           spaceId,
           user,
         });
@@ -87,9 +86,7 @@ export class ListPlugin
         core: {
           savedObjects: { client: savedObjectsClient },
           elasticsearch: {
-            legacy: {
-              client: { callAsCurrentUser: callCluster },
-            },
+            client: { asCurrentUser: esClient },
           },
         },
       } = context;
@@ -106,8 +103,8 @@ export class ListPlugin
             }),
           getListClient: (): ListClient =>
             new ListClient({
-              callCluster,
               config,
+              esClient,
               spaceId,
               user,
             }),

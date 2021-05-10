@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
@@ -13,22 +14,22 @@ import {
 } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
-import { Loading } from '../../../../../../applications/shared/loading';
+import { Loading } from '../../../../../shared/loading';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
+import { AddSourceList } from './add_source_list';
+import { AvailableSourcesList } from './available_sources_list';
+import { ConfiguredSourcesList } from './configured_sources_list';
 import {
   ADD_SOURCE_NEW_SOURCE_DESCRIPTION,
   ADD_SOURCE_ORG_SOURCE_DESCRIPTION,
   ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION,
 } from './constants';
-
-import { AddSourceList } from './add_source_list';
-import { AvailableSourcesList } from './available_sources_list';
-import { ConfiguredSourcesList } from './configured_sources_list';
 
 describe('AddSourceList', () => {
   const initializeSources = jest.fn();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore
@@ -31,7 +32,7 @@ export async function getTimeOfLastEvent({
     size: 1,
     ignoreUnavailable: true,
     body: {
-      _source: ['timestamp'],
+      _source: ['beats_stats.timestamp', '@timestamp'],
       sort: [
         {
           timestamp: {
@@ -59,5 +60,8 @@ export async function getTimeOfLastEvent({
   };
 
   const response = await callWithRequest(req, 'search', params);
-  return response.hits?.hits.length ? response.hits?.hits[0]?._source.timestamp : undefined;
+  return response.hits?.hits.length
+    ? response.hits?.hits[0]?._source.beats_stats?.timestamp ??
+        response.hits?.hits[0]?._source['@timestamp']
+    : undefined;
 }

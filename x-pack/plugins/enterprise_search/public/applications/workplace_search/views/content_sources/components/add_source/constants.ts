@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -175,7 +176,7 @@ export const CONFIG_CUSTOM_BUTTON = i18n.translate(
 export const CONFIG_OAUTH_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configOauth.label',
   {
-    defaultMessage: 'Complete connection',
+    defaultMessage: 'Select GitHub organizations to sync',
   }
 );
 
@@ -337,6 +338,13 @@ export const SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE = i18n.translate(
   }
 );
 
+export const SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.documentLevelPermissions.title',
+  {
+    defaultMessage: 'Document-level permissions available with Platinum license',
+  }
+);
+
 export const SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.documentLevelPermissions.text',
   {
@@ -351,28 +359,6 @@ export const SOURCE_FEATURES_EXPLORE_BUTTON = i18n.translate(
     defaultMessage: 'Explore Platinum features',
   }
 );
-
-export const SOURCE_FEATURES_INCLUDED_FEATURES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.included.title',
-  {
-    defaultMessage: 'Included features',
-  }
-);
-
-export const CONNECT_REMOTE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.remote.text',
-  {
-    defaultMessage: 'Remote',
-  }
-);
-
-export const CONNECT_PRIVATE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.private.text',
-  {
-    defaultMessage: 'Private',
-  }
-);
-
 export const CONNECT_WHICH_OPTION_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.whichOption.link',
   {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -14,16 +15,19 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const testUsers = [USER.ML_POWERUSER, USER.ML_POWERUSER_SPACES];
+  const testUsers = [
+    { user: USER.ML_POWERUSER, discoverAvailable: true },
+    { user: USER.ML_POWERUSER_SPACES, discoverAvailable: false },
+  ];
 
   describe('for user with full ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);
 
     describe('with no data loaded', function () {
-      for (const user of testUsers) {
-        describe(`(${user})`, function () {
+      for (const testUser of testUsers) {
+        describe(`(${testUser.user})`, function () {
           before(async () => {
-            await ml.securityUI.loginAs(user);
+            await ml.securityUI.loginAs(testUser.user);
             await ml.api.cleanMlIndices();
           });
 
@@ -132,10 +136,11 @@ export default function ({ getService }: FtrProviderContext) {
           description: 'Test calendar',
         });
         await ml.api.createCalendarEvents(calendarId, [
+          // @ts-expect-error not full interface
           {
             description: eventDescription,
-            start_time: 1513641600000,
-            end_time: 1513728000000,
+            start_time: '1513641600000',
+            end_time: '1513728000000',
           },
         ]);
 
@@ -152,10 +157,10 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.api.deleteFilter(filterId);
       });
 
-      for (const user of testUsers) {
-        describe(`(${user})`, function () {
+      for (const testUser of testUsers) {
+        describe(`(${testUser.user})`, function () {
           before(async () => {
-            await ml.securityUI.loginAs(user);
+            await ml.securityUI.loginAs(testUser.user);
           });
 
           after(async () => {
@@ -304,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
               'should display enabled DFA job view and action menu'
             );
             await ml.dataFrameAnalyticsTable.assertJobRowViewButtonEnabled(dfaJobId, true);
-            await ml.dataFrameAnalyticsTable.assertJowRowActionsMenuButtonEnabled(dfaJobId, true);
+            await ml.dataFrameAnalyticsTable.assertJobRowActionsMenuButtonEnabled(dfaJobId, true);
             await ml.dataFrameAnalyticsTable.assertJobActionViewButtonEnabled(dfaJobId, true);
 
             await ml.testExecution.logTestStep('should display enabled DFA job row action buttons');
@@ -356,10 +361,18 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display the data visualizer table');
             await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-            await ml.testExecution.logTestStep('should display the actions panel with cards');
+            await ml.testExecution.logTestStep(
+              `should display the actions panel ${
+                testUser.discoverAvailable ? 'with' : 'without'
+              } Discover card`
+            );
             await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+            await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
+
+            await ml.testExecution.logTestStep('should display job cards');
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
             await ml.dataVisualizerIndexBased.assertRecognizerCardExists(ecExpectedModuleId);
+            await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
           });
 
           it('should display elements on File Data Visualizer page correctly', async () => {

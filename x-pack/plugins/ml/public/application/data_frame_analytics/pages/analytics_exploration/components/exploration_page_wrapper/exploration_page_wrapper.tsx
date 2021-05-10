@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useState } from 'react';
@@ -32,24 +33,32 @@ import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 
-const filters = {
-  options: [
-    {
-      id: 'training',
-      label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.trainingSubsetLabel', {
-        defaultMessage: 'Training',
-      }),
-    },
-    {
-      id: 'testing',
-      label: i18n.translate('xpack.ml.dataframe.analytics.explorationResults.testingSubsetLabel', {
-        defaultMessage: 'Testing',
-      }),
-    },
-  ],
-  columnId: 'ml.is_training',
-  key: { training: true, testing: false },
-};
+function getFilters(resultsField: string) {
+  return {
+    options: [
+      {
+        id: 'training',
+        label: i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.trainingSubsetLabel',
+          {
+            defaultMessage: 'Training',
+          }
+        ),
+      },
+      {
+        id: 'testing',
+        label: i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.testingSubsetLabel',
+          {
+            defaultMessage: 'Testing',
+          }
+        ),
+      },
+    ],
+    columnId: `${resultsField}.is_training`,
+    key: { training: true, testing: false },
+  };
+}
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
@@ -150,7 +159,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
         </>
       )}
 
-      {indexPattern !== undefined && (
+      {indexPattern !== undefined && jobConfig && (
         <>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
@@ -161,7 +170,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
                     indexPattern={indexPattern}
                     setSearchQuery={searchQueryUpdateHandler}
                     query={query}
-                    filters={filters}
+                    filters={getFilters(jobConfig.dest.results_field)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -174,6 +183,11 @@ export const ExplorationPageWrapper: FC<Props> = ({
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <ExpandableSectionAnalytics jobId={jobConfig.id} />
+      )}
+
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
+        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
 
       {isLoadingJobConfig === true &&
@@ -190,10 +204,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
           </>
         )}
 
-      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
-        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
-      )}
+      <EuiSpacer size="m" />
 
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&

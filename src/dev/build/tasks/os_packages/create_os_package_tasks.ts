@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Task } from '../../lib';
@@ -49,21 +49,22 @@ export const CreateRpmPackage: Task = {
   },
 };
 
+const dockerBuildDate = new Date().toISOString();
 export const CreateDockerCentOS: Task = {
   description: 'Creating Docker CentOS image',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      ubi: false,
-      context: false,
       architecture: 'x64',
+      context: false,
       image: true,
+      dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
-      ubi: false,
-      context: false,
       architecture: 'aarch64',
+      context: false,
       image: true,
+      dockerBuildDate,
     });
   },
 };
@@ -74,10 +75,11 @@ export const CreateDockerUBI: Task = {
   async run(config, log, build) {
     if (!build.isOss()) {
       await runDockerGenerator(config, log, build, {
-        ubi: true,
-        context: false,
         architecture: 'x64',
+        context: false,
+        ubi: true,
         image: true,
+        dockerBuildDate,
       });
     }
   },
@@ -88,9 +90,9 @@ export const CreateDockerContexts: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      ubi: false,
       context: true,
       image: false,
+      dockerBuildDate,
     });
 
     if (!build.isOss()) {
@@ -98,6 +100,13 @@ export const CreateDockerContexts: Task = {
         ubi: true,
         context: true,
         image: false,
+        dockerBuildDate,
+      });
+      await runDockerGenerator(config, log, build, {
+        ironbank: true,
+        context: true,
+        image: false,
+        dockerBuildDate,
       });
     }
   },

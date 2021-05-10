@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -29,12 +30,14 @@ const MyFlexItem = styled(EuiFlexItem)`
   }
 `;
 
-interface ExceptionItemProps {
+export interface ExceptionItemProps {
   loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
+  showName?: boolean;
+  showModified?: boolean;
 }
 
 const ExceptionItemComponent = ({
@@ -43,6 +46,8 @@ const ExceptionItemComponent = ({
   commentsAccordionId,
   onDeleteException,
   onEditException,
+  showModified = false,
+  showName = false,
 }: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -85,6 +90,8 @@ const ExceptionItemComponent = ({
               showComments={showComments}
               exceptionItem={exceptionItem}
               onCommentsClick={onCommentsClick}
+              showModified={showModified}
+              showName={showName}
             />
             <ExceptionEntries
               disableDelete={disableDelete}

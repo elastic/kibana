@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -82,6 +83,13 @@ export class HeadlessChromiumDriverFactory {
         } as puppeteer.LaunchOptions);
 
         page = await browser.newPage();
+
+        // Log version info for debugging / maintenance
+        const client = await page.target().createCDPSession();
+        const versionInfo = await client.send('Browser.getVersion');
+        logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
+
+        await page.emulateTimezone(browserTimezone);
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
@@ -165,7 +173,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<puppeteer.Request>(page, 'requestfailed').pipe(
+    const pageRequestFailed$ = Rx.fromEvent<puppeteer.HTTPRequest>(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
@@ -184,6 +192,10 @@ export class HeadlessChromiumDriverFactory {
     // NOTE: The browser driver can not observe stdout and stderr of the child process
     // Puppeteer doesn't give a handle to the original ChildProcess object
     // See https://github.com/GoogleChrome/puppeteer/issues/1292#issuecomment-521470627
+
+    if (childProcess == null) {
+      throw new TypeError('childProcess is null or undefined!');
+    }
 
     // just log closing of the process
     const processClose$ = Rx.fromEvent<void>(childProcess, 'close').pipe(

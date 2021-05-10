@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
-
 import { monaco } from '@kbn/monaco';
 
-import { LIGHT_THEME, DARK_THEME } from './editor_theme';
+import {
+  DARK_THEME,
+  LIGHT_THEME,
+  DARK_THEME_TRANSPARENT,
+  LIGHT_THEME_TRANSPARENT,
+} from './editor_theme';
 
 import './editor.scss';
 
@@ -86,6 +90,11 @@ export interface Props {
    * Should the editor use the dark theme
    */
   useDarkTheme?: boolean;
+
+  /**
+   * Should the editor use a transparent background
+   */
+  transparentBackground?: boolean;
 }
 
 export class CodeEditor extends React.Component<Props, {}> {
@@ -132,8 +141,12 @@ export class CodeEditor extends React.Component<Props, {}> {
       }
     });
 
-    // Register the theme
+    // Register themes
     monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
+    monaco.editor.defineTheme(
+      'euiColorsTransparent',
+      this.props.useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+    );
   };
 
   _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
@@ -152,20 +165,33 @@ export class CodeEditor extends React.Component<Props, {}> {
     const { languageId, value, onChange, width, height, options } = this.props;
 
     return (
-      <React.Fragment>
+      <>
         <MonacoEditor
-          theme="euiColors"
+          theme={this.props.transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
           language={languageId}
           value={value}
           onChange={onChange}
-          editorWillMount={this._editorWillMount}
-          editorDidMount={this._editorDidMount}
           width={width}
           height={height}
-          options={options}
+          editorWillMount={this._editorWillMount}
+          editorDidMount={this._editorDidMount}
+          options={{
+            renderLineHighlight: 'none',
+            scrollBeyondLastLine: false,
+            minimap: {
+              enabled: false,
+            },
+            scrollbar: {
+              useShadows: false,
+            },
+            wordBasedSuggestions: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            ...options,
+          }}
         />
         <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
-      </React.Fragment>
+      </>
     );
   }
 

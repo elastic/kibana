@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
-import { KbnClient } from '@kbn/dev-utils';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
 import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
@@ -16,7 +18,6 @@ import {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   GetPackagesResponse,
-  PostAgentEnrollRequest,
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   EPM_API_ROUTES,
@@ -24,11 +25,7 @@ import {
   ENROLLMENT_API_KEY_ROUTES,
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
-  PostAgentEnrollResponse,
-  PostAgentCheckinRequest,
-  PostAgentCheckinResponse,
-  PostAgentAcksResponse,
-  PostAgentAcksRequest,
+  Agent,
 } from '../../../fleet/common';
 import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
@@ -112,7 +109,7 @@ async function indexHostDocs({
   const timestamp = new Date().getTime();
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
-  let enrolledAgent: undefined | PostAgentEnrollResponse['item'];
+  let enrolledAgent: undefined | Agent;
 
   for (let j = 0; j < numDocs; j++) {
     generator.updateHostData();
@@ -302,14 +299,14 @@ const fleetEnrollAgentForHost = async (
   kbnClient: KbnClientWithApiKeySupport,
   endpointHost: HostMetadata,
   agentPolicyId: string
-): Promise<undefined | PostAgentEnrollResponse['item']> => {
+): Promise<undefined | Agent> => {
   // Get Enrollement key for host's applied policy
   const enrollmentApiKey = await kbnClient
     .request<GetEnrollmentAPIKeysResponse>({
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
       method: 'GET',
       query: {
-        kuery: `fleet-enrollment-api-keys.policy_id:"${agentPolicyId}"`,
+        kuery: `policy_id:"${agentPolicyId}"`,
       },
     })
     .then((apiKeysResponse) => {
@@ -358,7 +355,7 @@ const fleetEnrollAgentForHost = async (
   };
 
   // Enroll an agent for the Host
-  const body: PostAgentEnrollRequest['body'] = {
+  const body = {
     type: 'PERMANENT',
     metadata: {
       local: {
@@ -399,7 +396,7 @@ const fleetEnrollAgentForHost = async (
     });
 
     if (res) {
-      const enrollObj: PostAgentEnrollResponse = await res.json();
+      const enrollObj = await res.json();
       if (!res.ok) {
         // eslint-disable-next-line no-console
         console.error('unable to enroll agent', enrollObj);
@@ -407,7 +404,7 @@ const fleetEnrollAgentForHost = async (
       }
       // ------------------------------------------------
       // now check the agent in so that it can complete enrollment
-      const checkinBody: PostAgentCheckinRequest['body'] = {
+      const checkinBody = {
         events: [
           {
             type: 'STATE',
@@ -445,7 +442,7 @@ const fleetEnrollAgentForHost = async (
         return;
       }
 
-      const checkinObj: PostAgentCheckinResponse = await checkinRes.json();
+      const checkinObj = await checkinRes.json();
       if (!checkinRes.ok) {
         // eslint-disable-next-line no-console
         console.error(
@@ -457,9 +454,9 @@ const fleetEnrollAgentForHost = async (
       // ------------------------------------------------
       // If we have an action to ack(), then do it now
       if (checkinObj.actions.length) {
-        const ackActionBody: PostAgentAcksRequest['body'] = {
+        const ackActionBody = {
           // @ts-ignore
-          events: checkinObj.actions.map<PostAgentAcksRequest['body']['events'][0]>((action) => {
+          events: checkinObj.actions.map((action) => {
             return {
               action_id: action.id,
               type: 'ACTION_RESULT',
@@ -484,7 +481,7 @@ const fleetEnrollAgentForHost = async (
           }
         );
 
-        const ackActionObj: PostAgentAcksResponse = await ackActionResp.json();
+        const ackActionObj = await ackActionResp.json();
         if (!ackActionResp.ok) {
           // eslint-disable-next-line no-console
           console.error(

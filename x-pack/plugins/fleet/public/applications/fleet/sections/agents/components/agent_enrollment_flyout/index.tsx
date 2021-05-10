@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -18,9 +20,15 @@ import {
   EuiFlyoutFooter,
   EuiTab,
   EuiTabs,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
+import { i18n } from '@kbn/i18n';
+
+import { useGetSettings, useUrlModal } from '../../../../hooks';
+import type { AgentPolicy } from '../../../../types';
+
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
 
@@ -29,14 +37,70 @@ interface Props {
   agentPolicies?: AgentPolicy[];
 }
 
+const MissingFleetServerHostCallout: React.FunctionComponent = () => {
+  const { setModal } = useUrlModal();
+  return (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.agentEnrollment.missingFleetHostCalloutTitle', {
+        defaultMessage: 'Missing URL for Fleet Server host',
+      })}
+    >
+      <FormattedMessage
+        id="xpack.fleet.agentEnrollment.missingFleetHostCalloutText"
+        defaultMessage="A URL for your Fleet Server host is required to enroll agents with Fleet. You can add this information in Fleet Settings. For more information, see the {link}."
+        values={{
+          link: (
+            <EuiLink
+              href="https://www.elastic.co/guide/en/fleet/current/index.html"
+              target="_blank"
+              external
+            >
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.missingFleetHostGuideLink"
+                defaultMessage="Fleet User Guide"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+      <EuiSpacer size="m" />
+      <EuiButton
+        fill
+        iconType="gear"
+        onClick={() => {
+          setModal('settings');
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.fleetSettingsLink"
+          defaultMessage="Fleet Settings"
+        />
+      </EuiButton>
+    </EuiCallOut>
+  );
+};
+
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentPolicies,
 }) => {
   const [mode, setMode] = useState<'managed' | 'standalone'>('managed');
 
+  const { modal } = useUrlModal();
+  const [lastModal, setLastModal] = useState(modal);
+  const settings = useGetSettings();
+  const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
+
+  // Refresh settings when there is a modal/flyout change
+  useEffect(() => {
+    if (modal !== lastModal) {
+      settings.resendRequest();
+      setLastModal(modal);
+    }
+  }, [modal, lastModal, settings]);
+
   return (
-    <EuiFlyout onClose={onClose} size="l" maxWidth={880}>
+    <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
@@ -70,8 +134,14 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         </EuiTabs>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        {mode === 'managed' ? (
+      <EuiFlyoutBody
+        banner={
+          fleetServerHosts.length === 0 && mode === 'managed' ? (
+            <MissingFleetServerHostCallout />
+          ) : undefined
+        }
+      >
+        {fleetServerHosts.length === 0 && mode === 'managed' ? null : mode === 'managed' ? (
           <ManagedInstructions agentPolicies={agentPolicies} />
         ) : (
           <StandaloneInstructions agentPolicies={agentPolicies} />

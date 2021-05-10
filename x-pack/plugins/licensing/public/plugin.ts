@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
@@ -121,7 +123,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     };
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     this.coreStart = core;
     if (!this.refresh || !this.license$) {
       throw new Error('Setup has not been completed');

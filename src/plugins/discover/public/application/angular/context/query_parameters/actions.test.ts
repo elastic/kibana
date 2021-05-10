@@ -1,25 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-// @ts-ignore
 import { getQueryParameterActions } from './actions';
-import { FilterManager } from '../../../../../../data/public';
+import { FilterManager, SortDirection } from '../../../../../../data/public';
 import { coreMock } from '../../../../../../../core/public/mocks';
+import { ContextAppState, LoadingStatus, QueryParameters } from '../../context_app_state';
 const setupMock = coreMock.createSetup();
 
-let state: {
-  queryParameters: {
-    defaultStepSize: number;
-    indexPatternId: string;
-    predecessorCount: number;
-    successorCount: number;
-  };
-};
+let state: ContextAppState;
 let filterManager: FilterManager;
 let filterManagerSpy: jest.SpyInstance;
 
@@ -33,7 +26,25 @@ beforeEach(() => {
       indexPatternId: 'INDEX_PATTERN_ID',
       predecessorCount: 10,
       successorCount: 10,
+      anchorId: '',
+      columns: [],
+      filters: [],
+      sort: ['field', SortDirection.asc],
+      tieBreakerField: '',
     },
+    loadingStatus: {
+      anchor: LoadingStatus.UNINITIALIZED,
+      predecessors: LoadingStatus.UNINITIALIZED,
+      successors: LoadingStatus.UNINITIALIZED,
+    },
+    rows: {
+      all: [],
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      anchor: { $$_isAnchor: true, fields: [], sort: [], _source: [], _id: '' },
+      predecessors: [],
+      successors: [],
+    },
+    useNewFieldsApi: true,
   };
 });
 
@@ -105,6 +116,7 @@ describe('context query_parameter actions', function () {
       const newState = {
         ...state,
         queryParameters: {
+          ...state.queryParameters,
           additionalParameter: 'ADDITIONAL_PARAMETER',
         },
       };
@@ -113,11 +125,12 @@ describe('context query_parameter actions', function () {
         anchorId: 'ANCHOR_ID',
         columns: ['column'],
         defaultStepSize: 3,
-        filters: ['filter'],
+        filters: [],
         indexPatternId: 'INDEX_PATTERN',
         predecessorCount: 100,
         successorCount: 100,
-        sort: ['field'],
+        sort: ['field', SortDirection.asc],
+        tieBreakerField: '',
       });
 
       expect(actualState).toEqual({
@@ -125,20 +138,21 @@ describe('context query_parameter actions', function () {
         anchorId: 'ANCHOR_ID',
         columns: ['column'],
         defaultStepSize: 3,
-        filters: ['filter'],
+        filters: [],
         indexPatternId: 'INDEX_PATTERN',
         predecessorCount: 100,
         successorCount: 100,
-        sort: ['field'],
+        sort: ['field', SortDirection.asc],
+        tieBreakerField: '',
       });
     });
 
     it('should ignore invalid properties', function () {
       const newState = { ...state };
 
-      setQueryParameters(newState)({
+      setQueryParameters(newState)(({
         additionalParameter: 'ADDITIONAL_PARAMETER',
-      });
+      } as unknown) as QueryParameters);
 
       expect(state.queryParameters).toEqual(newState.queryParameters);
     });

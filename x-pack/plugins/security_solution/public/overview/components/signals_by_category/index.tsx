@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback } from 'react';
@@ -18,6 +19,7 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+  combinedQueries?: string;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
@@ -28,6 +30,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
+  combinedQueries,
   deleteQuery,
   filters,
   from,
@@ -60,6 +63,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
 
   return (
     <AlertsHistogramPanel
+      combinedQueries={combinedQueries}
       deleteQuery={deleteQuery}
       filters={filters}
       from={from}

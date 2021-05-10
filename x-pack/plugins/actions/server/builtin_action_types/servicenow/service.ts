@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import axios, { AxiosResponse } from 'axios';
@@ -10,7 +11,11 @@ import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } fr
 
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
-import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
+import {
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ResponseError,
+} from './types';
 import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
@@ -61,6 +66,15 @@ export const createExternalService = (
     }
   };
 
+  const createErrorMessage = (errorResponse: ResponseError): string => {
+    if (errorResponse == null) {
+      return '';
+    }
+
+    const { error } = errorResponse;
+    return error != null ? `${error?.message}: ${error?.detail}` : '';
+  };
+
   const getIncident = async (id: string) => {
     try {
       const res = await request({
@@ -75,7 +89,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.SERVICENOW,
-          `Unable to get incident with id ${id}. Error: ${error.message}`
+          `Unable to get incident with id ${id}. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -96,7 +112,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.SERVICENOW,
-          `Unable to find incidents by query. Error: ${error.message}`
+          `Unable to find incidents by query. Error: ${error.message} Reason: ${createErrorMessage(
+            error.response?.data
+          )}`
         )
       );
     }
@@ -121,7 +139,12 @@ export const createExternalService = (
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.SERVICENOW, `Unable to create incident. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.SERVICENOW,
+          `Unable to create incident. Error: ${error.message} Reason: ${createErrorMessage(
+            error.response?.data
+          )}`
+        )
       );
     }
   };
@@ -146,7 +169,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.SERVICENOW,
-          `Unable to update incident with id ${incidentId}. Error: ${error.message}`
+          `Unable to update incident with id ${incidentId}. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response?.data)}`
         )
       );
     }
@@ -164,7 +189,12 @@ export const createExternalService = (
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.SERVICENOW, `Unable to get fields. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.SERVICENOW,
+          `Unable to get fields. Error: ${error.message} Reason: ${createErrorMessage(
+            error.response?.data
+          )}`
+        )
       );
     }
   };
@@ -181,7 +211,12 @@ export const createExternalService = (
       return res.data.result;
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.SERVICENOW, `Unable to get choices. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.SERVICENOW,
+          `Unable to get choices. Error: ${error.message} Reason: ${createErrorMessage(
+            error.response?.data
+          )}`
+        )
       );
     }
   };

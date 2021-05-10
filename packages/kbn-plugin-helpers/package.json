@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "description": "Just some helpers for kibana plugin devs.",
-  "license": "SSPL-1.0 OR Elastic License",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "kibana": {
     "devOnly": true
   },
   "main": "target/index.js",
+  "types": "target/index.d.ts",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
   },
@@ -16,7 +17,6 @@
     "kbn:watch": "../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
     "@kbn/optimizer": "link:../kbn-optimizer"
   }
 }

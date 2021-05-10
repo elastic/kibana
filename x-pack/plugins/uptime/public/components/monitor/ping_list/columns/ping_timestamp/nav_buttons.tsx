@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { nextAriaLabel, prevAriaLabel } from './translations';
 
 export interface NavButtonsProps {
@@ -33,8 +34,9 @@ export const NavButtons: React.FC<NavButtonsProps> = ({
         disabled={stepNumber === 1}
         color="subdued"
         size="s"
-        onClick={() => {
+        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           setStepNumber(stepNumber - 1);
+          evt.stopPropagation();
         }}
         iconType="arrowLeft"
         aria-label={prevAriaLabel}
@@ -45,8 +47,9 @@ export const NavButtons: React.FC<NavButtonsProps> = ({
         disabled={stepNumber === maxSteps}
         color="subdued"
         size="s"
-        onClick={() => {
+        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           setStepNumber(stepNumber + 1);
+          evt.stopPropagation();
         }}
         iconType="arrowRight"
         aria-label={nextAriaLabel}

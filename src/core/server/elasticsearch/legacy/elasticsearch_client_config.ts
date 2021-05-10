@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ConfigOptions } from 'elasticsearch';
@@ -106,11 +106,14 @@ export function parseElasticsearchClientConfig(
     esClientConfig.sniffInterval = getDurationAsMs(config.sniffInterval);
   }
 
+  const needsAuth = auth !== false && config.username && config.password;
+  if (needsAuth) {
+    esClientConfig.httpAuth = `${config.username}:${config.password}`;
+  }
+
   if (Array.isArray(config.hosts)) {
-    const needsAuth = auth !== false && config.username && config.password;
     esClientConfig.hosts = config.hosts.map((nodeUrl: string) => {
       const uri = url.parse(nodeUrl);
-
       const httpsURI = uri.protocol === 'https:';
       const httpURI = uri.protocol === 'http:';
 
@@ -125,10 +128,6 @@ export function parseElasticsearchClientConfig(
           ...config.customHeaders,
         },
       };
-
-      if (needsAuth) {
-        host.auth = `${config.username}:${config.password}`;
-      }
 
       return host;
     });

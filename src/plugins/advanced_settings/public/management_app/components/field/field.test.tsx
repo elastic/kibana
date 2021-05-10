@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -29,6 +29,7 @@ const defaults = {
 const exampleValues = {
   array: ['example_value'],
   boolean: false,
+  color: '#FF00CC',
   image: 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=',
   json: { foo: 'bar2' },
   markdown: 'Hello World',
@@ -163,6 +164,18 @@ const settings: Record<string, FieldSetting> = {
     isOverridden: false,
     ...defaults,
   },
+  color: {
+    name: 'color:test:setting',
+    ariaName: 'color test setting',
+    displayName: 'Color test setting',
+    description: 'Description for Color test setting',
+    type: 'color',
+    value: undefined,
+    defVal: null,
+    isCustom: false,
+    isOverridden: false,
+    ...defaults,
+  },
 };
 const userValues = {
   array: ['user', 'value'],
@@ -174,6 +187,7 @@ const userValues = {
   select: 'banana',
   string: 'foo',
   stringWithValidation: 'fooUserValue',
+  color: '#FACF0C',
 };
 
 const invalidUserValues = {
@@ -187,6 +201,8 @@ const getFieldSettingValue = (wrapper: ReactWrapper, name: string, type: string)
   const field = findTestSubject(wrapper, `advancedSetting-editField-${name}`);
   if (type === 'boolean') {
     return field.props()['aria-checked'];
+  } else if (type === 'color') {
+    return field.props().color;
   } else {
     return field.props().value;
   }
@@ -422,6 +438,36 @@ describe('Field', () => {
             expect(handleChange).toBeCalledWith(setting.name, { value: setting.defVal });
           });
         }
+      });
+    } else if (type === 'color') {
+      describe(`for changing ${type} setting`, () => {
+        const { wrapper, component } = setup();
+        const userValue = userValues[type];
+
+        it('should be able to change value', async () => {
+          await (component.instance() as Field).onFieldChange(userValue);
+          const updated = wrapper.update();
+          expect(handleChange).toBeCalledWith(setting.name, { value: userValue });
+          updated.setProps({ unsavedChanges: { value: userValue } });
+          const currentValue = wrapper.find('EuiColorPicker').prop('color');
+          expect(currentValue).toEqual(userValue);
+        });
+
+        it('should be able to reset to default value', async () => {
+          await wrapper.setProps({
+            unsavedChanges: {},
+            setting: { ...setting, value: userValue },
+          });
+          const updated = wrapper.update();
+          findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
+          const expectedEditableValue = getEditableValue(setting.type, setting.defVal);
+          expect(handleChange).toBeCalledWith(setting.name, {
+            value: expectedEditableValue,
+          });
+          updated.setProps({ unsavedChanges: { value: expectedEditableValue } });
+          const currentValue = wrapper.find('EuiColorPicker').prop('color');
+          expect(currentValue).toEqual(expectedEditableValue);
+        });
       });
     } else {
       describe(`for changing ${type} setting`, () => {

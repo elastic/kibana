@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-asScoped: (request: KibanaRequest) => ISearchClient;
+asScoped: (request: KibanaRequest) => IScopedSearchClient;
 ```

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { shareReplay } from 'rxjs/operators';
@@ -133,7 +133,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
-      auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
+      auth: {
+        get: deps.http.auth.get,
+        isAuthenticated: deps.http.auth.isAuthenticated,
+      },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
@@ -162,6 +165,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: deps.uiSettings.register,
     },
     getStartServices: () => plugin.startDependencies,
+    deprecations: deps.deprecations.getRegistry(plugin.name),
   };
 }
 

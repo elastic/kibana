@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Map as MbMap } from 'mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
@@ -16,23 +18,26 @@ import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,
   FIELD_ORIGIN,
+  LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
+  SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
   SOURCE_TYPES,
   STYLE_TYPE,
 } from '../../../common/constants';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   AggDescriptor,
+  Attribution,
   ESTermSourceDescriptor,
   JoinDescriptor,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
 } from '../../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';
@@ -51,6 +56,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
   getMinZoom(): number;
@@ -64,6 +70,7 @@ export interface ILayer {
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
+  isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
@@ -73,10 +80,10 @@ export interface ILayer {
   canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
-  isDataLoaded(): boolean;
+  isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): string | undefined;
+  getType(): LAYER_TYPE | undefined;
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
@@ -93,10 +100,11 @@ export interface ILayer {
   isFittable(): Promise<boolean>;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+  getDescriptor(): LayerDescriptor;
 }
 
 export type CustomIconAndTooltipContent = {
-  icon: ReactElement<any> | null;
+  icon: ReactNode;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
@@ -148,6 +156,10 @@ export class AbstractLayer implements ILayer {
     // @ts-expect-error
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
+  }
+
+  getDescriptor(): LayerDescriptor {
+    return this._descriptor;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
@@ -253,10 +265,16 @@ export class AbstractLayer implements ILayer {
   }
 
   async getAttributions(): Promise<Attribution[]> {
-    if (!this.hasErrors()) {
-      return await this.getSource().getAttributions();
+    if (this.hasErrors() || !this.isVisible()) {
+      return [];
     }
-    return [];
+
+    const attributionProvider = this.getSource().getAttributionProvider();
+    if (attributionProvider) {
+      return attributionProvider();
+    }
+
+    return this._descriptor.attribution !== undefined ? [this._descriptor.attribution] : [];
   }
 
   getStyleForEditing(): IStyle {
@@ -396,7 +414,16 @@ export class AbstractLayer implements ILayer {
   }
 
   isLayerLoading(): boolean {
-    return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+    const areTilesLoading =
+      typeof this._descriptor.__areTilesLoaded !== 'undefined'
+        ? !this._descriptor.__areTilesLoaded
+        : false;
+    return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+  }
+
+  isLoadingBounds() {
+    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
+    return !!boundsDataRequest && boundsDataRequest.isLoading();
   }
 
   hasErrors(): boolean {
@@ -437,7 +464,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-  isDataLoaded(): boolean {
+  isInitialDataLoadComplete(): boolean {
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
@@ -469,8 +496,8 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): string | undefined {
-    return this._descriptor.type;
+  getType(): LAYER_TYPE | undefined {
+    return this._descriptor.type as LAYER_TYPE;
   }
 
   areLabelsOnTop(): boolean {

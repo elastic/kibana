@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -131,6 +133,17 @@ export function MachineLearningDataVisualizerTableProvider(
       );
     }
 
+    public async assertViewInLensActionEnabled(fieldName: string) {
+      const actionButton = this.rowSelector(fieldName, 'mlActionButtonViewInLens');
+      await testSubjects.existOrFail(actionButton);
+      await testSubjects.isEnabled(actionButton);
+    }
+
+    public async assertViewInLensActionNotExists(fieldName: string) {
+      const actionButton = this.rowSelector(fieldName, 'mlActionButtonViewInLens');
+      await testSubjects.missingOrFail(actionButton);
+    }
+
     public async assertFieldDistinctValuesExist(fieldName: string) {
       const selector = this.rowSelector(fieldName, 'mlDataVisualizerTableColumnDistinctValues');
       await testSubjects.existOrFail(selector);
@@ -247,6 +260,7 @@ export function MachineLearningDataVisualizerTableProvider(
       fieldName: string,
       docCountFormatted: string,
       topValuesCount: number,
+      viewableInLens: boolean,
       checkDistributionPreviewExist = true
     ) {
       await this.assertRowExists(fieldName);
@@ -260,6 +274,11 @@ export function MachineLearningDataVisualizerTableProvider(
 
       if (checkDistributionPreviewExist) {
         await this.assertDistributionPreviewExist(fieldName);
+      }
+      if (viewableInLens) {
+        await this.assertViewInLensActionEnabled(fieldName);
+      } else {
+        await this.assertViewInLensActionNotExists(fieldName);
       }
 
       await this.ensureDetailsClosed(fieldName);
@@ -305,6 +324,7 @@ export function MachineLearningDataVisualizerTableProvider(
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
+
       await this.ensureDetailsOpen(fieldName);
 
       await this.assertExamplesList(fieldName, expectedExamplesCount);
@@ -318,6 +338,7 @@ export function MachineLearningDataVisualizerTableProvider(
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
+
       await this.ensureDetailsOpen(fieldName);
 
       await this.assertExamplesList(fieldName, expectedExamplesCount);
@@ -330,6 +351,7 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertUnknownFieldContents(fieldName: string, docCountFormatted: string) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
+
       await this.ensureDetailsOpen(fieldName);
 
       await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlDVDocumentStatsContent'));
@@ -341,7 +363,8 @@ export function MachineLearningDataVisualizerTableProvider(
       fieldType: string,
       fieldName: string,
       docCountFormatted: string,
-      exampleCount: number
+      exampleCount: number,
+      viewableInLens: boolean
     ) {
       // Currently the data used in the data visualizer tests only contains these field types.
       if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
@@ -354,6 +377,12 @@ export function MachineLearningDataVisualizerTableProvider(
         await this.assertGeoPointFieldContents(fieldName, docCountFormatted, exampleCount);
       } else if (fieldType === ML_JOB_FIELD_TYPES.UNKNOWN) {
         await this.assertUnknownFieldContents(fieldName, docCountFormatted);
+      }
+
+      if (viewableInLens) {
+        await this.assertViewInLensActionEnabled(fieldName);
+      } else {
+        await this.assertViewInLensActionNotExists(fieldName);
       }
     }
 

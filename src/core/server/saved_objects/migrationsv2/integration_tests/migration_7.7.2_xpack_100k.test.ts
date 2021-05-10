@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { join } from 'path';
+import Path from 'path';
+import Fs from 'fs';
+import Util from 'util';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config/target/mocks';
@@ -16,8 +18,15 @@ import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');
 
-describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
+const asyncUnlink = Util.promisify(Fs.unlink);
+async function removeLogFile() {
+  // ignore errors if it doesn't exist
+  await asyncUnlink(logFilePath).catch(() => void 0);
+}
+
+describe('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
@@ -32,7 +41,7 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
       adjustTimeout: (t: number) => jest.setTimeout(600000),
       settings: {
         es: {
-          license: oss ? 'oss' : 'trial',
+          license: 'trial',
           dataArchive,
         },
       },
@@ -47,16 +56,16 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
         logging: {
           appenders: {
             file: {
-              kind: 'file',
-              path: join(__dirname, 'migration_test_kibana.log'),
+              type: 'file',
+              fileName: logFilePath,
               layout: {
-                kind: 'json',
+                type: 'json',
               },
             },
           },
           loggers: [
             {
-              context: 'root',
+              name: 'root',
               appenders: ['file'],
             },
           ],
@@ -93,9 +102,10 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
   const migratedIndex = `.kibana_${kibanaVersion}_001`;
 
   beforeAll(async () => {
+    await removeLogFile();
     await startServers({
       oss: false,
-      dataArchive: join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
+      dataArchive: Path.join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
     });
   });
 

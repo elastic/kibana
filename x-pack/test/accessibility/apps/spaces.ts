@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // a11y tests for spaces, space selection and spacce creation and feature controls
@@ -24,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for manage spaces menu from top nav on Kibana home', async () => {
-      await PageObjects.spaceSelector.openSpacesNav();
+      await testSubjects.click('space-avatar-default');
       await retry.waitFor(
         'Manage spaces option visible',
         async () => await testSubjects.exists('manageSpaces')

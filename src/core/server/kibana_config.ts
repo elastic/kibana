@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -12,12 +12,13 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 export type KibanaConfigType = TypeOf<typeof config.schema>;
 
 const deprecations: ConfigDeprecationProvider = () => [
-  (settings, fromPath, log) => {
+  (settings, fromPath, addDeprecation) => {
     const kibana = settings[fromPath];
     if (kibana?.index) {
-      log(
-        `"kibana.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
-      );
+      addDeprecation({
+        message: `"kibana.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
+        documentationUrl: 'https://ela.st/kbn-remove-legacy-multitenancy',
+      });
     }
     return settings;
   },
@@ -32,4 +33,8 @@ export const config = {
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),
   deprecations,
+  exposeToUsage: {
+    autocompleteTerminateAfter: true,
+    autocompleteTimeout: true,
+  },
 };

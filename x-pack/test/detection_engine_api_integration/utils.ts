@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KbnClient } from '@kbn/dev-utils';
-import { ApiResponse, Client } from '@elastic/elasticsearch';
+import { KbnClient } from '@kbn/test';
+import type { ApiResponse } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import { NonEmptyEntriesArray } from '../../plugins/lists/common/schemas';
 import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
@@ -37,6 +40,7 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_RULES_URL,
+  INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
 import { getCreateExceptionListItemMinimalSchemaMockWithoutId } from '../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
@@ -168,7 +172,7 @@ export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRules
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
-  machine_learning_job_id: 'some_job_id',
+  machine_learning_job_id: ['some_job_id'],
   type: 'machine_learning',
 });
 
@@ -185,7 +189,7 @@ export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): Updat
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
-  machine_learning_job_id: 'some_job_id',
+  machine_learning_job_id: ['some_job_id'],
   type: 'machine_learning',
 });
 
@@ -223,7 +227,8 @@ export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
  * created from that rule's regular id.
  * @param ruleIds The rule_id to search for signals
  */
-export const getQuerySignalsId = (ids: string[]) => ({
+export const getQuerySignalsId = (ids: string[], size = 10) => ({
+  size,
   query: {
     terms: {
       'signal.rule.id': ids,
@@ -339,7 +344,7 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
     name: 'Simple ML Rule',
     description: 'Simple Machine Learning Rule',
     anomaly_threshold: 44,
-    machine_learning_job_id: 'some_job_id',
+    machine_learning_job_id: ['some_job_id'],
     type: 'machine_learning',
   };
 };
@@ -379,7 +384,7 @@ export const deleteAllAlerts = async (
   );
 };
 
-export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
+export const downgradeImmutableRule = async (es: KibanaClient, ruleId: string): Promise<void> => {
   return countDownES(async () => {
     return es.updateByQuery({
       index: '.kibana',
@@ -404,9 +409,10 @@ export const downgradeImmutableRule = async (es: Client, ruleId: string): Promis
  * Remove all timelines from the .kibana index
  * @param es The ElasticSearch handle
  */
-export const deleteAllTimelines = async (es: Client): Promise<void> => {
+export const deleteAllTimelines = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
@@ -419,10 +425,11 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
+export const deleteAllRulesStatuses = async (es: KibanaClient): Promise<void> => {
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
+      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:siem-detection-engine-rule-status',
       wait_for_completion: true,
       refresh: true,
@@ -673,20 +680,27 @@ export const getWebHookAction = () => ({
   name: 'Some connector',
 });
 
-export const getRuleWithWebHookAction = (id: string, enabled = false): CreateRulesSchema => ({
-  ...getSimpleRule('rule-1', enabled),
-  throttle: 'rule',
-  actions: [
-    {
-      group: 'default',
-      id,
-      params: {
-        body: '{}',
+export const getRuleWithWebHookAction = (
+  id: string,
+  enabled = false,
+  rule?: CreateRulesSchema
+): CreateRulesSchema | UpdateRulesSchema => {
+  const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
+  return {
+    ...finalRule,
+    throttle: 'rule',
+    actions: [
+      {
+        group: 'default',
+        id,
+        params: {
+          body: '{}',
+        },
+        action_type_id: '.webhook',
       },
-      action_type_id: '.webhook',
-    },
-  ],
-});
+    ],
+  };
+};
 
 export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
   ...getSimpleRuleOutput(),
@@ -765,6 +779,17 @@ export const countDownES = async (
 };
 
 /**
+ * Refresh an index, making changes available to search.
+ * Useful for tests where we want to ensure that a rule does NOT create alerts, e.g. testing exceptions.
+ * @param es The ElasticSearch handle
+ */
+export const refreshIndex = async (es: KibanaClient, index?: string) => {
+  await es.indices.refresh({
+    index,
+  });
+};
+
+/**
  * Does a plain countdown and checks against a boolean to determine if to wait and try again.
  * This is useful for over the wire things that can cause issues such as conflict or timeouts
  * for testing resiliency.
@@ -831,6 +856,78 @@ export const createRule = async (
 
 /**
  * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not do any retries.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const updateRule = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  updatedRule: UpdateRulesSchema
+): Promise<FullResponseSchema> => {
+  const { body } = await supertest
+    .put(DETECTION_ENGINE_RULES_URL)
+    .set('kbn-xsrf', 'true')
+    .send(updatedRule)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * creates a new action and expects a 200 and does not do any retries.
+ * @param supertest The supertest deps
+ */
+export const createNewAction = async (supertest: SuperTest<supertestAsPromised.Test>) => {
+  const { body } = await supertest
+    .post('/api/actions/action')
+    .set('kbn-xsrf', 'true')
+    .send(getWebHookAction())
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * uses the find API to get an immutable rule by id.
+ * @param supertest The supertest deps
+ */
+export const findImmutableRuleById = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ruleId: string
+): Promise<{
+  page: number;
+  perPage: number;
+  total: number;
+  data: FullResponseSchema[];
+}> => {
+  const { body } = await supertest
+    .get(
+      `${DETECTION_ENGINE_RULES_URL}/_find?filter=alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true" AND alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`
+    )
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * creates a new action and expects a 200 and does not do any retries.
+ * @param supertest The supertest deps
+ */
+export const getPrePackagedRulesStatus = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<PrePackagedRulesAndTimelinesStatusSchema> => {
+  const { body } = await supertest
+    .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not try to any retries. Creates exception lists
  * @param supertest The supertest deps
  * @param rule The rule to create
@@ -882,6 +979,19 @@ export const getRule = async (
   return body;
 };
 
+export const waitForAlertToComplete = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  id: string
+): Promise<void> => {
+  await waitFor(async () => {
+    const { body: alertBody } = await supertest
+      .get(`/api/alerts/alert/${id}/state`)
+      .set('kbn-xsrf', 'true')
+      .expect(200);
+    return alertBody.previousStartedAt != null;
+  }, 'waitForAlertToComplete');
+};
+
 /**
  * Waits for the rule in find status to be 'succeeded'
  * or the provided status, before continuing
@@ -890,7 +1000,7 @@ export const getRule = async (
 export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' = 'succeeded'
+  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
 ): Promise<void> => {
   await waitFor(async () => {
     const { body } = await supertest
@@ -914,7 +1024,7 @@ export const waitForSignalsToBePresent = async (
   signalIds: string[]
 ): Promise<void> => {
   await waitFor(async () => {
-    const signalsOpen = await getSignalsByIds(supertest, signalIds);
+    const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
     return signalsOpen.hits.hits.length >= numberOfSignals;
   }, 'waitForSignalsToBePresent');
 };
@@ -948,7 +1058,8 @@ export const getSignalsByRuleIds = async (
  */
 export const getSignalsByIds = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  ids: string[]
+  ids: string[],
+  size?: number
 ): Promise<
   SearchResponse<{
     signal: Signal;
@@ -958,7 +1069,7 @@ export const getSignalsByIds = async (
   const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids))
+    .send(getQuerySignalsId(ids, size))
     .expect(200);
   return signalsOpen;
 };
@@ -1007,7 +1118,7 @@ export const installPrePackagedRules = async (
  */
 export const createRuleWithExceptionEntries = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  rule: QueryCreateSchema,
+  rule: CreateRulesSchema,
   entries: NonEmptyEntriesArray[]
 ): Promise<FullResponseSchema> => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -1041,7 +1152,7 @@ export const createRuleWithExceptionEntries = async (
   // the rule to sometimes not filter correctly the first time with an exception list
   // or other timing issues. Then afterwards wait for the rule to have succeeded before
   // returning.
-  const ruleWithException: QueryCreateSchema = {
+  const ruleWithException: CreateRulesSchema = {
     ...rule,
     enabled: false,
     exceptions_list: [
@@ -1079,7 +1190,7 @@ export const getIndexNameFromLoad = (loadResponse: Record<string, unknown>): str
  * @param esClient elasticsearch {@link Client}
  * @param index name of the index to query
  */
-export const waitForIndexToPopulate = async (es: Client, index: string): Promise<void> => {
+export const waitForIndexToPopulate = async (es: KibanaClient, index: string): Promise<void> => {
   await waitFor(async () => {
     const response = await es.count<{ count: number }>({ index });
     return response.body.count > 0;
@@ -1101,4 +1212,17 @@ export const deleteMigrations = async ({
       })
     )
   );
+};
+
+export const getOpenSignals = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  es: KibanaClient,
+  rule: FullResponseSchema
+) => {
+  await waitForRuleSuccessOrStatus(supertest, rule.id);
+  // Critically important that we wait for rule success AND refresh the write index in that order before we
+  // assert that no signals were created. Otherwise, signals could be written but not available to query yet
+  // when we search, causing tests that check that signals are NOT created to pass when they should fail.
+  await refreshIndex(es, rule.output_index);
+  return getSignalsByIds(supertest, [rule.id]);
 };

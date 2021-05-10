@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SpecDefinitionsService } from '../../../services';
@@ -16,7 +16,7 @@ export const search = (specService: SpecDefinitionsService) => {
         // populated by a global rule
       },
       profile: {
-        __one_of: ['true', 'false'],
+        __one_of: [true, false],
       },
       aggs: {
         __template: {
@@ -118,6 +118,26 @@ export const search = (specService: SpecDefinitionsService) => {
         },
       },
       docvalue_fields: ['{field}'],
+      fields: {
+        __one_of: [
+          [
+            {
+              __one_of: [
+                '{field}',
+                '*',
+                {
+                  field: '{field}',
+                  include_unmapped: {
+                    __one_of: ['true', 'false'],
+                  },
+                  format: '',
+                },
+              ],
+            },
+          ],
+          '*',
+        ],
+      },
       collapse: {
         __template: {
           field: 'FIELD',
@@ -144,6 +164,19 @@ export const search = (specService: SpecDefinitionsService) => {
           __scope_link: 'GLOBAL.script',
         },
       },
+      runtime_mappings: {
+        __template: {
+          FIELD: {
+            type: '',
+            script: {
+              // populated by a global rule
+            },
+          },
+        },
+        '*': {
+          __scope_link: 'GLOBAL.script',
+        },
+      },
       partial_fields: {
         __template: {
           NAME: {
@@ -160,8 +193,11 @@ export const search = (specService: SpecDefinitionsService) => {
       },
       _source: {
         __one_of: [
-          '{field}',
           ['{field}'],
+          '*',
+          '{field}',
+          true,
+          false,
           {
             includes: {
               __one_of: ['{field}', ['{field}']],

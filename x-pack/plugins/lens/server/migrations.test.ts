@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { migrations, LensDocShape } from './migrations';
@@ -594,6 +595,243 @@ describe('Lens migrations', () => {
       );
 
       expect(layersWithSuggestedPriority).toEqual(0);
+    });
+  });
+
+  describe('7.12.0 restructure datatable state', () => {
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mock-saved-object-id',
+      attributes: {
+        state: {
+          datasourceStates: {
+            indexpattern: {},
+          },
+          visualization: {
+            layers: [
+              {
+                layerId: 'first',
+                columns: ['a', 'b', 'c'],
+              },
+            ],
+            sorting: {
+              columnId: 'a',
+              direction: 'asc',
+            },
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        title: 'Table',
+        visualizationType: 'lnsDatatable',
+      },
+    };
+
+    it('should not touch non datatable visualization', () => {
+      const xyChart = {
+        ...example,
+        attributes: { ...example.attributes, visualizationType: 'xy' },
+      };
+      const result = migrations['7.12.0'](xyChart, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result).toBe(xyChart);
+    });
+
+    it('should remove layer array and reshape state', () => {
+      const result = migrations['7.12.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result.attributes.state.visualization).toEqual({
+        layerId: 'first',
+        columns: [
+          {
+            columnId: 'a',
+          },
+          {
+            columnId: 'b',
+          },
+          {
+            columnId: 'c',
+          },
+        ],
+        sorting: {
+          columnId: 'a',
+          direction: 'asc',
+        },
+      });
+      // should leave other parts alone
+      expect(result.attributes.state.datasourceStates).toEqual(
+        example.attributes.state.datasourceStates
+      );
+      expect(result.attributes.state.query).toEqual(example.attributes.state.query);
+      expect(result.attributes.state.filters).toEqual(example.attributes.state.filters);
+      expect(result.attributes.title).toEqual(example.attributes.title);
+    });
+  });
+
+  describe('7.13.0 rename operations for Formula', () => {
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '21c145c0-8667-11eb-b6a9-a5bf52bdf519',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsXY',
+        state: {
+          datasourceStates: {
+            indexpattern: {
+              layers: {
+                '5ab74ddc-93ca-44e2-9857-ecf85c86b53e': {
+                  columns: {
+                    '2e57a41e-5a52-42d3-877f-bd211d903ef8': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                    },
+                    '5fea2a56-7b73-44b5-9a50-7f0c0c4f8fd0': {
+                      label: 'Unique count of agent.keyword',
+                      dataType: 'number',
+                      operationType: 'cardinality',
+                      scale: 'ratio',
+                      sourceField: 'agent.keyword',
+                      isBucketed: false,
+                    },
+                    'e5efca70-edb5-4d6d-a30a-79384066987e': {
+                      label: 'Average of bytes',
+                      dataType: 'number',
+                      operationType: 'avg',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                    '7ffb7bde-4f42-47ab-b74d-1b4fd8393e0f': {
+                      label: 'Differences of bytes',
+                      dataType: 'number',
+                      operationType: 'derivative',
+                      isBucketed: false,
+                      scale: 'ratio',
+                      references: ['9ca33a9b-f2e6-46ef-a5e1-14bfbe262605'],
+                    },
+                    '9ca33a9b-f2e6-46ef-a5e1-14bfbe262605': {
+                      label: 'Average of bytes',
+                      dataType: 'number',
+                      operationType: 'avg',
+                      sourceField: 'bytes',
+                      isBucketed: false,
+                      scale: 'ratio',
+                    },
+                  },
+                  columnOrder: [
+                    '2e57a41e-5a52-42d3-877f-bd211d903ef8',
+                    '5fea2a56-7b73-44b5-9a50-7f0c0c4f8fd0',
+                    'e5efca70-edb5-4d6d-a30a-79384066987e',
+                    '9ca33a9b-f2e6-46ef-a5e1-14bfbe262605',
+                    '7ffb7bde-4f42-47ab-b74d-1b4fd8393e0f',
+                  ],
+                  incompleteColumns: {},
+                },
+              },
+            },
+          },
+          visualization: {
+            title: 'Empty XY chart',
+            legend: { isVisible: true, position: 'right' },
+            valueLabels: 'hide',
+            preferredSeriesType: 'bar_stacked',
+            layers: [
+              {
+                layerId: '5ab74ddc-93ca-44e2-9857-ecf85c86b53e',
+                accessors: [
+                  '5fea2a56-7b73-44b5-9a50-7f0c0c4f8fd0',
+                  'e5efca70-edb5-4d6d-a30a-79384066987e',
+                  '7ffb7bde-4f42-47ab-b74d-1b4fd8393e0f',
+                ],
+                position: 'top',
+                seriesType: 'bar_stacked',
+                showGridlines: false,
+                xAccessor: '2e57a41e-5a52-42d3-877f-bd211d903ef8',
+              },
+            ],
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    };
+
+    it('should rename only specific operation types', () => {
+      const result = migrations['7.13.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const layers = result.attributes.state.datasourceStates.indexpattern.layers;
+      expect(layers).toEqual({
+        '5ab74ddc-93ca-44e2-9857-ecf85c86b53e': {
+          columns: {
+            '2e57a41e-5a52-42d3-877f-bd211d903ef8': {
+              label: '@timestamp',
+              dataType: 'date',
+              operationType: 'date_histogram',
+              sourceField: '@timestamp',
+              isBucketed: true,
+              scale: 'interval',
+              params: { interval: 'auto' },
+            },
+            '5fea2a56-7b73-44b5-9a50-7f0c0c4f8fd0': {
+              label: 'Unique count of agent.keyword',
+              dataType: 'number',
+              operationType: 'unique_count',
+              scale: 'ratio',
+              sourceField: 'agent.keyword',
+              isBucketed: false,
+            },
+            'e5efca70-edb5-4d6d-a30a-79384066987e': {
+              label: 'Average of bytes',
+              dataType: 'number',
+              operationType: 'average',
+              sourceField: 'bytes',
+              isBucketed: false,
+              scale: 'ratio',
+            },
+            '7ffb7bde-4f42-47ab-b74d-1b4fd8393e0f': {
+              label: 'Differences of bytes',
+              dataType: 'number',
+              operationType: 'differences',
+              isBucketed: false,
+              scale: 'ratio',
+              references: ['9ca33a9b-f2e6-46ef-a5e1-14bfbe262605'],
+            },
+            '9ca33a9b-f2e6-46ef-a5e1-14bfbe262605': {
+              label: 'Average of bytes',
+              dataType: 'number',
+              operationType: 'average',
+              sourceField: 'bytes',
+              isBucketed: false,
+              scale: 'ratio',
+            },
+          },
+          columnOrder: [
+            '2e57a41e-5a52-42d3-877f-bd211d903ef8',
+            '5fea2a56-7b73-44b5-9a50-7f0c0c4f8fd0',
+            'e5efca70-edb5-4d6d-a30a-79384066987e',
+            '9ca33a9b-f2e6-46ef-a5e1-14bfbe262605',
+            '7ffb7bde-4f42-47ab-b74d-1b4fd8393e0f',
+          ],
+          incompleteColumns: {},
+        },
+      });
+      // should leave other parts alone
+      expect(result.attributes.state.visualization).toEqual(example.attributes.state.visualization);
+      expect(result.attributes.state.query).toEqual(example.attributes.state.query);
+      expect(result.attributes.state.filters).toEqual(example.attributes.state.filters);
+      expect(result.attributes.title).toEqual(example.attributes.title);
     });
   });
 });

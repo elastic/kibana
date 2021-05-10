@@ -1,17 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { EsQueryAlertParamsSchema, EsQueryAlertParams } from './alert_type_params';
+import {
+  EsQueryAlertParamsSchema,
+  EsQueryAlertParams,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+} from './alert_type_params';
 
 const DefaultParams: Writable<Partial<EsQueryAlertParams>> = {
   index: ['index-name'],
   timeField: 'time-field',
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+  size: 100,
   timeWindowSize: 5,
   timeWindowUnit: 'm',
   thresholdComparator: '>',
@@ -95,6 +101,28 @@ describe('alertType Params validate()', () => {
     params.esQuery = '{\n  "aggs":{\n    "match_all" : {}\n  }\n}';
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
       `"[esQuery]: must contain \\"query\\""`
+    );
+  });
+
+  it('fails for invalid size', async () => {
+    delete params.size;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[size]: expected value of type [number] but got [undefined]"`
+    );
+
+    params.size = 'foo';
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[size]: expected value of type [number] but got [string]"`
+    );
+
+    params.size = -1;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[size]: Value must be equal to or greater than [0]."`
+    );
+
+    params.size = ES_QUERY_MAX_HITS_PER_EXECUTION + 1;
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[size]: Value must be equal to or lower than [10000]."`
     );
   });
 

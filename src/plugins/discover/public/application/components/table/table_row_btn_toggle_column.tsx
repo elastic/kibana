@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -15,9 +15,15 @@ export interface Props {
   active: boolean;
   disabled?: boolean;
   onClick: () => void;
+  fieldname: string;
 }
 
-export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
+export function DocViewTableRowBtnToggleColumn({
+  onClick,
+  active,
+  disabled = false,
+  fieldname = '',
+}: Props) {
   if (disabled) {
     return (
       <EuiButtonIcon
@@ -48,7 +54,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         aria-pressed={active}
         onClick={onClick}
         className="kbnDocViewer__actionButton"
-        data-test-subj="toggleColumnButton"
+        data-test-subj={`toggleColumnButton_${fieldname}`}
         iconType={'listAdd'}
         iconSize={'s'}
       />

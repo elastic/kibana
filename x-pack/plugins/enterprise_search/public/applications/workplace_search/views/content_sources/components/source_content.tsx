@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -9,9 +10,6 @@ import React, { useEffect, useState } from 'react';
 import { useActions, useValues } from 'kea';
 import { startCase } from 'lodash';
 import moment from 'moment';
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -30,20 +28,17 @@ import {
   EuiTableRowCell,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
-import { SourceContentItem } from '../../../types';
-
+import { Loading } from '../../../../shared/loading';
 import { TruncatedContent } from '../../../../shared/truncate';
-
-const MAX_LENGTH = 28;
-
 import { ComponentLoader } from '../../../components/shared/component_loader';
-import { Loading } from '../../../../../applications/shared/loading';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
 import { CUSTOM_SERVICE_TYPE } from '../../../constants';
+import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
+import { SourceContentItem } from '../../../types';
 import {
   NO_CONTENT_MESSAGE,
   CUSTOM_DOCUMENTATION_LINK,
@@ -54,18 +49,16 @@ import {
   SOURCE_CONTENT_TITLE,
   CONTENT_LOADING_TEXT,
 } from '../constants';
-
 import { SourceLogic } from '../source_logic';
+
+const MAX_LENGTH = 28;
 
 export const SourceContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const {
-    setActivePage,
-    searchContentSourceDocuments,
-    resetSourceState,
-    setContentFilterValue,
-  } = useActions(SourceLogic);
+  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } = useActions(
+    SourceLogic
+  );
 
   const {
     contentSource: { id, serviceType, urlField, titleField, urlFieldIsLinkable, isFederatedSource },
@@ -77,10 +70,6 @@ export const SourceContent: React.FC = () => {
     dataLoading,
     sectionLoading,
   } = useValues(SourceLogic);
-
-  useEffect(() => {
-    return resetSourceState;
-  }, []);
 
   useEffect(() => {
     searchContentSourceDocuments(id);
@@ -110,7 +99,7 @@ export const SourceContent: React.FC = () => {
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
 
   const emptyState = (
-    <EuiPanel className="euiPanel--inset">
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiEmptyPrompt
         title={<h2>{emptyMessage}</h2>}
         iconType="documents"
@@ -155,7 +144,9 @@ export const SourceContent: React.FC = () => {
             </EuiLink>
           )}
         </EuiTableRowCell>
-        <EuiTableRowCell>{moment(updated).format('M/D/YYYY, h:mm:ss A')}</EuiTableRowCell>
+        <EuiTableRowCell align="right">
+          {moment(updated).format('M/D/YYYY, h:mm:ss A')}
+        </EuiTableRowCell>
       </EuiTableRow>
     );
   };
@@ -168,7 +159,7 @@ export const SourceContent: React.FC = () => {
         <EuiTableHeader>
           <EuiTableHeaderCell>{TITLE_HEADING}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{startCase(urlField)}</EuiTableHeaderCell>
-          <EuiTableHeaderCell>{LAST_UPDATED_HEADING}</EuiTableHeaderCell>
+          <EuiTableHeaderCell align="right">{LAST_UPDATED_HEADING}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>{contentItems.map(contentItem)}</EuiTableBody>
       </EuiTable>

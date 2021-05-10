@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
@@ -18,7 +20,7 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -165,7 +167,7 @@ describe('alert_edit', () => {
       <AlertEdit
         onClose={() => {}}
         initialAlert={alert}
-        reloadAlerts={() => {
+        onSave={() => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}

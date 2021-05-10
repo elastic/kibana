@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
@@ -14,6 +16,7 @@ import {
   AlertTypeRegistryContract,
   AlertTypeParams,
   AlertUpdates,
+  AlertFlyoutCloseReason,
 } from '../../../types';
 import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
@@ -32,11 +35,13 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: () => void;
+  onClose: (reason: AlertFlyoutCloseReason) => void;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
   metadata?: MetaData;
 }
 
@@ -49,8 +54,10 @@ const AlertAdd = ({
   alertTypeId,
   initialValues,
   reloadAlerts,
+  onSave,
   metadata,
 }: AlertAddProps) => {
+  const onSaveHandler = onSave ?? reloadAlerts;
   const initialAlert: InitialAlert = useMemo(
     () => ({
       params: {},
@@ -117,7 +124,7 @@ const AlertAdd = ({
     ) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
-      onClose();
+      onClose(AlertFlyoutCloseReason.CANCELED);
     }
   };
 
@@ -125,9 +132,9 @@ const AlertAdd = ({
     const savedAlert = await onSaveAlert();
     setIsSaving(false);
     if (savedAlert) {
-      onClose();
-      if (reloadAlerts) {
-        reloadAlerts();
+      onClose(AlertFlyoutCloseReason.SAVED);
+      if (onSaveHandler) {
+        onSaveHandler();
       }
     }
   };
@@ -147,9 +154,9 @@ const AlertAdd = ({
       const newAlert = await createAlert({ http, alert: alert as AlertUpdates });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-          defaultMessage: 'Created alert "{alertName}"',
+          defaultMessage: 'Created rule "{ruleName}"',
           values: {
-            alertName: newAlert.name,
+            ruleName: newAlert.name,
           },
         })
       );
@@ -158,7 +165,7 @@ const AlertAdd = ({
       toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
-            defaultMessage: 'Cannot create alert.',
+            defaultMessage: 'Cannot create rule.',
           })
       );
     }
@@ -176,7 +183,7 @@ const AlertAdd = ({
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create alert"
+                defaultMessage="Create rule"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
             </h3>
@@ -243,7 +250,7 @@ const AlertAdd = ({
           <ConfirmAlertClose
             onConfirm={() => {
               setIsConfirmAlertCloseModalOpen(false);
-              onClose();
+              onClose(AlertFlyoutCloseReason.CANCELED);
             }}
             onCancel={() => {
               setIsConfirmAlertCloseModalOpen(false);

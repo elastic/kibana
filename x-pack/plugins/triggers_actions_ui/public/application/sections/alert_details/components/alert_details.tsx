@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment, useEffect, useReducer } from 'react';
 import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
@@ -26,7 +28,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertExecutionStatusErrorReasons } from '../../../../../../alerts/common';
+import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -38,7 +40,7 @@ import {
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
 import { AlertEdit } from '../../alert_form';
-import { routeToAlertDetails } from '../../../constants';
+import { routeToRuleDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
@@ -107,7 +109,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
 
   const setAlert = async () => {
-    history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+    history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
   };
 
   const getAlertStatusErrorReasonText = () => {
@@ -157,7 +159,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           }}
                           actionTypeRegistry={actionTypeRegistry}
                           alertTypeRegistry={alertTypeRegistry}
-                          reloadAlerts={setAlert}
+                          onSave={setAlert}
                         />
                       )}
                     </Fragment>
@@ -330,11 +332,20 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 ) : (
                   <Fragment>
                     <EuiSpacer />
-                    <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
+                    <EuiCallOut
+                      title={i18n.translate(
+                        'xpack.triggersActionsUI.sections.alertDetails.alerts.disabledRuleTitle',
+                        {
+                          defaultMessage: 'Disabled Rule',
+                        }
+                      )}
+                      color="warning"
+                      iconType="help"
+                    >
                       <p>
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                          defaultMessage="This alert is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
+                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledRule"
+                          defaultMessage="This rule is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
                         />
                       </p>
                     </EuiCallOut>

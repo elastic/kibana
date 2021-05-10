@@ -1,29 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { errors } from 'elasticsearch';
-import { ObjectType } from '@kbn/config-schema';
+
+import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
-import {
-  Headers,
-  kibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '../../../../../../src/core/server';
-import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
-import { Session } from '../../session_management';
-import { defineChangeUserPasswordRoutes } from './change_password';
+import type { Headers, RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { sessionMock } from '../../session_management/session.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
+import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationResult } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { Session } from '../../session_management';
+import { sessionMock } from '../../session_management/session.mock';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { defineChangeUserPasswordRoutes } from './change_password';
 
 describe('Change password', () => {
   let router: jest.Mocked<SecurityRouter>;

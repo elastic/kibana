@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -31,17 +32,10 @@ describe('FiltersExpressionSelect', () => {
           tags: [],
         }}
         setAlertParams={jest.fn()}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiSpacer
-          size="xs"
-        />
-      </Fragment>
-    `);
+    expect(component).toMatchInlineSnapshot(`<Fragment />`);
   });
 
   it.each([
@@ -70,7 +64,6 @@ describe('FiltersExpressionSelect', () => {
           locations: [],
         }}
         setAlertParams={jest.fn()}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -98,7 +91,6 @@ describe('FiltersExpressionSelect', () => {
           locations: ['nyc'],
         }}
         setAlertParams={setAlertParamsMock}
-        setUpdatedFieldValues={jest.fn()}
         shouldUpdateUrl={false}
       />
     );
@@ -193,7 +185,6 @@ describe('FiltersExpressionSelect', () => {
           onRemoveFilter={jest.fn()}
           filters={filters}
           setAlertParams={jest.fn()}
-          setUpdatedFieldValues={jest.fn()}
           shouldUpdateUrl={false}
         />
       );

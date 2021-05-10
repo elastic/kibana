@@ -1,24 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { savedObjectsManagementPluginMock } from 'src/plugins/saved_objects_management/public/mocks';
+
+import { uiApiMock } from '../ui_api/mocks';
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 // import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
-import { spacesManagerMock } from '../spaces_manager/mocks';
-import { ShareSavedObjectsToSpaceService } from '.';
-import { coreMock, notificationServiceMock } from 'src/core/public/mocks';
-import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/saved_objects_management/public/mocks';
+import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space_service';
 
 describe('ShareSavedObjectsToSpaceService', () => {
   describe('#setup', () => {
     it('registers the ShareToSpaceSavedObjectsManagement Action and Column', () => {
       const deps = {
-        spacesManager: spacesManagerMock.create(),
-        notificationsSetup: notificationServiceMock.createSetupContract(),
         savedObjectsManagementSetup: savedObjectsManagementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices,
+        spacesApiUi: uiApiMock.create(),
       };
 
       const service = new ShareSavedObjectsToSpaceService();

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent } from 'react';
@@ -13,20 +13,21 @@ import { EuiDraggable, EuiDroppable } from '@elastic/eui';
 import { Agg } from './agg';
 // @ts-ignore
 import { seriesChangeHandler } from '../lib/series_change_handler';
-// @ts-ignore
 import { handleAdd, handleDelete } from '../lib/collection_actions';
 import { newMetricAggFn } from '../lib/new_metric_agg_fn';
-import { PanelSchema, SeriesItemsSchema } from '../../../../common/types';
-import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
+import type { Panel, Series } from '../../../../common/types';
+import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import { IFieldType } from '../../../../../data/common/index_patterns/fields';
 
 const DROPPABLE_ID = 'aggs_dnd';
 
 export interface AggsProps {
-  panel: PanelSchema;
-  model: SeriesItemsSchema;
+  name: keyof Series;
+  panel: Panel;
+  model: Series;
   fields: IFieldType[];
   uiRestrictions: TimeseriesUIRestrictions;
+  onChange(): void;
 }
 
 export class Aggs extends PureComponent<AggsProps> {

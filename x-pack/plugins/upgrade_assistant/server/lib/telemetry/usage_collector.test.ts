@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
 import { IClusterClient } from 'src/core/server';
@@ -49,6 +51,7 @@ describe('Upgrade Assistant Usage Collector', () => {
                   'ui_open.overview': 10,
                   'ui_open.cluster': 20,
                   'ui_open.indices': 30,
+                  'ui_open.kibana': 15,
                   'ui_reindex.close': 1,
                   'ui_reindex.open': 4,
                   'ui_reindex.start': 2,
@@ -88,6 +91,7 @@ describe('Upgrade Assistant Usage Collector', () => {
           overview: 10,
           cluster: 20,
           indices: 30,
+          kibana: 15,
         },
         ui_reindex: {
           close: 1,

@@ -1,23 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import { EuiPageContentBody, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPageContentBody,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  IconType,
+} from '@elastic/eui';
 
 interface Props {
   title: string;
   subtitle: string;
+  iconType?: IconType;
 }
-export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, children }) => (
+export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, children }) => (
   <section>
     <header>
-      <EuiTitle size="m">
-        <h2>{title}</h2>
-      </EuiTitle>
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        justifyContent="flexStart"
+        responsive={false}
+      >
+        {iconType && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={iconType} size="l" />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h2>{title}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         <p>{subtitle}</p>
       </EuiText>

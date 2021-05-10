@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,7 +10,6 @@ import { Route, Switch, Redirect } from 'react-router-dom';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { BreadcrumbTrail } from '../../../shared/kibana_chrome/generate_breadcrumbs';
 import { NotFound } from '../../../shared/not_found';
 import {
   ENGINE_ANALYTICS_PATH,
@@ -21,7 +21,7 @@ import {
   ENGINE_ANALYTICS_QUERY_DETAILS_PATH,
   ENGINE_ANALYTICS_QUERY_DETAIL_PATH,
 } from '../../routes';
-import { generateEnginePath } from '../engine';
+import { generateEnginePath, getEngineBreadcrumbs } from '../engine';
 
 import {
   ANALYTICS_TITLE,
@@ -41,11 +41,8 @@ import {
   QueryDetail,
 } from './views';
 
-interface Props {
-  engineBreadcrumb: BreadcrumbTrail;
-}
-export const AnalyticsRouter: React.FC<Props> = ({ engineBreadcrumb }) => {
-  const ANALYTICS_BREADCRUMB = [...engineBreadcrumb, ANALYTICS_TITLE];
+export const AnalyticsRouter: React.FC = () => {
+  const ANALYTICS_BREADCRUMB = getEngineBreadcrumbs([ANALYTICS_TITLE]);
 
   return (
     <Switch>

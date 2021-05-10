@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiSelectOption } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../../types';
 import {
   ExecutorSubActionPushParamsITSM,
@@ -44,4 +44,3 @@ export interface Choice {
 }
 
 export type Fields = Record<string, Choice[]>;
-export type Options = Record<string, EuiSelectOption[]>;

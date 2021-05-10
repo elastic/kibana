@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import classNames from 'classnames';
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { EuiFieldText, EuiText, keys } from '@elastic/eui';
+import { EuiFieldText, EuiText, keys, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
   placeholder: string;
@@ -88,11 +90,16 @@ function _InlineTextInput({
       tabIndex={disabled ? -1 : 0}
       onFocus={() => setIsShowingTextInput(true)}
     >
-      <EuiText size="s" color="subdued">
-        <div className="pipelineProcessorsEditor__item__description">
-          {text || <em>{placeholder}</em>}
-        </div>
-      </EuiText>
+      <EuiToolTip content={text ?? placeholder}>
+        <EuiText size="s" color="subdued">
+          <div
+            className="pipelineProcessorsEditor__item__description"
+            data-test-subj="inlineTextInputNonEditableText"
+          >
+            {text || <em>{placeholder}</em>}
+          </div>
+        </EuiText>
+      </EuiToolTip>
     </div>
   );
 }

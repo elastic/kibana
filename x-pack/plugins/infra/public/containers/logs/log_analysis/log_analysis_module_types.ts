@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { HttpHandler } from 'src/core/public';
+import { estypes } from '@elastic/elasticsearch';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -45,6 +47,7 @@ export interface ModuleDescriptor<JobType extends string> {
   validateSetupIndices: (
     indices: string[],
     timestampField: string,
+    runtimeMappings: estypes.RuntimeFields,
     fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
@@ -52,6 +55,7 @@ export interface ModuleDescriptor<JobType extends string> {
     timestampField: string,
     startTime: number,
     endTime: number,
+    runtimeMappings: estypes.RuntimeFields,
     fetch: HttpHandler
   ) => Promise<ValidateLogEntryDatasetsResponsePayload>;
 }
@@ -61,4 +65,5 @@ export interface ModuleSourceConfiguration {
   sourceId: string;
   spaceId: string;
   timestampField: string;
+  runtimeMappings: estypes.RuntimeFields;
 }

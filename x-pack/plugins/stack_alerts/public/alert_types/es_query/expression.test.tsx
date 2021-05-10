@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -56,9 +57,6 @@ jest.mock('../../../../triggers_actions_ui/public', () => {
     ...original,
     getIndexPatterns: () => {
       return ['index1', 'index2'];
-    },
-    firstFieldOption: () => {
-      return { text: 'Select a field', value: '' };
     },
     getTimeFieldOptions: () => {
       return [
@@ -118,6 +116,11 @@ describe('EsQueryAlertTypeExpression', () => {
         docLinks: {
           ELASTIC_WEBSITE_URL: '',
           DOC_LINK_VERSION: '',
+          links: {
+            query: {
+              queryDsl: 'query-dsl.html',
+            },
+          },
         },
       },
     });
@@ -128,6 +131,7 @@ describe('EsQueryAlertTypeExpression', () => {
       index: ['test-index'],
       timeField: '@timestamp',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       thresholdComparator: '>',
       threshold: [0],
       timeWindowSize: 15,
@@ -139,6 +143,7 @@ describe('EsQueryAlertTypeExpression', () => {
     const errors = {
       index: [],
       esQuery: [],
+      size: [],
       timeField: [],
       timeWindowSize: [],
     };
@@ -147,6 +152,7 @@ describe('EsQueryAlertTypeExpression', () => {
       <EsQueryAlertTypeExpression
         alertInterval="1m"
         alertThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
         alertParams={alertParams}
         setAlertParams={() => {}}
         setAlertProperty={() => {}}
@@ -171,6 +177,7 @@ describe('EsQueryAlertTypeExpression', () => {
   test('should render EsQueryAlertTypeExpression with expected components', async () => {
     const wrapper = await setup(getAlertParams());
     expect(wrapper.find('[data-test-subj="indexSelectPopover"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="sizeValueExpression"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="queryJsonEditor"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();

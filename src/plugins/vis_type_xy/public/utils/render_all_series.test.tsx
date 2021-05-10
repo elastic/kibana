@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -15,6 +15,7 @@ import {
   getVisConfig,
   getVisConfigPercentiles,
   getPercentilesData,
+  getVisConfigMutipleYaxis,
 } from './render_all_series.test.mocks';
 import { SeriesParam, VisConfig } from '../types';
 
@@ -96,6 +97,22 @@ describe('renderAllSeries', function () {
   it('renders the correct yAccessors for not percentile aggs', () => {
     const renderSeries = getAllSeries(getVisConfig(), defaultSeriesParams, defaultData);
     const wrapper = shallow(<div>{renderSeries}</div>);
+    expect(wrapper.find(AreaSeries).prop('yAccessors')).toEqual(['col-1-3']);
+  });
+
+  it('renders the correct yAccessors for multiple yAxis', () => {
+    const mutipleYAxisConfig = getVisConfigMutipleYaxis();
+    const renderMutipleYAxisSeries = renderAllSeries(
+      mutipleYAxisConfig,
+      defaultSeriesParams as SeriesParam[],
+      defaultData,
+      jest.fn(),
+      jest.fn(),
+      'Europe/Athens',
+      'col-0-2',
+      []
+    );
+    const wrapper = shallow(<div>{renderMutipleYAxisSeries}</div>);
     expect(wrapper.find(AreaSeries).prop('yAccessors')).toEqual(['col-1-3']);
   });
 

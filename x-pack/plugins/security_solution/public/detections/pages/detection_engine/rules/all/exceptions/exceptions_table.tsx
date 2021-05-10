@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
-import { EuiBasicTable, EuiEmptyPrompt, EuiLoadingContent, EuiProgress } from '@elastic/eui';
-import styled from 'styled-components';
+import {
+  EuiBasicTable,
+  EuiEmptyPrompt,
+  EuiLoadingContent,
+  EuiProgress,
+  EuiSearchBarProps,
+} from '@elastic/eui';
 import { History } from 'history';
 
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { NamespaceType } from '../../../../../../../../lists/common';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { useApi, useExceptionLists } from '../../../../../../shared_imports';
+import { ExceptionListFilter, useApi, useExceptionLists } from '../../../../../../shared_imports';
 import { FormatUrl } from '../../../../../../common/components/link_to';
 import { HeaderSection } from '../../../../../../common/components/header_section';
 import { Loader } from '../../../../../../common/components/loader';
@@ -24,17 +31,10 @@ import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
-
-// Known lost battle with Eui :(
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
+import { ExceptionsSearchBar } from './exceptions_search_bar';
+import { getSearchFilters } from '../helpers';
 
 export type Func = () => Promise<void>;
-export interface ExceptionListFilter {
-  name?: string | null;
-  list_id?: string | null;
-  created_by?: string | null;
-}
 
 interface ExceptionListsTableProps {
   history: History;
@@ -70,8 +70,10 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
       exceptionReferenceModalInitialState
     );
+    const [filters, setFilters] = useState<ExceptionListFilter | undefined>(undefined);
     const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
       errorMessage: i18n.ERROR_EXCEPTION_LISTS,
+      filterOptions: filters,
       http,
       namespaceTypes: ['single', 'agnostic'],
       notifications,
@@ -87,6 +89,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
     const [exportingListIds, setExportingListIds] = useState<string[]>([]);
     const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+    const { addError } = useAppToasts();
 
     const handleDeleteSuccess = useCallback(
       (listId?: string) => () => {
@@ -99,12 +102,11 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
 
     const handleDeleteError = useCallback(
       (err: Error & { body?: { message: string } }): void => {
-        notifications.toasts.addError(err, {
+        addError(err, {
           title: i18n.EXCEPTION_DELETE_ERROR,
-          toastMessage: err.body != null ? err.body.message : err.message,
         });
       },
-      [notifications.toasts]
+      [addError]
     );
 
     const handleDelete = useCallback(
@@ -169,9 +171,9 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
 
     const handleExportError = useCallback(
       (err: Error) => {
-        notifications.toasts.addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
+        addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
       },
-      [notifications.toasts]
+      [addError]
     );
 
     const handleExport = useCallback(
@@ -222,6 +224,29 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
         />
       );
     }, []);
+
+    const handleSearch = useCallback(
+      async ({
+        query,
+        queryText,
+      }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
+        const filterOptions = {
+          name: null,
+          list_id: null,
+          created_by: null,
+          type: null,
+          tags: null,
+        };
+        const searchTerms = getSearchFilters({
+          defaultSearchTerm: 'name',
+          filterOptions,
+          query,
+          searchValue: queryText,
+        });
+        setFilters(searchTerms);
+      },
+      []
+    );
 
     const handleCloseReferenceErrorModal = useCallback((): void => {
       setDeletingListIds([]);
@@ -288,7 +313,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       () => ({
         pageIndex: pagination.page - 1,
         pageSize: pagination.perPage,
-        totalItemCount: pagination.total,
+        totalItemCount: pagination.total || 0,
         pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
       }),
       [pagination]
@@ -320,11 +345,14 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               split
               title={i18n.ALL_EXCEPTIONS}
               subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
-            />
+            >
+              {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
+            </HeaderSection>
 
             {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
+
             {initLoading ? (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             ) : (
@@ -336,7 +364,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                   numberSelectedItems={0}
                   onRefresh={handleRefresh}
                 />
-                <MyEuiBasicTable
+                <EuiBasicTable
                   data-test-subj="exceptions-table"
                   columns={exceptionsColumns}
                   isSelectable={!hasNoPermissions ?? false}

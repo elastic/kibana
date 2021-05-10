@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -23,12 +24,14 @@ describe('getUpgradeAssistantStatus', () => {
   const resolvedIndices = {
     indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
   };
+
   // @ts-expect-error mock data is too loosely typed
   const deprecationsResponse: DeprecationAPIResponse = _.cloneDeep(fakeDeprecations);
 
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
 
   esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+    // @ts-expect-error not full interface
     asApiResponse(deprecationsResponse)
   );
 
@@ -46,6 +49,7 @@ describe('getUpgradeAssistantStatus', () => {
 
   it('returns readyForUpgrade === false when critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      // @ts-expect-error not full interface
       asApiResponse({
         cluster_settings: [{ level: 'critical', message: 'Do count me', url: 'https://...' }],
         node_settings: [],
@@ -62,6 +66,7 @@ describe('getUpgradeAssistantStatus', () => {
 
   it('returns readyForUpgrade === true when no critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      // @ts-expect-error not full interface
       asApiResponse({
         cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
         node_settings: [],
@@ -78,6 +83,7 @@ describe('getUpgradeAssistantStatus', () => {
 
   it('filters out security realm deprecation on Cloud', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      // @ts-expect-error not full interface
       asApiResponse({
         cluster_settings: [
           {

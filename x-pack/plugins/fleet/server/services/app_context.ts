@@ -1,44 +1,51 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { BehaviorSubject, Observable } from 'rxjs';
+
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import {
+import { kibanaPackageJson } from '@kbn/utils';
+import type { KibanaRequest } from 'src/core/server';
+import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
-  KibanaRequest,
 } from 'src/core/server';
-import {
+
+import type { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
-import packageJSON from '../../../../../package.json';
-import { SecurityPluginStart } from '../../../security/server';
-import { FleetConfigType } from '../../common';
-import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
-import { CloudSetup } from '../../../cloud/server';
+import type { SecurityPluginStart } from '../../../security/server';
+import type { FleetConfigType } from '../../common';
+import type { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
+import type { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
+  private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
   private security: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
-  private kibanaVersion: FleetAppContext['kibanaVersion'] = packageJSON.version;
-  private kibanaBranch: FleetAppContext['kibanaBranch'] = packageJSON.branch;
+  private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
+  private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
   public async start(appContext: FleetAppContext) {
+    this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
@@ -63,6 +70,13 @@ class AppContextService {
     this.externalCallbacks.clear();
   }
 
+  public getData() {
+    if (!this.data) {
+      throw new Error('Data start service not set.');
+    }
+    return this.data;
+  }
+
   public getEncryptedSavedObjects() {
     if (!this.encryptedSavedObjects) {
       throw new Error('Encrypted saved object start service not set.');
@@ -75,6 +89,10 @@ class AppContextService {
       throw new Error('Security service not set.');
     }
     return this.security;
+  }
+
+  public hasSecurity() {
+    return !!this.security;
   }
 
   public getCloud() {

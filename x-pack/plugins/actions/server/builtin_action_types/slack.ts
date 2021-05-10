@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { URL } from 'url';
 import { curry } from 'lodash';
+import HttpProxyAgent from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -130,13 +133,15 @@ async function slackExecutor(
   const { message } = params;
   const proxySettings = configurationUtilities.getProxySettings();
 
-  const customAgents = getCustomAgents(configurationUtilities, logger);
+  const customAgents = getCustomAgents(configurationUtilities, logger, webhookUrl);
   const agent = webhookUrl.toLowerCase().startsWith('https')
     ? customAgents.httpsAgent
     : customAgents.httpAgent;
 
   if (proxySettings) {
-    logger.debug(`IncomingWebhook was called with proxyUrl ${proxySettings.proxyUrl}`);
+    if (agent instanceof HttpProxyAgent || agent instanceof HttpsProxyAgent) {
+      logger.debug(`IncomingWebhook was called with proxyUrl ${proxySettings.proxyUrl}`);
+    }
   }
 
   try {

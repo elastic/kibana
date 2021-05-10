@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CaptureConfig } from '../../../../server/types';
@@ -45,6 +46,8 @@ export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig
     // The viewport may later need to be resized depending on the position of the clip area.
     // These numbers come from the job parameters, so this is a close guess.
     `--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`,
+    // allow screenshot clip region to go outside of the viewport
+    `--mainFrameClipsContent=false`,
   ];
 
   if (proxyConfig.enabled) {

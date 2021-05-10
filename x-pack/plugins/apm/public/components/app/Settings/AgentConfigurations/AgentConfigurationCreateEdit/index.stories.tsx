@@ -1,18 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { HttpSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
@@ -28,10 +23,10 @@ storiesOf(
   module
 )
   .addDecorator((storyFn) => {
-    const httpMock = {};
+    const coreMock = ({} as unknown) as CoreStart;
 
     // mock
-    createCallApmApi((httpMock as unknown) as HttpSetup);
+    createCallApmApi(coreMock);
 
     const contextMock = {
       core: {

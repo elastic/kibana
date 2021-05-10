@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -20,25 +21,41 @@ import {
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
   ANOMALY_THRESHOLD_INPUT,
+  AT_LEAST_ONE_INDEX_PATTERN,
+  AT_LEAST_ONE_VALID_MATCH,
+  BACK_TO_ALL_RULES_LINK,
+  COMBO_BOX_CLEAR_BTN,
   COMBO_BOX_INPUT,
   CREATE_AND_ACTIVATE_BTN,
   CUSTOM_QUERY_INPUT,
+  CUSTOM_QUERY_REQUIRED,
+  DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_TAB,
+  EQL_QUERY_INPUT,
+  EQL_QUERY_PREVIEW_HISTOGRAM,
+  EQL_QUERY_VALIDATION_SPINNER,
+  EQL_TYPE,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
   INPUT,
+  INVALID_MATCH_CONTENT,
   INVESTIGATION_NOTES_TEXTAREA,
   LOOK_BACK_INTERVAL,
   LOOK_BACK_TIME_TYPE,
-  MACHINE_LEARNING_DROPDOWN,
-  MACHINE_LEARNING_LIST,
+  MACHINE_LEARNING_DROPDOWN_INPUT,
   MACHINE_LEARNING_TYPE,
+  MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
+  MITRE_ATTACK_ADD_TACTIC_BUTTON,
+  MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
+  MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN,
+  MITRE_ATTACK_TACTIC_DROPDOWN,
+  MITRE_ATTACK_TECHNIQUE_DROPDOWN,
   MITRE_TACTIC,
+  QUERY_PREVIEW_BUTTON,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
-  DEFAULT_RISK_SCORE_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
@@ -46,6 +63,8 @@ import {
   RULE_NAME_OVERRIDE,
   RULE_STATUS,
   RULE_TIMESTAMP_OVERRIDE,
+  RULES_CREATION_FORM,
+  RULES_CREATION_PREVIEW,
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
   SCHEDULE_CONTINUE_BUTTON,
@@ -54,29 +73,18 @@ import {
   SEVERITY_MAPPING_OVERRIDE_OPTION,
   SEVERITY_OVERRIDE_ROW,
   TAGS_INPUT,
+  THREAT_COMBO_BOX_INPUT,
+  THREAT_ITEM_ENTRY_DELETE_BUTTON,
+  THREAT_MAPPING_COMBO_BOX_INPUT,
+  THREAT_MATCH_AND_BUTTON,
+  THREAT_MATCH_CUSTOM_QUERY_INPUT,
+  THREAT_MATCH_INDICATOR_INDEX,
+  THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
+  THREAT_MATCH_OR_BUTTON,
+  THREAT_MATCH_QUERY_INPUT,
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  EQL_TYPE,
-  EQL_QUERY_INPUT,
-  QUERY_PREVIEW_BUTTON,
-  EQL_QUERY_PREVIEW_HISTOGRAM,
-  EQL_QUERY_VALIDATION_SPINNER,
-  COMBO_BOX_CLEAR_BTN,
-  MITRE_ATTACK_TACTIC_DROPDOWN,
-  MITRE_ATTACK_TECHNIQUE_DROPDOWN,
-  MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN,
-  MITRE_ATTACK_ADD_TACTIC_BUTTON,
-  MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
-  MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
-  THREAT_COMBO_BOX_INPUT,
-  THREAT_ITEM_ENTRY_DELETE_BUTTON,
-  THREAT_MATCH_AND_BUTTON,
-  INVALID_MATCH_CONTENT,
-  THREAT_MATCH_OR_BUTTON,
-  AT_LEAST_ONE_VALID_MATCH,
-  AT_LEAST_ONE_INDEX_PATTERN,
-  CUSTOM_QUERY_REQUIRED,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -87,6 +95,8 @@ export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
   cy.get(CREATE_AND_ACTIVATE_BTN).click({ force: true });
   cy.get(CREATE_AND_ACTIVATE_BTN).should('not.exist');
+  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
+  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
 };
 
 export const fillAboutRule = (
@@ -270,23 +280,26 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
-  cy.get(EQL_QUERY_INPUT).should('exist');
-  cy.get(EQL_QUERY_INPUT).should('be.visible');
-  cy.get(EQL_QUERY_INPUT).type(rule.customQuery!);
-  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
-  cy.get(QUERY_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery!);
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
+  cy.get(RULES_CREATION_PREVIEW)
+    .find(QUERY_PREVIEW_BUTTON)
+    .should('not.be.disabled')
+    .click({ force: true });
   cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
       if (text !== 'Hits') {
-        cy.get(QUERY_PREVIEW_BUTTON).click({ force: true });
+        cy.get(RULES_CREATION_PREVIEW).find(QUERY_PREVIEW_BUTTON).click({ force: true });
         cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
 
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-  cy.get(EQL_QUERY_INPUT).should('not.exist');
+  cy.get(`${RULES_CREATION_FORM} ${EQL_QUERY_INPUT}`).should('not.exist');
 };
 
 /**
@@ -319,17 +332,17 @@ export const fillIndicatorMatchRow = ({
 }) => {
   const computedRowNumber = rowNumber == null ? 1 : rowNumber;
   const computedValueRows = validColumns == null ? 'both' : validColumns;
-  const OFFSET = 2;
-  cy.get(COMBO_BOX_INPUT)
-    .eq(computedRowNumber * OFFSET + 1)
+  cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
+    .eq(computedRowNumber * 2 - 2)
+    .eq(0)
     .type(indexField);
   if (computedValueRows === 'indexField' || computedValueRows === 'both') {
     cy.get(`button[title="${indexField}"]`)
       .should('be.visible')
       .then(([e]) => e.click());
   }
-  cy.get(COMBO_BOX_INPUT)
-    .eq(computedRowNumber * OFFSET + 2)
+  cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
+    .eq(computedRowNumber * 2 - 1)
     .type(indicatorIndexField);
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
@@ -387,19 +400,20 @@ export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
 /** Returns the indicator index pattern */
-export const getIndicatorIndex = () => cy.get(COMBO_BOX_INPUT).eq(0);
+export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
 
 /** Returns the indicator's indicator index */
-export const getIndicatorIndicatorIndex = () => cy.get(COMBO_BOX_INPUT).eq(2);
+export const getIndicatorIndicatorIndex = () =>
+  cy.get(THREAT_MATCH_INDICATOR_INDICATOR_INDEX).eq(0);
 
 /** Returns the index pattern's clear button  */
 export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN);
 
 /** Returns the custom query input */
-export const getCustomQueryInput = () => cy.get(CUSTOM_QUERY_INPUT).eq(0);
+export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT).eq(0);
 
 /** Returns the custom query input */
-export const getCustomIndicatorQueryInput = () => cy.get(CUSTOM_QUERY_INPUT).eq(1);
+export const getCustomIndicatorQueryInput = () => cy.get(THREAT_MATCH_QUERY_INPUT).eq(0);
 
 /** Returns custom query required content */
 export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQUIRED);
@@ -411,7 +425,7 @@ export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQ
 export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRule) => {
   fillIndexAndIndicatorIndexPattern(rule.index, rule.indicatorIndexPattern);
   fillIndicatorMatchRow({
-    indexField: rule.indicatorMapping,
+    indexField: rule.indicatorMappingField,
     indicatorIndexField: rule.indicatorIndexField,
   });
   getDefineContinueButton().should('exist').click({ force: true });
@@ -419,14 +433,17 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
-  cy.get(MACHINE_LEARNING_DROPDOWN).click({ force: true });
-  cy.contains(MACHINE_LEARNING_LIST, rule.machineLearningJob).click();
+  rule.machineLearningJobs.forEach((machineLearningJob) => {
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${machineLearningJob}{enter}`);
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
+  });
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${machineLearningRule.anomalyScoreThreshold}`, {
     force: true,
   });
   getDefineContinueButton().should('exist').click({ force: true });
 
-  cy.get(MACHINE_LEARNING_DROPDOWN).should('not.exist');
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
 };
 
 export const goToDefineStepTab = () => {
@@ -461,7 +478,7 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForAlertsToPopulate = async () => {
+export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
@@ -470,7 +487,7 @@ export const waitForAlertsToPopulate = async () => {
         .invoke('text')
         .then((countText) => {
           const alertCount = parseInt(countText, 10) || 0;
-          return alertCount > 0;
+          return alertCount >= alertCountThreshold;
         });
     },
     { interval: 500, timeout: 12000 }
@@ -479,7 +496,7 @@ export const waitForAlertsToPopulate = async () => {
 
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
-    cy.get(REFRESH_BUTTON).click();
+    cy.get(REFRESH_BUTTON).click({ force: true });
     return cy
       .get(RULE_STATUS)
       .invoke('text')

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import {
@@ -56,8 +58,10 @@ import { addBasePath } from '../index';
 
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
+import { registerTransformNodesRoutes } from './transforms_nodes';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import { isLatestTransform } from '../../../common/types/transform';
+import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
@@ -173,7 +177,6 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
-  registerTransformsAuditMessagesRoutes(routeDependencies);
 
   /**
    * @apiGroup Transforms
@@ -204,6 +207,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
         await ctx.core.elasticsearch.client.asCurrentUser.transform
           .putTransform({
+            // @ts-expect-error @elastic/elasticsearch max_page_search_size is required in TransformPivot
             body: req.body,
             transform_id: transformId,
           })
@@ -248,6 +252,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           const {
             body,
           } = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
+            // @ts-expect-error query doesn't satisfy QueryContainer from @elastic/elasticsearch
             body: req.body,
             transform_id: transformId,
           });
@@ -387,6 +392,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  registerTransformsAuditMessagesRoutes(routeDependencies);
+  registerTransformNodesRoutes(routeDependencies);
 }
 
 async function getIndexPatternId(
@@ -447,9 +455,12 @@ async function deleteTransforms(
           transform_id: transformId,
         });
         const transformConfig = body.transforms[0];
+        // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
         destinationIndex = Array.isArray(transformConfig.dest.index)
-          ? transformConfig.dest.index[0]
-          : transformConfig.dest.index;
+          ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+            transformConfig.dest.index[0]
+          : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+            transformConfig.dest.index;
       } catch (getTransformConfigError) {
         transformDeleted.error = getTransformConfigError.meta.body.error;
         results[transformId] = {
@@ -534,6 +545,7 @@ const previewTransformHandler: RequestHandler<
   try {
     const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
+      // @ts-expect-error max_page_search_size is required in TransformPivot
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {
@@ -551,9 +563,7 @@ const previewTransformHandler: RequestHandler<
       ).reduce((acc, [fieldName, fieldCaps]) => {
         const fieldDefinition = Object.values(fieldCaps)[0];
         const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
-        const isKeywordDuplicate =
-          fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
-        if (isMetaField || isKeywordDuplicate) {
+        if (isMetaField || isKeywordDuplicate(fieldName, fieldNamesSet)) {
           return acc;
         }
         acc[fieldName] = { ...fieldDefinition };

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -41,21 +41,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open add panel when add button is clicked', async () => {
-      await testSubjects.click('dashboardAddPanelButton');
+      await dashboardAddPanel.clickOpenAddPanel();
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
       await testSubjects.click('euiFlyoutCloseButton');
     });
 
     it('should add new visualization from dashboard', async () => {
-      await testSubjects.exists('addVisualizationButton');
-      await testSubjects.click('addVisualizationButton');
       await dashboardVisualizations.createAndAddMarkdown({
         name: 'Dashboard Test Markdown',
         markdown: 'Markdown text',
       });
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.markdownWithValuesExists(['Markdown text']);
+    });
+
+    it('should open editor menu when editor button is clicked', async () => {
+      await dashboardAddPanel.clickEditorMenuButton();
+      await testSubjects.existOrFail('dashboardEditorContextMenu');
     });
   });
 }

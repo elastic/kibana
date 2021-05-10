@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,12 +11,21 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'number_range',
+  'ip',
+  'ip_range',
+  'date',
+  'date_range',
+]);
 
 const SCALE = 'ratio';
-const OPERATION_TYPE = 'cardinality';
+const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
 function ofName(name: string) {
@@ -30,7 +40,7 @@ function ofName(name: string) {
 export interface CardinalityIndexPatternColumn
   extends FormattedIndexPatternColumn,
     FieldBasedIndexPatternColumn {
-  operationType: 'cardinality';
+  operationType: typeof OPERATION_TYPE;
 }
 
 export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
@@ -60,6 +70,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
+  filterable: true,
   getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
   buildColumn({ field, previousColumn }) {
     return {
@@ -69,13 +80,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format }
-          : undefined,
+      filter: previousColumn?.filter,
+      params: getFormatFromPreviousColumn(previousColumn),
     };
   },
   toEsAggsFn: (column, columnId) => {

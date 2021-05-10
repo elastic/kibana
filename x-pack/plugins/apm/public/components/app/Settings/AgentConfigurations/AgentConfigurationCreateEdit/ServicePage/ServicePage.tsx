@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -32,7 +33,7 @@ interface Props {
 }
 
 export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
-  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
+  const { data: serviceNamesData, status: serviceNamesStatus } = useFetcher(
     (callApmApi) => {
       return callApmApi({
         endpoint: 'GET /api/apm/settings/agent-configuration/services',
@@ -42,8 +43,9 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     [],
     { preservePreviousData: false }
   );
+  const serviceNames = serviceNamesData?.serviceNames ?? [];
 
-  const { data: environments = [], status: environmentStatus } = useFetcher(
+  const { data: environmentsData, status: environmentsStatus } = useFetcher(
     (callApmApi) => {
       if (newConfig.service.name) {
         return callApmApi({
@@ -57,6 +59,8 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     [newConfig.service.name],
     { preservePreviousData: false }
   );
+
+  const environments = environmentsData?.environments ?? [];
 
   const { status: agentNameStatus } = useFetcher(
     async (callApmApi) => {
@@ -152,11 +156,11 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           'xpack.apm.agentConfig.servicePage.environment.fieldLabel',
           { defaultMessage: 'Service environment' }
         )}
-        isLoading={environmentStatus === FETCH_STATUS.LOADING}
+        isLoading={environmentsStatus === FETCH_STATUS.LOADING}
         options={environmentOptions}
         value={newConfig.service.environment}
         disabled={
-          !newConfig.service.name || environmentStatus === FETCH_STATUS.LOADING
+          !newConfig.service.name || environmentsStatus === FETCH_STATUS.LOADING
         }
         onChange={(e) => {
           e.preventDefault();

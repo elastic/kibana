@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -78,12 +78,13 @@ export class VisualizePlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
 
   private readonly visEditorsRegistry = createVisEditorsRegistry();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
     { home, urlForwarding, data }: VisualizePluginSetupDependencies
   ) {
@@ -94,7 +95,7 @@ export class VisualizePlugin
       setActiveUrl,
       restorePreviousUrl,
     } = createKbnUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/visualize'),
+      baseUrl: core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
       navLinkUpdater$: this.appStateUpdater,
@@ -114,6 +115,12 @@ export class VisualizePlugin
         },
       ],
       getHistory: () => this.currentHistory!,
+      onBeforeNavLinkSaved: (urlToSave: string) => {
+        if (this.isLinkedToOriginatingApp?.()) {
+          return core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH);
+        }
+        return urlToSave;
+      },
     });
     this.stopUrlTracking = () => {
       stopUrlTracker();
@@ -122,8 +129,8 @@ export class VisualizePlugin
     setUISettings(core.uiSettings);
 
     core.application.register({
-      id: 'visualize',
-      title: 'Visualize',
+      id: VisualizeConstants.APP_ID,
+      title: 'Visualize Library',
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -133,6 +140,15 @@ export class VisualizePlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         this.currentHistory = params.history;
+
+        // allows the urlTracker to only save URLs that are not linked to an originatingApp
+        this.isLinkedToOriginatingApp = () => {
+          return Boolean(
+            pluginsStart.embeddable
+              .getStateTransfer()
+              .getIncomingEditorState(VisualizeConstants.APP_ID)?.originatingApp
+          );
+        };
 
         // make sure the index pattern list is up to date
         pluginsStart.data.indexPatterns.clearCache();
@@ -172,6 +188,7 @@ export class VisualizePlugin
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
+          dashboardCapabilities: coreStart.application.capabilities.dashboard,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
@@ -204,7 +221,7 @@ export class VisualizePlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize',
+        title: 'Visualize Library',
         description: i18n.translate('visualize.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',

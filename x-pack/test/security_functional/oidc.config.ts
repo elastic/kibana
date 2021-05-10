@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { resolve } from 'path';
@@ -25,6 +26,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     __dirname,
     '../security_api_integration/fixtures/oidc/oidc_provider'
   );
+
+  const testEndpointsPlugin = resolve(__dirname, './fixtures/common/test_endpoints');
 
   return {
     testFiles: [resolve(__dirname, './tests/oidc')],
@@ -60,6 +63,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${oidcOpPPlugin}`,
+        `--plugin-path=${testEndpointsPlugin}`,
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         '--xpack.security.authc.selector.enabled=false',

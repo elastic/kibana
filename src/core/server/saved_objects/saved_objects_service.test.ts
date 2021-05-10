@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -42,7 +42,7 @@ describe('SavedObjectsService', () => {
       }
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
-        maxImportExportSize: new ByteSizeValue(0),
+        maxImportExportSize: 10000,
       });
     });
     return mockCoreContext.create({ configService, env });
@@ -274,7 +274,7 @@ describe('SavedObjectsService', () => {
         expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual([]);
@@ -292,7 +292,7 @@ describe('SavedObjectsService', () => {
         createScopedRepository(req, ['someHiddenType']);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
@@ -311,7 +311,7 @@ describe('SavedObjectsService', () => {
         createInternalRepository();
 
         const [
-          [, , , client, includedHiddenTypes],
+          [, , , client, , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(coreStart.elasticsearch.client.asInternalUser).toBe(client);
@@ -328,7 +328,7 @@ describe('SavedObjectsService', () => {
         createInternalRepository(['someHiddenType']);
 
         const [
-          [, , , , includedHiddenTypes],
+          [, , , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,6 +19,7 @@ jest.mock('../engine', () => ({
 import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
+
 import { AnalyticsLogic } from './';
 
 describe('AnalyticsLogic', () => {
@@ -28,7 +30,6 @@ describe('AnalyticsLogic', () => {
 
   const DEFAULT_VALUES = {
     dataLoading: true,
-    analyticsUnavailable: false,
     allTags: [],
     recentQueries: [],
     topQueries: [],
@@ -80,7 +81,6 @@ describe('AnalyticsLogic', () => {
     },
   ];
   const MOCK_ANALYTICS_RESPONSE = {
-    analyticsUnavailable: false,
     allTags: ['some-tag'],
     startDate: '1970-01-01',
     recentQueries: MOCK_RECENT_QUERIES,
@@ -96,7 +96,6 @@ describe('AnalyticsLogic', () => {
     queriesNoResultsPerDay: [1, 2, 3],
   };
   const MOCK_QUERY_RESPONSE = {
-    analyticsUnavailable: false,
     allTags: ['some-tag'],
     startDate: '1970-01-01',
     totalQueriesForQuery: 50,
@@ -115,19 +114,6 @@ describe('AnalyticsLogic', () => {
   });
 
   describe('actions', () => {
-    describe('onAnalyticsUnavailable', () => {
-      it('should set state', () => {
-        mount();
-        AnalyticsLogic.actions.onAnalyticsUnavailable();
-
-        expect(AnalyticsLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: false,
-          analyticsUnavailable: true,
-        });
-      });
-    });
-
     describe('onAnalyticsDataLoad', () => {
       it('should set state', () => {
         mount();
@@ -211,27 +197,14 @@ describe('AnalyticsLogic', () => {
         );
       });
 
-      it('calls onAnalyticsUnavailable if analyticsUnavailable is in response', async () => {
-        http.get.mockReturnValueOnce(Promise.resolve({ analyticsUnavailable: true }));
-        mount();
-        jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
-
-        AnalyticsLogic.actions.loadAnalyticsData();
-        await nextTick();
-
-        expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
-      });
-
       it('handles errors', async () => {
         http.get.mockReturnValueOnce(Promise.reject('error'));
         mount();
-        jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
 
         AnalyticsLogic.actions.loadAnalyticsData();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
-        expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
       });
     });
 
@@ -286,27 +259,14 @@ describe('AnalyticsLogic', () => {
         );
       });
 
-      it('calls onAnalyticsUnavailable if analyticsUnavailable is in response', async () => {
-        http.get.mockReturnValueOnce(Promise.resolve({ analyticsUnavailable: true }));
-        mount();
-        jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
-
-        AnalyticsLogic.actions.loadQueryData('some-query');
-        await nextTick();
-
-        expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
-      });
-
       it('handles errors', async () => {
         http.get.mockReturnValueOnce(Promise.reject('error'));
         mount();
-        jest.spyOn(AnalyticsLogic.actions, 'onAnalyticsUnavailable');
 
         AnalyticsLogic.actions.loadQueryData('some-query');
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
-        expect(AnalyticsLogic.actions.onAnalyticsUnavailable).toHaveBeenCalled();
       });
     });
   });

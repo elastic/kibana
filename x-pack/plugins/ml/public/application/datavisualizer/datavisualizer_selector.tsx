@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment } from 'react';
@@ -24,9 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
 import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
-
 import { NavigationMenu } from '../components/navigation_menu';
-import { getMaxBytesFormatted } from './file_based/components/utils';
 import { HelpMenu } from '../components/help_menu';
 
 function startTrialDescription() {
@@ -57,8 +56,10 @@ export const DatavisualizerSelector: FC = () => {
       licenseManagement,
       http: { basePath },
       docLinks,
+      fileDataVisualizer,
     },
   } = useMlKibana();
+
   const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
 
@@ -67,7 +68,12 @@ export const DatavisualizerSelector: FC = () => {
     licenseManagement.enabled === true &&
     isFullLicense() === false;
 
-  const maxFileSize = getMaxBytesFormatted();
+  if (fileDataVisualizer === undefined) {
+    // eslint-disable-next-line no-console
+    console.error('File data visualizer plugin not available');
+    return null;
+  }
+  const maxFileSize = fileDataVisualizer.getMaxBytesFormatted();
 
   return (
     <Fragment>
@@ -136,7 +142,7 @@ export const DatavisualizerSelector: FC = () => {
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
-                      defaultMessage="Upload file"
+                      defaultMessage="Select file"
                     />
                   </EuiButton>
                 }
@@ -166,7 +172,7 @@ export const DatavisualizerSelector: FC = () => {
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
-                      defaultMessage="Select index"
+                      defaultMessage="Select index pattern"
                     />
                   </EuiButton>
                 }

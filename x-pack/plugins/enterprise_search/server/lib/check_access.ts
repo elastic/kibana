@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { SpacesPluginStart } from '../../../spaces/server';
+
 import { SecurityPluginSetup } from '../../../security/server';
-import { ConfigType } from '../';
+import { SpacesPluginStart } from '../../../spaces/server';
+import { ProductAccess } from '../../common/types';
+import { ConfigType } from '../index';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
@@ -17,10 +20,6 @@ interface CheckAccess {
   spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
-}
-export interface Access {
-  hasAppSearchAccess: boolean;
-  hasWorkplaceSearchAccess: boolean;
 }
 
 const ALLOW_ALL_PLUGINS = {
@@ -43,7 +42,7 @@ export const checkAccess = async ({
   spaces,
   request,
   log,
-}: CheckAccess): Promise<Access> => {
+}: CheckAccess): Promise<ProductAccess> => {
   const isRbacEnabled = security?.authz.mode.useRbacForRequest(request) ?? false;
 
   // We can only retrieve the active space when either:

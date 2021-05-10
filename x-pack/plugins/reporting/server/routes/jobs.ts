@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
+import { ROUTE_TAG_CAN_REDIRECT } from '../../../security/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
@@ -197,6 +199,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
           docId: schema.string({ minLength: 3 }),
         }),
       },
+      options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
     },
     userHandler(async (user, context, req, res) => {
       // ensure the async dependencies are loaded

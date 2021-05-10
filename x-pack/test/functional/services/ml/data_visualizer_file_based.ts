@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -123,6 +124,12 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('mlFileImportSuccessCallout');
       });
+    },
+
+    async selectCreateFilebeatConfig() {
+      await testSubjects.scrollIntoView('fileDataVisFilebeatConfigLink');
+      await testSubjects.click('fileDataVisFilebeatConfigLink');
+      await testSubjects.existOrFail('fileDataVisFilebeatConfigPanel');
     },
   };
 }

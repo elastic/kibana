@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import sinon from 'sinon';
@@ -41,20 +41,26 @@ export const createSendRequestHelpers = (): SendRequestHelpers => {
 
   // Set up successful request helpers.
   sendRequestSpy
-    .withArgs(successRequest.path, {
-      body: JSON.stringify(successRequest.body),
-      query: undefined,
-    })
+    .withArgs(
+      successRequest.path,
+      sinon.match({
+        body: JSON.stringify(successRequest.body),
+        query: undefined,
+      })
+    )
     .resolves(successResponse);
   const sendSuccessRequest = () => sendRequest({ ...successRequest });
   const getSuccessResponse = () => ({ data: successResponse.data, error: null });
 
   // Set up failed request helpers.
   sendRequestSpy
-    .withArgs(errorRequest.path, {
-      body: JSON.stringify(errorRequest.body),
-      query: undefined,
-    })
+    .withArgs(
+      errorRequest.path,
+      sinon.match({
+        body: JSON.stringify(errorRequest.body),
+        query: undefined,
+      })
+    )
     .rejects(errorResponse);
   const sendErrorRequest = () => sendRequest({ ...errorRequest });
   const getErrorResponse = () => ({

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -15,7 +15,7 @@ import { calculateSiblings } from '../lib/calculate_siblings';
 import { calculateLabel } from '../../../../common/calculate_label';
 import { basicAggs } from '../../../../common/basic_aggs';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../common/enums';
 
 function createTypeFilter(restrict, exclude = []) {
   return (metric) => {
@@ -70,7 +70,7 @@ export function MetricSelect(props) {
   const percentileOptions = siblings
     .filter((row) => /^percentile/.test(row.type))
     .reduce((acc, row) => {
-      const label = calculateLabel(row, calculatedMetrics, fields);
+      const label = calculateLabel(row, calculatedMetrics, fields, false);
 
       switch (row.type) {
         case METRIC_TYPES.PERCENTILE_RANK:
@@ -100,7 +100,7 @@ export function MetricSelect(props) {
     }, []);
 
   const options = siblings.filter(filterRows(includeSiblings)).map((row) => {
-    const label = calculateLabel(row, calculatedMetrics, fields);
+    const label = calculateLabel(row, calculatedMetrics, fields, false);
     return { value: row.id, label };
   });
   const allOptions = [...options, ...additionalOptions, ...percentileOptions];

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -50,15 +50,14 @@ export function SavedQueryManagementComponentProvider({
       // an error.
       await testSubjects.click('savedQueryFormSaveButton');
 
-      const saveQueryFormSaveButtonStatus = await testSubjects.isEnabled(
-        'savedQueryFormSaveButton'
-      );
+      await retry.waitForWithTimeout('save button to be disabled', 1000, async () => {
+        const saveQueryFormSaveButtonStatus = await testSubjects.isEnabled(
+          'savedQueryFormSaveButton'
+        );
+        return saveQueryFormSaveButtonStatus === false;
+      });
 
-      try {
-        expect(saveQueryFormSaveButtonStatus).to.not.eql(true);
-      } finally {
-        await testSubjects.click('savedQueryFormCancelButton');
-      }
+      await testSubjects.click('savedQueryFormCancelButton');
     }
 
     public async saveCurrentlyLoadedAsNewQuery(
@@ -137,6 +136,13 @@ export function SavedQueryManagementComponentProvider({
       }
 
       await testSubjects.click('savedQueryFormSaveButton');
+    }
+
+    async savedQueryExist(title: string) {
+      await this.openSavedQueryManagementComponent();
+      const exists = testSubjects.exists(`~load-saved-query-${title}-button`);
+      await this.closeSavedQueryManagementComponent();
+      return exists;
     }
 
     async savedQueryExistOrFail(title: string) {

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
-import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
+import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryBeforeCursor } from '../../../../common/log_entry';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
@@ -47,7 +48,7 @@ export const useLogEntriesBeforeRequest = ({
     requests$: logEntriesBeforeSearchRequests$,
   } = useDataSearch({
     getRequest: useCallback(
-      (cursor: LogEntryBeforeCursor['before'], size: number) => {
+      (cursor: LogEntryBeforeCursor['before'], params: { size: number; extendTo?: number }) => {
         return !!sourceId
           ? {
               request: {
@@ -57,9 +58,9 @@ export const useLogEntriesBeforeRequest = ({
                   endTimestamp,
                   highlightPhrase,
                   query,
-                  size,
+                  size: params.size,
                   sourceId,
-                  startTimestamp,
+                  startTimestamp: params.extendTo ?? startTimestamp,
                 }),
               },
               options: { strategy: LOG_ENTRIES_SEARCH_STRATEGY },

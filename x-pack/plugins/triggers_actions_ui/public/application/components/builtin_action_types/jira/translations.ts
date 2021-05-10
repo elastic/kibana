@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -69,14 +70,6 @@ export const JIRA_AUTHENTICATION_LABEL = i18n.translate(
   }
 );
 
-export const JIRA_REMEMBER_VALUES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.rememberValuesLabel',
-  {
-    defaultMessage:
-      'Remember these values. You must reenter them each time you edit the connector.',
-  }
-);
-
 export const JIRA_REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.reenterValuesLabel',
   {
@@ -114,7 +107,7 @@ export const JIRA_API_TOKEN_REQUIRED = i18n.translate(
 );
 
 export const MAPPING_FIELD_SUMMARY = i18n.translate(
-  'xpack.triggersActionsUI.case.configureCases.mappingFieldSummary',
+  'xpack.triggersActionsUI.cases.configureCases.mappingFieldSummary',
   {
     defaultMessage: 'Summary',
   }
@@ -196,5 +189,12 @@ export const SEARCH_ISSUES_LOADING = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.searchIssuesLoading',
   {
     defaultMessage: 'Loading...',
+  }
+);
+
+export const LABELS_WHITE_SPACES = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.labelsSpacesErrorMessage',
+  {
+    defaultMessage: 'Labels cannot contain spaces.',
   }
 );

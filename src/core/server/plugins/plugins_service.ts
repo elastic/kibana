@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
-import { Observable, EMPTY } from 'rxjs';
-import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
-import { pick } from '@kbn/std';
+import { Observable } from 'rxjs';
+import { filter, first, map, concatMap, tap, toArray } from 'rxjs/operators';
+import { pick, getFlattenedObject } from '@kbn/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -75,11 +75,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly uiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
-  private readonly discoveryDisabled: boolean;
+  private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
-    this.discoveryDisabled = coreContext.env.isDevCliParent;
     this.pluginsSystem = new PluginsSystem(coreContext);
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
@@ -90,14 +89,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async discover({ environment }: PluginsServiceDiscoverDeps) {
     const config = await this.config$.pipe(first()).toPromise();
 
-    const { error$, plugin$ } = this.discoveryDisabled
-      ? {
-          error$: EMPTY,
-          plugin$: EMPTY,
-        }
-      : discover(config, this.coreContext, {
-          uuid: environment.instanceUuid,
-        });
+    const { error$, plugin$ } = discover(config, this.coreContext, {
+      uuid: environment.instanceUuid,
+    });
 
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
@@ -116,14 +110,17 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     };
   }
 
+  public getExposedPluginConfigsToUsage() {
+    return this.pluginConfigUsageDescriptors;
+  }
+
   public async setup(deps: PluginsServiceSetupDeps) {
     this.log.debug('Setting up plugins service');
 
     const config = await this.config$.pipe(first()).toPromise();
 
     let contracts = new Map<PluginName, unknown>();
-    const initialize = config.initialize && !this.coreContext.env.isDevCliParent;
-    if (initialize) {
+    if (config.initialize) {
       contracts = await this.pluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps);
     } else {
@@ -131,7 +128,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     return {
-      initialized: initialize,
+      initialized: config.initialize,
       contracts,
     };
   }
@@ -209,7 +206,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     >();
     await plugin$
       .pipe(
-        mergeMap(async (plugin) => {
+        concatMap(async (plugin) => {
           const configDescriptor = plugin.getConfigDescriptor();
           if (configDescriptor) {
             this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
@@ -217,6 +214,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
               this.coreContext.configService.addDeprecationProvider(
                 plugin.configPath,
                 configDescriptor.deprecations
+              );
+            }
+            if (configDescriptor.exposeToUsage) {
+              this.pluginConfigUsageDescriptors.set(
+                Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
+                getFlattenedObject(configDescriptor.exposeToUsage)
               );
             }
             this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
@@ -230,6 +233,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           if (plugin.includesUiPlugin) {
             this.uiPluginInternalInfo.set(plugin.name, {
               requiredBundles: plugin.requiredBundles,
+              version: plugin.manifest.version,
               publicTargetDir: Path.resolve(plugin.path, 'target/public'),
               publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
             });

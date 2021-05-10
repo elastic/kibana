@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -26,7 +27,7 @@ import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
-import { Ast } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
 import {
   DataPublicPluginStart,
@@ -39,6 +40,20 @@ import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+
+const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
+  navLinks: { management: true },
+  management: { kibana: { indexPatterns: true } },
+};
+
+function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
+  const core = coreMock.createStart();
+  ((core.application.capabilities as unknown) as Record<
+    string,
+    Record<string, boolean | Record<string, boolean>>
+  >) = newCapabilities;
+  return core;
+}
 
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -83,7 +98,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -107,7 +122,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -131,7 +146,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -169,49 +184,16 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
     );
 
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-      Object {
-        "chain": Array [
-          Object {
-            "arguments": Object {},
-            "function": "kibana",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {
-              "layerIds": Array [
-                "first",
-              ],
-              "tables": Array [
-                Object {
-                  "chain": Array [
-                    Object {
-                      "arguments": Object {},
-                      "function": "datasource",
-                      "type": "function",
-                    },
-                  ],
-                  "type": "expression",
-                },
-              ],
-            },
-            "function": "lens_merge_tables",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {},
-            "function": "vis",
-            "type": "function",
-          },
-        ],
-        "type": "expression",
-      }
+      "kibana
+      | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+      | vis"
     `);
   });
 
@@ -243,7 +225,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -287,7 +269,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={dispatch}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -339,18 +321,16 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
     );
 
-    expect(
-      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[1].arguments.layerIds
-    ).toEqual(['first', 'second', 'third']);
-    expect(
-      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[1].arguments.tables
-    ).toMatchInlineSnapshot(`
+    const ast = fromExpression(instance.find(expressionRendererMock).prop('expression') as string);
+
+    expect(ast.chain[1].arguments.layerIds).toEqual(['first', 'second', 'third']);
+    expect(ast.chain[1].arguments.tables).toMatchInlineSnapshot(`
                                     Array [
                                       Object {
                                         "chain": Array [
@@ -420,7 +400,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
-          core={coreMock.createSetup()}
+          core={createCoreStartWithPermissions()}
           plugins={{ uiActions: uiActionsMock, data: dataMock }}
           getSuggestionForField={() => undefined}
         />
@@ -477,7 +457,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
-          core={coreMock.createSetup()}
+          core={createCoreStartWithPermissions()}
           plugins={{ uiActions: uiActionsMock, data: dataMock }}
           getSuggestionForField={() => undefined}
         />
@@ -503,6 +483,130 @@ describe('workspace_panel', () => {
     instance.update();
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('should show an error message if there are missing indexpatterns in the visualization', () => {
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    mockDatasource.checkIntegrity.mockReturnValue(['a']);
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    instance = mount(
+      <WorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            // define a layer with an indexpattern not available
+            state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        core={createCoreStartWithPermissions()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
+      />
+    );
+
+    expect(instance.find('[data-test-subj="missing-refs-failure"]').exists()).toBeTruthy();
+    expect(instance.find(expressionRendererMock)).toHaveLength(0);
+  });
+
+  it('should not show the management action in case of missing indexpattern and no navigation permissions', () => {
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    instance = mount(
+      <WorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            // define a layer with an indexpattern not available
+            state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        // Use cannot navigate to the management page
+        core={createCoreStartWithPermissions({
+          navLinks: { management: false },
+          management: { kibana: { indexPatterns: true } },
+        })}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
+      />
+    );
+
+    expect(
+      instance.find('[data-test-subj="configuration-failure-reconfigure-indexpatterns"]').exists()
+    ).toBeFalsy();
+  });
+
+  it('should not show the management action in case of missing indexpattern and no indexPattern specific permissions', () => {
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+
+    instance = mount(
+      <WorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            // define a layer with an indexpattern not available
+            state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={() => {}}
+        ExpressionRenderer={expressionRendererMock}
+        // user can go to management, but indexPatterns management is not accessible
+        core={createCoreStartWithPermissions({
+          navLinks: { management: true },
+          management: { kibana: { indexPatterns: false } },
+        })}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
+      />
+    );
+
+    expect(
+      instance.find('[data-test-subj="configuration-failure-reconfigure-indexpatterns"]').exists()
+    ).toBeFalsy();
   });
 
   it('should show an error message if validation on datasource does not pass', () => {
@@ -535,7 +639,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -577,7 +681,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -621,7 +725,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -662,7 +766,7 @@ describe('workspace_panel', () => {
         visualizationState={{}}
         dispatch={() => {}}
         ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
+        core={createCoreStartWithPermissions()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
         getSuggestionForField={() => undefined}
       />
@@ -701,7 +805,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
-          core={coreMock.createSetup()}
+          core={createCoreStartWithPermissions()}
           plugins={{ uiActions: uiActionsMock, data: dataMock }}
           getSuggestionForField={() => undefined}
         />
@@ -746,7 +850,7 @@ describe('workspace_panel', () => {
           visualizationState={{}}
           dispatch={() => {}}
           ExpressionRenderer={expressionRendererMock}
-          core={coreMock.createSetup()}
+          core={createCoreStartWithPermissions()}
           plugins={{ uiActions: uiActionsMock, data: dataMock }}
           getSuggestionForField={() => undefined}
         />
@@ -774,7 +878,7 @@ describe('workspace_panel', () => {
     let mockGetSuggestionForField: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
-    const draggedField = { id: 'field' };
+    const draggedField = { id: 'field', humanData: { label: 'Label' } };
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
@@ -792,6 +896,8 @@ describe('workspace_panel', () => {
           keyboardMode={false}
           setKeyboardMode={() => {}}
           setA11yMessage={() => {}}
+          registerDropTarget={jest.fn()}
+          dropTargetsByOrder={undefined}
         >
           <WorkspacePanel
             activeDatasourceId={'mock'}
@@ -813,7 +919,7 @@ describe('workspace_panel', () => {
             visualizationState={{}}
             dispatch={mockDispatch}
             ExpressionRenderer={expressionRendererMock}
-            core={coreMock.createSetup()}
+            core={createCoreStartWithPermissions()}
             plugins={{ uiActions: uiActionsMock, data: dataMock }}
             getSuggestionForField={mockGetSuggestionForField}
           />
@@ -830,7 +936,7 @@ describe('workspace_panel', () => {
       });
       initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!(draggedField, { id: 'lnsWorkspace' });
+      instance.find(DragDrop).prop('onDrop')!(draggedField, 'field_replace');
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',
@@ -849,12 +955,12 @@ describe('workspace_panel', () => {
         visualizationState: {},
       });
       initComponent();
-      expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
+      expect(instance.find(DragDrop).prop('dropTypes')).toBeTruthy();
     });
 
     it('should refuse to drop if there are no suggestions', () => {
       initComponent();
-      expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
+      expect(instance.find(DragDrop).prop('dropType')).toBeFalsy();
     });
   });
 });

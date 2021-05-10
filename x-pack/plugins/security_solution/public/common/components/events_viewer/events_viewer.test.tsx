@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -25,7 +26,13 @@ import { KqlMode } from '../../../timelines/store/timeline/model';
 import { SortDirection } from '../../../timelines/components/timeline/body/sort';
 import { AlertsTableFilterGroup } from '../../../detections/components/alerts_table/alerts_filter_group';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+
+jest.mock('../../hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../../timelines/components/graph_overlay', () => ({
   GraphOverlay: jest.fn(() => <div />),
@@ -85,7 +92,6 @@ const eventsViewerDefaultProps = {
   deletedEventIds: [],
   docValueFields: [],
   end: to,
-  expandedEvent: {},
   filters: [],
   id: TimelineId.detectionsPage,
   indexNames: mockIndexNames,
@@ -99,7 +105,8 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
-  handleCloseExpandedEvent: jest.fn(),
+  renderCellValue: DefaultCellRenderer,
+  rowRenderers: defaultRowRenderers,
   start: from,
   sort: [
     {
@@ -118,7 +125,9 @@ describe('EventsViewer', () => {
   let testProps = {
     defaultModel: eventsDefaultModel,
     end: to,
-    id: 'test-stateful-events-viewer',
+    id: TimelineId.test,
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
     start: from,
     scopeId: SourcererScopeName.timeline,
   };
@@ -130,6 +139,7 @@ describe('EventsViewer', () => {
   });
 
   describe('event details', () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
     beforeEach(() => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponseWithEvents]);
     });
@@ -149,14 +159,15 @@ describe('EventsViewer', () => {
         expect(mockDispatch).toBeCalledTimes(2);
         expect(mockDispatch.mock.calls[1][0]).toEqual({
           payload: {
-            event: {
+            panelView: 'eventDetail',
+            params: {
               eventId: 'yb8TkHYBRgU82_bJu_rY',
               indexName: 'auditbeat-7.10.1-2020.12.18-000001',
             },
             tabType: 'query',
-            timelineId: 'test-stateful-events-viewer',
+            timelineId: TimelineId.test,
           },
-          type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+          type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
         });
       });
     });
@@ -198,17 +209,22 @@ describe('EventsViewer', () => {
 
     defaultHeaders.forEach((header) => {
       test(`it renders the ${header.id} default EventsViewer column header`, () => {
+        testProps = {
+          ...testProps,
+          // Update with a new id, to force columns back to default.
+          id: TimelineId.alternateTest,
+        };
         const wrapper = mount(
           <TestProviders>
             <StatefulEventsViewer {...testProps} />
           </TestProviders>
         );
 
-        defaultHeaders.forEach((h) =>
+        defaultHeaders.forEach((h) => {
           expect(wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()).toBe(
             true
-          )
-        );
+          );
+        });
       });
     });
   });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -26,6 +26,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Time Series', () => {
       beforeEach(async () => {
         await visualBuilder.resetPage();
+        await visualBuilder.clickPanelOptions('timeSeries');
+        await visualBuilder.setDropLastBucket(true);
+        await visualBuilder.clickDataTab('timeSeries');
       });
 
       it('should render all necessary components', async () => {

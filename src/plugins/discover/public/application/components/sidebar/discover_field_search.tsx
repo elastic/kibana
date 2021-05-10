@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './discover_field_search.scss';
@@ -53,13 +53,18 @@ export interface Props {
    * types for the type filter
    */
   types: string[];
+
+  /**
+   * use new fields api
+   */
+  useNewFieldsApi?: boolean;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types }: Props) {
+export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -226,6 +231,21 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     );
   };
 
+  const footer = () => {
+    return (
+      <EuiPopoverFooter paddingSize="s">
+        <EuiSwitch
+          label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
+            defaultMessage: 'Hide missing fields',
+          })}
+          checked={values.missing}
+          onChange={handleMissingChange}
+          data-test-subj="missingSwitch"
+        />
+      </EuiPopoverFooter>
+    );
+  };
+
   const selectionPanel = (
     <div className="dscFieldSearch__formWrapper">
       <EuiForm data-test-subj="filterSelectionPanel">
@@ -271,22 +291,13 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             }}
             button={buttonContent}
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">
               {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
                 defaultMessage: 'Filter by type',
               })}
             </EuiPopoverTitle>
             {selectionPanel}
-            <EuiPopoverFooter>
-              <EuiSwitch
-                label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
-                  defaultMessage: 'Hide missing fields',
-                })}
-                checked={values.missing}
-                onChange={handleMissingChange}
-                data-test-subj="missingSwitch"
-              />
-            </EuiPopoverFooter>
+            {footer()}
           </EuiPopover>
         </EuiFilterGroup>
       </EuiOutsideClickDetector>

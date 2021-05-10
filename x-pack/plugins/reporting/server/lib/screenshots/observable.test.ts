@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('puppeteer', () => ({
   launch: () => ({
     // Fixme needs event emitters
     newPage: () => ({
+      emulateTimezone: jest.fn(),
       setDefaultTimeout: jest.fn(),
     }),
     process: jest.fn(),
@@ -202,7 +204,7 @@ describe('Screenshot Observable Pipeline', () => {
     expect(mockOpen.mock.calls.length).toBe(2);
 
     const firstSelector = mockOpen.mock.calls[0][1].waitForSelector;
-    expect(firstSelector).toBe('.application');
+    expect(firstSelector).toBe('.kbnAppWrapper');
 
     const secondSelector = mockOpen.mock.calls[1][1].waitForSelector;
     expect(secondSelector).toBe('[data-shared-page="2"]');
@@ -339,8 +341,6 @@ describe('Screenshot Observable Pipeline', () => {
 
         if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
           return Promise.resolve(null);
-        } else if (mockCall === contexts.CONTEXT_GETBROWSERDIMENSIONS) {
-          return Promise.resolve([800, 600]);
         } else {
           return Promise.resolve();
         }

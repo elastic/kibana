@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { onBrushEnd, isTimeseriesEmpty } from './helper';
 import { History } from 'history';
-import { TimeSeries } from '../../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 
 describe('Chart helper', () => {
   describe('onBrushEnd', () => {
@@ -50,7 +52,7 @@ describe('Chart helper', () => {
           type: 'line',
           color: 'red',
         },
-      ] as TimeSeries[];
+      ] as Array<TimeSeries<Coordinate>>;
       expect(isTimeseriesEmpty(timeseries)).toBeTruthy();
     });
     it('returns true when y coordinate is null', () => {
@@ -61,7 +63,7 @@ describe('Chart helper', () => {
           type: 'line',
           color: 'red',
         },
-      ] as TimeSeries[];
+      ] as Array<TimeSeries<Coordinate>>;
       expect(isTimeseriesEmpty(timeseries)).toBeTruthy();
     });
     it('returns true when y coordinate is undefined', () => {
@@ -72,7 +74,7 @@ describe('Chart helper', () => {
           type: 'line',
           color: 'red',
         },
-      ] as TimeSeries[];
+      ] as Array<TimeSeries<Coordinate>>;
       expect(isTimeseriesEmpty(timeseries)).toBeTruthy();
     });
     it('returns false when at least one coordinate is filled', () => {
@@ -89,7 +91,7 @@ describe('Chart helper', () => {
           type: 'line',
           color: 'green',
         },
-      ] as TimeSeries[];
+      ] as Array<TimeSeries<Coordinate>>;
       expect(isTimeseriesEmpty(timeseries)).toBeFalsy();
     });
   });

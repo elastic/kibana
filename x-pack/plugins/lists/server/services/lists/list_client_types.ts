@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PassThrough, Readable } from 'stream';
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import {
   Description,
@@ -34,7 +35,7 @@ import {
 import { ConfigType } from '../../config';
 
 export interface ConstructorOptions {
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   config: ConfigType;
   spaceId: string;
   user: string;

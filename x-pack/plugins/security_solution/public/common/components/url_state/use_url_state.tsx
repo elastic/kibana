@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { difference, isEmpty } from 'lodash/fp';
@@ -9,7 +10,6 @@ import { useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
-import { useApolloClient } from '../../utils/apollo_context';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
   getQueryStringFromLocation,
@@ -69,7 +69,6 @@ export const useUrlStateHooks = ({
   urlState,
 }: UrlStateContainerPropTypes) => {
   const [isInitializing, setIsInitializing] = useState(true);
-  const apolloClient = useApolloClient();
   const { filterManager, savedQueries } = useKibana().services.data.query;
   const prevProps = usePrevious({ pathName, pageName, urlState });
 
@@ -160,7 +159,6 @@ export const useUrlStateHooks = ({
     });
 
     setInitialStateFromUrl({
-      apolloClient,
       detailName,
       filterManager,
       indexPattern,

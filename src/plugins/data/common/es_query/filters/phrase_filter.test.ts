@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -27,10 +27,25 @@ describe('Phrase filter builder', () => {
     expect(typeof buildPhraseFilter).toBe('function');
   });
 
-  it('should return a match query filter when passed a standard field', () => {
+  it('should return a match query filter when passed a standard string field', () => {
+    const field = getField('extension');
+
+    expect(buildPhraseFilter(field, 'jpg', indexPattern)).toEqual({
+      meta: {
+        index: 'id',
+      },
+      query: {
+        match_phrase: {
+          extension: 'jpg',
+        },
+      },
+    });
+  });
+
+  it('should return a match query filter when passed a standard numeric field', () => {
     const field = getField('bytes');
 
-    expect(buildPhraseFilter(field, 5, indexPattern)).toEqual({
+    expect(buildPhraseFilter(field, '5', indexPattern)).toEqual({
       meta: {
         index: 'id',
       },
@@ -42,10 +57,45 @@ describe('Phrase filter builder', () => {
     });
   });
 
+  it('should return a match query filter when passed a standard bool field', () => {
+    const field = getField('ssl');
+
+    expect(buildPhraseFilter(field, 'true', indexPattern)).toEqual({
+      meta: {
+        index: 'id',
+      },
+      query: {
+        match_phrase: {
+          ssl: true,
+        },
+      },
+    });
+  });
+
   it('should return a script filter when passed a scripted field', () => {
     const field = getField('script number');
 
     expect(buildPhraseFilter(field, 5, indexPattern)).toEqual({
+      meta: {
+        index: 'id',
+        field: 'script number',
+      },
+      script: {
+        script: {
+          lang: 'expression',
+          params: {
+            value: 5,
+          },
+          source: '(1234) == value',
+        },
+      },
+    });
+  });
+
+  it('should return a script filter when passed a scripted field with numeric conversion', () => {
+    const field = getField('script number');
+
+    expect(buildPhraseFilter(field, '5', indexPattern)).toEqual({
       meta: {
         index: 'id',
         field: 'script number',

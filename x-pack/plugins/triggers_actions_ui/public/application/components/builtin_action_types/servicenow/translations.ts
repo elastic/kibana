@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -16,7 +17,7 @@ export const SERVICENOW_ITSM_DESC = i18n.translate(
 export const SERVICENOW_SIR_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
   {
-    defaultMessage: 'Create an incident in ServiceNow SIR.',
+    defaultMessage: 'Create an incident in ServiceNow SecOps.',
   }
 );
 
@@ -30,7 +31,7 @@ export const SERVICENOW_ITSM_TITLE = i18n.translate(
 export const SERVICENOW_SIR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
   {
-    defaultMessage: 'ServiceNow SIR',
+    defaultMessage: 'ServiceNow SecOps',
   }
 );
 
@@ -171,7 +172,7 @@ export const MALWARE_URL_LABEL = i18n.translate(
 export const MALWARE_HASH_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashTitle',
   {
-    defaultMessage: 'Malware hash',
+    defaultMessage: 'Malware Hash',
   }
 );
 

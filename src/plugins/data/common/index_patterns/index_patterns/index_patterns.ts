@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -415,19 +415,19 @@ export class IndexPatternsService {
         },
         spec.fieldAttrs
       );
-      // APPLY RUNTIME FIELDS
+      // CREATE RUNTIME FIELDS
       for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
-        if (spec.fields[key]) {
-          spec.fields[key].runtimeField = value;
-        } else {
+        // do not create runtime field if mapped field exists
+        if (!spec.fields[key]) {
           spec.fields[key] = {
             name: key,
             type: castEsToKbnFieldTypeName(value.type),
             runtimeField: value,
             aggregatable: true,
             searchable: true,
-            count: 0,
             readFromDocValues: false,
+            customLabel: spec.fieldAttrs?.[key]?.customLabel,
+            count: spec.fieldAttrs?.[key]?.count,
           };
         }
       }
@@ -535,6 +535,9 @@ export class IndexPatternsService {
     });
     indexPattern.id = response.id;
     this.indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
+    if (this.savedObjectsCache) {
+      this.savedObjectsCache.push(response as SavedObject<IndexPatternSavedObjectAttrs>);
+    }
     return indexPattern;
   }
 

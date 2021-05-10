@@ -4,13 +4,13 @@
 
 ## SavedObjectsType.convertToMultiNamespaceTypeVersion property
 
-If defined, objects of this type will be converted to multi-namespace objects when migrating to this version.
+If defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this version.
 
 Requirements:
 
-1. This string value must be a valid semver version 2. This type must have previously specified [\`namespaceType: 'single'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md) 3. This type must also specify [\`namespaceType: 'multiple'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md)
+1. This string value must be a valid semver version 2. This type must have previously specified [\`namespaceType: 'single'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md) 3. This type must also specify [\`namespaceType: 'multiple'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md) \*or\* [\`namespaceType: 'multiple-isolated'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md)
 
-Example of a single-namespace type in 7.10:
+Example of a single-namespace type in 7.12:
 
 ```ts
 {
@@ -21,7 +21,19 @@ Example of a single-namespace type in 7.10:
 }
 
 ```
-Example after converting to a multi-namespace type in 7.11:
+Example after converting to a multi-namespace (isolated) type in 8.0:
+
+```ts
+{
+  name: 'foo',
+  hidden: false,
+  namespaceType: 'multiple-isolated',
+  mappings: {...},
+  convertToMultiNamespaceTypeVersion: '8.0.0'
+}
+
+```
+Example after converting to a multi-namespace (shareable) type in 8.1:
 
 ```ts
 {
@@ -29,11 +41,11 @@ Example after converting to a multi-namespace type in 7.11:
   hidden: false,
   namespaceType: 'multiple',
   mappings: {...},
-  convertToMultiNamespaceTypeVersion: '7.11.0'
+  convertToMultiNamespaceTypeVersion: '8.0.0'
 }
 
 ```
-Note: a migration function can be optionally specified for the same version.
+Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
 
 <b>Signature:</b>
 

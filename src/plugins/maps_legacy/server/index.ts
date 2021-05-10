@@ -1,36 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Plugin, PluginConfigDescriptor } from 'kibana/server';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { Observable } from 'rxjs';
 import { configSchema, MapsLegacyConfig } from '../config';
 import { getUiSettings } from './ui_settings';
 
 export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
-  exposeToBrowser: {
-    includeElasticMapsService: true,
-    proxyElasticMapsServiceInMaps: true,
-    tilemap: true,
-    regionmap: true,
-    manifestServiceUrl: true,
-    emsUrl: true,
-    emsFileApiUrl: true,
-    emsTileApiUrl: true,
-    emsLandingPageUrl: true,
-    emsFontLibraryUrl: true,
-    emsTileLayerId: true,
-  },
+  exposeToBrowser: {},
   schema: configSchema,
 };
 
 export interface MapsLegacyPluginSetup {
-  config$: Observable<MapsLegacyConfig>;
+  config: MapsLegacyConfig;
 }
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup> {
@@ -43,10 +30,9 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup> {
   public setup(core: CoreSetup) {
     core.uiSettings.register(getUiSettings());
 
-    // @ts-ignore
-    const config$ = this._initializerContext.config.create();
+    const pluginConfig = this._initializerContext.config.get();
     return {
-      config$,
+      config: pluginConfig,
     };
   }
 

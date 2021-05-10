@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ILegacyScopedClusterClient } from 'src/core/server';
 import {
   compareDatasetsByMaximumAnomalyScore,
@@ -13,6 +15,7 @@ import {
   CategoriesSort,
 } from '../../../common/log_analysis';
 import { LogEntryContext } from '../../../common/log_entry';
+import type { ResolvedLogSourceConfiguration } from '../../../common/log_sources';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
@@ -35,7 +38,6 @@ import {
   createTopLogEntryCategoriesQuery,
   topLogEntryCategoriesResponseRT,
 } from './queries/top_log_entry_categories';
-import { InfraSource } from '../sources';
 import { fetchMlJob, getLogEntryDatasets } from './common';
 
 export async function getTopLogEntryCategories(
@@ -146,7 +148,7 @@ export async function getLogEntryCategoryExamples(
   endTime: number,
   categoryId: number,
   exampleCount: number,
-  sourceConfiguration: InfraSource
+  resolvedSourceConfiguration: ResolvedLogSourceConfiguration
 ) {
   const finalizeLogEntryCategoryExamplesSpan = startTracingSpan('get category example log entries');
 
@@ -164,7 +166,7 @@ export async function getLogEntryCategoryExamples(
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
-  const tiebreakerField = sourceConfiguration.configuration.fields.tiebreaker;
+  const { tiebreakerField, runtimeMappings } = resolvedSourceConfiguration;
 
   if (indices == null || timestampField == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(
@@ -188,6 +190,7 @@ export async function getLogEntryCategoryExamples(
   } = await fetchLogEntryCategoryExamples(
     context,
     indices,
+    runtimeMappings,
     timestampField,
     tiebreakerField,
     startTime,
@@ -401,6 +404,7 @@ async function fetchTopLogEntryCategoryHistograms(
 async function fetchLogEntryCategoryExamples(
   requestContext: { core: { elasticsearch: { legacy: { client: ILegacyScopedClusterClient } } } },
   indices: string,
+  runtimeMappings: estypes.RuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
@@ -417,6 +421,7 @@ async function fetchLogEntryCategoryExamples(
       'search',
       createLogEntryCategoryExamplesQuery(
         indices,
+        runtimeMappings,
         timestampField,
         tiebreakerField,
         startTime,

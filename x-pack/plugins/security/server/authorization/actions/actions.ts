@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { AlertingActions } from './alerting';
 import { ApiActions } from './api';
 import { AppActions } from './app';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UIActions } from './ui';
-import { AlertingActions } from './alerting';
 
 /** Actions are used to create the "actions" that are associated with Elasticsearch's
  * application privileges, and are used to perform the authorization checks implemented

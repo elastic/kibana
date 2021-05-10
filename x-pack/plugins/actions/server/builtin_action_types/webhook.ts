@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
@@ -178,7 +180,6 @@ export async function executor(
     return successResult(actionId, data);
   } else {
     const { error } = result;
-
     if (error.response) {
       const {
         status,
@@ -207,6 +208,10 @@ export async function executor(
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
+      logger.error(`error on ${actionId} webhook event: ${message}`);
+      return errorResultRequestFailed(actionId, message);
+    } else if (error.isAxiosError) {
+      const message = `${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     }

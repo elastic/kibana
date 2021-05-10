@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -21,7 +23,8 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
+
+import type { AgentPolicy } from '../../../../types';
 import { useInput, useStartServices, sendRequest } from '../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../services';
 
@@ -113,10 +116,12 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
             required={true}
             defaultValue={policyIdDefaultValue}
             {...form.policyIdInput.props}
-            options={agentPolicies.map((agentPolicy) => ({
-              value: agentPolicy.id,
-              text: agentPolicy.name,
-            }))}
+            options={agentPolicies
+              .filter((agentPolicy) => !agentPolicy.is_managed)
+              .map((agentPolicy) => ({
+                value: agentPolicy.id,
+                text: agentPolicy.name,
+              }))}
           />
         </EuiFormRow>
         <EuiButton type="submit" fill isLoading={form.isLoading}>

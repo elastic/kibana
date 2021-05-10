@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -68,7 +69,6 @@ describe('<FollowerIndicesList />', () => {
   });
 
   describe('when there are multiple pages of follower indices', () => {
-    let find;
     let component;
     let table;
     let actions;
@@ -92,7 +92,7 @@ describe('<FollowerIndicesList />', () => {
       httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
 
       // Mount the component
-      ({ find, component, table, actions, form } = setup());
+      ({ component, table, actions, form } = setup());
 
       await nextTick(); // Make sure that the http request is fulfilled
       component.update();
@@ -107,9 +107,8 @@ describe('<FollowerIndicesList />', () => {
       expect(tableCellsValues.length).toBe(10);
     });
 
-    // Skipped until we can figure out how to get this test to work.
-    test.skip('search works', () => {
-      form.setInputValue(find('followerIndexSearch'), 'unique');
+    test('search works', () => {
+      form.setInputValue('followerIndexSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('followerIndexListTable');
       expect(tableCellsValues.length).toBe(1);
     });

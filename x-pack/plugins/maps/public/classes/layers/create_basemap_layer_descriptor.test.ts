@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-jest.mock('../../meta', () => {
+jest.mock('../../util', () => {
   return {};
 });
 jest.mock('../../kibana_services', () => {
@@ -32,7 +33,7 @@ import { createBasemapLayerDescriptor } from './create_basemap_layer_descriptor'
 describe('kibana.yml configured with map.tilemap.url', () => {
   beforeAll(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../meta').getKibanaTileMap = () => {
+    require('../../util').getKibanaTileMap = () => {
       return {
         url: 'myTileUrl',
       };
@@ -60,7 +61,7 @@ describe('kibana.yml configured with map.tilemap.url', () => {
 describe('EMS is enabled', () => {
   beforeAll(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../meta').getKibanaTileMap = () => {
+    require('../../util').getKibanaTileMap = () => {
       return null;
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -94,7 +95,7 @@ describe('EMS is enabled', () => {
 describe('EMS is not enabled', () => {
   beforeAll(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../meta').getKibanaTileMap = () => {
+    require('../../util').getKibanaTileMap = () => {
       return null;
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires

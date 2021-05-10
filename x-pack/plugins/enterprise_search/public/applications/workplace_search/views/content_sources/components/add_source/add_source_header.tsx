@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -35,14 +36,14 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
         <EuiFlexItem grow={false}>
           <SourceIcon
             serviceType={serviceType}
-            fullBleed={true}
             name={name}
             className="adding-a-source__icon"
+            size="xxl"
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="m">
-            <h3 className="adding-a-source__name">
+            <h3>
               <EuiTextColor color="default">{name}</EuiTextColor>
             </h3>
           </EuiText>
@@ -51,7 +52,6 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xl" />
     </>
   );
 };

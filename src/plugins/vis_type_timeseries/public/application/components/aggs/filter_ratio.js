@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -13,6 +13,7 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 import {
   htmlIdGenerator,
@@ -29,7 +30,7 @@ import { getDataStart } from '../../../services';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 
 const isFieldHistogram = (fields, indexPattern, field) => {
-  const indexFields = fields[indexPattern];
+  const indexFields = fields[getIndexPatternKey(indexPattern)];
   if (!indexFields) return false;
   const fieldObject = indexFields.find((f) => f.name === field);
   if (!fieldObject) return false;
@@ -51,8 +52,9 @@ export const FilterRatioAgg = (props) => {
     (query) => handleChange({ denominator: query }),
     [handleChange]
   );
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
 
   const defaults = {
     numerator: getDataStart().query.queryString.getDefaultQuery(),
@@ -151,24 +153,20 @@ export const FilterRatioAgg = (props) => {
 
         {model.metric_agg !== 'count' ? (
           <EuiFlexItem>
-            <EuiFormRow
-              id={htmlId('aggField')}
+            <FieldSelect
               label={
                 <FormattedMessage
                   id="visTypeTimeseries.filterRatio.fieldLabel"
                   defaultMessage="Field"
                 />
               }
-            >
-              <FieldSelect
-                fields={fields}
-                type={model.metric_agg}
-                restrict={getSupportedFieldsByMetricType(model.metric_agg)}
-                indexPattern={indexPattern}
-                value={model.field}
-                onChange={handleSelectChange('field')}
-              />
-            </EuiFormRow>
+              fields={fields}
+              type={model.metric_agg}
+              restrict={getSupportedFieldsByMetricType(model.metric_agg)}
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

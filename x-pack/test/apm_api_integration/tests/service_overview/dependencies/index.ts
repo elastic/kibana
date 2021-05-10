@@ -1,26 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import url from 'url';
-import { sortBy, pick, last, omit } from 'lodash';
+import { last, omit, pick, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { registry } from '../../../common/registry';
-import { Maybe } from '../../../../../plugins/apm/typings/common';
-import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { createApmApiSupertest } from '../../../common/apm_api_supertest';
+import { roundNumber } from '../../../utils';
 import { ENVIRONMENT_ALL } from '../../../../../plugins/apm/common/environment_filter_values';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { registry } from '../../../common/registry';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
 
-const round = (num: Maybe<number>): string => (isFiniteNumber(num) ? num.toPrecision(4) : '');
-
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const apmApiSupertest = createApmApiSupertest(getService('supertest'));
   const es = getService('es');
 
   const archiveName = 'apm_8.0.0';
@@ -31,20 +29,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/api/apm/services/opbeans-java/dependencies`,
+        const response = await apmApiSupertest({
+          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+          params: {
+            path: { serviceName: 'opbeans-java' },
             query: {
               start,
               end,
               numBuckets: 20,
               environment: ENVIRONMENT_ALL.value,
             },
-          })
-        );
+          },
+        });
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql([]);
+        expect(response.body.serviceDependencies).to.eql([]);
       });
     }
   );
@@ -205,17 +204,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        response = await supertest.get(
-          url.format({
-            pathname: `/api/apm/services/opbeans-java/dependencies`,
+        response = await apmApiSupertest({
+          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+          params: {
+            path: { serviceName: 'opbeans-java' },
             query: {
               start,
               end,
               numBuckets: 20,
               environment: ENVIRONMENT_ALL.value,
             },
-          })
-        );
+          },
+        });
       });
 
       it('returns a 200', () => {
@@ -223,20 +223,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns two dependencies', () => {
-        expect(response.body.length).to.be(2);
+        expect(response.body.serviceDependencies.length).to.be(2);
       });
 
       it('returns opbeans-node as a dependency', () => {
-        const opbeansNode = response.body.find(
+        const opbeansNode = response.body.serviceDependencies.find(
           (item) => item.type === 'service' && item.serviceName === 'opbeans-node'
         );
 
         expect(opbeansNode !== undefined).to.be(true);
 
         const values = {
-          latency: round(opbeansNode?.latency.value),
-          throughput: round(opbeansNode?.throughput.value),
-          errorRate: round(opbeansNode?.errorRate.value),
+          latency: roundNumber(opbeansNode?.latency.value),
+          throughput: roundNumber(opbeansNode?.throughput.value),
+          errorRate: roundNumber(opbeansNode?.errorRate.value),
           ...pick(opbeansNode, 'serviceName', 'type', 'agentName', 'environment', 'impact'),
         };
 
@@ -249,30 +249,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: '',
           serviceName: 'opbeans-node',
           type: 'service',
-          errorRate: round(errors / count),
-          latency: round(sum / count),
-          throughput: round(count / ((endTime - startTime) / 1000 / 60)),
+          errorRate: roundNumber(errors / count),
+          latency: roundNumber(sum / count),
+          throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
           impact: 100,
         });
 
-        const firstValue = round(opbeansNode?.latency.timeseries[0].y);
-        const lastValue = round(last(opbeansNode?.latency.timeseries)?.y);
+        const firstValue = roundNumber(opbeansNode?.latency.timeseries[0].y);
+        const lastValue = roundNumber(last(opbeansNode?.latency.timeseries)?.y);
 
-        expect(firstValue).to.be(round(20 / 3));
+        expect(firstValue).to.be(roundNumber(20 / 3));
         expect(lastValue).to.be('1.000');
       });
 
       it('returns postgres as an external dependency', () => {
-        const postgres = response.body.find(
+        const postgres = response.body.serviceDependencies.find(
           (item) => item.type === 'external' && item.name === 'postgres'
         );
 
         expect(postgres !== undefined).to.be(true);
 
         const values = {
-          latency: round(postgres?.latency.value),
-          throughput: round(postgres?.throughput.value),
-          errorRate: round(postgres?.errorRate.value),
+          latency: roundNumber(postgres?.latency.value),
+          throughput: roundNumber(postgres?.throughput.value),
+          errorRate: roundNumber(postgres?.errorRate.value),
           ...pick(postgres, 'spanType', 'spanSubtype', 'name', 'impact', 'type'),
         };
 
@@ -285,9 +285,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           spanSubtype: 'http',
           name: 'postgres',
           type: 'external',
-          errorRate: round(errors / count),
-          latency: round(sum / count),
-          throughput: round(count / ((endTime - startTime) / 1000 / 60)),
+          errorRate: roundNumber(errors / count),
+          latency: roundNumber(sum / count),
+          throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
           impact: 0,
         });
       });
@@ -304,17 +304,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        response = await supertest.get(
-          url.format({
-            pathname: `/api/apm/services/opbeans-python/dependencies`,
+        response = await apmApiSupertest({
+          endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
+          params: {
+            path: { serviceName: 'opbeans-python' },
             query: {
               start,
               end,
               numBuckets: 20,
               environment: ENVIRONMENT_ALL.value,
             },
-          })
-        );
+          },
+        });
       });
 
       it('returns a successful response', () => {
@@ -322,10 +323,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns at least one item', () => {
-        expect(response.body.length).to.be.greaterThan(0);
+        expect(response.body.serviceDependencies.length).to.be.greaterThan(0);
 
         expectSnapshot(
-          omit(response.body[0], [
+          omit(response.body.serviceDependencies[0], [
             'errorRate.timeseries',
             'throughput.timeseries',
             'latency.timeseries',
@@ -351,7 +352,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the right names', () => {
-        const names = response.body.map((item) => item.name);
+        const names = response.body.serviceDependencies.map((item) => item.name);
         expectSnapshot(names.sort()).toMatchInline(`
           Array [
             "elasticsearch",
@@ -363,7 +364,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the right service names', () => {
-        const serviceNames = response.body
+        const serviceNames = response.body.serviceDependencies
           .map((item) => (item.type === 'service' ? item.serviceName : undefined))
           .filter(Boolean);
 
@@ -376,7 +377,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the right latency values', () => {
         const latencyValues = sortBy(
-          response.body.map((item) => ({ name: item.name, latency: item.latency.value })),
+          response.body.serviceDependencies.map((item) => ({
+            name: item.name,
+            latency: item.latency.value,
+          })),
           'name'
         );
 
@@ -404,7 +408,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the right throughput values', () => {
         const throughputValues = sortBy(
-          response.body.map((item) => ({ name: item.name, throughput: item.throughput.value })),
+          response.body.serviceDependencies.map((item) => ({
+            name: item.name,
+            throughput: item.throughput.value,
+          })),
           'name'
         );
 
@@ -432,7 +439,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the right impact values', () => {
         const impactValues = sortBy(
-          response.body.map((item) => ({
+          response.body.serviceDependencies.map((item) => ({
             name: item.name,
             impact: item.impact,
             latency: item.latency.value,

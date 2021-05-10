@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useState, FC } from 'react';
@@ -87,9 +88,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     !needsDestIndexPattern &&
     isOutlierAnalysis(jobConfig?.analysis) &&
     jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
-    columnsWithCharts.findIndex(
-      (d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}.feature_name`
-    ) === -1;
+    columnsWithCharts.findIndex((d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}`) === -1;
 
   const scatterplotFieldOptions = useScatterplotFieldOptions(
     indexPattern,

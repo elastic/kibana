@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreUsageStatsClient } from './core_usage_stats_client';
@@ -123,6 +123,18 @@ export interface CoreUsageData extends CoreUsageStats {
 }
 
 /**
+ * Type describing Core's usage data payload
+ * @internal
+ */
+export type ConfigUsageData = Record<string, any | any[]>;
+
+/**
+ * Type describing Core's usage data payload
+ * @internal
+ */
+export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
+
+/**
  * Usage data from Core services
  * @internal
  */
@@ -212,6 +224,13 @@ export interface CoreConfigUsageData {
       supportedProtocols: string[];
       clientAuthentication: 'none' | 'optional' | 'required';
     };
+    securityResponseHeaders: {
+      strictTransportSecurity: string;
+      xContentTypeOptions: string;
+      referrerPolicy: string;
+      permissionsPolicyConfigured: boolean;
+      disableEmbedding: boolean;
+    };
   };
 
   logging: {
@@ -227,8 +246,9 @@ export interface CoreConfigUsageData {
   // };
 
   savedObjects: {
+    customIndex: boolean;
     maxImportPayloadBytes: number;
-    maxImportExportSizeBytes: number;
+    maxImportExportSize: number;
   };
 
   // uiSettings: {
@@ -262,4 +282,5 @@ export interface CoreUsageDataStart {
    * @internal
    * */
   getCoreUsageData(): Promise<CoreUsageData>;
+  getConfigsUsageData(): Promise<ConfigUsageData>;
 }

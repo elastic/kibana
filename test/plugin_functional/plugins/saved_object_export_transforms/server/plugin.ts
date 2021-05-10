@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
@@ -90,8 +90,6 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
       },
     });
 
-    /////////////
-    /////////////
     // example of a SO type that will throw an object-transform-error
     savedObjects.registerType({
       name: 'test-export-transform-error',
@@ -134,8 +132,29 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
         },
       },
     });
+
+    // example of a SO type that is exportable while being hidden
+    savedObjects.registerType({
+      name: 'test-actions-export-hidden',
+      hidden: true,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          enabled: {
+            type: 'boolean',
+          },
+        },
+      },
+      management: {
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle: (obj) => obj.attributes.title,
+      },
+    });
   }
 
   public start() {}
+
   public stop() {}
 }

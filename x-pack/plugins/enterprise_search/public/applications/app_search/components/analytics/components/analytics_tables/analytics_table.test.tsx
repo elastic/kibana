@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mountWithIntl, mockKibanaValues } from '../../../../../__mocks__';
+import { mountWithIntl } from '../../../../../__mocks__';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+
 import { EuiBasicTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
+
+import { runActionColumnTests } from './test_helpers/shared_columns_tests';
 
 import { AnalyticsTable } from './';
 
 describe('AnalyticsTable', () => {
-  const { navigateToUrl } = mockKibanaValues;
-
   const items = [
     {
       key: 'some search',
@@ -67,18 +69,19 @@ describe('AnalyticsTable', () => {
     expect(tableContent).toContain('0');
   });
 
-  it('renders an action column', () => {
+  it('renders tag counts instead of tag names if isSmall is passed', () => {
+    const wrapper = mountWithIntl(<AnalyticsTable items={items} isSmall />);
+    const tableContent = wrapper.find(EuiBasicTable).text();
+
+    expect(tableContent).toContain('Analytics tags');
+    expect(tableContent).toContain('1 tag');
+    expect(tableContent).toContain('2 tags');
+    expect(wrapper.find(EuiBadge)).toHaveLength(3);
+  });
+
+  describe('renders an action column', () => {
     const wrapper = mountWithIntl(<AnalyticsTable items={items} />);
-    const viewQuery = wrapper.find('[data-test-subj="AnalyticsTableViewQueryButton"]').first();
-    const editQuery = wrapper.find('[data-test-subj="AnalyticsTableEditQueryButton"]').first();
-
-    viewQuery.simulate('click');
-    expect(navigateToUrl).toHaveBeenCalledWith(
-      '/engines/some-engine/analytics/query_detail/some%20search'
-    );
-
-    editQuery.simulate('click');
-    // TODO
+    runActionColumnTests(wrapper);
   });
 
   it('renders an empty prompt if no items are passed', () => {

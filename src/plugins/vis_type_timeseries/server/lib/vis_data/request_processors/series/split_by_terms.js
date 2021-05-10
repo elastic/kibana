@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { overwrite } from '../../helpers';
 import { basicAggs } from '../../../../../common/basic_aggs';
 import { getBucketsPath } from '../../helpers/get_buckets_path';
 import { bucketTransform } from '../../helpers/bucket_transform';
+import { validateField } from '../../../../../common/fields_utils';
 
-export function splitByTerms(req, panel, series) {
+export function splitByTerms(req, panel, series, esQueryConfig, seriesIndex) {
   return (next) => (doc) => {
     if (series.split_mode === 'terms' && series.terms_field) {
       const termsField = series.terms_field;
       const orderByTerms = series.terms_order_by;
+
+      validateField(termsField, seriesIndex);
 
       const direction = series.terms_direction || 'desc';
       const metric = series.metrics.find((item) => item.id === orderByTerms);

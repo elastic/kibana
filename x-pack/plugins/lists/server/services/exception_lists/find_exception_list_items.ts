@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
@@ -22,6 +24,7 @@ import {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
+import { escapeQuotes } from '../utils/escape_query';
 
 import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
@@ -87,7 +90,8 @@ export const getExceptionListsItemFilter = ({
   savedObjectType: SavedObjectType[];
 }): string => {
   return listId.reduce((accum, singleListId, index) => {
-    const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: ${singleListId})`;
+    const escapedListId = escapeQuotes(singleListId);
+    const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: "${escapedListId}")`;
     const listItemAppendWithFilter =
       filter[index] != null ? `(${listItemAppend} AND ${filter[index]})` : listItemAppend;
     if (accum === '') {
@@ -115,8 +119,9 @@ export const findValueListExceptionListItems = async ({
   sortField,
   sortOrder,
 }: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
+  const escapedValueListId = escapeQuotes(valueListId);
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:${valueListId}) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:${valueListId}) `,
+    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:"${escapedValueListId}") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:"${escapedValueListId}") `,
     page,
     perPage,
     sortField,

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setMockValues } from '../../../../__mocks__';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import {
@@ -17,6 +19,7 @@ import {
   AnalyticsTable,
   RecentQueriesTable,
 } from '../components';
+
 import { Analytics, ViewAllButton } from './analytics';
 
 describe('Analytics overview', () => {
@@ -39,7 +42,7 @@ describe('Analytics overview', () => {
 
     expect(wrapper.find(AnalyticsCards)).toHaveLength(1);
     expect(wrapper.find(AnalyticsChart)).toHaveLength(1);
-    expect(wrapper.find(AnalyticsSection)).toHaveLength(3);
+    expect(wrapper.find(AnalyticsSection)).toHaveLength(2);
     expect(wrapper.find(AnalyticsTable)).toHaveLength(4);
     expect(wrapper.find(RecentQueriesTable)).toHaveLength(1);
   });

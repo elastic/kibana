@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
@@ -20,7 +20,7 @@ import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
-import { Plugin } from '../types';
+import { AsyncPlugin } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
@@ -138,7 +138,7 @@ describe('PluginsService', () => {
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         },
-      } as Plugin<void, typeof pluginStartContract, {}, {}>);
+      } as AsyncPlugin<void, typeof pluginStartContract, {}, {}>);
 
     jest.doMock(
       join(pluginPath, 'server'),

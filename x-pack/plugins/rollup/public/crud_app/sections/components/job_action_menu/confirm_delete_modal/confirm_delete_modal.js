@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -9,7 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 export class ConfirmDeleteModal extends Component {
   static propTypes = {
@@ -90,28 +91,26 @@ export class ConfirmDeleteModal extends Component {
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          cancelButtonText={i18n.translate(
-            'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          buttonColor="danger"
-          confirmButtonText={i18n.translate(
-            'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.confirmButtonText',
-            {
-              defaultMessage: 'Delete',
-            }
-          )}
-        >
-          {content}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={title}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        cancelButtonText={i18n.translate(
+          'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        buttonColor="danger"
+        confirmButtonText={i18n.translate(
+          'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Delete',
+          }
+        )}
+      >
+        {content}
+      </EuiConfirmModal>
     );
   }
 }

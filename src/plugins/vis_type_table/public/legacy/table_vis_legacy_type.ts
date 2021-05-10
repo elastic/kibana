@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,7 +13,7 @@ import { VisTypeDefinition } from '../../../visualizations/public';
 import { TableOptions } from '../components/table_vis_options_lazy';
 import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
 import { TableVisParams, VIS_TYPE_TABLE } from '../../common';
-import { toExpressionAst } from '../to_ast';
+import { toExpressionAstLegacy } from './to_ast_legacy';
 
 export const tableVisLegacyTypeDefinition: VisTypeDefinition<TableVisParams> = {
   name: VIS_TYPE_TABLE,
@@ -50,7 +50,7 @@ export const tableVisLegacyTypeDefinition: VisTypeDefinition<TableVisParams> = {
         title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
           defaultMessage: 'Metric',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
         aggSettings: {
           top_hits: {
             allowStrings: true,
@@ -79,7 +79,7 @@ export const tableVisLegacyTypeDefinition: VisTypeDefinition<TableVisParams> = {
       },
     ],
   },
-  toExpressionAst,
+  toExpressionAst: toExpressionAstLegacy,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
   requiresSearch: true,
 };

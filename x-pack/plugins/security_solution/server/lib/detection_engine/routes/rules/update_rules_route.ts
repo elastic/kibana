@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { updateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
@@ -67,8 +68,8 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
             alertsClient,
             savedObjectsClient,
             enabled: request.body.enabled ?? true,
-            actions: request.body.actions,
-            throttle: request.body.throttle,
+            actions: request.body.actions ?? [],
+            throttle: request.body.throttle ?? 'no_actions',
             name: request.body.name,
           });
           const ruleStatuses = await ruleStatusClient.find({

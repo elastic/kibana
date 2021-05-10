@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import { SessionTimeoutHttpInterceptor } from './session_timeout_http_interceptor';
-import { setup } from '../../../../../src/core/test_helpers/http_test_setup';
+
+import { setup } from 'src/core/test_helpers/http_test_setup';
+
 import { createSessionTimeoutMock } from './session_timeout.mock';
+import { SessionTimeoutHttpInterceptor } from './session_timeout_http_interceptor';
 
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPage, EuiPageBody, EuiPageProps } from '@elastic/eui';
@@ -15,7 +16,9 @@ const Page = styled(EuiPage)<EuiPageProps>`
 
 const Container = styled.div<{ color?: string }>`
   overflow-y: hidden;
-  min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
+  min-height: calc(
+    100vh - ${(props) => props.theme.eui.euiHeaderHeight + props.theme.eui.euiHeaderHeight}
+  );
   background: ${(props) => props.color};
 `;
 

@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 
 import {
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiFieldPassword,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ResilientActionConnector } from './types';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientActionConnector>> = ({
   action,
@@ -113,7 +114,14 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
+          <EuiFormRow fullWidth>
+            {getEncryptedFieldNotifyLabel(
+              !action.id,
+              2,
+              action.isMissingSecrets ?? false,
+              i18n.REENTER_VALUES_LABEL
+            )}
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -173,24 +181,6 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
     </>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <EuiText size="s" data-test-subj="rememberValuesMessage">
-        {i18n.REMEMBER_VALUES_LABEL}
-      </EuiText>
-    );
-  }
-  return (
-    <EuiCallOut
-      size="s"
-      iconType="iInCircle"
-      title={i18n.REENTER_VALUES_LABEL}
-      data-test-subj="reenterValuesMessage"
-    />
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { ResilientConnectorFields as default };

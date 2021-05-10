@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
@@ -39,7 +40,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       mockAgentService,
       mockSavedObjectClient,
       mockElasticsearchClient,
-      ['online']
+      ['healthy']
     );
     expect(result).toBeDefined();
   });
@@ -70,7 +71,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       ['offline']
     );
     const offlineKuery = AgentStatusKueryHelper.buildKueryForOfflineAgents();
-    expect(mockAgentService.listAgents.mock.calls[0][2].kuery).toEqual(
+    expect(mockAgentService.listAgents.mock.calls[0][1].kuery).toEqual(
       expect.stringContaining(offlineKuery)
     );
     expect(result).toBeDefined();
@@ -100,11 +101,11 @@ describe('test filtering endpoint hosts by agent status', () => {
       mockAgentService,
       mockSavedObjectClient,
       mockElasticsearchClient,
-      ['unenrolling', 'error']
+      ['updating', 'unhealthy']
     );
-    const unenrollKuery = AgentStatusKueryHelper.buildKueryForUnenrollingAgents();
+    const unenrollKuery = AgentStatusKueryHelper.buildKueryForUpdatingAgents();
     const errorKuery = AgentStatusKueryHelper.buildKueryForErrorAgents();
-    expect(mockAgentService.listAgents.mock.calls[0][2].kuery).toEqual(
+    expect(mockAgentService.listAgents.mock.calls[0][1].kuery).toEqual(
       expect.stringContaining(`${unenrollKuery} OR ${errorKuery}`)
     );
     expect(result).toBeDefined();

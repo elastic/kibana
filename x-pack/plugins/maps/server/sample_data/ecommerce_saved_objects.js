@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { emsWorldLayerId } from '../../common';
 
 const layerList = [
   {
@@ -28,7 +30,7 @@ const layerList = [
     alpha: 1,
     sourceDescriptor: {
       type: 'EMS_FILE',
-      id: 'world_countries',
+      id: emsWorldLayerId,
       tooltipProperties: ['name', 'iso2'],
     },
     visible: true,

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -22,7 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid field data tests', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
@@ -41,9 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
+        await PageObjects.discover.clickFieldListItemAdd('extension');
         const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(50);
+        expect(marks.length).to.be.greaterThan(0);
         expect(marks.indexOf('php')).to.be(0);
+        await PageObjects.discover.clickFieldListItemRemove('extension');
       });
 
       it('search type:apache should show the correct hit count', async function () {
@@ -67,9 +70,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickDocSortAsc();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await retry.try(async function tryingForTime() {
-          const rowData = await dataGrid.getFields();
-          expect(rowData[0][0].startsWith(expectedTimeStamp)).to.be.ok();
+        await retry.waitFor('first cell contains expected timestamp', async () => {
+          const cell = await dataGrid.getCellElement(1, 3);
+          const text = await cell.getVisibleText();
+          return text === expectedTimeStamp;
         });
       });
 

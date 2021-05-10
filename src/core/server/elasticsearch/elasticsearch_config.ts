@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 import { ServiceConfigDescriptor } from '../internal_types';
+import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -52,10 +53,42 @@ export const configSchema = schema.object({
     )
   ),
   password: schema.maybe(schema.string()),
-  requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-    defaultValue: ['authorization'],
+  requestHeadersWhitelist: schema.oneOf(
+    [
+      schema.string({
+        // can't use `validate` option on union types, forced to validate each individual subtypes
+        // see https://github.com/elastic/kibana/issues/64906
+        validate: (headersWhitelist) => {
+          const reservedHeaders = getReservedHeaders([headersWhitelist]);
+          if (reservedHeaders.length) {
+            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+          }
+        },
+      }),
+      schema.arrayOf(schema.string(), {
+        // can't use `validate` option on union types, forced to validate each individual subtypes
+        // see https://github.com/elastic/kibana/issues/64906
+        validate: (headersWhitelist) => {
+          const reservedHeaders = getReservedHeaders(headersWhitelist);
+          if (reservedHeaders.length) {
+            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+          }
+        },
+      }),
+    ],
+    {
+      defaultValue: ['authorization'],
+    }
+  ),
+  customHeaders: schema.recordOf(schema.string(), schema.string(), {
+    defaultValue: {},
+    validate: (customHeaders) => {
+      const reservedHeaders = getReservedHeaders(Object.keys(customHeaders));
+      if (reservedHeaders.length) {
+        return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+      }
+    },
   }),
-  customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
@@ -111,32 +144,32 @@ export const configSchema = schema.object({
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
-  (settings, fromPath, log) => {
+  (settings, fromPath, addDeprecation) => {
     const es = settings[fromPath];
     if (!es) {
       return settings;
     }
     if (es.username === 'elastic') {
-      log(
-        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+      });
     } else if (es.username === 'kibana') {
-      log(
-        `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
+      });
     }
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
-      log(
-        `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+      });
     } else if (es.ssl?.certificate !== undefined && es.ssl?.key === undefined) {
-      log(
-        `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+      });
     } else if (es.logQueries === true) {
-      log(
-        `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`
-      );
+      addDeprecation({
+        message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`,
+      });
     }
     return settings;
   },

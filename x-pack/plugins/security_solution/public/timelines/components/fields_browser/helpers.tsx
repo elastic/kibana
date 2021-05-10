@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -15,7 +16,7 @@ import {
 } from '../../../common/components/accessibility/helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { BrowserField, BrowserFields } from '../../../common/containers/source';
-import { alertsHeaders } from '../../../detections/components/alerts_table/default_config';
+import { alertsHeaders } from '../../../common/components/alerts_viewer/default_headers';
 import {
   DEFAULT_CATEGORY_NAME,
   defaultHeaders,

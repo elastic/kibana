@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent, MouseEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -25,14 +24,14 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
 import { Loading } from '../../../../shared/loading';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { SourceIcon } from '../../../components/shared/source_icon';
-
-import { GroupLogic } from '../group_logic';
-
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { ContentSource } from '../../../types';
+import { GroupLogic } from '../group_logic';
 
 const HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerTitle',
@@ -44,12 +43,6 @@ const HEADER_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerDescription',
   {
     defaultMessage: 'Calibrate relative document importance across group content sources.',
-  }
-);
-const HEADER_ACTION_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerActionText',
-  {
-    defaultMessage: 'Save',
   }
 );
 const ZERO_STATE_TITLE = i18n.translate(
@@ -95,10 +88,10 @@ export const GroupSourcePrioritization: React.FC = () => {
     <EuiButton
       disabled={groupPrioritiesUnchanged}
       color="primary"
-      fill={true}
+      fill
       onClick={saveGroupSourcePrioritization}
     >
-      {HEADER_ACTION_TEXT}
+      {SAVE_BUTTON_LABEL}
     </EuiButton>
   );
   const handleSliderChange = (
@@ -108,7 +101,7 @@ export const GroupSourcePrioritization: React.FC = () => {
   const hasSources = contentSources.length > 0;
 
   const zeroState = (
-    <EuiPanel paddingSize="none" className="euiPanel--inset">
+    <EuiPanel paddingSize="none">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt
         iconType="advancedSettingsApp"
@@ -134,7 +127,7 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   const sourceTable = (
-    <EuiTable className="table table--emphasized" responsive={false} tableLayout="auto">
+    <EuiTable responsive={false} tableLayout="auto">
       <EuiTableHeader>
         <EuiTableHeaderCell>{SOURCE_TABLE_HEADER}</EuiTableHeaderCell>
         <EuiTableHeaderCell align="right">{PRIORITY_TABLE_HEADER}</EuiTableHeaderCell>
@@ -145,14 +138,12 @@ export const GroupSourcePrioritization: React.FC = () => {
             <EuiTableRowCell>
               <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <SourceIcon serviceType={serviceType} name={name} className="source-row__icon" />
+                  <SourceIcon serviceType={serviceType} name={name} />
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <span className="source-row__name">{name}</span>
-                </EuiFlexItem>
+                <EuiFlexItem>{name}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
-            <EuiTableRowCell align="right" style={{ padding: 0 }}>
+            <EuiTableRowCell align="right">
               <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
                   <EuiRange
@@ -160,16 +151,12 @@ export const GroupSourcePrioritization: React.FC = () => {
                     min={1}
                     max={10}
                     step={1}
+                    showInput
                     value={activeSourcePriorities[id]}
                     onChange={(e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) =>
                       handleSliderChange(id, e)
                     }
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ paddingLeft: 10 }}>
-                  <div style={{ margin: 0 }} className="input-container--range__count">
-                    {activeSourcePriorities[id]}
-                  </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>

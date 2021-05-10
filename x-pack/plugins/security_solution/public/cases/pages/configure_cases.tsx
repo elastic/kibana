@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
@@ -12,15 +13,15 @@ import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
+import { useGetUserSavedObjectPermissions, useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
-import { ConfigureCases } from '../components/configure_cases';
 import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
 
 const ConfigureCasesPageComponent: React.FC = () => {
+  const { cases } = useKibana().services;
   const history = useHistory();
   const userPermissions = useGetUserSavedObjectPermissions();
   const search = useGetUrlSearch(navTabs.case);
@@ -52,7 +53,9 @@ const ConfigureCasesPageComponent: React.FC = () => {
           </HeaderWrapper>
         </SectionWrapper>
         <WhitePageWrapper>
-          <ConfigureCases userCanCrud={userPermissions?.crud ?? false} />
+          {cases.getConfigureCases({
+            userCanCrud: userPermissions?.crud ?? false,
+          })}
         </WhitePageWrapper>
       </WrapperPage>
       <SpyRoute pageName={SecurityPageName.case} />

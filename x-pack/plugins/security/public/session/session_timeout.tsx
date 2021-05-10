@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { NotificationsSetup, Toast, HttpSetup, ToastInput } from 'src/core/public';
-import { BroadcastChannel } from 'broadcast-channel';
-import { SessionInfo } from '../../common/types';
+import type { BroadcastChannel as BroadcastChannelType } from 'broadcast-channel';
+
+import type { HttpSetup, NotificationsSetup, Toast, ToastInput } from 'src/core/public';
+
+import type { SessionInfo } from '../../common/types';
+import type { ISessionExpired } from './session_expired';
 import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
 import { createToast as createLifespanToast } from './session_lifespan_warning';
-import { ISessionExpired } from './session_expired';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server
@@ -42,7 +45,7 @@ export interface ISessionTimeout {
 }
 
 export class SessionTimeout implements ISessionTimeout {
-  private channel?: BroadcastChannel<SessionInfo>;
+  private channel?: BroadcastChannelType<SessionInfo>;
   private sessionInfo?: SessionInfo;
   private fetchTimer?: number;
   private warningTimer?: number;
@@ -61,15 +64,26 @@ export class SessionTimeout implements ISessionTimeout {
       return;
     }
 
-    // subscribe to a broadcast channel for session timeout messages
-    // this allows us to synchronize the UX across tabs and avoid repetitive API calls
-    const name = `${this.tenant}/session_timeout`;
-    this.channel = new BroadcastChannel(name, { webWorkerSupport: false });
-    this.channel.onmessage = this.handleSessionInfoAndResetTimers;
-
-    // Triggers an initial call to the endpoint to get session info;
-    // when that returns, it will set the timeout
-    return this.fetchSessionInfoAndResetTimers();
+    import('broadcast-channel')
+      .then(({ BroadcastChannel }) => {
+        // subscribe to a broadcast channel for session timeout messages
+        // this allows us to synchronize the UX across tabs and avoid repetitive API calls
+        const name = `${this.tenant}/session_timeout`;
+        this.channel = new BroadcastChannel(name, { webWorkerSupport: false });
+        this.channel.onmessage = this.handleSessionInfoAndResetTimers;
+      })
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Failed to load broadcast channel. Session management will not be kept in sync when multiple tabs are loaded.`,
+          e
+        );
+      })
+      .finally(() => {
+        // Triggers an initial call to the endpoint to get session info;
+        // when that returns, it will set the timeout
+        return this.fetchSessionInfoAndResetTimers();
+      });
   }
 
   stop() {

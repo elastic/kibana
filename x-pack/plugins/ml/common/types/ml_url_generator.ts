@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type {
@@ -14,6 +15,7 @@ import { ML_PAGES } from '../constants/ml_url_generator';
 import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
 import type { SearchQueryLanguage } from '../constants/search';
 import type { ListingPageUrlState } from './common';
+import type { InfluencersFilterQuery } from './es_client';
 
 type OptionalPageState = object | undefined;
 
@@ -63,6 +65,7 @@ export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlStat
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB
+  | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
@@ -111,9 +114,9 @@ export interface ExplorerAppState {
     viewByFromPage?: number;
   };
   mlExplorerFilter: {
-    influencersFilterQuery?: unknown;
+    influencersFilterQuery?: InfluencersFilterQuery;
     filterActive?: boolean;
-    filteredFields?: string[];
+    filteredFields?: Array<string | number>;
     queryString?: string;
   };
   query?: any;

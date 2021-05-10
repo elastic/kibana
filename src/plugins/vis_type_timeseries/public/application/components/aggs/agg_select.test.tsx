@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -11,6 +11,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { AggSelect } from './agg_select';
 import { METRIC, SERIES } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
+import { Metric } from '../../../../common/types';
 
 describe('TSVB AggSelect', () => {
   const setup = (panelType: string, value: string) => {
@@ -28,7 +29,7 @@ describe('TSVB AggSelect', () => {
           onChange={jest.fn()}
           panelType={panelType}
           value={value}
-          siblings={series.metrics}
+          siblings={series.metrics as Metric[]}
         />
       </div>
     );
@@ -86,6 +87,14 @@ describe('TSVB AggSelect', () => {
         Object {
           "label": "Count",
           "value": "count",
+        },
+        Object {
+          "label": "Max",
+          "value": "max",
+        },
+        Object {
+          "label": "Min",
+          "value": "min",
         },
         Object {
           "label": "Sum",

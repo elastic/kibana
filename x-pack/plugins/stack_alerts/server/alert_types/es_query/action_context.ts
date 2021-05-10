@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerts/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
 import { EsQueryAlertParams } from './alert_type_params';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 // alert type context provided to actions
 
@@ -28,7 +29,7 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
   // threshold conditions
   conditions: string;
   // query matches
-  hits: ESSearchHit[];
+  hits: estypes.Hit[];
 }
 
 export function addMessages(

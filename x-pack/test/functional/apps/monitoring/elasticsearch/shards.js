@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
+      await setup('monitoring/singlecluster_three_nodes_shard_relocation', {
         from: 'Oct 5, 2017 @ 19:34:48.000',
         to: 'Oct 5, 2017 @ 20:35:12.000',
       });

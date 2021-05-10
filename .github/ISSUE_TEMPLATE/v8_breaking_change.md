@@ -2,7 +2,7 @@
 name: 8.0 Breaking change
 about: Breaking changes from 7.x -> 8.0
 title: "[Breaking change]"
-labels: Team:Elasticsearch UI, Feature:Upgrade Assistant, Breaking Change
+labels: Feature:Upgrade Assistant, Breaking Change
 assignees: ''
 
 ---
@@ -12,8 +12,8 @@ assignees: ''
 ******* LABEL CHANGES NECESSARY ********
 ****************************************
  
-Please add a "NeededFor:${TeamName}" label to denote the team that is
-requesting the breaking change to be surfaced in the Upgrade Assistant.
+Please add a team label to denote the team that the
+breaking change is applicable to.
  
 -->
 
@@ -30,16 +30,14 @@ requesting the breaking change to be surfaced in the Upgrade Assistant.
 <!-- e.g. Based on telemetry data, roughly 75% of our users will need to make changes to x. -->
 <!-- e.g. A majority of users will need to make changes to x. -->
 
-**How can we programmatically determine whether the cluster is affected by this breaking change?**
+**Can the change be registered with the [Kibana deprecation service](https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.deprecationsservicesetup.md)?**
 
-**What can users do to address the change manually?**
+<!-- The deprecation service is consumed by the Upgrade Assistant to surface Kibana deprecations.
+  It provides a way for Kibana deprecations to be resolved automatically via an API
+  or manually by providing step-by-step instructions for users to follow. -->
 
-<!-- If applicable, describe the manual migration steps and/or link to available docs. -->
-
-**How could we make migration easier with the Upgrade Assistant?**
-
-<!-- This can be as basic as notifying the user about the deprecation and linking to some
-  migration docs, or as advanced as a dedicated UI for fixing the problem. -->
+<!-- Each plugin owner is responsible for registering their deprecations via the service.
+  Please link to the issue/PR that will add this functionality. -->
 
 **Are there any edge cases?**
 

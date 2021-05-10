@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -25,11 +26,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
     it('should generate expected events for normal operation', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'MY action',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         })
@@ -41,11 +42,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       };
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.patternFiring',
+            rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             throttle: null,
             params: {
@@ -63,7 +64,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       // get the events we're expecting
       const events = await retry.try(async () => {
@@ -173,11 +174,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
     it('should generate expected events for normal operation with subgroups', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'MY action',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         })
@@ -190,11 +191,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       };
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.patternFiring',
+            rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             throttle: null,
             params: {
@@ -212,7 +213,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       // get the events we're expecting
       const events = await retry.try(async () => {
@@ -314,11 +315,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
     it('should generate events for execution errors', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.throw',
+            rule_type_id: 'test.throw',
             schedule: { interval: '1s' },
             throttle: null,
           })
@@ -326,7 +327,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       const events = await retry.try(async () => {
         return await getEventLog({

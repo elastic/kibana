@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
@@ -37,14 +38,18 @@ export function monitoringClustersProvider($injector) {
 
     async function getClusters() {
       try {
-        const response = await $http.post(url, {
-          ccs,
-          timeRange: {
-            min: min.toISOString(),
-            max: max.toISOString(),
+        const response = await $http.post(
+          url,
+          {
+            ccs,
+            timeRange: {
+              min: min.toISOString(),
+              max: max.toISOString(),
+            },
+            codePaths,
           },
-          codePaths,
-        });
+          { headers: { 'kbn-system-request': 'true' } }
+        );
         return formatClusters(response.data);
       } catch (err) {
         const Private = $injector.get('Private');

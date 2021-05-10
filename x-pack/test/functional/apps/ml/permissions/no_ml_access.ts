@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -12,15 +13,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error']);
   const ml = getService('ml');
 
-  const testUsers = [USER.ML_UNAUTHORIZED, USER.ML_UNAUTHORIZED_SPACES];
+  const testUsers = [
+    { user: USER.ML_UNAUTHORIZED, discoverAvailable: true },
+    { user: USER.ML_UNAUTHORIZED_SPACES, discoverAvailable: true },
+  ];
 
   describe('for user with no ML access', function () {
     this.tags(['skipFirefox', 'mlqa']);
 
-    for (const user of testUsers) {
-      describe(`(${user})`, function () {
+    for (const testUser of testUsers) {
+      describe(`(${testUser.user})`, function () {
         before(async () => {
-          await ml.securityUI.loginAs(user);
+          await ml.securityUI.loginAs(testUser.user);
         });
 
         after(async () => {

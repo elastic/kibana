@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { externals } from '@kbn/ui-shared-deps';
 import { stringifyRequest } from 'loader-utils';
+import { resolve } from 'path';
 import { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
-import { externals } from '@kbn/ui-shared-deps';
 import { REPO_ROOT } from './lib/constants';
 
 const stats = {
@@ -80,6 +80,12 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     stats,
   };
 
+  // Disable the progress plugin
+  const progressPlugin: any = (storybookConfig.plugins || []).find((plugin: any) => {
+    return 'handler' in plugin && plugin.showActiveModules && plugin.showModules;
+  });
+  progressPlugin.handler = () => {};
+
   // This is the hacky part. We find something that looks like the
   // HtmlWebpackPlugin and mutate its `options.template` to point at our
   // revised template.
@@ -89,5 +95,6 @@ export default function ({ config: storybookConfig }: { config: Configuration })
   if (htmlWebpackPlugin) {
     htmlWebpackPlugin.options.template = require.resolve('../lib/templates/index.ejs');
   }
+
   return webpackMerge(storybookConfig, config);
 }

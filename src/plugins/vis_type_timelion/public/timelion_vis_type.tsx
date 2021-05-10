@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { lazy } from 'react';
@@ -13,8 +13,11 @@ import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
+import { getIndexPatterns } from './helpers/plugin_services';
 
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { parseTimelionExpressionAsync } from '../common/parser_async';
+
+import { VIS_EVENT_TO_TRIGGER, VisParams } from '../../visualizations/public';
 
 const TimelionOptions = lazy(() => import('./timelion_options'));
 
@@ -46,6 +49,21 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     inspectorAdapters: {},
     getSupportedTriggers: () => {
       return [VIS_EVENT_TO_TRIGGER.applyFilter];
+    },
+    getUsedIndexPattern: async (params: VisParams) => {
+      try {
+        const args = (await parseTimelionExpressionAsync(params.expression))?.args ?? [];
+        const indexArg = args.find(
+          ({ type, name, function: fn }) => type === 'namedArg' && fn === 'es' && name === 'index'
+        );
+
+        if (indexArg?.value.text) {
+          return getIndexPatterns().find(indexArg.value.text);
+        }
+      } catch {
+        // timelion expression is invalid
+      }
+      return [];
     },
     options: {
       showIndexSelection: false,

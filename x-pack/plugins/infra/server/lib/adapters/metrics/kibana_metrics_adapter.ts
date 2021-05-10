@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -20,6 +21,7 @@ import {
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { isVisSeriesData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
@@ -33,7 +35,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     options: InfraMetricsRequestOptions,
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
+    const indexPattern = `${options.sourceConfiguration.metricAlias}`;
     const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
     const nodeField = fields.id;
 
@@ -58,7 +60,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     return Promise.all(requests)
       .then((results) => {
-        return results.map((result) => {
+        return results.filter(isVisSeriesData).map((result) => {
           const metricIds = Object.keys(result).filter(
             (k) => !['type', 'uiRestrictions'].includes(k)
           );
@@ -111,7 +113,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       );
     }
 
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
+    const indexPattern = `${options.sourceConfiguration.metricAlias}`;
     const timerange = {
       min: options.timerange.from,
       max: options.timerange.to,
@@ -131,7 +133,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const calculatedInterval = await calculateMetricInterval(
       client,
       {
-        indexPattern: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
+        indexPattern: `${options.sourceConfiguration.metricAlias}`,
         timestampField: options.sourceConfiguration.fields.timestamp,
         timerange: options.timerange,
       },

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -25,7 +26,6 @@ describe('groups routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/workplace_search/groups',
-        payload: 'query',
       });
 
       registerGroupsRoute({
@@ -49,7 +49,6 @@ describe('groups routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/groups',
-        payload: 'body',
       });
 
       registerGroupsRoute({
@@ -84,7 +83,6 @@ describe('groups routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/groups/search',
-        payload: 'body',
       });
 
       registerSearchGroupsRoute({
@@ -162,7 +160,6 @@ describe('groups routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/groups/{id}',
-        payload: 'body',
       });
 
       registerGroupRoute({
@@ -245,7 +242,6 @@ describe('groups routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/groups/{id}/share',
-        payload: 'body',
       });
 
       registerShareGroupRoute({
@@ -281,7 +277,6 @@ describe('groups routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/groups/{id}/assign',
-        payload: 'body',
       });
 
       registerAssignGroupRoute({
@@ -317,7 +312,6 @@ describe('groups routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/groups/{id}/boosts',
-        payload: 'body',
       });
 
       registerBoostsGroupRoute({

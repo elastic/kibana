@@ -1,22 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { LayerSettings } from './layer_settings';
 import {
+  clearLayerAttribution,
+  setLayerAttribution,
   updateLayerLabel,
   updateLayerMaxZoom,
   updateLayerMinZoom,
   updateLayerAlpha,
   updateLabelsOnTop,
 } from '../../../actions';
+import { Attribution } from '../../../../common/descriptor_types';
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
+    clearLayerAttribution: (id: string) => dispatch(clearLayerAttribution(id)),
+    setLayerAttribution: (id: string, attribution: Attribution) =>
+      dispatch(setLayerAttribution(id, attribution)),
     updateLabel: (id: string, label: string) => dispatch(updateLayerLabel(id, label)),
     updateMinZoom: (id: string, minZoom: number) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id: string, maxZoom: number) => dispatch(updateLayerMaxZoom(id, maxZoom)),

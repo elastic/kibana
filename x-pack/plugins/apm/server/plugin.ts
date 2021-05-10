@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import {
   CoreSetup,
@@ -15,20 +16,10 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { APMConfig, APMXPackConfig, mergeConfigs } from '.';
-import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { mapValues } from 'lodash';
+import { APMConfig, APMXPackConfig } from '.';
+import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
-import { ActionsPlugin } from '../../actions/server';
-import { AlertingPlugin } from '../../alerts/server';
-import { CloudSetup } from '../../cloud/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { MlPluginSetup } from '../../ml/server';
-import { ObservabilityPluginSetup } from '../../observability/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { TaskManagerSetupContract } from '../../task_manager/server';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
@@ -37,45 +28,42 @@ import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
-import { createApmApi } from './routes/create_apm_api';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
 import { uiSettings } from './ui_settings';
-import type { ApmPluginRequestHandlerContext } from './routes/typings';
+import type {
+  ApmPluginRequestHandlerContext,
+  APMRouteHandlerResources,
+} from './routes/typings';
+import {
+  APMPluginSetup,
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from './types';
+import { registerRoutes } from './routes/register_routes';
+import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
+import { apmRuleRegistrySettings } from '../common/rules/apm_rule_registry_settings';
+import { apmRuleFieldMap } from '../common/rules/apm_rule_field_map';
 
-export interface APMPluginSetup {
-  config$: Observable<APMConfig>;
-  getApmIndices: () => ReturnType<typeof getApmIndices>;
-  createApmEventClient: (params: {
-    debug?: boolean;
-    request: KibanaRequest;
-    context: ApmPluginRequestHandlerContext;
-  }) => Promise<ReturnType<typeof createApmEventClient>>;
-}
+export type APMRuleRegistry = ReturnType<APMPlugin['setup']>['ruleRegistry'];
 
-export class APMPlugin implements Plugin<APMPluginSetup> {
+export class APMPlugin
+  implements
+    Plugin<
+      APMPluginSetup,
+      void,
+      APMPluginSetupDependencies,
+      APMPluginStartDependencies
+    > {
   private currentConfig?: APMConfig;
   private logger?: Logger;
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
 
-  public async setup(
-    core: CoreSetup,
-    plugins: {
-      apmOss: APMOSSPluginSetup;
-      home: HomeServerPluginSetup;
-      licensing: LicensingPluginSetup;
-      cloud?: CloudSetup;
-      usageCollection?: UsageCollectionSetup;
-      taskManager?: TaskManagerSetupContract;
-      alerts?: AlertingPlugin['setup'];
-      actions?: ActionsPlugin['setup'];
-      observability?: ObservabilityPluginSetup;
-      features: FeaturesPluginSetup;
-      security?: SecurityPluginSetup;
-      ml?: MlPluginSetup;
-    }
+  public setup(
+    core: CoreSetup<APMPluginStartDependencies>,
+    plugins: Omit<APMPluginSetupDependencies, 'core'>
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
@@ -88,16 +76,12 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     core.uiSettings.register(uiSettings);
 
-    if (plugins.actions && plugins.alerts) {
-      registerApmAlerts({
-        alerts: plugins.alerts,
-        actions: plugins.actions,
-        ml: plugins.ml,
-        config$: mergedConfig$,
-      });
-    }
+    const currentConfig = mergeConfigs(
+      plugins.apmOss.config,
+      this.initContext.config.get<APMXPackConfig>()
+    );
 
-    this.currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
+    this.currentConfig = currentConfig;
 
     if (
       plugins.taskManager &&
@@ -115,8 +99,8 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     }
 
     const ossTutorialProvider = plugins.apmOss.getRegisteredTutorialProvider();
-    plugins.home.tutorials.unregisterTutorial(ossTutorialProvider);
-    plugins.home.tutorials.registerTutorial(() => {
+    plugins.home?.tutorials.unregisterTutorial(ossTutorialProvider);
+    plugins.home?.tutorials.registerTutorial(() => {
       const ossPart = ossTutorialProvider({});
       if (this.currentConfig!['xpack.apm.ui.enabled'] && ossPart.artifacts) {
         ossPart.artifacts.application = {
@@ -140,14 +124,32 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
-    createApmApi().init(core, {
-      config$: mergedConfig$,
-      logger: this.logger!,
-      plugins: {
-        observability: plugins.observability,
-        security: plugins.security,
-        ml: plugins.ml,
+    const apmRuleRegistry = plugins.observability.ruleRegistry.create({
+      ...apmRuleRegistrySettings,
+      fieldMap: apmRuleFieldMap,
+    });
+
+    registerRoutes({
+      core: {
+        setup: core,
+        start: () => core.getStartServices().then(([coreStart]) => coreStart),
       },
+      logger: this.logger,
+      config: currentConfig,
+      repository: getGlobalApmServerRouteRepository(),
+      apmRuleRegistry,
+      plugins: mapValues(plugins, (value, key) => {
+        return {
+          setup: value,
+          start: () =>
+            core.getStartServices().then((services) => {
+              const [, pluginsStartContracts] = services;
+              return pluginsStartContracts[
+                key as keyof APMPluginStartDependencies
+              ];
+            }),
+        };
+      }) as APMRouteHandlerResources['plugins'],
     });
 
     const boundGetApmIndices = async () =>
@@ -155,6 +157,12 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         savedObjectsClient: await getInternalSavedObjectsClient(core),
         config: await mergedConfig$.pipe(take(1)).toPromise(),
       });
+    registerApmAlerts({
+      registry: apmRuleRegistry,
+      ml: plugins.ml,
+      config$: mergedConfig$,
+      logger: this.logger!.get('rule'),
+    });
 
     return {
       config$: mergedConfig$,
@@ -185,6 +193,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
           },
         });
       },
+      ruleRegistry: apmRuleRegistry,
     };
   }
 

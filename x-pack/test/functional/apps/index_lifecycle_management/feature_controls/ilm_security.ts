@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -43,9 +45,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with manage_ilm', () => {
+    describe('global dashboard read with manage_ilm', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'manage_ilm'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'manage_ilm'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

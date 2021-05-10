@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -20,11 +20,22 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const docTable = getService('docTable');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
+  const dataGrid = getService('dataGrid');
+  const kibanaServer = getService('kibanaServer');
 
   class DiscoverPage {
     public async getChartTimespan() {
       const el = await find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');
       return await el.getVisibleText();
+    }
+
+    public async getDocTable() {
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        return docTable;
+      } else {
+        return dataGrid;
+      }
     }
 
     public async findFieldByName(name: string) {
@@ -77,7 +88,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getColumnHeaders() {
-      return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
+      const isLegacy = await this.useLegacyTable();
+      if (isLegacy) {
+        return await docTable.getHeaderFields('embeddedSavedSearchDocTable');
+      }
+      const table = await this.getDocTable();
+      return await table.getHeaderFields();
     }
 
     public async openLoadSavedSearchPanel() {
@@ -139,7 +155,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
-      await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
+      await browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
@@ -179,26 +195,52 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getDocHeader() {
-      const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
-      return await docHeader.getVisibleText();
+      const table = await this.getDocTable();
+      const docHeader = await table.getHeaders();
+      return docHeader.join();
     }
 
     public async getDocTableRows() {
       await header.waitUntilLoadingHasFinished();
-      const rows = await testSubjects.findAll('docTableRow');
-      return rows;
+      const table = await this.getDocTable();
+      return await table.getBodyRows();
+    }
+
+    public async useLegacyTable() {
+      return (await kibanaServer.uiSettings.get('doc_table:legacy')) !== false;
     }
 
     public async getDocTableIndex(index: number) {
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
+        return await row.getVisibleText();
+      }
+
+      const row = await dataGrid.getRow({ rowIndex: index - 1 });
+      const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+      // Remove control columns
+      return result.slice(2).join(' ');
+    }
+
+    public async getDocTableIndexLegacy(index: number) {
       const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();
     }
 
-    public async getDocTableField(index: number) {
-      const field = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
-      );
-      return await field.getVisibleText();
+    public async getDocTableField(index: number, cellIdx: number = -1) {
+      const isLegacyDefault = await this.useLegacyTable();
+      const usedDefaultCellIdx = isLegacyDefault ? 0 : 2;
+      const usedCellIdx = cellIdx === -1 ? usedDefaultCellIdx : cellIdx;
+      if (isLegacyDefault) {
+        const fields = await find.allByCssSelector(
+          `tr.kbnDocTable__row:nth-child(${index}) [data-test-subj='docTableField']`
+        );
+        return await fields[usedCellIdx].getVisibleText();
+      }
+      const row = await dataGrid.getRow({ rowIndex: index - 1 });
+      const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+      return result[usedCellIdx];
     }
 
     public async skipToEndOfDocTable() {
@@ -210,24 +252,45 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return skipButton.click();
     }
 
+    /**
+     * When scrolling down the legacy table there's a link to scroll up
+     * So this is done by this function
+     */
+    public async backToTop() {
+      const skipButton = await testSubjects.find('discoverBackToTop');
+      return skipButton.click();
+    }
+
     public async getDocTableFooter() {
       return await testSubjects.find('discoverDocTableFooter');
     }
 
     public async clickDocSortDown() {
-      await find.clickByCssSelector('.fa-sort-down');
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        await find.clickByCssSelector('.fa-sort-down');
+      } else {
+        await dataGrid.clickDocSortAsc();
+      }
     }
 
     public async clickDocSortUp() {
-      await find.clickByCssSelector('.fa-sort-up');
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        await find.clickByCssSelector('.fa-sort-up');
+      } else {
+        await dataGrid.clickDocSortDesc();
+      }
+    }
+
+    public async isShowingDocViewer() {
+      return await testSubjects.exists('kbnDocViewer');
     }
 
     public async getMarks() {
       const table = await docTable.getTable();
-      const $ = await table.parseDomContent();
-      return $('mark')
-        .toArray()
-        .map((mark) => $(mark).text());
+      const marks = await table.findAllByTagName('mark');
+      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
     }
 
     public async toggleSidebarCollapse() {
@@ -242,6 +305,34 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         .map((field) => $(field).text());
     }
 
+    public async editField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.click(`field-${field}`);
+        await testSubjects.click(`discoverFieldListPanelEdit-${field}`);
+        await find.byClassName('indexPatternFieldEditor__form');
+      });
+    }
+
+    public async removeField(field: string) {
+      await testSubjects.click(`field-${field}`);
+      await testSubjects.click(`discoverFieldListPanelDelete-${field}`);
+      await testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    }
+
+    public async clickIndexPatternActions() {
+      await retry.try(async () => {
+        await testSubjects.click('discoverIndexPatternActions');
+        await testSubjects.existOrFail('discover-addRuntimeField-popover');
+      });
+    }
+
+    public async clickAddNewField() {
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-add-field');
+        await find.byClassName('indexPatternFieldEditor__form');
+      });
+    }
+
     public async hasNoResults() {
       return await testSubjects.exists('discoverNoResults');
     }
@@ -254,8 +345,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`field-${field}`);
     }
 
-    public async clickFieldSort(field: string) {
-      return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
+    public async clickFieldSort(field: string, text = 'Sort New-Old') {
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
+      }
+      return await dataGrid.clickDocSortAsc(field, text);
     }
 
     public async clickFieldListItemToggle(field: string) {
@@ -327,8 +422,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async removeHeaderColumn(name: string) {
-      await testSubjects.moveMouseTo(`docTableHeader-${name}`);
-      await testSubjects.click(`docTableRemoveHeader-${name}`);
+      const isLegacyDefault = await this.useLegacyTable();
+      if (isLegacyDefault) {
+        await testSubjects.moveMouseTo(`docTableHeader-${name}`);
+        await testSubjects.click(`docTableRemoveHeader-${name}`);
+      } else {
+        await dataGrid.clickRemoveColumn(name);
+      }
     }
 
     public async openSidebarFieldFilter() {

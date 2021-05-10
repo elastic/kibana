@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { MountPoint } from '../types';
@@ -31,6 +31,7 @@ import {
   NavigateToAppOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
+import { getUserConfirmationHandler } from './navigation_confirm';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
 interface SetupDeps {
@@ -91,7 +92,9 @@ export class ApplicationService {
   private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
+  private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
+  private overlayStart$ = new Subject<OverlayStart>();
 
   public setup({
     http: { basePath },
@@ -101,11 +104,23 @@ export class ApplicationService {
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    this.history = history || createBrowserHistory({ basename });
+    this.history =
+      history ||
+      createBrowserHistory({
+        basename,
+        getUserConfirmation: getUserConfirmationHandler({
+          overlayPromise: this.overlayStart$.pipe(take(1)).toPromise(),
+        }),
+      });
 
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
       return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+    };
+
+    this.openInNewTab = (url) => {
+      // window.open shares session information if base url is same
+      return window.open(appendAppPath(basename, url), '_blank');
     };
 
     this.redirectTo = redirectTo;
@@ -173,6 +188,8 @@ export class ApplicationService {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
+    this.overlayStart$.next(overlays);
+
     const httpLoadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(httpLoadingCount$);
 
@@ -207,7 +224,7 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { path, state, replace = false }: NavigateToAppOptions = {}
+      { path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
@@ -222,7 +239,12 @@ export class ApplicationService {
         if (!navigatingToSameApp) {
           this.appInternalStates.delete(this.currentAppId$.value!);
         }
-        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+        if (openInNewTab) {
+          this.openInNewTab!(getAppUrl(availableMounters, appId, path));
+        } else {
+          this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+        }
+
         this.currentAppId$.next(appId);
       }
     };

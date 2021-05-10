@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -38,11 +39,7 @@ export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) 
             defaultMessage="Use processors to transform data before indexing. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink
-                  href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
-                  target="_blank"
-                  external
-                >
+                <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank" external>
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
                     {

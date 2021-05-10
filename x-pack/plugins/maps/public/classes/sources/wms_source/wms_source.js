@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AbstractTMSSource } from '../tms_source';
@@ -18,14 +19,12 @@ export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
 export class WMSSource extends AbstractTMSSource {
   static type = SOURCE_TYPES.WMS;
 
-  static createDescriptor({ serviceUrl, layers, styles, attributionText, attributionUrl }) {
+  static createDescriptor({ serviceUrl, layers, styles }) {
     return {
       type: WMSSource.type,
       serviceUrl,
       layers,
       styles,
-      attributionText,
-      attributionUrl,
     };
   }
 
@@ -50,20 +49,6 @@ export class WMSSource extends AbstractTMSSource {
 
   async getDisplayName() {
     return this._descriptor.serviceUrl;
-  }
-
-  getAttributions() {
-    const { attributionText, attributionUrl } = this._descriptor;
-    const attributionComplete = !!attributionText && !!attributionUrl;
-
-    return attributionComplete
-      ? [
-          {
-            url: attributionUrl,
-            label: attributionText,
-          },
-        ]
-      : [];
   }
 
   getUrlTemplate() {

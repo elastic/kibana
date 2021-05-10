@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
-import { uiSettingsServiceMock } from '../../../../../../../../../../src/core/public/mocks';
+import {
+  docLinksServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../../../../../../../src/core/public/mocks';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
 
@@ -78,10 +83,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
 });
 
 const defaultProps = {
-  docLinks: {
-    DOC_LINK_VERSION: 'master',
-    ELASTIC_WEBSITE_URL: 'https://jest.elastic.co',
-  },
+  docLinks: docLinksServiceMock.createStartContract(),
 };
 
 export const WithAppDependencies = (Comp: any) => (props: any) => (

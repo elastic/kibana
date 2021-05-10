@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniqBy } from 'lodash/fp';
@@ -45,10 +46,11 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 
   const handleClick = useCallback(() => {
     dispatch(
-      timelineActions.toggleExpandedEvent({
+      timelineActions.toggleDetailPanel({
+        panelView: 'eventDetail',
         tabType: TimelineTabs.notes,
         timelineId,
-        event: {
+        params: {
           eventId,
           indexName: existingIndexNames.join(','),
         },

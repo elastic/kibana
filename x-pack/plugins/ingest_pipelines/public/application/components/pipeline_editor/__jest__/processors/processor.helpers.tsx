@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 import axios from 'axios';
@@ -88,9 +90,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
-    async addProcessorType({ type, label }: { type: string; label: string }) {
+    async addProcessorType(type: string) {
       await act(async () => {
-        find('processorTypeSelector.input').simulate('change', [{ value: type, label }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type }]);
       });
       component.update();
     },
@@ -125,12 +127,23 @@ export const setupEnvironment = () => {
   };
 };
 
+export const getProcessorValue = (onUpdate: jest.Mock, type: string) => {
+  const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+  const { processors } = onUpdateResult.getData();
+  return processors;
+};
+
 type TestSubject =
   | 'addProcessorForm.submitButton'
   | 'addProcessorButton'
   | 'addProcessorForm.submitButton'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'mockCodeEditor'
+  | 'tagField.input'
+  | 'ignoreMissingSwitch.input'
+  | 'ignoreFailureSwitch.input'
+  | 'ifField.textarea'
   | 'targetField.input'
   | 'keepOriginalField.input'
   | 'removeIfSuccessfulField.input';

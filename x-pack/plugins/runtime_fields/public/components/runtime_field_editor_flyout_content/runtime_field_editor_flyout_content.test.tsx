@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { act } from 'react-dom/test-utils';
 import { DocLinksStart } from 'src/core/public';
 
@@ -21,7 +23,10 @@ const setup = (props?: Props) =>
 const docLinks: DocLinksStart = {
   ELASTIC_WEBSITE_URL: 'htts://jestTest.elastic.co',
   DOC_LINK_VERSION: 'jest',
-  links: {} as any,
+  links: {
+    runtimeFields: { mapping: 'https://jestTest.elastic.co/to-be-defined.html' },
+    scriptedFields: {} as any,
+  } as any,
 };
 
 const noop = () => {};

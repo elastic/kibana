@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
@@ -46,15 +47,21 @@ const serviceNowSIRTable = 'sn_si_incident';
 export const ServiceNowITSMActionTypeId = '.servicenow';
 export const ServiceNowSIRActionTypeId = '.servicenow-sir';
 
-// action type definition
-export function getServiceNowITSMActionType(
-  params: GetActionTypeParams
-): ActionType<
+export type ServiceNowActionType = ActionType<
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
   ExecutorParams,
   PushToServiceResponse | {}
-> {
+>;
+
+export type ServiceNowActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ExecutorParams
+>;
+
+// action type definition
+export function getServiceNowITSMActionType(params: GetActionTypeParams): ServiceNowActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: ServiceNowITSMActionTypeId,
@@ -69,18 +76,16 @@ export function getServiceNowITSMActionType(
       }),
       params: ExecutorParamsSchemaITSM,
     },
-    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowITSMTable }),
+    executor: curry(executor)({
+      logger,
+      configurationUtilities,
+      table: serviceNowITSMTable,
+      commentFieldKey: 'work_notes',
+    }),
   };
 }
 
-export function getServiceNowSIRActionType(
-  params: GetActionTypeParams
-): ActionType<
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  ExecutorParams,
-  PushToServiceResponse | {}
-> {
+export function getServiceNowSIRActionType(params: GetActionTypeParams): ServiceNowActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: ServiceNowSIRActionTypeId,
@@ -95,7 +100,12 @@ export function getServiceNowSIRActionType(
       }),
       params: ExecutorParamsSchemaSIR,
     },
-    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowSIRTable }),
+    executor: curry(executor)({
+      logger,
+      configurationUtilities,
+      table: serviceNowSIRTable,
+      commentFieldKey: 'work_notes',
+    }),
   };
 }
 
@@ -106,12 +116,14 @@ async function executor(
     logger,
     configurationUtilities,
     table,
-  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities; table: string },
-  execOptions: ActionTypeExecutorOptions<
-    ServiceNowPublicConfigurationType,
-    ServiceNowSecretConfigurationType,
-    ExecutorParams
-  >
+    commentFieldKey = 'comments',
+  }: {
+    logger: Logger;
+    configurationUtilities: ActionsConfigurationUtilities;
+    table: string;
+    commentFieldKey?: string;
+  },
+  execOptions: ServiceNowActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
@@ -146,6 +158,7 @@ async function executor(
       params: pushToServiceParams,
       secrets,
       logger,
+      commentFieldKey,
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { DataPublicPluginSetup } from 'src/plugins/data/public';
@@ -22,6 +23,7 @@ import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/d
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
+import type { FileDataVisualizerPluginStart } from '../../../../file_data_visualizer/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -42,6 +44,7 @@ export interface DependencyCache {
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
   maps: MapsStartApi | null;
+  fileDataVisualizer: FileDataVisualizerPluginStart | null;
 }
 
 const cache: DependencyCache = {
@@ -63,6 +66,7 @@ const cache: DependencyCache = {
   i18n: null,
   urlGenerators: null,
   maps: null,
+  fileDataVisualizer: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -83,6 +87,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
+  cache.fileDataVisualizer = deps.fileDataVisualizer || null;
 }
 
 export function getTimefilter() {
@@ -207,4 +212,11 @@ export function clearCache() {
   Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });
+}
+
+export function getFileDataVisualizer() {
+  if (cache.fileDataVisualizer === null) {
+    throw new Error("fileDataVisualizer hasn't been initialized");
+  }
+  return cache.fileDataVisualizer;
 }

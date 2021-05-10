@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -9,12 +10,11 @@ import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import {
   ImportResponse,
   ImportFailure,
+  InputData,
   Settings,
   Mappings,
   IngestPipelineWrapper,
 } from '../common';
-
-export type InputData = any[];
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(

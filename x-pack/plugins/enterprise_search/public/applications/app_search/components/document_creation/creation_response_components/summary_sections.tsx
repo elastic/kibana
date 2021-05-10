@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { DocumentCreationLogic } from '../';
 
-import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';
 import { ExampleDocumentJson, MoreDocumentsText } from './summary_documents';
+import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';
 
 export const InvalidDocumentsSummary: React.FC = () => {
   const {

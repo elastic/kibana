@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EsQueryAlertActionContext, addMessages } from './action_context';
@@ -13,6 +14,7 @@ describe('ActionContext', () => {
       index: ['[index]'],
       timeField: '[timeField]',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
       thresholdComparator: '>',
@@ -40,6 +42,7 @@ describe('ActionContext', () => {
       index: ['[index]'],
       timeField: '[timeField]',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
       thresholdComparator: 'between',

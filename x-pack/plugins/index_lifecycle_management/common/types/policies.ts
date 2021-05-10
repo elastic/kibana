@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Index as IndexInterface } from '../../../index_management/common/types';
@@ -17,6 +18,7 @@ export interface Phases {
   hot?: SerializedHotPhase;
   warm?: SerializedWarmPhase;
   cold?: SerializedColdPhase;
+  frozen?: SerializedFrozenPhase;
   delete?: SerializedDeletePhase;
 }
 
@@ -50,6 +52,8 @@ export interface SerializedActionWithAllocation {
   migrate?: MigrateAction;
 }
 
+export type SearchableSnapshotStorage = 'full_copy' | 'shared_cache';
+
 export interface SearchableSnapshotAction {
   snapshot_repository: string;
   /**
@@ -57,12 +61,22 @@ export interface SearchableSnapshotAction {
    * not suit the vast majority of cases.
    */
   force_merge_index?: boolean;
+  /**
+   * This configuration lets the user create full or partial searchable snapshots.
+   * Full searchable snapshots store primary data locally and store replica data in the snapshot.
+   * Partial searchable snapshots store no data locally.
+   */
+  storage?: SearchableSnapshotStorage;
 }
 
 export interface RolloverAction {
-  max_size?: string;
   max_age?: string;
   max_docs?: number;
+  max_primary_shard_size?: string;
+  /**
+   * @deprecated This will be removed in versions 8+ of the stack
+   */
+  max_size?: string;
 }
 
 export interface SerializedHotPhase extends SerializedPhase {
@@ -96,6 +110,22 @@ export interface SerializedWarmPhase extends SerializedPhase {
 }
 
 export interface SerializedColdPhase extends SerializedPhase {
+  actions: {
+    freeze?: {};
+    readonly?: {};
+    allocate?: AllocateAction;
+    set_priority?: {
+      priority: number | null;
+    };
+    migrate?: MigrateAction;
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
+  };
+}
+
+export interface SerializedFrozenPhase extends SerializedPhase {
   actions: {
     freeze?: {};
     allocate?: AllocateAction;

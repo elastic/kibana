@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -11,20 +12,16 @@ import {
   mockKibanaValues,
   expectedAsyncError,
 } from '../../../__mocks__';
-
-import { AppLogic } from '../../app_logic';
-jest.mock('../../app_logic', () => ({
-  AppLogic: { values: { isOrganization: true } },
-}));
-
-import {
-  fullContentSources,
-  sourceConfigData,
-  contentItems,
-} from '../../__mocks__/content_sources.mock';
+import { fullContentSources, contentItems } from '../../__mocks__/content_sources.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
 import { DEFAULT_META } from '../../../shared/constants';
+
+jest.mock('../../app_logic', () => ({
+  AppLogic: { values: { isOrganization: true } },
+}));
+import { AppLogic } from '../../app_logic';
+
 import { NOT_FOUND_PATH } from '../../routes';
 
 import { SourceLogic } from './source_logic';
@@ -36,6 +33,7 @@ describe('SourceLogic', () => {
     flashAPIErrors,
     setSuccessMessage,
     setQueuedSuccessMessage,
+    setErrorMessage,
   } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
@@ -45,7 +43,6 @@ describe('SourceLogic', () => {
   const defaultValues = {
     contentSource: {},
     contentItems: [],
-    sourceConfigData: {},
     dataLoading: true,
     sectionLoading: true,
     buttonLoading: false,
@@ -85,13 +82,6 @@ describe('SourceLogic', () => {
         name: NAME,
       });
       expect(setSuccessMessage).toHaveBeenCalled();
-    });
-
-    it('setSourceConfigData', () => {
-      SourceLogic.actions.setSourceConfigData(sourceConfigData);
-
-      expect(SourceLogic.values.sourceConfigData).toEqual(sourceConfigData);
-      expect(SourceLogic.values.dataLoading).toEqual(false);
     });
 
     it('setSearchResults', () => {
@@ -215,6 +205,19 @@ describe('SourceLogic', () => {
 
         expect(navigateToUrl).toHaveBeenCalledWith(NOT_FOUND_PATH);
       });
+
+      it('renders error messages passed in success response from server', async () => {
+        const errors = ['ERROR'];
+        const promise = Promise.resolve({
+          ...contentSource,
+          errors,
+        });
+        http.get.mockReturnValue(promise);
+        SourceLogic.actions.initializeSource(contentSource.id);
+        await promise;
+
+        expect(setErrorMessage).toHaveBeenCalledWith(errors);
+      });
     });
 
     describe('initializeFederatedSummary', () => {
@@ -225,7 +228,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/123/federated_summary'
+          '/api/workplace_search/account/sources/123/federated_summary'
         );
         await promise;
         expect(onUpdateSummarySpy).toHaveBeenCalledWith(contentSource.summary);
@@ -395,40 +398,6 @@ describe('SourceLogic', () => {
         const promise = Promise.reject(error);
         http.delete.mockReturnValue(promise);
         SourceLogic.actions.removeContentSource(contentSource.id);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
-      });
-    });
-
-    describe('getSourceConfigData', () => {
-      const serviceType = 'github';
-
-      it('calls API and sets values', async () => {
-        AppLogic.values.isOrganization = true;
-
-        const setSourceConfigDataSpy = jest.spyOn(SourceLogic.actions, 'setSourceConfigData');
-        const promise = Promise.resolve(contentSource);
-        http.get.mockReturnValue(promise);
-        SourceLogic.actions.getSourceConfigData(serviceType);
-
-        expect(http.get).toHaveBeenCalledWith(
-          `/api/workplace_search/org/settings/connectors/${serviceType}`
-        );
-        await promise;
-        expect(setSourceConfigDataSpy).toHaveBeenCalled();
-      });
-
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
-        SourceLogic.actions.getSourceConfigData(serviceType);
         await expectedAsyncError(promise);
 
         expect(flashAPIErrors).toHaveBeenCalledWith(error);

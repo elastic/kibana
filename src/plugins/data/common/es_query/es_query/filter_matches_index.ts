@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IIndexPattern, IFieldType } from '../../index_patterns';
@@ -18,5 +18,12 @@ export function filterMatchesIndex(filter: Filter, indexPattern?: IIndexPattern 
   if (!filter.meta?.key || !indexPattern) {
     return true;
   }
+
+  // Fixes https://github.com/elastic/kibana/issues/89878
+  // Custom filters may refer multiple fields. Validate the index id only.
+  if (filter.meta?.type === 'custom') {
+    return filter.meta.index === indexPattern.id;
+  }
+
   return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -14,12 +14,13 @@ import { DiscoverGridSettings } from './types';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
+import { SelectButton } from './discover_grid_document_selection';
 
 export function getLeadControlColumns() {
   return [
     {
       id: 'openDetails',
-      width: 32,
+      width: 24,
       headerCellRender: () => (
         <EuiScreenReaderOnly>
           <span>
@@ -30,6 +31,20 @@ export function getLeadControlColumns() {
         </EuiScreenReaderOnly>
       ),
       rowCellRender: ExpandButton,
+    },
+    {
+      id: 'select',
+      width: 24,
+      rowCellRender: SelectButton,
+      headerCellRender: () => (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('discover.selectColumnHeader', {
+              defaultMessage: 'Select column',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
     },
   ];
 }
@@ -47,7 +62,7 @@ export function buildEuiGridColumn(
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
-    isSortable: indexPatternField?.sortable,
+    isSortable: indexPatternField?.sortable === true,
     display:
       columnName === '_source'
         ? i18n.translate('discover.grid.documentHeader', {

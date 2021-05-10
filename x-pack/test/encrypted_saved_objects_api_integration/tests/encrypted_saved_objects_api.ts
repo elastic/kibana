@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,7 +10,7 @@ import { SavedObject } from 'src/core/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const randomness = getService('randomness');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -28,13 +29,12 @@ export default function ({ getService }: FtrProviderContext) {
   ) {
     async function getRawSavedObjectAttributes({ id, type }: SavedObject) {
       const {
-        _source: { [type]: savedObject },
+        body: { _source },
       } = await es.get<Record<string, any>>({
         id: generateRawID(id, type),
         index: '.kibana',
-      } as any);
-
-      return savedObject;
+      });
+      return _source?.[type];
     }
 
     let savedObjectOriginalAttributes: {
@@ -442,8 +442,10 @@ export default function ({ getService }: FtrProviderContext) {
       afterEach(async () => {
         await es.deleteByQuery({
           index: '.kibana',
+          // @ts-expect-error @elastic/elasticsearch `DeleteByQueryRequest` type doesn't define `q`.
           q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
           refresh: true,
+          body: {},
         });
       });
 
@@ -490,8 +492,10 @@ export default function ({ getService }: FtrProviderContext) {
       afterEach(async () => {
         await es.deleteByQuery({
           index: '.kibana',
+          // @ts-expect-error @elastic/elasticsearch `DeleteByQueryRequest` type doesn't define `q`.
           q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
           refresh: true,
+          body: {},
         });
       });
 

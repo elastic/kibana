@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import {
   EuiFilterButton,
@@ -14,9 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../types';
+
+import type { AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../../constants';
+import { AGENTS_INDEX } from '../../../../constants';
 
 const statusFilters = [
   {
@@ -107,7 +110,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                     onSubmitSearch(newSearch);
                   }
                 }}
-                fieldPrefix={AGENT_SAVED_OBJECT_TYPE}
+                indexPattern={AGENTS_INDEX}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>

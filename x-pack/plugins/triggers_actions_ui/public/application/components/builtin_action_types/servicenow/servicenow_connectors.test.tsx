@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import ServiceNowConnectorFields from './servicenow_connectors';
@@ -93,6 +95,26 @@ describe('ServiceNowActionConnectorFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      actionTypeId: '.servicenow',
+      isPreconfigured: false,
+      isMissingSecrets: true,
+      config: {},
+      secrets: {},
+    } as ServiceNowActionConnector;
+    const wrapper = mountWithIntl(
+      <ServiceNowConnectorFields
+        action={actionConnector}
+        errors={{ apiUrl: [], username: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 
   test('should display a message on edit to re-enter credentials', () => {

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { range } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -28,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -39,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await PageObjects.lens.removeDimension('lnsDatatable_column');
+      await PageObjects.lens.removeDimension('lnsDatatable_rows');
       await PageObjects.lens.switchToVisualization('bar_stacked');
 
       await PageObjects.lens.configureDimension({
@@ -109,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -137,8 +139,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
-      await testSubjects.click('lnsLayerRemove');
-      await testSubjects.click('lnsLayerRemove');
+      await PageObjects.lens.removeLayer();
+      await PageObjects.lens.removeLayer();
       await testSubjects.existOrFail('empty-workspace');
     });
 
@@ -158,6 +160,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionLabel('Test of label');
       await PageObjects.lens.editDimensionFormat('Percent');
       await PageObjects.lens.editDimensionColor('#ff0000');
+      await PageObjects.lens.openVisualOptions();
+
+      await PageObjects.lens.useCurvedLines();
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
@@ -178,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const longLabel =
         'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
       await PageObjects.lens.editDimensionLabel(longLabel);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -206,13 +211,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'cardinality',
+        operation: 'unique_count',
         field: 'bytes',
         keepOpen: true,
       });
@@ -221,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(2);
@@ -230,10 +235,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await PageObjects.lens.toggleToolbarPopover('lnsValuesButton');
+      await PageObjects.lens.openVisualOptions();
       await testSubjects.click('lnsXY_valueLabels_inside');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       // check for value labels
       let data = await PageObjects.lens.getCurrentChartDebugState();
@@ -241,7 +246,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // switch to stacked bar chart
       await PageObjects.lens.switchToVisualization('bar_stacked');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       // check for value labels
       data = await PageObjects.lens.getCurrentChartDebugState();
@@ -254,14 +259,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
@@ -280,7 +285,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -298,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'avg',
+          operation: 'average',
           field: 'bytes',
         },
         1
@@ -389,7 +394,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -435,6 +440,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Two Y axes that are both valid
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
+    });
+
+    it('should allow formatting on references', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_rows > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'moving_average',
+        keepOpen: true,
+      });
+      await PageObjects.lens.configureReference({
+        operation: 'sum',
+        field: 'bytes',
+      });
+      await PageObjects.lens.editDimensionFormat('Number');
+      await PageObjects.lens.closeDimensionEditor();
+
+      const values = await Promise.all(
+        range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
+      );
+      expect(values).to.eql([
+        '-',
+        '222,420.00',
+        '702,050.00',
+        '1,879,613.33',
+        '3,482,256.25',
+        '4,359,953.00',
+      ]);
     });
 
     /**
@@ -489,7 +530,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
       await PageObjects.lens.configureDimension({
@@ -502,7 +543,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
-        operation: 'derivative',
+        operation: 'differences',
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
@@ -521,7 +562,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'cardinality',
+        operation: 'unique_count',
         field: 'ip',
       });
       await PageObjects.lens.configureDimension({
@@ -556,45 +597,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
       expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
-    });
-
-    it('should able to sort a table by a column', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
-      // Sort by number
-      await PageObjects.lens.changeTableSortingBy(2, 'asc');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
-      // Now sort by IP
-      await PageObjects.lens.changeTableSortingBy(0, 'asc');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('78.83.247.30');
-      // Change the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'desc');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
-      // Remove the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'none');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
-    });
-
-    it('should able to use filters cell actions in table', async () => {
-      const firstCellContent = await PageObjects.lens.getDatatableCellText(0, 0);
-      await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(
-        await find.existsByCssSelector(
-          `[data-test-subj*="filter-value-${firstCellContent}"][data-test-subj*="filter-negated"]`
-        )
-      ).to.eql(true);
     });
   });
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -33,14 +33,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {
+      const isLegacy = await PageObjects.discover.useLegacyTable();
       const rowData1 = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData1.startsWith('Jan 1, 2019 @ 12:10:30.124000000')).to.be.ok();
-      const rowData2 = await PageObjects.discover.getDocTableIndex(3);
-      expect(rowData2.startsWith('Jan 1, 2019 @ 12:10:30.123498765')).to.be.ok();
-      const rowData3 = await PageObjects.discover.getDocTableIndex(5);
-      expect(rowData3.startsWith('Jan 1, 2019 @ 12:10:30.123456789')).to.be.ok();
-      const rowData4 = await PageObjects.discover.getDocTableIndex(7);
-      expect(rowData4.startsWith('Jan 1, 2019 @ 12:10:30.123000000')).to.be.ok();
+      expect(rowData1).to.contain('Jan 1, 2019 @ 12:10:30.124000000');
+      const rowData2 = await PageObjects.discover.getDocTableIndex(isLegacy ? 3 : 2);
+      expect(rowData2).to.contain('Jan 1, 2019 @ 12:10:30.123498765');
+      const rowData3 = await PageObjects.discover.getDocTableIndex(isLegacy ? 5 : 3);
+      expect(rowData3).to.contain('Jan 1, 2019 @ 12:10:30.123456789');
+      const rowData4 = await PageObjects.discover.getDocTableIndex(isLegacy ? 7 : 4);
+      expect(rowData4).to.contain('Jan 1, 2019 @ 12:10:30.123000000');
     });
   });
 }

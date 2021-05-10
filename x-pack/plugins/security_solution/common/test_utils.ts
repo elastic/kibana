@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -14,10 +15,16 @@ interface Message<T> {
   schema: T | {};
 }
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts
+ */
 const onLeft = <T>(errors: t.Errors): Message<T> => {
   return { schema: {}, errors };
 };
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts
+ */
 const onRight = <T>(schema: T): Message<T> => {
   return {
     schema,
@@ -25,11 +32,15 @@ const onRight = <T>(schema: T): Message<T> => {
   };
 };
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts
+ */
 export const foldLeftRight = fold(onLeft, onRight);
 
 /**
  * Convenience utility to keep the error message handling within tests to be
  * very concise.
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts
  * @param validation The validation to get the errors from
  */
 export const getPaths = <A>(validation: t.Validation<A>): string[] => {
@@ -44,6 +55,7 @@ export const getPaths = <A>(validation: t.Validation<A>): string[] => {
 
 /**
  * Convenience utility to remove text appended to links by EUI
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts
  */
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');

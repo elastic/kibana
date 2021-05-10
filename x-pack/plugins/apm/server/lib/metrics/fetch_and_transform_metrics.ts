@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Overwrite, Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
 import { getMetricsProjection } from '../../projections/metrics';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
@@ -47,6 +48,8 @@ interface Filter {
 }
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
@@ -54,6 +57,8 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   aggs,
   additionalFilters = [],
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -64,6 +69,8 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   const { start, end, apmEventClient, config } = setup;
 
   const projection = getMetricsProjection({
+    environment,
+    kuery,
     setup,
     serviceName,
     serviceNodeName,

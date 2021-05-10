@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -167,6 +168,9 @@ export class AddLayerPanel extends Component<Props, State> {
           previewLayers={this._previewLayers}
           showBackButton={!this.state.isStepLoading}
           currentStepId={this.state.currentStep ? this.state.currentStep.id : null}
+          isOnFinalStep={
+            this.state.currentStep ? this.state.currentStep.id === ADD_LAYER_STEP_ID : false
+          }
           enableNextBtn={this._enableNextBtn}
           disableNextBtn={this._disableNextBtn}
           startStepLoading={this._startStepLoading}

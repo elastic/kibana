@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -59,3 +60,12 @@ export const ENDPOINT_TRUSTED_APPS_LIST_NAME = 'Endpoint Security Trusted Apps L
 
 /** Description of trusted apps agnostic list */
 export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION = 'Endpoint Security Trusted Apps List';
+
+/** ID of event filters agnostic list */
+export const ENDPOINT_EVENT_FILTERS_LIST_ID = 'endpoint_event_filters';
+
+/** Name of event filters agnostic list */
+export const ENDPOINT_EVENT_FILTERS_LIST_NAME = 'Endpoint Security Event Filters List';
+
+/** Description of event filters agnostic list */
+export const ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION = 'Endpoint Security Event Filters List';

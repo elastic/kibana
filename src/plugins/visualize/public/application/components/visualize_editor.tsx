@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './visualize_editor.scss';
@@ -22,6 +22,7 @@ import {
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
+import { VisualizeConstants } from '../..';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
@@ -54,7 +55,8 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
-    const { originatingApp: value } = services.stateTransferService.getIncomingEditorState() || {};
+    const { originatingApp: value } =
+      services.stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
     setOriginatingApp(value);
   }, [services]);
 

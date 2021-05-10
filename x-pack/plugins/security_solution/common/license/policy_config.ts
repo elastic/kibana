@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ILicense } from '../../../licensing/common/types';
@@ -44,27 +45,19 @@ export const isEndpointPolicyValidForLicense = (
   }
 
   // only platinum or higher may enable ransomware
-  if (
-    policy.windows.ransomware.mode !== defaults.windows.ransomware.mode ||
-    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode
-  ) {
+  if (policy.windows.ransomware.mode !== defaults.windows.ransomware.mode) {
     return false;
   }
 
   // only platinum or higher may enable ransomware notification
-  if (
-    policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled ||
-    policy.mac.popup.ransomware.enabled !== defaults.mac.popup.ransomware.enabled
-  ) {
+  if (policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled) {
     return false;
   }
 
   // Only Platinum or higher may change the ransomware message (which can be blank or what Endpoint defaults)
   if (
-    [policy.windows, policy.mac].some(
-      (p) =>
-        p.popup.ransomware.message !== '' && p.popup.ransomware.message !== DefaultMalwareMessage
-    )
+    policy.windows.popup.ransomware.message !== '' &&
+    policy.windows.popup.ransomware.message !== DefaultMalwareMessage
   ) {
     return false;
   }

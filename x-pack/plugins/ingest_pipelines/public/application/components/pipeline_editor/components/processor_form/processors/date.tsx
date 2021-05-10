@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -17,7 +18,7 @@ import {
   ComboBoxField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, to, from } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 
@@ -52,7 +53,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
   timezone: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.timezoneFieldLabel', {
       defaultMessage: 'Timezone (optional)',
     }),
@@ -60,13 +61,13 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.timezoneHelpText"
         defaultMessage="Timezone for the date. Defaults to {timezone}."
-        values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
+        values={{ timezone: <EuiCode>{'UTC'}</EuiCode> }}
       />
     ),
   },
   locale: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.localeFieldLabel', {
       defaultMessage: 'Locale (optional)',
     }),
@@ -74,7 +75,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.localeHelpText"
         defaultMessage="Locale for the date. Useful when parsing month or day names. Defaults to {timezone}."
-        values={{ timezone: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
+        values={{ timezone: <EuiCode>{'ENGLISH'}</EuiCode> }}
       />
     ),
   },
@@ -101,7 +102,7 @@ export const DateProcessor: FunctionComponent = () => {
             id="xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldHelpText"
             defaultMessage="Output field. If empty, the input field is updated in place. Defaults to {defaultField}."
             values={{
-              defaultField: <EuiCode inline>{'@timestamp'}</EuiCode>,
+              defaultField: <EuiCode>{'@timestamp'}</EuiCode>,
             }}
           />
         }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
@@ -70,6 +71,28 @@ export type IndexPatternColumn =
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
 export { IncompleteColumn } from './column_types';
+
+export { TermsIndexPatternColumn } from './terms';
+export { FiltersIndexPatternColumn } from './filters';
+export { CardinalityIndexPatternColumn } from './cardinality';
+export { PercentileIndexPatternColumn } from './percentile';
+export {
+  MinIndexPatternColumn,
+  AvgIndexPatternColumn,
+  SumIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MedianIndexPatternColumn,
+} from './metrics';
+export { DateHistogramIndexPatternColumn } from './date_histogram';
+export {
+  CumulativeSumIndexPatternColumn,
+  CounterRateIndexPatternColumn,
+  DerivativeIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+} from './calculations';
+export { CountIndexPatternColumn } from './count';
+export { LastValueIndexPatternColumn } from './last_value';
+export { RangeIndexPatternColumn } from './ranges';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -156,7 +179,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     columns: Record<string, IndexPatternColumn>
   ) => string;
   /**
-   * This function is called if another column in the same layer changed or got removed.
+   * This function is called if another column in the same layer changed or got added/removed.
    * Can be used to update references to other columns (e.g. for sorting).
    * Based on the current column and the other updated columns, this function has to
    * return an updated column. If not implemented, the `id` function is used instead.
@@ -207,6 +230,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * If set to optional, time scaling won't be enabled by default and can be removed.
    */
   timeScalingMode?: TimeScalingMode;
+  filterable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
 }
@@ -287,13 +311,6 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     layer: IndexPatternLayer,
     uiSettings: IUiSettingsClient
   ) => ExpressionAstFunction;
-  /**
-   * Optional function to return the suffix used for ES bucket paths and esaggs column id.
-   * This is relevant for multi metrics to pick the right value.
-   *
-   * @param column The current column
-   */
-  getEsAggsSuffix?: (column: C) => string;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
    *
@@ -413,3 +430,11 @@ export const operationDefinitionMap: Record<
   (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
   {}
 );
+
+/**
+ * Cannot map the prev names, but can guarantee the new names are matching up using the type system
+ */
+export const renameOperationsMapping: Record<string, GenericOperationDefinition['type']> = {
+  avg: 'average',
+  cardinality: 'unique_count',
+};

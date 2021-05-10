@@ -1,20 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, {
-  BaseSyntheticEvent,
-  KeyboardEvent,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Chart,
@@ -28,7 +20,6 @@ import {
   AccessorFn,
   Accessor,
 } from '@elastic/charts';
-import { keys } from '@elastic/eui';
 
 import { compact } from 'lodash';
 import {
@@ -50,7 +41,7 @@ import {
   renderAllSeries,
   getSeriesNameFn,
   getLegendActions,
-  useColorPicker,
+  getColorPicker,
   getXAccessor,
   getAllSeries,
 } from './utils';
@@ -86,16 +77,6 @@ const VisComponent = (props: VisComponentProps) => {
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
-  useEffect(() => {
-    const fn = () => {
-      props?.uiState?.emit?.('reload');
-    };
-    props?.uiState?.on?.('change', fn);
-
-    return () => {
-      props?.uiState?.off?.('change', fn);
-    };
-  }, [props?.uiState]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -157,17 +138,12 @@ const VisComponent = (props: VisComponentProps) => {
     (
       visData: Datatable,
       xAccessor: Accessor | AccessorFn,
-      splitSeriesAccessors: Array<Accessor | AccessorFn>,
-      splitChartAccessor?: Accessor | AccessorFn
+      splitSeriesAccessors: Array<Accessor | AccessorFn>
     ) => {
       const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
       return (series: XYChartSeriesIdentifier): ClickTriggerEvent | null => {
         if (xAccessor !== null) {
-          return getFilterFromSeriesFn(visData)(
-            series,
-            splitSeriesAccessorFnMap,
-            splitChartAccessor
-          );
+          return getFilterFromSeriesFn(visData)(series, splitSeriesAccessorFnMap);
         }
 
         return null;
@@ -208,11 +184,7 @@ const VisComponent = (props: VisComponentProps) => {
   }, [props.uiState]);
 
   const setColor = useCallback(
-    (newColor: string | null, seriesLabel: string | number, event: BaseSyntheticEvent) => {
-      if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
-        return;
-      }
-
+    (newColor: string | null, seriesLabel: string | number) => {
       const colors = props.uiState?.get('vis.colors') || {};
       if (colors[seriesLabel] === newColor || !newColor) {
         delete colors[seriesLabel];
@@ -342,6 +314,18 @@ const VisComponent = (props: VisComponentProps) => {
       xAccessor,
     ]
   );
+
+  const legendColorPicker = useMemo(
+    () =>
+      getColorPicker(
+        legendPosition,
+        setColor,
+        getSeriesName,
+        visParams.palette.name,
+        props.uiState
+      ),
+    [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
+  );
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -360,7 +344,7 @@ const VisComponent = (props: VisComponentProps) => {
           legendPosition={legendPosition}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
-          legendColorPicker={useColorPicker(legendPosition, setColor, getSeriesName)}
+          legendColorPicker={legendColorPicker}
           onElementClick={handleFilterClick(
             visData,
             xAccessor,
@@ -373,12 +357,7 @@ const VisComponent = (props: VisComponentProps) => {
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
               ? getLegendActions(
                   canFilter,
-                  getFilterEventData(
-                    visData,
-                    xAccessor,
-                    splitSeriesAccessors,
-                    splitChartColumnAccessor ?? splitChartRowAccessor
-                  ),
+                  getFilterEventData(visData, xAccessor, splitSeriesAccessors),
                   handleFilterAction,
                   getSeriesName
                 )

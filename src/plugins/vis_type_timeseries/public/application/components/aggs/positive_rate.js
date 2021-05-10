@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -65,9 +65,9 @@ export const PositiveRateAgg = (props) => {
   const handleSelectChange = createSelectHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
-  const indexPattern =
-    (props.series.override_index_pattern && props.series.series_index_pattern) ||
-    props.panel.index_pattern;
+  const indexPattern = props.series.override_index_pattern
+    ? props.series.series_index_pattern
+    : props.panel.index_pattern;
 
   const selectedUnitOptions = UNIT_OPTIONS.filter((o) => o.value === model.unit);
 
@@ -99,27 +99,22 @@ export const PositiveRateAgg = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.postiveRate.fieldLabel"
                 defaultMessage="Field"
               />
             }
+            fields={props.fields}
+            type={model.type}
+            restrict={[KBN_FIELD_TYPES.NUMBER]}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+            uiRestrictions={props.uiRestrictions}
             fullWidth
-          >
-            <FieldSelect
-              fields={props.fields}
-              type={model.type}
-              restrict={[KBN_FIELD_TYPES.NUMBER]}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-              uiRestrictions={props.uiRestrictions}
-              fullWidth
-            />
-          </EuiFormRow>
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow

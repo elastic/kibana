@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getBucketSize } from '../../helpers/get_bucket_size';
@@ -56,14 +56,14 @@ export function positiveRate(
   panel,
   series,
   esQueryConfig,
-  indexPatternObject,
+  seriesIndex,
   capabilities,
   uiSettings
 ) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-    const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
+    const { interval } = getIntervalAndTimefield(panel, series, seriesIndex);
     const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
 
     if (series.metrics.some(filter)) {

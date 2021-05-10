@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CanvasServiceFactory } from '.';
@@ -23,6 +24,11 @@ export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService>
   const loadServerFunctionWrappers = async () => {
     if (!cached) {
       cached = (async () => {
+        const labService = startPlugins.presentationUtil.labsService;
+        const useDataSearchProject = labService.getProject('labs:canvas:useDataService');
+        const hasDataSearch = useDataSearchProject.status.isEnabled;
+        const dataSearchFns = ['essql', 'esdocs', 'escount'];
+
         const serverFunctionList = await coreSetup.http.get(API_ROUTE_FUNCTIONS);
         const batchedFunction = bfetch.batchedFunction({ url: API_ROUTE_FUNCTIONS });
         const { serialize } = serializeProvider(expressions.getTypes());
@@ -31,9 +37,16 @@ export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService>
         // function that matches its definition, but which simply
         // calls the server-side function endpoint.
         Object.keys(serverFunctionList).forEach((functionName) => {
-          if (expressions.getFunction(functionName)) {
+          // Allow function to be overwritten if we want to use
+          // the server-hosted essql, esdocs, and escount functions
+          if (dataSearchFns.includes(functionName)) {
+            if (hasDataSearch && expressions.getFunction(functionName)) {
+              return;
+            }
+          } else if (expressions.getFunction(functionName)) {
             return;
           }
+
           const fn = () => ({
             ...serverFunctionList[functionName],
             fn: (input: any, args: any) => {

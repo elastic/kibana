@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CreateRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 
 export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],
@@ -47,6 +48,7 @@ export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   itemsPerSearch: undefined,
   threatQuery: undefined,
   threatIndex: undefined,
+  threatIndicatorPath: undefined,
   threshold: undefined,
   timestampOverride: undefined,
   to: 'now',
@@ -93,6 +95,7 @@ export const getCreateMlRulesOptionsMock = (): CreateRulesOptions => ({
   threat: [],
   threatFilters: undefined,
   threatIndex: undefined,
+  threatIndicatorPath: undefined,
   threatMapping: undefined,
   threatQuery: undefined,
   threatLanguage: undefined,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -26,7 +27,6 @@ import {
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_DETAILS,
 } from '../common/constants';
-
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
 import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
@@ -34,6 +34,7 @@ import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
+import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -42,12 +43,14 @@ interface MonitoringSetupPluginDependencies {
   usageCollection: UsageCollectionSetup;
 }
 
+const HASH_CHANGE = 'hashchange';
+
 export class MonitoringPlugin
   implements
     Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -104,7 +107,6 @@ export class MonitoringPlugin
           usageCollection: plugins.usageCollection,
         };
 
-        this.setInitialTimefilter(deps);
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
           if (location.pathname === '' && location.hash === '') {
@@ -112,7 +114,11 @@ export class MonitoringPlugin
           }
         });
 
+        const removeHashChange = this.setInitialTimefilter(deps);
         return () => {
+          if (removeHashChange) {
+            removeHashChange();
+          }
           removeHistoryListener();
           monitoringApp.destroy();
         };
@@ -129,8 +135,24 @@ export class MonitoringPlugin
 
   private setInitialTimefilter({ data }: MonitoringStartPluginDependencies) {
     const { timefilter } = data.query.timefilter;
-    const refreshInterval = { value: 10000, pause: false };
-    timefilter.setRefreshInterval(refreshInterval);
+    const { pause: pauseByDefault } = timefilter.getRefreshIntervalDefaults();
+    if (pauseByDefault) {
+      return;
+    }
+    /**
+     * We can't use timefilter.getRefreshIntervalUpdate$ last value,
+     * since it's not a BehaviorSubject. This means we need to wait for
+     * hash change because of angular's applyAsync
+     */
+    const onHashChange = () => {
+      const { value, pause } = timefilter.getRefreshInterval();
+      if (!value && pause) {
+        window.removeEventListener(HASH_CHANGE, onHashChange);
+        timefilter.setRefreshInterval({ value: 10000, pause: false });
+      }
+    };
+    window.addEventListener(HASH_CHANGE, onHashChange, false);
+    return () => window.removeEventListener(HASH_CHANGE, onHashChange);
   }
 
   private getExternalConfig() {
@@ -164,6 +186,7 @@ export class MonitoringPlugin
       )
     );
     alertTypeRegistry.register(createCCRReadExceptionsAlertType());
+    alertTypeRegistry.register(createLargeShardSizeAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);

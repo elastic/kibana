@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -77,5 +78,17 @@ describe('Axes Settings', () => {
     expect(component.find('[data-test-subj="lnsshowyRightAxisGridlines"]').prop('checked')).toBe(
       false
     );
+  });
+
+  it('hides the endzone visibility flag if no setter is passed in', () => {
+    const component = shallow(<AxisSettingsPopover {...props} />);
+    expect(component.find('[data-test-subj="lnsshowEndzones"]').length).toBe(0);
+  });
+
+  it('shows the switch if setter is present', () => {
+    const component = shallow(
+      <AxisSettingsPopover {...props} endzonesVisible={true} setEndzoneVisibility={() => {}} />
+    );
+    expect(component.find('[data-test-subj="lnsshowEndzones"]').prop('checked')).toBe(true);
   });
 });

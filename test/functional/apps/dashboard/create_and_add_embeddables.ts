@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -35,8 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('adds new visualization via the top nav link', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await PageObjects.dashboard.switchToEditMode();
-        await dashboardAddPanel.clickCreateNewLink();
-        await PageObjects.visualize.clickAggBasedVisualizations();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess(
@@ -52,9 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('adds a new visualization', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-        await dashboardAddPanel.ensureAddPanelIsShowing();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
-        await PageObjects.visualize.clickAggBasedVisualizations();
+        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess(
@@ -69,10 +68,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
-      it('saves the saved visualization url to the app link', async () => {
+      it('adds a markdown visualization via the quick button', async () => {
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+        await dashboardAddPanel.clickMarkdownQuickButton();
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'visualization from markdown quick button',
+          { redirectToOrigin: true }
+        );
+
+        await retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(originalPanelCount + 1);
+        });
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      it('saves the listing page instead of the visualization to the app link', async () => {
         await PageObjects.header.clickVisualize(true);
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
+        expect(currentUrl).not.to.contain(VisualizeConstants.EDIT_PATH);
       });
 
       after(async () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,8 +15,9 @@ import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { InternalSchemaType } from '../../../shared/schema/types';
+
 import { DocumentDetailLogic } from './document_detail_logic';
-import { InternalSchemaTypes } from '../../../shared/types';
 
 describe('DocumentDetailLogic', () => {
   const { mount } = new LogicMounter(DocumentDetailLogic);
@@ -36,7 +38,7 @@ describe('DocumentDetailLogic', () => {
   describe('actions', () => {
     describe('setFields', () => {
       it('should set fields to the provided value and dataLoading to false', () => {
-        const fields = [{ name: 'foo', value: ['foo'], type: 'string' as InternalSchemaTypes }];
+        const fields = [{ name: 'foo', value: ['foo'], type: InternalSchemaType.String }];
 
         mount({
           dataLoading: true,
@@ -52,7 +54,9 @@ describe('DocumentDetailLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('getDocumentDetails', () => {
       it('will call an API endpoint and then store the result', async () => {
         const fields = [{ name: 'name', value: 'python', type: 'string' }];
@@ -61,7 +65,7 @@ describe('DocumentDetailLogic', () => {
 
         DocumentDetailLogic.actions.getDocumentDetails('1');
 
-        expect(http.get).toHaveBeenCalledWith(`/api/app_search/engines/engine1/documents/1`);
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
         await nextTick();
         expect(DocumentDetailLogic.actions.setFields).toHaveBeenCalledWith(fields);
       });
@@ -95,7 +99,7 @@ describe('DocumentDetailLogic', () => {
         mount();
         DocumentDetailLogic.actions.deleteDocument('1');
 
-        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/engines/engine1/documents/1`);
+        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
         await nextTick();
         expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
           'Successfully marked document for deletion. It will be deleted momentarily.'

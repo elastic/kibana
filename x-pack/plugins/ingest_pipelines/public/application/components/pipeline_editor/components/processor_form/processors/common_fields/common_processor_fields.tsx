@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -37,6 +38,7 @@ const ignoreFailureConfig: FieldConfig<any> = {
 };
 
 const ifConfig: FieldConfig = {
+  serializer: from.emptyStringToUndefined,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
     defaultMessage: 'Condition (optional)',
   }),
@@ -47,6 +49,7 @@ const ifConfig: FieldConfig = {
 };
 
 const tagConfig: FieldConfig = {
+  serializer: from.emptyStringToUndefined,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldLabel', {
     defaultMessage: 'Tag (optional)',
   }),
@@ -62,6 +65,7 @@ export const CommonProcessorFields: FunctionComponent = () => {
   return (
     <section>
       <UseField
+        data-test-subj="ifField"
         config={ifConfig}
         component={TextEditor}
         componentProps={{
@@ -78,9 +82,14 @@ export const CommonProcessorFields: FunctionComponent = () => {
         path="fields.if"
       />
 
-      <UseField config={tagConfig} component={Field} path="fields.tag" />
+      <UseField data-test-subj="tagField" config={tagConfig} component={Field} path="fields.tag" />
 
-      <UseField config={ignoreFailureConfig} component={ToggleField} path="fields.ignore_failure" />
+      <UseField
+        data-test-subj="ignoreFailureSwitch"
+        config={ignoreFailureConfig}
+        component={ToggleField}
+        path="fields.ignore_failure"
+      />
     </section>
   );
 };

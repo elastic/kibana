@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { SortFieldOrUndefined } from '../../../common/schemas';
 
@@ -13,7 +13,7 @@ export type TieBreaker<T> = T & {
 };
 
 interface GetSearchAfterWithTieBreakerOptions<T> {
-  response: SearchResponse<TieBreaker<T>>;
+  response: estypes.SearchResponse<TieBreaker<T>>;
   sortField: SortFieldOrUndefined;
 }
 
@@ -26,14 +26,18 @@ export const getSearchAfterWithTieBreaker = <T>({
   } else {
     const lastEsElement = response.hits.hits[response.hits.hits.length - 1];
     if (sortField == null) {
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       return [lastEsElement._source.tie_breaker_id];
     } else {
-      const [[, sortValue]] = Object.entries(lastEsElement._source).filter(
-        ([key]) => key === sortField
-      );
+      const [[, sortValue]] = Object.entries(
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        lastEsElement._source
+      ).filter(([key]) => key === sortField);
       if (typeof sortValue === 'string') {
+        // @ts-expect-error @elastic/elasticsearch _source is optional
         return [sortValue, lastEsElement._source.tie_breaker_id];
       } else {
+        // @ts-expect-error @elastic/elasticsearch _source is optional
         return [lastEsElement._source.tie_breaker_id];
       }
     }

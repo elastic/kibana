@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -102,7 +103,11 @@ export class IndexTable extends Component {
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(
-      () => this.props.reloadIndices(this.props.indices.map((i) => i.name)),
+      () =>
+        this.props.reloadIndices(
+          this.props.indices.map((i) => i.name),
+          { asSystemRequest: true }
+        ),
       REFRESH_RATE_INDEX_LIST
     );
     const { location, filterChanged } = this.props;

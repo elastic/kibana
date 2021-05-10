@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import angular, { IModule } from 'angular';
@@ -9,10 +10,10 @@ import { uiRoutes } from './helpers/routes';
 import { Legacy } from '../legacy_shims';
 import { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';
 import { localAppModule, appModuleName } from './app_modules';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
 import { MonitoringStartPluginDependencies } from '../types';
 
-const APP_WRAPPER_CLASS = 'monApplicationWrapper';
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 

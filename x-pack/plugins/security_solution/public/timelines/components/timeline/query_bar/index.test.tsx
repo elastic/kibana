@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -95,8 +96,8 @@ describe('Timeline QueryBar ', () => {
     );
     const queryBarProps = wrapper.find(QueryBar).props();
 
-    expect(queryBarProps.dateRangeFrom).toEqual('now-24h');
-    expect(queryBarProps.dateRangeTo).toEqual('now');
+    expect(queryBarProps.dateRangeFrom).toEqual('now/d');
+    expect(queryBarProps.dateRangeTo).toEqual('now/d');
     expect(queryBarProps.filterQuery).toEqual({ query: 'here: query', language: 'kuery' });
     expect(queryBarProps.savedQuery).toEqual(undefined);
     expect(queryBarProps.filters).toHaveLength(1);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useState } from 'react';
@@ -13,9 +14,9 @@ import {
   EuiPopover,
   EuiButton,
 } from '@elastic/eui';
-import { EuiButtonProps } from '@elastic/eui/src/components/button/button';
-import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
-import { EuiContextMenuPanelProps } from '@elastic/eui/src/components/context_menu/context_menu_panel';
+import type { EuiButtonProps } from '@elastic/eui/src/components/button/button';
+import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuPanelProps } from '@elastic/eui/src/components/context_menu/context_menu_panel';
 
 type Props = {
   button?: {

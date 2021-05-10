@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { LicenseType } from '../../licensing/common/types';
 import {
-  ILegacyClusterClient,
-  ILegacyScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
@@ -32,13 +32,8 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
-  /**
-   * @deprecated Use `scopedClusterClient` instead.
-   */
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
-  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
 export interface ActionsApiRequestHandlerContext {
@@ -68,6 +63,7 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   id: string;
   actionTypeId: string;
   name: string;
+  isMissingSecrets?: boolean;
   config?: Config;
   isPreconfigured: boolean;
 }
@@ -112,13 +108,18 @@ export interface ActionType<
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
   };
-  renderParameterTemplates?(params: Params, variables: Record<string, unknown>): Params;
+  renderParameterTemplates?(
+    params: Params,
+    variables: Record<string, unknown>,
+    actionId?: string
+  ): Params;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
 export interface RawAction extends SavedObjectAttributes {
   actionTypeId: string;
   name: string;
+  isMissingSecrets: boolean;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }
@@ -138,6 +139,13 @@ export interface ActionTaskExecutorParams {
 
 export interface ProxySettings {
   proxyUrl: string;
+  proxyBypassHosts: Set<string> | undefined;
+  proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
   proxyRejectUnauthorizedCertificates: boolean;
+}
+
+export interface ResponseSettings {
+  maxContentLength: number;
+  timeout: number;
 }

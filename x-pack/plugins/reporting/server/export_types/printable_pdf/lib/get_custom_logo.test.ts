@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ReportingConfig, ReportingCore } from '../../../';
+import { ReportingCore } from '../../../';
 import {
   createMockConfig,
   createMockConfigSchema,
@@ -14,14 +15,12 @@ import {
 import { getConditionalHeaders } from '../../common';
 import { getCustomLogo } from './get_custom_logo';
 
-let mockConfig: ReportingConfig;
 let mockReportingPlugin: ReportingCore;
 
 const logger = createMockLevelLogger();
 
 beforeEach(async () => {
-  mockConfig = createMockConfig(createMockConfigSchema());
-  mockReportingPlugin = await createMockReportingCore(mockConfig);
+  mockReportingPlugin = await createMockReportingCore(createMockConfigSchema());
 });
 
 test(`gets logo from uiSettings`, async () => {
@@ -41,7 +40,10 @@ test(`gets logo from uiSettings`, async () => {
     get: mockGet,
   });
 
-  const conditionalHeaders = getConditionalHeaders(mockConfig, permittedHeaders);
+  const conditionalHeaders = getConditionalHeaders(
+    createMockConfig(createMockConfigSchema()),
+    permittedHeaders
+  );
 
   const { logo } = await getCustomLogo(
     mockReportingPlugin,

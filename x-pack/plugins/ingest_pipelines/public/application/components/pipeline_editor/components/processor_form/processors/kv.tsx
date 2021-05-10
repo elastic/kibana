@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -11,19 +12,16 @@ import { EuiCode } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
-  fieldValidators,
   UseField,
   Field,
   ComboBoxField,
   ToggleField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, from, to } from './shared';
+import { FieldsConfig, from, to, isEmptyString } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-
-const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
@@ -44,7 +42,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: emptyField(
+        validator: isEmptyString(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.fieldSplitRequiredError', {
             defaultMessage: 'A value is required.',
           })
@@ -69,7 +67,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: emptyField(
+        validator: isEmptyString(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.valueSplitRequiredError', {
             defaultMessage: 'A value is required.',
           })
@@ -106,6 +104,7 @@ const fieldsConfig: FieldsConfig = {
   prefix: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.prefixFieldLabel', {
       defaultMessage: 'Prefix',
     }),
@@ -117,6 +116,7 @@ const fieldsConfig: FieldsConfig = {
   trim_key: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.trimKeyFieldLabel', {
       defaultMessage: 'Trim key',
     }),
@@ -128,6 +128,7 @@ const fieldsConfig: FieldsConfig = {
   trim_value: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.trimValueFieldLabel', {
       defaultMessage: 'Trim value',
     }),

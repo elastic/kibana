@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fold, Either, mapLeft } from 'fp-ts/lib/Either';
@@ -23,6 +24,19 @@ export const validate = <T extends t.Mixed>(
   ];
   const right = (output: T): [T | null, string | null] => [output, null];
   return pipe(checked, fold(left, right));
+};
+
+export const validateNonExact = <T extends t.Mixed>(
+  obj: unknown,
+  schema: T
+): [t.TypeOf<T> | null, string | null] => {
+  const decoded = schema.decode(obj);
+  const left = (errors: t.Errors): [T | null, string | null] => [
+    null,
+    formatErrors(errors).join(','),
+  ];
+  const right = (output: T): [T | null, string | null] => [output, null];
+  return pipe(decoded, fold(left, right));
 };
 
 export const validateEither = <T extends t.Mixed, A extends unknown>(

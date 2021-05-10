@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
@@ -16,6 +16,13 @@ import {
 } from './providers/value_suggestion_provider';
 
 import { ConfigSchema } from '../../config';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { createUsageCollector } from './collectors';
+import {
+  KUERY_LANGUAGE_NAME,
+  setupKqlQuerySuggestionProvider,
+} from './providers/kql_query_suggestion';
+import { DataPublicPluginStart, DataStartDependencies } from '../types';
 
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];
@@ -29,12 +36,6 @@ export class AutocompleteService {
   private readonly querySuggestionProviders: Map<string, QuerySuggestionGetFn> = new Map();
   private getValueSuggestions?: ValueSuggestionsGetFn;
 
-  private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
-    if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
-      this.querySuggestionProviders.set(language, provider);
-    }
-  };
-
   private getQuerySuggestions: QuerySuggestionGetFn = (args) => {
     const { language } = args;
     const provider = this.querySuggestionProviders.get(language);
@@ -47,16 +48,28 @@ export class AutocompleteService {
   private hasQuerySuggestions = (language: string) => this.querySuggestionProviders.has(language);
 
   /** @public **/
-  public setup(core: CoreSetup, { timefilter }: { timefilter: TimefilterSetup }) {
+  public setup(
+    core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
+    {
+      timefilter,
+      usageCollection,
+    }: { timefilter: TimefilterSetup; usageCollection?: UsageCollectionSetup }
+  ) {
+    const usageCollector = createUsageCollector(core.getStartServices, usageCollection);
+
     this.getValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
-      ? setupValueSuggestionProvider(core, { timefilter })
+      ? setupValueSuggestionProvider(core, { timefilter, usageCollector })
       : getEmptyValueSuggestions;
 
-    return {
-      addQuerySuggestionProvider: this.addQuerySuggestionProvider,
+    if (this.autocompleteConfig.querySuggestions.enabled) {
+      this.querySuggestionProviders.set(KUERY_LANGUAGE_NAME, setupKqlQuerySuggestionProvider(core));
+    }
 
-      /** @obsolete **/
-      /** please use "getProvider" only from the start contract **/
+    return {
+      /**
+       * @deprecated
+       * please use "getQuerySuggestions" from the start contract
+       */
       getQuerySuggestions: this.getQuerySuggestions,
     };
   }

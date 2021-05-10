@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SenseEditor } from '../../models/sense_editor';
 import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
 import { MetricsTracker } from '../../../types';
 
-export const track = (requests: any[], editor: SenseEditor, trackUiMetric: MetricsTracker) => {
+export const track = (
+  requests: Array<{ method: string }>,
+  editor: SenseEditor,
+  trackUiMetric: MetricsTracker
+) => {
   const coreEditor = editor.getCoreEditor();
   // `getEndpointFromPosition` gets values from the server-side generated JSON files which
   // are a combination of JS, automatically generated JSON and manual overrides. That means

@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 
+import { nextTick } from '@kbn/test/jest';
+
+import { DEFAULT_META } from '../../../shared/constants';
+
 jest.mock('../../app_logic', () => ({
   AppLogic: {
     selectors: { myRole: jest.fn(() => ({})) },
-    values: { myRole: jest.fn(() => ({})) },
   },
 }));
-
-import { nextTick } from '@kbn/test/jest';
-
 import { AppLogic } from '../../app_logic';
+
+import { EngineTypes } from '../engine/types';
+
 import { ApiTokenTypes } from './constants';
 
 import { CredentialsLogic } from './credentials_logic';
@@ -41,7 +45,7 @@ describe('CredentialsLogic', () => {
     formErrors: [],
     isCredentialsDataComplete: false,
     isCredentialsDetailsComplete: false,
-    meta: {},
+    meta: DEFAULT_META,
     nameInputBlurred: false,
     shouldShowCredentialsForm: false,
     fullEngineAccessChecked: false,
@@ -59,8 +63,8 @@ describe('CredentialsLogic', () => {
 
   const credentialsDetails = {
     engines: [
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
+      { name: 'engine1', type: EngineTypes.indexed, language: 'english', result_fields: {} },
+      { name: 'engine1', type: EngineTypes.indexed, language: 'english', result_fields: {} },
     ],
   };
 
@@ -206,39 +210,6 @@ describe('CredentialsLogic', () => {
               access_all_engines: false,
               engines: ['someEngine', 'anotherEngine'],
             },
-          });
-        });
-      });
-    });
-
-    describe('onApiKeyDelete', () => {
-      const values = {
-        ...DEFAULT_VALUES,
-        apiTokens: expect.any(Array),
-      };
-
-      describe('apiTokens', () => {
-        it('should remove specified token from apiTokens if name matches', () => {
-          mount({
-            apiTokens: [newToken],
-          });
-
-          CredentialsLogic.actions.onApiKeyDelete(newToken.name);
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            apiTokens: [],
-          });
-        });
-
-        it('should not remove specified token from apiTokens if name does not match', () => {
-          mount({
-            apiTokens: [newToken],
-          });
-
-          CredentialsLogic.actions.onApiKeyDelete('foo');
-          expect(CredentialsLogic.values).toEqual({
-            ...values,
-            apiTokens: [newToken],
           });
         });
       });
@@ -465,6 +436,7 @@ describe('CredentialsLogic', () => {
 
       const values = {
         ...DEFAULT_VALUES,
+        dataLoading: false,
         apiTokens: expect.any(Array),
         meta: expect.any(Object),
         isCredentialsDataComplete: expect.any(Boolean),
@@ -512,6 +484,7 @@ describe('CredentialsLogic', () => {
     describe('setCredentialsDetails', () => {
       const values = {
         ...DEFAULT_VALUES,
+        dataLoading: false,
         engines: expect.any(Array),
         isCredentialsDetailsComplete: expect.any(Boolean),
       };
@@ -1036,18 +1009,25 @@ describe('CredentialsLogic', () => {
       });
     });
 
-    describe('initializeCredentialsData', () => {
-      it('should call fetchCredentials and fetchDetails', () => {
-        mount();
-        jest.spyOn(CredentialsLogic.actions, 'fetchCredentials').mockImplementationOnce(() => {});
-        jest.spyOn(CredentialsLogic.actions, 'fetchDetails').mockImplementationOnce(() => {});
+    describe('onPaginate', () => {
+      it('should set meta.page.current', () => {
+        mount({ meta: DEFAULT_META });
 
-        CredentialsLogic.actions.initializeCredentialsData();
-        expect(CredentialsLogic.actions.fetchCredentials).toHaveBeenCalled();
-        expect(CredentialsLogic.actions.fetchDetails).toHaveBeenCalled();
+        CredentialsLogic.actions.onPaginate(5);
+        expect(CredentialsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          meta: {
+            page: {
+              ...DEFAULT_META.page,
+              current: 5,
+            },
+          },
+        });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('fetchCredentials', () => {
       const meta = {
         page: {
@@ -1064,10 +1044,11 @@ describe('CredentialsLogic', () => {
         jest.spyOn(CredentialsLogic.actions, 'setCredentialsData').mockImplementationOnce(() => {});
         http.get.mockReturnValue(Promise.resolve({ meta, results }));
 
-        CredentialsLogic.actions.fetchCredentials(2);
+        CredentialsLogic.actions.fetchCredentials();
         expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
           query: {
-            'page[current]': 2,
+            'page[current]': 1,
+            'page[size]': 10,
           },
         });
         await nextTick();
@@ -1115,15 +1096,16 @@ describe('CredentialsLogic', () => {
     describe('deleteApiKey', () => {
       const tokenName = 'abc123';
 
-      it('will call an API endpoint and set the results with the `onApiKeyDelete` action', async () => {
+      it('will call an API endpoint and re-fetch the credentials list', async () => {
         mount();
-        jest.spyOn(CredentialsLogic.actions, 'onApiKeyDelete').mockImplementationOnce(() => {});
+        jest.spyOn(CredentialsLogic.actions, 'fetchCredentials').mockImplementationOnce(() => {});
         http.delete.mockReturnValue(Promise.resolve());
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
         expect(http.delete).toHaveBeenCalledWith(`/api/app_search/credentials/${tokenName}`);
         await nextTick();
-        expect(CredentialsLogic.actions.onApiKeyDelete).toHaveBeenCalledWith(tokenName);
+
+        expect(CredentialsLogic.actions.fetchCredentials).toHaveBeenCalled();
         expect(setSuccessMessage).toHaveBeenCalled();
       });
 

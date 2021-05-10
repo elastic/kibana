@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
@@ -20,7 +21,6 @@ describe('EngineOverviewLogic', () => {
   const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const mockEngineMetrics = {
-    apiLogsUnavailable: true,
     documentCount: 10,
     startDate: '1970-01-30',
     operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
@@ -31,7 +31,6 @@ describe('EngineOverviewLogic', () => {
 
   const DEFAULT_VALUES = {
     dataLoading: true,
-    apiLogsUnavailable: false,
     documentCount: 0,
     startDate: '',
     operationsPerDay: [],
@@ -77,7 +76,9 @@ describe('EngineOverviewLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('pollForOverviewMetrics', () => {
       it('fetches data and calls onPollingSuccess', async () => {
         mount();

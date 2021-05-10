@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable, of, Subject } from 'rxjs';
@@ -113,7 +114,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     await sleep(0);
 
@@ -154,31 +155,6 @@ describe('healthRoute', () => {
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.unavailable,
       summary: 'Task Manager is unavailable',
-      meta: {
-        status: 'error',
-        ...summarizeMonitoringStats(
-          mockHealthStats({
-            last_update: expect.any(String),
-            stats: {
-              configuration: {
-                timestamp: expect.any(String),
-              },
-              workload: {
-                timestamp: expect.any(String),
-              },
-              runtime: {
-                timestamp: expect.any(String),
-                value: {
-                  polling: {
-                    last_successful_poll: expect.any(String),
-                  },
-                },
-              },
-            },
-          }),
-          getTaskManagerConfig({})
-        ),
-      },
     });
   });
 
@@ -213,7 +189,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     await sleep(2000);
 
@@ -281,7 +257,7 @@ describe('healthRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({}, {}, ['ok', 'internalError']);
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchObject({
       body: {

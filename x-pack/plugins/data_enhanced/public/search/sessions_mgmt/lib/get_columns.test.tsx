@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -12,16 +13,19 @@ import moment from 'moment';
 import { ReactElement } from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SessionsConfigSchema } from '../';
-import { SearchSessionStatus } from '../../../../common/search';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { OnActionComplete } from '../components';
 import { UISession } from '../types';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 import { getColumns } from './get_columns';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { managementPluginMock } from '../../../../../../../src/plugins/management/public/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;
+let mockPluginsSetup: IManagementSectionsPluginsSetup;
 let mockConfig: SessionsConfigSchema;
 let api: SearchSessionsMgmtAPI;
 let sessionsClient: SessionsClient;
@@ -34,6 +38,10 @@ describe('Search Sessions Management table column factory', () => {
   beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockPluginsSetup = {
+      data: dataPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
+    };
     mockConfig = {
       defaultExpiration: moment.duration('7d'),
       management: {
@@ -65,11 +73,13 @@ describe('Search Sessions Management table column factory', () => {
       status: SearchSessionStatus.IN_PROGRESS,
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
+      initialState: {},
+      restoreState: {},
     };
   });
 
   test('returns columns', () => {
-    const columns = getColumns(mockCoreStart, api, mockConfig, tz, handleAction);
+    const columns = getColumns(mockCoreStart, mockPluginsSetup, api, mockConfig, tz, handleAction);
     expect(columns).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -121,9 +131,14 @@ describe('Search Sessions Management table column factory', () => {
 
   describe('name', () => {
     test('rendering', () => {
-      const [, nameColumn] = getColumns(mockCoreStart, api, mockConfig, tz, handleAction) as Array<
-        EuiTableFieldDataColumnType<UISession>
-      >;
+      const [, nameColumn] = getColumns(
+        mockCoreStart,
+        mockPluginsSetup,
+        api,
+        mockConfig,
+        tz,
+        handleAction
+      ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const name = mount(nameColumn.render!(mockSession.name, mockSession) as ReactElement);
 
@@ -134,9 +149,14 @@ describe('Search Sessions Management table column factory', () => {
   // Status column
   describe('status', () => {
     test('render in_progress', () => {
-      const [, , status] = getColumns(mockCoreStart, api, mockConfig, tz, handleAction) as Array<
-        EuiTableFieldDataColumnType<UISession>
-      >;
+      const [, , status] = getColumns(
+        mockCoreStart,
+        mockPluginsSetup,
+        api,
+        mockConfig,
+        tz,
+        handleAction
+      ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
       expect(
@@ -145,9 +165,14 @@ describe('Search Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , status] = getColumns(mockCoreStart, api, mockConfig, tz, handleAction) as Array<
-        EuiTableFieldDataColumnType<UISession>
-      >;
+      const [, , status] = getColumns(
+        mockCoreStart,
+        mockPluginsSetup,
+        api,
+        mockConfig,
+        tz,
+        handleAction
+      ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       mockSession.status = 'INVALID' as SearchSessionStatus;
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
@@ -165,6 +190,7 @@ describe('Search Sessions Management table column factory', () => {
 
       const [, , , createdDateCol] = getColumns(
         mockCoreStart,
+        mockPluginsSetup,
         api,
         mockConfig,
         tz,
@@ -181,6 +207,7 @@ describe('Search Sessions Management table column factory', () => {
 
       const [, , , createdDateCol] = getColumns(
         mockCoreStart,
+        mockPluginsSetup,
         api,
         mockConfig,
         tz,
@@ -195,6 +222,7 @@ describe('Search Sessions Management table column factory', () => {
     test('error handling', () => {
       const [, , , createdDateCol] = getColumns(
         mockCoreStart,
+        mockPluginsSetup,
         api,
         mockConfig,
         tz,

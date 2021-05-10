@@ -1,42 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
 import { Route, Redirect, Switch, useLocation } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 import { InitialAppData } from '../../../common/types';
-import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
-import { AppLogic } from './app_logic';
+import { KibanaLogic } from '../shared/kibana';
 import { Layout } from '../shared/layout';
-import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
+import { NotFound } from '../shared/not_found';
 
+import { AppLogic } from './app_logic';
+import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 import {
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
   SOURCES_PATH,
+  SOURCE_ADDED_PATH,
   PERSONAL_SOURCES_PATH,
   ORG_SETTINGS_PATH,
+  ROLE_MAPPINGS_PATH,
   SECURITY_PATH,
 } from './routes';
-
-import { SetupGuide } from './views/setup_guide';
-import { ErrorState } from './views/error_state';
-import { NotFound } from '../shared/not_found';
-import { Overview } from './views/overview';
-import { GroupsRouter } from './views/groups';
-import { Security } from './views/security';
 import { SourcesRouter } from './views/content_sources';
-import { SettingsRouter } from './views/settings';
-
-import { GroupSubNav } from './views/groups/components/group_sub_nav';
+import { SourceAdded } from './views/content_sources/components/source_added';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
+import { PrivateSourcesLayout } from './views/content_sources/private_sources_layout';
+import { ErrorState } from './views/error_state';
+import { GroupsRouter } from './views/groups';
+import { GroupSubNav } from './views/groups/components/group_sub_nav';
+import { Overview } from './views/overview';
+import { RoleMappingsRouter } from './views/role_mappings';
+import { Security } from './views/security';
+import { SettingsRouter } from './views/settings';
 import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
+import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -46,7 +51,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData, setContext } = useActions(AppLogic);
-  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   const { pathname } = useLocation();
@@ -59,11 +64,15 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
    * Personal dashboard urls begin with /p/
    * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
    */
-  const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
 
-  // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
-  const isOrganization = !pathname.match(personalSourceUrlRegex);
+  const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
+  const isOrganization = !pathname.match(personalSourceUrlRegex); // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
+
   setContext(isOrganization);
+
+  useEffect(() => {
+    setChromeIsVisible(isOrganization);
+  }, [pathname]);
 
   useEffect(() => {
     if (!hasInitialized) {
@@ -77,14 +86,22 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
+      <Route path={SOURCE_ADDED_PATH}>
+        <SourceAdded />
+      </Route>
       <Route exact path="/">
-        {errorConnecting ? <ErrorState /> : <Overview />}
+        {errorConnecting ? (
+          <ErrorState />
+        ) : (
+          <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
+            <Overview />
+          </Layout>
+        )}
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
-        {/* TODO: replace Layout with PrivateSourcesLayout (needs to be created) */}
-        <Layout navigation={<></>} restrictWidth readOnlyMode={readOnlyMode}>
+        <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
           <SourcesRouter />
-        </Layout>
+        </PrivateSourcesLayout>
       </Route>
       <Route path={SOURCES_PATH}>
         <Layout
@@ -102,6 +119,11 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           readOnlyMode={readOnlyMode}
         >
           <GroupsRouter />
+        </Layout>
+      </Route>
+      <Route path={ROLE_MAPPINGS_PATH}>
+        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
+          <RoleMappingsRouter />
         </Layout>
       </Route>
       <Route path={SECURITY_PATH}>

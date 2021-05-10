@@ -1,31 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IndicesGetMappingParams } from 'elasticsearch';
-import { GraphQLSchema } from 'graphql';
 
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
+  DocValueFieldsInput,
   PaginationInput,
   PaginationInputPaginated,
   SortField,
-  SourceConfiguration,
   TimerangeInput,
-  DocValueFieldsInput,
-} from '../../graphql/types';
-
-export * from '../../utils/typed_resolvers';
+} from '../../../common/search_strategy';
+import { SourceConfiguration } from '../sources';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkAdapter {
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: FrameworkRequest,
     method: 'search',

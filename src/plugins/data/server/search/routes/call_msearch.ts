@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
@@ -66,6 +65,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     try {
       const promise = esClient.asCurrentUser.msearch(
         {
+          // @ts-expect-error @elastic/elasticsearch client types don't support plain string bodies
           body: convertRequestBody(params.body, timeout),
         },
         {
@@ -78,9 +78,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
         body: {
           ...response,
           body: {
-            responses: response.body.responses?.map((r: SearchResponse<unknown>) =>
-              shimHitsTotal(r)
-            ),
+            responses: response.body.responses?.map((r) => shimHitsTotal(r)),
           },
         },
       };

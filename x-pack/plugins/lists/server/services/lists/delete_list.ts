@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { Id, ListSchema } from '../../../common/schemas';
 
@@ -12,22 +13,22 @@ import { getList } from './get_list';
 
 export interface DeleteListOptions {
   id: Id;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listIndex: string;
   listItemIndex: string;
 }
 
 export const deleteList = async ({
   id,
-  callCluster,
+  esClient,
   listIndex,
   listItemIndex,
 }: DeleteListOptions): Promise<ListSchema | null> => {
-  const list = await getList({ callCluster, id, listIndex });
+  const list = await getList({ esClient, id, listIndex });
   if (list == null) {
     return null;
   } else {
-    await callCluster('deleteByQuery', {
+    await esClient.deleteByQuery({
       body: {
         query: {
           term: {
@@ -36,13 +37,13 @@ export const deleteList = async ({
         },
       },
       index: listItemIndex,
-      refresh: 'wait_for',
+      refresh: false,
     });
 
-    await callCluster('delete', {
+    await esClient.delete({
       id,
       index: listIndex,
-      refresh: 'wait_for',
+      refresh: false,
     });
     return list;
   }

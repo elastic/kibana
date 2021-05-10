@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { History } from 'history';
 import { merge, Subject, Subscription } from 'rxjs';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { debounceTime, tap } from 'rxjs/operators';
+import { debounceTime, finalize, switchMap, tap } from 'rxjs/operators';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardConstants } from '../dashboard_constants';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
@@ -30,7 +30,7 @@ import {
   useSavedDashboard,
 } from './hooks';
 
-import { IndexPattern } from '../services/data';
+import { IndexPattern, waitUntilNextSessionCompletes$ } from '../services/data';
 import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardContainerInput } from '.';
 import { leaveConfirmStrings } from '../dashboard_strings';
@@ -63,11 +63,29 @@ export function DashboardApp({
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
+
+  const getIncomingEmbeddable = useCallback(
+    (removeAfterFetch?: boolean) => {
+      return embeddable
+        .getStateTransfer()
+        .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, removeAfterFetch);
+    },
+    [embeddable]
+  );
+
   const { dashboardStateManager, viewMode, setViewMode } = useDashboardStateManager(
     savedDashboard,
-    history
+    history,
+    getIncomingEmbeddable
   );
-  const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const dashboardContainer = useDashboardContainer({
+    timeFilter: data.query.timefilter.timefilter,
+    dashboardStateManager,
+    getIncomingEmbeddable,
+    setUnsavedChanges,
+    history,
+  });
   const searchSessionIdQuery$ = useMemo(
     () => createQueryParamObservable(history, DashboardConstants.SEARCH_SESSION_ID),
     [history]
@@ -191,16 +209,28 @@ export function DashboardApp({
     );
 
     subscriptions.add(
-      merge(
-        data.search.session.onRefresh$,
-        data.query.timefilter.timefilter.getAutoRefreshFetch$(),
-        searchSessionIdQuery$
-      ).subscribe(() => {
+      searchSessionIdQuery$.subscribe(() => {
         triggerRefresh$.next({ force: true });
       })
     );
 
+    subscriptions.add(
+      data.query.timefilter.timefilter
+        .getAutoRefreshFetch$()
+        .pipe(
+          tap(() => {
+            triggerRefresh$.next({ force: true });
+          }),
+          switchMap((done) =>
+            // best way on a dashboard to estimate that panels are updated is to rely on search session service state
+            waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
+          )
+        )
+        .subscribe()
+    );
+
     dashboardStateManager.registerChangeListener(() => {
+      setUnsavedChanges(dashboardStateManager.getIsDirty(data.query.timefilter.timefilter));
       // we aren't checking dirty state because there are changes the container needs to know about
       // that won't make the dashboard "dirty" - like a view mode change.
       triggerRefresh$.next();
@@ -273,7 +303,7 @@ export function DashboardApp({
   }, [data.search.session]);
 
   return (
-    <div className="app-container dshAppContainer">
+    <>
       {savedDashboard && dashboardStateManager && dashboardContainer && viewMode && (
         <>
           <DashboardTopNav
@@ -282,11 +312,13 @@ export function DashboardApp({
               embedSettings,
               indexPatterns,
               savedDashboard,
+              unsavedChanges,
               dashboardContainer,
               dashboardStateManager,
             }}
             viewMode={viewMode}
             lastDashboardId={savedDashboardId}
+            clearUnsavedChanges={() => setUnsavedChanges(false)}
             timefilter={data.query.timefilter.timefilter}
             onQuerySubmit={(_payload, isUpdate) => {
               if (isUpdate === false) {
@@ -302,6 +334,6 @@ export function DashboardApp({
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

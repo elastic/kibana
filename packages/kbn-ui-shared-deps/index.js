@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const Path = require('path');
@@ -57,5 +57,9 @@ exports.externals = {
    * runtime deps which don't need to be copied across all bundles
    */
   tslib: '__kbnSharedDeps__.TsLib',
+  '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
+  '@kbn/std': '__kbnSharedDeps__.KbnStd',
+  '@elastic/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
+  'rison-node': '__kbnSharedDeps__.RisonNode',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getSignalsTemplate } from './get_signals_template';
@@ -40,5 +41,10 @@ describe('get_signals_template', () => {
   test('it should have a "total_fields" section that is at least 10k in size', () => {
     const template = getSignalsTemplate('test-index');
     expect(template.settings.mapping.total_fields.limit).toBeGreaterThanOrEqual(10000);
+  });
+
+  test('it should match snapshot', () => {
+    const template = getSignalsTemplate('test-index');
+    expect(template).toMatchSnapshot();
   });
 });

@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__';
-import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { EuiSwitch, EuiConfirmModal } from '@elastic/eui';
-import { Loading } from '../../../shared/loading';
 
+import { shallow } from 'enzyme';
+
+import { EuiSwitch, EuiConfirmModal } from '@elastic/eui';
+
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+
+import { Loading } from '../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
+
 import { Security } from './security';
 
 describe('Security', () => {
@@ -48,18 +55,19 @@ describe('Security', () => {
     });
   });
 
-  it('renders on Basic license', () => {
+  it('renders', () => {
     setMockValues({ ...mockValues, hasPlatinumLicense: false });
     const wrapper = shallow(<Security />);
 
+    expect(wrapper.find(SetPageChrome)).toHaveLength(1);
+    expect(wrapper.find(UnsavedChangesPrompt)).toHaveLength(1);
     expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(true);
   });
 
-  it('renders on Platinum license', () => {
+  it('does not disable switch on Platinum license', () => {
     const wrapper = shallow(<Security />);
 
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(false);
   });
 
@@ -68,24 +76,6 @@ describe('Security', () => {
     const wrapper = shallow(<Security />);
 
     expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('handles window.onbeforeunload change', () => {
-    setMockValues({ ...mockValues, unsavedChanges: true });
-    shallow(<Security />);
-
-    expect(window.onbeforeunload!({} as any)).toEqual(
-      'Your private sources settings have not been saved. Are you sure you want to leave?'
-    );
-  });
-
-  it('handles window.onbeforeunload unmount', () => {
-    setMockValues({ ...mockValues, unsavedChanges: true });
-    shallow(<Security />);
-
-    unmountHandler();
-
-    expect(window.onbeforeunload).toEqual(null);
   });
 
   it('handles switch click', () => {

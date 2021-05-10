@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -45,10 +45,21 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
     public async dismissAllToasts() {
       const list = await this.getGlobalToastList();
       const toasts = await list.findAllByCssSelector(`.euiToast`);
+
+      if (toasts.length === 0) return;
+
       for (const toast of toasts) {
         await toast.moveMouseTo();
-        const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
-        await dismissButton.click();
+
+        if (await testSubjects.descendantExists('toastCloseButton', toast)) {
+          try {
+            const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
+            await dismissButton.click();
+          } catch (err) {
+            // ignore errors
+            // toasts are finnicky because they can dismiss themselves right before you close them
+          }
+        }
       }
     }
 

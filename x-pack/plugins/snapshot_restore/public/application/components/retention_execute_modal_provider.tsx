@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { executeRetention as executeRetentionRequest } from '../services/http';
@@ -57,31 +58,29 @@ export const RetentionExecuteModalProvider: React.FunctionComponent<Props> = ({ 
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.snapshotRestore.executeRetention.confirmModal.executeRetentionTitle"
-              defaultMessage="Run snapshot retention now?"
-            />
-          }
-          onCancel={closeModal}
-          onConfirm={executeRetention}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.snapshotRestore.executeRetention.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.snapshotRestore.executeRetention.confirmModal.confirmButtonLabel"
-              defaultMessage="Run retention"
-            />
-          }
-          data-test-subj="executeRetentionModal"
-        />
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.executeRetention.confirmModal.executeRetentionTitle"
+            defaultMessage="Run snapshot retention now?"
+          />
+        }
+        onCancel={closeModal}
+        onConfirm={executeRetention}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.executeRetention.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.executeRetention.confirmModal.confirmButtonLabel"
+            defaultMessage="Run retention"
+          />
+        }
+        data-test-subj="executeRetentionModal"
+      />
     );
   };
 

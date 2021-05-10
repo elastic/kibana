@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,6 +24,7 @@ export type SaveProps = OriginSaveProps | DashboardSaveProps;
 
 export interface Props {
   isVisible: boolean;
+  savingToLibraryPermitted?: boolean;
 
   originatingApp?: string;
   allowByValueEmbeddables: boolean;
@@ -46,6 +48,7 @@ export const SaveModal = (props: Props) => {
 
   const {
     originatingApp,
+    savingToLibraryPermitted,
     savedObjectsTagging,
     tagsIds,
     lastKnownDoc,
@@ -84,13 +87,15 @@ export const SaveModal = (props: Props) => {
     <TagEnhancedSavedObjectSaveModalDashboard
       savedObjectsTagging={savedObjectsTagging}
       initialTags={tagsIds}
+      canSaveByReference={Boolean(savingToLibraryPermitted)}
       onSave={(saveProps) => {
-        const saveToLibrary = saveProps.dashboardId === null;
+        const saveToLibrary = Boolean(saveProps.addToLibrary);
         onSave(saveProps, { saveToLibrary });
       }}
       onClose={onClose}
       documentInfo={{
-        id: lastKnownDoc.savedObjectId,
+        // if the user cannot save to the library - treat this as a new document.
+        id: savingToLibraryPermitted ? lastKnownDoc.savedObjectId : undefined,
         title: lastKnownDoc.title || '',
         description: lastKnownDoc.description || '',
       }}

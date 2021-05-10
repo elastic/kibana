@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from 'src/core/public';
-import { ObservabilityPluginSetupDeps } from '../plugin';
+import { ObservabilityPublicPluginsStart } from '../plugin';
+import { createObservabilityRuleRegistryMock } from '../rules/observability_rule_registry_mock';
 import { renderApp } from './';
 
 describe('renderApp', () => {
@@ -30,7 +33,7 @@ describe('renderApp', () => {
           },
         },
       },
-    } as unknown) as ObservabilityPluginSetupDeps;
+    } as unknown) as ObservabilityPublicPluginsStart;
     const core = ({
       application: { currentAppId$: new Observable(), navigateToUrl: () => {} },
       chrome: {
@@ -42,6 +45,7 @@ describe('renderApp', () => {
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
     } as unknown) as CoreStart;
+    const config = { unsafe: { alertingExperience: { enabled: true } } };
     const params = ({
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
@@ -49,7 +53,13 @@ describe('renderApp', () => {
     } as unknown) as AppMountParameters;
 
     expect(() => {
-      const unmount = renderApp(core, plugins, params);
+      const unmount = renderApp({
+        config,
+        core,
+        plugins,
+        appMountParameters: params,
+        observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+      });
       unmount();
     }).not.toThrowError();
   });

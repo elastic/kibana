@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiImage, EuiPopover } from '@elastic/eui';
@@ -15,12 +16,11 @@ const POPOVER_IMG_WIDTH = 640;
 const StepImage = styled(EuiImage)`
   &&& {
     display: flex;
-    figcaption {
-      white-space: nowrap;
-      align-self: center;
-      margin-left: 8px;
-      margin-top: 8px;
-      text-decoration: none !important;
+    figure.euiImage-isFullScreen {
+      display: flex;
+      div.stepArrowsFullScreen {
+        display: flex;
+      }
     }
   }
 `;
@@ -38,7 +38,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
   isImagePopoverOpen,
 }) => (
   <EuiPopover
-    anchorPosition="rightCenter"
+    anchorPosition="leftDown"
     button={
       <StepImage
         allowFullScreen={true}
@@ -48,9 +48,11 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
         hasShadow
         url={imgSrc}
         size="s"
+        className="syntheticsStepImage"
       />
     }
     isOpen={isImagePopoverOpen}
+    closePopover={() => {}}
   >
     <EuiImage
       alt={fullSizeImageAlt}

@@ -1,17 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
-  ConfigDeprecationLogger,
-  CoreSetup,
-  CoreStart,
-  PluginConfigDescriptor,
-} from 'kibana/server';
+import { AddConfigDeprecation, CoreSetup, CoreStart, PluginConfigDescriptor } from 'kibana/server';
 import { get } from 'lodash';
 
 import { configSchema, ConfigSchema } from '../config';
@@ -23,17 +18,28 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     // TODO: Remove deprecation once defaultAppId is deleted
-    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', true),
-    (completeConfig: Record<string, any>, rootPath: string, log: ConfigDeprecationLogger) => {
+    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', { silent: true }),
+    (
+      completeConfig: Record<string, any>,
+      rootPath: string,
+      addDeprecation: AddConfigDeprecation
+    ) => {
       if (
         get(completeConfig, 'kibana.defaultAppId') === undefined &&
         get(completeConfig, 'kibana_legacy.defaultAppId') === undefined
       ) {
         return completeConfig;
       }
-      log(
-        `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`
-      );
+      addDeprecation({
+        message: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
+        correctiveActions: {
+          manualSteps: [
+            'Go to Stack Management > Advanced Settings',
+            'Update the "defaultRoute" setting under the General section',
+            'Remove "kibana.defaultAppId" from the kibana.yml config file',
+          ],
+        },
+      });
       return completeConfig;
     },
   ],

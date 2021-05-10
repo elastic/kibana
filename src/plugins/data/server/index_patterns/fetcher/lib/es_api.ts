@@ -1,24 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ElasticsearchClient } from 'kibana/server';
 import { convertEsError } from './errors';
-import { FieldCapsResponse } from './field_capabilities';
-
-export interface IndicesAliasResponse {
-  [index: string]: IndexAliasResponse;
-}
-
-export interface IndexAliasResponse {
-  aliases: {
-    [aliasName: string]: Record<string, any>;
-  };
-}
 
 /**
  *  Call the index.getAlias API for a list of indices.
@@ -67,7 +56,7 @@ export async function callFieldCapsApi(
   fieldCapsOptions: { allow_no_indices: boolean } = { allow_no_indices: false }
 ) {
   try {
-    return await callCluster.fieldCaps<FieldCapsResponse>({
+    return await callCluster.fieldCaps({
       index: indices,
       fields: '*',
       ignore_unavailable: true,

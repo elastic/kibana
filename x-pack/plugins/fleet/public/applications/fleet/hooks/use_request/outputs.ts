@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { sendRequest, useRequest } from './use_request';
 import { outputRoutesService } from '../../services';
-import { PutOutputRequest, GetOutputsResponse } from '../../types';
+import type { PutOutputRequest, GetOutputsResponse } from '../../types';
+
+import { sendRequest, useRequest } from './use_request';
 
 export function useGetOutputs() {
   return useRequest<GetOutputsResponse>({

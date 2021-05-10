@@ -1,22 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IFieldFormat } from 'src/plugins/data/public';
 import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
-import { SchemaConfig } from 'src/plugins/visualizations/public';
+import { ExpressionValueVisDimension } from 'src/plugins/visualizations/public';
 import { TableVisParams } from '../common';
-
-export interface Dimensions {
-  buckets: SchemaConfig[];
-  metrics: SchemaConfig[];
-  splitColumn?: SchemaConfig[];
-  splitRow?: SchemaConfig[];
-}
 
 export interface ColumnWidthData {
   colIndex: number;
@@ -40,7 +33,10 @@ export interface TableVisUseUiStateProps {
 
 export interface TableVisConfig extends TableVisParams {
   title: string;
-  dimensions: Dimensions;
+  buckets?: ExpressionValueVisDimension[];
+  metrics: ExpressionValueVisDimension[];
+  splitColumn?: ExpressionValueVisDimension;
+  splitRow?: ExpressionValueVisDimension;
 }
 
 export interface FormattedColumn {

@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, AppSearchDeepLink } from 'src/core/public';
 import { AppUpdater } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
@@ -84,6 +84,20 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   public start() {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+    } else {
+      this.appStateUpdater.next(() => {
+        const deepLinks: AppSearchDeepLink[] = [...this.devTools.values()]
+          .filter(
+            // Some tools do not use a string title, so we filter those out
+            (tool) => !tool.enableRouting && !tool.isDisabled() && typeof tool.title === 'string'
+          )
+          .map((tool) => ({
+            id: tool.id,
+            title: tool.title as string,
+            path: `#/${tool.id}`,
+          }));
+        return { meta: { searchDeepLinks: deepLinks } };
+      });
     }
   }
 

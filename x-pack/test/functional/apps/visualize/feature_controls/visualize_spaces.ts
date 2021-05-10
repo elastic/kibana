@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { VisualizeConstants } from '../../../../../../src/plugins/visualize/public/application/visualize_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -42,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Visualize');
+        expect(navLinks).to.contain('Visualize Library');
       });
 
       it(`can view existing Visualization`, async () => {
@@ -83,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).not.to.contain('Visualize');
+        expect(navLinks).not.to.contain('Visualize Library');
       });
 
       it(`create new visualization shows 404`, async () => {

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { snakeCase } from 'lodash';
@@ -64,9 +64,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       .sort(sortByOrder);
 
   const getSolutionGraphicURL = (solutionId: string) =>
-    `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_${
-      IS_DARK_THEME ? 'dark' : 'light'
-    }_2x.png`;
+    `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_2x.png`;
 
   const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
   const kibanaApps = features.filter(({ solutionId }) => solutionId === 'kibana').sort(sortByOrder);
@@ -199,7 +197,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                         <EuiFlexItem className="kbnOverviewMore__item" key={id}>
                           <RedirectAppLinks application={application}>
                             <EuiCard
-                              className="kbnOverviewSolution"
+                              className={`kbnOverviewSolution ${id}`}
                               description={description ? description : ''}
                               href={addBasePath(path)}
                               icon={

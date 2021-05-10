@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
@@ -70,7 +72,11 @@ const getConflictDest = (id: string) => ({
   updatedAt: '2017-09-21T18:59:16.270Z',
 });
 
-export function importTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
+export function importTestSuiteFactory(
+  es: KibanaClient,
+  esArchiver: any,
+  supertest: SuperTest<any>
+) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: ImportTestCase | ImportTestCase[],
@@ -139,7 +145,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             type,
             destinationId ?? id
           );
-          expect(_source[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+          expect(_source?.[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
         }
       }
       for (let i = 0; i < expectedFailures.length; i++) {

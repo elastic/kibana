@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -44,6 +45,8 @@ const CommonAttributes = {
   short_description: schema.string(),
   description: schema.nullable(schema.string()),
   externalId: schema.nullable(schema.string()),
+  category: schema.nullable(schema.string()),
+  subcategory: schema.nullable(schema.string()),
 };
 
 // Schema for ServiceNow Incident Management (ITSM)
@@ -61,13 +64,11 @@ export const ExecutorSubActionPushParamsSchemaITSM = schema.object({
 export const ExecutorSubActionPushParamsSchemaSIR = schema.object({
   incident: schema.object({
     ...CommonAttributes,
-    category: schema.nullable(schema.string()),
     dest_ip: schema.nullable(schema.string()),
     malware_hash: schema.nullable(schema.string()),
     malware_url: schema.nullable(schema.string()),
-    priority: schema.nullable(schema.string()),
     source_ip: schema.nullable(schema.string()),
-    subcategory: schema.nullable(schema.string()),
+    priority: schema.nullable(schema.string()),
   }),
   comments: CommentsSchema,
 });

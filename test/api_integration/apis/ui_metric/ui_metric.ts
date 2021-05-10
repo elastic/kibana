@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   const createStatsMetric = (
@@ -34,6 +35,10 @@ export default function ({ getService }: FtrProviderContext) {
   });
 
   describe('ui_metric savedObject data', () => {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
+
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
       const reportManager = new ReportManager();
       const uiStatsMetric = createStatsMetric('myEvent');
@@ -97,12 +102,12 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           hits: { hits },
         },
-      } = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      } = await es.search<any>({ index: '.kibana', q: 'type:ui-metric' });
 
       const countTypeEvent = hits.find(
         (hit: { _id: string }) => hit._id === `ui-metric:myApp:${uniqueEventName}`
       );
-      expect(countTypeEvent._source['ui-metric'].count).to.eql(3);
+      expect(countTypeEvent?._source['ui-metric'].count).to.eql(3);
     });
   });
 }

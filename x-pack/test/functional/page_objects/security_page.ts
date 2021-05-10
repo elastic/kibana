@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { adminTestUser } from '@kbn/test';
@@ -106,7 +107,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     if (expectedResult === 'chrome') {
       await find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .app-wrapper:not(.hidden-chrome)',
+        '[data-test-subj="kibanaChrome"] .kbnAppWrapper:not(.kbnAppWrapper--hiddenChrome)',
         20000
       );
       log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
@@ -285,6 +286,11 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickSaveEditUser() {
       await find.clickByButtonText('Update user');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickSaveCreateUser() {
+      await find.clickByButtonText('Create user');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

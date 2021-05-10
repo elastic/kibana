@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,7 +10,6 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const dashboardVisualizations = getService('dashboardVisualizations');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
 
@@ -28,9 +28,6 @@ export default function ({ getPageObjects, getService }) {
 
     it('adds Lens visualization to empty dashboard', async () => {
       const title = 'Dashboard Test Lens';
-      await testSubjects.exists('addVisualizationButton');
-      await testSubjects.click('addVisualizationButton');
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await PageObjects.lens.createAndAddLensFromDashboard({ title, redirectToOrigin: true });
       await PageObjects.dashboard.waitForRenderComplete();
       await testSubjects.exists(`embeddablePanelHeading-${title}`);
@@ -86,9 +83,6 @@ export default function ({ getPageObjects, getService }) {
       const title = 'non-dashboard Test Lens';
       await PageObjects.dashboard.loadSavedDashboard('empty dashboard test');
       await PageObjects.dashboard.switchToEditMode();
-      await testSubjects.exists('dashboardAddNewPanelButton');
-      await testSubjects.click('dashboardAddNewPanelButton');
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await PageObjects.lens.createAndAddLensFromDashboard({ title });
       await PageObjects.lens.notLinkedToOriginatingApp();
       await PageObjects.common.navigateToApp('dashboard');

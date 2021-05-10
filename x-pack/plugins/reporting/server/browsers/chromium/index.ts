@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,10 +10,10 @@ import { BrowserDownload } from '../';
 import { CaptureConfig } from '../../../server/types';
 import { LevelLogger } from '../../lib';
 import { HeadlessChromiumDriverFactory } from './driver_factory';
-import { paths } from './paths';
+import { ChromiumArchivePaths } from './paths';
 
 export const chromium: BrowserDownload = {
-  paths,
+  paths: new ChromiumArchivePaths(),
   createDriverFactory: (binaryPath: string, captureConfig: CaptureConfig, logger: LevelLogger) =>
     new HeadlessChromiumDriverFactory(binaryPath, captureConfig, logger),
 };
@@ -31,3 +32,5 @@ export const getDisallowedOutgoingUrlError = (interceptedUrl: string) =>
       values: { interceptedUrl },
     })
   );
+
+export { ChromiumArchivePaths };

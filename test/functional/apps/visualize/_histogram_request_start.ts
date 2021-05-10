@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -69,6 +69,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const actualInterval = bucketEnd - bucketStart;
           expect(actualInterval).to.eql(1200000000);
         });
+      });
+    });
+
+    describe('autoBounds are not set for number_range data', function () {
+      it('should use provided value when number of generated buckets is less than histogram:maxBars', async function () {
+        log.debug('Field = machine.ram_range');
+        await PageObjects.visEditor.selectField('machine.ram_range');
+        await retry.waitFor('interval to be set', async () => {
+          return Boolean(await PageObjects.visEditor.getNumericInterval());
+        });
+        expect(await PageObjects.visEditor.getNumericInterval()).to.eql(100);
       });
     });
   });

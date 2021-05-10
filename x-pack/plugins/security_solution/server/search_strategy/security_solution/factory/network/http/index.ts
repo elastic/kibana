@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -23,6 +24,7 @@ import { getHttpEdges } from './helpers';
 import { buildHttpQuery } from './query.http_network.dsl';
 
 export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
+  // @ts-expect-error dns_name_query_count is not conpatible with @elastic/elasticsearch
   buildDsl: (options: NetworkHttpRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);

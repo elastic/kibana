@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import dateMath from '@elastic/datemath';
@@ -11,12 +11,7 @@ import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
 import { IIndexPattern, IFieldType, UI_SETTINGS, buildQueryFromFilters } from '../../../common';
 import { TimefilterSetup } from '../../query';
-
-function resolver(title: string, field: IFieldType, query: string, filters: any[]) {
-  // Only cache results for a minute
-  const ttl = Math.floor(Date.now() / 1000 / 60);
-  return [ttl, query, title, field.name, JSON.stringify(filters)].join('|');
-}
+import { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
@@ -47,15 +42,31 @@ export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSugg
 
 export const setupValueSuggestionProvider = (
   core: CoreSetup,
-  { timefilter }: { timefilter: TimefilterSetup }
+  {
+    timefilter,
+    usageCollector,
+  }: { timefilter: TimefilterSetup; usageCollector?: AutocompleteUsageCollector }
 ): ValueSuggestionsGetFn => {
+  function resolver(title: string, field: IFieldType, query: string, filters: any[]) {
+    // Only cache results for a minute
+    const ttl = Math.floor(Date.now() / 1000 / 60);
+    return [ttl, query, title, field.name, JSON.stringify(filters)].join('|');
+  }
+
   const requestSuggestions = memoize(
-    (index: string, field: IFieldType, query: string, filters: any = [], signal?: AbortSignal) =>
-      core.http.fetch(`/api/kibana/suggestions/values/${index}`, {
-        method: 'POST',
-        body: JSON.stringify({ query, field: field.name, filters }),
-        signal,
-      }),
+    (index: string, field: IFieldType, query: string, filters: any = [], signal?: AbortSignal) => {
+      usageCollector?.trackRequest();
+      return core.http
+        .fetch(`/api/kibana/suggestions/values/${index}`, {
+          method: 'POST',
+          body: JSON.stringify({ query, field: field.name, fieldMeta: field?.toSpec?.(), filters }),
+          signal,
+        })
+        .then((r) => {
+          usageCollector?.trackResult();
+          return r;
+        });
+    },
     resolver
   );
 
@@ -85,6 +96,16 @@ export const setupValueSuggestionProvider = (
       : undefined;
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
-    return await requestSuggestions(title, field, query, filters, signal);
+    try {
+      usageCollector?.trackCall();
+      return await requestSuggestions(title, field, query, filters, signal);
+    } catch (e) {
+      if (!signal?.aborted) {
+        usageCollector?.trackError();
+      }
+      // Remove rejected results from memoize cache
+      requestSuggestions.cache.delete(resolver(title, field, query, filters));
+      return [];
+    }
   };
 };

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -37,6 +37,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Sep 22, 2015 @ 06:00:00.000',
           'Sep 22, 2015 @ 11:00:00.000'
         );
+        await visualBuilder.markdownSwitchSubTab('options');
+        await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.setDropLastBucket(true);
+        await visualBuilder.markdownSwitchSubTab('markdown');
       });
 
       it('should render subtabs and table variables markdown components', async () => {

@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { SavedObjectsClientContract } from 'src/core/server';
+import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
+
+import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
+import type { EncryptedSavedObjectsService } from '../crypto';
+import { EncryptionError } from '../crypto';
 import { EncryptionErrorOperation } from '../crypto/encryption_error';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { EncryptedSavedObjectsService, EncryptionError } from '../crypto';
+import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
-import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
-import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
-import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
-
-jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => {
+jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(
-    '../../../../../src/core/server/saved_objects/service/lib/utils'
+    'src/core/server/saved_objects/service/lib/utils'
   );
   return {
     SavedObjectsUtils: {
@@ -1754,5 +1756,94 @@ describe('#removeReferencesTo', () => {
     );
 
     expect(mockBaseClient.removeReferencesTo).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('#openPointInTimeForType', () => {
+  it('redirects request to underlying base client', async () => {
+    const options = { keepAlive: '1m' };
+
+    await wrapper.openPointInTimeForType('some-type', options);
+
+    expect(mockBaseClient.openPointInTimeForType).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.openPointInTimeForType).toHaveBeenCalledWith('some-type', options);
+  });
+
+  it('returns response from underlying client', async () => {
+    const returnValue = {
+      id: 'abc123',
+    };
+    mockBaseClient.openPointInTimeForType.mockResolvedValue(returnValue);
+
+    const result = await wrapper.openPointInTimeForType('known-type');
+
+    expect(result).toBe(returnValue);
+  });
+
+  it('fails if base client fails', async () => {
+    const failureReason = new Error('Something bad happened...');
+    mockBaseClient.openPointInTimeForType.mockRejectedValue(failureReason);
+
+    await expect(wrapper.openPointInTimeForType('known-type')).rejects.toThrowError(failureReason);
+
+    expect(mockBaseClient.openPointInTimeForType).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('#closePointInTime', () => {
+  it('redirects request to underlying base client', async () => {
+    const id = 'abc123';
+    await wrapper.closePointInTime(id);
+
+    expect(mockBaseClient.closePointInTime).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.closePointInTime).toHaveBeenCalledWith(id, undefined);
+  });
+
+  it('returns response from underlying client', async () => {
+    const returnValue = {
+      succeeded: true,
+      num_freed: 1,
+    };
+    mockBaseClient.closePointInTime.mockResolvedValue(returnValue);
+
+    const result = await wrapper.closePointInTime('abc123');
+
+    expect(result).toBe(returnValue);
+  });
+
+  it('fails if base client fails', async () => {
+    const failureReason = new Error('Something bad happened...');
+    mockBaseClient.closePointInTime.mockRejectedValue(failureReason);
+
+    await expect(wrapper.closePointInTime('abc123')).rejects.toThrowError(failureReason);
+
+    expect(mockBaseClient.closePointInTime).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('#createPointInTimeFinder', () => {
+  it('redirects request to underlying base client with default dependencies', () => {
+    const options = { type: ['a', 'b'], search: 'query' };
+    wrapper.createPointInTimeFinder(options);
+
+    expect(mockBaseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, {
+      client: wrapper,
+    });
+  });
+
+  it('redirects request to underlying base client with custom dependencies', () => {
+    const options = { type: ['a', 'b'], search: 'query' };
+    const dependencies = {
+      client: {
+        find: jest.fn(),
+        openPointInTimeForType: jest.fn(),
+        closePointInTime: jest.fn(),
+      },
+    };
+    wrapper.createPointInTimeFinder(options, dependencies);
+
+    expect(mockBaseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, dependencies);
   });
 });

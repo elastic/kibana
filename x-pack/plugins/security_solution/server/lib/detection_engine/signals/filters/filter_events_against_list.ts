@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+import type { estypes } from '@elastic/elasticsearch';
 import { ExceptionListItemSchema, entriesList } from '../../../../../../lists/common/schemas';
 import { hasLargeValueList } from '../../../../../common/detection_engine/utils';
 import { FilterEventsAgainstListOptions } from './types';
 import { filterEvents } from './filter_events';
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
-import { SearchResponse } from '../../../types';
 
 /**
  * Filters events against a large value based list. It does this through these
@@ -37,7 +38,7 @@ export const filterEventsAgainstList = async <T>({
   logger,
   eventSearchResult,
   buildRuleMessage,
-}: FilterEventsAgainstListOptions<T>): Promise<SearchResponse<T>> => {
+}: FilterEventsAgainstListOptions<T>): Promise<estypes.SearchResponse<T>> => {
   try {
     const atLeastOneLargeValueList = exceptionsList.some(({ entries }) =>
       hasLargeValueList(entries)
@@ -54,9 +55,9 @@ export const filterEventsAgainstList = async <T>({
       return listItem.entries.every((entry) => entriesList.is(entry));
     });
 
-    const res = await valueListExceptionItems.reduce<Promise<SearchResponse<T>['hits']['hits']>>(
+    const res = await valueListExceptionItems.reduce<Promise<Array<estypes.Hit<T>>>>(
       async (
-        filteredAccum: Promise<SearchResponse<T>['hits']['hits']>,
+        filteredAccum: Promise<Array<estypes.Hit<T>>>,
         exceptionItem: ExceptionListItemSchema
       ) => {
         const events = await filteredAccum;
@@ -74,7 +75,7 @@ export const filterEventsAgainstList = async <T>({
         );
         return filteredEvents;
       },
-      Promise.resolve<SearchResponse<T>['hits']['hits']>(eventSearchResult.hits.hits)
+      Promise.resolve<Array<estypes.Hit<T>>>(eventSearchResult.hits.hits)
     );
 
     return {

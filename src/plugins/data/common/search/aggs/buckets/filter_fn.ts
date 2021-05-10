@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,7 @@ export const aggFilterFnName = 'aggFilter';
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTER>;
 
-type Arguments = Assign<AggArgs, { geo_bounding_box?: string }>;
+type Arguments = Assign<AggArgs, { geo_bounding_box?: string; filter?: string }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -59,6 +59,13 @@ export const aggFilter = (): FunctionDefinition => ({
         defaultMessage: 'Filter results based on a point location within a bounding box',
       }),
     },
+    filter: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.buckets.filter.filter.help', {
+        defaultMessage:
+          'Filter results based on a kql or lucene query. Do not use together with geo_bounding_box',
+      }),
+    },
     json: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.filter.json.help', {
@@ -75,6 +82,13 @@ export const aggFilter = (): FunctionDefinition => ({
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
 
+    const geoBoundingBox = getParsedValue(args, 'geo_bounding_box');
+    const filter = getParsedValue(args, 'filter');
+
+    if (geoBoundingBox && filter) {
+      throw new Error("filter and geo_bounding_box can't be used together");
+    }
+
     return {
       type: 'agg_type',
       value: {
@@ -84,7 +98,8 @@ export const aggFilter = (): FunctionDefinition => ({
         type: BUCKET_TYPES.FILTER,
         params: {
           ...rest,
-          geo_bounding_box: getParsedValue(args, 'geo_bounding_box'),
+          geo_bounding_box: geoBoundingBox,
+          filter,
         },
       },
     };

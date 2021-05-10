@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ToolingLog, createAnyInstanceSerializer } from '@kbn/dev-utils';
@@ -33,8 +33,11 @@ it('build default and oss dist for current platform, without packages, by defaul
         "createDockerCentOS": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
         "createRpmPackage": false,
         "downloadFreshNode": true,
+        "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": false,
         "versionQualifier": "",
@@ -57,8 +60,11 @@ it('builds packages if --all-platforms is passed', () => {
         "createDockerCentOS": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
         "createRpmPackage": true,
         "downloadFreshNode": true,
+        "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
@@ -81,8 +87,11 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "createDockerCentOS": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
         "createRpmPackage": true,
         "downloadFreshNode": true,
+        "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
@@ -105,8 +114,11 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "createDockerCentOS": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
         "createRpmPackage": false,
         "downloadFreshNode": true,
+        "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
@@ -130,8 +142,11 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "createDockerCentOS": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
         "createRpmPackage": false,
         "downloadFreshNode": true,
+        "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
@@ -162,8 +177,11 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "createDockerCentOS": true,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
         "createRpmPackage": false,
         "downloadFreshNode": true,
+        "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",
@@ -187,8 +205,11 @@ it('limits packages if --all-platforms passed with --skip-docker-centos', () => 
         "createDockerCentOS": false,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
         "createRpmPackage": true,
         "downloadFreshNode": true,
+        "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
         "versionQualifier": "",

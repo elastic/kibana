@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { dirname, resolve } from 'path';
@@ -13,8 +13,8 @@ import Joi from 'joi';
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-const INSPECTING =
-  process.execArgv.includes('--inspect') || process.execArgv.includes('--inspect-brk');
+// it will search both --inspect and --inspect-brk
+const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
 const urlPartsSchema = () =>
   Joi.object()
@@ -169,7 +169,7 @@ export const schema = Joi.object()
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('oss'),
+        license: Joi.string().default('basic'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
         serverEnvVars: Joi.object(),
@@ -210,6 +210,13 @@ export const schema = Joi.object()
     esArchiver: Joi.object()
       .keys({
         directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+      })
+      .default(),
+
+    // settings for the saved objects svc
+    kbnArchiver: Joi.object()
+      .keys({
+        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
       })
       .default(),
 

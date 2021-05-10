@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -86,7 +87,6 @@ export class ReportInfoButton extends Component<Props, State> {
 
     const attempts = info.attempts ? info.attempts.toString() : NA;
     const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
-    const priority = info.priority ? info.priority.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
     const warnings = info.output && info.output.warnings ? info.output.warnings.join(',') : null;
 
@@ -151,10 +151,6 @@ export class ReportInfoButton extends Component<Props, State> {
       {
         title: 'Max Attempts',
         description: maxAttempts,
-      },
-      {
-        title: 'Priority',
-        description: priority,
       },
       {
         title: 'Timeout',

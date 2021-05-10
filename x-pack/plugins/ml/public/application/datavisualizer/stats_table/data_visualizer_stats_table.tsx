@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState } from 'react';
 
 import {
   CENTER_ALIGNMENT,
+  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFlexItem,
   EuiIcon,
@@ -36,7 +38,6 @@ import {
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
 } from './types/field_vis_config';
-import { FileBasedNumberContentPreview } from '../file_based/components/field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 
 const FIELD_NAME = 'fieldName';
@@ -51,6 +52,7 @@ interface DataVisualizerTableProps<T> {
     update: Partial<DataVisualizerIndexBasedAppState | DataVisualizerFileBasedAppState>
   ) => void;
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
+  extendedColumns?: Array<EuiBasicTableColumn<T>>;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -58,11 +60,12 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   pageState,
   updatePageState,
   getItemIdToExpandedRowMap,
+  extendedColumns,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
 
-  const { onTableChange, pagination, sorting } = useTableSettings<DataVisualizerTableItem>(
+  const { onTableChange, pagination, sorting } = useTableSettings<T>(
     items,
     pageState,
     updatePageState
@@ -135,7 +138,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       'data-test-subj': 'mlDataVisualizerTableColumnDetailsToggle',
     };
 
-    return [
+    const baseColumns = [
       expanderColumn,
       {
         field: 'type',
@@ -220,8 +223,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           if (item.type === ML_JOB_FIELD_TYPES.NUMBER) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
               return <IndexBasedNumberContentPreview config={item} />;
-            } else {
-              return <FileBasedNumberContentPreview config={item} />;
             }
           }
 
@@ -235,7 +236,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         'data-test-subj': 'mlDataVisualizerTableColumnDistribution',
       },
     ];
-  }, [expandAll, showDistributions, updatePageState]);
+    return extendedColumns ? [...baseColumns, ...extendedColumns] : baseColumns;
+  }, [expandAll, showDistributions, updatePageState, extendedColumns]);
 
   const itemIdToExpandedRowMap = useMemo(() => {
     let itemIds = expandedRowItemIds;
@@ -247,7 +249,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   return (
     <EuiFlexItem data-test-subj="mlDataVisualizerTableContainer">
-      <EuiInMemoryTable<DataVisualizerTableItem>
+      <EuiInMemoryTable<T>
         className={'mlDataVisualizer'}
         items={items}
         itemId={FIELD_NAME}

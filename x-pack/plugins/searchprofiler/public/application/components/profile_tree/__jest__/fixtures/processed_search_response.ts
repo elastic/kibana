@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { produce } from 'immer';
+import { Index } from '../../../../types';
 
 const shard1 = {
   id: ['L22w_FX2SbqlQYOP5QrYDg', '.kibana_1', '0'],
@@ -334,11 +337,14 @@ const search1Child = {
 (searchRoot.treeRoot as any) = search1;
 (shard1.searches[0] as any) = searchRoot;
 
-export const processedResponseWithFirstShard = produce<any>(null, () => [
-  {
-    shards: [shard1],
-    time: 0.058419,
-    name: '.kibana_1',
-    visible: false,
-  },
-]);
+export const processedResponseWithFirstShard = produce<Index[]>(
+  [
+    {
+      shards: [shard1],
+      time: 0.058419,
+      name: '.kibana_1',
+      visible: false,
+    },
+  ],
+  () => undefined
+);

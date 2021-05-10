@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionsClient } from './actions_client';
@@ -26,6 +29,8 @@ import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
 
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -35,7 +40,7 @@ jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => (
 
 const defaultKibanaIndex = '.kibana';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const scopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
@@ -58,9 +63,7 @@ beforeEach(() => {
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-    ),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
     preconfiguredActions: [],
@@ -89,6 +92,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -120,6 +124,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -159,6 +164,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -196,6 +202,7 @@ describe('create()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -247,6 +254,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -271,6 +279,7 @@ describe('create()', () => {
       isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       config: {},
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -280,6 +289,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -344,6 +354,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {
           a: true,
           b: true,
@@ -370,6 +381,7 @@ describe('create()', () => {
       isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       config: {
         a: true,
         b: true,
@@ -387,6 +399,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -402,17 +415,26 @@ describe('create()', () => {
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
+      preconfiguredAlertHistoryEsIndex: false,
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true,
       rejectUnauthorized: true,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+      maxResponseContentLength: new ByteSizeValue(1000000),
+      responseTimeout: moment.duration('60s'),
+      cleanupFailedExecutionsTask: {
+        enabled: true,
+        cleanupInterval: schema.duration().validate('5m'),
+        idleInterval: schema.duration().validate('1h'),
+        pageSize: 100,
+      },
     });
 
     const localActionTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
-      taskRunnerFactory: new TaskRunnerFactory(
-        new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-      ),
+      taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
       preconfiguredActions: [],
@@ -437,6 +459,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -470,6 +493,7 @@ describe('create()', () => {
       attributes: {
         name: 'my name',
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         config: {},
       },
       references: [],
@@ -506,6 +530,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -554,6 +579,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -616,6 +642,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -641,6 +668,7 @@ describe('get()', () => {
         attributes: {
           name: 'my name',
           actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
           config: {},
         },
         references: [],
@@ -744,12 +772,15 @@ describe('getAll()', () => {
         ],
       };
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      });
+      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        })
+      );
 
       actionsClient = new ActionsClient({
         actionTypeRegistry,
@@ -806,6 +837,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
+              isMissingSecrets: false,
               config: {
                 foo: 'bar',
               },
@@ -815,12 +847,15 @@ describe('getAll()', () => {
           },
         ],
       });
-      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      });
+      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        })
+      );
 
       await actionsClient.getAll();
 
@@ -863,6 +898,7 @@ describe('getAll()', () => {
           type: 'type',
           attributes: {
             name: 'test',
+            isMissingSecrets: false,
             config: {
               foo: 'bar',
             },
@@ -873,12 +909,15 @@ describe('getAll()', () => {
       ],
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-      aggregations: {
-        '1': { doc_count: 6 },
-        testPreconfigured: { doc_count: 2 },
-      },
-    });
+    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      })
+    );
 
     actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -911,6 +950,7 @@ describe('getAll()', () => {
         config: {
           foo: 'bar',
         },
+        isMissingSecrets: false,
         referencedByCount: 6,
       },
       {
@@ -938,17 +978,21 @@ describe('getBulk()', () => {
               config: {
                 foo: 'bar',
               },
+              isMissingSecrets: false,
             },
             references: [],
           },
         ],
       });
-      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      });
+      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        })
+      );
 
       actionsClient = new ActionsClient({
         actionTypeRegistry,
@@ -1006,17 +1050,21 @@ describe('getBulk()', () => {
               config: {
                 foo: 'bar',
               },
+              isMissingSecrets: false,
             },
             references: [],
           },
         ],
       });
-      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-        aggregations: {
-          '1': { doc_count: 6 },
-          testPreconfigured: { doc_count: 2 },
-        },
-      });
+      scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        })
+      );
 
       await actionsClient.getBulk(['1']);
 
@@ -1061,17 +1109,21 @@ describe('getBulk()', () => {
             config: {
               foo: 'bar',
             },
+            isMissingSecrets: false,
           },
           references: [],
         },
       ],
     });
-    scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-      aggregations: {
-        '1': { doc_count: 6 },
-        testPreconfigured: { doc_count: 2 },
-      },
-    });
+    scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      // @ts-expect-error not full search response
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      })
+    );
 
     actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -1113,6 +1165,7 @@ describe('getBulk()', () => {
           foo: 'bar',
         },
         id: '1',
+        isMissingSecrets: false,
         isPreconfigured: false,
         name: 'test',
       },
@@ -1201,6 +1254,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
       },
       references: [],
     });
@@ -1209,6 +1263,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1289,6 +1344,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
       },
       references: [],
     });
@@ -1297,6 +1353,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},
@@ -1315,6 +1372,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
+      isMissingSecrets: false,
       name: 'my name',
       config: {},
     });
@@ -1325,6 +1383,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1340,6 +1399,70 @@ describe('update()', () => {
       Array [
         "action",
         "my-action",
+      ]
+    `);
+  });
+
+  test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    });
+    const result = await actionsClient.update({
+      id: 'my-action',
+      action: {
+        name: 'my name',
+        config: {},
+        secrets: {},
+      },
+    });
+    expect(result).toEqual({
+      id: 'my-action',
+      isPreconfigured: false,
+      actionTypeId: 'my-action-type',
+      isMissingSecrets: true,
+      name: 'my name',
+      config: {},
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "action",
+        Object {
+          "actionTypeId": "my-action-type",
+          "config": Object {},
+          "isMissingSecrets": false,
+          "name": "my name",
+          "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
+          "references": Array [],
+        },
       ]
     `);
   });
@@ -1398,6 +1521,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: true,
         name: 'my name',
         config: {
           a: true,
@@ -1424,6 +1548,7 @@ describe('update()', () => {
       id: 'my-action',
       isPreconfigured: false,
       actionTypeId: 'my-action-type',
+      isMissingSecrets: true,
       name: 'my name',
       config: {
         a: true,
@@ -1442,6 +1567,7 @@ describe('update()', () => {
             "b": true,
             "c": true,
           },
+          "isMissingSecrets": false,
           "name": "my name",
           "secrets": Object {},
         },
@@ -1477,6 +1603,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
         name: 'my name',
         config: {},
         secrets: {},

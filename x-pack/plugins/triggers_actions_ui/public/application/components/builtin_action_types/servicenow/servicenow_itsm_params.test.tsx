@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from '@testing-library/react';
@@ -26,6 +28,8 @@ const actionParams = {
       severity: '1',
       urgency: '2',
       impact: '3',
+      category: 'software',
+      subcategory: 'os',
       externalId: null,
     },
     comments: [],
@@ -53,34 +57,48 @@ const defaultProps = {
 
 const useGetChoicesResponse = {
   isLoading: false,
-  choices: ['severity', 'urgency', 'impact']
-    .map((element) => [
-      {
-        dependent_value: '',
-        label: '1 - Critical',
-        value: '1',
-        element,
-      },
-      {
-        dependent_value: '',
-        label: '2 - High',
-        value: '2',
-        element,
-      },
-      {
-        dependent_value: '',
-        label: '3 - Moderate',
-        value: '3',
-        element,
-      },
-      {
-        dependent_value: '',
-        label: '4 - Low',
-        value: '4',
-        element,
-      },
-    ])
-    .flat(),
+  choices: [
+    {
+      dependent_value: '',
+      label: 'Software',
+      value: 'software',
+      element: 'category',
+    },
+    {
+      dependent_value: 'software',
+      label: 'Operation System',
+      value: 'os',
+      element: 'subcategory',
+    },
+    ...['severity', 'urgency', 'impact']
+      .map((element) => [
+        {
+          dependent_value: '',
+          label: '1 - Critical',
+          value: '1',
+          element,
+        },
+        {
+          dependent_value: '',
+          label: '2 - High',
+          value: '2',
+          element,
+        },
+        {
+          dependent_value: '',
+          label: '3 - Moderate',
+          value: '3',
+          element,
+        },
+        {
+          dependent_value: '',
+          label: '4 - Low',
+          value: '4',
+          element,
+        },
+      ])
+      .flat(),
+  ],
 };
 
 describe('ServiceNowITSMParamsFields renders', () => {
@@ -99,6 +117,8 @@ describe('ServiceNowITSMParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeTruthy();
@@ -151,49 +171,52 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
   });
 
-  test('it transforms the urgencies to options correctly', async () => {
+  test('it transforms the categories to options correctly', async () => {
     const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
 
     wrapper.update();
-    expect(wrapper.find('[data-test-subj="urgencySelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
+    expect(wrapper.find('[data-test-subj="categorySelect"]').first().prop('options')).toEqual([
+      {
+        value: 'software',
+        text: 'Software',
+      },
     ]);
   });
 
-  test('it transforms the severities to options correctly', async () => {
+  test('it transforms the subcategories to options correctly', async () => {
     const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
 
     wrapper.update();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').first().prop('options')).toEqual([
+      {
+        text: 'Operation System',
+        value: 'os',
+      },
     ]);
   });
 
-  test('it transforms the impacts to options correctly', async () => {
+  test('it transforms the options correctly', async () => {
     const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
 
     wrapper.update();
-    expect(wrapper.find('[data-test-subj="impactSelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
-    ]);
+    const testers = ['severity', 'urgency', 'impact'];
+    testers.forEach((subj) =>
+      expect(wrapper.find(`[data-test-subj="${subj}Select"]`).first().prop('options')).toEqual([
+        { value: '1', text: '1 - Critical' },
+        { value: '2', text: '2 - High' },
+        { value: '3', text: '3 - Moderate' },
+        { value: '4', text: '4 - Low' },
+      ])
+    );
   });
 
   describe('UI updates', () => {
@@ -204,6 +227,8 @@ describe('ServiceNowITSMParamsFields renders', () => {
       { dataTestSubj: '[data-test-subj="urgencySelect"]', key: 'urgency' },
       { dataTestSubj: '[data-test-subj="severitySelect"]', key: 'severity' },
       { dataTestSubj: '[data-test-subj="impactSelect"]', key: 'impact' },
+      { dataTestSubj: '[data-test-subj="categorySelect"]', key: 'category' },
+      { dataTestSubj: '[data-test-subj="subcategorySelect"]', key: 'subcategory' },
     ];
 
     simpleFields.forEach((field) =>

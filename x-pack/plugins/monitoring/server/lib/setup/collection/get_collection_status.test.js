@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getCollectionStatus } from '.';
@@ -33,6 +34,9 @@ const mockReq = (
             if (prop === 'server.uuid') {
               return 'kibana-1234';
             }
+            if (prop === 'monitoring.ui.metricbeat.index') {
+              return 'metricbeat-*';
+            }
           }),
         };
       },
@@ -46,12 +50,14 @@ const mockReq = (
       plugins: {
         monitoring: {
           info: {
-            getSecurityFeature: () => {
-              return {
-                isAvailable: securityEnabled,
-                isEnabled: securityEnabled,
-              };
-            },
+            getLicenseService: () => ({
+              getSecurityFeature: () => {
+                return {
+                  isAvailable: securityEnabled,
+                  isEnabled: securityEnabled,
+                };
+              },
+            }),
           },
         },
         elasticsearch: {
@@ -101,24 +107,27 @@ describe('getCollectionStatus', () => {
           buckets: [
             {
               key: '.monitoring-es-7-2019',
-              es_uuids: { buckets: [{ key: 'es_1' }] },
+              es_uuids: { buckets: [{ key: 'es_1', single_type: {} }] },
             },
             {
               key: '.monitoring-kibana-7-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1' }] },
+              kibana_uuids: { buckets: [{ key: 'kibana_1', single_type: {} }] },
             },
             {
               key: '.monitoring-beats-7-2019',
               beats_uuids: {
                 buckets: [
-                  { key: 'apm_1', beat_type: { buckets: [{ key: 'apm-server' }] } },
-                  { key: 'beats_1' },
+                  {
+                    key: 'apm_1',
+                    single_type: { beat_type: { buckets: [{ key: 'apm-server' }] } },
+                  },
+                  { key: 'beats_1', single_type: {} },
                 ],
               },
             },
             {
               key: '.monitoring-logstash-7-2019',
-              logstash_uuids: { buckets: [{ key: 'logstash_1' }] },
+              logstash_uuids: { buckets: [{ key: 'logstash_1', single_type: {} }] },
             },
           ],
         },
@@ -155,19 +164,19 @@ describe('getCollectionStatus', () => {
           buckets: [
             {
               key: '.monitoring-es-7-mb-2019',
-              es_uuids: { buckets: [{ key: 'es_1' }] },
+              es_uuids: { buckets: [{ key: 'es_1', single_type: {} }] },
             },
             {
               key: '.monitoring-kibana-7-mb-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1' }] },
+              kibana_uuids: { buckets: [{ key: 'kibana_1', single_type: {} }] },
             },
             {
               key: '.monitoring-beats-7-2019',
-              beats_uuids: { buckets: [{ key: 'beats_1' }] },
+              beats_uuids: { buckets: [{ key: 'beats_1', single_type: {} }] },
             },
             {
               key: '.monitoring-logstash-7-2019',
-              logstash_uuids: { buckets: [{ key: 'logstash_1' }] },
+              logstash_uuids: { buckets: [{ key: 'logstash_1', single_type: {} }] },
             },
           ],
         },
@@ -200,23 +209,30 @@ describe('getCollectionStatus', () => {
           buckets: [
             {
               key: '.monitoring-es-7-mb-2019',
-              es_uuids: { buckets: [{ key: 'es_1' }] },
+              es_uuids: { buckets: [{ key: 'es_1', single_type: {} }] },
             },
             {
               key: '.monitoring-kibana-7-mb-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1' }, { key: 'kibana_2' }] },
+              kibana_uuids: {
+                buckets: [
+                  { key: 'kibana_1', single_type: {} },
+                  { key: 'kibana_2', single_type: {} },
+                ],
+              },
             },
             {
               key: '.monitoring-kibana-7-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1', by_timestamp: { value: 12 } }] },
+              kibana_uuids: {
+                buckets: [{ key: 'kibana_1', single_type: { by_timestamp: { value: 12 } } }],
+              },
             },
             {
               key: '.monitoring-beats-7-2019',
-              beats_uuids: { buckets: [{ key: 'beats_1' }] },
+              beats_uuids: { buckets: [{ key: 'beats_1', single_type: {} }] },
             },
             {
               key: '.monitoring-logstash-7-2019',
-              logstash_uuids: { buckets: [{ key: 'logstash_1' }] },
+              logstash_uuids: { buckets: [{ key: 'logstash_1', single_type: {} }] },
             },
           ],
         },

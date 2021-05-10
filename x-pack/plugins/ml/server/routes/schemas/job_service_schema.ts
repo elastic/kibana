@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
+import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const categorizationFieldExamplesSchema = {
   indexPatternTitle: schema.string(),
@@ -15,62 +19,78 @@ export const categorizationFieldExamplesSchema = {
   start: schema.number(),
   end: schema.number(),
   analyzer: schema.any(),
+  runtimeMappings: runtimeMappingsSchema,
+  indicesOptions: indicesOptionsSchema,
 };
 
-export const chartSchema = {
+export const basicChartSchema = {
   indexPatternTitle: schema.string(),
-  timeField: schema.maybe(schema.string()),
-  start: schema.maybe(schema.number()),
-  end: schema.maybe(schema.number()),
+  timeField: schema.string(),
+  start: schema.number(),
+  end: schema.number(),
   intervalMs: schema.number(),
   query: schema.any(),
   aggFieldNamePairs: schema.arrayOf(schema.any()),
-  splitFieldName: schema.maybe(schema.nullable(schema.string())),
+  splitFieldName: schema.nullable(schema.string()),
+  splitFieldValue: schema.nullable(schema.string()),
+  runtimeMappings: schema.maybe(runtimeMappingsSchema),
+  indicesOptions: schema.maybe(indicesOptionsSchema),
+};
+
+export const populationChartSchema = {
+  indexPatternTitle: schema.string(),
+  timeField: schema.string(),
+  start: schema.number(),
+  end: schema.number(),
+  intervalMs: schema.number(),
+  query: schema.any(),
+  aggFieldNamePairs: schema.arrayOf(schema.any()),
+  splitFieldName: schema.nullable(schema.string()),
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
+  runtimeMappings: schema.maybe(runtimeMappingsSchema),
+  indicesOptions: schema.maybe(indicesOptionsSchema),
 };
 
 export const datafeedIdsSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
+  datafeedIds: schema.arrayOf(schema.string()),
 });
 
 export const forceStartDatafeedSchema = schema.object({
-  datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
+  datafeedIds: schema.arrayOf(schema.string()),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
-});
-
-export const jobIdSchema = schema.object({
-  /** Optional list of job IDs. */
-  jobIds: schema.maybe(schema.string()),
 });
 
 export const jobIdsSchema = schema.object({
-  /** Optional list of job IDs. */
-  jobIds: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
+  /** List of job IDs. */
+  jobIds: schema.arrayOf(schema.string()),
 });
 
-export const jobsWithTimerangeSchema = {
+export const optionaljobIdsSchema = schema.object({
+  /** Optional list of job IDs. */
+  jobIds: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const jobsWithTimerangeSchema = schema.object({
   dateFormatTz: schema.maybe(schema.string()),
-};
+});
 
 export const lookBackProgressSchema = {
   jobId: schema.string(),
-  start: schema.maybe(schema.number()),
-  end: schema.maybe(schema.number()),
+  start: schema.number(),
+  end: schema.number(),
 };
 
 export const topCategoriesSchema = { jobId: schema.string(), count: schema.number() };
 
-export const updateGroupsSchema = {
-  jobs: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        job_id: schema.maybe(schema.string()),
-        groups: schema.arrayOf(schema.maybe(schema.string())),
-      })
-    )
+export const updateGroupsSchema = schema.object({
+  jobs: schema.arrayOf(
+    schema.object({
+      jobId: schema.string(),
+      groups: schema.arrayOf(schema.string()),
+    })
   ),
-};
+});
 
 export const revertModelSnapshotSchema = schema.object({
   jobId: schema.string(),
@@ -88,6 +108,16 @@ export const revertModelSnapshotSchema = schema.object({
     )
   ),
 });
+
+export const datafeedPreviewSchema = schema.oneOf([
+  schema.object({
+    job: schema.object(anomalyDetectionJobSchema),
+    datafeed: datafeedConfigSchema,
+  }),
+  schema.object({
+    datafeedId: schema.string(),
+  }),
+]);
 
 export const jobsExistSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),

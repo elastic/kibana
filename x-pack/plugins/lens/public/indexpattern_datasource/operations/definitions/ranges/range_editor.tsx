@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -32,7 +33,11 @@ const GranularityHelpPopover = () => {
     <HelpPopover
       anchorPosition="upCenter"
       button={
-        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        >
           {i18n.translate('xpack.lens.indexPattern.ranges.granularityHelpText', {
             defaultMessage: 'How it works',
           })}
@@ -54,10 +59,8 @@ const GranularityHelpPopover = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.ranges.granularityPopoverExplanation"
-          defaultMessage='The size of the interval is chosen to be a "nice" value. It is possible for the chosen
-            interval to stay the same when changing the granularity slider if the "nice" interval is
-            the same. The minimum granularity is 1, and the maximum is 
-            {setting}. To change the maximum granularity setting, go to Advanced settings.'
+          defaultMessage='The size of the interval is a "nice" value. When the granularity of the slider changes, the interval stays the same when the “nice” interval is the same. The minimum granularity is 1, and the maximum value is 
+            {setting}. To change the maximum granularity, go to Advanced settings.'
           values={{
             setting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
           }}
@@ -67,7 +70,7 @@ const GranularityHelpPopover = () => {
       <p>
         {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverAdvancedExplanation', {
           defaultMessage:
-            'Intervals are incremented by 10, 5 or 2: for example an interval can be 100 or 0.2 .',
+            'Intervals are incremented by 10, 5 or 2. For example, an interval can be 100 or 0.2 .',
         })}
       </p>
     </HelpPopover>

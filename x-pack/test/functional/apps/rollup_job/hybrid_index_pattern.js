@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import datemath from '@elastic/datemath';
@@ -9,11 +10,12 @@ import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings']);
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('hybrid index pattern', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
@@ -41,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
         'waiting for 3 records to be loaded into elasticsearch.',
         10000,
         async () => {
-          const response = await es.indices.get({
+          const { body: response } = await es.indices.get({
             index: `${rollupSourceIndexPrefix}*`,
             allow_no_indices: false,
           });
@@ -51,9 +53,8 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
-        await es.transport.request({
-          path: `/_rollup/job/${rollupJobName}`,
-          method: 'PUT',
+        await es.rollup.putJob({
+          id: rollupJobName,
           body: {
             index_pattern: `${rollupSourceIndexPrefix}*`,
             rollup_index: rollupTargetIndexName,
@@ -97,19 +98,19 @@ export default function ({ getService, getPageObjects }) {
       // ensure all fields are available
       await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
       const fields = await PageObjects.settings.getFieldNames();
-      expect(fields).to.eql(['_source', '_id', '_type', '_index', '_score', '@timestamp']);
+      expect(fields).to.eql(['@timestamp', '_id', '_index', '_score', '_source', '_type']);
     });
 
     after(async () => {
       // Delete the rollup job.
-      await es.transport.request({
-        path: `/_rollup/job/${rollupJobName}`,
-        method: 'DELETE',
-      });
+      await es.rollup.deleteJob({ id: rollupJobName });
 
-      await es.indices.delete({ index: rollupTargetIndexName });
-      await es.indices.delete({ index: `${regularIndexPrefix}*` });
-      await es.indices.delete({ index: `${rollupSourceIndexPrefix}*` });
+      await esDeleteAllIndices([
+        rollupTargetIndexName,
+        `${regularIndexPrefix}*`,
+        `${rollupSourceIndexPrefix}*`,
+      ]);
+
       await esArchiver.load('empty_kibana');
     });
   });

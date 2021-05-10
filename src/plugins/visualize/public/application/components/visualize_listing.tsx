@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './visualize_listing.scss';
@@ -40,6 +40,7 @@ export const VisualizeListing = () => {
       savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
+      dashboardCapabilities,
       kbnUrlStateStorage,
     },
   } = useKibana<VisualizeServices>();
@@ -63,17 +64,17 @@ export const VisualizeListing = () => {
   }, [history, pathname, visualizations]);
 
   useMount(() => {
-    // Reset editor state if the visualize listing page is loaded.
+    // Reset editor state for all apps if the visualize listing page is loaded.
     stateTransferService.clearEditorState();
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
-          defaultMessage: 'Visualize',
+          defaultMessage: 'Visualize Library',
         }),
       },
     ]);
     chrome.docTitle.change(
-      i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize' })
+      i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize Library' })
     );
   });
   useUnmount(() => closeNewVisModal.current());
@@ -148,6 +149,7 @@ export const VisualizeListing = () => {
   const calloutMessage = (
     <>
       <FormattedMessage
+        data-test-subj="visualize-dashboard-flow-prompt"
         id="visualize.visualizeListingDashboardFlowDescription"
         defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
         values={{
@@ -172,18 +174,19 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
-        <div className="visListingCallout">
-          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-        </div>
-      )}
+      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
+        dashboardCapabilities.createNew && (
+          <div className="visListingCallout">
+            <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+          </div>
+        )}
       <TableListView
         headingId="visualizeListingHeading"
         // we allow users to create visualizations even if they can't save them
         // for data exploration purposes
         createItem={createNewVis}
         tableCaption={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualizations',
+          defaultMessage: 'Visualize Library',
         })}
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
@@ -193,7 +196,7 @@ export const VisualizeListing = () => {
         initialPageSize={savedObjectsPublic.settings.getPerPage()}
         initialFilter={''}
         rowHeader="title"
-        noItemsFragment={noItemsFragment}
+        emptyPrompt={noItemsFragment}
         entityName={i18n.translate('visualize.listing.table.entityName', {
           defaultMessage: 'visualization',
         })}
@@ -201,7 +204,7 @@ export const VisualizeListing = () => {
           defaultMessage: 'visualizations',
         })}
         tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualizations',
+          defaultMessage: 'Visualize Library',
         })}
         toastNotifications={toastNotifications}
         searchFilters={searchFilters}

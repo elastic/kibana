@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { http } from '../http_service';
 
 import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
 import {
   DataFrameAnalyticsConfig,
   UpdateDataFrameAnalyticsConfig,
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
+import { NewJobCapsResponse } from '../../../../common/types/fields';
 import {
   DeleteDataFrameAnalyticsWithIndexStatus,
   AnalyticsMapReturnType,
@@ -34,18 +37,19 @@ export type GetDataFrameAnalyticsStatsResponse =
   | GetDataFrameAnalyticsStatsResponseOk
   | GetDataFrameAnalyticsStatsResponseError;
 
-interface GetDataFrameAnalyticsResponse {
+export interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-interface DeleteDataFrameAnalyticsWithIndexResponse {
+export interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
-interface JobsExistsResponse {
+
+export interface JobsExistsResponse {
   results: {
     [jobId: string]: boolean;
   };
@@ -162,6 +166,22 @@ export const dataFrameAnalytics = {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
+    });
+  },
+  validateDataFrameAnalytics(analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>) {
+    const body = JSON.stringify(analyticsConfig);
+    return http<ValidateAnalyticsJobResponse>({
+      path: `${basePath()}/data_frame/analytics/validate`,
+      method: 'POST',
+      body,
+    });
+  },
+  newJobCapsAnalytics(indexPatternTitle: string, isRollup: boolean = false) {
+    const query = isRollup === true ? { rollup: true } : {};
+    return http<NewJobCapsResponse>({
+      path: `${basePath()}/data_frame/analytics/new_job_caps/${indexPatternTitle}`,
+      method: 'GET',
+      query,
     });
   },
 };

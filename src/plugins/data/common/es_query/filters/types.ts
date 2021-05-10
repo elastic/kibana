@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ExistsFilter } from './exists_filter';
@@ -35,6 +35,7 @@ export enum FILTERS {
   MISSING = 'missing',
   QUERY_STRING = 'query_string',
   RANGE = 'range',
+  RANGE_FROM_VALUE = 'range_from_value',
   GEO_BOUNDING_BOX = 'geo_bounding_box',
   GEO_POLYGON = 'geo_polygon',
   SPATIAL_FILTER = 'spatial_filter',

@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Alert } from '../../../types';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 import { AlertNotifyWhen } from './alert_notify_when';
 
 describe('alert_notify_when', () => {

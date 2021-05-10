@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
@@ -159,6 +160,7 @@ const EncryptionKeySchema = schema.conditional(
 );
 
 const RolesSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
   allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
 });
 

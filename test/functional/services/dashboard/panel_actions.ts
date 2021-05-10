@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -17,11 +17,14 @@ const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
+const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
+const LIBRARY_NOTIFICATION_TEST_SUBJ = 'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION';
+const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
 
 export function DashboardPanelActionsProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header', 'common']);
+  const PageObjects = getPageObjects(['header', 'common', 'dashboard']);
   const inspector = getService('inspector');
 
   return new (class DashboardPanelActions {
@@ -93,15 +96,15 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async clickExpandPanelToggle() {
       log.debug(`clickExpandPanelToggle`);
-      this.openContextMenu();
+      await this.openContextMenu();
       const isActionVisible = await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
       if (!isActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
-    async removePanel() {
+    async removePanel(parent?: WebElementWrapper) {
       log.debug('removePanel');
-      await this.openContextMenu();
+      await this.openContextMenu(parent);
       const isActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
       if (!isActionVisible) await this.clickContextMenuMoreItem();
       const isPanelActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
@@ -111,10 +114,8 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async removePanelByTitle(title: string) {
       const header = await this.getPanelHeading(title);
-      await this.openContextMenu(header);
-      const isActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
-      if (!isActionVisible) await this.clickContextMenuMoreItem();
-      await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
+      log.debug('found header? ', Boolean(header));
+      await this.removePanel(header);
     }
 
     async customizePanel(parent?: WebElementWrapper) {
@@ -146,6 +147,20 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
         await this.openContextMenu();
       }
       await testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
+      await PageObjects.dashboard.waitForRenderComplete();
+    }
+
+    async openCopyToModalByTitle(title?: string) {
+      log.debug(`copyPanelTo(${title})`);
+      if (title) {
+        const panelOptions = await this.getPanelHeading(title);
+        await this.openContextMenu(panelOptions);
+      } else {
+        await this.openContextMenu();
+      }
+      const isActionVisible = await testSubjects.exists(COPY_PANEL_TO_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
+      await testSubjects.click(COPY_PANEL_TO_DATA_TEST_SUBJ);
     }
 
     async openInspectorByTitle(title: string) {
@@ -170,6 +185,29 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
         await this.clickContextMenuMoreItem();
       }
       await testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
+    }
+
+    async unlinkFromLibary(parent?: WebElementWrapper) {
+      log.debug('unlinkFromLibrary');
+      const libraryNotification = parent
+        ? await testSubjects.findDescendant(LIBRARY_NOTIFICATION_TEST_SUBJ, parent)
+        : await testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
+      await libraryNotification.click();
+      await testSubjects.click('libraryNotificationUnlinkButton');
+    }
+
+    async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
+      log.debug('saveToLibrary');
+      await this.openContextMenu(parent);
+      const exists = await testSubjects.exists(SAVE_TO_LIBRARY_TEST_SUBJ);
+      if (!exists) {
+        await this.clickContextMenuMoreItem();
+      }
+      await testSubjects.click(SAVE_TO_LIBRARY_TEST_SUBJ);
+      await testSubjects.setValue('savedObjectTitle', newTitle, {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('confirmSaveSavedObjectButton');
     }
 
     async expectExistsRemovePanelAction() {

@@ -1,34 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema, TypeOf } from '@kbn/config-schema';
-import { RouteDependencies } from '../../types';
-import { addBasePath } from '../helpers';
-import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
+import type { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../../common/lib';
+import type { RouteDependencies } from '../../types';
 import { getManagedRepositoryName } from '../../lib';
+import { addBasePath } from '../helpers';
 
 export function registerSnapshotsRoutes({
   router,
   license,
-  lib: { isEsError, wrapEsError },
+  lib: { wrapEsError, handleEsError },
 }: RouteDependencies) {
   // GET all snapshots
   router.get(
     { path: addBasePath('snapshots'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
 
-      const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
+      const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       let policies: string[] = [];
 
       // Attempt to retrieve policies
       // This could fail if user doesn't have access to read SLM policies
       try {
-        const policiesByName = await callAsCurrentUser('sr.policies');
+        const { body: policiesByName } = await clusterClient.asCurrentUser.slm.getLifecycle();
         policies = Object.keys(policiesByName);
       } catch (e) {
         // Silently swallow error as policy names aren't required in UI
@@ -42,7 +44,9 @@ export function registerSnapshotsRoutes({
       let repositoryNames: string[];
 
       try {
-        const repositoriesByName = await callAsCurrentUser('snapshot.getRepository', {
+        const {
+          body: repositoriesByName,
+        } = await clusterClient.asCurrentUser.snapshot.getRepository({
           repository: '_all',
         });
         repositoryNames = Object.keys(repositoriesByName);
@@ -53,13 +57,7 @@ export function registerSnapshotsRoutes({
           });
         }
       } catch (e) {
-        if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        return res.internalError({ body: e });
+        return handleEsError({ error: e, response: res });
       }
 
       const snapshots: SnapshotDetails[] = [];
@@ -69,23 +67,27 @@ export function registerSnapshotsRoutes({
       const fetchSnapshotsForRepository = async (repository: string) => {
         try {
           // If any of these repositories 504 they will cost the request significant time.
-          const {
-            responses: fetchedResponses,
-          }: {
-            responses: Array<{
-              repository: 'string';
-              snapshots: SnapshotDetailsEs[];
-            }>;
-          } = await callAsCurrentUser('snapshot.get', {
+          const response = await clusterClient.asCurrentUser.snapshot.get({
             repository,
             snapshot: '_all',
             ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           });
 
+          // @ts-expect-error @elastic/elasticsearch remove this "as unknown" workaround when the types for this endpoint are correct. Track progress at https://github.com/elastic/elastic-client-generator/issues/250.
+          const { responses: fetchedResponses } = response.body;
+
           // Decorate each snapshot with the repository with which it's associated.
+          // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
           fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
+            // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
             fetchedSnapshots.forEach((snapshot) => {
-              snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
+              snapshots.push(
+                deserializeSnapshotDetails(
+                  repository,
+                  snapshot as SnapshotDetailsEs,
+                  managedRepository
+                )
+              );
             });
           });
 
@@ -122,28 +124,27 @@ export function registerSnapshotsRoutes({
       validate: { params: getOneParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
       const { repository, snapshot } = req.params as TypeOf<typeof getOneParamsSchema>;
-      const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
+      const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       try {
-        const {
-          responses: snapshotsResponse,
-        }: {
-          responses: Array<{
-            repository: string;
-            snapshots: SnapshotDetailsEs[];
-            error?: any;
-          }>;
-        } = await callAsCurrentUser('snapshot.get', {
+        const response = await clusterClient.asCurrentUser.snapshot.get({
           repository,
           snapshot: '_all',
           ignore_unavailable: true,
         });
 
+        // @ts-expect-error @elastic/elasticsearch remove this "as unknown" workaround when the types for this endpoint are correct. Track progress at https://github.com/elastic/elastic-client-generator/issues/250.
+        const { responses: snapshotsResponse } = response.body;
+
         const snapshotsList =
           snapshotsResponse && snapshotsResponse[0] && snapshotsResponse[0].snapshots;
+        if (!snapshotsList || snapshotsList.length === 0) {
+          return res.notFound({ body: 'Snapshot not found' });
+        }
         const selectedSnapshot = snapshotsList.find(
+          // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;
 
@@ -153,10 +154,12 @@ export function registerSnapshotsRoutes({
         }
 
         const successfulSnapshots = snapshotsList
+          // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
           .filter(({ state }) => state === 'SUCCESS')
+          // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
           .sort((a, b) => {
-            return +new Date(b.end_time) - +new Date(a.end_time);
-          });
+            return +new Date(b.end_time!) - +new Date(a.end_time!);
+          }) as SnapshotDetailsEs[];
 
         return res.ok({
           body: deserializeSnapshotDetails(
@@ -167,14 +170,7 @@ export function registerSnapshotsRoutes({
           ),
         });
       } catch (e) {
-        if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return res.internalError({ body: e });
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -190,7 +186,7 @@ export function registerSnapshotsRoutes({
   router.post(
     { path: addBasePath('snapshots/bulk_delete'), validate: { body: deleteSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
 
       const response: {
         itemsDeleted: Array<{ snapshot: string; repository: string }>;
@@ -208,7 +204,8 @@ export function registerSnapshotsRoutes({
         for (let i = 0; i < snapshots.length; i++) {
           const { snapshot, repository } = snapshots[i];
 
-          await callAsCurrentUser('snapshot.delete', { snapshot, repository })
+          await clusterClient.asCurrentUser.snapshot
+            .delete({ snapshot, repository })
             .then(() => response.itemsDeleted.push({ snapshot, repository }))
             .catch((e) =>
               response.errors.push({
@@ -220,14 +217,7 @@ export function registerSnapshotsRoutes({
 
         return res.ok({ body: response });
       } catch (e) {
-        if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return res.internalError({ body: e });
+        return handleEsError({ error: e, response: res });
       }
     })
   );

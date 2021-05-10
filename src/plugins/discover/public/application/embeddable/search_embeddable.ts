@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './search_embeddable.scss';
@@ -29,20 +29,19 @@ import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  getServices,
-  IndexPattern,
-  ISearchSource,
-} from '../../kibana_services';
+import { getServices, IndexPattern, ISearchSource } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
-import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import {
+  SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../common';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DiscoverServices } from '../../build_services';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { getDefaultSort } from '../angular/doc_table/lib/get_default_sort';
+import { handleSourceColumnState } from '../angular/helpers';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -62,6 +61,7 @@ interface SearchScope extends ng.IScope {
   totalHitCount?: number;
   isLoading?: boolean;
   showTimeCol?: boolean;
+  useNewFieldsApi?: boolean;
 }
 
 interface SearchEmbeddableConfig {
@@ -162,7 +162,7 @@ export class SearchEmbeddable
       throw new Error('Search scope not defined');
     }
     this.searchInstance = this.$compile(
-      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
+      this.services.uiSettings.get('doc_table:legacy') ? searchTemplate : searchTemplateGrid
     )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
@@ -220,11 +220,16 @@ export class SearchEmbeddable
       this.updateInput({ sort });
     };
 
+    searchScope.isLoading = true;
+
+    const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
+    searchScope.useNewFieldsApi = useNewFieldsApi;
+
     searchScope.addColumn = (columnName: string) => {
       if (!searchScope.columns) {
         return;
       }
-      const columns = columnActions.addColumn(searchScope.columns, columnName);
+      const columns = columnActions.addColumn(searchScope.columns, columnName, useNewFieldsApi);
       this.updateInput({ columns });
     };
 
@@ -232,7 +237,7 @@ export class SearchEmbeddable
       if (!searchScope.columns) {
         return;
       }
-      const columns = columnActions.removeColumn(searchScope.columns, columnName);
+      const columns = columnActions.removeColumn(searchScope.columns, columnName, useNewFieldsApi);
       this.updateInput({ columns });
     };
 
@@ -280,7 +285,7 @@ export class SearchEmbeddable
 
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
-
+    const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
     if (!this.searchScope) return;
 
     const { searchSource } = this.savedSearch;
@@ -298,44 +303,57 @@ export class SearchEmbeddable
         this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
+    if (useNewFieldsApi) {
+      searchSource.removeField('fieldsFromSource');
+      const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
+      searchSource.setField('fields', [fields]);
+    } else {
+      searchSource.removeField('fields');
+      if (this.searchScope.indexPattern) {
+        const fieldNames = this.searchScope.indexPattern.fields.map((field) => field.name);
+        searchSource.setField('fieldsFromSource', fieldNames);
+      }
+    }
 
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();
-    const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
-      defaultMessage: 'Data',
-    });
-    const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-    });
 
-    const inspectorRequest = this.inspectorAdapters.requests!.start(title, {
-      description,
-      searchSessionId,
-    });
-    inspectorRequest.stats(getRequestInspectorStats(searchSource));
-    searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
-      inspectorRequest.json(body);
+    this.searchScope.$apply(() => {
+      this.searchScope!.isLoading = true;
     });
     this.updateOutput({ loading: true, error: undefined });
 
     try {
       // Make the request
-      const resp = await searchSource.fetch({
-        abortSignal: this.abortController.signal,
-        sessionId: searchSessionId,
-      });
+      const { rawResponse: resp } = await searchSource
+        .fetch$({
+          abortSignal: this.abortController.signal,
+          sessionId: searchSessionId,
+          inspector: {
+            adapter: this.inspectorAdapters.requests,
+            title: i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
+              defaultMessage: 'Data',
+            }),
+            description: i18n.translate('discover.embeddable.inspectorRequestDescription', {
+              defaultMessage:
+                'This request queries Elasticsearch to fetch the data for the search.',
+            }),
+          },
+        })
+        .toPromise();
       this.updateOutput({ loading: false, error: undefined });
-
-      // Log response to inspector
-      inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {
         this.searchScope!.hits = resp.hits.hits;
-        this.searchScope!.totalHitCount = resp.hits.total;
+        this.searchScope!.totalHitCount = resp.hits.total as number;
+        this.searchScope!.isLoading = false;
       });
     } catch (error) {
       this.updateOutput({ loading: false, error });
+      this.searchScope.$apply(() => {
+        this.searchScope!.isLoading = false;
+      });
     }
   };
 
@@ -352,7 +370,10 @@ export class SearchEmbeddable
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
-    searchScope.columns = this.input.columns || this.savedSearch.columns;
+    searchScope.columns = handleSourceColumnState(
+      { columns: this.input.columns || this.savedSearch.columns },
+      this.services.core.uiSettings
+    ).columns;
     const savedSearchSort =
       this.savedSearch.sort && this.savedSearch.sort.length
         ? this.savedSearch.sort
@@ -366,6 +387,11 @@ export class SearchEmbeddable
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource!.setField('filter', this.input.filters);
       this.filtersSearchSource!.setField('query', this.input.query);
+      if (this.input.query?.query || this.input.filters?.length) {
+        this.filtersSearchSource!.setField('highlightAll', true);
+      } else {
+        this.filtersSearchSource!.removeField('highlightAll');
+      }
 
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;

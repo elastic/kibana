@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/dev-utils';
+import { fromRoot } from '@kbn/utils';
 import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
@@ -16,7 +17,6 @@ import { loggingSystemMock } from '../logging/logging_system.mock';
 import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { PluginManifest } from './types';
 import { Server } from '../server';
-import { fromRoot } from '../utils';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService } from '@kbn/config';
 

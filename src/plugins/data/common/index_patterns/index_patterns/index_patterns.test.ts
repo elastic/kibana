@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { defaults } from 'lodash';
@@ -25,6 +25,25 @@ let object: any = {};
 function setDocsourcePayload(id: string | null, providedPayload: any) {
   object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
 }
+
+const savedObject = {
+  id: 'id',
+  version: 'version',
+  attributes: {
+    title: 'kibana-*',
+    timeFieldName: '@timestamp',
+    fields: '[]',
+    sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
+    fieldFormatMap: '{"field":{}}',
+    typeMeta: '{}',
+    type: '',
+    runtimeFieldMap:
+      '{"aRuntimeField": { "type": "keyword", "script": {"source": "emit(\'hello\')"}}}',
+    fieldAttrs: '{"aRuntimeField": { "count": 5, "customLabel": "A Runtime Field"}}',
+  },
+  type: 'index-pattern',
+  references: [],
+};
 
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
@@ -219,23 +238,14 @@ describe('IndexPatterns', () => {
   });
 
   test('savedObjectToSpec', () => {
-    const savedObject = {
-      id: 'id',
-      version: 'version',
-      attributes: {
-        title: 'kibana-*',
-        timeFieldName: '@timestamp',
-        fields: '[]',
-        sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
-        fieldFormatMap: '{"field":{}}',
-        typeMeta: '{}',
-        type: '',
-      },
-      type: 'index-pattern',
-      references: [],
-    };
+    const spec = indexPatterns.savedObjectToSpec(savedObject);
+    expect(spec).toMatchSnapshot();
+  });
 
-    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
+  test('correctly composes runtime field', async () => {
+    setDocsourcePayload('id', savedObject);
+    const indexPattern = await indexPatterns.get('id');
+    expect(indexPattern.fields).toMatchSnapshot();
   });
 
   test('failed requests are not cached', async () => {

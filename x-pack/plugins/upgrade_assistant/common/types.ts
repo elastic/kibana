@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
@@ -91,15 +92,21 @@ export interface ReindexOperation extends SavedObjectAttributes {
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
-export enum ReindexWarning {
-  // 6.0 -> 7.0 warnings, now unused
-  allField = 0,
-  booleanFields = 1,
-
-  // 7.0 -> 8.0 warnings
-  apmReindex,
-
-  // 8.0 -> 9.0 warnings
+// 7.0 -> 8.0 warnings
+export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
+export interface ReindexWarning {
+  warningType: ReindexWarningTypes;
+  /**
+   * Optional metadata for deprecations
+   *
+   * @remark
+   * For example, for the "customTypeName" deprecation,
+   * we want to surface the typeName to the user.
+   * For "indexSetting" we want to surface the deprecated settings.
+   */
+  meta?: {
+    [key: string]: string | string[];
+  };
 }
 
 export enum IndexGroup {
@@ -110,13 +117,14 @@ export enum IndexGroup {
 // Telemetry types
 export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
 export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
-export type UIOpenOption = 'overview' | 'cluster' | 'indices';
+export type UIOpenOption = 'overview' | 'cluster' | 'indices' | 'kibana';
 export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
 export interface UIOpen {
   overview: boolean;
   cluster: boolean;
   indices: boolean;
+  kibana: boolean;
 }
 
 export interface UIReindex {
@@ -131,6 +139,7 @@ export interface UpgradeAssistantTelemetrySavedObject {
     overview: number;
     cluster: number;
     indices: number;
+    kibana: number;
   };
   ui_reindex: {
     close: number;
@@ -145,6 +154,7 @@ export interface UpgradeAssistantTelemetry {
     overview: number;
     cluster: number;
     indices: number;
+    kibana: number;
   };
   ui_reindex: {
     close: number;
@@ -184,6 +194,7 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
   reindex?: boolean;
+  deprecatedIndexSettings?: string[];
   /**
    * Indicate what blockers have been detected for calling reindex
    * against this index.

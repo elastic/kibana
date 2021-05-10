@@ -4,7 +4,7 @@
 
 ## SavedObjectTypeRegistry.isMultiNamespace() method
 
-Returns whether the type is multi-namespace (shareable); resolves to `false` if the type is not registered
+Returns whether the type is multi-namespace (shareable \*or\* isolated); resolves to `false` if the type is not registered
 
 <b>Signature:</b>
 

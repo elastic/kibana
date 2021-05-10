@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -21,8 +22,9 @@ import { CreateRulesSchema } from '../../../../../../common/detection_engine/sch
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import {
-  getRulesUrl,
   getDetectionEngineUrl,
+  getRuleDetailsUrl,
+  getRulesUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
@@ -137,7 +139,7 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.scheduleRule]: false,
     [RuleStep.ruleActions]: false,
   });
-  const [{ isLoading, isSaved }, setRule] = useCreateRule();
+  const [{ isLoading, ruleId }, setRule] = useCreateRule();
   const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
   const ruleName = stepsData.current[RuleStep.aboutRule].data?.name;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
@@ -262,9 +264,9 @@ const CreateRulePageComponent: React.FC = () => {
     />
   );
 
-  if (isSaved && ruleName) {
+  if (ruleName && ruleId) {
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
-    history.replace(getRulesUrl());
+    history.replace(getRuleDetailsUrl(ruleId));
     return null;
   }
 

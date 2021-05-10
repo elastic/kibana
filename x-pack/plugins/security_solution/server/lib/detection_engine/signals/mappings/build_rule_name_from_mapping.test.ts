@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sampleDocNoSortId } from '../__mocks__/es_results';
@@ -14,6 +15,7 @@ describe('buildRuleNameFromMapping', () => {
 
   test('rule name defaults to provided if mapping is incomplete', () => {
     const ruleName = buildRuleNameFromMapping({
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       eventSource: sampleDocNoSortId()._source,
       ruleName: 'rule-name',
       ruleNameMapping: 'message',

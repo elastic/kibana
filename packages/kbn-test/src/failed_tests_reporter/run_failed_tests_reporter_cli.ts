@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -11,6 +11,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { run, createFailError, createFlagError } from '@kbn/dev-utils';
 import globby from 'globby';
+import normalize from 'normalize-path';
 
 import { getFailures, TestFailure } from './get_failures';
 import { GithubApi, GithubIssueMini } from './github_api';
@@ -61,7 +62,9 @@ export function runFailedTestsReporterCli() {
         throw createFlagError('Missing --build-url or process.env.BUILD_URL');
       }
 
-      const patterns = flags._.length ? flags._ : DEFAULT_PATTERNS;
+      const patterns = (flags._.length ? flags._ : DEFAULT_PATTERNS).map((p) =>
+        normalize(Path.resolve(p))
+      );
       log.info('Searching for reports at', patterns);
       const reportPaths = await globby(patterns, {
         absolute: true,

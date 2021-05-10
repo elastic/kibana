@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo } from 'react';
@@ -22,6 +23,8 @@ function getEnvironmentOptions(environments: string[]) {
   return [ENVIRONMENT_ALL, ...environmentOptions];
 }
 
+const INITIAL_DATA = { environments: [] };
+
 export function useEnvironmentsFetcher({
   serviceName,
   start,
@@ -31,11 +34,11 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
-  const { data: environments = [], status = 'loading' } = useFetcher(
+  const { data = INITIAL_DATA, status = 'loading' } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/ui_filters/environments',
+          endpoint: 'GET /api/apm/environments',
           params: {
             query: {
               start,
@@ -50,9 +53,9 @@ export function useEnvironmentsFetcher({
   );
 
   const environmentOptions = useMemo(
-    () => getEnvironmentOptions(environments),
-    [environments]
+    () => getEnvironmentOptions(data.environments),
+    [data?.environments]
   );
 
-  return { environments, status, environmentOptions };
+  return { environments: data.environments, status, environmentOptions };
 }

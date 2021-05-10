@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -188,6 +189,23 @@ export const schema: FormSchema<AboutStepRule> = {
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
       {
         defaultMessage: 'MITRE ATT&CK\\u2122',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
+  threatIndicatorPath: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
+      {
+        defaultMessage: 'Indicator prefix override',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
+      {
+        defaultMessage:
+          'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
       }
     ),
     labelAppend: OptionalFieldLabel,

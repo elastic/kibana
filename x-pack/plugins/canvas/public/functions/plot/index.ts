@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set';
 import { groupBy, get, keyBy, map, sortBy } from 'lodash';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-// @ts-expect-error untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';
@@ -81,8 +81,7 @@ export function plotFunctionFactory(
       fn: (input, args) => {
         const seriesStyles: { [key: string]: SeriesStyle } =
           keyBy(args.seriesStyle || [], 'label') || {};
-
-        const sortedRows = sortBy(input.rows, ['x', 'y', 'color', 'size', 'text']);
+        const sortedRows = input.rows;
         const ticks = getTickHash(input.columns, sortedRows);
         const font = args.font ? getFontSpec(args.font) : {};
 

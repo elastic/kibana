@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -12,24 +14,24 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
+  SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUpdateOptions,
-  SavedObjectsUtils,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import {
-  AuditLogger,
-  EventOutcome,
-  SavedObjectAction,
-  savedObjectEvent,
-  SecurityAuditLogger,
-} from '../audit';
-import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import { CheckPrivilegesResponse } from '../authorization/types';
-import { SpacesService } from '../plugin';
+import type { AuditLogger, SecurityAuditLogger } from '../audit';
+import { SavedObjectAction, savedObjectEvent } from '../audit';
+import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
+import type { CheckPrivilegesResponse } from '../authorization/types';
+import type { SpacesService } from '../plugin';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -114,7 +116,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id: optionsWithId.id },
       })
     );
@@ -176,7 +178,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       this.auditLogger.log(
         savedObjectEvent({
           action: SavedObjectAction.CREATE,
-          outcome: EventOutcome.UNKNOWN,
+          outcome: 'unknown',
           savedObject: { type, id },
         })
       )
@@ -203,7 +205,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id },
       })
     );
@@ -211,7 +213,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.delete(type, id, options);
   }
 
-  public async find<T = unknown>(options: SavedObjectsFindOptions) {
+  public async find<T = unknown, A = unknown>(options: SavedObjectsFindOptions) {
     if (
       this.getSpacesService() == null &&
       Array.isArray(options.namespaces) &&
@@ -219,6 +221,11 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     ) {
       throw this.errors.createBadRequestError(
         `_find across namespaces is not permitted when the Spaces plugin is disabled.`
+      );
+    }
+    if (options.pit && Array.isArray(options.namespaces) && options.namespaces.length > 1) {
+      throw this.errors.createBadRequestError(
+        '_find across namespaces is not permitted when using the `pit` option.'
       );
     }
 
@@ -238,7 +245,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
           error: new Error(status),
         })
       );
-      return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+      return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
 
     const typeToNamespacesMap = Array.from(typeMap).reduce<Map<string, string[] | undefined>>(
@@ -247,7 +254,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       new Map()
     );
 
-    const response = await this.baseClient.find<T>({
+    const response = await this.baseClient.find<T, A>({
       ...options,
       typeToNamespacesMap: undefined, // if the user is fully authorized, use `undefined` as the typeToNamespacesMap to prevent privilege escalation
       ...(status === 'partially_authorized' && { typeToNamespacesMap, type: '', namespaces: [] }), // the repository requires that `type` and `namespaces` must be empty if `typeToNamespacesMap` is defined
@@ -393,7 +400,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.UPDATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id },
       })
     );
@@ -439,7 +446,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.ADD_TO_SPACES,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id },
         addToSpaces: namespaces,
       })
@@ -476,7 +483,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.DELETE_FROM_SPACES,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type, id },
         deleteFromSpaces: namespaces,
       })
@@ -517,7 +524,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       this.auditLogger.log(
         savedObjectEvent({
           action: SavedObjectAction.UPDATE,
-          outcome: EventOutcome.UNKNOWN,
+          outcome: 'unknown',
           savedObject: { type, id },
         })
       )
@@ -553,11 +560,76 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       savedObjectEvent({
         action: SavedObjectAction.REMOVE_REFERENCES,
         savedObject: { type, id },
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
       })
     );
 
     return await this.baseClient.removeReferencesTo(type, id, options);
+  }
+
+  public async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions
+  ) {
+    try {
+      const args = { type, options };
+      await this.ensureAuthorized(type, 'open_point_in_time', options?.namespace, {
+        args,
+        // Partial authorization is acceptable in this case because this method is only designed
+        // to be used with `find`, which already allows for partial authorization.
+        requireFullAuthorization: false,
+      });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.OPEN_POINT_IN_TIME,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.OPEN_POINT_IN_TIME,
+        outcome: 'unknown',
+      })
+    );
+
+    return await this.baseClient.openPointInTimeForType(type, options);
+  }
+
+  public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    // We are intentionally omitting a call to `ensureAuthorized` here, because `closePointInTime`
+    // doesn't take in `types`, which are required to perform authorization. As there is no way
+    // to know what index/indices a PIT was created against, we have no practical means of
+    // authorizing users. We've decided we are okay with this because:
+    //   (a) Elasticsearch only requires `read` privileges on an index in order to open/close
+    //       a PIT against it, and;
+    //   (b) By the time a user is accessing this service, they are already authenticated
+    //       to Kibana, which is our closest equivalent to Elasticsearch's `read`.
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.CLOSE_POINT_IN_TIME,
+        outcome: 'unknown',
+      })
+    );
+
+    return await this.baseClient.closePointInTime(id, options);
+  }
+
+  public createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ) {
+    // We don't need to perform an authorization check here or add an audit log, because
+    // `createPointInTimeFinder` is simply a helper that calls `find`, `openPointInTimeForType`,
+    // and `closePointInTime` internally, so authz checks and audit logs will already be applied.
+    return this.baseClient.createPointInTimeFinder(findOptions, {
+      client: this,
+      // Include dependencies last so that subsequent SO client wrappers have their settings applied.
+      ...dependencies,
+    });
   }
 
   private async checkPrivileges(

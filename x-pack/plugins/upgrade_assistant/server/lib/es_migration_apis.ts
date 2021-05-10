@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'src/core/server';
+import { indexSettingDeprecations } from '../../common/constants';
 import {
   DeprecationAPIResponse,
   EnrichedDeprecationInfo,
@@ -17,9 +19,7 @@ export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
-  const {
-    body: deprecations,
-  } = await dataClient.asCurrentUser.migration.deprecations<DeprecationAPIResponse>();
+  const { body: deprecations } = await dataClient.asCurrentUser.migration.deprecations();
 
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations);
@@ -56,6 +56,7 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
             ...d,
             index: indexName,
             reindex: /Index created before/.test(d.message),
+            deprecatedIndexSettings: getIndexSettingDeprecations(d.message),
           } as EnrichedDeprecationInfo)
       )
     );
@@ -72,4 +73,12 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
   } else {
     return combined;
   }
+};
+
+const getIndexSettingDeprecations = (message: string) => {
+  const indexDeprecation = Object.values(indexSettingDeprecations).find(
+    ({ deprecationMessage }) => deprecationMessage === message
+  );
+
+  return indexDeprecation?.settings || [];
 };

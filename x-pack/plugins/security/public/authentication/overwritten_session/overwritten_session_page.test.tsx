@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { OverwrittenSessionPage } from './overwritten_session_page';
+import React from 'react';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { authenticationMock } from '../index.mock';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { AuthenticationStatePage } from '../components/authentication_state_page';
+import { authenticationMock } from '../index.mock';
+import { OverwrittenSessionPage } from './overwritten_session_page';
 
 describe('OverwrittenSessionPage', () => {
   beforeAll(() => {

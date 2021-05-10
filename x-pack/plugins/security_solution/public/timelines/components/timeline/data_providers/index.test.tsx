@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -69,6 +70,60 @@ describe('DataProviders', () => {
       expect(wrapper.find('[data-test-subj="empty"]').last().text()).toEqual(
         'Drop anythinghighlightedhere to build anORquery+ Add field'
       );
+    });
+
+    describe('resizable drop target', () => {
+      const manageTimelineForTesting = {
+        foo: {
+          ...getTimelineDefaults('test'),
+          filterManager,
+        },
+      };
+
+      test('it may be resized vertically via a resize handle', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+              <DataProviders timelineId="test" />
+            </ManageGlobalTimeline>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="dataProviders"]').first()).toHaveStyleRule(
+          'resize',
+          'vertical'
+        );
+      });
+
+      test('it never grows taller than one third (33%) of the view height', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+              <DataProviders timelineId="test" />
+            </ManageGlobalTimeline>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="dataProviders"]').first()).toHaveStyleRule(
+          'max-height',
+          '33vh'
+        );
+      });
+
+      test('it automatically displays scroll bars when the width or height of the data providers exceeds the drop target', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+              <DataProviders timelineId="test" />
+            </ManageGlobalTimeline>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="dataProviders"]').first()).toHaveStyleRule(
+          'overflow',
+          'auto'
+        );
+      });
     });
   });
 });

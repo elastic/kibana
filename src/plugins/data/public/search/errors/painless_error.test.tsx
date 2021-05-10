@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { coreMock } from '../../../../../core/public/mocks';
@@ -27,15 +27,17 @@ describe('PainlessError', () => {
     });
     const component = mount(e.getErrorMessage(startMock.application));
 
-    const scriptElem = findTestSubject(component, 'painlessScript').getDOMNode();
-
     const failedShards = e.attributes?.failed_shards![0];
-    const script = failedShards!.reason.script;
-    expect(scriptElem.textContent).toBe(`Error executing Painless script: '${script}'`);
 
     const stackTraceElem = findTestSubject(component, 'painlessStackTrace').getDOMNode();
-    const stackTrace = failedShards!.reason.script_stack!.join('\n');
+    const stackTrace = failedShards!.reason.script_stack!.splice(-2).join('\n');
     expect(stackTraceElem.textContent).toBe(stackTrace);
+
+    const humanReadableError = findTestSubject(
+      component,
+      'painlessHumanReadableError'
+    ).getDOMNode();
+    expect(humanReadableError.textContent).toBe(failedShards?.reason.caused_by?.reason);
 
     expect(component.find('EuiButton').length).toBe(1);
   });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -16,7 +16,23 @@ import {
   SavedObjectUnsanitizedDoc,
 } from '../../serialization';
 import { MigrateAndConvertFn } from './document_migrator';
-import { SavedObjectsMigrationLogger } from '.';
+
+/**
+ * Error thrown when saved object migrations encounter a corrupt saved object.
+ * Corrupt saved objects cannot be serialized because:
+ *  - there's no `[type]` property which contains the type attributes
+ *  - the type or namespace in the _id doesn't match the `type` or `namespace`
+ *    properties
+ */
+export class CorruptSavedObjectError extends Error {
+  constructor(public readonly rawId: string) {
+    super(`Unable to migrate the corrupt saved object document with _id: '${rawId}'.`);
+
+    // Set the prototype explicitly, see:
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, CorruptSavedObjectError.prototype);
+  }
+}
 
 /**
  * Applies the specified migration function to every saved object document in the list
@@ -29,13 +45,12 @@ import { SavedObjectsMigrationLogger } from '.';
 export async function migrateRawDocs(
   serializer: SavedObjectsSerializer,
   migrateDoc: MigrateAndConvertFn,
-  rawDocs: SavedObjectsRawDoc[],
-  log: SavedObjectsMigrationLogger
+  rawDocs: SavedObjectsRawDoc[]
 ): Promise<SavedObjectsRawDoc[]> {
   const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
   const processedDocs = [];
   for (const raw of rawDocs) {
-    const options = { namespaceTreatment: 'lax' as 'lax' };
+    const options = { namespaceTreatment: 'lax' as const };
     if (serializer.isRawSavedObject(raw, options)) {
       const savedObject = serializer.rawToSavedObject(raw, options);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
@@ -48,11 +63,7 @@ export async function migrateRawDocs(
         )
       );
     } else {
-      log.error(
-        `Error: Unable to migrate the corrupt Saved Object document ${raw._id}. To prevent Kibana from performing a migration on every restart, please delete or fix this document by ensuring that the namespace and type in the document's id matches the values in the namespace and type fields.`,
-        { rawDocument: raw }
-      );
-      processedDocs.push(raw);
+      throw new CorruptSavedObjectError(raw._id);
     }
   }
   return processedDocs;

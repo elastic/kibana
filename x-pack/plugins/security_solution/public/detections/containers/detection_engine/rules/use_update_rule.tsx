@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState, Dispatch } from 'react';
 
-import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { UpdateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 import { transformOutput } from './transforms';
@@ -25,7 +26,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
   const [rule, setRule] = useState<UpdateRulesSchema | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -41,7 +42,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
           }
         } catch (error) {
           if (isSubscribed) {
-            errorToToaster({ title: i18n.RULE_ADD_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.RULE_ADD_FAILURE });
           }
         }
         if (isSubscribed) {
@@ -55,7 +56,7 @@ export const useUpdateRule = (): ReturnUpdateRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, dispatchToaster]);
+  }, [rule, addError]);
 
   return [{ isLoading, isSaved }, setRule];
 };

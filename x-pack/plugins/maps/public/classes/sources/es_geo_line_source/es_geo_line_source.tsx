@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -189,6 +190,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     // Fetch entities
     //
     const entitySearchSource = await this.makeSearchSource(searchFilters, 0);
+    entitySearchSource.setField('trackTotalHits', false);
     const splitField = getField(indexPattern, this._descriptor.splitField);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = { size: MAX_TRACKS };
@@ -249,6 +251,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const tracksSearchFilters = { ...searchFilters };
     delete tracksSearchFilters.buffer;
     const tracksSearchSource = await this.makeSearchSource(tracksSearchFilters, 0);
+    tracksSearchSource.setField('trackTotalHits', false);
     tracksSearchSource.setField('aggs', {
       tracks: {
         filters: {

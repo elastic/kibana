@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IRouter, Logger, CoreSetup } from 'kibana/server';
@@ -77,46 +77,32 @@ export function runRoute(
       },
     },
     router.handleLegacyErrors(async (context, request, response) => {
-      try {
-        const [, { data }] = await core.getStartServices();
-        const uiSettings = await context.core.uiSettings.client.getAll();
-        const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser
-        );
+      const [, { data }] = await core.getStartServices();
+      const uiSettings = await context.core.uiSettings.client.getAll();
+      const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+        context.core.savedObjects.client,
+        context.core.elasticsearch.client.asCurrentUser
+      );
 
-        const tlConfig = getTlConfig({
-          context,
-          request,
-          settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
-          getFunction,
-          getIndexPatternsService: () => indexPatternsService,
-          getStartServices: core.getStartServices,
-          allowedGraphiteUrls: configManager.getGraphiteUrls(),
-          esShardTimeout: configManager.getEsShardTimeout(),
-        });
-        const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
+      const tlConfig = getTlConfig({
+        context,
+        request,
+        settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
+        getFunction,
+        getIndexPatternsService: () => indexPatternsService,
+        getStartServices: core.getStartServices,
+        allowedGraphiteUrls: configManager.getGraphiteUrls(),
+        esShardTimeout: configManager.getEsShardTimeout(),
+      });
+      const chainRunner = chainRunnerFn(tlConfig);
+      const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
 
-        return response.ok({
-          body: {
-            sheet,
-            stats: chainRunner.getStats(),
-          },
-        });
-      } catch (err) {
-        logger.error(`${err.toString()}: ${err.stack}`);
-        // TODO Maybe we should just replace everywhere we throw with Boom? Probably.
-        if (err.isBoom) {
-          throw err;
-        } else {
-          return response.internalError({
-            body: {
-              message: err.toString(),
-            },
-          });
-        }
-      }
+      return response.ok({
+        body: {
+          sheet,
+          stats: chainRunner.getStats(),
+        },
+      });
     })
   );
 }

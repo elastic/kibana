@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { Fragment, useCallback, useEffect, useReducer, useRef } from 'react';
+
+import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { Unit } from '@elastic/datemath';
 import styled from 'styled-components';
 import {
@@ -30,6 +32,7 @@ import { formatDate } from '../../../../common/components/super_date_picker';
 import { State, queryPreviewReducer } from './reducer';
 import { isNoisy } from './helpers';
 import { PreviewCustomQueryHistogram } from './custom_histogram';
+import { FieldValueThreshold } from '../threshold_input';
 
 const Select = styled(EuiSelect)`
   width: ${({ theme }) => theme.eui.euiSuperDatePickerWidth};
@@ -54,7 +57,7 @@ export const initialState: State = {
   showNonEqlHistogram: false,
 };
 
-export type Threshold = { field: string | undefined; value: number } | undefined;
+export type Threshold = FieldValueThreshold | undefined;
 
 interface PreviewQueryProps {
   dataTestSubj: string;
@@ -266,6 +269,16 @@ export const PreviewQuery = ({
     }
   }, [setWarnings, setShowHistogram, ruleType, handlePreviewEqlQuery, startNonEql, timeframe]);
 
+  const previewButtonDisabled = useMemo(() => {
+    return (
+      isMatrixHistogramLoading ||
+      eqlQueryLoading ||
+      isDisabled ||
+      query == null ||
+      (query != null && query.query.query === '' && query.filters.length === 0)
+    );
+  }, [eqlQueryLoading, isDisabled, isMatrixHistogramLoading, query]);
+
   return (
     <>
       <EuiFormRow
@@ -291,9 +304,7 @@ export const PreviewQuery = ({
           <EuiFlexItem grow={false}>
             <PreviewButton
               fill
-              isDisabled={
-                isMatrixHistogramLoading || eqlQueryLoading || isDisabled || query == null
-              }
+              isDisabled={previewButtonDisabled}
               onClick={handlePreviewClicked}
               data-test-subj="queryPreviewButton"
             >

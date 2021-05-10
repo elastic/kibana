@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
@@ -15,6 +16,7 @@ const appCountsSchema: MakeSchemaFrom<AppCounts> = {
 
 const byAppCountsSchema: MakeSchemaFrom<RangeStats['statuses']['cancelled']> = {
   csv: appCountsSchema,
+  csv_searchsource: appCountsSchema,
   PNG: appCountsSchema,
   printable_pdf: appCountsSchema,
 };
@@ -26,6 +28,7 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
   csv: availableTotalSchema,
+  csv_searchsource: availableTotalSchema,
   PNG: availableTotalSchema,
   printable_pdf: {
     ...availableTotalSchema,

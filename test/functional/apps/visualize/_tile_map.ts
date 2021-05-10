@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects([
     'common',
@@ -219,64 +218,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visEditor.setIsFilteredByCollarCheckbox(true);
           await PageObjects.visEditor.clickGo();
         });
-      });
-    });
-
-    describe('zoom warning behavior', function describeIndexTests() {
-      // Zoom warning is only applicable to OSS
-      this.tags(['skipCloud', 'skipFirefox']);
-
-      const waitForLoading = false;
-      let zoomWarningEnabled;
-      let last = false;
-      const toastDefaultLife = 6000;
-
-      before(async function () {
-        await browser.setWindowSize(1280, 1000);
-
-        log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        log.debug('clickTileMap');
-        await PageObjects.visualize.clickTileMap();
-        await PageObjects.visualize.clickNewSearch();
-
-        zoomWarningEnabled = await testSubjects.exists('zoomWarningEnabled');
-        log.debug(`Zoom warning enabled: ${zoomWarningEnabled}`);
-
-        const zoomLevel = 9;
-        for (let i = 0; i < zoomLevel; i++) {
-          await PageObjects.tileMap.clickMapZoomIn();
-        }
-      });
-
-      beforeEach(async function () {
-        await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
-      });
-
-      afterEach(async function () {
-        if (!last) {
-          await PageObjects.common.sleep(toastDefaultLife);
-          await PageObjects.tileMap.clickMapZoomOut(waitForLoading);
-        }
-      });
-
-      it('should show warning at zoom 10', async () => {
-        await testSubjects.existOrFail('maxZoomWarning');
-      });
-
-      it('should continue providing zoom warning if left alone', async () => {
-        await testSubjects.existOrFail('maxZoomWarning');
-      });
-
-      it('should suppress zoom warning if suppress warnings button clicked', async () => {
-        last = true;
-        await PageObjects.visChart.waitForVisualization();
-        await testSubjects.click('suppressZoomWarnings');
-        await PageObjects.tileMap.clickMapZoomOut(waitForLoading);
-        await testSubjects.waitForDeleted('suppressZoomWarnings');
-        await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
-
-        await testSubjects.missingOrFail('maxZoomWarning');
       });
     });
   });

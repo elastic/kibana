@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -23,6 +24,7 @@ import {
   listArray,
   threat_query,
   threat_index,
+  threat_indicator_path,
   threat_mapping,
   threat_language,
   threat_filters,
@@ -35,7 +37,7 @@ import {
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerts/common/alert.ts
+ * @see x-pack/plugins/alerting/common/alert.ts
  */
 export const action = t.exact(
   t.type({
@@ -76,6 +78,7 @@ const StatusTypes = t.union([
   t.literal('failed'),
   t.literal('going to run'),
   t.literal('partial failure'),
+  t.literal('warning'),
 ]);
 
 // TODO: make a ticket
@@ -120,7 +123,7 @@ export const RuleSchema = t.intersection([
     last_success_message: t.string,
     last_success_at: t.string,
     meta: MetaRule,
-    machine_learning_job_id: t.string,
+    machine_learning_job_id: t.array(t.string),
     output_index: t.string,
     query: t.string,
     rule_name_override,
@@ -131,6 +134,7 @@ export const RuleSchema = t.intersection([
     threat_query,
     threat_filters,
     threat_index,
+    threat_indicator_path,
     threat_mapping,
     threat_language,
     timeline_id: t.string,
@@ -251,7 +255,12 @@ export interface RuleStatus {
   failures: RuleInfoStatus[];
 }
 
-export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
+export type RuleStatusType =
+  | 'failed'
+  | 'going to run'
+  | 'succeeded'
+  | 'partial failure'
+  | 'warning';
 export interface RuleInfoStatus {
   alert_id: string;
   status_date: string;

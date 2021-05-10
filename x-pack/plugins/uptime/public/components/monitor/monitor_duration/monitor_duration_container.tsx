@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useEffect } from 'react';
@@ -23,6 +24,8 @@ import { JobStat } from '../../../../../ml/public';
 import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../common/types';
 import { getMLJobId } from '../../../../common/lib';
+import { createExploratoryViewUrl } from '../../../../../observability/public';
+import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const {
@@ -47,6 +50,24 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const dispatch = useDispatch();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
+
+  const { basePath } = useUptimeSettingsContext();
+
+  const exploratoryViewLink = createExploratoryViewUrl(
+    {
+      [`monitor-duration`]: {
+        reportType: 'upd',
+        time: { from: dateRangeStart, to: dateRangeEnd },
+        reportDefinitions: {
+          'monitor.id': [monitorId] as string[],
+        },
+        breakdown: 'observer.geo.name',
+        operationType: 'average',
+        dataType: 'synthetics',
+      },
+    },
+    basePath
+  );
 
   useEffect(() => {
     if (isMLAvailable) {
@@ -76,6 +97,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
       anomalies={anomalies}
       hasMLJob={hasMLJob}
       loading={loading || jobsLoading}
+      exploratoryViewLink={exploratoryViewLink}
       locationDurationLines={durationLines?.locationDurationLines ?? []}
     />
   );

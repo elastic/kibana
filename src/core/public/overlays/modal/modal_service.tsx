@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint-disable max-classes-per-file */
 
 import { i18n as t } from '@kbn/i18n';
-import { EuiModal, EuiConfirmModal, EuiOverlayMask, EuiConfirmModalProps } from '@elastic/eui';
+import { EuiModal, EuiConfirmModal, EuiConfirmModalProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -101,6 +101,7 @@ export interface OverlayModalOpenOptions {
   className?: string;
   closeButtonAriaLabel?: string;
   'data-test-subj'?: string;
+  maxWidth?: boolean | number | string;
 }
 
 interface StartDeps {
@@ -136,13 +137,11 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <EuiOverlayMask>
-            <i18n.Context>
-              <EuiModal {...options} onClose={() => modal.close()}>
-                <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
-              </EuiModal>
-            </i18n.Context>
-          </EuiOverlayMask>,
+          <i18n.Context>
+            <EuiModal {...options} onClose={() => modal.close()}>
+              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+            </EuiModal>
+          </i18n.Context>,
           targetDomElement
         );
 
@@ -198,11 +197,9 @@ export class ModalService {
           };
 
           render(
-            <EuiOverlayMask>
-              <i18n.Context>
-                <EuiConfirmModal {...props} />
-              </i18n.Context>
-            </EuiOverlayMask>,
+            <i18n.Context>
+              <EuiConfirmModal {...props} />
+            </i18n.Context>,
             targetDomElement
           );
         });

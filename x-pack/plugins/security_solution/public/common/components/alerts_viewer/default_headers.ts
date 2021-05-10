@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RowRendererId } from '../../../../common/types/timeline';
@@ -17,53 +18,53 @@ export const alertsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.module',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
     linkField: 'rule.reference',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.dataset',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.category',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'event.severity',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'observer.name',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'host.name',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'message',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'agent.id',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'agent.type',
-    width: DEFAULT_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
 ];
 

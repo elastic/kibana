@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -30,15 +30,41 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.sleep(500);
     }
 
+    async clickQuickButton(visType: string) {
+      log.debug(`DashboardAddPanel.clickQuickButton${visType}`);
+      await testSubjects.click(`dashboardQuickButton${visType}`);
+    }
+
+    async clickMarkdownQuickButton() {
+      await this.clickQuickButton('markdown');
+    }
+
+    async clickMapQuickButton() {
+      await this.clickQuickButton('map');
+    }
+
+    async clickEditorMenuButton() {
+      log.debug('DashboardAddPanel.clickEditorMenuButton');
+      await testSubjects.click('dashboardEditorMenuButton');
+    }
+
+    async clickAggBasedVisualizations() {
+      log.debug('DashboardAddPanel.clickEditorMenuAggBasedMenuItem');
+      await testSubjects.click('dashboardEditorAggBasedMenuItem');
+    }
+
     async clickVisType(visType: string) {
       log.debug('DashboardAddPanel.clickVisType');
       await testSubjects.click(`visType-${visType}`);
     }
 
+    async clickEmbeddableFactoryGroupButton(groupId: string) {
+      log.debug('DashboardAddPanel.clickEmbeddableFactoryGroupButton');
+      await testSubjects.click(`dashboardEditorMenu-${groupId}Group`);
+    }
+
     async clickAddNewEmbeddableLink(type: string) {
-      await testSubjects.click('createNew');
       await testSubjects.click(`createNew-${type}`);
-      await testSubjects.missingOrFail(`createNew-${type}`);
     }
 
     async toggleFilterPopover() {

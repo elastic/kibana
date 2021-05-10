@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -90,6 +90,21 @@ export function generateFilters(
     if (existing) {
       updateExistingFilter(existing, negate);
       filter = existing;
+    } else if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
+      // When dealing with range fields, the filter type depends on the data passed in. If it's an
+      // object we assume that it's a min/max value
+      const tmpIndexPattern = { id: index } as IIndexPattern;
+
+      filter = buildFilter(
+        tmpIndexPattern,
+        fieldObj,
+        FILTERS.RANGE_FROM_VALUE,
+        false,
+        false,
+        value,
+        null,
+        FilterStateStore.APP_STATE
+      );
     } else {
       const tmpIndexPattern = { id: index } as IIndexPattern;
       // exists filter special case:  fieldname = '_exists' and value = fieldname

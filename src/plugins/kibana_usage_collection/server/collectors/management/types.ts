@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export interface UsageStats {
@@ -18,6 +18,7 @@ export interface UsageStats {
   'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
+  'banners:textContent': string;
   /**
    * non-sensitive settings
    */
@@ -27,10 +28,11 @@ export interface UsageStats {
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
+  'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
-  'apm:enableCorrelations': boolean;
+  'observability:enableInspectEsQueries': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -69,12 +71,11 @@ export interface UsageStats {
   'discover:sampleSize': number;
   defaultColumns: string[];
   'context:defaultSize': number;
-  'discover:aggs:terms:size': number;
   'context:tieBreakerFields': string[];
   'discover:sort:defaultOrder': string;
   'context:step': number;
   'accessibility:disableAnimations': boolean;
-  'ml:fileDataVisualizerMaxFileSize': string;
+  'fileUpload:maxFileSize': string;
   'ml:anomalyDetection:results:enableTimeDefaults': boolean;
   'ml:anomalyDetection:results:timeDefaults': string;
   'truncate:maxHeight': number;
@@ -114,4 +115,10 @@ export interface UsageStats {
   'csv:quoteValues': boolean;
   'dateFormat:dow': string;
   dateFormat: string;
+  'banners:placement': string;
+  'banners:textColor': string;
+  'banners:backgroundColor': string;
+  'labs:canvas:enable_ui': boolean;
+  'labs:canvas:useDataService': boolean;
+  'labs:presentation:timeToPresent': boolean;
 }

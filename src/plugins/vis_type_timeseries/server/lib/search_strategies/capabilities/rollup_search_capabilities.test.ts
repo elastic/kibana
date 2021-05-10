@@ -1,22 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Unit } from '@elastic/datemath';
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
 
-import type { VisPayload } from '../../../../common/types';
-import type { ReqFacade } from '../strategies/abstract_search_strategy';
-
 describe('Rollup Search Capabilities', () => {
   const testTimeZone = 'time_zone';
   const testInterval = '10s';
   const rollupIndex = 'rollupIndex';
-  const request = ({} as unknown) as ReqFacade<VisPayload>;
 
   let fieldsCapabilities: Record<string, any>;
   let rollupSearchCaps: RollupSearchCapabilities;
@@ -35,16 +31,19 @@ describe('Rollup Search Capabilities', () => {
       },
     };
 
-    rollupSearchCaps = new RollupSearchCapabilities(request, fieldsCapabilities, rollupIndex);
+    rollupSearchCaps = new RollupSearchCapabilities(
+      { maxBucketsLimit: 2000, timezone: 'UTC' },
+      fieldsCapabilities,
+      rollupIndex
+    );
   });
 
   test('should create instance of RollupSearchRequest', () => {
-    expect(rollupSearchCaps.fieldsCapabilities).toBe(fieldsCapabilities);
     expect(rollupSearchCaps.rollupIndex).toBe(rollupIndex);
   });
 
   test('should return the "timezone" for the rollup request', () => {
-    expect(rollupSearchCaps.searchTimezone).toBe(testTimeZone);
+    expect(rollupSearchCaps.timezone).toBe(testTimeZone);
   });
 
   test('should return the default "interval" for the rollup request', () => {

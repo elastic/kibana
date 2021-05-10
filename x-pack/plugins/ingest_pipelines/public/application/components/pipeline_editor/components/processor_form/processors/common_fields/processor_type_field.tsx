@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, ReactNode } from 'react';
@@ -79,7 +81,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
           const type = typeField.value;
           const processorDescriptor = getProcessorDescriptor(type);
           if (processorDescriptor) {
-            description = processorDescriptor.description || '';
+            description = processorDescriptor.typeDescription || '';
             selectedOptions = [{ label: processorDescriptor.label, value: type }];
           } else {
             // If there is no label for this processor type, just use the type as the label

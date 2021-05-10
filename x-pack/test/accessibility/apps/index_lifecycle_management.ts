@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -27,7 +28,10 @@ const TEST_POLICY_ALL_PHASES = {
 };
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+  const { common, indexLifecycleManagement } = getPageObjects([
+    'common',
+    'indexLifecycleManagement',
+  ]);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const esClient = getService('es');
@@ -51,7 +55,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
       await esClient.ilm.deleteLifecycle({ policy: TEST_POLICY_NAME });
+    });
+
+    it('Create Policy Form', async () => {
+      await retry.waitFor('Index Lifecycle Policy create/edit view to be present', async () => {
+        return testSubjects.isDisplayed('createPolicyButton');
+      });
+
+      // Navigate to create policy page and take snapshot
+      await testSubjects.click('createPolicyButton');
+      await retry.waitFor('Index Lifecycle Policy create/edit view to be present', async () => {
+        return (await testSubjects.getVisibleText('policyTitle')) === 'Create policy';
+      });
+
+      // Fill out form after enabling all phases and take snapshot.
+      await indexLifecycleManagement.fillNewPolicyForm('testPolicy', true, true, false);
+      await a11y.testAppSnapshot();
+    });
+
+    it('Send Request Flyout on New Policy Page', async () => {
+      // Take snapshot of the show request panel
+      await testSubjects.click('requestButton');
+      await a11y.testAppSnapshot();
+
+      // Close panel and save policy
+      await testSubjects.click('euiFlyoutCloseButton');
+      await indexLifecycleManagement.saveNewPolicy();
     });
 
     it('List policies view', async () => {

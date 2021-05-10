@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Fs from 'fs';
@@ -34,9 +34,15 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
     pluginScanDirs: [],
   });
 
+  const target = Path.resolve(sourceDir, 'target');
+
   await runOptimizer(config).pipe(logOptimizerState(log, config)).toPromise();
 
+  // clean up unnecessary files
+  Fs.unlinkSync(Path.resolve(target, 'public/metrics.json'));
+  Fs.unlinkSync(Path.resolve(target, 'public/.kbn-optimizer-cache'));
+
   // move target into buildDir
-  await asyncRename(Path.resolve(sourceDir, 'target'), Path.resolve(buildDir, 'target'));
+  await asyncRename(target, Path.resolve(buildDir, 'target'));
   log.indent(-2);
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import sinon from 'sinon';
@@ -65,6 +65,9 @@ describe('esArchiver: createCreateIndexStream()', () => {
               ],
             },
             Object {
+              "headers": Object {
+                "x-elastic-product-origin": "kibana",
+              },
               "ignore": Array [
                 404,
               ],
@@ -80,6 +83,11 @@ describe('esArchiver: createCreateIndexStream()', () => {
               "index": Array [
                 "actual-index",
               ],
+            },
+            Object {
+              "headers": Object {
+                "x-elastic-product-origin": "kibana",
+              },
             },
           ],
         ]
@@ -117,7 +125,6 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ]);
 
       sinon.assert.calledWith(client.indices.create as sinon.SinonSpy, {
-        method: 'PUT',
         index: 'index',
         body: {
           settings: undefined,

@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useEffect, useState } from 'react';
-import { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
-import { createHashHistory, History } from 'history';
+import type { History } from 'history';
+import { createHashHistory } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
+
+import type { FleetConfigType, FleetStartServices } from '../../plugin';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+
 import {
   ConfigContext,
   FleetStatusProvider,
@@ -21,6 +28,7 @@ import {
   sendSetup,
   useBreadcrumbs,
   useConfig,
+  useStartServices,
 } from './hooks';
 import { Error, Loading } from './components';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
@@ -33,10 +41,7 @@ import { DataStreamApp } from './sections/data_stream';
 import { FleetApp } from './sections/agents';
 import { IngestManagerOverview } from './sections/overview';
 import { ProtectedRoute } from './index';
-import { FleetConfigType, FleetStartServices } from '../../plugin';
-import { UIExtensionsStorage } from './types';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import type { UIExtensionsStorage } from './types';
 import { UIExtensionsContext } from './hooks/use_ui_extension';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
@@ -55,6 +60,7 @@ const Panel = styled(EuiPanel)`
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
+  const { notifications } = useStartServices();
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -77,6 +83,13 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
             if (setupResponse.error) {
               setInitializationError(setupResponse.error);
             }
+            if (setupResponse.data?.nonFatalErrors?.length) {
+              notifications.toasts.addError(setupResponse.data.nonFatalErrors[0], {
+                title: i18n.translate('xpack.fleet.setup.uiPreconfigurationErrorTitle', {
+                  defaultMessage: 'Configuration error',
+                }),
+              });
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -88,7 +101,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, []);
+  }, [notifications.toasts]);
 
   if (isPermissionsLoading || permissionsError) {
     return (

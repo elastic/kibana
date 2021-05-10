@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -14,9 +14,9 @@ export type SortPairArr = [string, string];
 export type SortPair = SortPairArr | SortPairObj;
 export type SortInput = SortPair | SortPair[];
 
-export function isSortable(fieldName: string, indexPattern: IndexPattern) {
+export function isSortable(fieldName: string, indexPattern: IndexPattern): boolean {
   const field = indexPattern.getFieldByName(fieldName);
-  return field && field.sortable;
+  return !!(field && field.sortable);
 }
 
 function createSortObject(

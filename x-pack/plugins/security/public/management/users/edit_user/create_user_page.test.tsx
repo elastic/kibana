@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { render, fireEvent, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import React from 'react';
+
+import { coreMock } from 'src/core/public/mocks';
+
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 import { CreateUserPage } from './create_user_page';
@@ -17,6 +20,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('CreateUserPage', () => {
+  jest.setTimeout(15_000);
+
   it('creates user when submitting form and redirects back', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/create'] });

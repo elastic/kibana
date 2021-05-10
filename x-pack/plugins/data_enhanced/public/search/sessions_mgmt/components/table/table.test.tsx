@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockedKeys } from '@kbn/utility-types/jest';
@@ -12,14 +13,17 @@ import moment from 'moment';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SearchSessionStatus } from '../../../../../common/search';
-import { SessionsConfigSchema } from '../../';
+import { SearchSessionStatus } from '../../../../../../../../src/plugins/data/common';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../../';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper, mockUrls } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { managementPluginMock } from '../../../../../../../../src/plugins/management/public/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;
+let mockPluginsSetup: IManagementSectionsPluginsSetup;
 let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 let api: SearchSessionsMgmtAPI;
@@ -28,6 +32,10 @@ describe('Background Search Session Management Table', () => {
   beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockPluginsSetup = {
+      data: dataPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
+    };
     mockConfig = {
       defaultExpiration: moment.duration('7d'),
       management: {
@@ -78,6 +86,7 @@ describe('Background Search Session Management Table', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtTable
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               timezone="UTC"
               config={mockConfig}
@@ -107,6 +116,7 @@ describe('Background Search Session Management Table', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtTable
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               timezone="UTC"
               config={mockConfig}
@@ -119,10 +129,10 @@ describe('Background Search Session Management Table', () => {
       expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "App",
-          "Namevery background search",
-          "StatusIn progress",
+          "Namevery background search ",
+          "StatusExpired",
           "Created2 Dec, 2020, 00:19:32",
-          "Expiration7 Dec, 2020, 00:19:32",
+          "Expiration--",
           "",
           "",
         ]
@@ -148,6 +158,7 @@ describe('Background Search Session Management Table', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtTable
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               timezone="UTC"
               config={mockConfig}
@@ -180,6 +191,7 @@ describe('Background Search Session Management Table', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtTable
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               timezone="UTC"
               config={mockConfig}

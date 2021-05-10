@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -120,6 +121,7 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
   params: PushToServiceApiParams;
   secrets: Record<string, unknown>;
   logger: Logger;
+  commentFieldKey: string;
 }
 
 export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
@@ -168,4 +170,13 @@ export interface ExternalServiceCommentResponse {
   commentId: string;
   pushedDate: string;
   externalCommentId?: string;
+}
+
+type TypeNullOrUndefined<T> = T | null | undefined;
+export interface ResponseError {
+  error: TypeNullOrUndefined<{
+    message: TypeNullOrUndefined<string>;
+    detail: TypeNullOrUndefined<string>;
+  }>;
+  status: TypeNullOrUndefined<string>;
 }

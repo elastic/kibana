@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { lazy } from 'react';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 
-import { TimeseriesVisParams } from '../../../metrics_fn';
-import { TimeseriesVisData } from '../../../../common/types';
+import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisData, PanelData } from '../../../../common/types';
 
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.
@@ -43,7 +44,7 @@ export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVi
 
 export interface TimeseriesVisProps {
   model: TimeseriesVisParams;
-  onBrush: (gte: string, lte: string) => void;
+  onBrush: (gte: string, lte: string, series: PanelData[]) => Promise<void>;
   onUiState: (
     field: string,
     value: {
@@ -54,4 +55,6 @@ export interface TimeseriesVisProps {
   uiState: PersistedState;
   visData: TimeseriesVisData;
   getConfig: IUiSettingsClient['get'];
+  syncColors: boolean;
+  palettesService: PaletteRegistry;
 }

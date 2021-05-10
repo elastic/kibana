@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,6 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const log = getService('log');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Home page', function () {
     before(async () => {
@@ -48,8 +50,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain(`/data_streams`);
 
         // Verify content
-        const dataStreamList = await testSubjects.exists('dataStreamList');
-        expect(dataStreamList).to.be(true);
+        await retry.waitFor('Wait until dataStream Table is visible.', async () => {
+          return await testSubjects.isDisplayed('dataStreamTable');
+        });
       });
     });
 

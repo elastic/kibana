@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -58,13 +59,13 @@ export function Header({ color, datePicker = null, restrictWidth }: Props) {
       </HeaderMenuPortal>
       <Wrapper restrictWidth={restrictWidth}>
         <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="logoObservability" size="xxl" data-test-subj="observability-logo" />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                 <EuiTitle>
                   <h1>
                     {i18n.translate('xpack.observability.home.title', {

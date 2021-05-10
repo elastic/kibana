@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import glob from 'glob';
@@ -14,9 +14,11 @@ import { Project } from './project';
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
-  new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
   new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/drilldowns/url_drilldown/tsconfig.json'), {
+    name: 'security_solution/cypress',
+  }),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
     name: 'security_solution/cypress',
   }),
@@ -26,10 +28,6 @@ export const PROJECTS = [
   }),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/ftr_e2e/tsconfig.json'), {
     name: 'apm/ftr_e2e',
-    disableTypeCheck: true,
-  }),
-  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/scripts/tsconfig.json'), {
-    name: 'apm/scripts',
     disableTypeCheck: true,
   }),
 

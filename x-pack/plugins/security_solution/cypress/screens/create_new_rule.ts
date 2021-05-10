@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const ABOUT_CONTINUE_BTN = '[data-test-subj="about-continue"]';
@@ -25,6 +26,8 @@ export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
+export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
+
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
@@ -35,8 +38,23 @@ export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
+export const THREAT_MAPPING_COMBO_BOX_INPUT =
+  '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
+
+export const THREAT_MATCH_CUSTOM_QUERY_INPUT =
+  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
+
+export const THREAT_MATCH_INDICATOR_QUERY_INPUT =
+  '[data-test-subj="detectionEngineStepDefineRuleThreatMatchIndices"] [data-test-subj="queryInput"]';
+
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
+
+export const THREAT_MATCH_INDICATOR_INDEX =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
+
+export const THREAT_MATCH_INDICATOR_INDICATOR_INDEX =
+  '[data-test-subj="detectionEngineStepDefineRuleThreatMatchIndices"] [data-test-subj="comboBoxInput"]';
 
 export const THREAT_MATCH_AND_BUTTON = '[data-test-subj="andButton"]';
 
@@ -90,9 +108,8 @@ export const LOOK_BACK_INTERVAL =
 export const LOOK_BACK_TIME_TYPE =
   '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
-export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button';
-
-export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
+export const MACHINE_LEARNING_DROPDOWN_INPUT =
+  '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
@@ -127,6 +144,10 @@ export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
 
 export const RISK_OVERRIDE =
   '[data-test-subj="detectionEngineStepAboutRuleRiskScore-riskOverride"]';
+
+export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
+
+export const RULES_CREATION_PREVIEW = '[data-test-subj="ruleCreationQueryPreview"]';
 
 export const RULE_DESCRIPTION_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleDescription"] [data-test-subj="input"]';

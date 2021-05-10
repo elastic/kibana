@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 
 export type Maybe<T> = T | null;
@@ -69,10 +70,7 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface DocValueFields {
-  field: string;
-  format?: string | null;
-}
+export type DocValueFields = estypes.DocValueField;
 
 export interface Explanation {
   value: number;

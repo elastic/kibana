@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -39,14 +40,19 @@ export const buildLastEventTimeQuery = ({
             allowNoIndices: true,
             index: indicesToQuery.network,
             ignoreUnavailable: true,
+            track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-              aggregations: {
-                last_seen_event: { max: { field: '@timestamp' } },
-              },
-              query: { bool: { should: getIpDetailsFilter(details.ip) } },
-              size: 0,
-              track_total_hits: false,
+              query: { bool: { filter: { bool: { should: getIpDetailsFilter(details.ip) } } } },
+              _source: ['@timestamp'],
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
             },
           };
         }
@@ -57,14 +63,19 @@ export const buildLastEventTimeQuery = ({
             allowNoIndices: true,
             index: indicesToQuery.hosts,
             ignoreUnavailable: true,
+            track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-              aggregations: {
-                last_seen_event: { max: { field: '@timestamp' } },
-              },
               query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
-              size: 0,
-              track_total_hits: false,
+              _source: ['@timestamp'],
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
             },
           };
         }
@@ -75,14 +86,19 @@ export const buildLastEventTimeQuery = ({
           allowNoIndices: true,
           index: indicesToQuery[indexKey],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-            aggregations: {
-              last_seen_event: { max: { field: '@timestamp' } },
-            },
             query: { match_all: {} },
-            size: 0,
-            track_total_hits: false,
+            _source: ['@timestamp'],
+            size: 1,
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                },
+              },
+            ],
           },
         };
       default:

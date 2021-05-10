@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
@@ -17,6 +18,11 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
+import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import {
+  createIndexPatternMock,
+  createIndexPatternsStartMock,
+} from '../../../common/dependency_mocks/index_patterns';
 import { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
@@ -69,6 +75,15 @@ describe('LogEntries search strategy', () => {
           index: 'log-indices-*',
           body: expect.objectContaining({
             fields: expect.arrayContaining(['event.dataset', 'message']),
+            runtime_mappings: {
+              runtime_field: {
+                type: 'keyword',
+                script: {
+                  lang: 'painless',
+                  source: 'emit("runtime value")',
+                },
+              },
+            },
           }),
         }),
       }),
@@ -100,7 +115,7 @@ describe('LogEntries search strategy', () => {
               fields: {
                 '@timestamp': [1605116827143],
                 'event.dataset': ['HIT_DATASET'],
-                MESSAGE_FIELD: ['HIT_MESSAGE'],
+                message: ['HIT_MESSAGE'],
                 'container.id': ['HIT_CONTAINER_ID'],
               },
               sort: [1605116827143 as any, 1 as any], // incorrectly typed as string upstream
@@ -165,7 +180,7 @@ describe('LogEntries search strategy', () => {
             columnId: 'MESSAGE_COLUMN_ID',
             message: [
               {
-                field: 'MESSAGE_FIELD',
+                field: 'message',
                 value: ['HIT_MESSAGE'],
                 highlights: [],
               },
@@ -253,7 +268,10 @@ const createSourceConfigurationMock = (): InfraSource => ({
   configuration: {
     name: 'SOURCE_NAME',
     description: 'SOURCE_DESCRIPTION',
-    logAlias: 'log-indices-*',
+    logIndices: {
+      type: 'index_pattern',
+      indexPatternId: 'test-index-pattern',
+    },
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
     metricsExplorerDefaultView: 'DEFAULT_VIEW',
@@ -277,6 +295,7 @@ const createSourceConfigurationMock = (): InfraSource => ({
       timestamp: 'TIMESTAMP_FIELD',
       tiebreaker: 'TIEBREAKER_FIELD',
     },
+    anomalyThreshold: 20,
   },
 });
 
@@ -307,6 +326,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   uiSettingsClient: uiSettingsServiceMock.createClient(),
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
+  searchSessionsClient: createSearchSessionsClientMock(),
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,
@@ -315,4 +335,33 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
     getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
   },
+  indexPatterns: createIndexPatternsStartMock(0, [
+    createIndexPatternMock({
+      id: 'test-index-pattern',
+      title: 'log-indices-*',
+      timeFieldName: '@timestamp',
+      fields: [
+        {
+          name: 'event.dataset',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'runtime_field',
+          type: 'string',
+          runtimeField: {
+            type: 'keyword',
+            script: {
+              source: 'emit("runtime value")',
+            },
+          },
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    }),
+  ]),
 });

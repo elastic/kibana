@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -18,7 +19,7 @@ import {
   SelectField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, to, from } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 
 const { emptyField } = fieldValidators;
@@ -56,7 +57,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
   index_name_prefix: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNamePrefixFieldLabel',
       {
@@ -70,7 +71,7 @@ const fieldsConfig: FieldsConfig = {
   },
   index_name_format: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNameFormatFieldLabel',
       {
@@ -81,7 +82,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNameFormatFieldHelpText"
         defaultMessage="Date format used to print the parsed date into the index name. Defaults to {value}."
-        values={{ value: <EuiCode inline>{'yyyy-MM-dd'}</EuiCode> }}
+        values={{ value: <EuiCode>{'yyyy-MM-dd'}</EuiCode> }}
       />
     ),
   },
@@ -101,13 +102,13 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsHelpText"
         defaultMessage="Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats. Defaults to {value}."
-        values={{ value: <EuiCode inline>{"yyyy-MM-dd'T'HH:mm:ss.SSSXX"}</EuiCode> }}
+        values={{ value: <EuiCode>{"yyyy-MM-dd'T'HH:mm:ss.SSSXX"}</EuiCode> }}
       />
     ),
   },
   timezone: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.timezoneFieldLabel',
       {
@@ -118,13 +119,13 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.timezoneHelpText"
         defaultMessage="Timezone used when parsing the date and constructing the index name expression. Defaults to {timezone}."
-        values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
+        values={{ timezone: <EuiCode>{'UTC'}</EuiCode> }}
       />
     ),
   },
   locale: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.localeFieldLabel',
       {
@@ -135,7 +136,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexForm.localeHelpText"
         defaultMessage="Locale to use when parsing the date. Useful when parsing month or day names. Defaults to {locale}."
-        values={{ locale: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
+        values={{ locale: <EuiCode>{'ENGLISH'}</EuiCode> }}
       />
     ),
   },

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -74,7 +76,7 @@ export async function createApmTelemetry({
     });
 
     const search: CollectTelemetryParams['search'] = (params) =>
-      unwrapEsResponse(esClient.asInternalUser.search<any>(params));
+      unwrapEsResponse(esClient.asInternalUser.search(params)) as any;
 
     const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
       unwrapEsResponse(esClient.asInternalUser.indices.stats(params));

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../selectors/map_selectors', () => ({}));
@@ -275,6 +276,9 @@ describe('map_actions', () => {
       };
       require('../selectors/map_selectors').getSearchSessionId = () => {
         return searchSessionId;
+      };
+      require('../selectors/map_selectors').getSearchSessionMapBuffer = () => {
+        return undefined;
       };
       require('../selectors/map_selectors').getMapSettings = () => {
         return {

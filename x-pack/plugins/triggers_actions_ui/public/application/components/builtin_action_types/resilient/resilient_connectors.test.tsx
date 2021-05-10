@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import ResilientConnectorFields from './resilient_connectors';
@@ -107,6 +109,26 @@ describe('ResilientActionConnectorFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      actionTypeId: '.resilient',
+      isPreconfigured: false,
+      config: {},
+      secrets: {},
+      isMissingSecrets: true,
+    } as ResilientActionConnector;
+    const wrapper = mountWithIntl(
+      <ResilientConnectorFields
+        action={actionConnector}
+        errors={{ apiUrl: [], apiKeyId: [], apiKeySecret: [], orgId: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
   });
 
   test('should display a message on edit to re-enter credentials', () => {

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import qs from 'querystring';
 import { isEmpty } from 'lodash';
@@ -19,7 +21,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const url = `/api/apm/services/opbeans-java/transactions/charts/distribution?${qs.stringify({
     start: metadata.start,
     end: metadata.end,
-    uiFilters: encodeURIComponent('{}'),
     transactionName: 'APIRestController#stats',
     transactionType: 'request',
   })}`;

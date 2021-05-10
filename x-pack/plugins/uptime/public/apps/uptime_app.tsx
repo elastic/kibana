@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
+import styled from 'styled-components';
+import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
 import {
   KibanaContextProvider,
@@ -30,6 +31,7 @@ import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 export interface UptimeAppColors {
   danger: string;
@@ -59,6 +61,18 @@ export interface UptimeAppProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
 }
+
+const StyledPage = styled(EuiPage)`
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: auto;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+`;
 
 const Application = (props: UptimeAppProps) => {
   const {
@@ -95,12 +109,20 @@ const Application = (props: UptimeAppProps) => {
 
   store.dispatch(setBasePath(basePath));
 
+  const storage = new Storage(window.localStorage);
+
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
         <ReduxProvider store={store}>
           <KibanaContextProvider
-            services={{ ...core, ...plugins, triggersActionsUi: startPlugins.triggersActionsUi }}
+            services={{
+              ...core,
+              ...plugins,
+              storage,
+              data: startPlugins.data,
+              triggersActionsUi: startPlugins.triggersActionsUi,
+            }}
           >
             <Router history={appMountParameters.history}>
               <EuiThemeProvider darkMode={darkMode}>
@@ -108,7 +130,7 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                        <StyledPage data-test-subj="uptimeApp">
                           <RedirectAppLinks application={core.application}>
                             <main>
                               <UptimeAlertsFlyoutWrapper />
@@ -116,7 +138,7 @@ const Application = (props: UptimeAppProps) => {
                               <ActionMenu appMountParameters={appMountParameters} />
                             </main>
                           </RedirectAppLinks>
-                        </EuiPage>
+                        </StyledPage>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>

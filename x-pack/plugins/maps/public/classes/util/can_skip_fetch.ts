@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import _ from 'lodash';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
@@ -53,14 +55,15 @@ export async function canSkipSourceUpdate({
   source,
   prevDataRequest,
   nextMeta,
+  extentAware,
 }: {
   source: ISource;
   prevDataRequest: DataRequest | undefined;
   nextMeta: DataMeta;
+  extentAware: boolean;
 }): Promise<boolean> {
   const timeAware = await source.isTimeAware();
   const refreshTimerAware = await source.isRefreshTimerAware();
-  const extentAware = source.isFilterByMapBounds();
   const isFieldAware = source.isFieldAware();
   const isQueryAware = source.isQueryAware();
   const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
@@ -130,11 +133,12 @@ export async function canSkipSourceUpdate({
   }
 
   let updateDueToPrecisionChange = false;
+  let updateDueToExtentChange = false;
+
   if (isGeoGridPrecisionAware) {
     updateDueToPrecisionChange = !_.isEqual(prevMeta.geogridPrecision, nextMeta.geogridPrecision);
   }
 
-  let updateDueToExtentChange = false;
   if (extentAware) {
     updateDueToExtentChange = updateDueToExtent(prevMeta, nextMeta);
   }

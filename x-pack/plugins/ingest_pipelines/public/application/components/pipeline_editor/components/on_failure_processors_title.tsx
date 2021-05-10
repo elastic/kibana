@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -30,9 +32,7 @@ export const OnFailureProcessorsTitle: FunctionComponent = () => {
           values={{
             learnMoreLink: (
               <EuiLink
-                href={
-                  services.documentation.getEsDocsBasePath() + '/handling-failure-in-pipelines.html'
-                }
+                href={services.documentation.getHandlingFailureUrl()}
                 target="_blank"
                 external
               >

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getJourneySteps, formatSyntheticEvents } from './get_journey_steps';
@@ -13,9 +14,9 @@ describe('getJourneySteps request module', () => {
       expect(formatSyntheticEvents()).toMatchInlineSnapshot(`
         Array [
           "step/end",
-          "stderr",
           "cmd/status",
           "step/screenshot",
+          "journey/browserconsole",
         ]
       `);
     });
@@ -120,9 +121,9 @@ describe('getJourneySteps request module', () => {
           "terms": Object {
             "synthetics.type": Array [
               "step/end",
-              "stderr",
               "cmd/status",
               "step/screenshot",
+              "journey/browserconsole",
             ],
           },
         }

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import './config_panel.scss';
 
-import React, { useMemo, memo, useEffect, useState, useCallback } from 'react';
+import React, { useMemo, memo } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Visualization } from '../../../types';
@@ -14,6 +16,7 @@ import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
 import { removeLayer, appendLayer } from './layer_actions';
 import { ConfigPanelWrapperProps } from './types';
+import { useFocusUpdate } from './use_focus_update';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const activeVisualization = props.visualizationMap[props.activeVisualizationId || ''];
@@ -23,50 +26,6 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
     <LayerPanels {...props} activeVisualization={activeVisualization} />
   ) : null;
 });
-
-function useFocusUpdate(layerIds: string[]) {
-  const [nextFocusedLayerId, setNextFocusedLayerId] = useState<string | null>(null);
-  const [layerRefs, setLayersRefs] = useState<Record<string, HTMLElement | null>>({});
-
-  useEffect(() => {
-    const focusable = nextFocusedLayerId && layerRefs[nextFocusedLayerId];
-    if (focusable) {
-      focusable.focus();
-      setNextFocusedLayerId(null);
-    }
-  }, [layerIds, layerRefs, nextFocusedLayerId]);
-
-  const setLayerRef = useCallback((layerId, el) => {
-    if (el) {
-      setLayersRefs((refs) => ({
-        ...refs,
-        [layerId]: el,
-      }));
-    }
-  }, []);
-
-  const removeLayerRef = useCallback(
-    (layerId) => {
-      if (layerIds.length <= 1) {
-        return setNextFocusedLayerId(layerId);
-      }
-
-      const removedLayerIndex = layerIds.findIndex((l) => l === layerId);
-      const nextFocusedLayerIdId =
-        removedLayerIndex === 0 ? layerIds[1] : layerIds[removedLayerIndex - 1];
-
-      setLayersRefs((refs) => {
-        const newLayerRefs = { ...refs };
-        delete newLayerRefs[layerId];
-        return newLayerRefs;
-      });
-      return setNextFocusedLayerId(nextFocusedLayerIdId);
-    },
-    [layerIds]
-  );
-
-  return { setNextFocusedLayerId, removeLayerRef, setLayerRef };
-}
 
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
@@ -83,7 +42,11 @@ export function LayerPanels(
   } = props;
 
   const layerIds = activeVisualization.getLayerIds(visualizationState);
-  const { setNextFocusedLayerId, removeLayerRef, setLayerRef } = useFocusUpdate(layerIds);
+  const {
+    setNextFocusedId: setNextFocusedLayerId,
+    removeRef: removeLayerRef,
+    registerNewRef: registerNewLayerRef,
+  } = useFocusUpdate(layerIds);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -143,7 +106,7 @@ export function LayerPanels(
           <LayerPanel
             {...props}
             activeVisualization={activeVisualization}
-            setLayerRef={setLayerRef}
+            registerNewLayerRef={registerNewLayerRef}
             key={layerId}
             layerId={layerId}
             layerIndex={layerIndex}
@@ -171,7 +134,7 @@ export function LayerPanels(
         ) : null
       )}
       {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
           <EuiToolTip
             className="eui-fullWidth"
             title={i18n.translate('xpack.lens.xyChart.addLayer', {
@@ -191,6 +154,8 @@ export function LayerPanels(
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
+              fill
+              color="text"
               onClick={() => {
                 const id = generateId();
                 dispatch({

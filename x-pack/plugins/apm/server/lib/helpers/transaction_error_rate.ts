@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
@@ -9,7 +10,7 @@ import { EventOutcome } from '../../../common/event_outcome';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../typings/elasticsearch/aggregations';
+} from '../../../../../../typings/elasticsearch';
 
 export const getOutcomeAggregation = () => ({
   terms: {
@@ -19,6 +20,20 @@ export const getOutcomeAggregation = () => ({
 });
 
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
+
+export const getTimeseriesAggregation = (
+  start: number,
+  end: number,
+  intervalString: string
+) => ({
+  date_histogram: {
+    field: '@timestamp',
+    fixed_interval: intervalString,
+    min_doc_count: 0,
+    extended_bounds: { min: start, max: end },
+  },
+  aggs: { outcomes: getOutcomeAggregation() },
+});
 
 export function calculateTransactionErrorPercentage(
   outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>

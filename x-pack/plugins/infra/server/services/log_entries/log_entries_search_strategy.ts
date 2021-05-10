@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pick } from '@kbn/std';
@@ -17,7 +18,10 @@ import type {
   ISearchStrategy,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
-import { LogSourceColumnConfiguration } from '../../../common/http_api/log_sources';
+import {
+  LogSourceColumnConfiguration,
+  logSourceFieldColumnConfigurationRT,
+} from '../../../common/log_sources';
 import {
   getLogEntryCursorFromHit,
   LogColumn,
@@ -52,6 +56,7 @@ import {
   getSortDirection,
   LogEntryHit,
 } from './queries/log_entries';
+import { resolveLogSourceConfiguration } from '../../../common/log_sources';
 
 type LogEntriesSearchRequest = IKibanaSearchRequest<LogEntriesSearchRequestParams>;
 type LogEntriesSearchResponse = IKibanaSearchResponse<LogEntriesSearchResponsePayload>;
@@ -70,15 +75,26 @@ export const logEntriesSearchStrategyProvider = ({
       defer(() => {
         const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
-        const sourceConfiguration$ = defer(() =>
-          sources.getSourceConfiguration(dependencies.savedObjectsClient, request.params.sourceId)
+        const resolvedSourceConfiguration$ = defer(() =>
+          forkJoin([
+            sources.getSourceConfiguration(
+              dependencies.savedObjectsClient,
+              request.params.sourceId
+            ),
+            data.indexPatterns.indexPatternsServiceFactory(
+              dependencies.savedObjectsClient,
+              dependencies.esClient.asCurrentUser
+            ),
+          ]).pipe(
+            concatMap(([sourceConfiguration, indexPatternsService]) =>
+              resolveLogSourceConfiguration(sourceConfiguration.configuration, indexPatternsService)
+            )
+          )
         ).pipe(take(1), shareReplay(1));
 
         const messageFormattingRules$ = defer(() =>
-          sourceConfiguration$.pipe(
-            map(({ configuration }) =>
-              compileFormattingRules(getBuiltinRules(configuration.fields.message))
-            )
+          resolvedSourceConfiguration$.pipe(
+            map(({ messageField }) => compileFormattingRules(getBuiltinRules(messageField)))
           )
         ).pipe(take(1), shareReplay(1));
 
@@ -90,19 +106,24 @@ export const logEntriesSearchStrategyProvider = ({
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            forkJoin([sourceConfiguration$, messageFormattingRules$]).pipe(
+            forkJoin([resolvedSourceConfiguration$, messageFormattingRules$]).pipe(
               map(
-                ([{ configuration }, messageFormattingRules]): IEsSearchRequest => {
+                ([
+                  { indices, timestampField, tiebreakerField, columns, runtimeMappings },
+                  messageFormattingRules,
+                ]): IEsSearchRequest => {
                   return {
+                    // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                     params: createGetLogEntriesQuery(
-                      configuration.logAlias,
+                      indices,
                       params.startTimestamp,
                       params.endTimestamp,
                       pickRequestCursor(params),
                       params.size + 1,
-                      configuration.fields.timestamp,
-                      configuration.fields.tiebreaker,
-                      messageFormattingRules.requiredFields,
+                      timestampField,
+                      tiebreakerField,
+                      getRequiredFields(params.columns ?? columns, messageFormattingRules),
+                      runtimeMappings,
                       params.query,
                       params.highlightPhrase
                     ),
@@ -118,13 +139,17 @@ export const logEntriesSearchStrategyProvider = ({
           concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies))
         );
 
-        return combineLatest([searchResponse$, sourceConfiguration$, messageFormattingRules$]).pipe(
-          map(([esResponse, { configuration }, messageFormattingRules]) => {
+        return combineLatest([
+          searchResponse$,
+          resolvedSourceConfiguration$,
+          messageFormattingRules$,
+        ]).pipe(
+          map(([esResponse, { columns }, messageFormattingRules]) => {
             const rawResponse = decodeOrThrow(getLogEntriesResponseRT)(esResponse.rawResponse);
 
             const entries = rawResponse.hits.hits
               .slice(0, request.params.size)
-              .map(getLogEntryFromHit(configuration.logColumns, messageFormattingRules));
+              .map(getLogEntryFromHit(request.params.columns ?? columns, messageFormattingRules));
 
             const sortDirection = getSortDirection(pickRequestCursor(request.params));
 
@@ -191,13 +216,13 @@ const getLogEntryFromHit = (
         } else if ('messageColumn' in column) {
           return {
             columnId: column.messageColumn.id,
-            message: messageFormattingRules.format(hit.fields, hit.highlight || {}),
+            message: messageFormattingRules.format(hit.fields ?? {}, hit.highlight || {}),
           };
         } else {
           return {
             columnId: column.fieldColumn.id,
             field: column.fieldColumn.field,
-            value: hit.fields[column.fieldColumn.field] ?? [],
+            value: hit.fields?.[column.fieldColumn.field] ?? [],
             highlights: hit.highlight?.[column.fieldColumn.field] ?? [],
           };
         }
@@ -221,9 +246,9 @@ const pickRequestCursor = (
 
 const getContextFromHit = (hit: LogEntryHit): LogEntryContext => {
   // Get all context fields, then test for the presence and type of the ones that go together
-  const containerId = hit.fields['container.id']?.[0];
-  const hostName = hit.fields['host.name']?.[0];
-  const logFilePath = hit.fields['log.file.path']?.[0];
+  const containerId = hit.fields?.['container.id']?.[0];
+  const hostName = hit.fields?.['host.name']?.[0];
+  const logFilePath = hit.fields?.['log.file.path']?.[0];
 
   if (typeof containerId === 'string') {
     return { 'container.id': containerId };
@@ -243,3 +268,23 @@ function getResponseCursors(entries: LogEntry[]) {
 
   return { topCursor, bottomCursor };
 }
+
+const VIEW_IN_CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
+
+const getRequiredFields = (
+  columns: LogSourceColumnConfiguration[],
+  messageFormattingRules: CompiledLogMessageFormattingRule
+): string[] => {
+  const fieldsFromColumns = columns.reduce<string[]>((accumulatedFields, logColumn) => {
+    if (logSourceFieldColumnConfigurationRT.is(logColumn)) {
+      return [...accumulatedFields, logColumn.fieldColumn.field];
+    }
+    return accumulatedFields;
+  }, []);
+
+  const fieldsFromFormattingRules = messageFormattingRules.requiredFields;
+
+  return Array.from(
+    new Set([...fieldsFromColumns, ...fieldsFromFormattingRules, ...VIEW_IN_CONTEXT_FIELDS])
+  );
+};

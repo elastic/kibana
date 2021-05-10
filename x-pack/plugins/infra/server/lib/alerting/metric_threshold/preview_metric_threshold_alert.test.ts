@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as mocks from './test_mocks';
 import { Comparator, Aggregators, MetricExpressionParams } from './types';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { previewMetricThresholdAlert } from './preview_metric_threshold_alert';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('Previewing the metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
@@ -18,11 +21,12 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '1m',
         alertThrottle: '1m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(30);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(30);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(30);
     });
 
@@ -33,11 +37,12 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '3m',
         alertThrottle: '3m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(10);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(10);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(10);
     });
     test('returns the expected results using a bucket interval longer than the alert interval', async () => {
@@ -47,11 +52,12 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '30s',
         alertThrottle: '30s',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(60);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(60);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(60);
     });
     test('returns the expected results using a throttle interval longer than the alert interval', async () => {
@@ -61,12 +67,37 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '1m',
         alertThrottle: '3m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(30);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(30);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(15);
+    });
+    test('returns the expected results using a notify setting of Only on Status Change', async () => {
+      const [ungroupedResult] = await previewMetricThresholdAlert({
+        ...baseParams,
+        params: {
+          ...baseParams.params,
+          criteria: [
+            {
+              ...baseCriterion,
+              metric: 'test.metric.3',
+            } as MetricExpressionParams,
+          ],
+        },
+        lookback: 'h',
+        alertInterval: '1m',
+        alertThrottle: '1m',
+        alertOnNoData: true,
+        alertNotifyWhen: 'onActionGroupChange',
+      });
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(20);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
+      expect(notifications).toBe(20);
     });
   });
   describe('querying with a groupBy parameter', () => {
@@ -81,16 +112,27 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '1m',
         alertThrottle: '1m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
-      const [firedResultsA, noDataResultsA, errorResultsA, notificationsA] = resultA;
-      expect(firedResultsA).toBe(30);
-      expect(noDataResultsA).toBe(0);
-      expect(errorResultsA).toBe(0);
+      const {
+        fired: firedA,
+        noData: noDataA,
+        error: errorA,
+        notifications: notificationsA,
+      } = resultA;
+      expect(firedA).toBe(30);
+      expect(noDataA).toBe(0);
+      expect(errorA).toBe(0);
       expect(notificationsA).toBe(30);
-      const [firedResultsB, noDataResultsB, errorResultsB, notificationsB] = resultB;
-      expect(firedResultsB).toBe(60);
-      expect(noDataResultsB).toBe(0);
-      expect(errorResultsB).toBe(0);
+      const {
+        fired: firedB,
+        noData: noDataB,
+        error: errorB,
+        notifications: notificationsB,
+      } = resultB;
+      expect(firedB).toBe(60);
+      expect(noDataB).toBe(0);
+      expect(errorB).toBe(0);
       expect(notificationsB).toBe(60);
     });
   });
@@ -111,29 +153,44 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '1m',
         alertThrottle: '1m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(25);
-      expect(noDataResults).toBe(10);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(25);
+      expect(noData).toBe(10);
+      expect(error).toBe(0);
       expect(notifications).toBe(35);
     });
   });
 });
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
-  const metric = body.query.bool.filter[1]?.exists.field;
-  if (body.aggs.groupings) {
-    if (body.aggs.groupings.composite.after) {
-      return mocks.compositeEndResponse;
+
+services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
+  const metric = params?.body.query.bool.filter[1]?.exists.field;
+  if (params?.body.aggs.groupings) {
+    if (params?.body.aggs.groupings.composite.after) {
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(
+        mocks.compositeEndResponse
+      );
     }
-    return mocks.basicCompositePreviewResponse;
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.basicCompositePreviewResponse
+    );
   }
   if (metric === 'test.metric.2') {
-    return mocks.alternateMetricPreviewResponse;
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.alternateMetricPreviewResponse
+    );
   }
-  return mocks.basicMetricPreviewResponse;
+  if (metric === 'test.metric.3') {
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.repeatingMetricPreviewResponse
+    );
+  }
+  return elasticsearchClientMock.createSuccessTransportRequestPromise(
+    mocks.basicMetricPreviewResponse
+  );
 });
 
 const baseCriterion = {
@@ -153,7 +210,7 @@ const config = {
 } as any;
 
 const baseParams = {
-  callCluster: services.callCluster,
+  esClient: services.scopedClusterClient.asCurrentUser,
   params: {
     criteria: [baseCriterion],
     groupBy: undefined,

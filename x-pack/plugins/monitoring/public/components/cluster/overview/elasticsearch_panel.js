@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -48,6 +49,7 @@ import {
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_CCR_READ_EXCEPTIONS,
+  ALERT_LARGE_SHARD_SIZE,
 } from '../../../../common/constants';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
@@ -177,6 +179,8 @@ const NODES_PANEL_ALERTS = [
   ALERT_MISSING_MONITORING_DATA,
 ];
 
+const INDICES_PANEL_ALERTS = [ALERT_LARGE_SHARD_SIZE];
+
 export function ElasticsearchPanel(props) {
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
@@ -301,6 +305,16 @@ export function ElasticsearchPanel(props) {
     );
   }
 
+  let indicesAlertStatus = null;
+  if (shouldShowAlertBadge(alerts, INDICES_PANEL_ALERTS, setupModeContext)) {
+    const alertsList = INDICES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    indicesAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
+
   return (
     <ClusterItemContainer {...props} url="elasticsearch" title="Elasticsearch">
       <EuiFlexGrid columns={4}>
@@ -342,7 +356,7 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <EuiHealth color={statusColorMap[clusterStats.status]} data-test-subj="statusIcon">
-                  <HealthLabel status={clusterStats.status} />
+                  <HealthLabel status={clusterStats.status} product={'es'} />
                 </EuiHealth>
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -410,8 +424,8 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskAvailable">
                 <BytesPercentageUsage
-                  usedBytes={get(nodes, 'fs.available_in_bytes')}
-                  maxBytes={get(nodes, 'fs.total_in_bytes')}
+                  usedBytes={get(nodes, 'fs.available.bytes', get(nodes, 'fs.available_in_bytes'))}
+                  maxBytes={get(nodes, 'fs.total.bytes', get(nodes, 'fs.total_in_bytes'))}
                 />
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -423,8 +437,16 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esJvmHeap">
                 <BytesPercentageUsage
-                  usedBytes={get(nodes, 'jvm.mem.heap_used_in_bytes')}
-                  maxBytes={get(nodes, 'jvm.mem.heap_max_in_bytes')}
+                  usedBytes={get(
+                    nodes,
+                    'jvm.mem.heap.used.bytes',
+                    get(nodes, 'jvm.mem.heap_used_in_bytes')
+                  )}
+                  maxBytes={get(
+                    nodes,
+                    'jvm.mem.heap.max.bytes',
+                    get(nodes, 'jvm.mem.heap_max_in_bytes')
+                  )}
                 />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
@@ -433,29 +455,36 @@ export function ElasticsearchPanel(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <DisabledIfNoDataAndInSetupModeLink
-                  setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeData}
-                  href={goToIndices()}
-                  data-test-subj="esNumberOfIndices"
-                  aria-label={i18n.translate(
-                    'xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel',
-                    {
-                      defaultMessage: 'Elasticsearch Indices: {indicesCount}',
-                      values: { indicesCount: formatNumber(get(indices, 'count'), 'int_commas') },
-                    }
-                  )}
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.esPanel.indicesCountLinkLabel"
-                    defaultMessage="Indices: {indicesCount}"
-                    values={{ indicesCount: formatNumber(get(indices, 'count'), 'int_commas') }}
-                  />
-                </DisabledIfNoDataAndInSetupModeLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <DisabledIfNoDataAndInSetupModeLink
+                      setupModeEnabled={setupMode.enabled}
+                      setupModeData={setupModeData}
+                      href={goToIndices()}
+                      data-test-subj="esNumberOfIndices"
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel',
+                        {
+                          defaultMessage: 'Elasticsearch Indices: {indicesCount}',
+                          values: {
+                            indicesCount: formatNumber(get(indices, 'count'), 'int_commas'),
+                          },
+                        }
+                      )}
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.esPanel.indicesCountLinkLabel"
+                        defaultMessage="Indices: {indicesCount}"
+                        values={{ indicesCount: formatNumber(get(indices, 'count'), 'int_commas') }}
+                      />
+                    </DisabledIfNoDataAndInSetupModeLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {indicesAlertStatus}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -468,7 +497,7 @@ export function ElasticsearchPanel(props) {
                 data-test-subj="esDocumentsCount"
                 className="eui-textBreakWord"
               >
-                {formatNumber(get(indices, 'docs.count'), 'int_commas')}
+                {formatNumber(get(indices, 'docs.total', get(indices, 'docs.count')), 'int_commas')}
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -478,7 +507,10 @@ export function ElasticsearchPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskUsage">
-                {formatNumber(get(indices, 'store.size_in_bytes'), 'byte')}
+                {formatNumber(
+                  get(indices, 'store.size.bytes', get(indices, 'store.size_in_bytes')),
+                  'byte'
+                )}
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle className="eui-textBreakWord">

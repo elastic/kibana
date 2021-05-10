@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint-disable dot-notation */
@@ -71,20 +71,20 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
       const telemetrySender = new TelemetrySender(telemetryService);
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
+      const shouldSendReport = telemetrySender['shouldSendReport']();
 
       expect(telemetryService.getIsOptedIn).toBeCalledTimes(1);
-      expect(shouldSendRerpot).toBe(false);
+      expect(shouldSendReport).toBe(false);
     });
 
     it('returns true if lastReported is undefined', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
+      const shouldSendReport = telemetrySender['shouldSendReport']();
 
       expect(telemetrySender['lastReported']).toBeUndefined();
-      expect(shouldSendRerpot).toBe(true);
+      expect(shouldSendReport).toBe(true);
     });
 
     it('returns true if lastReported passed REPORT_INTERVAL_MS', () => {
@@ -94,8 +94,8 @@ describe('TelemetrySender', () => {
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender['lastReported'] = `${lastReported}`;
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
-      expect(shouldSendRerpot).toBe(true);
+      const shouldSendReport = telemetrySender['shouldSendReport']();
+      expect(shouldSendReport).toBe(true);
     });
 
     it('returns false if lastReported is within REPORT_INTERVAL_MS', () => {
@@ -105,8 +105,8 @@ describe('TelemetrySender', () => {
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender['lastReported'] = `${lastReported}`;
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
-      expect(shouldSendRerpot).toBe(false);
+      const shouldSendReport = telemetrySender['shouldSendReport']();
+      expect(shouldSendReport).toBe(false);
     });
 
     it('returns true if lastReported is malformed', () => {
@@ -114,8 +114,8 @@ describe('TelemetrySender', () => {
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender['lastReported'] = `random_malformed_string`;
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
-      expect(shouldSendRerpot).toBe(true);
+      const shouldSendReport = telemetrySender['shouldSendReport']();
+      expect(shouldSendReport).toBe(true);
     });
 
     describe('sendIfDue', () => {
@@ -126,9 +126,7 @@ describe('TelemetrySender', () => {
         originalFetch = window.fetch;
       });
 
-      // @ts-ignore
       beforeEach(() => (window.fetch = mockFetch = jest.fn()));
-      // @ts-ignore
       afterAll(() => (window.fetch = originalFetch));
 
       it('does not send if already sending', async () => {
@@ -250,9 +248,7 @@ describe('TelemetrySender', () => {
       originalSetInterval = window.setInterval;
     });
 
-    // @ts-ignore
     beforeEach(() => (window.setInterval = mockSetInterval = jest.fn()));
-    // @ts-ignore
     afterAll(() => (window.setInterval = originalSetInterval));
 
     it('calls sendIfDue every 60000 ms', () => {

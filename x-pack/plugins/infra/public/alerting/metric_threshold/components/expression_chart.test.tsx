@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
@@ -9,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { MetricExpression } from '../types';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import React from 'react';
 import { ExpressionChart } from './expression_chart';
 import { act } from 'react-dom/test-utils';
@@ -44,25 +45,23 @@ describe('ExpressionChart', () => {
       fields: [],
     };
 
-    const source: InfraSource = {
+    const source: MetricsSourceConfiguration = {
       id: 'default',
       origin: 'fallback',
       configuration: {
         name: 'default',
         description: 'The default configuration',
-        logColumns: [],
         metricAlias: 'metricbeat-*',
-        logAlias: 'filebeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
         fields: {
           timestamp: '@timestamp',
-          message: ['message'],
           container: 'container.id',
           host: 'host.name',
           pod: 'kubernetes.pod.uid',
           tiebreaker: '_doc',
         },
+        anomalyThreshold: 20,
       },
     };
 

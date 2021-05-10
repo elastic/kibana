@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
@@ -35,6 +36,7 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
       ...response,
       inspect,
       edges: response.rawResponse.hits.hits,
+      // @ts-expect-error doesn't handle case when total TotalHits
       totalCount: response.rawResponse.hits.total,
       pageInfo: {
         activePage: activePage ?? 0,

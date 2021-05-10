@@ -8,6 +8,9 @@
 
 ```typescript
 readonly links: {
+        readonly canvas: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -21,6 +24,7 @@ readonly links: {
             readonly installation: string;
             readonly configuration: string;
             readonly elasticsearchOutput: string;
+            readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
         };
@@ -29,6 +33,10 @@ readonly links: {
         };
         readonly metricbeat: {
             readonly base: string;
+            readonly configure: string;
+            readonly httpEndpoint: string;
+            readonly install: string;
+            readonly start: string;
         };
         readonly enterpriseSearch: {
             readonly base: string;
@@ -48,6 +56,8 @@ readonly links: {
             readonly base: string;
         };
         readonly aggs: {
+            readonly composite: string;
+            readonly composite_missing_bucket: string;
             readonly date_histogram: string;
             readonly date_range: string;
             readonly date_format_pattern: string;
@@ -80,21 +90,31 @@ readonly links: {
             readonly sum: string;
             readonly top_hits: string;
         };
-        readonly runtimeFields: string;
+        readonly runtimeFields: {
+            readonly overview: string;
+            readonly mapping: string;
+        };
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
             readonly painless: string;
             readonly painlessApi: string;
+            readonly painlessLangSpec: string;
             readonly painlessSyntax: string;
+            readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
+        readonly search: {
+            readonly sessions: string;
+        };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
+            readonly fieldFormattersString: string;
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly upgradeAssistant: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
@@ -102,18 +122,24 @@ readonly links: {
         };
         readonly query: {
             readonly eql: string;
-            readonly luceneQuerySyntax: string;
-            readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuerySyntax: string;
+            readonly percolate: string;
+            readonly queryDsl: string;
         };
         readonly date: {
             readonly dateMath: string;
+            readonly dateMathIndexNames: string;
         };
         readonly management: Record<string, string>;
         readonly ml: Record<string, string>;
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
         readonly apis: Readonly<{
+            bulkIndexAlias: string;
+            byteSizeUnits: string;
+            createAutoFollowPattern: string;
+            createFollower: string;
             createIndex: string;
             createSnapshotLifecyclePolicy: string;
             createRoleMapping: string;
@@ -121,13 +147,19 @@ readonly links: {
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
+            cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
+            painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
+            putSnapshotLifecyclePolicy: string;
+            putIndexTemplateV1: string;
             putWatch: string;
+            simulatePipeline: string;
+            timeUnits: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;
@@ -148,5 +180,8 @@ readonly links: {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
+        readonly plugins: Record<string, string>;
+        readonly snapshotRestore: Record<string, string>;
+        readonly ingest: Record<string, string>;
     };
 ```

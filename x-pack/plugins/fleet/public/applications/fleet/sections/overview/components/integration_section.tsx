@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,11 +14,13 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { OverviewPanel } from './overview_panel';
-import { OverviewStats } from './overview_stats';
+
 import { useLink, useGetPackages } from '../../../hooks';
 import { Loading } from '../../agents/components';
 import { installationStatuses } from '../../../../../../common/constants';
+
+import { OverviewStats } from './overview_stats';
+import { OverviewPanel } from './overview_panel';
 
 export const OverviewIntegrationSection: React.FC = () => {
   const { getHref } = useLink();
@@ -30,7 +33,7 @@ export const OverviewIntegrationSection: React.FC = () => {
       (item) => 'savedObject' in item && item.version > item.savedObject.attributes.version
     )?.length ?? 0;
   return (
-    <EuiFlexItem component="section">
+    <EuiFlexItem component="section" data-test-subj="fleet-integrations-section">
       <OverviewPanel
         title={i18n.translate('xpack.fleet.overviewPageIntegrationsPanelTitle', {
           defaultMessage: 'Integrations',

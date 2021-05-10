@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setAutoFreeze } from 'immer';
 import { cloneDeep } from 'lodash';
 import { SerializedPolicy } from '../../../../../common/types';
 import { defaultRolloverAction } from '../../../constants';
-import { deserializer } from './deserializer';
+import { createDeserializer } from './deserializer';
 import { createSerializer } from './serializer';
 import { FormInternal } from '../types';
 
@@ -16,6 +17,8 @@ const isObject = (v: unknown): v is { [key: string]: any } =>
   Object.prototype.toString.call(v) === '[object Object]';
 
 const unknownValue = { some: 'value' };
+
+const deserializer = createDeserializer(false);
 
 const populateWithUnknownEntries = (v: unknown) => {
   if (isObject(v)) {
@@ -38,8 +41,9 @@ const originalPolicy: SerializedPolicy = {
       actions: {
         rollover: {
           max_age: '1d',
-          max_size: '10gb',
+          max_primary_shard_size: '33gb',
           max_docs: 1000,
+          max_size: '10gb',
         },
         forcemerge: {
           index_codec: 'best_compression',
@@ -82,6 +86,7 @@ const originalPolicy: SerializedPolicy = {
           exclude: { test: 'my_value' },
         },
         freeze: {},
+        readonly: {},
         set_priority: {
           priority: 12,
         },
@@ -201,6 +206,14 @@ describe('deserializer and serializer', () => {
     const result = serializer(formInternal);
 
     expect(result.phases.warm!.actions.readonly).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in cold', () => {
+    formInternal._meta.cold.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.readonly).toBeUndefined();
   });
 
   it('allows force merge and readonly actions to be configured in hot with default rollover enabled', () => {

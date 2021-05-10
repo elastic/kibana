@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AnyAction, Dispatch } from 'redux';
@@ -23,6 +24,7 @@ import { updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
+  CLEAR_LAYER_PROP,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
   REMOVE_TRACKED_LAYER_STATE,
@@ -39,9 +41,14 @@ import {
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/descriptor_types';
+import {
+  Attribution,
+  JoinDescriptor,
+  LayerDescriptor,
+  StyleDescriptor,
+} from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
-import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../classes/layers/vector_layer';
 import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
@@ -348,6 +355,23 @@ export function updateLayerLabel(id: string, newLabel: string) {
   };
 }
 
+export function setLayerAttribution(id: string, attribution: Attribution) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'attribution',
+    newValue: attribution,
+  };
+}
+
+export function clearLayerAttribution(id: string) {
+  return {
+    type: CLEAR_LAYER_PROP,
+    id,
+    propName: 'attribution',
+  };
+}
+
 export function updateLayerMinZoom(id: string, minZoom: number) {
   return {
     type: UPDATE_LAYER_PROP,
@@ -536,5 +560,14 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
         dispatch(setLayerVisibility(layer.id, !hiddenLayerIds.includes(layer.id)))
       );
     }
+  };
+}
+
+export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id: layerId,
+    propName: '__areTilesLoaded',
+    newValue: areTilesLoaded,
   };
 }

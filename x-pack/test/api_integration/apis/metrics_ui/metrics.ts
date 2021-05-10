@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -68,8 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(series).to.have.property('id', 'user');
         expect(series).to.have.property('data');
         const datapoint = last(series.data) as any;
-        expect(datapoint).to.have.property('timestamp', 1547571720000);
-        expect(datapoint).to.have.property('value', 0.0018333333333333333);
+        expect(datapoint).to.have.property('timestamp', 1547571780000);
+        expect(datapoint).to.have.property('value', 0.0015);
       });
     });
 

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { delay } from 'bluebird';
@@ -462,6 +462,21 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      */
     async getWelcomeText() {
       return await testSubjects.getVisibleText('global-banner-item');
+    }
+
+    /**
+     * Clicks on an element, and validates that the desired effect has taken place
+     * by confirming the existence of a validator
+     */
+    async clickAndValidate(
+      clickTarget: string,
+      validator: string,
+      isValidatorCssString: boolean = false,
+      topOffset?: number
+    ) {
+      await testSubjects.click(clickTarget, undefined, topOffset);
+      const validate = isValidatorCssString ? find.byCssSelector : testSubjects.exists;
+      await validate(validator);
     }
   }
 

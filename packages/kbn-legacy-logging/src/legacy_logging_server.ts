@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ServerExtType, Server } from '@hapi/hapi';
@@ -88,7 +88,7 @@ export class LegacyLoggingServer {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
-    const { value: loggingConfig } = legacyLoggingConfigSchema.validate({
+    const loggingConfig = legacyLoggingConfigSchema.validate({
       ...legacyLoggingConfig,
       events: {
         ...legacyLoggingConfig.events,

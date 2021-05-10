@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -15,7 +16,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LayerConfig, AxesSettingsConfig } from './types';
+import { XYLayerConfig, AxesSettingsConfig } from './types';
 import { ToolbarPopover } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
@@ -33,7 +34,7 @@ export interface AxisSettingsPopoverProps {
   /**
    * Contains the chart layers
    */
-  layers?: LayerConfig[];
+  layers?: XYLayerConfig[];
   /**
    * Determines the axis title
    */
@@ -70,6 +71,14 @@ export interface AxisSettingsPopoverProps {
    * Toggles the axis title visibility
    */
   toggleAxisTitleVisibility: (axis: AxesSettingsConfigKeys, checked: boolean) => void;
+  /**
+   * Set endzone visibility
+   */
+  setEndzoneVisibility?: (checked: boolean) => void;
+  /**
+   * Flag whether endzones are visible
+   */
+  endzonesVisible?: boolean;
 }
 const popoverConfig = (
   axis: AxesSettingsConfigKeys,
@@ -137,6 +146,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   areGridlinesVisible,
   isAxisTitleVisible,
   toggleAxisTitleVisibility,
+  setEndzoneVisibility,
+  endzonesVisible,
 }) => {
   const [title, setTitle] = useState<string | undefined>(axisTitle);
 
@@ -211,6 +222,20 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         onChange={() => toggleGridlinesVisibility(axis)}
         checked={areGridlinesVisible}
       />
+      {setEndzoneVisibility && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            compressed
+            data-test-subj={`lnsshowEndzones`}
+            label={i18n.translate('xpack.lens.xyChart.showEnzones', {
+              defaultMessage: 'Show partial data markers',
+            })}
+            onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
+            checked={Boolean(endzonesVisible)}
+          />
+        </>
+      )}
     </ToolbarPopover>
   );
 };

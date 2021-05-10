@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getCerts } from './get_certs';
@@ -23,6 +24,7 @@ import { getJourneyScreenshot } from './get_journey_screenshot';
 import { getJourneyDetails } from './get_journey_details';
 import { getNetworkEvents } from './get_network_events';
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
+import { getStepLastSuccessfulStep } from './get_last_successful_step';
 
 export const requests = {
   getCerts,
@@ -41,6 +43,7 @@ export const requests = {
   getIndexStatus,
   getJourneySteps,
   getJourneyFailedSteps,
+  getStepLastSuccessfulStep,
   getJourneyScreenshot,
   getJourneyDetails,
   getNetworkEvents,

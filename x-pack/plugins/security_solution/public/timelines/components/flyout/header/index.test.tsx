@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders, mockIndexNames, mockIndexPattern } from '../../../../common/mock';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { FlyoutHeader } from '.';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -24,12 +26,28 @@ jest.mock('../../../containers/kpis', () => ({
 }));
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 const mockUseTimelineKpiResponse = {
   processCount: 1,
   userCount: 1,
   sourceIpCount: 1,
   hostCount: 1,
+  destinationIpCount: 1,
+};
+
+const mockUseTimelineLargeKpiResponse = {
+  processCount: 1000,
+  userCount: 1000000,
+  sourceIpCount: 1000000000,
+  hostCount: 999,
   destinationIpCount: 1,
 };
 const defaultMocks = {
@@ -64,7 +82,7 @@ describe('Timeline KPIs', () => {
     it('renders the component, labels and values succesfully', async () => {
       const wrapper = mount(
         <TestProviders>
-          <FlyoutHeader timelineId={'timeline-1'} />
+          <FlyoutHeader timelineId={TimelineId.test} />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="siem-timeline-kpis"]').exists()).toEqual(true);
@@ -86,7 +104,7 @@ describe('Timeline KPIs', () => {
     it('renders a loading indicator for values', async () => {
       const wrapper = mount(
         <TestProviders>
-          <FlyoutHeader timelineId={'timeline-1'} />
+          <FlyoutHeader timelineId={TimelineId.test} />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
@@ -102,7 +120,7 @@ describe('Timeline KPIs', () => {
     it('renders labels and the default empty string', async () => {
       const wrapper = mount(
         <TestProviders>
-          <FlyoutHeader timelineId={'timeline-1'} />
+          <FlyoutHeader timelineId={TimelineId.test} />
         </TestProviders>
       );
 
@@ -111,6 +129,31 @@ describe('Timeline KPIs', () => {
       );
       expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
         expect.stringContaining(getEmptyValue())
+      );
+    });
+  });
+
+  describe('when the response contains numbers larger than one thousand', () => {
+    beforeEach(() => {
+      mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineLargeKpiResponse]);
+    });
+    it('formats the numbers correctly', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <FlyoutHeader timelineId={TimelineId.test} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
+        expect.stringContaining('1k')
+      );
+      expect(wrapper.find('[data-test-subj="siem-timeline-user-kpi"]').first().text()).toEqual(
+        expect.stringContaining('1m')
+      );
+      expect(wrapper.find('[data-test-subj="siem-timeline-source-ip-kpi"]').first().text()).toEqual(
+        expect.stringContaining('1b')
+      );
+      expect(wrapper.find('[data-test-subj="siem-timeline-host-kpi"]').first().text()).toEqual(
+        expect.stringContaining('999')
       );
     });
   });

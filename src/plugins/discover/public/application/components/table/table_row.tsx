@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import classNames from 'classnames';
@@ -54,6 +54,30 @@ export function DocViewTableRow({
   const key = field ? field : fieldMapping?.displayName;
   return (
     <tr key={key} data-test-subj={`tableDocViewRow-${key}`}>
+      {typeof onFilter === 'function' && (
+        <td className="kbnDocViewer__buttons">
+          <DocViewTableRowBtnFilterAdd
+            disabled={!fieldMapping || !fieldMapping.filterable}
+            onClick={() => onFilter(fieldMapping, valueRaw, '+')}
+          />
+          <DocViewTableRowBtnFilterRemove
+            disabled={!fieldMapping || !fieldMapping.filterable}
+            onClick={() => onFilter(fieldMapping, valueRaw, '-')}
+          />
+          {typeof onToggleColumn === 'function' && (
+            <DocViewTableRowBtnToggleColumn
+              active={isColumnActive}
+              onClick={onToggleColumn}
+              fieldname={String(key)}
+            />
+          )}
+          <DocViewTableRowBtnFilterExists
+            disabled={!fieldMapping || !fieldMapping.filterable}
+            onClick={() => onFilter('_exists_', field, '+')}
+            scripted={fieldMapping && fieldMapping.scripted}
+          />
+        </td>
+      )}
       <td className="kbnDocViewer__field">
         {field ? (
           <FieldName
@@ -83,26 +107,6 @@ export function DocViewTableRow({
           dangerouslySetInnerHTML={{ __html: value as string }}
         />
       </td>
-      {typeof onFilter === 'function' && (
-        <td className="kbnDocViewer__buttons">
-          <DocViewTableRowBtnFilterAdd
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter(fieldMapping, valueRaw, '+')}
-          />
-          <DocViewTableRowBtnFilterRemove
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter(fieldMapping, valueRaw, '-')}
-          />
-          {typeof onToggleColumn === 'function' && (
-            <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
-          )}
-          <DocViewTableRowBtnFilterExists
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter('_exists_', field, '+')}
-            scripted={fieldMapping && fieldMapping.scripted}
-          />
-        </td>
-      )}
     </tr>
   );
 }

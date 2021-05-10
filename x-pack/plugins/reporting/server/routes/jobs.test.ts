@@ -1,17 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { of } from 'rxjs';
+import { ElasticsearchClient } from 'kibana/server';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
+import {
+  createMockConfigSchema,
+  createMockPluginSetup,
+  createMockReportingCore,
+} from '../test_helpers';
 import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../types';
 import { registerJobInfoRoutes } from './jobs';
 
@@ -23,8 +30,9 @@ describe('GET /api/reporting/jobs/download', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
+  let mockSetupDeps: ReportingInternalSetup;
+  let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
-  const config = createMockConfig(createMockConfigSchema());
   const getHits = (...sources: any) => {
     return {
       hits: {
@@ -38,12 +46,9 @@ describe('GET /api/reporting/jobs/download', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: jest.fn() })
     );
-    core = await createMockReportingCore(config, ({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
+    mockSetupDeps = createMockPluginSetup({
       security: {
         license: {
           isEnabled: () => true,
@@ -64,7 +69,12 @@ describe('GET /api/reporting/jobs/download', () => {
           type: 'gold',
         }),
       },
-    } as unknown) as ReportingInternalSetup);
+    });
+
+    core = await createMockReportingCore(
+      createMockConfigSchema({ roles: { enabled: false } }),
+      mockSetupDeps
+    );
     // @ts-ignore
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({
@@ -81,6 +91,8 @@ describe('GET /api/reporting/jobs/download', () => {
       validLicenses: ['basic', 'gold'],
     } as ExportTypeDefinition);
     core.getExportTypesRegistry = () => exportTypesRegistry;
+
+    mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
   });
 
   afterEach(async () => {
@@ -88,10 +100,7 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('fails on malformed download IDs', async () => {
-    // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.legacy.client = {
-      callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
-    };
+    mockEsClient.search.mockResolvedValueOnce({ body: getHits() } as any);
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -132,42 +141,8 @@ describe('GET /api/reporting/jobs/download', () => {
       );
   });
 
-  it('fails on users without the appropriate role', async () => {
-    // @ts-ignore
-    core.pluginSetupDeps = ({
-      // @ts-ignore
-      ...core.pluginSetupDeps,
-      security: {
-        license: {
-          isEnabled: () => true,
-        },
-        authc: {
-          getCurrentUser: () => ({
-            id: '123',
-            roles: ['peasant'],
-            username: 'Tom Riddle',
-          }),
-        },
-      },
-    } as unknown) as ReportingInternalSetup;
-    registerJobInfoRoutes(core);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener)
-      .get('/api/reporting/jobs/download/dope')
-      .expect(403)
-      .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Sorry, you don't have access to Reporting"`)
-      );
-  });
-
   it('returns 404 if job not found', async () => {
-    // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.legacy.client = {
-      callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
-    };
-
+    mockEsClient.search.mockResolvedValueOnce({ body: getHits() } as any);
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -176,12 +151,9 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('returns a 401 if not a valid job type', async () => {
-    // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.legacy.client = {
-      callAsInternalUser: jest
-        .fn()
-        .mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' }))),
-    };
+    mockEsClient.search.mockResolvedValueOnce({
+      body: getHits({ jobtype: 'invalidJobType' }),
+    } as any);
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -190,14 +162,9 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('when a job is incomplete', async () => {
-    // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.legacy.client = {
-      callAsInternalUser: jest
-        .fn()
-        .mockReturnValue(
-          Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' }))
-        ),
-    };
+    mockEsClient.search.mockResolvedValueOnce({
+      body: getHits({ jobtype: 'unencodedJobType', status: 'pending' }),
+    } as any);
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -210,18 +177,13 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('when a job fails', async () => {
-    // @ts-ignore
-    core.pluginSetupDeps.elasticsearch.legacy.client = {
-      callAsInternalUser: jest.fn().mockReturnValue(
-        Promise.resolve(
-          getHits({
-            jobtype: 'unencodedJobType',
-            status: 'failed',
-            output: { content: 'job failure message' },
-          })
-        )
-      ),
-    };
+    mockEsClient.search.mockResolvedValueOnce({
+      body: getHits({
+        jobtype: 'unencodedJobType',
+        status: 'failed',
+        output: { content: 'job failure message' },
+      }),
+    } as any);
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -235,7 +197,7 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   describe('successful downloads', () => {
-    const getCompleteHits = async ({
+    const getCompleteHits = ({
       jobType = 'unencodedJobType',
       outputContent = 'job output content',
       outputContentType = 'text/plain',
@@ -252,11 +214,7 @@ describe('GET /api/reporting/jobs/download', () => {
     };
 
     it('when a known job-type is complete', async () => {
-      const hits = getCompleteHits();
-      // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.legacy.client = {
-        callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
-      };
+      mockEsClient.search.mockResolvedValueOnce({ body: getCompleteHits() } as any);
       registerJobInfoRoutes(core);
 
       await server.start();
@@ -268,11 +226,7 @@ describe('GET /api/reporting/jobs/download', () => {
     });
 
     it('succeeds when security is not there or disabled', async () => {
-      const hits = getCompleteHits();
-      // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.legacy.client = {
-        callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
-      };
+      mockEsClient.search.mockResolvedValueOnce({ body: getCompleteHits() } as any);
 
       // @ts-ignore
       core.pluginSetupDeps.security = null;
@@ -289,14 +243,12 @@ describe('GET /api/reporting/jobs/download', () => {
     });
 
     it(`doesn't encode output-content for non-specified job-types`, async () => {
-      const hits = getCompleteHits({
-        jobType: 'unencodedJobType',
-        outputContent: 'test',
-      });
-      // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.legacy.client = {
-        callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
-      };
+      mockEsClient.search.mockResolvedValueOnce({
+        body: getCompleteHits({
+          jobType: 'unencodedJobType',
+          outputContent: 'test',
+        }),
+      } as any);
       registerJobInfoRoutes(core);
 
       await server.start();
@@ -308,15 +260,13 @@ describe('GET /api/reporting/jobs/download', () => {
     });
 
     it(`base64 encodes output content for configured jobTypes`, async () => {
-      const hits = getCompleteHits({
-        jobType: 'base64EncodedJobType',
-        outputContent: 'test',
-        outputContentType: 'application/pdf',
-      });
-      // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.legacy.client = {
-        callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
-      };
+      mockEsClient.search.mockResolvedValueOnce({
+        body: getCompleteHits({
+          jobType: 'base64EncodedJobType',
+          outputContent: 'test',
+          outputContentType: 'application/pdf',
+        }),
+      } as any);
       registerJobInfoRoutes(core);
 
       await server.start();
@@ -329,15 +279,13 @@ describe('GET /api/reporting/jobs/download', () => {
     });
 
     it('refuses to return unknown content-types', async () => {
-      const hits = getCompleteHits({
-        jobType: 'unencodedJobType',
-        outputContent: 'alert("all your base mine now");',
-        outputContentType: 'application/html',
-      });
-      // @ts-ignore
-      core.pluginSetupDeps.elasticsearch.legacy.client = {
-        callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
-      };
+      mockEsClient.search.mockResolvedValueOnce({
+        body: getCompleteHits({
+          jobType: 'unencodedJobType',
+          outputContent: 'alert("all your base mine now");',
+          outputContentType: 'application/html',
+        }),
+      } as any);
       registerJobInfoRoutes(core);
 
       await server.start();
@@ -351,6 +299,40 @@ describe('GET /api/reporting/jobs/download', () => {
             statusCode: 400,
           });
         });
+    });
+  });
+
+  describe('Deprecated: role-based access control', () => {
+    it('fails on users without the appropriate role', async () => {
+      const deprecatedConfig = createMockConfigSchema({ roles: { enabled: true } });
+      core = await createMockReportingCore(deprecatedConfig, mockSetupDeps);
+      // @ts-ignore
+      core.pluginSetupDeps = ({
+        // @ts-ignore
+        ...core.pluginSetupDeps,
+        security: {
+          license: {
+            isEnabled: () => true,
+          },
+          authc: {
+            getCurrentUser: () => ({
+              id: '123',
+              roles: ['peasant'],
+              username: 'Tom Riddle',
+            }),
+          },
+        },
+      } as unknown) as ReportingInternalSetup;
+      registerJobInfoRoutes(core);
+
+      await server.start();
+
+      await supertest(httpSetup.server.listener)
+        .get('/api/reporting/jobs/download/dope')
+        .expect(403)
+        .then(({ body }) =>
+          expect(body.message).toMatchInlineSnapshot(`"Sorry, you don't have access to Reporting"`)
+        );
     });
   });
 });

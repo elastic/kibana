@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { take } from 'rxjs/operators';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, Logger } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginStart } from '../../licensing/server';
@@ -26,14 +26,17 @@ interface StartDeps {
 }
 
 export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDeps> {
+  private readonly logger: Logger;
   private securitySetup?: SecurityPluginSetup;
   private beatsLibs?: CMServerLibs;
 
   constructor(
     private readonly initializerContext: PluginInitializerContext<BeatsManagementConfigType>
-  ) {}
+  ) {
+    this.logger = initializerContext.logger.get();
+  }
 
-  public async setup(core: CoreSetup<StartDeps>, { features, security }: SetupDeps) {
+  public setup(core: CoreSetup<StartDeps>, { features, security }: SetupDeps) {
     this.securitySetup = security;
 
     const router = core.http.createRouter<BeatsManagementRequestHandlerContext>();
@@ -63,8 +66,8 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
     return {};
   }
 
-  public async start({ elasticsearch }: CoreStart, { licensing }: StartDeps) {
-    const config = await this.initializerContext.config.create().pipe(take(1)).toPromise();
+  public start({ elasticsearch }: CoreStart, { licensing }: StartDeps) {
+    const config = this.initializerContext.config.get();
     const logger = this.initializerContext.logger.get();
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
 
@@ -77,7 +80,9 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
       kibanaVersion,
     });
 
-    await this.beatsLibs.database.putTemplate(INDEX_NAMES.BEATS, beatsIndexTemplate);
+    this.beatsLibs.database.putTemplate(INDEX_NAMES.BEATS, beatsIndexTemplate).catch((e) => {
+      this.logger.error(`Error create beats template: ${e.message}`);
+    });
 
     return {};
   }

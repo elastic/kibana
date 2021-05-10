@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { StorybookConfig } from '@storybook/core/types';
@@ -13,5 +13,15 @@ export const defaultConfig: StorybookConfig = {
   stories: ['../**/*.stories.tsx'],
   typescript: {
     reactDocgen: false,
+  },
+  webpackFinal: (config, options) => {
+    if (process.env.CI) {
+      config.parallelism = 4;
+      config.cache = true;
+    }
+
+    config.node = { fs: 'empty' };
+
+    return config;
   },
 };

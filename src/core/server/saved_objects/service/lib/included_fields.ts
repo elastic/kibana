@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 function toArray(value: string | string[]): string[] {
@@ -12,7 +12,10 @@ function toArray(value: string | string[]): string[] {
 /**
  * Provides an array of paths for ES source filtering
  */
-export function includedFields(type: string | string[] = '*', fields?: string[] | string) {
+export function includedFields(
+  type: string | string[] = '*',
+  fields?: string[] | string
+): string[] | undefined {
   if (!fields || fields.length === 0) {
     return;
   }

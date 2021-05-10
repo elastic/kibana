@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
@@ -34,7 +35,7 @@ import {
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
-  toggleExpandedEvent,
+  toggleDetailPanel,
   unPinEvent,
   updateAutoSaveMsg,
   updateColumns,
@@ -59,6 +60,7 @@ import {
   updateTitleAndDescription,
   upsertColumn,
   toggleModalSaveTimeline,
+  updateEqlOptions,
 } from './actions';
 import {
   addNewTimeline,
@@ -98,11 +100,12 @@ import {
   updateSavedQuery,
   updateGraphEventId,
   updateFilters,
+  updateTimelineDetailsPanel,
   updateTimelineEventType,
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -129,6 +132,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         dataProviders,
         dateRange,
         excludedRowRendererIds,
+        expandedDetail = {},
         show,
         columns,
         itemsPerPage,
@@ -147,6 +151,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           dataProviders,
           dateRange,
           excludedRowRendererIds,
+          expandedDetail,
           filters,
           id,
           itemsPerPage,
@@ -177,22 +182,19 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { tabType, timelineId, event = {} }) => {
-    const expandedTabType = tabType ?? TimelineTabs.query;
-    return {
-      ...state,
-      timelineById: {
-        ...state.timelineById,
-        [timelineId]: {
-          ...state.timelineById[timelineId],
-          expandedEvent: {
-            ...state.timelineById[timelineId].expandedEvent,
-            [expandedTabType]: event,
-          },
+  .case(toggleDetailPanel, (state, action) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [action.timelineId]: {
+        ...state.timelineById[action.timelineId],
+        expandedDetail: {
+          ...state.timelineById[action.timelineId].expandedDetail,
+          ...updateTimelineDetailsPanel(action),
         },
       },
-    };
-  })
+    },
+  }))
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
     timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
@@ -524,6 +526,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         activeTab,
+        prevActiveTab: state.timelineById[id].activeTab,
       },
     },
   }))
@@ -534,6 +537,19 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         showSaveModal: showModalSaveTimeline,
+      },
+    },
+  }))
+  .case(updateEqlOptions, (state, { id, field, value }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        eqlOptions: {
+          ...(state.timelineById[id].eqlOptions ?? {}),
+          [field]: value,
+        },
       },
     },
   }))

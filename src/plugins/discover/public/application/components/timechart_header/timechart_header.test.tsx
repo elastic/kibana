@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -12,6 +12,7 @@ import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
 import { EuiIconTip } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { DataPublicPluginStart } from '../../../../../data/public';
 
 describe('timechart header', function () {
   let props: TimechartHeaderProps;
@@ -19,10 +20,18 @@ describe('timechart header', function () {
 
   beforeAll(() => {
     props = {
-      timeRange: {
-        from: 'May 14, 2020 @ 11:05:13.590',
-        to: 'May 14, 2020 @ 11:20:13.590',
-      },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              getTime: () => {
+                return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+              },
+            },
+          },
+        },
+      } as DataPublicPluginStart,
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       stateInterval: 's',
       options: [
         {
@@ -70,10 +79,10 @@ describe('timechart header', function () {
     component = mountWithIntl(<TimechartHeader {...props} />);
     const dropdown = findTestSubject(component, 'discoverIntervalSelect');
     expect(dropdown.length).toBe(1);
-    // @ts-ignore
+    // @ts-expect-error
     const values = dropdown.find('option').map((option) => option.prop('value'));
     expect(values).toEqual(['auto', 'ms', 's']);
-    // @ts-ignore
+    // @ts-expect-error
     const labels = dropdown.find('option').map((option) => option.text());
     expect(labels).toEqual(['Auto', 'Millisecond', 'Second']);
   });

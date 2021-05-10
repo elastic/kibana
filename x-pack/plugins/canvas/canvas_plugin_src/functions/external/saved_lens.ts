@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
@@ -16,6 +17,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
+import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;
@@ -88,6 +90,31 @@ export function savedLens(): ExpressionFunctionDefinition<
         embeddableType: EmbeddableTypes.lens,
         generatedAt: Date.now(),
       };
+    },
+    extract(state) {
+      const refName = 'savedLens.id';
+      const references: SavedObjectReference[] = [
+        {
+          name: refName,
+          type: 'lens',
+          id: state.id[0] as string,
+        },
+      ];
+      return {
+        state: {
+          ...state,
+          id: [refName],
+        },
+        references,
+      };
+    },
+
+    inject(state, references) {
+      const reference = references.find((ref) => ref.name === 'savedLens.id');
+      if (reference) {
+        state.id[0] = reference.id;
+      }
+      return state;
     },
   };
 }

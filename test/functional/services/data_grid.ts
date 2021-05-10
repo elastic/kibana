@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { chunk } from 'lodash';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
@@ -22,6 +23,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
+  const retry = getService('retry');
 
   class DataGrid {
     async getDataGridTableData(): Promise<TabbedGridData> {
@@ -31,14 +33,11 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const columns = $('.euiDataGridHeaderCell__content')
         .toArray()
         .map((cell) => $(cell).text());
-      const rows = $.findTestSubjects('dataGridRow')
+      const cells = $.findTestSubjects('dataGridRowCell')
         .toArray()
-        .map((row) =>
-          $(row)
-            .find('.euiDataGridRowCell__truncate')
-            .toArray()
-            .map((cell) => $(cell).text())
-        );
+        .map((cell) => $(cell).text());
+
+      const rows = chunk(cells, columns.length);
 
       return {
         columns,
@@ -56,20 +55,18 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       cellDataTestSubj: string
     ): Promise<string[][]> {
       const $ = await element.parseDomContent();
-      return $('[data-test-subj="dataGridRow"]')
+      const columnNumber = $('.euiDataGridHeaderCell__content').length;
+      const cells = $.findTestSubjects('dataGridRowCell')
         .toArray()
-        .map((row) =>
-          $(row)
-            .findTestSubjects('dataGridRowCell')
-            .toArray()
-            .map((cell) =>
-              $(cell)
-                .findTestSubject(cellDataTestSubj)
-                .text()
-                .replace(/&nbsp;/g, '')
-                .trim()
-            )
+        .map((cell) =>
+          $(cell)
+            .findTestSubject(cellDataTestSubj)
+            .text()
+            .replace(/&nbsp;/g, '')
+            .trim()
         );
+
+      return chunk(cells, columnNumber);
     }
 
     /**
@@ -90,62 +87,81 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
      * @param columnIndex column index starting from 1 (1 means 1st column)
      */
     public async getCellElement(rowIndex: number, columnIndex: number) {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      const columnNumber = $('.euiDataGridHeaderCell__content').length;
       return await find.byCssSelector(
-        `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRow"]:nth-of-type(${
-          rowIndex + 1
-        })
-        [data-test-subj="dataGridRowCell"]:nth-of-type(${columnIndex})`
+        `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"]:nth-of-type(${
+          columnNumber * (rowIndex - 1) + columnIndex + 1
+        })`
       );
     }
-    public async getFields() {
-      const rows = await find.allByCssSelector('.euiDataGridRow');
 
-      const result = [];
-      for (const row of rows) {
-        const cells = await row.findAllByClassName('euiDataGridRowCell__truncate');
-        const cellsText = [];
-        let cellIdx = 0;
-        for (const cell of cells) {
-          if (cellIdx > 0) {
-            cellsText.push(await cell.getVisibleText());
-          }
-          cellIdx++;
+    public async getDocCount(): Promise<number> {
+      const grid = await find.byCssSelector('[data-document-number]');
+      return Number(await grid.getAttribute('data-document-number'));
+    }
+
+    public async getFields() {
+      const cells = await find.allByCssSelector('.euiDataGridRowCell');
+
+      const rows: string[][] = [];
+      let rowIdx = -1;
+      for (const cell of cells) {
+        if (await cell.elementHasClass('euiDataGridRowCell--firstColumn')) {
+          // first column contains expand icon
+          rowIdx++;
+          rows[rowIdx] = [];
         }
-        result.push(cellsText);
+        if (!(await cell.elementHasClass('euiDataGridRowCell--controlColumn'))) {
+          rows[rowIdx].push(await cell.getVisibleText());
+        }
       }
-      return result;
+      return rows;
     }
 
     public async getTable(selector: string = 'docTable') {
       return await testSubjects.find(selector);
     }
 
-    public async getBodyRows(): Promise<WebElementWrapper[]> {
-      const table = await this.getTable();
-      return await table.findAllByTestSubject('dataGridRow');
+    public async getBodyRows(): Promise<WebElementWrapper[][]> {
+      return this.getDocTableRows();
     }
 
+    /**
+     * Returns an array of rows (which are array of cells)
+     */
     public async getDocTableRows() {
       const table = await this.getTable();
-      return await table.findAllByTestSubject('dataGridRow');
+      if (!table) {
+        return [];
+      }
+      const cells = await table.findAllByCssSelector('.euiDataGridRowCell');
+
+      const rows: WebElementWrapper[][] = [];
+      let rowIdx = -1;
+      for (const cell of cells) {
+        if (await cell.elementHasClass('euiDataGridRowCell--firstColumn')) {
+          rowIdx++;
+          rows[rowIdx] = [];
+        }
+        rows[rowIdx].push(cell);
+      }
+      return rows;
     }
 
-    public async getAnchorRow(): Promise<WebElementWrapper> {
-      const table = await this.getTable();
-      return await table.findByTestSubject('~docTableAnchorRow');
-    }
-
-    public async getRow(options: SelectOptions): Promise<WebElementWrapper> {
-      return options.isAnchorRow
-        ? await this.getAnchorRow()
-        : (await this.getBodyRows())[options.rowIndex];
+    /**
+     * Returns an array of cells for that row
+     */
+    public async getRow(options: SelectOptions): Promise<WebElementWrapper[]> {
+      return (await this.getBodyRows())[options.rowIndex];
     }
 
     public async clickRowToggle(
       options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
     ): Promise<void> {
       const row = await this.getRow(options);
-      const toggle = await row.findByTestSubject('~docTableExpandToggleColumn');
+      const toggle = await row[0];
       await toggle.click();
     }
 
@@ -162,7 +178,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const textArr = [];
       let idx = 0;
       for (const cell of result) {
-        if (idx > 0) {
+        if (idx > 1) {
           textArr.push(await cell.getVisibleText());
         }
         idx++;
@@ -177,14 +193,39 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       return await detailsRow.findAllByTestSubject('~docTableRowAction');
     }
 
-    public async clickDocSortAsc() {
-      await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      await find.clickByButtonText('Sort New-Old');
+    public async openColMenuByField(field: string) {
+      await retry.waitFor('header cell action being displayed', async () => {
+        // to prevent flakiness
+        await testSubjects.click(`dataGridHeaderCell-${field}`);
+        return await testSubjects.exists(`dataGridHeaderCellActionGroup-${field}`);
+      });
     }
 
-    public async clickDocSortDesc() {
-      await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      await find.clickByButtonText('Sort Old-New');
+    public async clickDocSortAsc(field?: string, sortText = 'Sort New-Old') {
+      if (field) {
+        await this.openColMenuByField(field);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      }
+      await find.clickByButtonText(sortText);
+    }
+
+    public async clickDocSortDesc(field?: string, sortText = 'Sort Old-New') {
+      if (field) {
+        await this.openColMenuByField(field);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      }
+      await find.clickByButtonText(sortText);
+    }
+
+    public async clickRemoveColumn(field?: string) {
+      if (field) {
+        await this.openColMenuByField(field);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      }
+      await find.clickByButtonText('Remove column');
     }
     public async getDetailsRow(): Promise<WebElementWrapper> {
       const detailRows = await this.getDetailsRows();
@@ -227,6 +268,10 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    public async hasNoResults() {
+      return await find.existsByCssSelector('.euiDataGrid__noResults');
     }
   }
 

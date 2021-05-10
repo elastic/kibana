@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -12,13 +12,13 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
-import { MetricsItemsSchema } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 
 interface AggRowProps {
   disableDelete: boolean;
-  model: MetricsItemsSchema;
-  siblings: MetricsItemsSchema[];
+  model: Metric;
+  siblings: Metric[];
   dragHandleProps: DragHandleProps;
   children: React.ReactNode;
   onAdd: () => void;
@@ -28,7 +28,7 @@ interface AggRowProps {
 export function AggRow(props: AggRowProps) {
   let iconType = 'eyeClosed';
   let iconColor = 'subdued';
-  const lastSibling = last(props.siblings) as MetricsItemsSchema;
+  const lastSibling = last(props.siblings) as Metric;
 
   if (lastSibling.id === props.model.id) {
     iconType = 'eye';

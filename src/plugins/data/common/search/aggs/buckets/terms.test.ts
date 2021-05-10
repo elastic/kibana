@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import type { IndexPatternField } from '../../../index_patterns';
+import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
@@ -17,16 +19,44 @@ describe('Terms Agg', () => {
       const indexPattern = {
         id: '1234',
         title: 'logstash-*',
-        fields: {
-          getByName: () => field,
-          filter: () => [field],
-        },
-      } as any;
+        fields: [
+          {
+            name: 'field',
+            type: 'string',
+            esTypes: ['string'],
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+          },
+          {
+            name: 'string_field',
+            type: 'string',
+            esTypes: ['string'],
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+          },
+          {
+            name: 'empty_number_field',
+            type: 'number',
+            esTypes: ['number'],
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+          },
+          {
+            name: 'number_field',
+            type: 'number',
+            esTypes: ['number'],
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+          },
+        ],
+      } as IndexPattern;
 
-      const field = {
-        name: 'field',
-        indexPattern,
-      };
+      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.filter = () => indexPattern.fields;
 
       return new AggConfigs(
         indexPattern,
@@ -207,16 +237,28 @@ describe('Terms Agg', () => {
       const indexPattern = {
         id: '1234',
         title: 'logstash-*',
-        fields: {
-          getByName: () => field,
-          filter: () => [field],
-        },
-      } as any;
+        fields: [
+          {
+            name: 'string_field',
+            type: 'string',
+            esTypes: ['string'],
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+          },
+          {
+            name: 'number_field',
+            type: 'number',
+            esTypes: ['number'],
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+          },
+        ],
+      } as IndexPattern;
 
-      const field = {
-        name: 'field',
-        indexPattern,
-      };
+      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      indexPattern.fields.filter = () => indexPattern.fields;
 
       const aggConfigs = new AggConfigs(
         indexPattern,

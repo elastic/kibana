@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { buildRequestBody } from './build_request_body';
@@ -72,20 +72,20 @@ describe('buildRequestBody(req)', () => {
     const series = panel.series[0];
     const getValidTimeInterval = jest.fn(() => '10s');
     const capabilities = {
-      searchTimezone: 'UTC',
+      timezone: 'UTC',
       getValidTimeInterval,
     };
     const config = {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
-    const indexPatternObject = {};
+    const indexPattern = {};
     const doc = await buildRequestBody(
-      { payload: body },
+      { body },
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       {
         get: async () => 50,

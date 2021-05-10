@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createRulesSchema, CreateRulesSchema, SavedQueryCreateSchema } from './rule_schemas';
@@ -617,7 +618,7 @@ describe('create rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot send in an array of threat that are missing "technique"', () => {
+  test('You can send in an array of threat that are missing "technique"', () => {
     const payload = {
       ...getCreateRulesSchemaMock(),
       threat: [
@@ -635,10 +636,8 @@ describe('create rules schema', () => {
     const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,technique"',
-    ]);
-    expect(message.schema).toEqual({});
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
   });
 
   test('You can optionally send in an array of false positives', () => {
@@ -1151,7 +1150,7 @@ describe('create rules schema', () => {
     });
   });
 
-  describe('threat_mapping', () => {
+  describe('threat_match', () => {
     test('You can set a threat query, index, mapping, filters when creating a rule', () => {
       const payload = getCreateThreatMatchRulesSchemaMock();
       const decoded = createRulesSchema.decode(payload);

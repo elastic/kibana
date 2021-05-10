@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { of } from 'rxjs';
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
+import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { HomeServerPluginSetup } from '../../../home/server';
 import { registerVegaUsageCollector } from './register_vega_collector';
+import { ConfigObservable } from '../types';
 
 describe('registerVegaUsageCollector', () => {
   const mockIndex = 'mock_index';
   const mockDeps = { home: ({} as unknown) as HomeServerPluginSetup };
-  const mockConfig = of({ kibana: { index: mockIndex } });
+  const mockConfig = of({ kibana: { index: mockIndex } }) as ConfigObservable;
 
   it('makes a usage collector and registers it`', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();

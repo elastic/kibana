@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './datapanel.scss';
@@ -49,10 +50,13 @@ export interface FieldsAccordionProps {
   renderCallout: JSX.Element;
   exists: (field: IndexPatternField) => boolean;
   showExistenceFetchError?: boolean;
+  showExistenceFetchTimeout?: boolean;
   hideDetails?: boolean;
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
+  editField?: (name: string) => void;
+  removeField?: (name: string) => void;
 }
 
 export const FieldsAccordion = memo(function InnerFieldsAccordion({
@@ -70,9 +74,12 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   exists,
   hideDetails,
   showExistenceFetchError,
+  showExistenceFetchTimeout,
   groupIndex,
   dropOntoWorkspace,
   hasSuggestionForField,
+  editField,
+  removeField,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField, index) => (
@@ -86,9 +93,20 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
         groupIndex={groupIndex}
         dropOntoWorkspace={dropOntoWorkspace}
         hasSuggestionForField={hasSuggestionForField}
+        editField={editField}
+        removeField={removeField}
       />
     ),
-    [fieldProps, exists, hideDetails, dropOntoWorkspace, hasSuggestionForField, groupIndex]
+    [
+      fieldProps,
+      exists,
+      hideDetails,
+      dropOntoWorkspace,
+      hasSuggestionForField,
+      groupIndex,
+      editField,
+      removeField,
+    ]
   );
 
   const renderButton = useMemo(() => {
@@ -117,25 +135,44 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   }, [label, helpTooltip]);
 
   const extraAction = useMemo(() => {
-    return showExistenceFetchError ? (
-      <EuiIconTip
-        aria-label={i18n.translate('xpack.lens.indexPattern.existenceErrorAriaLabel', {
-          defaultMessage: 'Existence fetch failed',
-        })}
-        type="alert"
-        color="warning"
-        content={i18n.translate('xpack.lens.indexPattern.existenceErrorLabel', {
-          defaultMessage: "Field information can't be loaded",
-        })}
-      />
-    ) : hasLoaded ? (
-      <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
-        {fieldsCount}
-      </EuiNotificationBadge>
-    ) : (
-      <EuiLoadingSpinner size="m" />
-    );
-  }, [showExistenceFetchError, hasLoaded, isFiltered, fieldsCount]);
+    if (showExistenceFetchError) {
+      return (
+        <EuiIconTip
+          aria-label={i18n.translate('xpack.lens.indexPattern.existenceErrorAriaLabel', {
+            defaultMessage: 'Existence fetch failed',
+          })}
+          type="alert"
+          color="warning"
+          content={i18n.translate('xpack.lens.indexPattern.existenceErrorLabel', {
+            defaultMessage: "Field information can't be loaded",
+          })}
+        />
+      );
+    }
+    if (showExistenceFetchTimeout) {
+      return (
+        <EuiIconTip
+          aria-label={i18n.translate('xpack.lens.indexPattern.existenceTimeoutAriaLabel', {
+            defaultMessage: 'Existence fetch timed out',
+          })}
+          type="clock"
+          color="warning"
+          content={i18n.translate('xpack.lens.indexPattern.existenceTimeoutLabel', {
+            defaultMessage: 'Field information took too long',
+          })}
+        />
+      );
+    }
+    if (hasLoaded) {
+      return (
+        <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
+          {fieldsCount}
+        </EuiNotificationBadge>
+      );
+    }
+
+    return <EuiLoadingSpinner size="m" />;
+  }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, fieldsCount]);
 
   return (
     <EuiAccordion

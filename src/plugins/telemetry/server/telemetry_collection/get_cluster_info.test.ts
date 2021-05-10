@@ -1,24 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getClusterInfo } from './get_cluster_info';
 
-export function mockGetClusterInfo(clusterInfo: any) {
+export function mockGetClusterInfo<ClusterInfo>(clusterInfo: ClusterInfo) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info
-    // @ts-ignore we only care about the response body
-    .mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: { ...clusterInfo },
-      }
-    );
+  // @ts-expect-error we only care about the response body
+  esClient.info.mockResolvedValue({ body: { ...clusterInfo } });
   return esClient;
 }
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBadge, EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
@@ -14,7 +15,6 @@ import { timelineActions, timelineSelectors } from '../../../../timelines/store/
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
-import { TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
@@ -23,8 +23,6 @@ const NotesCountBadge = (styled(EuiBadge)`
 ` as unknown) as typeof EuiBadge;
 
 NotesCountBadge.displayName = 'NotesCountBadge';
-
-export type SaveTimeline = (args: TimelineInput) => void;
 
 interface AddToFavoritesButtonProps {
   timelineId: string;

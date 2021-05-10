@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { ReactNode } from 'react';
 import { AppMount } from 'src/core/public';
 
 /**
@@ -26,8 +27,9 @@ export class DevToolApp {
   /**
    * The human readable name of the dev tool. Should be internationalized.
    * This will be used as a label in the tab above the actual tool.
+   * May also be a ReactNode.
    */
-  public readonly title: string;
+  public readonly title: ReactNode;
   public readonly mount: AppMount;
 
   /**
@@ -55,7 +57,7 @@ export class DevToolApp {
 
   constructor(
     id: string,
-    title: string,
+    title: ReactNode,
     mount: AppMount,
     enableRouting: boolean,
     order: number,

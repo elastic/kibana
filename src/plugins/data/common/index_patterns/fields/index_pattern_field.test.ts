@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IndexPatternField } from './index_pattern_field';
@@ -26,7 +26,7 @@ describe('Field', function () {
     script: 'script',
     lang: 'lang',
     count: 1,
-    esTypes: ['text'],
+    esTypes: ['text'], // note, this will get replaced by the runtime field type
     aggregatable: true,
     filterable: true,
     searchable: true,
@@ -71,7 +71,7 @@ describe('Field', function () {
   });
 
   it('sets type field when _source field', () => {
-    const field = getField({ name: '_source' });
+    const field = getField({ name: '_source', runtimeField: undefined });
     expect(field.type).toEqual('_source');
   });
 

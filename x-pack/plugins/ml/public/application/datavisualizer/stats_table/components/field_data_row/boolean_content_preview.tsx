@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FC, useMemo } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
+import { OrdinalChartData } from '../../../../../../common/types/field_histograms';
+import { ColumnChart } from '../../../../components/data_grid/column_chart';
 import { FieldDataRowProps } from '../../types';
 import { getTFPercentage } from '../../utils';
-import { ColumnChart } from '../../../../components/data_grid/column_chart';
-import { OrdinalChartData } from '../../../../components/data_grid/use_column_chart';
 
 export const BooleanContentPreview: FC<FieldDataRowProps> = ({ config }) => {
   const chartData = useMemo(() => {

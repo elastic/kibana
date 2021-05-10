@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { map } from 'lodash';
@@ -11,7 +13,6 @@ import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { TimeSeries } from '../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
@@ -114,9 +115,9 @@ export function TransactionDurationAlertTrigger(props: Props) {
     ]
   );
 
-  const maxY = getMaxY([
-    { data: data ?? [] } as TimeSeries<{ x: number; y: number | null }>,
-  ]);
+  const latencyChartPreview = data?.latencyChartPreview ?? [];
+
+  const maxY = getMaxY([{ data: latencyChartPreview }]);
   const formatter = getDurationFormatter(maxY);
   const yTickFormat = getResponseTimeTickFormatter(formatter);
 
@@ -125,7 +126,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const chartPreview = (
     <ChartPreview
-      data={data}
+      data={latencyChartPreview}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
     />

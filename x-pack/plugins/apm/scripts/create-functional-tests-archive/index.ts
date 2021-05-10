@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { argv } from 'yargs';
@@ -9,6 +10,7 @@ import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
 
@@ -115,7 +117,7 @@ async function run() {
 
   const query = {
     bool: {
-      should: should.map(({ bool }) => ({ bool })),
+      should: should.map(({ bool }) => ({ bool })) as QueryContainer[],
       minimum_should_match: 1,
     },
   };

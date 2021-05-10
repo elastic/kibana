@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ILegacyClusterClient } from 'src/core/server';
 import { MonitoringConfig } from '../../config';
-import { fetchAvailableCcs } from '../../lib/alerts/fetch_available_ccs';
+import { fetchAvailableCcsLegacy } from '../../lib/alerts/fetch_available_ccs';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
 import { fetchLicenseType } from './lib/fetch_license_type';
 import { MonitoringUsage, StackProductUsage, MonitoringClusterStackProductUsage } from './types';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../common/constants';
 import { getCcsIndexPattern } from '../../lib/alerts/get_ccs_index_pattern';
-import { fetchClusters } from '../../lib/alerts/fetch_clusters';
+import { fetchClustersLegacy } from '../../lib/alerts/fetch_clusters';
 
 export function getMonitoringUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -105,9 +106,9 @@ export function getMonitoringUsageCollector(
         ? legacyEsClient.asScoped(kibanaRequest).callAsCurrentUser
         : legacyEsClient.callAsInternalUser;
       const usageClusters: MonitoringClusterStackProductUsage[] = [];
-      const availableCcs = config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
+      const availableCcs = config.ui.ccs.enabled ? await fetchAvailableCcsLegacy(callCluster) : [];
       const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
-      const clusters = await fetchClusters(callCluster, elasticsearchIndex);
+      const clusters = await fetchClustersLegacy(callCluster, elasticsearchIndex);
       for (const cluster of clusters) {
         const license = await fetchLicenseType(callCluster, availableCcs, cluster.clusterUuid);
         const stackProducts = await getStackProductsUsage(

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceStartContract,
@@ -24,6 +26,7 @@ import {
 import { SearchResponse } from 'elasticsearch';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { Agent } from '../../../../../fleet/common/types/models';
 import { AgentService } from '../../../../../fleet/server/services';
@@ -47,11 +50,7 @@ describe('test policy response handler', () => {
 
     it('should return the latest policy response for a host', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-      });
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -70,11 +69,7 @@ describe('test policy response handler', () => {
     });
 
     it('should return not found when there is no response policy for host', async () => {
-      const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-      });
+      const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
         Promise.resolve(createSearchResponse())
@@ -177,6 +172,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -207,6 +203,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({

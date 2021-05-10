@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -114,6 +115,28 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
       });
 
+      it('should create an ES ApiKey with metadata', async () => {
+        const { body: apiResponse } = await supertest
+          .post(`/api/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            policy_id: 'policy1',
+          })
+          .expect(200);
+
+        const { body: apiKeyRes } = await es.security.getApiKey({
+          id: apiResponse.item.api_key_id,
+        });
+
+        // @ts-expect-error Metadata not yet in the client type
+        expect(apiKeyRes.api_keys[0].metadata).eql({
+          policy_id: 'policy1',
+          managed_by: 'fleet',
+          managed: true,
+          type: 'enroll',
+        });
+      });
+
       it('should create an ES ApiKey with limited privileges', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment-api-keys`)
@@ -159,33 +182,6 @@ export default function (providerContext: FtrProviderContext) {
             create_index: false,
             write: false,
           },
-        });
-      });
-
-      describe('It should handle error when the Fleet user is invalid', () => {
-        before(async () => {});
-        after(async () => {
-          await getService('supertest')
-            .post(`/api/fleet/agents/setup`)
-            .set('kbn-xsrf', 'xxx')
-            .send({ forceRecreate: true });
-        });
-
-        it('should not allow to create an enrollment api key if the Fleet admin user is invalid', async () => {
-          await es.security.changePassword({
-            username: 'fleet_enroll',
-            body: {
-              password: Buffer.from((Math.random() * 10000000).toString()).toString('base64'),
-            },
-          });
-          const res = await supertest
-            .post(`/api/fleet/enrollment-api-keys`)
-            .set('kbn-xsrf', 'xxx')
-            .send({
-              policy_id: 'policy1',
-            })
-            .expect(400);
-          expect(res.body.message).match(/Fleet Admin user is invalid/);
         });
       });
     });

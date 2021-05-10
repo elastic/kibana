@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -212,6 +213,11 @@ export class DynamicActionManager {
    * @param triggers List of triggers to which action should react.
    */
   public async createEvent(action: SerializedAction, triggers: string[]) {
+    if (!triggers.length) {
+      // This error should never happen, hence it is not translated.
+      throw new Error('No triggers selected for event.');
+    }
+
     const event: SerializedEvent = {
       eventId: uuidv4(),
       triggers,

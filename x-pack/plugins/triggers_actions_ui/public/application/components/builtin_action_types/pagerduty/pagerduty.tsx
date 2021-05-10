@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -16,6 +18,7 @@ import {
   PagerDutyConfig,
   PagerDutySecrets,
   PagerDutyActionParams,
+  EventActionOptions,
 } from '.././types';
 import pagerDutySvg from './pagerduty.svg';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
@@ -86,7 +89,10 @@ export function getActionType(): ActionTypeModel<
           )
         );
       }
-      if (!actionParams.summary?.length) {
+      if (
+        actionParams.eventAction === EventActionOptions.TRIGGER &&
+        !actionParams.summary?.length
+      ) {
         errors.summary.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredSummaryText',

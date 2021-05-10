@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+
 import { useValues, useActions } from 'kea';
+
 import { EuiSpacer } from '@elastic/eui';
 
-import { KibanaLogic } from '../../../shared/kibana';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { KibanaLogic } from '../../../shared/kibana';
 import { Loading } from '../../../shared/loading';
 
 import { LogRetentionCallout, LogRetentionOptions } from '../log_retention';
 
+import { AnalyticsHeader } from './components';
+
 import { AnalyticsLogic } from './';
-import { AnalyticsHeader, AnalyticsUnavailable } from './components';
 
 interface Props {
   title: string;
@@ -31,7 +35,7 @@ export const AnalyticsLayout: React.FC<Props> = ({
 }) => {
   const { history } = useValues(KibanaLogic);
   const { query } = useParams() as { query: string };
-  const { dataLoading, analyticsUnavailable } = useValues(AnalyticsLogic);
+  const { dataLoading } = useValues(AnalyticsLogic);
   const { loadAnalyticsData, loadQueryData } = useActions(AnalyticsLogic);
 
   useEffect(() => {
@@ -40,7 +44,6 @@ export const AnalyticsLayout: React.FC<Props> = ({
   }, [history.location.search]);
 
   if (dataLoading) return <Loading />;
-  if (analyticsUnavailable) return <AnalyticsUnavailable />;
 
   return (
     <>

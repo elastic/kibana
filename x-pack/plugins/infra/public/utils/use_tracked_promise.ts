@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable max-classes-per-file */
@@ -234,35 +235,39 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
   return [promiseState, execute] as [typeof promiseState, typeof execute];
 };
 
-interface UninitializedPromiseState {
+export interface UninitializedPromiseState {
   state: 'uninitialized';
 }
 
-interface PendingPromiseState<ResolvedValue> {
+export interface PendingPromiseState<ResolvedValue> {
   state: 'pending';
   promise: Promise<ResolvedValue>;
 }
 
-interface ResolvedPromiseState<ResolvedValue> {
+export interface ResolvedPromiseState<ResolvedValue> {
   state: 'resolved';
   promise: Promise<ResolvedValue>;
   value: ResolvedValue;
 }
 
-interface RejectedPromiseState<ResolvedValue, RejectedValue> {
+export interface RejectedPromiseState<ResolvedValue, RejectedValue> {
   state: 'rejected';
   promise: Promise<ResolvedValue>;
   value: RejectedValue;
 }
 
-type SettledPromise<ResolvedValue, RejectedValue> =
+export type SettledPromiseState<ResolvedValue, RejectedValue> =
   | ResolvedPromiseState<ResolvedValue>
   | RejectedPromiseState<ResolvedValue, RejectedValue>;
 
-type PromiseState<ResolvedValue, RejectedValue = unknown> =
+export type PromiseState<ResolvedValue, RejectedValue = unknown> =
   | UninitializedPromiseState
   | PendingPromiseState<ResolvedValue>
-  | SettledPromise<ResolvedValue, RejectedValue>;
+  | SettledPromiseState<ResolvedValue, RejectedValue>;
+
+export const isRejectedPromiseState = (
+  promiseState: PromiseState<any, any>
+): promiseState is RejectedPromiseState<any, any> => promiseState.state === 'rejected';
 
 interface CancelablePromise<ResolvedValue> {
   // reject the promise prematurely with a CanceledPromiseError

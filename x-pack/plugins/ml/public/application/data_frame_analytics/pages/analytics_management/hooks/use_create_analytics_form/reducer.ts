@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
+import { memoize, isEqual } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
@@ -469,7 +470,11 @@ export function reducer(state: State, action: Action): State {
       let disableSwitchToForm = false;
       try {
         resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
-        disableSwitchToForm = isAdvancedConfig(resultJobConfig);
+        const runtimeMappingsChanged =
+          state.form.runtimeMappings &&
+          resultJobConfig.source.runtime_mappings &&
+          !isEqual(state.form.runtimeMappings, resultJobConfig.source.runtime_mappings);
+        disableSwitchToForm = isAdvancedConfig(resultJobConfig) || runtimeMappingsChanged;
       } catch (e) {
         return {
           ...state,
@@ -557,8 +562,9 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SWITCH_TO_FORM:
       const { jobConfig: config } = state;
       const { jobId } = state.form;
+      // Persist form state when switching back from advanced editor
       // @ts-ignore
-      const formState = getFormStateFromJobConfig(config, false);
+      const formState = { ...state.form, ...getFormStateFromJobConfig(config, false) };
 
       if (typeof jobId === 'string' && jobId.trim() !== '') {
         formState.jobId = jobId;

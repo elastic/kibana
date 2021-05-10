@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -42,18 +43,20 @@ export const GroupOfNodes: React.FC<Props> = ({
     <GroupOfNodesContainer style={{ width }}>
       <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
       <Nodes>
-        {group.nodes.map((node) => (
-          <Node
-            key={`${node.pathId}:${node.name}`}
-            options={options}
-            squareSize={group.squareSize}
-            node={node}
-            formatter={formatter}
-            bounds={bounds}
-            nodeType={nodeType}
-            currentTime={currentTime}
-          />
-        ))}
+        {group.width
+          ? group.nodes.map((node) => (
+              <Node
+                key={`${node.pathId}:${node.name}`}
+                options={options}
+                squareSize={group.squareSize}
+                node={node}
+                formatter={formatter}
+                bounds={bounds}
+                nodeType={nodeType}
+                currentTime={currentTime}
+              />
+            ))
+          : null}
       </Nodes>
     </GroupOfNodesContainer>
   );

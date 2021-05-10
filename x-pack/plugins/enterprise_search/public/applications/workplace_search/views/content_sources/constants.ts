@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -147,7 +148,7 @@ export const ACCESS_TOKEN_LABEL = i18n.translate(
 );
 
 export const ID_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.id.label', {
-  defaultMessage: 'ID',
+  defaultMessage: 'Source Identifier',
 });
 
 export const LEARN_CUSTOM_FEATURES_BUTTON = i18n.translate(
@@ -256,6 +257,13 @@ export const READY_TEXT = i18n.translate(
   }
 );
 
+export const SOURCE_SETTINGS_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.settings.heading',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export const SOURCE_SETTINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.settings.title',
   {
@@ -294,14 +302,36 @@ export const SOURCE_CONFIG_LINK = i18n.translate(
 export const SOURCE_REMOVE_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.remove.title',
   {
-    defaultMessage: 'Remove this source',
+    defaultMessage: 'Remove this content source',
   }
 );
 
 export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+  'xpack.enterpriseSearch.workplaceSearch.sources.remove.description',
   {
-    defaultMessage: 'Edit content source connector settings to change.',
+    defaultMessage: 'This action cannot be undone.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsTitle',
+  {
+    defaultMessage: 'Sync Diagnostics',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsDescription',
+  {
+    defaultMessage:
+      'Retrieve relevant diagnostics data for troubleshooting active synchronization processes.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsButton',
+  {
+    defaultMessage: 'Download diagnostics data',
   }
 );
 
@@ -412,10 +442,6 @@ export const SHARED_EMPTY_DESCRIPTION = i18n.translate(
   }
 );
 
-export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
-  defaultMessage: 'and',
-});
-
 export const LICENSE_CALLOUT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.title',
   {
@@ -463,5 +489,13 @@ export const UNDERSTAND_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.understandButton',
   {
     defaultMessage: 'I understand',
+  }
+);
+
+export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.privateDashboard.readOnlyMode.warning',
+  {
+    defaultMessage:
+      'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
   }
 );

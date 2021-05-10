@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { tabifyDocs } from './tabify_docs';
@@ -37,6 +37,10 @@ describe('tabifyDocs', () => {
     hits: {
       hits: [
         {
+          _id: 'hit-id-value',
+          _index: 'hit-index-value',
+          _type: 'hit-type-value',
+          _score: 77,
           _source: { sourceTest: 123 },
           fields: { fieldTest: 123, invalidMapping: 345, nested: [{ field: 123 }] },
         },
@@ -56,6 +60,11 @@ describe('tabifyDocs', () => {
 
   it('skips nested fields if option is set', () => {
     const table = tabifyDocs(response, index, { shallow: true });
+    expect(table).toMatchSnapshot();
+  });
+
+  it('combines meta fields if meta option is set', () => {
+    const table = tabifyDocs(response, index, { meta: true });
     expect(table).toMatchSnapshot();
   });
 

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { HttpHandler } from 'src/core/public';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
 } from '../../../common/http_api/log_analysis';
-import { DatasetFilter } from '../../../common/infra_ml';
 import { DeleteJobsResponsePayload } from './api/ml_cleanup';
 import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload } from './api/ml_get_module';
@@ -19,7 +20,7 @@ export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 export interface SetUpModuleArgs {
   start?: number | undefined;
   end?: number | undefined;
-  datasetFilter?: DatasetFilter;
+  filter?: any;
   moduleSourceConfiguration: ModuleSourceConfiguration;
   partitionField?: string;
 }

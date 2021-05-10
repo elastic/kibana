@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { Vis } from '../../../../../../visualizations/public';
 import { SelectOption } from '../../../../../../vis_default_editor/public';
 
-import { SeriesParam, ValueAxis } from '../../../../types';
+import { SeriesParam, ValueAxis, ChartMode, AxisMode } from '../../../../types';
 import { LineOptions } from './line_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
 import { ChartType } from '../../../../../common';
+import { getConfigCollections } from '../../../collections';
+
+const collections = getConfigCollections();
 
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
@@ -27,17 +29,16 @@ export interface ChartOptionsParams {
   changeValueAxis: ChangeValueAxis;
   setParamByIndex: SetParamByIndex;
   valueAxes: ValueAxis[];
-  vis: Vis;
 }
 
 function ChartOptions({
   chart,
   index,
   valueAxes,
-  vis,
   changeValueAxis,
   setParamByIndex,
 }: ChartOptionsParams) {
+  const [disabledMode, setDisabledMode] = useState<boolean>(false);
   const setChart: SetChart = useCallback(
     (paramName, value) => {
       setParamByIndex('seriesParams', index, paramName, value);
@@ -68,6 +69,20 @@ function ChartOptions({
     [valueAxes]
   );
 
+  useEffect(() => {
+    const valueAxisToMetric = valueAxes.find((valueAxis) => valueAxis.id === chart.valueAxis);
+    if (valueAxisToMetric) {
+      if (valueAxisToMetric.scale.mode === AxisMode.Percentage) {
+        setDisabledMode(true);
+        if (chart.mode !== ChartMode.Stacked) {
+          setChart('mode', ChartMode.Stacked);
+        }
+      } else if (disabledMode) {
+        setDisabledMode(false);
+      }
+    }
+  }, [valueAxes, chart, disabledMode, setChart, setDisabledMode]);
+
   return (
     <>
       <SelectOption
@@ -90,7 +105,7 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.chartTypeLabel', {
               defaultMessage: 'Chart type',
             })}
-            options={vis.type.editorConfig.collections.chartTypes}
+            options={collections.chartTypes}
             paramName="type"
             value={chart.type}
             setValue={setChart}
@@ -102,8 +117,9 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.modeLabel', {
               defaultMessage: 'Mode',
             })}
-            options={vis.type.editorConfig.collections.chartModes}
+            options={collections.chartModes}
             paramName="mode"
+            disabled={disabledMode}
             value={chart.mode}
             setValue={setChart}
           />
@@ -118,7 +134,7 @@ function ChartOptions({
             label={i18n.translate('visTypeXy.controls.pointSeries.series.lineModeLabel', {
               defaultMessage: 'Line mode',
             })}
-            options={vis.type.editorConfig.collections.interpolationModes}
+            options={collections.interpolationModes}
             paramName="interpolate"
             value={chart.interpolate}
             setValue={setChart}
@@ -126,7 +142,7 @@ function ChartOptions({
         </>
       )}
 
-      {chart.type === ChartType.Line && <LineOptions chart={chart} vis={vis} setChart={setChart} />}
+      {chart.type === ChartType.Line && <LineOptions chart={chart} setChart={setChart} />}
     </>
   );
 }

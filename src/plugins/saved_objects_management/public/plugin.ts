@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -15,6 +15,7 @@ import { DiscoverStart } from '../../discover/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
+import type { SpacesOssPluginStart } from '../../spaces_oss/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -49,6 +50,7 @@ export interface StartDependencies {
   visualizations?: VisualizationsStart;
   discover?: DiscoverStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  spacesOss?: SpacesOssPluginStart;
 }
 
 export class SavedObjectsManagementPlugin

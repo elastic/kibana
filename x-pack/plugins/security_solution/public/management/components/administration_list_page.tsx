@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FC, memo } from 'react';
 import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
 import styled from 'styled-components';
@@ -12,8 +14,18 @@ import { HeaderPage } from '../../common/components/header_page';
 import { SiemNavigation } from '../../common/components/navigation';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { AdministrationSubTab } from '../types';
-import { ENDPOINTS_TAB, TRUSTED_APPS_TAB, BETA_BADGE_LABEL } from '../common/translations';
-import { getEndpointListPath, getTrustedAppsListPath } from '../common/routing';
+import {
+  ENDPOINTS_TAB,
+  TRUSTED_APPS_TAB,
+  BETA_BADGE_LABEL,
+  EVENT_FILTERS_TAB,
+} from '../common/translations';
+import {
+  getEndpointListPath,
+  getEventFiltersListPath,
+  getTrustedAppsListPath,
+} from '../common/routing';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 /** Ensure that all flyouts z-index in Administation area show the flyout header */
 const EuiPanelStyled = styled(EuiPanel)`
@@ -32,6 +44,7 @@ interface AdministrationListPageProps {
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
   ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
+    const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
     const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
 
     return (
@@ -64,6 +77,18 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
               pageId: SecurityPageName.administration,
               disabled: false,
             },
+            ...(isEventFilteringEnabled
+              ? {
+                  [AdministrationSubTab.eventFilters]: {
+                    name: EVENT_FILTERS_TAB,
+                    id: AdministrationSubTab.eventFilters,
+                    href: getEventFiltersListPath(),
+                    urlKey: 'administration',
+                    pageId: SecurityPageName.administration,
+                    disabled: false,
+                  },
+                }
+              : {}),
           }}
         />
 

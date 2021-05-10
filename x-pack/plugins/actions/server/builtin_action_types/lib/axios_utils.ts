@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
@@ -29,7 +30,8 @@ export const request = async <T = unknown>({
   validateStatus?: (status: number) => boolean;
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
-  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
+  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, url);
+  const { maxContentLength, timeout } = configurationUtilities.getResponseSettings();
 
   return await axios(url, {
     ...rest,
@@ -39,6 +41,8 @@ export const request = async <T = unknown>({
     httpAgent,
     httpsAgent,
     proxy: false,
+    maxContentLength,
+    timeout,
   });
 };
 

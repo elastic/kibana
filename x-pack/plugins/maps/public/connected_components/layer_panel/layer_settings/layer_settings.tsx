@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent, Fragment } from 'react';
@@ -16,13 +17,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Attribution } from '../../../../common/descriptor_types';
 import { MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
 import { ILayer } from '../../../classes/layers/layer';
+import { AttributionFormRow } from './attribution_form_row';
 
 export interface Props {
   layer: ILayer;
+  clearLayerAttribution: (layerId: string) => void;
+  setLayerAttribution: (id: string, attribution: Attribution) => void;
   updateLabel: (layerId: string, label: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
@@ -51,6 +56,14 @@ export function LayerSettings(props: Props) {
 
   const onLabelsOnTopChange = (event: EuiSwitchEvent) => {
     props.updateLabelsOnTop(layerId, event.target.checked);
+  };
+
+  const onAttributionChange = (attribution?: Attribution) => {
+    if (attribution) {
+      props.setLayerAttribution(layerId, attribution);
+    } else {
+      props.clearLayerAttribution(layerId);
+    }
   };
 
   const renderZoomSliders = () => {
@@ -126,6 +139,7 @@ export function LayerSettings(props: Props) {
         {renderZoomSliders()}
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
+        <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
       </EuiPanel>
 
       <EuiSpacer size="s" />

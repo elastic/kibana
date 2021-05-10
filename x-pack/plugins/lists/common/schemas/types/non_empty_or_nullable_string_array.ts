@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -11,7 +12,7 @@ import { Either } from 'fp-ts/lib/Either';
  * Types the nonEmptyOrNullableStringArray as:
  *   - An array of non empty strings of length 1 or greater
  *   - This differs from NonEmptyStringArray in that both input and output are type array
- *
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const nonEmptyOrNullableStringArray = new t.Type<string[], string[], unknown>(
   'NonEmptyOrNullableStringArray',
@@ -30,5 +31,12 @@ export const nonEmptyOrNullableStringArray = new t.Type<string[], string[], unkn
   t.identity
 );
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyOrNullableStringArray = t.OutputOf<typeof nonEmptyOrNullableStringArray>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type NonEmptyOrNullableStringArrayDecoded = t.TypeOf<typeof nonEmptyOrNullableStringArray>;

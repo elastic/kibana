@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { always, id, pipe } from '../utils';
@@ -15,7 +15,6 @@ import { pluckIndex } from '../transforms';
 const coverageDelimRe = /^#CC#\s/;
 
 export const empties = (x) => x !== '';
-export const comments = (x) => !/^#\s{1,3}/.test(x);
 const dropDelim = (x) => () => x.replace(coverageDelimRe, '');
 
 export const dropCCDelim = (x) =>

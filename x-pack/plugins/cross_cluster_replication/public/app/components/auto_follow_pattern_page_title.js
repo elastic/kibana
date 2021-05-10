@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -17,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { getAutoFollowPatternUrl } from '../services/documentation_links';
+import { documentationLinks } from '../services/documentation_links';
 
 export const AutoFollowPatternPageTitle = ({ title }) => (
   <Fragment>
@@ -35,7 +36,7 @@ export const AutoFollowPatternPageTitle = ({ title }) => (
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={getAutoFollowPatternUrl()}
+            href={documentationLinks.apis.createAutoFollowPattern}
             target="_blank"
             iconType="help"
             data-test-subj="docsButton"

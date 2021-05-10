@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,6 +12,7 @@ import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
+import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
 type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
   render(visData: VegaParser): Promise<void>;
@@ -24,6 +25,9 @@ export const createVegaVisualization = ({
   class VegaVisualization {
     private readonly dataPlugin = getData();
     private vegaView: InstanceType<typeof VegaView> | null = null;
+    private vegaStateRestorer = createVegaStateRestorer({
+      isActive: () => Boolean(this.vegaView?._parser?.restoreSignalValuesOnRefresh),
+    });
 
     constructor(
       private el: HTMLDivElement,
@@ -71,6 +75,7 @@ export const createVegaVisualization = ({
         const vegaViewParams = {
           parentEl: this.el,
           fireEvent: this.fireEvent,
+          vegaStateRestorer: this.vegaStateRestorer,
           vegaParser,
           serviceSettings,
           filterManager,
@@ -89,6 +94,7 @@ export const createVegaVisualization = ({
     }
 
     destroy() {
+      this.vegaStateRestorer.clear();
       this.vegaView?.destroy();
     }
   };

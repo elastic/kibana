@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'kibana/public';
@@ -28,15 +29,13 @@ export class DatatableVisualization {
     editorFrame.registerVisualization(async () => {
       const {
         getDatatable,
-        datatableColumns,
-        datatableColumnWidth,
+        datatableColumn,
         getDatatableRenderer,
         datatableVisualization,
       } = await import('../async_services');
       const resolvedFormatFactory = await formatFactory;
 
-      expressions.registerFunction(() => datatableColumns);
-      expressions.registerFunction(() => datatableColumnWidth);
+      expressions.registerFunction(() => datatableColumn);
       expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
       expressions.registerRenderer(() =>
         getDatatableRenderer({

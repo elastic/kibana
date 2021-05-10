@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { produce } from 'immer';
@@ -70,6 +71,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
             delete hotPhaseActions.rollover.max_docs;
           }
 
+          if (updatedPolicy.phases.hot!.actions.rollover?.max_primary_shard_size) {
+            hotPhaseActions.rollover.max_primary_shard_size = `${hotPhaseActions.rollover.max_primary_shard_size}${_meta.hot?.customRollover.maxPrimaryShardSizeUnit}`;
+          } else {
+            delete hotPhaseActions.rollover.max_primary_shard_size;
+          }
+
           if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
             hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot?.customRollover.maxStorageSizeUnit}`;
           } else {
@@ -123,7 +130,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       /**
        * HOT PHASE SEARCHABLE SNAPSHOT
        */
-      if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
+      if (updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
+        hotPhaseActions.searchable_snapshot = {
+          ...hotPhaseActions.searchable_snapshot,
+          snapshot_repository: _meta.searchableSnapshot.repository,
+        };
+      } else {
         delete hotPhaseActions.searchable_snapshot;
       }
     }
@@ -224,6 +236,15 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       }
 
       /**
+       * COLD PHASE READ ONLY
+       */
+      if (_meta.cold.readonlyEnabled) {
+        coldPhase.actions.readonly = coldPhase.actions.readonly ?? {};
+      } else {
+        delete coldPhase.actions.readonly;
+      }
+
+      /**
        * COLD PHASE SET PRIORITY
        */
       if (!updatedPolicy.phases.cold?.actions?.set_priority) {
@@ -233,11 +254,45 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       /**
        * COLD PHASE SEARCHABLE SNAPSHOT
        */
-      if (!updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
+      if (updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
+        coldPhase.actions.searchable_snapshot = {
+          ...coldPhase.actions.searchable_snapshot,
+          snapshot_repository: _meta.searchableSnapshot.repository,
+        };
+      } else {
         delete coldPhase.actions.searchable_snapshot;
       }
     } else {
       delete draft.phases.cold;
+    }
+
+    /**
+     * FROZEN PHASE SERIALIZATION
+     */
+    if (_meta.frozen?.enabled) {
+      draft.phases.frozen!.actions = draft.phases.frozen?.actions ?? {};
+      const frozenPhase = draft.phases.frozen!;
+
+      /**
+       * FROZEN PHASE MIN AGE
+       */
+      if (updatedPolicy.phases.frozen?.min_age) {
+        frozenPhase.min_age = `${updatedPolicy.phases.frozen!.min_age}${_meta.frozen.minAgeUnit}`;
+      }
+
+      /**
+       * FROZEN PHASE SEARCHABLE SNAPSHOT
+       */
+      if (updatedPolicy.phases.frozen?.actions?.searchable_snapshot) {
+        frozenPhase.actions.searchable_snapshot = {
+          ...frozenPhase.actions.searchable_snapshot,
+          snapshot_repository: _meta.searchableSnapshot.repository,
+        };
+      } else {
+        delete frozenPhase.actions.searchable_snapshot;
+      }
+    } else {
+      delete draft.phases.frozen;
     }
 
     /**
@@ -253,7 +308,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       deletePhase.actions.delete = deletePhase.actions.delete ?? {};
 
       /**
-       * DELETE PHASE SEARCHABLE SNAPSHOT
+       * DELETE PHASE MIN AGE
        */
       if (updatedPolicy.phases.delete?.min_age) {
         deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;

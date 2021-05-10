@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -95,7 +96,7 @@ describe('createManagedConfiguration()', () => {
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" error(s).'
+        'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
       );
     });
 
@@ -179,7 +180,7 @@ describe('createManagedConfiguration()', () => {
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" error(s).'
+        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
       );
     });
 

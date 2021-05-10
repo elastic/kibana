@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -10,15 +11,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'home', 'lens']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
 
   describe('Lens', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('lens/basic');
     });
 
     after(async () => {
@@ -27,6 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.checkListingSelectAllCheckbox();
       await listingTable.clickDeleteSelected();
       await PageObjects.common.clickConfirmOnModal();
+      await esArchiver.unload('logstash_functional');
+      await esArchiver.unload('lens/basic');
     });
 
     it('lens', async () => {
@@ -40,17 +42,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.timePicker.ensureHiddenNoDataPopover();
+      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: 'timestamp',
+        operation: 'terms',
+        field: 'ip',
       });
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
-        field: 'AvgTicketPrice',
+        operation: 'average',
+        field: 'bytes',
       });
 
       await a11y.testAppSnapshot();
@@ -75,6 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.timePicker.ensureHiddenNoDataPopover();
+      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.openDimensionEditor('lnsXY_xDimensionPanel > lns-empty-dimension');
       await a11y.testAppSnapshot();
@@ -95,21 +99,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
-        field: 'timestamp',
+        field: '@timestamp',
       });
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
-        field: 'AvgTicketPrice',
+        operation: 'average',
+        field: 'bytes',
       });
 
       await testSubjects.click('lnsSuggestion-barChart > lnsSuggestion');
       await a11y.testAppSnapshot();
     });
 
-    // Skip until https://github.com/elastic/kibana/issues/88661 gets closed
-    it.skip('lens XY chart with multiple layers', async () => {
+    it('lens XY chart with multiple layers', async () => {
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.switchToVisualization('area');
@@ -117,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           operation: 'terms',
-          field: 'DestCityName',
+          field: 'ip',
         },
         1
       );
@@ -126,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           operation: 'median',
-          field: 'FlightTimeMin',
+          field: 'bytes',
         },
         1
       );

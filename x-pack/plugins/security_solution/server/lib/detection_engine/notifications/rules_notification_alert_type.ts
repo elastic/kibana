@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Logger } from 'src/core/server';
@@ -13,7 +14,7 @@ import {
 } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
-import { RuleAlertAttributes } from '../signals/types';
+import { AlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
@@ -37,7 +38,7 @@ export const rulesNotificationAlertType = ({
   },
   minimumLicenseRequired: 'basic',
   async executor({ startedAt, previousStartedAt, alertId, services, params }) {
-    const ruleAlertSavedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
+    const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
       params.ruleAlertId
     );
@@ -63,7 +64,7 @@ export const rulesNotificationAlertType = ({
       size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId,
-      callCluster: services.callCluster,
+      esClient: services.scopedClusterClient.asCurrentUser,
     });
 
     const signals = results.hits.hits.map((hit) => hit._source);
@@ -90,6 +91,7 @@ export const rulesNotificationAlertType = ({
         signalsCount,
         resultsLink,
         ruleParams,
+        // @ts-expect-error @elastic/elasticsearch _source is optional
         signals,
       });
     }

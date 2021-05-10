@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subject, Observable } from 'rxjs';
@@ -421,6 +421,7 @@ export class SavedObjectsService
         this.typeRegistry,
         kibanaConfig.index,
         esClient,
+        this.logger.get('repository'),
         includedHiddenTypes
       );
     };
@@ -459,6 +460,7 @@ export class SavedObjectsService
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
           exportSizeLimit: this.config!.maxImportExportSize,
+          logger: this.logger.get('exporter'),
         }),
       createImporter: (savedObjectsClient) =>
         new SavedObjectsImporter({
@@ -474,7 +476,7 @@ export class SavedObjectsService
 
   private createMigrator(
     kibanaConfig: KibanaConfigType,
-    savedObjectsConfig: SavedObjectsMigrationConfigType,
+    soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     migrationsRetryDelay?: number
   ): IKibanaMigrator {
@@ -482,7 +484,7 @@ export class SavedObjectsService
       typeRegistry: this.typeRegistry,
       logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
-      savedObjectsConfig,
+      soMigrationsConfig,
       kibanaConfig,
       client,
       migrationsRetryDelay,

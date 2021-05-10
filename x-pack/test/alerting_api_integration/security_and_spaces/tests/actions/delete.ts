@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -25,11 +26,11 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle delete action request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -40,7 +41,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 
@@ -70,11 +71,11 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't delete action from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -86,7 +87,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}`)
+            .delete(`${getUrlPrefix('other')}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 
@@ -119,7 +120,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle delete request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/actions/action/2`)
+            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/2`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -147,7 +148,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't delete action from preconfigured list`, async () => {
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/actions/action/my-slack1`)
+            .delete(`${getUrlPrefix(space.id)}/api/actions/connector/my-slack1`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 

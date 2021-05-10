@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
-import { InfraSourceConfiguration } from '../../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
@@ -142,7 +143,7 @@ const createTSVBIndexPattern = (alias: string) => {
 };
 
 export const createTSVBLink = (
-  source: InfraSourceConfiguration | undefined,
+  source: MetricsSourceConfigurationProperties | undefined,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
   timeRange: MetricsExplorerTimeOptions,

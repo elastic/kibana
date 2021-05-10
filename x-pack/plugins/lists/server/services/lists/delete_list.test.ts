@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
@@ -47,9 +48,9 @@ describe('delete_list', () => {
     const deleteByQuery = {
       body: { query: { term: { list_id: LIST_ID } } },
       index: LIST_ITEM_INDEX,
-      refresh: 'wait_for',
+      refresh: false,
     };
-    expect(options.callCluster).toBeCalledWith('deleteByQuery', deleteByQuery);
+    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
   });
 
   test('Delete calls "delete" second if a list is returned from getList', async () => {
@@ -60,15 +61,15 @@ describe('delete_list', () => {
     const deleteQuery = {
       id: LIST_ID,
       index: LIST_INDEX,
-      refresh: 'wait_for',
+      refresh: false,
     };
-    expect(options.callCluster).toHaveBeenNthCalledWith(2, 'delete', deleteQuery);
+    expect(options.esClient.delete).toHaveBeenNthCalledWith(1, deleteQuery);
   });
 
   test('Delete does not call data client if the list returns null', async () => {
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteListOptionsMock();
     await deleteList(options);
-    expect(options.callCluster).not.toHaveBeenCalled();
+    expect(options.esClient.delete).not.toHaveBeenCalled();
   });
 });
