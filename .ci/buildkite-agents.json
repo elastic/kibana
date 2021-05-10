@@ -20,6 +20,23 @@
         "diskSizeGb": 75
       },
       {
+        "queue": "default-nat",
+        "name": "kibana-buildkite-nat",
+        "overprovision": 0,
+        "minimumAgents": 1,
+        "maximumAgents": 10,
+        "gracefulStopAfterMins": 360,
+        "hardStopAfterMins": 540,
+        "idleTimeoutMins": 60,
+        "exitAfterOneJob": false,
+        "imageFamily": "kibana-bk-dev-agents",
+        "machineType": "e2-small",
+        "diskType": "pd-ssd",
+        "diskSizeGb": 75,
+        "subnetwork": "buildkite",
+        "disableExternalIp": true
+      },
+      {
         "queue": "bootstrap",
         "name": "kb-buildkite-bootstrap",
         "overprovision": 0,
