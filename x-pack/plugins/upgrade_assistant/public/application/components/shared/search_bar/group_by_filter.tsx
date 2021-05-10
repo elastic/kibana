@@ -14,10 +14,10 @@ import { GroupByOption } from '../../types';
 
 const LocalizedOptions: { [option: string]: string } = {
   message: i18n.translate('xpack.upgradeAssistant.checkupTab.controls.groupByBar.byIssueLabel', {
-    defaultMessage: 'by issue',
+    defaultMessage: 'By issue',
   }),
   index: i18n.translate('xpack.upgradeAssistant.checkupTab.controls.groupByBar.byIndexLabel', {
-    defaultMessage: 'by index',
+    defaultMessage: 'By index',
   }),
 };
 

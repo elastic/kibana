@@ -16,10 +16,10 @@ import { COLOR_MAP, REVERSE_LEVEL_MAP } from '../constants';
 
 const LocalizedLevels: { [level: string]: string } = {
   warning: i18n.translate('xpack.upgradeAssistant.checkupTab.deprecations.warningLabel', {
-    defaultMessage: 'warning',
+    defaultMessage: 'Warning',
   }),
   critical: i18n.translate('xpack.upgradeAssistant.checkupTab.deprecations.criticalLabel', {
-    defaultMessage: 'critical',
+    defaultMessage: 'Critical',
   }),
 };
 
