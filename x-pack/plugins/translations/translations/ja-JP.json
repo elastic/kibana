@@ -8248,8 +8248,6 @@
     "xpack.enterpriseSearch.appSearch.productCta": "App Searchの起動",
     "xpack.enterpriseSearch.appSearch.productDescription": "ダッシュボード、分析、APIを活用し、高度なアプリケーション検索をシンプルにします。",
     "xpack.enterpriseSearch.appSearch.productName": "App Search",
-    "xpack.enterpriseSearch.appSearch.resetMappingsWarningModalBody": "{strongText}認証が成功したすべてのユーザーには所有者ロールが割り当てられ、すべてのエンジンにアクセスできます。",
-    "xpack.enterpriseSearch.appSearch.resetMappingsWarningModalBodyBold": "すべてのロールマッピングが削除されます。",
     "xpack.enterpriseSearch.appSearch.result.documentDetailLink": "ドキュメントの詳細を表示",
     "xpack.enterpriseSearch.appSearch.result.hideAdditionalFields": "追加フィールドを非表示",
     "xpack.enterpriseSearch.appSearch.result.title": "ドキュメント{id}",
