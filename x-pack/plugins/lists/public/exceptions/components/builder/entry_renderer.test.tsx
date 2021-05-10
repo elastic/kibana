@@ -228,6 +228,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
@@ -264,6 +265,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isNotInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
