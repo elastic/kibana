@@ -52,6 +52,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   config: IUiSettingsClient;
   /**
+   * a statistics of the distribution of fields in the given hits
+   */
+  fieldCounts: Record<string, number>;
+  /**
    * hits fetched from ES, displayed in the doc table
    */
   hits: ElasticSearchHit[];

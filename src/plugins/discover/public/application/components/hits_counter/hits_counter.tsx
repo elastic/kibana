@@ -35,7 +35,7 @@ export function HitsCounter({ hits$, showResetButton, onResetQuery }: HitsCounte
   useEffect(() => {
     const subscription = hits$.subscribe({
       next: (res) => {
-        if (res && res.state === 'success' && res.total !== total && Number(res.total) >= 0) {
+        if (res && res.state === 'complete' && res.total !== total && Number(res.total) >= 0) {
           setTotal(Number(res.total));
         }
       },

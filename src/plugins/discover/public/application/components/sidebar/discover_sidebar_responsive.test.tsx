@@ -90,6 +90,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   return {
     columns: ['extension'],
     config: configMock,
+    fieldCounts,
     hits,
     indexPatternList,
     indexPatterns: indexPatternsMock,

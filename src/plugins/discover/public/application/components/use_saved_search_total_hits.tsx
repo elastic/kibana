@@ -9,6 +9,8 @@ import { useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SavedSearch } from '../../saved_searches';
 import { DataPublicPluginStart } from '../../../../data/public';
+import { IInspectorInfo } from '../../../../data/common';
+import { fetchStatuses } from './constants';
 
 export type TotalHitsSubject = BehaviorSubject<{ state: string; total?: number }>;
 
@@ -19,25 +21,29 @@ export function useSavedSearchTotalHits({
   savedSearch: SavedSearch;
   data: DataPublicPluginStart;
 }) {
-  const subject: TotalHitsSubject = useMemo(() => new BehaviorSubject({ state: 'initial' }), []);
+  const subject: TotalHitsSubject = useMemo(
+    () => new BehaviorSubject({ state: fetchStatuses.UNINITIALIZED }),
+    []
+  );
 
   const fetchData = useCallback(
-    (abortController: AbortController, searchSessionId: string) => {
+    (abortController: AbortController, searchSessionId: string, inspector: IInspectorInfo) => {
       const searchSource = savedSearch.searchSource.createChild();
       const indexPattern = savedSearch.searchSource.getField('index');
       searchSource.setField('trackTotalHits', true);
       searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
       searchSource.setField('size', 0);
-      subject.next({ state: 'loading' });
+      subject.next({ state: fetchStatuses.LOADING });
 
       const searchSourceFetch$ = searchSource.fetch$({
+        inspector,
         abortSignal: abortController.signal,
         sessionId: searchSessionId,
       });
 
       searchSourceFetch$.subscribe({
         next: ({ rawResponse }) => {
-          subject.next({ state: 'success', total: rawResponse.hits.total as number });
+          subject.next({ state: fetchStatuses.COMPLETE, total: rawResponse.hits.total as number });
           return rawResponse.hits.total;
         },
         error: (error) => {

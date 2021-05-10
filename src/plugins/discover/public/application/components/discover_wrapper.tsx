@@ -6,22 +6,54 @@
  * Side Public License, v 1.
  */
 import React, { useMemo, useCallback, useEffect } from 'react';
-import { DiscoverProps } from './types';
+import { History } from 'history';
 import { Discover } from './discover';
-import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { useDiscoverState } from './use_discover_state';
 import { useSearchSession } from './use_search_session';
+import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../data/common';
+import { DiscoverServices } from '../../build_services';
+import { SavedSearch } from '../../saved_searches';
+import { getStateDefaults } from '../helpers/get_state_defaults';
 
 const DiscoverMemoized = React.memo(Discover);
 
-export function DiscoverWrapper(props: DiscoverProps) {
-  const { services } = props.opts;
-  const { chrome, docLinks, uiSettings: config, data } = services;
+export interface DiscoverWrapperProps {
+  /**
+   * Current IndexPattern
+   */
+  indexPattern: IndexPattern;
 
-  const history = useMemo(() => services.history(), [services]);
+  opts: {
+    /**
+     * Use angular router for navigation
+     */
+    navigateTo: () => void;
+    /**
+     * Instance of browser history
+     */
+    history: History;
+    /**
+     * List of available index patterns
+     */
+    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+    /**
+     * Kibana core services used by discover
+     */
+    services: DiscoverServices;
+    /**
+     * Current instance of SavedSearch
+     */
+    savedSearch: SavedSearch;
+  };
+}
+
+export function DiscoverWrapper(props: DiscoverWrapperProps) {
+  const { services, history, navigateTo, indexPatternList } = props.opts;
+  const { chrome, docLinks, uiSettings: config, data } = services;
 
   const useNewFieldsApi = useMemo(() => !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [
     services,
@@ -50,7 +82,7 @@ export function DiscoverWrapper(props: DiscoverProps) {
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
       if (!search && !hash && pathname === '/') {
-        resetSavedSearch();
+        resetSavedSearch('');
       }
     });
     return () => unlistenHistoryBasePath();
@@ -61,18 +93,8 @@ export function DiscoverWrapper(props: DiscoverProps) {
   /**
    * Data fetching logic
    */
-  const shouldSearchOnPageLoad = useCallback(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    return (
-      config.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      services.timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL()
-    );
-  }, [config, savedSearch.id, searchSessionManager, services.timefilter]);
 
-  const useSavedSearch = useSavedSearchData({
+  const { refetch$, chart$, hits$, shouldSearchOnPageLoad, savedSearch$ } = useSavedSearchData({
     indexPattern,
     savedSearch,
     searchSessionManager,
@@ -81,49 +103,72 @@ export function DiscoverWrapper(props: DiscoverProps) {
     state,
     stateContainer,
     useNewFieldsApi,
-    shouldSearchOnPageLoad,
   });
 
   /**
-   * Initializing
+   * Initializing saved search
    */
+
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-
     setBreadcrumbsTitle(savedSearch, chrome);
-    addHelpMenuToAppChrome(chrome, docLinks);
+
+    const newAppState = getStateDefaults({
+      config,
+      data,
+      savedSearch,
+    });
     // Propagate current app state to url, then start syncing and fetching
-    stateContainer.replaceUrlAppState({}).then(() => {
-      stateContainer.startSync();
+    stateContainer.replaceUrlAppState(newAppState).then(() => {
       if (shouldSearchOnPageLoad()) {
-        useSavedSearch.refetch$.next();
+        refetch$.next();
       }
     });
     return () => {
       data.search.session.clear();
-      stateContainer.stopSync();
     };
   }, [
     savedSearch,
     chrome,
     docLinks,
-    useSavedSearch.refetch$,
-    services,
+    refetch$,
     shouldSearchOnPageLoad,
     stateContainer,
     data,
+    config,
   ]);
+
+  /**
+   * Initializing syncing with state and help menu
+   */
+
+  useEffect(() => {
+    stateContainer.startSync();
+    addHelpMenuToAppChrome(chrome, docLinks);
+    return () => stateContainer.stopSync();
+  }, [stateContainer, chrome, docLinks]);
+
+  const resetQuery = useCallback(() => {
+    resetSavedSearch(savedSearch.id);
+  }, [resetSavedSearch, savedSearch]);
 
   return (
     <DiscoverMemoized
-      {...props}
+      chart$={chart$}
+      hits$={hits$}
       indexPattern={indexPattern}
+      indexPatternList={indexPatternList}
+      refetch$={refetch$}
+      resetQuery={resetQuery}
+      navigateTo={navigateTo}
+      savedSearch={savedSearch}
+      savedSearch$={savedSearch$}
+      searchSessionManager={searchSessionManager}
+      searchSource={searchSource}
+      services={services}
       state={state}
       stateContainer={stateContainer}
-      searchSessionManager={searchSessionManager}
-      useSavedSearch={useSavedSearch}
-      searchSource={searchSource}
     />
   );
 }

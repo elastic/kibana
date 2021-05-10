@@ -9,8 +9,7 @@
 import { uniq } from 'lodash';
 import { Duration, Moment } from 'moment';
 import { Unit } from '@elastic/datemath';
-
-import { SerializedFieldFormat } from '../../../../../expressions/common/types';
+import { SerializedFieldFormat } from '../../../../../expressions/common';
 
 export interface Column {
   id: string;
@@ -71,7 +70,7 @@ export interface Chart {
   ordered: Ordered;
 }
 
-export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
+export const buildPointSeriesData = (table: Table, dimensions: Dimensions): Chart => {
   const { x, y } = dimensions;
   const xAccessor = table.columns[x.accessor].id;
   const yAccessor = table.columns[y.accessor].id;

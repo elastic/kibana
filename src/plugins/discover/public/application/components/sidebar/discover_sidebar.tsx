@@ -35,7 +35,6 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { calcFieldCounts } from '../../helpers/calc_field_counts';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -70,6 +69,7 @@ export function DiscoverSidebar({
   alwaysShowActionButtons = false,
   columns,
   config,
+  fieldCounts,
   fieldFilter,
   hits,
   indexPatternList,
@@ -97,21 +97,15 @@ export function DiscoverSidebar({
   const { indexPatternFieldEditor } = services;
   const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
-  const [fieldCounts, setFieldCounts] = useState<Record<string, number>>({});
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
   useEffect(() => {
     if (indexPattern !== selectedIndexPattern) {
-      setFieldCounts({});
       setIndexPattern(selectedIndexPattern);
     }
   }, [selectedIndexPattern, indexPattern]);
-  useEffect(() => {
-    const newFieldCounts = calcFieldCounts(fieldCounts || {}, hits, selectedIndexPattern!);
-    setFieldCounts(newFieldCounts);
-  }, [fieldCounts, hits, selectedIndexPattern]);
 
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
@@ -252,7 +246,6 @@ export function DiscoverSidebar({
               fieldName,
               onDelete: async () => {
                 onEditRuntimeField();
-                setFieldCounts({});
               },
             });
             if (setFieldEditorRef) {

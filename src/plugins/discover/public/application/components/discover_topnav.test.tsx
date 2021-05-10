@@ -12,8 +12,6 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverServices } from '../../build_services';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { uiSettingsMock as mockUiSettings } from '../../__mocks__/ui_settings';
-import { IndexPatternAttributes } from '../../../../data/common/index_patterns';
-import { SavedObject } from '../../../../../core/types';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenu } from '../../../../navigation/public';
 import { ISearchSource, Query } from '../../../../data/common';
@@ -37,17 +35,12 @@ function getProps(): DiscoverTopNavProps {
     },
     uiSettings: mockUiSettings,
   } as unknown) as DiscoverServices;
-  const indexPattern = indexPatternMock;
   return {
     stateContainer: {} as GetStateReturn,
     indexPattern: indexPatternMock,
-    opts: {
-      indexPatternList: (indexPattern as unknown) as Array<SavedObject<IndexPatternAttributes>>,
-      navigateTo: jest.fn(),
-      savedSearch: savedSearchMock,
-      services,
-      routeReload: jest.fn(),
-    },
+    savedSearch: savedSearchMock,
+    navigateTo: jest.fn(),
+    services,
     query: {} as Query,
     savedQuery: '',
     updateQuery: jest.fn(),

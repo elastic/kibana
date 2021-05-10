@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
-import { merge, Subject, Observable } from 'rxjs';
+import { merge, Subject, BehaviorSubject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { debounceTime, tap, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import { DiscoverServices } from '../../build_services';
@@ -15,25 +16,32 @@ import { IndexPattern, ISearchSource } from '../../../../data/common';
 import { SavedSearch } from '../../saved_searches';
 import { AppState, GetStateReturn } from '../angular/discover_state';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
-import { RequestAdapter } from '../../../../inspector/common/adapters/request';
+import { RequestAdapter } from '../../../../inspector/public';
 import { fetchStatuses } from './constants';
 import { ChartSubject, useSavedSearchChart } from './use_saved_search_chart';
 import { TotalHitsSubject, useSavedSearchTotalHits } from './use_saved_search_total_hits';
 import { useSavedSearchDocuments } from './use_saved_search_documents';
 import { AutoRefreshDoneFn } from '../../../../data/public';
+import { calcFieldCounts } from '../helpers/calc_field_counts';
+import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../common';
 
 export interface UseSavedSearch {
   chart$: ChartSubject;
-  fetch$: Observable<unknown>;
+  hits$: TotalHitsSubject;
+  refetch$: Subject<unknown>;
+  savedSearch$: SavedSearchSubject;
+  shouldSearchOnPageLoad: () => boolean;
+}
+
+export type SavedSearchSubject = BehaviorSubject<{
   fetchCounter: number;
   fetchError?: Error;
-  fetchStatus: string;
-  hits$: TotalHitsSubject;
+  fieldCounts: Record<string, number>;
   inspectorAdapters?: { requests: RequestAdapter };
-  refetch$: Subject<unknown>;
-  rows: ElasticSearchHit[];
-  reset: () => void;
-}
+  rows?: ElasticSearchHit[];
+  state: string;
+}>;
+
 export const useSavedSearch = ({
   services,
   searchSessionManager,
@@ -42,7 +50,6 @@ export const useSavedSearch = ({
   savedSearch,
   searchSource,
   stateContainer,
-  shouldSearchOnPageLoad,
   useNewFieldsApi,
 }: {
   services: DiscoverServices;
@@ -52,13 +59,53 @@ export const useSavedSearch = ({
   savedSearch: SavedSearch;
   searchSource: ISearchSource;
   stateContainer: GetStateReturn;
-  shouldSearchOnPageLoad: () => boolean;
   useNewFieldsApi: boolean;
 }): UseSavedSearch => {
+  const shouldSearchOnPageLoad = useCallback(() => {
+    // A saved search is created on every page load, so we check the ID to see if we're loading a
+    // previously saved search or if it is just transient
+    return (
+      services.uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      savedSearch.id !== undefined ||
+      services.timefilter.getRefreshInterval().pause === false ||
+      searchSessionManager.hasSearchSessionIdInURL()
+    );
+  }, [services.uiSettings, savedSearch.id, searchSessionManager, services.timefilter]);
+
+  const savedSearch$: SavedSearchSubject = useMemo(
+    () =>
+      new BehaviorSubject({
+        state: shouldSearchOnPageLoad() ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED,
+        fetchCounter: 0,
+        fieldCounts: {},
+      }),
+    [shouldSearchOnPageLoad]
+  );
+  const [fetchCounter, setFetchCounter] = useState(0);
   const [cachedState, setCachedState] = useState(state);
+  const [fieldCounts, setFieldCounts] = useState<Record<string, number>>({});
   const abortControllerRef = useRef<AbortController | undefined>();
   const { data, filterManager, timefilter } = services;
   const refetch$ = useMemo(() => new Subject(), []);
+  useEffect(() => {
+    const subscription = refetch$.subscribe({
+      next: (val = '') => {
+        if (val === 'reset') {
+          // triggered e.g. when runtime field was added our changed
+          savedSearch$.next({
+            fetchCounter,
+            state: fetchStatuses.LOADING,
+            rows: [],
+            fieldCounts: {},
+          });
+        }
+      },
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [fetchCounter, refetch$, savedSearch$]);
+
   // handler emitted by `timefilter.getAutoRefreshFetch$()`
   // to notify when data completed loading and to start a new autorefresh loop
   const autoRefreshDoneCb = useRef<undefined | AutoRefreshDoneFn>(undefined);
@@ -74,19 +121,10 @@ export const useSavedSearch = ({
     savedSearch,
   });
 
-  const {
-    fetchStatus,
-    fetchError,
-    fetchCounter,
-    rows,
-    inspectorAdapters,
-    fetch,
-    reset,
-  } = useSavedSearchDocuments({
+  const { fetchStatus, fetch } = useSavedSearchDocuments({
     services,
     indexPattern,
     useNewFieldsApi,
-    showUnmappedFields: useNewFieldsApi,
     volatileSearchSource: searchSource,
     stateContainer,
     shouldSearchOnPageLoad,
@@ -115,32 +153,69 @@ export const useSavedSearch = ({
     fetchStatus,
   ]);
 
-  const fetchAll = useCallback(() => {
-    if (abortControllerRef.current) abortControllerRef.current.abort();
-    abortControllerRef.current = new AbortController();
-    const requests: Array<Promise<unknown>> = [];
-    const searchSessionId = searchSessionManager.getNextSearchSessionId();
+  const fetchAll = useCallback(
+    (resetFieldCounts = false) => {
+      const newFetchCounter = fetchCounter + 1;
+      const inspectorAdapters = { requests: new RequestAdapter() };
+      const inspector = {
+        adapter: inspectorAdapters.requests,
+        title: i18n.translate('discover.inspectorRequestDataTitle', {
+          defaultMessage: 'data',
+        }),
+        description: i18n.translate('discover.inspectorRequestDescription', {
+          defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+        }),
+      };
 
-    requests.push(fetch(abortControllerRef.current, searchSessionId));
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+      abortControllerRef.current = new AbortController();
+      const requests: Array<Promise<unknown>> = [];
+      const searchSessionId = searchSessionManager.getNextSearchSessionId();
 
-    if (indexPattern.timeFieldName && !state.hideChart) {
-      requests.push(fetchChart(abortControllerRef.current, searchSessionId));
-    }
+      requests.push(fetch(abortControllerRef.current, searchSessionId, inspector));
 
-    requests.push(fetchHits(abortControllerRef.current, searchSessionId));
+      if (indexPattern.timeFieldName && !state.hideChart) {
+        requests.push(fetchChart(abortControllerRef.current, searchSessionId, inspector));
+      }
 
-    Promise.all(requests).finally(() => {
-      autoRefreshDoneCb.current?.();
-      autoRefreshDoneCb.current = undefined;
-    });
-  }, [
-    fetch,
-    fetchChart,
-    fetchHits,
-    indexPattern.timeFieldName,
-    searchSessionManager,
-    state.hideChart,
-  ]);
+      requests.push(fetchHits(abortControllerRef.current, searchSessionId, inspector));
+      savedSearch$.next({ state: fetchStatuses.LOADING, fetchCounter, fieldCounts });
+
+      Promise.all(requests)
+        .then((res) => {
+          const newFieldCounts = calcFieldCounts(
+            resetFieldCounts ? {} : fieldCounts,
+            res[0] as ElasticSearchHit[],
+            indexPattern
+          );
+
+          savedSearch$.next({
+            fetchCounter: newFetchCounter,
+            state: fetchStatuses.COMPLETE,
+            rows: res[0] as ElasticSearchHit[],
+            inspectorAdapters,
+            fieldCounts: newFieldCounts,
+          });
+          setFetchCounter(newFetchCounter);
+          setFieldCounts(newFieldCounts);
+        })
+        .finally(() => {
+          autoRefreshDoneCb.current?.();
+          autoRefreshDoneCb.current = undefined;
+        });
+    },
+    [
+      fetch,
+      fetchChart,
+      fetchCounter,
+      fetchHits,
+      fieldCounts,
+      indexPattern,
+      savedSearch$,
+      searchSessionManager,
+      state.hideChart,
+    ]
+  );
 
   useEffect(() => {
     const subscription = fetch$.subscribe({
@@ -156,6 +231,7 @@ export const useSavedSearch = ({
 
   useEffect(() => {
     let triggerFetch = false;
+    let resetFieldCounts = false;
     if (state.hideChart !== cachedState.hideChart && !state.hideChart) {
       triggerFetch = true;
     }
@@ -167,26 +243,19 @@ export const useSavedSearch = ({
     }
     if (!isEqual(state.index, cachedState.index)) {
       triggerFetch = true;
+      resetFieldCounts = true;
     }
     setCachedState(state);
     if (triggerFetch) {
-      fetchAll();
+      fetchAll(resetFieldCounts);
     }
   }, [cachedState, refetch$, state.interval, state.sort, fetchAll, state]);
 
   return {
-    fetch$,
     chart$,
     hits$,
     refetch$,
-    fetchStatus,
-    fetchError,
-    fetchCounter,
-    rows,
-    inspectorAdapters,
-    reset: () => {
-      reset();
-      refetch$.next();
-    },
+    savedSearch$,
+    shouldSearchOnPageLoad,
   };
 };

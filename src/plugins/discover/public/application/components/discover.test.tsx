@@ -10,7 +10,6 @@ import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
 import { setHeaderActionMenuMounter } from '../../kibana_services';
-
 import { Discover } from './discover';
 import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
@@ -18,19 +17,21 @@ import { DiscoverServices } from '../../build_services';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
 import { uiSettingsMock as mockUiSettings } from '../../__mocks__/ui_settings';
-import { IndexPattern, IndexPatternAttributes } from '../../../../data/common/index_patterns';
+import { IndexPattern, IndexPatternAttributes } from '../../../../data/common';
 import { SavedObject } from '../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
-import { fetchStatuses } from './constants';
-import { UseSavedSearch } from './use_saved_search';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 import { GetStateReturn } from '../angular/discover_state';
 import { DataPublicPluginStart } from '../../../../data/public';
-import { TopNavMenu } from '../../../../navigation/public/top_nav_menu';
+import { TopNavMenu } from '../../../../navigation/public';
+import { fetchStatuses } from './constants';
+import { DiscoverProps } from './types';
+import { TotalHitsSubject } from './use_saved_search_total_hits';
+import { SavedSearchSubject } from './use_saved_search';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(indexPattern: IndexPattern) {
+function getProps(indexPattern: IndexPattern): DiscoverProps {
   const searchSourceMock = createSearchSourceMock({});
   const services = ({
     data: {
@@ -64,31 +65,34 @@ function getProps(indexPattern: IndexPattern) {
     },
   } as unknown) as DiscoverServices;
 
-  const useSavedSearchMock = ({
-    rows: esHits,
-    fetchStatus: fetchStatuses.COMPLETE,
-    fetch$: new Subject(),
-    hits$: new BehaviorSubject({ state: 'success', total: esHits.length }),
-    chart$: new BehaviorSubject({ state: 'initial' }),
-  } as unknown) as UseSavedSearch;
-
   const indexPatternList = ([indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
   }) as unknown) as Array<SavedObject<IndexPatternAttributes>>;
+  const hits$ = new BehaviorSubject({
+    state: fetchStatuses.COMPLETE,
+    total: Number(esHits.length),
+  }) as TotalHitsSubject;
+
+  const savedSearch$ = new BehaviorSubject({
+    state: fetchStatuses.COMPLETE,
+    rows: esHits,
+    fetchCounter: 1,
+    fieldCounts: {},
+  }) as SavedSearchSubject;
 
   return {
+    chart$: new BehaviorSubject({ state: fetchStatuses.UNINITIALIZED }),
+    hits$,
     indexPattern,
-    opts: {
-      indexPatternList,
-      navigateTo: jest.fn(),
-      savedSearch: savedSearchMock,
-      services,
-      routeReload: jest.fn(),
-    },
+    indexPatternList,
+    navigateTo: jest.fn(),
+    refetch$: new Subject(),
     resetQuery: jest.fn(),
-    useSavedSearch: useSavedSearchMock,
-    searchSource: searchSourceMock,
+    savedSearch$,
+    savedSearch: savedSearchMock,
     searchSessionManager: {} as DiscoverSearchSessionManager,
+    searchSource: searchSourceMock,
+    services,
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
   };

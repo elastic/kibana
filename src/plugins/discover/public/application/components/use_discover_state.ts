@@ -123,18 +123,20 @@ export function useDiscoverState({
     return () => unsubsribe();
   }, [config, services.indexPatterns, state.index, stateContainer.appStateContainer, setState]);
 
-  const resetSavedSearch = useCallback(async () => {
-    const newSavedSearch = await services.getSavedSearchById();
-    newSavedSearch.searchSource.setField('index', indexPattern);
-    stateContainer.setAppState(
-      getStateDefaults({
+  const resetSavedSearch = useCallback(
+    async (id: string) => {
+      const newSavedSearch = await services.getSavedSearchById(id);
+      newSavedSearch.searchSource.setField('index', indexPattern);
+      const newAppState = getStateDefaults({
         config,
         data,
-        savedSearch,
-      })
-    );
-    setSavedSearch(newSavedSearch);
-  }, [config, data, indexPattern, savedSearch, services, stateContainer]);
+        savedSearch: newSavedSearch,
+      });
+      stateContainer.setAppState(newAppState);
+      setSavedSearch(newSavedSearch);
+    },
+    [indexPattern, services, config, data, stateContainer]
+  );
 
   return {
     state,

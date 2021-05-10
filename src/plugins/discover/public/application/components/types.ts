@@ -6,47 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from 'kibana/public';
-import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
-import { IndexPatternAttributes, ISearchSource } from '../../../../data/public';
+import { Subject } from 'rxjs';
+import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../data/common';
+import { ISearchSource } from '../../../../data/public';
+import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
+import { AppState, GetStateReturn } from '../angular/discover_state';
+import { SavedSearchSubject } from './use_saved_search';
+import { ChartSubject } from './use_saved_search_chart';
+import { TotalHitsSubject } from './use_saved_search_total_hits';
+import { DiscoverServices } from '../../build_services';
 import { SavedSearch } from '../../saved_searches';
 
-import { DiscoverServices } from '../../build_services';
-
 export interface DiscoverProps {
-  /**
-   * Current IndexPattern
-   */
+  chart$: ChartSubject;
+  hits$: TotalHitsSubject;
   indexPattern: IndexPattern;
-
-  opts: {
-    /**
-     * Use angular router for navigation
-     */
-    navigateTo: () => void;
-    /**
-     * List of available index patterns
-     */
-    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-    /**
-     * Reload current Angular route, used for switching index patterns, legacy
-     */
-    routeReload: () => void;
-    /**
-     * Kibana core services used by discover
-     */
-    services: DiscoverServices;
-    /**
-     * Current instance of SavedSearch
-     */
-    savedSearch: SavedSearch;
-  };
-  /**
-   * Function to reset the current query
-   */
+  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  refetch$: Subject<unknown>;
   resetQuery: () => void;
-  /**
-   * Instance of SearchSource, the high level search API
-   */
+  navigateTo: (url: string) => void;
+  savedSearch$: SavedSearchSubject;
+  savedSearch: SavedSearch;
+  searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
+  services: DiscoverServices;
+  state: AppState;
+  stateContainer: GetStateReturn;
 }

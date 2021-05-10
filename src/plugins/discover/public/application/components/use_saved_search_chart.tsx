@@ -9,16 +9,21 @@ import { useCallback, useMemo } from 'react';
 
 import { BehaviorSubject } from 'rxjs';
 import { TimechartBucketInterval } from './timechart_header/timechart_header';
-import { AggConfigs } from '../../../../data/common/search/aggs';
-import { SearchSource, tabifyAggResponse } from '../../../../data/common';
+import {
+  SearchSource,
+  tabifyAggResponse,
+  AggConfigs,
+  IInspectorInfo,
+} from '../../../../data/common';
 import { applyAggsToSearchSource, getDimensions } from './histogram';
 import { SavedSearch } from '../../saved_searches';
-import { discoverResponseHandler } from '../angular/response_handler';
 import { DataPublicPluginStart, search } from '../../../../data/public';
+import { buildPointSeriesData, Chart as IChart } from '../angular/helpers/point_series';
+import { fetchStatuses } from './constants';
 
 export type ChartSubject = BehaviorSubject<{
   state: string;
-  data?: unknown;
+  data?: IChart;
   bucketInterval?: TimechartBucketInterval;
 }>;
 
@@ -27,13 +32,15 @@ async function fetch(
   abortController: AbortController,
   chartAggConfigs: AggConfigs,
   data: DataPublicPluginStart,
-  searchSessionId: string
+  searchSessionId: string,
+  inspector: IInspectorInfo
 ) {
   try {
     const { rawResponse } = await searchSource
       .fetch$({
         abortSignal: abortController.signal,
         sessionId: searchSessionId,
+        inspector,
       })
       .toPromise();
     const tabifiedData = tabifyAggResponse(chartAggConfigs, rawResponse);
@@ -41,8 +48,7 @@ async function fetch(
     if (!dimensions) {
       return;
     }
-
-    return discoverResponseHandler(tabifiedData, dimensions);
+    return buildPointSeriesData(tabifiedData, dimensions);
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') return;
     data.search.showError(error);
@@ -58,10 +64,13 @@ export function useSavedSearchChart({
   data: DataPublicPluginStart;
   interval: string;
 }) {
-  const subject: ChartSubject = useMemo(() => new BehaviorSubject({ state: 'initial' }), []);
+  const subject: ChartSubject = useMemo(
+    () => new BehaviorSubject({ state: fetchStatuses.UNINITIALIZED }),
+    []
+  );
 
   const fetchData = useCallback(
-    (abortController: AbortController, searchSessionId: string) => {
+    (abortController: AbortController, searchSessionId: string, inspector) => {
       const searchSource = savedSearch.searchSource.createChild();
       const indexPattern = savedSearch.searchSource.getField('index');
       searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
@@ -75,13 +84,18 @@ export function useSavedSearchChart({
           ? bucketAggConfig.buckets?.getInterval()
           : undefined;
 
-      subject.next({ state: 'loading' });
+      subject.next({ state: fetchStatuses.UNINITIALIZED });
 
-      return fetch(searchSource, abortController, chartAggConfigs!, data, searchSessionId).then(
-        (result: unknown) => {
-          subject.next({ state: 'complete', data: result, bucketInterval: newInterval });
-        }
-      );
+      return fetch(
+        searchSource,
+        abortController,
+        chartAggConfigs!,
+        data,
+        searchSessionId,
+        inspector
+      ).then((result) => {
+        subject.next({ state: fetchStatuses.COMPLETE, data: result, bucketInterval: newInterval });
+      });
     },
     [data, interval, savedSearch.searchSource, subject]
   );

@@ -12,7 +12,10 @@ import { Query, TimeRange } from '../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../kibana_services';
 import { GetStateReturn } from '../angular/discover_state';
 
-export type DiscoverTopNavProps = Pick<DiscoverProps, 'indexPattern' | 'opts' | 'searchSource'> & {
+export type DiscoverTopNavProps = Pick<
+  DiscoverProps,
+  'indexPattern' | 'navigateTo' | 'savedSearch' | 'services' | 'searchSource'
+> & {
   onOpenInspector: () => void;
   query?: Query;
   savedQuery?: string;
@@ -22,28 +25,30 @@ export type DiscoverTopNavProps = Pick<DiscoverProps, 'indexPattern' | 'opts' | 
 
 export const DiscoverTopNav = ({
   indexPattern,
-  opts,
   onOpenInspector,
   query,
   savedQuery,
   stateContainer,
   updateQuery,
   searchSource,
+  navigateTo,
+  savedSearch,
+  services,
 }: DiscoverTopNavProps) => {
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
-  const { TopNavMenu } = opts.services.navigation.ui;
+  const { TopNavMenu } = services.navigation.ui;
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
         indexPattern,
-        navigateTo: opts.navigateTo,
-        savedSearch: opts.savedSearch,
-        services: opts.services,
+        navigateTo,
+        savedSearch,
+        services,
         state: stateContainer,
         onOpenInspector,
         searchSource,
       }),
-    [indexPattern, opts, onOpenInspector, searchSource, stateContainer]
+    [indexPattern, navigateTo, onOpenInspector, searchSource, stateContainer, savedSearch, services]
   );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
@@ -73,9 +78,9 @@ export const DiscoverTopNav = ({
       query={query}
       setMenuMountPoint={setMenuMountPoint}
       savedQueryId={savedQuery}
-      screenTitle={opts.savedSearch.title}
+      screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={!!opts.services.capabilities.discover.saveQuery}
+      showSaveQuery={!!services.capabilities.discover.saveQuery}
       showSearchBar={true}
       useDefaultBehaviors={true}
     />

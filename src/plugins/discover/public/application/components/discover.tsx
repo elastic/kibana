@@ -42,11 +42,8 @@ import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { DiscoverChart } from './discover_chart';
-import { UseSavedSearch } from './use_saved_search';
-import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 import { getResultState } from '../helpers/get_result_state';
-import { AppState, GetStateReturn } from '../angular/discover_state';
-import { InspectorSession } from '../../../../inspector/public';
+import { InspectorSession, RequestAdapter } from '../../../../inspector/public';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -55,21 +52,21 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 
 export function Discover({
+  chart$,
+  hits$,
   indexPattern,
-  opts,
+  indexPatternList,
+  navigateTo,
+  refetch$,
   resetQuery,
-  searchSource,
+  savedSearch$,
+  savedSearch,
   searchSessionManager,
+  searchSource,
+  services,
   state,
   stateContainer,
-  useSavedSearch,
-}: DiscoverProps & {
-  searchSessionManager: DiscoverSearchSessionManager;
-  state: AppState;
-  stateContainer: GetStateReturn;
-  useSavedSearch: UseSavedSearch;
-}) {
-  const { savedSearch, indexPatternList, services } = opts;
+}: DiscoverProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -78,11 +75,43 @@ export function Discover({
     uiSettings: config,
     filterManager,
   } = services;
+
   const sampleSize = useMemo(() => config.get(SAMPLE_SIZE_SETTING), [config]);
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
+  const [rows, setRows] = useState<ElasticSearchHit[]>([]);
+
+  const [fetchState, setFetchState] = useState<{
+    state: string;
+    fetchCounter: number;
+    inspectorAdapters?: { requests: RequestAdapter };
+    fieldCounts: Record<string, number>;
+  }>({
+    state: savedSearch$.getValue().state,
+    fetchCounter: 0,
+    fieldCounts: {},
+  });
+  const { state: fetchStatus, fetchCounter, inspectorAdapters } = fetchState;
+
+  useEffect(() => {
+    const subscription = savedSearch$.subscribe((next) => {
+      if (
+        (next.state && next.state !== fetchState.state) ||
+        (next.fetchCounter && next.fetchCounter !== fetchState.fetchCounter)
+      ) {
+        setFetchState({ ...fetchState, ...next });
+        if (next.rows) {
+          setRows(next.rows);
+        }
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [savedSearch$, fetchState]);
+
   const isMobile = () => {
     // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
     return collapseIcon && !collapseIcon.current;
@@ -104,7 +133,6 @@ export function Discover({
     [useNewFieldsApi]
   );
 
-  const { chart$, hits$, refetch$, fetchStatus, fetchError, fetchCounter, rows } = useSavedSearch;
   const resultState = useMemo(() => getResultState(fetchStatus, rows), [fetchStatus, rows]);
 
   const updateQuery = useCallback(
@@ -133,14 +161,14 @@ export function Discover({
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    if (useSavedSearch.inspectorAdapters) {
+    if (inspectorAdapters) {
       setExpandedDoc(undefined);
-      const session = services.inspector.open(useSavedSearch.inspectorAdapters, {
+      const session = services.inspector.open(inspectorAdapters, {
         title: savedSearch.title,
       });
       setInspectorSession(session);
     }
-  }, [setExpandedDoc, useSavedSearch.inspectorAdapters, savedSearch, services.inspector]);
+  }, [setExpandedDoc, inspectorAdapters, savedSearch, services.inspector]);
 
   useEffect(() => {
     return () => {
@@ -204,9 +232,9 @@ export function Discover({
     [stateContainer, state]
   );
 
-  const onEditRuntimeField = () => {
-    useSavedSearch.reset();
-  };
+  const onEditRuntimeField = useCallback(() => {
+    refetch$.next('reset');
+  }, [refetch$]);
 
   const columns = useMemo(() => {
     if (!state.columns) {
@@ -216,6 +244,10 @@ export function Discover({
   }, [state, useNewFieldsApi]);
 
   const contentCentered = resultState === 'uninitialized';
+  const showTimeCol = useMemo(
+    () => !config.get('doc_table:hideTimeColumn', false) && !!indexPattern.timeFieldName,
+    [config, indexPattern.timeFieldName]
+  );
 
   return (
     <I18nProvider>
@@ -223,10 +255,12 @@ export function Discover({
         <TopNavMemoized
           indexPattern={indexPattern}
           onOpenInspector={onOpenInspector}
-          opts={opts}
           query={state.query}
+          navigateTo={navigateTo}
           savedQuery={state.savedQuery}
+          savedSearch={savedSearch}
           searchSource={searchSource}
+          services={services}
           stateContainer={stateContainer}
           updateQuery={updateQuery}
         />
@@ -239,6 +273,7 @@ export function Discover({
               <SidebarMemoized
                 config={config}
                 columns={columns}
+                fieldCounts={fetchState.fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
                 indexPatterns={indexPatterns}
@@ -290,7 +325,6 @@ export function Discover({
                     timeFieldName={timeField}
                     queryLanguage={state.query?.language || ''}
                     data={data}
-                    error={fetchError}
                   />
                 )}
                 {resultState === 'uninitialized' && (
@@ -341,8 +375,8 @@ export function Discover({
                             indexPattern={indexPattern}
                             rows={rows}
                             sort={state.sort || []}
-                            searchDescription={opts.savedSearch.description}
-                            searchTitle={opts.savedSearch.lastSavedTitle}
+                            searchDescription={savedSearch.description}
+                            searchTitle={savedSearch.lastSavedTitle}
                             onAddColumn={onAddColumn}
                             onBackToTop={onBackToTop}
                             onFilter={onAddFilter}
@@ -364,13 +398,10 @@ export function Discover({
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={sampleSize}
-                              searchDescription={opts.savedSearch.description}
-                              searchTitle={opts.savedSearch.lastSavedTitle}
+                              searchDescription={savedSearch.description}
+                              searchTitle={savedSearch.lastSavedTitle}
                               setExpandedDoc={setExpandedDoc}
-                              showTimeCol={
-                                !config.get('doc_table:hideTimeColumn', false) &&
-                                !!indexPattern.timeFieldName
-                              }
+                              showTimeCol={showTimeCol}
                               services={services}
                               settings={state.grid}
                               onAddColumn={onAddColumn}

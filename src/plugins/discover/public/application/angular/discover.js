@@ -16,7 +16,6 @@ import {
   redirectWhenMissing,
 } from '../../kibana_services';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
 
 const services = getServices();
@@ -126,16 +125,10 @@ function discoverController($route, $scope) {
   const history = getHistory();
 
   $scope.opts = {
-    // number of records to fetch, then paginate through
-    sampleSize: config.get(SAMPLE_SIZE_SETTING),
-    savedSearch: savedSearch,
+    savedSearch,
+    history,
     services,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
-    routeReload: () => {
-      $scope.$evalAsync(() => {
-        $route.reload();
-      });
-    },
   };
 
   $scope.$on('$destroy', () => {
@@ -147,16 +140,5 @@ function discoverController($route, $scope) {
     $scope.$evalAsync(() => {
       history.push(path);
     });
-  };
-
-  $scope.resetQuery = function () {
-    history.push(
-      $route.current.params.id ? `/view/${encodeURIComponent($route.current.params.id)}` : '/'
-    );
-    $route.reload();
-  };
-
-  $scope.newQuery = function () {
-    history.push('/');
   };
 }

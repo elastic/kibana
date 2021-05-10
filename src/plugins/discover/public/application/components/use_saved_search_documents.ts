@@ -6,21 +6,18 @@
  * Side Public License, v 1.
  */
 import { useState, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { fetchStatuses } from './constants';
 import { IndexPattern, ISearchSource } from '../../kibana_services';
-import { RequestAdapter } from '../../../../inspector/common/adapters/request';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { DiscoverServices } from '../../build_services';
 import { GetStateReturn } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
-import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { IInspectorInfo } from '../../../../data/common';
 
 export function useSavedSearchDocuments({
   indexPattern,
   services,
-  showUnmappedFields,
   stateContainer,
   useNewFieldsApi,
   volatileSearchSource,
@@ -29,7 +26,6 @@ export function useSavedSearchDocuments({
   services: DiscoverServices;
   indexPattern: IndexPattern;
   useNewFieldsApi: boolean;
-  showUnmappedFields: boolean;
   volatileSearchSource: ISearchSource;
   stateContainer: GetStateReturn;
   shouldSearchOnPageLoad: () => boolean;
@@ -40,13 +36,8 @@ export function useSavedSearchDocuments({
   const [fetchCounter, setFetchCounter] = useState(0);
   const [fetchError, setFetchError] = useState(undefined);
 
-  const [documents, setDocuments] = useState<ElasticSearchHit[]>([]);
-  const [inspectorAdapters, setInspectorAdapters] = useState<
-    undefined | { requests: RequestAdapter }
-  >();
-
   const fetch = useCallback(
-    (abortController: AbortController, searchSessionId: string) => {
+    (abortController: AbortController, searchSessionId: string, inspector: IInspectorInfo) => {
       setFetchCounter(fetchCounter + 1);
       setFetchError(undefined);
 
@@ -61,31 +52,20 @@ export function useSavedSearchDocuments({
         services,
         sort: sort as SortOrder[],
         useNewFieldsApi,
-        showUnmappedFields,
+        showUnmappedFields: useNewFieldsApi,
       });
       setFetchStatus(fetchStatuses.LOADING);
-      const newInspectorAdapters = { requests: new RequestAdapter() };
 
       return volatileSearchSource
         .fetch$({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
-          inspector: {
-            adapter: newInspectorAdapters.requests,
-            title: i18n.translate('discover.inspectorRequestDataTitle', {
-              defaultMessage: 'data',
-            }),
-            description: i18n.translate('discover.inspectorRequestDescription', {
-              defaultMessage:
-                'This request queries Elasticsearch to fetch the data for the search.',
-            }),
-          },
+          inspector,
         })
         .toPromise()
         .then(({ rawResponse }) => {
-          setDocuments(rawResponse.hits.hits as ElasticSearchHit[]);
           setFetchStatus(fetchStatuses.COMPLETE);
-          setInspectorAdapters(newInspectorAdapters);
+          return rawResponse.hits.hits;
         })
         .catch((error) => {
           // If the request was aborted then no need to surface this error in the UI
@@ -93,14 +73,12 @@ export function useSavedSearchDocuments({
           setFetchStatus(fetchStatuses.ERROR);
           setFetchError(error);
           services.data.search.showError(error);
-          setInspectorAdapters(newInspectorAdapters);
         });
     },
     [
       fetchCounter,
       indexPattern,
       services,
-      showUnmappedFields,
       stateContainer.appStateContainer,
       useNewFieldsApi,
       volatileSearchSource,
@@ -110,11 +88,6 @@ export function useSavedSearchDocuments({
     fetchStatus,
     fetchError,
     fetchCounter,
-    rows: documents,
-    inspectorAdapters,
     fetch,
-    reset: () => {
-      setDocuments([]);
-    },
   };
 }
