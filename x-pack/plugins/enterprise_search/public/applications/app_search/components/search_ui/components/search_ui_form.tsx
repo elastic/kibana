@@ -95,7 +95,6 @@ export const SearchUIForm: React.FC = () => {
       <EuiForm>
         <EuiFormRow label={TITLE_FIELD_LABEL} helpText={TITLE_FIELD_HELP_TEXT} fullWidth>
           <EuiSelect
-            name="title-field"
             options={optionFields}
             value={selectedTitleOption && selectedTitleOption.value}
             onChange={(e) => onTitleFieldChange(e.target.value)}
