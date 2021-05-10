@@ -49,7 +49,7 @@ describe('SchemaLogic', () => {
     isModalOpen: false,
   };
 
-  /**
+  /*
    * Unfortunately, we can't mount({ schema: ... }) & have to use an action to set schema
    * because of the separate connected logic file - our LogicMounter test helper sets context
    * for only the currently tested file
