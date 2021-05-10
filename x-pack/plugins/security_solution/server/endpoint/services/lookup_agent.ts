@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SearchRequest } from '@elastic/elasticsearch/api/types';
 import { SearchResponse } from 'elasticsearch';
 import { HostMetadata } from '../../../common/endpoint/types';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -22,8 +23,7 @@ export async function getAgentIDsForEndpoints(
 
   const query = getESQueryHostMetadataByIDs(endpointIDs, queryStrategy!);
   const esClient = requestHandlerContext.core.elasticsearch.client.asCurrentUser;
-  // @ts-expect-error
-  const { body } = await esClient.search<HostMetadata>(query);
+  const { body } = await esClient.search<HostMetadata>(query as SearchRequest);
   const hosts = queryStrategy!.queryResponseToHostListResult(body as SearchResponse<HostMetadata>);
 
   return hosts.resultList.map((x: HostMetadata): string => x.elastic.agent.id);
