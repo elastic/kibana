@@ -195,7 +195,7 @@ To display the cluster data in *Discover*, load documents directly from `_source
 [[known-issues-v7.12.0]]
 === Known issues
 
-==== Saved object migrations
+*Saved object migrations*
 
 When upgrading to 7.12.0, {kib} retries failed saved object migrations without user intervention.
 
@@ -210,7 +210,7 @@ Impacts include:
 
 If your upgrade migration fails repeatedly, refer to {kibana-ref}/upgrade-migrations.html#preventing-migration-failures[preventing migration failures].
 
-==== Cluster performance degradation due to {kib} search sessions in non-default space (fixed in 7.12.1)
+*Cluster performance degradation due to {kib} search sessions in non-default space (fixed in 7.12.1)*
 
 Kibana fails to update and delete {kibana-ref}/search-sessions.html[search sessions objects] created in non-default space, degrading the performance of the cluster due to a flooding of async search API usage.
 This issue is fixed in 7.12.1 release by {kibana-pull}96123[#96123]. For 7.12.0 workaround refer to {kibana-issue}96124[#96124].
