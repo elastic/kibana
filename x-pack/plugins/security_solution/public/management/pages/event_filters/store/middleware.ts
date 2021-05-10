@@ -14,7 +14,6 @@ import {
 
 import { EventFiltersHttpService } from '../service';
 
-import { EventFiltersListPageData, EventFiltersListPageState } from '../state';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
 
 import {
@@ -35,7 +34,12 @@ import {
   getSubmissionResource,
   getNewComment,
 } from './selector';
-import { EventFiltersService, EventFiltersServiceGetListOptions } from '../types';
+import {
+  EventFiltersListPageData,
+  EventFiltersListPageState,
+  EventFiltersService,
+  EventFiltersServiceGetListOptions,
+} from '../types';
 import {
   createFailedResourceState,
   createLoadedResourceState,

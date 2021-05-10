@@ -12,7 +12,7 @@ import {
   UpdateExceptionListItemSchema,
 } from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
-import { EventFiltersListPageState } from '../state';
+import { EventFiltersListPageState } from '../types';
 
 export type EventFiltersListPageDataChanged = Action<'eventFiltersListPageDataChanged'> & {
   payload: EventFiltersListPageState['listPage']['data'];

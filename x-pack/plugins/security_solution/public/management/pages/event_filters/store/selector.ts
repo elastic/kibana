@@ -7,9 +7,8 @@
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
 
-import { EventFiltersServiceGetListOptions } from '../types';
+import { EventFiltersListPageState, EventFiltersServiceGetListOptions } from '../types';
 
-import { EventFiltersListPageState } from '../state';
 import { ExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {

@@ -26,9 +26,9 @@ import {
   EventFiltersListPageDataExistsChanged,
 } from './action';
 
-import { EventFiltersListPageState } from '../state';
 import { initialEventFiltersPageState } from './builders';
 import { getListPageIsActive } from './selector';
+import { EventFiltersListPageState } from '../types';
 
 type StateReducer = ImmutableReducer<EventFiltersListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (

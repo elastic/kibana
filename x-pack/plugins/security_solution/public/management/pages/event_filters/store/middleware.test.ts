@@ -15,11 +15,10 @@ import { AppAction } from '../../../../common/store/actions';
 import { createEventFiltersPageMiddleware } from './middleware';
 import { eventFiltersPageReducer } from './reducer';
 
-import { EventFiltersListPageState } from '../state';
 import { initialEventFiltersPageState } from './builders';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
-import { EventFiltersService } from '../types';
+import { EventFiltersListPageState, EventFiltersService } from '../types';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getListFetchError } from './selector';

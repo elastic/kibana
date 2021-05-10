@@ -9,9 +9,9 @@ import { initialEventFiltersPageState } from './builders';
 import { eventFiltersPageReducer } from './reducer';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
-import { EventFiltersListPageState } from '../state';
 import { UserChangedUrl } from '../../../../common/store/routing/action';
 import { getListPageIsActive } from './selector';
+import { EventFiltersListPageState } from '../types';
 
 describe('event filters reducer', () => {
   let initialState: EventFiltersListPageState;
