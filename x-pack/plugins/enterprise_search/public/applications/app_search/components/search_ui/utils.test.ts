@@ -7,16 +7,16 @@
 
 import '../../../__mocks__/enterprise_search_url.mock';
 
-import { generatePreviwUrl } from './utils';
+import { generatePreviewUrl } from './utils';
 
-describe('generatePreviwUrl', () => {
+describe('generatePreviewUrl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('generates a url to the preview application from state', () => {
     expect(
-      generatePreviwUrl(
+      generatePreviewUrl(
         {
           fromKibana: 'true',
           titleField: 'foo',

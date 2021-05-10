@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { EngineLogic } from '../../engine';
 import { SearchUILogic } from '../search_ui_logic';
 import { ActiveField } from '../types';
-import { generatePreviwUrl } from '../utils';
+import { generatePreviewUrl } from '../utils';
 
 const TITLE_FIELD_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.titleFieldLabel',
@@ -100,7 +100,7 @@ export const SearchUIForm: React.FC = () => {
     onUrlFieldChange,
   } = useActions(SearchUILogic);
 
-  const previewHref = generatePreviwUrl(
+  const previewHref = generatePreviewUrl(
     {
       fromKibana: 'true',
       titleField,

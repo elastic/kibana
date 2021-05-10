@@ -6,7 +6,7 @@
  */
 
 jest.mock('../utils', () => ({
-  generatePreviwUrl: jest.fn(),
+  generatePreviewUrl: jest.fn(),
 }));
 
 import { setMockValues, setMockActions } from '../../../../__mocks__';
@@ -16,7 +16,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ActiveField } from '../types';
-import { generatePreviwUrl } from '../utils';
+import { generatePreviewUrl } from '../utils';
 
 import { SearchUIForm } from './search_ui_form';
 
@@ -178,7 +178,7 @@ describe('SearchUIForm', () => {
   });
 
   it('includes a link to generate the preview', () => {
-    (generatePreviwUrl as jest.Mock).mockReturnValue('http://www.example.com?foo=bar');
+    (generatePreviewUrl as jest.Mock).mockReturnValue('http://www.example.com?foo=bar');
 
     setMockValues({
       ...values,
@@ -193,7 +193,7 @@ describe('SearchUIForm', () => {
       shallow(<SearchUIForm />).find('[data-test-subj="generateReferenceUiPreview"]');
 
     expect(subject().prop('href')).toBe('http://www.example.com?foo=bar');
-    expect(generatePreviwUrl).toHaveBeenCalledWith(
+    expect(generatePreviewUrl).toHaveBeenCalledWith(
       {
         fromKibana: 'true',
         urlField: 'foo',
