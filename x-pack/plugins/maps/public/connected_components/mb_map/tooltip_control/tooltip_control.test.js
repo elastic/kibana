@@ -28,8 +28,27 @@ const mockLayer = {
   getId: () => {
     return layerId;
   },
+  isVisible: () => {
+    return true;
+  },
   canShowTooltip: () => {
     return true;
+  },
+  getFeatureById: () => {
+    return {
+      geometry: {
+        coordinates: [
+          [
+            [-67.5, 40.9799],
+            [-90, 40.9799],
+            [-90, 21.94305],
+            [-67.5, 21.94305],
+            [-67.5, 40.9799],
+          ],
+        ],
+        type: 'Polygon',
+      },
+    };
   },
 };
 
@@ -236,10 +255,9 @@ describe('TooltipControl', () => {
       mockMbMapHandlers.click(mockMapMouseEvent);
 
       sinon.assert.notCalled(closeOnClickTooltipStub);
-      sinon.assert.calledWith(openOnClickTooltipStub, {
-        features: [{ id: 1, layerId: 'tfi3f', mbProperties: { __kbn__feature_id__: 1 } }],
-        location: [100, 30],
-      });
+      const tooltipState = openOnClickTooltipStub.getCalls()[0].args[0];
+      expect(tooltipState.features.length).toBe(1);
+      expect(tooltipState.location).toEqual([100, 30]);
     });
   });
 });
