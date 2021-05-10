@@ -22,16 +22,12 @@ import { EngineLogic } from '../../engine';
 import {
   TITLE_FIELD_LABEL,
   TITLE_FIELD_HELP_TEXT,
-  TITLE_FIELD_PLACEHOLDER,
   FILTER_FIELD_LABEL,
   FILTER_FIELD_HELP_TEXT,
-  FILTER_FIELD_PLACEHOLDER,
   SORT_FIELD_LABEL,
   SORT_FIELD_HELP_TEXT,
-  SORT_FIELD_PLACEHOLDER,
   URL_FIELD_LABEL,
   URL_FIELD_HELP_TEXT,
-  URL_FIELD_PLACEHOLDER,
   GENERATE_PREVIEW_BUTTON_LABEL,
 } from '../i18n';
 import { SearchUILogic } from '../search_ui_logic';
@@ -98,7 +94,6 @@ export const SearchUIForm: React.FC = () => {
           value={selectedTitleOption && selectedTitleOption.value}
           onChange={(e) => onTitleFieldChange(e.target.value)}
           fullWidth
-          placeholder={TITLE_FIELD_PLACEHOLDER}
           onFocus={() => onActiveFieldChange(ActiveField.Title)}
           onBlur={() => onActiveFieldChange(ActiveField.None)}
           hasNoInitialSelection
@@ -115,7 +110,6 @@ export const SearchUIForm: React.FC = () => {
           onFocus={() => onActiveFieldChange(ActiveField.Filter)}
           onBlur={() => onActiveFieldChange(ActiveField.None)}
           fullWidth
-          placeholder={FILTER_FIELD_PLACEHOLDER}
           data-test-subj="selectFilters"
         />
       </EuiFormRow>
@@ -129,7 +123,6 @@ export const SearchUIForm: React.FC = () => {
           onFocus={() => onActiveFieldChange(ActiveField.Sort)}
           onBlur={() => onActiveFieldChange(ActiveField.None)}
           fullWidth
-          placeholder={SORT_FIELD_PLACEHOLDER}
           data-test-subj="selectSort"
         />
       </EuiFormRow>
@@ -140,7 +133,6 @@ export const SearchUIForm: React.FC = () => {
           value={selectedURLOption && selectedURLOption.value}
           onChange={(e) => onUrlFieldChange(e.target.value)}
           fullWidth
-          placeholder={URL_FIELD_PLACEHOLDER}
           onFocus={() => onActiveFieldChange(ActiveField.Url)}
           onBlur={() => onActiveFieldChange(ActiveField.None)}
           hasNoInitialSelection

@@ -38,10 +38,6 @@ export const TITLE_FIELD_HELP_TEXT = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.titleFieldHelpText',
   { defaultMessage: 'Used as the top-level visual identifier for every rendered result' }
 );
-export const TITLE_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.titleFieldPlaceholder',
-  { defaultMessage: 'Select a title field' }
-);
 export const FILTER_FIELD_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.filterFieldLabel',
   { defaultMessage: 'Filter fields (Optional)' }
@@ -49,10 +45,6 @@ export const FILTER_FIELD_LABEL = i18n.translate(
 export const FILTER_FIELD_HELP_TEXT = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.filterFieldHelpText',
   { defaultMessage: 'Faceted values rendered as filters and available as query refinement' }
-);
-export const FILTER_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.filterFieldPlaceholder',
-  { defaultMessage: 'Click to select' }
 );
 export const SORT_FIELD_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.sortFieldLabel',
@@ -62,10 +54,6 @@ export const SORT_FIELD_HELP_TEXT = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.sortHelpText',
   { defaultMessage: 'Used to display result sorting options, ascending and descending' }
 );
-export const SORT_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.sortFieldPlaceholder',
-  { defaultMessage: 'Click to select' }
-);
 export const URL_FIELD_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldLabel',
   { defaultMessage: 'URL field (Optional)' }
@@ -73,10 +61,6 @@ export const URL_FIELD_LABEL = i18n.translate(
 export const URL_FIELD_HELP_TEXT = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldHelpText',
   { defaultMessage: "Used as a result's link target, if applicable" }
-);
-export const URL_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldPlaceholder',
-  { defaultMessage: 'Select a URL field' }
 );
 export const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.generatePreviewButtonLabel',
