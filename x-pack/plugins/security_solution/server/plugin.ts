@@ -305,10 +305,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     compose(core, plugins, endpointContext);
 
     core.getStartServices().then(([_, depsStart]) => {
-      const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
-        depsStart.data,
-        endpointContext
-      );
+      const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );

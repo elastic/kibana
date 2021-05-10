@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/api/types';
+import { SearchResponse } from 'elasticsearch';
 import {
   metadataCurrentIndexPattern,
   metadataIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import { HostMetadata, MetadataQueryStrategyVersions } from '../../../../../common/endpoint/types';
 import { HostListQueryResult, HostQueryResult, MetadataQueryStrategy } from '../../../types';
+
+interface HitSource {
+  _source: HostMetadata;
+}
 
 export function metadataQueryStrategyV1(): MetadataQueryStrategy {
   return {
@@ -38,13 +42,11 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
     ): HostListQueryResult => {
       const response = searchResponse as SearchResponse<HostMetadata>;
       return {
-        resultLength:
-          ((response?.aggregations?.total as unknown) as { value?: number; relation: string })
-            ?.value || 0,
+        resultLength: response?.aggregations?.total?.value || 0,
         resultList: response.hits.hits
-          .map((hit) => hit.inner_hits?.most_recent.hits.hits)
-          .flatMap((data) => data)
-          .map((entry) => (entry?._source ?? {}) as HostMetadata),
+          .map((hit) => hit.inner_hits.most_recent.hits.hits)
+          .flatMap((data) => data as HitSource)
+          .map((entry) => entry._source),
         queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_1,
       };
     },
@@ -73,7 +75,7 @@ export function metadataQueryStrategyV2(): MetadataQueryStrategy {
       >;
       const list =
         response.hits.hits.length > 0
-          ? response.hits.hits.map((entry) => stripHostDetails(entry?._source as HostMetadata))
+          ? response.hits.hits.map((entry) => stripHostDetails(entry._source))
           : [];
 
       return {
@@ -93,7 +95,7 @@ export function metadataQueryStrategyV2(): MetadataQueryStrategy {
         resultLength: response.hits.hits.length,
         result:
           response.hits.hits.length > 0
-            ? stripHostDetails(response.hits.hits[0]._source as HostMetadata)
+            ? stripHostDetails(response.hits.hits[0]._source)
             : undefined,
         queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
       };
