@@ -12,7 +12,7 @@ import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { rainbowColors } from '../lib/rainbow_colors';
 import { computeGradientFinalColor } from '../lib/compute_gradient_final_color';
-import { PALETTES } from '../../../common/types';
+import { PALETTES } from '../../../common/enums';
 
 export interface PalettePickerProps {
   activePalette?: PaletteOutput;

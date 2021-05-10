@@ -15,6 +15,7 @@ export type StringToPositiveNumberC = t.Type<number, string, unknown>;
  *   - If a string this converts the string into a number
  *   - Ensures it is a number (and not NaN)
  *   - Ensures it is positive number
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const StringToPositiveNumber: StringToPositiveNumberC = new t.Type<number, string, unknown>(
   'StringToPositiveNumber',

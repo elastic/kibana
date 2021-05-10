@@ -12,6 +12,7 @@ import { Either } from 'fp-ts/lib/Either';
  * Types the DefaultArray<C> as:
  *   - If undefined, then a default array will be set
  *   - If an array is sent in, then the array will be validated to ensure all elements are type C
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultArray = <C extends t.Mixed>(codec: C) => {
   const arrType = t.array(codec);
