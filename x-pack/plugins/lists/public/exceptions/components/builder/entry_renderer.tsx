@@ -193,7 +193,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && !allowLargeValueLists
+          isFirst && allowLargeValueLists
         );
     const comboBox = (
       <OperatorComponent
