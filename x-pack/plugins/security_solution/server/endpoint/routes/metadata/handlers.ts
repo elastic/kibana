@@ -17,7 +17,7 @@ import {
 import {
   HostInfo,
   HostMetadata,
-  HostResult,
+  HostMetaDataInfo,
   HostResultList,
   HostStatus,
   MetadataQueryStrategyVersions,
@@ -178,11 +178,11 @@ export const getMetadataRequestHandler = function (
   };
 };
 
-export async function getHostInfo(
+export async function getHostMetaData(
   metadataRequestContext: MetadataRequestContext,
   id: string,
   queryStrategyVersion?: MetadataQueryStrategyVersions
-): Promise<HostResult | undefined> {
+): Promise<HostMetaDataInfo | undefined> {
   if (
     !metadataRequestContext.esClient &&
     !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
@@ -239,7 +239,7 @@ export async function getHostData(
     throw Boom.badRequest('esClient not found');
   }
 
-  const hostResult = await getHostInfo(metadataRequestContext, id, queryStrategyVersion);
+  const hostResult = await getHostMetaData(metadataRequestContext, id, queryStrategyVersion);
 
   if (!hostResult) {
     return undefined;
