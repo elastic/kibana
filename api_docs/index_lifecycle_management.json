@@ -5,77 +5,87 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "indexLifecycleManagement",
         "id": "def-public.IlmUrlGeneratorState",
         "type": "Interface",
+        "tags": [],
         "label": "IlmUrlGeneratorState",
         "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.IlmUrlGeneratorState.page",
-            "type": "CompoundType",
-            "label": "page",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
-              "lineNumber": 22
-            },
-            "signature": [
-              "\"policies_list\" | \"policy_edit\" | \"policy_create\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.IlmUrlGeneratorState.policyName",
-            "type": "string",
-            "label": "policyName",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
-              "lineNumber": 23
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.IlmUrlGeneratorState.absolute",
-            "type": "CompoundType",
-            "label": "absolute",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
-              "lineNumber": 24
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
         "source": {
           "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
           "lineNumber": 21
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexLifecycleManagement",
+            "id": "def-public.IlmUrlGeneratorState.page",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "\"policies_list\" | \"policy_edit\" | \"policy_create\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexLifecycleManagement",
+            "id": "def-public.IlmUrlGeneratorState.policyName",
+            "type": "string",
+            "tags": [],
+            "label": "policyName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexLifecycleManagement",
+            "id": "def-public.IlmUrlGeneratorState.absolute",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "absolute",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "indexLifecycleManagement",
         "id": "def-public.ILM_URL_GENERATOR_ID",
         "type": "string",
+        "tags": [],
         "label": "ILM_URL_GENERATOR_ID",
         "description": [],
+        "signature": [
+          "\"ILM_URL_GENERATOR_ID\""
+        ],
         "source": {
           "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
           "lineNumber": 19
         },
-        "signature": [
-          "\"ILM_URL_GENERATOR_ID\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
