@@ -6,7 +6,11 @@
  */
 
 import { Action } from 'redux';
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
 import { EventFiltersListPageState } from '../state';
 
@@ -24,25 +28,30 @@ export type EventFiltersListPageDataExistsChanged = Action<'eventFiltersListPage
 
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
-    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
+  };
+};
+
+export type EventFiltersInitFromId = Action<'eventFiltersInitFromId'> & {
+  payload: {
+    id: string;
   };
 };
 
 export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
   payload: {
-    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
     hasNameError?: boolean;
     hasItemsError?: boolean;
     hasOSError?: boolean;
+    newComment?: string;
   };
 };
 
+export type EventFiltersUpdateStart = Action<'eventFiltersUpdateStart'>;
+export type EventFiltersUpdateSuccess = Action<'eventFiltersUpdateSuccess'>;
 export type EventFiltersCreateStart = Action<'eventFiltersCreateStart'>;
-export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'> & {
-  payload: {
-    exception: ExceptionListItemSchema;
-  };
-};
+export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'>;
 export type EventFiltersCreateError = Action<'eventFiltersCreateError'>;
 
 export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'> & {
@@ -53,9 +62,12 @@ export type EventFiltersPageAction =
   | EventFiltersListPageStateChanged
   | EventFiltersListPageDataChanged
   | EventFiltersListPageDataExistsChanged
-  | EventFiltersCreateStart
   | EventFiltersInitForm
+  | EventFiltersInitFromId
   | EventFiltersChangeForm
+  | EventFiltersUpdateStart
+  | EventFiltersUpdateSuccess
+  | EventFiltersCreateStart
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
   | EventFiltersFormStateChanged;

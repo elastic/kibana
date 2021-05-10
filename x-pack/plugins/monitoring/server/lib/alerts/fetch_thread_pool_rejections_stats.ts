@@ -97,9 +97,9 @@ export async function fetchThreadPoolRejectionStats(
   const { body: response } = await esClient.search(params);
   const stats: AlertThreadPoolRejectionsStats[] = [];
   // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
 
-  if (!clusterBuckets.length) {
+  if (!clusterBuckets?.length) {
     return stats;
   }
 
