@@ -13,6 +13,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   const PageObjects = getPageObjects([
     'common',
@@ -24,6 +26,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('histogram agg onSearchRequestStart', function () {
     before(async function () {
+      // loading back default data
+      await esArchiver.load('empty_kibana');
+
+      await kibanaServer.importExport.load('discover');
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('long_window_logstash');
+
       await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
