@@ -144,7 +144,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   };
 
   const setIsCloseable = (isCloseable: boolean) => {
-    setState({ ...state, isDimensionClosePrevented: !isCloseable });
+    setState((prevState) => ({ ...prevState, isDimensionClosePrevented: !isCloseable }));
   };
 
   const selectedOperationDefinition =

@@ -63,7 +63,8 @@ export function LayerPanels(
     () => (datasourceId: string, newState: unknown) => {
       dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
-        updater: () => newState,
+        updater: (prevState: unknown) =>
+          typeof newState === 'function' ? newState(prevState) : newState,
         datasourceId,
         clearStagedPreview: false,
       });

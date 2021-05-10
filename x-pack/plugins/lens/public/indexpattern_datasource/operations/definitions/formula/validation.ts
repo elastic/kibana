@@ -16,7 +16,6 @@ import {
   getOperationParams,
   getValueOrName,
   groupArgsByType,
-  hasInvalidOperations,
   isMathNode,
   tinymathFunctions,
 } from './util';
@@ -72,6 +71,28 @@ export interface ErrorWrapper {
 
 export function isParsingError(message: string) {
   return message.includes(validationErrors.failedParsing.message);
+}
+
+function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
+  function flattenFunctionNodes(node: TinymathAST | string): TinymathFunction[] {
+    if (!isObject(node) || node.type !== 'function') {
+      return [];
+    }
+    return [node, ...node.args.flatMap(flattenFunctionNodes)].filter(Boolean);
+  }
+  return flattenFunctionNodes(root);
+}
+
+export function hasInvalidOperations(
+  node: TinymathAST | string,
+  operations: Record<string, GenericOperationDefinition>
+): { names: string[]; locations: TinymathLocation[] } {
+  const nodes = findFunctionNodes(node).filter((v) => !isMathNode(v) && !operations[v.name]);
+  return {
+    // avoid duplicates
+    names: Array.from(new Set(nodes.map(({ name }) => name))),
+    locations: nodes.map(({ location }) => location),
+  };
 }
 
 export const getQueryValidationError = (

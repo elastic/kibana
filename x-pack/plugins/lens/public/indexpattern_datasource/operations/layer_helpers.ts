@@ -1079,11 +1079,21 @@ export function getExistingColumnGroups(layer: IndexPatternLayer): [string[], st
 /**
  * Returns true if the given column can be applied to the given index pattern
  */
-export function isColumnTransferable(column: IndexPatternColumn, newIndexPattern: IndexPattern) {
-  return operationDefinitionMap[column.operationType].isTransferable(
-    column,
-    newIndexPattern,
-    operationDefinitionMap
+export function isColumnTransferable(
+  column: IndexPatternColumn,
+  newIndexPattern: IndexPattern,
+  layer: IndexPatternLayer
+): boolean {
+  return (
+    operationDefinitionMap[column.operationType].isTransferable(
+      column,
+      newIndexPattern,
+      operationDefinitionMap
+    ) &&
+    (!('references' in column) ||
+      column.references.every((columnId) =>
+        isColumnTransferable(layer.columns[columnId], newIndexPattern, layer)
+      ))
   );
 }
 
@@ -1092,15 +1102,7 @@ export function updateLayerIndexPattern(
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
   const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) => {
-    if ('references' in column) {
-      return (
-        isColumnTransferable(column, newIndexPattern) &&
-        column.references.every((columnId) =>
-          isColumnTransferable(layer.columns[columnId], newIndexPattern)
-        )
-      );
-    }
-    return isColumnTransferable(column, newIndexPattern);
+    return isColumnTransferable(column, newIndexPattern, layer);
   });
   const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {
     const operationDefinition = operationDefinitionMap[column.operationType];
