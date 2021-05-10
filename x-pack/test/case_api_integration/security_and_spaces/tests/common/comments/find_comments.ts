@@ -28,6 +28,7 @@ import {
   ensureSavedObjectIsAuthorized,
   getSpaceUrlPrefix,
   createCase,
+  superUserSpace1Auth,
 } from '../../../../common/lib/utils';
 
 import {
@@ -40,7 +41,6 @@ import {
   globalRead,
   obsSecRead,
 } from '../../../../common/lib/authentication/users';
-import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

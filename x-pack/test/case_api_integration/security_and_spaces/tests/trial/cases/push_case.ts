@@ -8,8 +8,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
-import * as st from 'supertest';
-import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -21,30 +19,21 @@ import {
 } from '../../../../common/lib/mock';
 import {
   getConfigurationRequest,
-  getServiceNowConnector,
-  createConnector,
-  createConfiguration,
   createCase,
   pushCase,
   createComment,
-  CreateConnectorResponse,
   updateCase,
-  getAllUserAction,
+  getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   deleteAllCaseItems,
+  superUserSpace1Auth,
+  createCaseWithConnector,
 } from '../../../../common/lib/utils';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
-import {
-  CaseConnector,
-  CasePostRequest,
-  CaseResponse,
-  CaseStatuses,
-  CaseUserActionResponse,
-  ConnectorTypes,
-} from '../../../../../../plugins/cases/common/api';
+import { CaseStatuses, CaseUserActionResponse } from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -54,8 +43,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { User } from '../../../../common/lib/authentication/types';
-import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -78,70 +65,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    const createCaseWithConnector = async ({
-      testAgent = supertest,
-      configureReq = {},
-      auth = { user: superUser, space: null },
-      createCaseReq = getPostCaseRequest(),
-    }: {
-      testAgent?: st.SuperTest<supertestAsPromised.Test>;
-      configureReq?: Record<string, unknown>;
-      auth?: { user: User; space: string | null };
-      createCaseReq?: CasePostRequest;
-    } = {}): Promise<{
-      postedCase: CaseResponse;
-      connector: CreateConnectorResponse;
-    }> => {
-      const connector = await createConnector({
-        supertest: testAgent,
-        req: {
-          ...getServiceNowConnector(),
-          config: { apiUrl: servicenowSimulatorURL },
-        },
-        auth,
-      });
-
-      actionsRemover.add(auth.space ?? 'default', connector.id, 'action', 'actions');
-      await createConfiguration(
-        testAgent,
-        {
-          ...getConfigurationRequest({
-            id: connector.id,
-            name: connector.name,
-            type: connector.connector_type_id as ConnectorTypes,
-          }),
-          ...configureReq,
-        },
-        200,
-        auth
-      );
-
-      const postedCase = await createCase(
-        testAgent,
-        {
-          ...createCaseReq,
-          connector: {
-            id: connector.id,
-            name: connector.name,
-            type: connector.connector_type_id,
-            fields: {
-              urgency: '2',
-              impact: '2',
-              severity: '2',
-              category: 'software',
-              subcategory: 'os',
-            },
-          } as CaseConnector,
-        },
-        200,
-        auth
-      );
-
-      return { postedCase, connector };
-    };
-
     it('should push a case', async () => {
-      const { postedCase, connector } = await createCaseWithConnector();
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest,
+        servicenowSimulatorURL,
+        actionsRemover,
+      });
       const theCase = await pushCase({
         supertest,
         caseId: postedCase.id,
@@ -167,7 +96,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('pushes a comment appropriately', async () => {
-      const { postedCase, connector } = await createCaseWithConnector();
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest,
+        servicenowSimulatorURL,
+        actionsRemover,
+      });
       await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
       const theCase = await pushCase({
         supertest,
@@ -183,6 +116,9 @@ export default ({ getService }: FtrProviderContext): void => {
         configureReq: {
           closure_type: 'close-by-pushing',
         },
+        supertest,
+        servicenowSimulatorURL,
+        actionsRemover,
       });
       const theCase = await pushCase({
         supertest,
@@ -194,13 +130,17 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create the correct user action', async () => {
-      const { postedCase, connector } = await createCaseWithConnector();
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest,
+        servicenowSimulatorURL,
+        actionsRemover,
+      });
       const pushedCase = await pushCase({
         supertest,
         caseId: postedCase.id,
         connectorId: connector.id,
       });
-      const userActions = await getAllUserAction(supertest, pushedCase.id);
+      const userActions = await getCaseUserActions({ supertest, caseID: pushedCase.id });
       const pushUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
       const { new_value, ...rest } = pushUserAction as CaseUserActionResponse;
@@ -231,6 +171,9 @@ export default ({ getService }: FtrProviderContext): void => {
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('should push a collection case but not close it when closure_type: close-by-pushing', async () => {
       const { postedCase, connector } = await createCaseWithConnector({
+        supertest,
+        servicenowSimulatorURL,
+        actionsRemover,
         configureReq: {
           closure_type: 'close-by-pushing',
         },
@@ -267,7 +210,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('unhappy path = 409s when case is closed', async () => {
-      const { postedCase, connector } = await createCaseWithConnector();
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest,
+        servicenowSimulatorURL,
+        actionsRemover,
+      });
       await updateCase({
         supertest,
         params: {
@@ -294,7 +241,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should push a case that the user has permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          testAgent: supertestWithoutAuth,
+          supertest,
+          servicenowSimulatorURL,
+          actionsRemover,
           auth: superUserSpace1Auth,
         });
 
@@ -308,7 +257,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should not push a case that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          testAgent: supertestWithoutAuth,
+          supertest,
+          servicenowSimulatorURL,
+          actionsRemover,
           auth: superUserSpace1Auth,
           createCaseReq: getPostCaseRequest({ owner: 'observabilityFixture' }),
         });
@@ -327,7 +278,9 @@ export default ({ getService }: FtrProviderContext): void => {
           user.username
         } with role(s) ${user.roles.join()} - should NOT push a case`, async () => {
           const { postedCase, connector } = await createCaseWithConnector({
-            testAgent: supertestWithoutAuth,
+            supertest,
+            servicenowSimulatorURL,
+            actionsRemover,
             auth: superUserSpace1Auth,
           });
 
@@ -343,7 +296,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should not push a case in a space that the user does not have permissions for', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
-          testAgent: supertestWithoutAuth,
+          supertest,
+          servicenowSimulatorURL,
+          actionsRemover,
           auth: { user: superUser, space: 'space2' },
         });
 

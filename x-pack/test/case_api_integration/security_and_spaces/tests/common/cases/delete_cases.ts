@@ -22,9 +22,10 @@ import {
   deleteCases,
   createComment,
   getComment,
-  getAllUserAction,
   removeServerGeneratedPropertiesFromUserAction,
   getCase,
+  superUserSpace1Auth,
+  getCaseUserActions,
 } from '../../../../common/lib/utils';
 import { getSubCaseDetailsUrl } from '../../../../../../plugins/cases/common/api/helpers';
 import { CaseResponse } from '../../../../../../plugins/cases/common/api';
@@ -38,8 +39,6 @@ import {
   obsOnly,
   superUser,
 } from '../../../../common/lib/authentication/users';
-
-import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -89,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should create a user action when creating a case', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
       await deleteCases({ supertest, caseIDs: [postedCase.id] });
-      const userActions = await getAllUserAction(supertest, postedCase.id);
+      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
       const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
       expect(creationUserAction).to.eql({
