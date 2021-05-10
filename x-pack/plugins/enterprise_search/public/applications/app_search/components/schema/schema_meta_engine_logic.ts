@@ -59,8 +59,8 @@ export const MetaEngineSchemaLogic = kea<
     ],
   },
   listeners: ({ actions }) => ({
-    loadMetaEngineSchema: async () => {
-      await actions.loadSchema(actions.onMetaEngineSchemaLoad);
+    loadMetaEngineSchema: () => {
+      actions.loadSchema(actions.onMetaEngineSchemaLoad);
     },
   }),
 });

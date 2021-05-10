@@ -122,8 +122,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     ],
   },
   listeners: ({ actions, values }) => ({
-    loadIndexedEngineSchema: async () => {
-      await actions.loadSchema(actions.onSchemaLoad);
+    loadIndexedEngineSchema: () => {
+      actions.loadSchema(actions.onSchemaLoad);
     },
     addSchemaField: ({ fieldName, fieldType }) => {
       if (values.schema.hasOwnProperty(fieldName)) {
