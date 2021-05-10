@@ -29,7 +29,7 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   return (
     <EuiFlexGroup alignItems="flexStart">
       <LeftColumn grow={2} />
-      <EuiFlexItem grow={9}>
+      <EuiFlexItem grow={9} className="eui-textBreakWord">
         {packageInfo.readme ? (
           <Readme
             readmePath={packageInfo.readme}
