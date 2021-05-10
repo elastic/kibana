@@ -23,7 +23,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { getMetricsDetailsUrl } from '../../../services';
+import { documentationLinks } from '../../../services/documentation_links';
 import { FieldList } from '../../components';
 import { FieldChooser, StepError } from './components';
 import { METRICS_CONFIG } from '../../../constants';
@@ -387,7 +387,7 @@ export class StepMetrics extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={getMetricsDetailsUrl()}
+              href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateMetricsDocsButton"
