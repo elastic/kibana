@@ -127,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
         verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
       });
 
-      it('should return 404 if unkown id is provided', async () => {
+      it('should return 404 if unknown id is provided', async () => {
         const resp = await supertest
           .post(
             `/internal/search/ese/FkxOb21iV1g2VGR1S2QzaWVtRU9fMVEbc3JWeWc1VHlUdDZ6MENxcXlYVG1Fdzo2NDg4`
@@ -177,7 +177,6 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/rollup`)
           .set('kbn-xsrf', 'foo')
           .send({
-            indexType: 'rollup',
             params: {
               body: {
                 query: {
@@ -195,9 +194,28 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/rollup`)
           .set('kbn-xsrf', 'foo')
           .send({
-            indexType: 'rollup',
             params: {
               index: 'banana',
+              body: {
+                query: {
+                  match_all: {},
+                },
+              },
+            },
+          })
+          .expect(400);
+
+        verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
+      });
+
+      it('should return 400 when called with non-rollup index', async () => {
+        const resp = await supertest
+          .post(`/internal/search/rollup`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              index: 'logstash-*',
+              size: 0,
               body: {
                 query: {
                   match_all: {},
@@ -215,7 +233,6 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/rollup`)
           .set('kbn-xsrf', 'foo')
           .send({
-            indexType: 'rollup',
             params: {
               index: 'rollup_logstash',
               size: 0,
