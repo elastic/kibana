@@ -219,7 +219,7 @@ To customize how {kib} displays data fields, use the formatting options.
 . Select *Set format*, then enter the *Format* for the field.
 
 [float]
-[[field-formatters-string]]
+[[string-field-formatters]]
 ==== String field formatters
 
 String fields support *String* and *Url* formatters.
