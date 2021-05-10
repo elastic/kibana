@@ -51,7 +51,6 @@ export function GeoFieldWorkspacePanel(props: Props) {
           <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
         </h2>
         <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
-        <EuiSpacer size="l" />
         <DragDrop
           className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
           dataTestSubj="lnsGeoFieldWorkspace"
@@ -61,12 +60,14 @@ export function GeoFieldWorkspacePanel(props: Props) {
           value={dragDropIdentifier}
           onDrop={onDrop}
         >
-          <strong>
-            <FormattedMessage
-              id="xpack.lens.geoFieldWorkspace.dropMessage"
-              defaultMessage="Drop field here to open in Maps"
-            />
-          </strong>
+          <p>
+            <strong>
+              <FormattedMessage
+                id="xpack.lens.geoFieldWorkspace.dropMessage"
+                defaultMessage="Drop field here to open in Maps"
+              />
+            </strong>
+          </p>
         </DragDrop>
       </EuiText>
     </EuiPageContentBody>
