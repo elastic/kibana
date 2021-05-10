@@ -182,7 +182,6 @@ describe('SearchUIForm', () => {
 
     setMockValues({
       ...values,
-      engineName: 'engine1',
       urlField: 'foo',
       titleField: 'bar',
       facetFields: ['baz'],
@@ -193,15 +192,11 @@ describe('SearchUIForm', () => {
       shallow(<SearchUIForm />).find('[data-test-subj="generateSearchUiPreview"]');
 
     expect(subject().prop('href')).toBe('http://www.example.com?foo=bar');
-    expect(generatePreviewUrl).toHaveBeenCalledWith(
-      {
-        fromKibana: 'true',
-        urlField: 'foo',
-        titleField: 'bar',
-        facets: ['baz'],
-        sortFields: ['qux'],
-      },
-      'engine1'
-    );
+    expect(generatePreviewUrl).toHaveBeenCalledWith({
+      urlField: 'foo',
+      titleField: 'bar',
+      facets: ['baz'],
+      sortFields: ['qux'],
+    });
   });
 });

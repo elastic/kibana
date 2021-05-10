@@ -48,7 +48,6 @@ export const SearchUIForm: React.FC = () => {
     facetFields,
     sortFields,
   } = useValues(SearchUILogic);
-  const { engineName } = useValues(EngineLogic);
   const {
     onActiveFieldChange,
     onFacetFieldsChange,
@@ -57,16 +56,12 @@ export const SearchUIForm: React.FC = () => {
     onUrlFieldChange,
   } = useActions(SearchUILogic);
 
-  const previewHref = generatePreviewUrl(
-    {
-      fromKibana: 'true',
-      titleField,
-      urlField,
-      facets: facetFields,
-      sortFields,
-    },
-    engineName
-  );
+  const previewHref = generatePreviewUrl({
+    titleField,
+    urlField,
+    facets: facetFields,
+    sortFields,
+  });
 
   const formatSelectOption = (fieldName: string) => {
     return { text: fieldName, value: fieldName };

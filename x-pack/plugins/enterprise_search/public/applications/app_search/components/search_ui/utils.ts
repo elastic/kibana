@@ -8,11 +8,16 @@
 import queryString, { ParsedQuery } from 'query-string';
 
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
+import { EngineLogic } from '../engine';
 
-export const generatePreviewUrl = (query: ParsedQuery, engineName: string) => {
+export const generatePreviewUrl = (query: ParsedQuery) => {
+  const { engineName } = EngineLogic.values;
   return queryString.stringifyUrl(
     {
-      query,
+      query: {
+        ...query,
+        fromKibana: 'true',
+      },
       url: getAppSearchUrl(`/engines/${engineName}/reference_application/preview`),
     },
     { arrayFormat: 'bracket', skipEmptyString: true }
