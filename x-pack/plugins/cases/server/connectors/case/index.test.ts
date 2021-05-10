@@ -903,7 +903,7 @@ describe('case connector', () => {
     }
   });
 
-  // TODO: enable these when the actions framework provides a request and a saved objects service
+  // Enable these when the actions framework provides a request and a saved objects service
   // ENABLE_CASE_CONNECTOR: enable these tests after the case connector feature is completed
   describe.skip('execute', () => {
     it('allows only supported sub-actions', async () => {
