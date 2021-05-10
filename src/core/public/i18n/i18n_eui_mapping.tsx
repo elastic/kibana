@@ -39,7 +39,7 @@ export const getEuiContextMapping = () => {
       page,
       pageCount,
     }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableDescriptionWithoutPagination', {
+      i18n.translate('core.euiBasicTable.tableAutoCaptionWithPagination', {
         defaultMessage:
           'This table contains {itemCount} rows out of {totalItemCount} rows; Page {page} of {pageCount}.',
         values: { itemCount, totalItemCount, page, pageCount },
@@ -471,13 +471,13 @@ export const getEuiContextMapping = () => {
       }
     ),
     'euiDataGridSchema.dateSortTextAsc': i18n.translate('core.euiDataGridSchema.dateSortTextAsc', {
-      defaultMessage: 'New-Old',
+      defaultMessage: 'Old-New',
       description: 'Ascending date label',
     }),
     'euiDataGridSchema.dateSortTextDesc': i18n.translate(
       'core.euiDataGridSchema.dateSortTextDesc',
       {
-        defaultMessage: 'Old-New',
+        defaultMessage: 'New-Old',
         description: 'Descending date label',
       }
     ),
@@ -524,8 +524,8 @@ export const getEuiContextMapping = () => {
     }),
     'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
       i18n.translate('core.euiFilterButton.filterBadge', {
-        defaultMessage: '${count} ${filterCountLabel} filters',
-        values: { count, filterCountLabel: hasActiveFilters ? 'active' : 'available' },
+        defaultMessage: '{count} {hasActiveFilters} filters',
+        values: { count, hasActiveFilters: hasActiveFilters ? 'active' : 'available' },
       }),
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
@@ -647,18 +647,18 @@ export const getEuiContextMapping = () => {
     'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
       defaultMessage: 'Closes this modal window',
     }),
-    'euiNotificationEventMessages.accordionButtonText': ({
+    'euiNotificationEventMessages.accordionButtonText': ({ messagesLength }: EuiValues) =>
+      i18n.translate('core.euiNotificationEventMessages.accordionButtonText', {
+        defaultMessage: '+ {messagesLength} more',
+        values: { messagesLength },
+      }),
+    'euiNotificationEventMessages.accordionAriaLabelButtonText': ({
       messagesLength,
       eventName,
     }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMessages.accordionButtonText', {
+      i18n.translate('core.euiNotificationEventMessages.accordionAriaLabelButtonText', {
         defaultMessage: '+ {messagesLength} messages for {eventName}',
         values: { messagesLength, eventName },
-      }),
-    'euiNotificationEventMessages.accordionAriaLabelButtonText': ({ messagesLength }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMessages.accordionAriaLabelButtonText', {
-        defaultMessage: '+ {messagesLength} more',
-        values: { messagesLength },
       }),
     'euiNotificationEventMeta.contextMenuButton': ({ eventName }: EuiValues) =>
       i18n.translate('core.euiNotificationEventMeta.contextMenuButton', {
@@ -865,7 +865,7 @@ export const getEuiContextMapping = () => {
       description: 'Placeholder message while data is asynchronously loaded',
     }),
     'euiSelectable.noAvailableOptions': i18n.translate('core.euiSelectable.noAvailableOptions', {
-      defaultMessage: "There aren't any options available",
+      defaultMessage: 'No options available',
     }),
     'euiSelectable.noMatchingOptions': ({ searchValue }: EuiValues) => (
       <FormattedMessage
@@ -898,7 +898,7 @@ export const getEuiContextMapping = () => {
     'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
       'core.euiSelectableListItem.excludedOptionInstructions',
       {
-        defaultMessage: 'To deselect this option, press enter',
+        defaultMessage: 'To deselect this option, press enter.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
@@ -1023,7 +1023,7 @@ export const getEuiContextMapping = () => {
     'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
       i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
         defaultMessage:
-          'You are in a form selector of {optionsCount} items and must select a single option. Use the Up and Down keys to navigate or Escape to close.',
+          'You are in a form selector of {optionsCount} items and must select a single option. Use the up and down keys to navigate or escape to close.',
         values: { optionsCount },
       }),
     'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>

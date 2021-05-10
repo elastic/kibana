@@ -6,13 +6,111 @@
  * Side Public License, v 1.
  */
 
+jest.mock('@kbn/i18n');
+
+import { i18n } from '@kbn/i18n';
+
 import i18ntokens from '@elastic/eui/i18ntokens.json';
 import { getEuiContextMapping } from './i18n_eui_mapping';
 
-test('all tokens are mapped', () => {
-  // Extract the tokens from the EUI library: We need to uniq them because they might be duplicated
-  const euiTokensFromLib = [...new Set(i18ntokens.map(({ token }) => token))];
-  const euiTokensFromMapping = Object.keys(getEuiContextMapping());
+type EuiToken = keyof ReturnType<typeof getEuiContextMapping>;
 
-  expect(euiTokensFromMapping.sort()).toStrictEqual(euiTokensFromLib.sort());
+/** Regexp to find {values} usage */
+const VALUES_REGEXP = /\{\w+\}/;
+
+/**
+ * List here those EUI tokens which defaultMessages are intentionally changed in Kibana.
+ * Looking at the examples in the list, it looks like this is a workaround
+ * while @elastic/eui fixes the translations on their end.
+ */
+const INTENTIONALLY_OVERRIDDEN_TRANSLATIONS: EuiToken[] = [
+  'euiTourStep.closeTour', // "Close tour" makes more sense for consistency, since we have "Skip tour" and "End tour"
+  'euiTourStepIndicator.ariaLabel', // `@elastic/eui` extracted it as a stringified function
+];
+
+describe('@elastic/eui i18n tokens', () => {
+  const i18nTranslateMock = jest
+    .fn()
+    .mockImplementation((id, { defaultMessage }) => defaultMessage);
+  i18n.translate = i18nTranslateMock;
+
+  const euiContextMapping = getEuiContextMapping();
+
+  test('all tokens are mapped', () => {
+    // Extract the tokens from the EUI library: We need to uniq them because they might be duplicated
+    const euiTokensFromLib = [...new Set(i18ntokens.map(({ token }) => token))];
+    const euiTokensFromMapping = Object.keys(euiContextMapping);
+
+    expect(euiTokensFromMapping.sort()).toStrictEqual(euiTokensFromLib.sort());
+  });
+
+  test('tokens that include {word} should be mapped to functions', () => {
+    const euiTokensFromLibWithValues = i18ntokens.filter(({ defString }) =>
+      VALUES_REGEXP.test(defString)
+    );
+    const euiTokensFromLib = [...new Set(euiTokensFromLibWithValues.map(({ token }) => token))];
+    const euiTokensFromMapping = Object.entries(euiContextMapping)
+      .filter(([, value]) => typeof value === 'function')
+      .map(([key]) => key);
+
+    expect(euiTokensFromMapping.sort()).toStrictEqual(euiTokensFromLib.sort());
+  });
+
+  i18ntokens.forEach(({ token, defString }) => {
+    describe(`Token "${token}"`, () => {
+      let i18nTranslateCall: [
+        string,
+        { defaultMessage: string; values?: object; description?: string }
+      ];
+
+      beforeAll(() => {
+        // If it's a function, call it, so we have the mock to register the call.
+        const entry = euiContextMapping[token as keyof typeof euiContextMapping];
+        const translationOutput = typeof entry === 'function' ? entry({}) : entry;
+
+        // If it's a string, it comes from i18n.translate call
+        if (typeof translationOutput === 'string') {
+          // find the call in the mocks
+          i18nTranslateCall = i18nTranslateMock.mock.calls.find(
+            ([kbnToken]) => kbnToken === `core.${token}`
+          );
+        } else {
+          // Otherwise, it's a fn returning `FormattedMessage` component => read the props
+          const { id, defaultMessage, values } = translationOutput.props;
+          i18nTranslateCall = [id, { defaultMessage, values }];
+        }
+      });
+
+      test('a translation should be registered as `core.{TOKEN}`', () => {
+        expect(i18nTranslateCall).not.toBeUndefined();
+      });
+
+      test('defaultMessage is in sync with defString', () => {
+        // Clean up typical errors from the `@elastic/eui` extraction token tool
+        const normalizedDefString = defString
+          // Quoted words should use double-quotes
+          .replace(/\s'/g, ' "')
+          .replace(/'\s/g, '" ')
+          // Should not include break-lines
+          .replace(/\n/g, '')
+          // Should trim extra spaces
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+
+        if (INTENTIONALLY_OVERRIDDEN_TRANSLATIONS.includes(token as EuiToken)) {
+          expect(i18nTranslateCall[1].defaultMessage).not.toBe(normalizedDefString);
+        } else {
+          expect(i18nTranslateCall[1].defaultMessage).toBe(normalizedDefString);
+        }
+      });
+
+      test('values should match', () => {
+        const valuesFromEuiLib = defString.match(new RegExp(VALUES_REGEXP, 'g')) || [];
+        const receivedValuesInMock = Object.keys(i18nTranslateCall[1].values ?? {}).map(
+          (key) => `{${key}}`
+        );
+        expect(receivedValuesInMock.sort()).toStrictEqual(valuesFromEuiLib.sort());
+      });
+    });
+  });
 });
