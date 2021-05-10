@@ -40,7 +40,7 @@ export function TimesliderToggleButton(props: Props) {
         onClick={onClick}
         data-test-subj="timesliderToggleButton"
         iconType={ClockPlayIcon}
-        color="text"
+        color={props.isTimesliderOpen ? 'primary' : 'text'}
         aria-label={label}
         title={label}
       />

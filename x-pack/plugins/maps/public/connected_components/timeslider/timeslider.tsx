@@ -75,6 +75,8 @@ class KeyedTimeslider extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
+    // auto-select range between first tick and second tick
+    this._onChange([this.state.ticks[0].value, this.state.ticks[1].value]);
   }
 
   _doesTimesliceCoverTimerange() {
