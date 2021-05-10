@@ -64,13 +64,12 @@ function getNormalizedValueByRange(
 function workoutColorForCell(
   value: number,
   params: CustomPaletteState,
-  minMax: { min: number; max: number },
-  gradientHelper: (value: number) => string
+  minMax: { min: number; max: number }
 ) {
   if (value == null) {
     return '';
   }
-  const { colors, stops, range, gradient, continuity, rangeMax, rangeMin } = params;
+  const { colors, stops, range, continuity, rangeMax, rangeMin } = params;
   // ranges can be absolute numbers or percentages
   // normalized the incoming value to the same format as range to make easier comparisons
   const normalizedValue = getNormalizedValueByRange(value, params, minMax);
@@ -94,10 +93,6 @@ function workoutColorForCell(
     return;
   }
 
-  if (gradient && gradientHelper) {
-    return gradientHelper(normalizedValue) || '';
-  }
-
   if (stops.length) {
     return findColorsByStops(normalizedValue, comparisonFn, colors, stops);
   }
@@ -116,7 +111,7 @@ export const createGridCell = (
   const darkColor = IS_DARK_THEME ? darkTheme.euiColorEmptyShade : lightTheme.euiTextColor;
   const lightColor = IS_DARK_THEME ? darkTheme.euiTextColor : lightTheme.euiColorEmptyShade;
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
-    const { table, alignments, minMaxByColumnId, gradientHelpers } = useContext(DataContext);
+    const { table, alignments, minMaxByColumnId } = useContext(DataContext);
     const rowValue = table?.rows[rowIndex][columnId];
     const content = formatters[columnId]?.convert(rowValue, 'html');
     const currentAlignment = alignments && alignments[columnId];
@@ -127,14 +122,9 @@ export const createGridCell = (
 
     useEffect(() => {
       if (minMaxByColumnId?.[columnId]) {
-        if (colorMode !== 'none' && palette?.params && gradientHelpers) {
+        if (colorMode !== 'none' && palette?.params) {
           // workout the bucket the value belongs to
-          const color = workoutColorForCell(
-            rowValue,
-            palette.params,
-            minMaxByColumnId[columnId],
-            gradientHelpers[columnId]
-          );
+          const color = workoutColorForCell(rowValue, palette.params, minMaxByColumnId[columnId]);
           if (color) {
             const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
             if (colorMode === 'cell' && color) {
@@ -158,7 +148,7 @@ export const createGridCell = (
           });
         }
       };
-    }, [rowValue, columnId, setCellProps, colorMode, palette, minMaxByColumnId, gradientHelpers]);
+    }, [rowValue, columnId, setCellProps, colorMode, palette, minMaxByColumnId]);
 
     return (
       <div

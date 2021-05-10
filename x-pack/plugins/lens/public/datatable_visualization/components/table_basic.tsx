@@ -70,7 +70,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     sortingDirection: props.args.sortingDirection,
   });
   const [firstLocalTable, updateTable] = useState(firstTable);
-  const currentPalette = useRef(props.paletteService.get('custom'));
 
   useDeepCompareEffect(() => {
     setColumnConfig({
@@ -236,28 +235,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     );
   }, [firstLocalTable, isNumericMap, columnConfig]);
 
-  const gradientHelpers: Record<string, (value: number) => string> = useMemo(() => {
-    const fnsMap: Record<string, (value: number) => string> = {};
-    columnConfig.columns
-      .filter(
-        ({ columnId, colorMode }) =>
-          // avoid to compute it for columns without the attribute
-          minMaxByColumnId[columnId] && colorMode != null && colorMode !== 'none'
-      )
-      .forEach(({ columnId, palette }) => {
-        const minValue = palette?.params?.rangeMin ?? minMaxByColumnId[columnId].min;
-        const maxValue = palette?.params?.rangeMax ?? minMaxByColumnId[columnId].max;
-        const fn = currentPalette.current.getGradientColorHelper?.(minMaxByColumnId[columnId], {
-          colors: palette?.params?.colors,
-          stops: palette?.params?.stops.length ? palette?.params?.stops : [minValue, maxValue],
-        });
-        if (fn) {
-          fnsMap[columnId] = fn;
-        }
-      });
-    return fnsMap;
-  }, [minMaxByColumnId, columnConfig, currentPalette]);
-
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
       return [];
@@ -330,7 +307,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
           alignments,
           minMaxByColumnId,
-          gradientHelpers,
         }}
       >
         <EuiDataGrid

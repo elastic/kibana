@@ -60,5 +60,4 @@ export interface DataContextType {
   rowHasRowClickTriggerActions?: boolean[];
   alignments?: Record<string, 'left' | 'right' | 'center'>;
   minMaxByColumnId?: Record<string, { min: number; max: number }>;
-  gradientHelpers?: Record<string, (value: number) => string>;
 }
