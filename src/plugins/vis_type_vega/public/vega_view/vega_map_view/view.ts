@@ -18,7 +18,6 @@ import { getAttributionsForTmsService } from './map_service_settings';
 import type { MapServiceSettings } from './map_service_settings';
 
 // @ts-expect-error
-// @ts-expect-error
 import {
   defaultMapConfig,
   defaultMabBoxStyle,
@@ -28,6 +27,7 @@ import {
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 import './vega_map_view.scss';
 
+// @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 // @ts-expect-error
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
