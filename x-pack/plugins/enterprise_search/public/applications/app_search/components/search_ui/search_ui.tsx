@@ -65,7 +65,7 @@ export const SearchUI: React.FC = () => {
               </p>
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.appSearch.engine.searchUI.bodyDescription"
+                  id="xpack.enterpriseSearch.appSearch.engine.searchUI.lowerBodyDescription"
                   defaultMessage="Use the fields below to generate a sample search experience built with Search UI. Use the sample to preview search results, or build upon it to create your own custom search experience. {link}."
                   values={{
                     link: (

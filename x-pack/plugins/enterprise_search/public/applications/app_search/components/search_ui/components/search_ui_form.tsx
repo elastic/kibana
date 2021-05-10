@@ -9,14 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiForm,
-  EuiFormRow,
-  EuiSelect,
-  EuiComboBox,
-  EuiButton,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSelect, EuiComboBox, EuiButton } from '@elastic/eui';
 
 import {
   TITLE_FIELD_LABEL,
