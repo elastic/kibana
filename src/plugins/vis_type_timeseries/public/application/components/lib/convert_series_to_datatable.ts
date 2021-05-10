@@ -7,6 +7,7 @@
  */
 import { IndexPattern } from 'src/plugins/data/public';
 import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
+import { Query } from 'src/plugins/data/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData } from '../../../../common/types';
 import { BUCKET_TYPES } from '../../../../common/enums';
@@ -16,7 +17,7 @@ import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import type { TSVBTables } from './types';
 
 interface FilterParams {
-  filter?: unknown;
+  filter?: Query;
   label?: string;
   field?: string;
 }
@@ -43,7 +44,6 @@ export const addMetaToColumns = (
     if (column.type === BUCKET_TYPES.FILTERS && column.params) {
       const filters = column.params.map((col) => ({
         input: col.filter,
-        label: col.label,
       }));
       params = {
         filters,
@@ -131,14 +131,22 @@ export const convertSeriesToDataTable = async (
       }
     }
     const columnsWithMeta = addMetaToColumns(columns, usedIndexPattern);
-
+    const filtersColumn = columns.find((col) => col.type === BUCKET_TYPES.FILTERS);
     let rows: DatatableRow[] = [];
     for (let j = 0; j < seriesPerLayer.length; j++) {
       const data = seriesPerLayer[j].data.map((rowData) => {
         const row: DatatableRow = [rowData[0], rowData[1]];
         // If the layer is split by terms aggregation, the data array should also contain the split value.
-        if (isGroupedByTerms || isGroupedByFilters) {
+        if (isGroupedByTerms) {
           row.push(seriesPerLayer[j].label);
+        }
+        if (filtersColumn) {
+          const params = filtersColumn.params?.find((p) => p.label === seriesPerLayer[j].label);
+          if (params && params.filter) {
+            row.push(params.filter.query);
+          } else {
+            row.push(seriesPerLayer[j].label);
+          }
         }
         return row;
       });
