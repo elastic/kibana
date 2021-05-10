@@ -7,13 +7,14 @@
 
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
+import { HostIsolationResponse } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
-import { HOST_ISOLATION_CREATE_API } from '../../../../../common/endpoint/constants';
+import { ISOLATE_HOST_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -22,7 +23,6 @@ import {
   AlertSearchResponse,
   AlertsIndex,
   UpdateAlertStatusProps,
-  HostIsolationResponse,
   CasesFromAlertsResponse,
 } from './types';
 
@@ -124,7 +124,7 @@ export const createHostIsolation = async ({
   comment?: string;
   caseIds?: string[];
 }): Promise<HostIsolationResponse> =>
-  KibanaServices.get().http.fetch<HostIsolationResponse>(HOST_ISOLATION_CREATE_API, {
+  KibanaServices.get().http.fetch<HostIsolationResponse>(ISOLATE_HOST_ROUTE, {
     method: 'POST',
     body: JSON.stringify({
       agent_ids: [agentId],

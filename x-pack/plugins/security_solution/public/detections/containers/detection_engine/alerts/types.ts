@@ -48,10 +48,6 @@ export interface AlertsIndex {
   index_mapping_outdated: boolean;
 }
 
-export interface HostIsolationResponse {
-  action: string;
-}
-
 export type CasesFromAlertsResponse = string[];
 
 export interface Privilege {
