@@ -9,7 +9,7 @@ import queryString, { ParsedQuery } from 'query-string';
 
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 
-export const generatePreviwUrl = (query: ParsedQuery, engineName: string) => {
+export const generatePreviewUrl = (query: ParsedQuery, engineName: string) => {
   return queryString.stringifyUrl(
     {
       query,
