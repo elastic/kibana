@@ -40,7 +40,6 @@ export type MapContext = {
   drawState?: DrawState;
   shapeToDraw?: DRAW_TYPE;
   featuresToIndexQueue: Feature[];
-  editModeActive: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
 };

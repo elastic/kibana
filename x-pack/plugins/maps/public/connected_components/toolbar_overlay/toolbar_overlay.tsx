@@ -21,7 +21,6 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  addDrawLayerInProgress: boolean;
   showEditButton: boolean;
   shapeDrawModeActive: boolean;
   pointDrawModeActive: boolean;

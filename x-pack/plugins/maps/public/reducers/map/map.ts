@@ -47,7 +47,6 @@ import {
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
   SET_SHAPE_TO_DRAW,
-  UPDATE_EDIT_MODE,
   ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
   CLEAR_DRAWING_DATA,
@@ -66,7 +65,6 @@ import {
 } from './layer_utils';
 import { startDataRequest, stopDataRequest, updateSourceDataRequest } from './data_request_utils';
 import { MapState } from './types';
-import { DRAW_TYPE } from '../../../common';
 
 export const DEFAULT_MAP_STATE: MapState = {
   ready: false,
@@ -87,7 +85,6 @@ export const DEFAULT_MAP_STATE: MapState = {
     vectorLayerIndexName: '',
     drawState: undefined,
     shapeToDraw: undefined,
-    editModeActive: false,
     featuresToIndexQueue: [],
   },
   selectedLayerId: null,
@@ -113,14 +110,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           shapeToDraw: action.shapeToDraw,
-        },
-      };
-    case UPDATE_EDIT_MODE:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          editModeActive: action.isActive,
         },
       };
     case ADD_FEATURES_TO_INDEX_QUEUE:
@@ -157,7 +146,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           ...state.mapState,
           drawState: undefined,
           shapeToDraw: undefined,
-          editModeActive: false,
           featuresToIndexQueue: [],
         },
       };

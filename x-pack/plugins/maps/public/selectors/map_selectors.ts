@@ -197,8 +197,6 @@ export const isUsingSearch = (state: MapStoreState): boolean => {
 export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
-export const getEditModeActive = ({ map }: MapStoreState): boolean => map.mapState.editModeActive;
-
 export const getShapeToDraw = ({ map }: MapStoreState): DRAW_TYPE | undefined =>
   map.mapState.shapeToDraw;
 

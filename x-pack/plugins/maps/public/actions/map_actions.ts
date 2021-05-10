@@ -45,7 +45,6 @@ import {
   TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
   SET_SHAPE_TO_DRAW,
-  UPDATE_EDIT_MODE,
   UPDATE_MAP_SETTING,
   ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
@@ -336,13 +335,6 @@ export function updateDrawState(drawState: DrawState | null) {
       type: UPDATE_DRAW_STATE,
       drawState,
     });
-  };
-}
-
-export function updateEditMode(isActive: boolean) {
-  return {
-    type: UPDATE_EDIT_MODE,
-    isActive,
   };
 }
 

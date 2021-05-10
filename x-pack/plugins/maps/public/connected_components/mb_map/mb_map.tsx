@@ -63,7 +63,6 @@ export interface Props {
   goto?: Goto | null;
   inspectorAdapters: Adapters;
   isFullScreen: boolean;
-  editModeActive: boolean;
   scrollZoom: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;

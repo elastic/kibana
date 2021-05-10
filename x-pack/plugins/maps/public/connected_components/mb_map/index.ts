@@ -23,7 +23,6 @@ import {
 import {
   getGoto,
   getLayerList,
-  getLayersBySourceType,
   getMapReady,
   getMapSettings,
   getScrollZoom,
@@ -32,7 +31,7 @@ import {
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
-import { DRAW_MODE, SOURCE_TYPES } from '../../../common';
+import { DRAW_MODE } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -44,7 +43,6 @@ function mapStateToProps(state: MapStoreState) {
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
-    editModeActive: !!getLayersBySourceType(SOURCE_TYPES.ES_SEARCH, state).length,
     featureModeActive:
       getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
     filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
