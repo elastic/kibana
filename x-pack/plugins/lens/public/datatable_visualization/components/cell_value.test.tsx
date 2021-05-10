@@ -112,7 +112,9 @@ describe('datatable cell renderer', () => {
                 colors: ['#aaa', '#bbb', '#ccc'],
                 gradient: false,
                 stops: [],
-                range: 'auto',
+                range: 'percent',
+                rangeMin: 0,
+                rangeMax: 100,
               },
             },
             type: 'lens_datatable_column',
@@ -140,7 +142,6 @@ describe('datatable cell renderer', () => {
           value={{
             table,
             minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
-            gradientHelpers: {},
             ...context,
           }}
         >
@@ -174,7 +175,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 0, max: 123 } },
-          gradientHelpers: { a: gradientHelper },
         });
 
         // 123 is exactly the max range of 123 set, so it picks the last color
@@ -190,7 +190,6 @@ describe('datatable cell renderer', () => {
 
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 0, max: 0 } },
-          gradientHelpers: {},
         });
 
         // 123 is above the max range of 100 set
@@ -204,7 +203,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 0, max: 123 } },
-          gradientHelpers: { a: gradientHelper },
         });
         // 123 is exactly the max range of 123 set, so it picks the last color
         expect(setCellProps).toHaveBeenCalledWith({
@@ -397,7 +395,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 12, max: 250 /* > 123 */ } },
-          gradientHelpers: { a: gradientHelper },
         });
 
         expect(gradientHelper).toHaveBeenCalledWith(123);
@@ -417,7 +414,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 12, max: 250 /* > 123 */ } },
-          gradientHelpers: { a: gradientHelper },
         });
 
         expect(gradientHelper).toHaveBeenCalledWith(123);
@@ -437,7 +433,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
-          gradientHelpers: { a: gradientHelper },
         });
 
         expect(gradientHelper).toHaveBeenCalledWith((100 * (123 - 12)) / (155 - 12));
@@ -475,7 +470,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 0, max: 123 } },
-          gradientHelpers: { a: gradientHelper },
         });
 
         expect(setCellProps).toHaveBeenCalledWith({
@@ -496,7 +490,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 0, max: 150 } },
-          gradientHelpers: { a: gradientHelper },
         });
 
         expect(setCellProps).not.toHaveBeenCalled();
@@ -515,7 +508,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 0, max: 123 } },
-          gradientHelpers: { a: gradientHelper },
         });
 
         expect(setCellProps).toHaveBeenCalledWith({
@@ -536,7 +528,6 @@ describe('datatable cell renderer', () => {
         const gradientHelper = jest.fn(() => '#000');
         const { setCellProps } = await renderCellComponent(columnConfig, {
           minMaxByColumnId: { a: { min: 0, max: 123 } },
-          gradientHelpers: { a: gradientHelper },
         });
 
         expect(setCellProps).not.toHaveBeenCalled();
