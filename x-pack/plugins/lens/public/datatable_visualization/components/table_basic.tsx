@@ -70,7 +70,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     sortingDirection: props.args.sortingDirection,
   });
   const [firstLocalTable, updateTable] = useState(firstTable);
-  const [currentPalette] = useState(props.paletteService.get('custom'));
+  const currentPalette = useRef(props.paletteService.get('custom'));
 
   useDeepCompareEffect(() => {
     setColumnConfig({
@@ -247,7 +247,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       .forEach(({ columnId, palette }) => {
         const minValue = palette?.params?.rangeMin ?? minMaxByColumnId[columnId].min;
         const maxValue = palette?.params?.rangeMax ?? minMaxByColumnId[columnId].max;
-        const fn = currentPalette.getGradientColorHelper?.(minMaxByColumnId[columnId], {
+        const fn = currentPalette.current.getGradientColorHelper?.(minMaxByColumnId[columnId], {
           colors: palette?.params?.colors,
           stops: palette?.params?.stops.length ? palette?.params?.stops : [minValue, maxValue],
         });

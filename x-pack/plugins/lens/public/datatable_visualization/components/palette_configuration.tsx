@@ -200,7 +200,7 @@ export function CustomizablePalette({
 
               newParams.stops = getPaletteStops(palettes, newParams, {
                 prevPalette:
-                  isNewPaletteCustom || isCurrentPaletteCustom ? undefined : activePalette.name,
+                  isNewPaletteCustom || isCurrentPaletteCustom ? undefined : newPalette.name,
                 dataBounds,
               });
 

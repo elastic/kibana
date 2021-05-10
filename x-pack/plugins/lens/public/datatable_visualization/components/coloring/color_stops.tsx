@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
+import type { FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -14,15 +15,12 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { ColorStop, DEFAULT_COLOR } from './constants';
-import { getDataMinMax, isValidColor } from './utils';
+import { getDataMinMax, getStepValue, isValidColor } from './utils';
 import { TooltipWrapper } from '../../../shared_components';
 import { useDebounceWithOptions } from '../../../indexpattern_datasource/operations/definitions/helpers';
-
-function shouldRoundDigits(value: number) {
-  return value > 1;
-}
 
 interface CustomPropsForm {
   colorStops: ColorStop[];
@@ -33,6 +31,8 @@ interface CustomPropsForm {
 export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: CustomPropsForm) => {
   const shouldEnableDelete = colorStops.length > 2;
   const remappedControlStops = colorStops;
+
+  const [onBlurOption, setOnBlur] = useState('row');
 
   const [localColorStops, setLocalColorStops] = useState<ColorStop[]>(colorStops);
 
@@ -58,22 +58,40 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
     <EuiFlexItem>
       <EuiFormRow display="row">
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>
+          <EuiFlexItem
+            onBlur={(e: FocusEvent<HTMLDivElement>) => {
+              if (onBlurOption === 'block') {
+                // sort the stops when the focus leaves the block container
+                const shouldSort = localColorStops.some(({ stop }, index) => {
+                  if (index === 0) {
+                    return stop > localColorStops[index + 1].stop;
+                  }
+                  if (index === localColorStops.length - 1) {
+                    return stop < localColorStops[index - 1].stop;
+                  }
+                  return (
+                    stop < localColorStops[index - 1].stop || stop > localColorStops[index + 1].stop
+                  );
+                });
+                const isFocusStillInContent = (e.currentTarget as Node)?.contains(
+                  e.relatedTarget as Node
+                );
+                if (shouldSort && !isFocusStillInContent) {
+                  setLocalColorStops(
+                    [...localColorStops].sort(({ stop: stopA }, { stop: stopB }) => stopA - stopB)
+                  );
+                }
+              }
+            }}
+          >
             {remappedControlStops.map(({ color, stop }, index) => {
+              const prevStopValue = localColorStops[index - 1]?.stop ?? -Infinity;
               const stopValue = localColorStops[index]?.stop ?? stop;
               const colorValue = localColorStops[index]?.color ?? color;
               const nextStopValue =
                 localColorStops[index + 1]?.stop ?? colorStops[index + 1]?.stop ?? Infinity;
 
               const errorMessages = [];
-              if (stopValue > nextStopValue) {
-                errorMessages.push(
-                  i18n.translate('xpack.lens.table.dynamicColoring.customPalette.stopError', {
-                    defaultMessage: 'Stop value {index} cannot be higher than Stop {nextIndex}',
-                    values: { index: index + 1, nextIndex: index + 2 },
-                  })
-                );
-              }
               // do not show color error messages if number field is already in error
               if (!isValidColor(colorValue) && errorMessages.length === 0) {
                 errorMessages.push(
@@ -88,6 +106,22 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                   display="rowCompressed"
                   isInvalid={Boolean(errorMessages.length)}
                   error={errorMessages[0]}
+                  onBlur={(e: FocusEvent<HTMLDivElement>) => {
+                    if (onBlurOption === 'row') {
+                      // sort the stops when the focus leaves the row container
+                      const shouldSort = stopValue > nextStopValue || prevStopValue > stopValue;
+                      const isFocusStillInContent = (e.currentTarget as Node)?.contains(
+                        e.relatedTarget as Node
+                      );
+                      if (shouldSort && !isFocusStillInContent) {
+                        setLocalColorStops(
+                          [...localColorStops].sort(
+                            ({ stop: stopA }, { stop: stopB }) => stopA - stopB
+                          )
+                        );
+                      }
+                    }
+                  }}
                 >
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
@@ -102,6 +136,16 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                             color: colorValue,
                             stop: Number(newStopString),
                           };
+                          if (onBlurOption === 'input') {
+                            if (
+                              prevStopValue > Number(newStopString) ||
+                              Number(newStopString) > nextStopValue
+                            ) {
+                              newColorStops.sort(
+                                ({ stop: stopA }, { stop: stopB }) => stopA - stopB
+                              );
+                            }
+                          }
                           setLocalColorStops(newColorStops);
                         }}
                         append={rangeType === 'percent' ? '%' : undefined}
@@ -114,7 +158,6 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                             },
                           }
                         )}
-                        isInvalid={stopValue > nextStopValue}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -189,17 +232,8 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
               )}
               onClick={() => {
                 const newColorStops = [...colorStops];
-                const length = newColorStops.length;
                 const { max } = getDataMinMax(rangeType, dataBounds);
-                // workout the steps from the last 2 items
-                const dataStep =
-                  newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1;
-                let step = shouldRoundDigits(dataStep) ? Math.round(dataStep) : dataStep;
-                if (max < colorStops[length - 1].stop + step) {
-                  const diffToMax = max - colorStops[length - 1].stop;
-                  // if the computed step goes way out of bound, fallback to 1, otherwise reach max
-                  step = diffToMax > 0 ? diffToMax : 1;
-                }
+                const step = getStepValue(colorStops, newColorStops, max);
                 newColorStops.push({
                   color: DEFAULT_COLOR,
                   stop: colorStops[length - 1].stop + step,
@@ -214,6 +248,33 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
           </EuiFlexItem>
           <EuiFlexItem />
         </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiFormRow label={'Sort on blur:'} display="rowCompressed">
+        <EuiButtonGroup
+          isFullWidth
+          legend={'Sort on blur:'}
+          data-test-subj="lnsDatatable_dynamicColoring_custom_range_groups"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `input`,
+              label: 'on Input',
+            },
+            {
+              id: `row`,
+              label: 'on Row',
+            },
+            {
+              id: `block`,
+              label: 'on Block',
+            },
+          ]}
+          idSelected={onBlurOption}
+          onChange={(id) => {
+            // TODO: remove this once chosen the onBlur option
+            setOnBlur(id);
+          }}
+        />
       </EuiFormRow>
     </EuiFlexItem>
   );

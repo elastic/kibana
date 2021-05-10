@@ -18,8 +18,11 @@ export function shiftPalette(stops: ColorStop[], max: number) {
     stop: i + 1 < array.length ? array[i + 1].stop : max,
   }));
   if (stops[stops.length - 1].stop === max) {
-    // pop out the last value (to void any conflict)
-    result.pop();
+    // extends the range by a fair amount to make it work the extra case for the last stop === max
+    const computedStep = getStepValue(stops, result, max) || 1;
+    // do not go beyond the unit step in this case
+    const step = Math.min(1, computedStep);
+    result[stops.length - 1].stop = max + step;
   }
   return result;
 }
@@ -202,4 +205,21 @@ export function roundStopValues(colorStops: ColorStop[]) {
     const roundedStop = stop > 1 ? Math.round(stop) : stop;
     return { color, stop: roundedStop };
   });
+}
+
+function shouldRoundDigits(value: number) {
+  return value > 1;
+}
+
+export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[], max: number) {
+  const length = newColorStops.length;
+  // workout the steps from the last 2 items
+  const dataStep = newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1;
+  let step = shouldRoundDigits(dataStep) ? Math.round(dataStep) : dataStep;
+  if (max < colorStops[length - 1].stop + step) {
+    const diffToMax = max - colorStops[length - 1].stop;
+    // if the computed step goes way out of bound, fallback to 1, otherwise reach max
+    step = diffToMax > 0 ? diffToMax : 1;
+  }
+  return step;
 }
