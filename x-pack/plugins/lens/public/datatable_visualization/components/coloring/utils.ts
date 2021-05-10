@@ -157,45 +157,6 @@ export function getControlStops(
   }
 }
 
-export function remapForDisplay(
-  stops: ColorStop[],
-  params: CustomPaletteParams,
-  { dataBounds }: { dataBounds: { min: number; max: number } }
-) {
-  const newStops: ColorStop[] = [];
-  const minStop = stops[0].stop;
-  const { min: minRef, max: maxRef } = getDataMinMax(params.rangeType, dataBounds);
-  // original values are stored into colorStops
-  const colorStops = params?.colorStops || [];
-  if (minStop > minRef) {
-    if (params.continuity === 'below' || params.continuity === 'all') {
-      newStops.push({
-        color: (colorStops[0] || stops[0]).color,
-        stop: colorStops[0]?.stop || minRef,
-      });
-    }
-  }
-  newStops.push(...stops);
-  if (minStop < maxRef) {
-    if (params.continuity == null || params.continuity === 'above' || params.continuity === 'all') {
-      newStops.push({
-        color: (colorStops[colorStops.length - 1] || stops[stops.length - 1]).color,
-        stop: maxRef,
-      });
-    }
-  }
-
-  const interval = maxRef - minRef;
-  const newMin = 0;
-
-  return remapStopsByNewInterval(newStops, {
-    newInterval: DEFAULT_MAX_STOP,
-    oldInterval: interval,
-    newMin,
-    oldMin: minRef,
-  });
-}
-
 export function isValidColor(colorString: string) {
   return colorString !== '' && isValidHex(colorString);
 }

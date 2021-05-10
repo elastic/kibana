@@ -18,8 +18,7 @@ import {
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,
-  activePalette: PaletteOutput<CustomPaletteParams> | undefined,
-  dataBounds: { min: number; max: number }
+  activePalette: PaletteOutput<CustomPaletteParams> | undefined
 ) {
   const { id, title } = palettes.get(CUSTOM_PALETTE);
 
@@ -42,13 +41,12 @@ function getCustomPaletteConfig(
     return { value: id, title, type: 'text' as const };
   }
 
-  const stops = activePalette.params.stops; // remapForDisplay(activePalette.params.stops, activePalette.params, { dataBounds });
   // full custom palette
   return {
     value: id,
     title,
     type: FIXED_PROGRESSION,
-    palette: stops,
+    palette: activePalette.params.stops,
   };
 }
 
@@ -58,14 +56,12 @@ export function PalettePicker({
   setPalette,
   showCustomPalette,
   showDynamicColorOnly,
-  dataBounds,
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput) => void;
   showCustomPalette?: boolean;
   showDynamicColorOnly?: boolean;
-  dataBounds: { min: number; max: number };
 }) {
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
@@ -85,7 +81,7 @@ export function PalettePicker({
       };
     });
   if (showCustomPalette) {
-    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette, dataBounds));
+    palettesToShow.push(getCustomPaletteConfig(palettes, activePalette));
   }
   return (
     <EuiColorPalettePicker

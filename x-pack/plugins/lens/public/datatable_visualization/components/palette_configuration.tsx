@@ -184,7 +184,6 @@ export function CustomizablePalette({
           <PalettePicker
             data-test-subj="lnsDatatable_dynamicColoring_palette_picker"
             palettes={palettes}
-            dataBounds={dataBounds}
             activePalette={activePalette}
             setPalette={(newPalette) => {
               const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
