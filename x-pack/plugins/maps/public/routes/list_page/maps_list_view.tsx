@@ -142,6 +142,9 @@ export function MapsListView() {
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
       })}
+      tableCaption={i18n.translate('xpack.maps.mapListing.tableCaption', {
+        defaultMessage: 'Maps',
+      })}
       tableListTitle={getAppTitle()}
       toastNotifications={getToasts()}
       searchFilters={searchFilters}
