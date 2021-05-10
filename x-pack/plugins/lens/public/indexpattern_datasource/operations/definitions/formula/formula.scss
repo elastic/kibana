@@ -1,14 +1,44 @@
 .lnsFormula {
+  display: flex;
+  flex-direction: column;
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    height: 100%;
+  }
+}
+
+.lnsFormula__editor,
+.lnsFormula__docs {
+  flex: 1;
+  min-height: 0;
+}
+
+.lnsFormula__editor {
   border-bottom: $euiBorderThin;
+  display: flex;
+  flex-direction: column;
 
   & > * + * {
     border-top: $euiBorderThin;
   }
 }
 
-.lnsFormula__header,
-.lnsFormula__footer {
+.lnsFormula__editorHeader,
+.lnsFormula__editorFooter {
   padding: $euiSizeS;
+}
+
+.lnsFormula__editorContent {
+  flex: 1;
+  max-height: 200px;
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    max-height: none;
+  }
+}
+
+.lnsFormula__docs {
+  background: $euiColorEmptyShade;
 }
 
 .lnsFormulaOverflow {

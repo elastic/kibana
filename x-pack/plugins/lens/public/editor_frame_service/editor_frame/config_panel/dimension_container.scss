@@ -8,12 +8,18 @@
   position: absolute;
   left: 0;
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+
   @include euiBreakpoint('l', 'xl') {
     top: 0 !important;
     height: 100% !important;
   }
+
   @include euiBreakpoint('xs', 's', 'm') {
     @include euiFlyout;
+  }
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    box-shadow: none;
   }
 }
 
