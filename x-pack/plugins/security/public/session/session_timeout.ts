@@ -37,6 +37,7 @@ export class SessionTimeout {
 
   private isVisible = document.visibilityState !== 'hidden';
   private isFetchingSessionInfo = false;
+  private snoozedWarningState?: SessionState;
 
   private sessionState$ = new BehaviorSubject<SessionState>({
     lastExtensionTime: 0,
@@ -143,33 +144,46 @@ export class SessionTimeout {
     }
   };
 
-  private resetTimers = ({ expiresInMs }: SessionState) => {
+  private resetTimers = ({ lastExtensionTime, expiresInMs }: SessionState) => {
     this.stopRefreshTimer = this.stopRefreshTimer?.();
     this.stopWarningTimer = this.stopWarningTimer?.();
     this.stopLogoutTimer = this.stopLogoutTimer?.();
 
     if (expiresInMs !== null) {
-      const refreshTimeout =
-        expiresInMs - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS - SESSION_CHECK_MS;
-      const warningTimeout = Math.max(
-        expiresInMs - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS,
+      const logoutInMs = Math.max(expiresInMs - SESSION_GRACE_PERIOD_MS, 0);
+
+      // Show warning before session expires. However, do not show warning again if previously
+      // dismissed. The snooze time is the expiration time that was remaining in the warning.
+      const showWarningInMs = Math.max(
+        logoutInMs - SESSION_EXPIRATION_WARNING_MS,
+        this.snoozedWarningState
+          ? this.snoozedWarningState.lastExtensionTime +
+              this.snoozedWarningState.expiresInMs! -
+              SESSION_GRACE_PERIOD_MS -
+              lastExtensionTime
+          : 0,
         0
       );
-      const logoutTimeout = Math.max(expiresInMs - SESSION_GRACE_PERIOD_MS, 0);
 
-      // 1. Refresh session info before displaying any warnings
-      if (refreshTimeout > 0) {
-        this.stopRefreshTimer = startTimer(this.fetchSessionInfo, refreshTimeout);
-      }
+      const fetchSessionInMs = showWarningInMs - SESSION_CHECK_MS;
 
-      // 2. Afterwards, show warning toast
-      if (warningTimeout > 0) {
+      // Schedule logout when session is about to expire
+      this.stopLogoutTimer = startTimer(() => this.sessionExpired.logout(), logoutInMs);
+
+      // Hide warning if session has been extended
+      if (showWarningInMs > 0) {
         this.hideWarning();
       }
-      this.stopWarningTimer = startTimer(this.showWarning, warningTimeout);
 
-      // 3. Finally, logout
-      this.stopLogoutTimer = startTimer(() => this.sessionExpired.logout(), logoutTimeout);
+      // Schedule warning before session expires
+      if (showWarningInMs < logoutInMs) {
+        this.stopWarningTimer = startTimer(this.showWarning, showWarningInMs);
+      }
+
+      // Refresh session info before showing warning
+      if (fetchSessionInMs > 0 && fetchSessionInMs < logoutInMs) {
+        this.stopRefreshTimer = startTimer(this.fetchSessionInfo, fetchSessionInMs);
+      }
     }
   };
 
@@ -214,7 +228,7 @@ export class SessionTimeout {
       });
       if (sessionInfo) {
         const { expiresInMs, canBeExtended } = sessionInfo;
-        const nextState = {
+        const nextState: SessionState = {
           lastExtensionTime: Date.now(),
           expiresInMs,
           canBeExtended,
@@ -223,6 +237,7 @@ export class SessionTimeout {
         if (this.channel) {
           this.channel.postMessage(nextState);
         }
+        return nextState;
       }
     } catch (error) {
       // ignore
@@ -233,17 +248,28 @@ export class SessionTimeout {
 
   private showWarning = () => {
     if (!this.warningToast) {
-      const onExtend = () => this.fetchSessionInfo(true);
-      const onClose = () => (this.warningToast = undefined);
+      const onExtend = async () => {
+        const { canBeExtended } = this.sessionState$.getValue();
+        if (canBeExtended) {
+          await this.fetchSessionInfo(true);
+        }
+      };
+      const onClose = () => {
+        this.hideWarning(true);
+        return onExtend();
+      };
       const toast = createSessionExpirationToast(this.sessionState$, onExtend, onClose);
       this.warningToast = this.notifications.toasts.add(toast);
     }
   };
 
-  private hideWarning = () => {
+  private hideWarning = (snooze = false) => {
     if (this.warningToast) {
       this.notifications.toasts.remove(this.warningToast);
       this.warningToast = undefined;
+      if (snooze) {
+        this.snoozedWarningState = this.sessionState$.getValue();
+      }
     }
   };
 }

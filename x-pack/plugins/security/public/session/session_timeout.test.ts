@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ToastInputFields } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 
 import {
@@ -125,7 +126,6 @@ describe('SessionTimeout', () => {
       SESSION_ROUTE,
       expect.objectContaining({ asSystemRequest: false })
     );
-    nowMock.mockClear();
   });
 
   it('refetches session info before warning is displayed', async () => {
@@ -161,8 +161,6 @@ describe('SessionTimeout', () => {
     const [{ request: handleHttpRequest }] = http.intercept.mock.calls[0];
     const fetchOptions = handleHttpRequest!({ path: '/test' }, {} as any);
     expect(fetchOptions).toEqual({ path: '/test', asSystemRequest: true });
-
-    visibilityStateMock.mockClear();
   });
 
   it('does not mark HTTP requests to external URLs as system requests', async () => {
@@ -175,8 +173,6 @@ describe('SessionTimeout', () => {
     const [{ request: handleHttpRequest }] = http.intercept.mock.calls[0];
     const fetchOptions = handleHttpRequest!({ path: 'http://elastic.co/' }, {} as any);
     expect(fetchOptions).toBe(undefined);
-
-    visibilityStateMock.mockClear();
   });
 
   it('marks HTTP requests as user requests when tab is visible', async () => {
@@ -189,8 +185,6 @@ describe('SessionTimeout', () => {
     const [{ request: handleHttpRequest }] = http.intercept.mock.calls[0];
     const fetchOptions = handleHttpRequest!({ path: '/test' }, {} as any);
     expect(fetchOptions).toEqual({ path: '/test', asSystemRequest: false });
-
-    visibilityStateMock.mockClear();
   });
 
   it('resets timers when receiving message from other tabs', async () => {
@@ -224,6 +218,86 @@ describe('SessionTimeout', () => {
     );
   });
 
+  it('extends session when closing expiration warning', async () => {
+    const { sessionTimeout, notifications, http } = createSessionTimeout(60 * 60 * 1000);
+    await sessionTimeout.start();
+
+    expect(http.fetch).toHaveBeenCalledTimes(1);
+    expect(http.fetch).toHaveBeenLastCalledWith(
+      SESSION_ROUTE,
+      expect.objectContaining({ asSystemRequest: true })
+    );
+
+    jest.runOnlyPendingTimers();
+
+    expect(http.fetch).toHaveBeenCalledTimes(2);
+    expect(http.fetch).toHaveBeenLastCalledWith(
+      SESSION_ROUTE,
+      expect.objectContaining({ asSystemRequest: true })
+    );
+
+    const [toast] = notifications.toasts.add.mock.calls[0] as [ToastInputFields];
+
+    await toast.onClose!();
+
+    expect(http.fetch).toHaveBeenCalledTimes(3);
+    expect(http.fetch).toHaveBeenLastCalledWith(
+      SESSION_ROUTE,
+      expect.objectContaining({ asSystemRequest: false })
+    );
+  });
+
+  it('show warning 5 minutes before expiration if not previously dismissed', async () => {
+    const { sessionTimeout, notifications } = createSessionTimeout(null);
+    await sessionTimeout.start();
+
+    const expiresInMs = 10 * 60 * 1000;
+    const showWarningInMs = expiresInMs - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS;
+
+    // eslint-disable-next-line dot-notation
+    sessionTimeout['resetTimers']({
+      lastExtensionTime: Date.now() + 1 * 60 * 1000,
+      expiresInMs,
+      canBeExtended: false,
+    });
+
+    jest.advanceTimersByTime(showWarningInMs);
+
+    expect(notifications.toasts.add).toHaveBeenCalled();
+  });
+
+  it('do not show warning again if previously dismissed', async () => {
+    const { sessionTimeout, notifications } = createSessionTimeout(null);
+    await sessionTimeout.start();
+
+    const expiresInMs = 10 * 60 * 1000;
+    const showWarningInMs = expiresInMs - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS;
+
+    // eslint-disable-next-line dot-notation
+    sessionTimeout['snoozedWarningState'] = {
+      lastExtensionTime: Date.now(),
+      expiresInMs,
+      canBeExtended: false,
+    };
+
+    // eslint-disable-next-line dot-notation
+    sessionTimeout['resetTimers']({
+      lastExtensionTime: Date.now() + 1 * 60 * 1000,
+      expiresInMs,
+      canBeExtended: false,
+    });
+
+    // We would normally show the warning at this point in time. However, since the warning has been
+    // dismissed for 10 minutes we will only show it after 10 minutes have elapsed
+    jest.advanceTimersByTime(showWarningInMs);
+    expect(notifications.toasts.add).not.toHaveBeenCalled();
+
+    // Advance the timer further so that a total have 10 minutes would have passed. This is the
+    // expiration time of the warning that was dismissed.
+    jest.advanceTimersByTime(9 * 60 * 1000 - showWarningInMs);
+    expect(notifications.toasts.add).toHaveBeenCalled();
+  });
+
   it('hides warning if session gets extended', async () => {
     const { sessionTimeout, notifications } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
@@ -235,7 +309,7 @@ describe('SessionTimeout', () => {
     expect(notifications.toasts.add).toHaveBeenCalled();
 
     // eslint-disable-next-line dot-notation
-    await sessionTimeout['fetchSessionInfo']!(true);
+    await sessionTimeout['fetchSessionInfo'](true);
 
     expect(notifications.toasts.remove).toHaveBeenCalled();
   });

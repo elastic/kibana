@@ -76,7 +76,7 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
 export const createSessionExpirationToast = (
   sessionState$: Observable<SessionState>,
   onExtend: () => Promise<any>,
-  onClose?: () => void
+  onClose: () => void
 ): ToastInput => {
   return {
     color: 'warning',
