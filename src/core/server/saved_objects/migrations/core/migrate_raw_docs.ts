@@ -21,16 +21,16 @@ import { MigrateAndConvertFn } from './document_migrator';
 import { TransformSavedObjectDocumentError } from '.';
 
 export interface DocumentsTransformFailed {
-  type: string;
-  corruptDocumentIds: string[];
-  transformErrors: TransformErrorObjects[];
+  readonly type: string;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
 }
 export interface DocumentsTransformSuccess {
-  processedDocs: SavedObjectsRawDoc[];
+  readonly processedDocs: SavedObjectsRawDoc[];
 }
 export interface TransformErrorObjects {
-  rawId: string;
-  err: TransformSavedObjectDocumentError | Error;
+  readonly rawId: string;
+  readonly err: TransformSavedObjectDocumentError | Error;
 }
 type MigrateFn = (
   doc: SavedObjectUnsanitizedDoc<unknown>
@@ -101,7 +101,6 @@ export function migrateRawDocsSafely(
     const options = { namespaceTreatment: 'lax' as const };
     for (const raw of rawDocs) {
       if (serializer.isRawSavedObject(raw, options)) {
-        // const savedObject = convertToRawAddMigrationVersion(raw, options, serializer);
         try {
           const savedObject = convertToRawAddMigrationVersion(raw, options, serializer);
           processedDocs.push(
@@ -110,9 +109,9 @@ export function migrateRawDocsSafely(
         } catch (err) {
           if (err instanceof TransformSavedObjectDocumentError) {
             // the doc id we get from the error is only the uuid part
-            // we transform the id to a raw saved object id.
+            // we use the original raw document _id instead
             transformErrors.push({
-              rawId: serializer.generateRawId(err.namespace, err.type, err.id),
+              rawId: raw._id,
               err,
             });
           } else {
@@ -179,7 +178,7 @@ async function migrateMapToRawDoc(
 }
 
 /**
- * Sanitizes the raw saved object document and sets the migration version
+ * Sanitizes the raw saved object document
  * @param {SavedObjectRawDoc} rawDoc
  * @param options
  * @param {SavedObjectsSerializer} serializer

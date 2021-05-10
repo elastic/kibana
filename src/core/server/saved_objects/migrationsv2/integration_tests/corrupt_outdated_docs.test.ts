@@ -111,10 +111,11 @@ describe('migration v2 with corrupt saved object documents', () => {
       const corruptBarSOs = /bar:/g;
       const corruptBazSOs = /baz:/g;
       expect(
-        [...err.message.matchAll(corruptFooSOs)].concat(
-          [...err.message.matchAll(corruptBarSOs)],
-          [...err.message.matchAll(corruptBazSOs)]
-        ).length
+        [
+          ...err.message.matchAll(corruptFooSOs),
+          ...err.message.matchAll(corruptBarSOs),
+          ...err.message.matchAll(corruptBazSOs),
+        ].length
       ).toEqual(16);
     }
   });

@@ -1039,7 +1039,6 @@ describe('migration actions', () => {
       const resultsWithProcessDocs = ((await transformTask()) as Either.Right<DocumentsTransformSuccess>)
         .right.processedDocs;
       expect(resultsWithProcessDocs.length).toEqual(2);
-      // const foo2 = hits.find((h) => h._id === 'foo:2');
       const foo2 = resultsWithProcessDocs.find((h) => h._id === 'foo:2');
       expect(foo2?._source?.value).toBe(3);
     });
