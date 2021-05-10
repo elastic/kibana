@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { Map, Style, MapboxOptions } from 'mapbox-gl';
 
 import { View, parse } from 'vega';
+// @ts-expect-error
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
@@ -17,7 +18,6 @@ import { getMapServiceSettings } from '../../services';
 import { getAttributionsForTmsService } from './map_service_settings';
 import type { MapServiceSettings } from './map_service_settings';
 
-// @ts-expect-error
 import {
   defaultMapConfig,
   defaultMabBoxStyle,
