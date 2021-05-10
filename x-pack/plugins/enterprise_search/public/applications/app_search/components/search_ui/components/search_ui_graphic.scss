@@ -145,7 +145,7 @@
       .outerBox {
         fill: $euiColorEmptyShade;
         stroke: $euiColorPrimary;
-        stroke-width: 2px;
+        stroke-width: $euiBorderWidthThick;
       }
       .header {
         fill: $euiColorPrimary;
