@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RuleDataClient } from '../../../rule_registry/server';
+
 import { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -59,16 +61,19 @@ export const initRoutes = (
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  ruleDataClient: RuleDataClient | null
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(router, ml);
-  readRulesRoute(router);
-  updateRulesRoute(router, ml);
-  patchRulesRoute(router, ml);
-  deleteRulesRoute(router);
-  findRulesRoute(router);
+  createRulesRoute(router, ml, ruleDataClient);
+  readRulesRoute(router, ruleDataClient);
+  updateRulesRoute(router, ml, ruleDataClient);
+  patchRulesRoute(router, ml, ruleDataClient);
+  deleteRulesRoute(router, ruleDataClient);
+  findRulesRoute(router, ruleDataClient);
+
+  // TODO: pass ruleDataClient to all relevant routes
 
   addPrepackedRulesRoute(router, config, security);
   getPrepackagedRulesStatusRoute(router, config, security);

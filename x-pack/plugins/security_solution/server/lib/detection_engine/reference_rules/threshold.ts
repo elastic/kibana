@@ -13,8 +13,10 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from '../../../../../../../src/core/server';
 
 import { AlertServices } from '../../../../../alerting/server';
-import { BaseRuleFieldMap, OutputOfFieldMap } from '../../../../../rule_registry/common';
-import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
+import {
+  RuleDataClient,
+  createPersistenceRuleTypeFactory,
+} from '../../../../../rule_registry/server';
 import { THRESHOLD_ALERT_TYPE_ID } from '../../../../common/constants';
 import { SecurityRuleRegistry } from '../../../plugin';
 import { SignalSearchResponse, ThresholdSignalHistory } from '../signals/types';
@@ -28,8 +30,6 @@ import { getFilter } from '../signals/get_filter';
 import { BuildRuleMessage } from '../signals/rule_messages';
 
 const createSecurityThresholdRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
-
-type AlertType = OutputOfFieldMap<BaseRuleFieldMap>;
 
 interface Rule {
   id: string;
@@ -61,7 +61,7 @@ interface BulkCreateThresholdSignalParams {
   buildRuleMessage: BuildRuleMessage;
 }
 
-const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): AlertType[] => {
+const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): any[] => {
   const thresholdResults = params.results;
   const threshold = {
     field: params.ruleParams.thresholdFields,
@@ -90,127 +90,129 @@ const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): AlertT
   });
 };
 
-export const thresholdAlertType = createSecurityThresholdRuleType({
-  id: THRESHOLD_ALERT_TYPE_ID,
-  name: 'Threshold Rule',
-  validate: {
-    params: schema.object({
-      indexPatterns: schema.arrayOf(schema.string()),
-      customQuery: schema.string(),
-      thresholdFields: schema.arrayOf(schema.string()),
-      thresholdValue: schema.number(),
-      thresholdCardinality: schema.arrayOf(
-        schema.object({
-          field: schema.string(),
-          value: schema.number(),
-        })
-      ),
-    }),
-  },
-  actionGroups: [
-    {
-      id: 'default',
-      name: 'Default',
+export const createThresholdAlertType = (ruleDataClient: RuleDataClient) => {
+  return createSecurityThresholdRuleType({
+    id: THRESHOLD_ALERT_TYPE_ID,
+    name: 'Threshold Rule',
+    validate: {
+      params: schema.object({
+        indexPatterns: schema.arrayOf(schema.string()),
+        customQuery: schema.string(),
+        thresholdFields: schema.arrayOf(schema.string()),
+        thresholdValue: schema.number(),
+        thresholdCardinality: schema.arrayOf(
+          schema.object({
+            field: schema.string(),
+            value: schema.number(),
+          })
+        ),
+      }),
     },
-  ],
-  defaultActionGroupId: 'default',
-  actionVariables: {
-    context: [{ name: 'server', description: 'the server' }],
-  },
-  minimumLicenseRequired: 'basic',
-  producer: 'security-solution',
-  async executor({
-    // previousStartedAt,
-    rule,
-    startedAt,
-    services,
-    params,
-  }) {
-    const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
-    const from = fromDate.toISOString();
-    const to = startedAt.toISOString();
-
-    // TODO: how to get the output index?
-    const outputIndex = ['.kibana-madi-8-alerts-security-solution-8.0.0-000001'];
-    const buildRuleMessage = (...messages: string[]) => messages.join();
-    const timestampOverride = undefined;
-
-    const {
-      thresholdSignalHistory,
-      searchErrors: previousSearchErrors,
-    } = await getThresholdSignalHistory({
-      indexPattern: outputIndex,
-      from,
-      to,
-      services: (services as unknown) as AlertServices,
-      logger: services.logger,
-      ruleId: rule.id,
-      bucketByFields: params.thresholdFields,
-      timestampOverride,
-      buildRuleMessage,
-    });
-
-    const bucketFilters = await getThresholdBucketFilters({
-      thresholdSignalHistory,
-      timestampOverride,
-    });
-
-    const esFilter = await getFilter({
-      type: 'threshold',
-      filters: bucketFilters,
-      language: 'kuery',
-      query: params.customQuery,
-      savedId: undefined,
-      services: (services as unknown) as AlertServices,
-      index: params.indexPatterns,
-      lists: [],
-    });
-
-    const {
-      searchResult: thresholdResults,
-      searchErrors,
-      searchDuration: thresholdSearchDuration,
-    } = await findThresholdSignals({
-      inputIndexPattern: params.indexPatterns,
-      from,
-      to,
-      services: (services as unknown) as AlertServices,
-      logger: services.logger,
-      filter: esFilter,
-      threshold: {
-        field: params.thresholdFields,
-        value: params.thresholdValue,
-        cardinality: params.thresholdCardinality,
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
       },
-      timestampOverride,
-      buildRuleMessage,
-    });
-
-    services.logger.info(`Threshold search took ${thresholdSearchDuration}ms`); // TODO: rule status service
-
-    const alerts = formatThresholdSignals({
-      results: thresholdResults,
-      ruleParams: params,
-      services: (services as unknown) as AlertServices & { logger: Logger },
-      inputIndexPattern: ['TODO'],
+    ],
+    defaultActionGroupId: 'default',
+    actionVariables: {
+      context: [{ name: 'server', description: 'the server' }],
+    },
+    minimumLicenseRequired: 'basic',
+    producer: 'security-solution',
+    async executor({
+      // previousStartedAt,
       rule,
       startedAt,
-      from: fromDate.toDate(),
-      thresholdSignalHistory,
-      buildRuleMessage,
-    });
+      services,
+      params,
+    }) {
+      const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
+      const from = fromDate.toISOString();
+      const to = startedAt.toISOString();
 
-    const errors = searchErrors.concat(previousSearchErrors);
-    if (errors.length === 0) {
-      services.alertWithPersistence(alerts).forEach((alert) => {
-        alert.scheduleActions('default', { server: 'server-test' });
+      // TODO: how to get the output index?
+      const outputIndex = ['.kibana-madi-8-alerts-security-solution-8.0.0-000001'];
+      const buildRuleMessage = (...messages: string[]) => messages.join();
+      const timestampOverride = undefined;
+
+      const {
+        thresholdSignalHistory,
+        searchErrors: previousSearchErrors,
+      } = await getThresholdSignalHistory({
+        indexPattern: outputIndex,
+        from,
+        to,
+        services: (services as unknown) as AlertServices,
+        logger: services.logger,
+        ruleId: rule.id,
+        bucketByFields: params.thresholdFields,
+        timestampOverride,
+        buildRuleMessage,
       });
-    } else {
-      throw new Error(errors.join('\n'));
-    }
 
-    return {
-      lastChecked: new Date(),
-    };
-  },
-});
+      const bucketFilters = await getThresholdBucketFilters({
+        thresholdSignalHistory,
+        timestampOverride,
+      });
+
+      const esFilter = await getFilter({
+        type: 'threshold',
+        filters: bucketFilters,
+        language: 'kuery',
+        query: params.customQuery,
+        savedId: undefined,
+        services: (services as unknown) as AlertServices,
+        index: params.indexPatterns,
+        lists: [],
+      });
+
+      const {
+        searchResult: thresholdResults,
+        searchErrors,
+        searchDuration: thresholdSearchDuration,
+      } = await findThresholdSignals({
+        inputIndexPattern: params.indexPatterns,
+        from,
+        to,
+        services: (services as unknown) as AlertServices,
+        logger: services.logger,
+        filter: esFilter,
+        threshold: {
+          field: params.thresholdFields,
+          value: params.thresholdValue,
+          cardinality: params.thresholdCardinality,
+        },
+        timestampOverride,
+        buildRuleMessage,
+      });
+
+      services.logger.info(`Threshold search took ${thresholdSearchDuration}ms`); // TODO: rule status service
+
+      const alerts = formatThresholdSignals({
+        results: thresholdResults,
+        ruleParams: params,
+        services: (services as unknown) as AlertServices & { logger: Logger },
+        inputIndexPattern: ['TODO'],
+        rule,
+        startedAt,
+        from: fromDate.toDate(),
+        thresholdSignalHistory,
+        buildRuleMessage,
+      });
+
+      const errors = searchErrors.concat(previousSearchErrors);
+      if (errors.length === 0) {
+        services.alertWithPersistence(alerts).forEach((alert) => {
+          alert.scheduleActions('default', { server: 'server-test' });
+        });
+      } else {
+        throw new Error(errors.join('\n'));
+      }
+
+      return {
+        lastChecked: new Date(),
+      };
+    },
+  });
+};

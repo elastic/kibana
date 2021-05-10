@@ -30,6 +30,7 @@ import {
 import { ecsFieldMap, pickWithPatterns } from '../../rule_registry/common';
 import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
+import { RuleDataClient, RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
@@ -39,9 +40,9 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { compose } from './lib/compose/kibana';
-import { queryAlertType } from './lib/detection_engine/reference_rules/query';
-import { eqlAlertType } from './lib/detection_engine/reference_rules/eql';
-import { thresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
+import { createQueryAlertType } from './lib/detection_engine/reference_rules/query';
+import { createEqlAlertType } from './lib/detection_engine/reference_rules/eql';
+import { createThresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -205,13 +206,35 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       config,
     });
 
+    // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
+    let ruleDataClient: RuleDataClient | null = null;
+    if (experimentalFeatures.ruleRegistryEnabled) {
+      // Create rule-registry data client scoped to security-solution
+      const start = () => core.getStartServices().then(([coreStart]) => coreStart);
+
+      ruleDataClient = new RuleDataClient({
+        getClusterClient: async () => {
+          const coreStart = await start();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+        ready: () => Promise.resolve(),
+        alias: plugins.ruleRegistry.getFullAssetName(),
+      });
+
+      // Register reference rule types via rule-registry
+      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient));
+      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient));
+      this.setupPlugins.alerting.registerType(createThresholdAlertType(ruleDataClient));
+    }
+
     // TO DO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
       config,
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
-      plugins.ml
+      plugins.ml,
+      ruleDataClient
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -286,23 +309,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
       },
     });
-
-    // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
-    if (experimentalFeatures.ruleRegistryEnabled) {
-      // Create rule-registry scoped to security-solution (APP_ID uses caps, not supported)
-      this.setupPlugins.ruleRegistry = plugins.ruleRegistry.create({
-        name: 'security-solution',
-        // fieldMap: ecsFieldMap,
-        fieldMap: {
-          ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
-        },
-      });
-
-      // Register reference rule types via rule-registry
-      this.setupPlugins.ruleRegistry.registerType(queryAlertType);
-      this.setupPlugins.ruleRegistry.registerType(eqlAlertType);
-      this.setupPlugins.ruleRegistry.registerType(thresholdAlertType);
-    }
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {

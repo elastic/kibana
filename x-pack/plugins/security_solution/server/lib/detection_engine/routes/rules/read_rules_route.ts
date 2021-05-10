@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -19,7 +20,10 @@ import { readRules } from '../../rules/read_rules';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const readRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const readRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  ruleDataClient: RuleDataClient | null
+) => {
   router.get(
     {
       path: DETECTION_ENGINE_RULES_URL,

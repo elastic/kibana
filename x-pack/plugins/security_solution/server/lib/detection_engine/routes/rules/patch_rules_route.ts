@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleDataClient } from '../../../../../../rule_registry/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -26,7 +27,11 @@ import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_s
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
-export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const patchRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml'],
+  ruleDataClient: RuleDataClient | null
+) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
