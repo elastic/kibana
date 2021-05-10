@@ -104,7 +104,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       [packageInputStreams, packagePolicyInput.streams]
     );
 
-    console.log(packagePolicyInput);
     return (
       <>
         {/* Header / input-level toggle */}
