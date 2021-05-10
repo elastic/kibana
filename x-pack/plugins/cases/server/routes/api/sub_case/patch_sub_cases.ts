@@ -10,7 +10,7 @@ import { SUB_CASES_PATCH_DEL_URL } from '../../../../common/constants';
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
 
-export function initPatchSubCasesApi({ router, caseService, logger }: RouteDeps) {
+export function initPatchSubCasesApi({ router, logger }: RouteDeps) {
   router.patch(
     {
       path: SUB_CASES_PATCH_DEL_URL,
