@@ -23,7 +23,7 @@
     .outerBox {
       fill: $euiColorEmptyShade;
       stroke: $euiColorLightShade;
-      stroke-width: 1px;
+      stroke-width: $euiBorderWidthThin;
     }
     .shoe {
       fill: $euiColorMediumShade;
