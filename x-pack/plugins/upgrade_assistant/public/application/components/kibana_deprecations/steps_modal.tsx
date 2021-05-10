@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiText,
   EuiSteps,
-  EuiSpacer,
   EuiButton,
   EuiModal,
   EuiModalBody,
