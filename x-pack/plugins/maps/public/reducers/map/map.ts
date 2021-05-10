@@ -73,6 +73,7 @@ export const DEFAULT_MAP_STATE: MapState = {
     extent: undefined,
     mouseCoordinates: undefined,
     timeFilters: undefined,
+    timeslice: undefined,
     query: undefined,
     filters: [],
     refreshConfig: undefined,
@@ -218,13 +219,21 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
     case SET_QUERY:
-      const { query, timeFilters, filters, searchSessionId, searchSessionMapBuffer } = action;
+      const {
+        query,
+        timeFilters,
+        timeslice,
+        filters,
+        searchSessionId,
+        searchSessionMapBuffer,
+      } = action;
       return {
         ...state,
         mapState: {
           ...state.mapState,
           query,
           timeFilters,
+          timeslice,
           filters,
           searchSessionId,
           searchSessionMapBuffer,
