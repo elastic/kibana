@@ -26,14 +26,14 @@ type MLRequestHandlerContext = RequestHandlerContext & {
   alerting?: AlertingApiRequestHandlerContext;
 };
 
-type Handler = (handlerParams: {
+type Handler<P = unknown, Q = unknown, B = unknown> = (handlerParams: {
   client: IScopedClusterClient;
-  request: KibanaRequest<any, any, any, any>;
+  request: KibanaRequest<P, Q, B>;
   response: KibanaResponseFactory;
   context: MLRequestHandlerContext;
   jobSavedObjectService: JobSavedObjectService;
   mlClient: MlClient;
-}) => ReturnType<RequestHandler>;
+}) => ReturnType<RequestHandler<P, Q, B>>;
 
 type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract | null;
 type GetInternalSavedObjectClient = () => SavedObjectsClientContract | null;
@@ -62,17 +62,17 @@ export class RouteGuard {
     this._isMlReady = isMlReady;
   }
 
-  public fullLicenseAPIGuard(handler: Handler) {
+  public fullLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
     return this._guard(() => this._mlLicense.isFullLicense(), handler);
   }
-  public basicLicenseAPIGuard(handler: Handler) {
+  public basicLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
     return this._guard(() => this._mlLicense.isMinimumLicense(), handler);
   }
 
-  private _guard(check: () => boolean, handler: Handler) {
+  private _guard<P, Q, B>(check: () => boolean, handler: Handler<P, Q, B>) {
     return (
       context: MLRequestHandlerContext,
-      request: KibanaRequest<any, any, any, any>,
+      request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
     ) => {
       if (check() === false) {
