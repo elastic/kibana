@@ -33,7 +33,7 @@ export interface EventFiltersListPageState {
     /** state for deletion of items from the list */
     deletion: {
       item: Pick<ExceptionListItemSchema, 'id' | 'name'> | undefined;
-      status: AsyncResourceState<unknown>;
+      status: AsyncResourceState<ExceptionListItemSchema>;
     };
   };
 }

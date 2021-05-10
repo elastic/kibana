@@ -197,7 +197,10 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
   }
 );
 
-const getDeletionState = createSelector(getCurrentListPageState, (listState) => listState.deletion);
+export const getDeletionState = createSelector(
+  getCurrentListPageState,
+  (listState) => listState.deletion
+);
 
 export const showDeleteModal: EventFiltersSelector<boolean> = createSelector(
   getDeletionState,
@@ -211,6 +214,13 @@ export const getItemToDelete: EventFiltersSelector<
 > = createSelector(getDeletionState, ({ item }) => item);
 
 export const isDeletionInProgress: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadingResourceState(status);
+  }
+);
+
+export const wasDeletionSuccessful: EventFiltersSelector<boolean> = createSelector(
   getDeletionState,
   ({ status }) => {
     return isLoadedResourceState(status);

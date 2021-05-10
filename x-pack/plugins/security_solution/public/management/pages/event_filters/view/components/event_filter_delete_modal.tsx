@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,21 +19,40 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
+import { i18n } from '@kbn/i18n';
 import { useEventFiltersSelector } from '../hooks';
-import { getItemToDelete, isDeletionInProgress } from '../../store/selector';
+import { getItemToDelete, isDeletionInProgress, wasDeletionSuccessful } from '../../store/selector';
 import { AppAction } from '../../../../../common/store/actions';
+import { useToasts } from '../../../../../common/lib/kibana';
 
 export const EventFilterDeleteModal = memo<{}>(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
+  const toasts = useToasts();
 
   const isDeleting = useEventFiltersSelector(isDeletionInProgress);
   const eventFilter = useEventFiltersSelector(getItemToDelete);
+  const wasDeleted = useEventFiltersSelector(wasDeletionSuccessful);
 
   const onCancel = useCallback(() => {
     dispatch({ type: 'eventFilterDeletionReset' });
   }, [dispatch]);
 
-  const onConfirm = useCallback(() => {}, []);
+  const onConfirm = useCallback(() => {
+    dispatch({ type: 'eventFilterDeleteSubmit' });
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (wasDeleted) {
+      toasts.addSuccess(
+        i18n.translate('xpack.securitySolution.eventFilters.deletionDialog.deleteSuccess', {
+          defaultMessage: '"{name}" has been removed from the Event Filters list.',
+          values: { name: eventFilter?.name },
+        })
+      );
+
+      dispatch({ type: 'eventFilterDeletionReset' });
+    }
+  }, [dispatch, eventFilter?.name, toasts, wasDeleted]);
 
   return (
     <EuiModal onClose={onCancel}>

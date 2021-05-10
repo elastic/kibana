@@ -32,6 +32,12 @@ export type EventFilterForDeletion = Action<'eventFilterForDeletion'> & {
 
 export type EventFilterDeletionReset = Action<'eventFilterDeletionReset'>;
 
+export type EventFilterDeleteSubmit = Action<'eventFilterDeleteSubmit'>;
+
+export type EventFilterDeleteStatusChanged = Action<'eventFilterDeleteStatusChanged'> & {
+  payload: EventFiltersListPageState['listPage']['deletion']['status'];
+};
+
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
     entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
@@ -78,4 +84,6 @@ export type EventFiltersPageAction =
   | EventFiltersCreateError
   | EventFiltersFormStateChanged
   | EventFilterForDeletion
-  | EventFilterDeletionReset;
+  | EventFilterDeletionReset
+  | EventFilterDeleteSubmit
+  | EventFilterDeleteStatusChanged;

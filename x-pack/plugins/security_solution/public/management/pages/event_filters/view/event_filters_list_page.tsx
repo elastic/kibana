@@ -162,10 +162,6 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleDeleteCancel = useCallback(() => {}, []);
-
-  const handleDeleteDone = useCallback(() => {}, []);
-
   return (
     <AdministrationListPage
       beta={false}
@@ -205,9 +201,7 @@ export const EventFiltersListPage = memo(() => {
         />
       )}
 
-      {showDelete && (
-        <EventFilterDeleteModal onCancel={handleDeleteCancel} onDone={handleDeleteDone} />
-      )}
+      {showDelete && <EventFilterDeleteModal />}
 
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
         items={listItems}

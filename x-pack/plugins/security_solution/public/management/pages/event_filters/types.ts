@@ -47,4 +47,5 @@ export interface EventFiltersService {
   getList(options?: EventFiltersServiceGetListOptions): Promise<FoundExceptionListItemSchema>;
   getOne(id: string): Promise<ExceptionListItemSchema>;
   updateOne(exception: Immutable<UpdateExceptionListItemSchema>): Promise<ExceptionListItemSchema>;
+  deleteOne(id: string): Promise<ExceptionListItemSchema>;
 }

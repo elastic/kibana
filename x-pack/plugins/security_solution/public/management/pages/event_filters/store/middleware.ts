@@ -15,10 +15,10 @@ import {
 import { EventFiltersHttpService } from '../service';
 
 import { EventFiltersListPageState } from '../state';
-import { getLastLoadedResourceState } from '../../../state/async_resource_state';
 
 import {
   CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
   transformNewItemOutput,
   transformOutput,
   UpdateExceptionListItemSchema,
@@ -33,8 +33,18 @@ import {
   getFormEntry,
   getSubmissionResource,
   getNewComment,
+  isDeletionInProgress,
+  getItemToDelete,
+  getDeletionState,
 } from './selector';
 import { EventFiltersService, EventFiltersServiceGetListOptions } from '../types';
+import {
+  createFailedResourceState,
+  createLoadedResourceState,
+  createLoadingResourceState,
+  getLastLoadedResourceState,
+} from '../../../state';
+import { ServerApiError } from '../../../../common/types';
 
 const addNewComments = (
   entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema,
@@ -285,6 +295,43 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
   }
 };
 
+const eventFilterDeleteEntry: MiddlewareActionHandler = async (
+  { getState, dispatch },
+  eventFiltersService
+) => {
+  const state = getState();
+
+  if (isDeletionInProgress(state)) {
+    return;
+  }
+
+  const itemId = getItemToDelete(state)?.id;
+
+  if (!itemId) {
+    return;
+  }
+
+  dispatch({
+    type: 'eventFilterDeleteStatusChanged',
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState(getDeletionState(state).status),
+  });
+
+  try {
+    const response = await eventFiltersService.deleteOne(itemId);
+    dispatch({
+      type: 'eventFilterDeleteStatusChanged',
+      payload: createLoadedResourceState(response),
+    });
+  } catch (e) {
+    dispatch({
+      type: 'eventFilterDeleteStatusChanged',
+      payload: createFailedResourceState<ExceptionListItemSchema, ServerApiError>(e.body ?? e),
+    });
+  }
+};
+
 export const createEventFiltersPageMiddleware = (
   eventFiltersService: EventFiltersService
 ): ImmutableMiddleware<EventFiltersListPageState, AppAction> => {
@@ -304,9 +351,12 @@ export const createEventFiltersPageMiddleware = (
       if (
         action.type === 'userChangedUrl' ||
         action.type === 'eventFiltersCreateSuccess' ||
-        action.type === 'eventFiltersUpdateSuccess'
+        action.type === 'eventFiltersUpdateSuccess' ||
+        action.type === 'eventFilterDeleteStatusChanged'
       ) {
         refreshListDataIfNeeded(store, eventFiltersService);
+      } else if (action.type === 'eventFilterDeleteSubmit') {
+        eventFilterDeleteEntry(store, eventFiltersService);
       }
     }
   };
