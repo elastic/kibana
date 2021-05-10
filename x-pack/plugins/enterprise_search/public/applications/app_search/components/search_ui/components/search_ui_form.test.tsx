@@ -190,7 +190,7 @@ describe('SearchUIForm', () => {
     });
 
     const subject = () =>
-      shallow(<SearchUIForm />).find('[data-test-subj="generateReferenceUiPreview"]');
+      shallow(<SearchUIForm />).find('[data-test-subj="generateSearchUiPreview"]');
 
     expect(subject().prop('href')).toBe('http://www.example.com?foo=bar');
     expect(generatePreviewUrl).toHaveBeenCalledWith(

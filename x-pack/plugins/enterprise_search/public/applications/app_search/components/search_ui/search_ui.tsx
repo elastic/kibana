@@ -36,27 +36,6 @@ const DESCRIPTION = i18n.translate('xpack.enterpriseSearch.appSearch.engine.sear
   defaultMessage: 'Preview search or kickstart your next search experience.',
 });
 
-<<<<<<< HEAD
-const SEARCH_UI_BODY_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.bodyDescription',
-  {
-    defaultMessage:
-      "Search UI is an open source library for building search experiences, written in React. Use the fields below to generate a pre-built search experience created with Search UI. Generate an interactive preview, then download the .zip and build upon it however you'd like.",
-  }
-);
-
-const REPOSITORY_LINK_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.repositoryLinkText',
-  { defaultMessage: 'Read more about Search UI' }
-);
-
-const GUIDE_LINK_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.guideLinkText',
-  { defaultMessage: 'Read the guide to using this generator' }
-);
-
-=======
->>>>>>> 516f098e561... Use i18n.ts
 export const SearchUI: React.FC = () => {
   const { loadFieldData } = useActions(SearchUILogic);
 
