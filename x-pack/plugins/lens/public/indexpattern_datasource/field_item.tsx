@@ -487,13 +487,11 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         <EuiText size="s">{getVisualizeGeoFieldMessage(field.type)}</EuiText>
 
         <EuiSpacer size="m" />
-        <EuiTextAlign textAlign="center">
           <VisualizeGeoFieldButton
             uiActions={uiActions}
             indexPatternId={indexPattern.id}
             fieldName={field.name}
           />
-        </EuiTextAlign>
       </>
     );
   } else if (
