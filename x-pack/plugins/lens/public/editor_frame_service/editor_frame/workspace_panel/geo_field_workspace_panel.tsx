@@ -65,12 +65,12 @@ export function GeoFieldWorkspacePanel(props: Props) {
           value={dragDropIdentifier}
           onDrop={onDrop}
         >
-          <h4>
+          <strong>
             <FormattedMessage
               id="xpack.lens.geoFieldWorkspace.dropMessage"
               defaultMessage="Drop field here to open in Maps"
             />
-          </h4>
+          </strong>
         </DragDrop>
       </EuiText>
     </EuiPageContentBody>
