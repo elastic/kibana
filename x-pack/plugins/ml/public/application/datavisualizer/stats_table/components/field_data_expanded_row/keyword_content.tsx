@@ -14,7 +14,6 @@ import { EMSTermJoinConfig } from '../../../../../../../maps/public';
 import { COMMON_EMS_LAYER_IDS } from '../../../../../../common/constants/embeddable_map';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
-// import { EmbeddedMapComponent } from '../../embedded_map';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();
@@ -24,7 +23,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
     services: { maps: mapsPlugin },
   } = useMlKibana();
 
-  const getEMSTermSuggestions = async () => {
+  const loadEMSTermSuggestions = async () => {
     if (!mapsPlugin) return;
     const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
       emsLayerIds: COMMON_EMS_LAYER_IDS,
@@ -38,7 +37,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
 
   useEffect(
     function getInitialEMSTermSuggestion() {
-      getEMSTermSuggestions();
+      loadEMSTermSuggestions();
     },
     [config?.fieldName]
   );

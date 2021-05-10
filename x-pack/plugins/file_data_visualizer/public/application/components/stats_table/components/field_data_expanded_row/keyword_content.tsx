@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { TopValues } from '../../../top_values';
 import { EMSTermJoinConfig } from '../../../../../../../maps/public';
@@ -29,7 +29,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
     services: { maps: mapsPlugin },
   } = useFileDataVisualizerKibana();
 
-  const getEMSTermSuggestions = async () => {
+  const loadEMSTermSuggestions = useCallback(async () => {
     if (!mapsPlugin) return;
     const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
       emsLayerIds: COMMON_EMS_LAYER_IDS,
@@ -39,14 +39,14 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
       sampleValuesColumnName: fieldName || '',
     });
     setEMSSuggestion(suggestion);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fieldName]);
 
   useEffect(
     function getInitialEMSTermSuggestion() {
-      getEMSTermSuggestions();
+      loadEMSTermSuggestions();
     },
-    // eslint-disable-next-line
-    [fieldName]
+    [loadEMSTermSuggestions]
   );
 
   return (
