@@ -21,7 +21,7 @@ import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 // @ts-ignore
-import { setEsBaseAndXPackBase, setHttp } from './crud_app/services/index';
+import { setHttp, init as initDocumentation } from './crud_app/services/index';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
@@ -108,6 +108,6 @@ export class RollupPlugin implements Plugin {
   start(core: CoreStart) {
     setHttp(core.http);
     setNotifications(core.notifications);
-    setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
+    initDocumentation(core.docLinks);
   }
 }
