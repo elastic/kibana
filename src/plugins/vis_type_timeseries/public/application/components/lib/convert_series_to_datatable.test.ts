@@ -15,6 +15,18 @@ jest.mock('../../../services', () => {
     getDataStart: jest.fn(() => {
       return {
         indexPatterns: jest.fn(),
+        query: {
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => {
+                return {
+                  from: '2021-04-30T16:42:24.502Z',
+                  to: '2021-05-05T14:42:24.502Z',
+                };
+              }),
+            },
+          },
+        },
       };
     }),
   };
@@ -59,7 +71,10 @@ describe('convert series to datatables', () => {
               type: 'date_histogram',
               schema: 'metric',
               params: {
-                field: 'test1',
+                timeRange: {
+                  from: '2021-04-30T16:42:24.502Z',
+                  to: '2021-05-05T14:42:24.502Z',
+                },
               },
             },
             type: 'date',

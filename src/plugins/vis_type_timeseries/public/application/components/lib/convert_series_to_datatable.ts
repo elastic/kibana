@@ -48,6 +48,12 @@ export const addMetaToColumns = (
       params = {
         filters,
       };
+    } else if (column.type === 'date_histogram') {
+      const { query } = getDataStart();
+      const timeRange = query.timefilter.timefilter.getTime();
+      params = {
+        timeRange,
+      };
     }
 
     const cleanedColumn = {
