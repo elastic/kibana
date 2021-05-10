@@ -18,23 +18,26 @@ Dashboards support many types of panels, and provide several editors that you ca
 |===
 
 | <<create-panels-with-editors,Visualization editors>>
-| Use the *Lens*, *TSVB*, *Vega*, and *Timelion* editors to help you create visualizations of your data, or create aggregation-based visualizations using {es} <<aggregation-reference,aggregations>>. 
+| Use the *Lens*, *TSVB*, *Vega*, and *Timelion* editors to create visualizations of your data, or create *Aggregation based* visualizations using {es} <<aggregation-reference,aggregations>>. 
 *Lens* is recommended for most users.
 
 | <<maps,Maps>>
 | Create beautiful displays of your geographical data.
 
-| <<enhance-dashboards,Tools>>
-| Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
+| <<xpack-ml-anomalies,Anomaly swim lane>>
+| Display the results from machine learning anomaly detection jobs.
 
-| <<save-your-search,Saved search from Discover>>
-| Display a saved search table from <<discover, *Discover*>>. The table results are not aggregated.
+| <<xpack-ml-anomalies,Anomaly chart>>
+| Display an anomaly chart from the *Anomaly Explorer.
 
 | <<logs-app,Log stream>>
 | Display a table of live streaming logs.
 
-| <<xpack-ml-anomalies,ML Anomaly Swim Lane>>
-| Display the results from machine learning anomaly detection jobs.
+| <<enhance-dashboards,Tools>>
+| Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
+
+| <<save-your-search,Saved search from Discover>>
+| Display a saved search data table from <<discover, *Discover*>>. The table results are not aggregated.
 
 |===
 
@@ -53,8 +56,6 @@ To create dashboards, you must meet the minimum requirements.
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
 * Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
-
-* Have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 
 * When the read-only indicator appears, you have insufficient privileges
 to create or save dashboards. The options to create and save dashboards are not visible. For more information,
@@ -85,13 +86,15 @@ add an existing panel from the *Visualize Library*, add a table of live streamin
 [[create-panels-with-lens]]
 ==== Create panels
 
-To create panels, use one of the editors, then add the panel to the dashboard.
+To create panels, choose the panel type you want to add, configure the panel, then add the panel to the dashboard. 
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, choose one of the following options:
 
-. On the *New visualization* window, click the editor you want to use. *Lens* is recommended for most users.
+* Click *Create visualization* to open *Lens*, the recommended visualization editor. 
 
-. To create the panel, configure the editor options.
+* Click *More types*, then select the panel type you want to add.
+
+. Configure the panel options.
 
 . To add the panel to the dashboard, choose one of the following options:
 
@@ -107,43 +110,25 @@ When panels are saved in the *Visualize Library*, image:dashboard/images/visuali
 [[add-panels-from-the-library]]
 ==== Add panels from the library
 
-Add panels that you've already created from the *Visualize Library*. 
+Add your search results from <<save-your-search,*Discover*>>, or add panels from the *Visualize Library*.
 
 . On the dashboard, click *Add from library*.
 
 . On the *Add from library* flyout, click the panels you want to add to the dashboard.
 
-. To close the flyout, click *X*.
+. To close the list, click *X*.
 +
-When a panel contains a stored query, both queries are applied.
+When a panel contains a saved query, both queries are applied.
 
 . To make changes to the panel, open the panel menu, then select the following options:
 
-* *Edit visualization* &mdash; Opens an editor so that you can reconfigure the panel. 
+* *Edit visualization* &mdash; Opens an editor so that you can change the panel. 
 +
-To make changes to the panel without affecting the original version, open the panel menu, then click *More > Unlink from library*.
+To make changes to the panel without changing the original version, open the panel menu, then click *More > Unlink from library*.
 
-* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title* and specify whether you want to display the panel title.
+* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title* and to display the panel title.
 
-[float]
-[[add-a-table-of-live-streaming-logs]]
-==== Add a logs panel
-
-Add a panel that displays a table of live streaming logs.
-
-. On the dashboard, click *Add from library*.
-
-. On the *Add from library* flyout, click *Create new*, then select *Log stream*.
-
-[float]
-[[add-machine-learning-results]]
-==== Add machine learning results
-
-Add a panel that displays the results from machine learning anomaly detection jobs.
-
-. On the dashboard, click *Add from library*.
-
-. On the *Add from library* flyout, click *Create new*, then select *ML Anomaly Swim Lane*.
+TIP: The search results from *Discover* are not aggregated.
 
 [[tsvb]]
 
@@ -185,85 +170,23 @@ Apply a set of design options to the entire dashboard.
 
 [float]
 [[search-or-filter-your-data]]
-=== Search or filter your data
+=== Search and filter your data
 
-{kib} provides you with several ways to search your data and apply {es} filters. You can combine the filters with any panel
+{kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
 filter to display the data want to you see.
 
-[float]
-[[semi-structured-search]]
-==== Semi-structured search
-
-Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>.
-Type a search term to match across all fields, or begin typing a field name to
-get prompted with field names and operators you can use to build a structured query. 
-
-For example, in the sample web logs data, the following query displays data only for the US:
-
-. Enter `g`, then select *geo.source*.
-
-. Select *equals some value* and *US*, then click *Update*.
-
-. For a more complex search, try:
-
-[source,text]
--------------------
-geo.src : "US" and url.keyword : "https://www.elastic.co/downloads/beats/metricbeat"
--------------------
-
-[float]
-[[time-filter]]
-==== Time filter
-
-The <<set-time-filter,time filter>> restrict the data that appears on the dashboard, but you can override the time filter with panel filters.
-  
-. To update the time filter, add a panel that displays time-based data along the x-axis.
-
-. Open the panel menu, then select *More > Customize time range*.
-
-. On the *Customize panel time range* window, specify the time range, then click *Add to panel*.
-+
-[role="screenshot"]
-image:images/time_range_per_panel.gif[Time range per dashboard panel]
-
-[float]
-[[additional-filters-with-and]]
-==== Additional filters with AND
-
-Add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, you can use the *Edit Filter* options, or the advanced JSON editor for the {es} {ref}/query-dsl.html[Query DSL]. 
-When there is one or more index patterns on the dashboard, you can select the index pattern that contains the fields you want to create the filter.
-
-For example, to filter the dashboard to display only ios data from *kibana_sample_data_logs*:
-
-. Click *Add filter*.
-
-. From the *Index Pattern* dropdown, select *kibana_sample_data_logs*.
-
-. Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
-
-. *Save* the filter.
-+
-To remove the filter, click *x*.
-
-[float]
-[[add-dynamic-filters]]
-==== Add dynamic filters
-
-When you see data in a panel that you want to use as a filter, you can dynamically create the filter. To dynamically add filters, click the data in a panel.
-
-. Click the data in the panel. 
-
-. Select filters you want to apply to all of the dashboard panels, then click *Apply*.
-+
-To remove the filters, click *x*.
+For more information, refer to <<kibana-concepts-analysts,{kib} concepts>>.
 
 [float]
 [[clone-panels]]
-=== Clone panels
+[[copy-to-dashboard]]
+=== Clone and copy panels
 
-To duplicate a panel and the configured functionality, clone the panel. Cloned panels continue to replicate all of the functionality from the original panel, 
+To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
 including renaming, editing, and cloning. When you clone a panel, the clone appears beside the original panel, and moves other panels to provide a space on the 
 dashboard. 
+
+To clone a panel:
 
 . From the toolbar, click *Edit*. 
 
@@ -274,11 +197,7 @@ image:images/clone_panel.gif[clone panel]
 +
 When cloned panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
 
-[float]
-[[copy-to-dashboard]]
-=== Copy panels
-
-To add a panel to another dashboard, copy the panel.
+To copy panels to another dashboard:
 
 . Open the panel menu, then select *More > Copy to dashboard*.
 

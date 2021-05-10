@@ -13,11 +13,9 @@ image:dashboard/images/lens.png[Lens]
 
 Open *Lens*, then explore the fields in your data. The list of fields are determined by the index pattern and time filter.
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *Create visualization*.
 
-. On the *New visualization* window, click *Lens*.
-
-. <<set-time-filter,Set the time filter>>. 
+. In *Lens*, <<set-time-filter,set the time filter>>. 
 
 . To view the fields in the a different index pattern, click the index pattern, then select a different index pattern from the dropdown.
 
@@ -60,7 +58,7 @@ TIP: *Other* can equal more than 100% by a small amount.
 
 Drag and drop the fields on to the visualization builder, then 
 
-. Drag and drop the fields to the visualization builder.
+. Drag and drop the fields on to the visualization builder.
 
 . To change the visualization type, use the following options:
 
