@@ -10,8 +10,8 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 
 import { ListSchema } from '../../../common/schemas';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
-import { getIndexESListMock } from '../../../common/schemas/elastic_query/index_es_list_schema.mock';
 import { LIST_ID, LIST_INDEX } from '../../../common/constants.mock';
+import { getIndexESListMock } from '../../schemas/elastic_query/index_es_list_schema.mock';
 
 import { CreateListOptions, createList } from './create_list';
 import { getCreateListOptionsMock } from './create_list.mock';

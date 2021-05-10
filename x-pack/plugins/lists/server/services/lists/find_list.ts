@@ -12,10 +12,10 @@ import {
   FoundListSchema,
   Page,
   PerPage,
-  SearchEsListSchema,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
+import { SearchEsListSchema } from '../../schemas/elastic_response';
 import {
   encodeCursor,
   getQueryFilter,
