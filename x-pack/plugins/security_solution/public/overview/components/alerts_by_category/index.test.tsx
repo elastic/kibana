@@ -12,7 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import '../../../common/mock/match_media';
 import '../../../common/mock/react_beautiful_dnd';
-import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
+import { useMatrixHistogramCombined } from '../../../common/containers/matrix_histogram';
 import { waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
@@ -21,7 +21,7 @@ import { AlertsByCategory } from '.';
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/containers/matrix_histogram', () => ({
-  useMatrixHistogram: jest.fn(),
+  useMatrixHistogramCombined: jest.fn(),
 }));
 
 const theme = () => ({ eui: { ...euiDarkVars, euiSizeL: '24px' }, darkMode: true });
@@ -45,7 +45,7 @@ describe('Alerts by category', () => {
   };
   describe('before loading data', () => {
     beforeAll(async () => {
-      (useMatrixHistogram as jest.Mock).mockReturnValue([
+      (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
         false,
         {
           data: null,
@@ -106,7 +106,7 @@ describe('Alerts by category', () => {
 
   describe('after loading data', () => {
     beforeAll(async () => {
-      (useMatrixHistogram as jest.Mock).mockReturnValue([
+      (useMatrixHistogramCombined as jest.Mock).mockReturnValue([
         false,
         {
           data: [
