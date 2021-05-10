@@ -147,7 +147,6 @@ const migrateEmbeddablePanels = (
   version: string
 ): SavedObjectMigrationFn => (doc: any) => {
   const { attributes } = doc;
-  console.log('GOT DEEZ ATTRIBUTES', JSON.stringify(attributes, null, 1));
   // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
   // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
   // object has panelsJSON in all previous versions of kibana.
@@ -163,24 +162,28 @@ const migrateEmbeddablePanels = (
   panels.forEach((panel) => {
     // Convert each panel into a state that can be passed to EmbeddablesSetup.migrate
     const originalPanelState = convertSavedDashboardPanelToPanelState(panel);
-    // Migrate the state using migrations defined by embeddables
-    const migratedInput = deps.embeddable.migrate(
-      {
-        ...originalPanelState.explicitInput,
-        type: originalPanelState.type,
-      },
-      version
-    );
-    // Convert the embeddable state back into the panel shape
-    newPanels.push(
-      convertPanelStateToSavedDashboardPanel(
+    if (panel.explicitInput.attributes) {
+      // Migrate the state using migrations defined by embeddables
+      const migratedInput = deps.embeddable.migrate(
         {
-          ...originalPanelState,
-          explicitInput: { ...migratedInput, id: migratedInput.id as string },
+          ...originalPanelState.explicitInput,
+          type: originalPanelState.type,
         },
         version
-      )
-    );
+      );
+      // Convert the embeddable state back into the panel shape
+      newPanels.push(
+        convertPanelStateToSavedDashboardPanel(
+          {
+            ...originalPanelState,
+            explicitInput: { ...migratedInput, id: migratedInput.id as string },
+          },
+          version
+        )
+      );
+    } else {
+      newPanels.push(panel);
+    }
   });
   return {
     ...doc,
