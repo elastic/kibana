@@ -169,3 +169,29 @@ export function getESQueryHostMetadataByID(
     index: metadataQueryStrategy.index,
   };
 }
+
+export function getESQueryHostMetadataByIDs(
+  agentIDs: string[],
+  metadataQueryStrategy: MetadataQueryStrategy
+) {
+  return {
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { terms: { 'agent.id': agentIDs } },
+                  { terms: { 'HostDetails.agent.id': agentIDs } },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      sort: MetadataSortMethod,
+    },
+    index: metadataQueryStrategy.index,
+  };
+}

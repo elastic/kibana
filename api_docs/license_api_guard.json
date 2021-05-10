@@ -11,78 +11,97 @@
   "server": {
     "classes": [
       {
+        "parentPluginId": "licenseApiGuard",
         "id": "def-server.License",
         "type": "Class",
         "tags": [],
         "label": "License",
         "description": [],
+        "source": {
+          "path": "x-pack/plugins/license_api_guard/server/license.ts",
+          "lineNumber": 33
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "licenseApiGuard",
             "id": "def-server.License.setup",
             "type": "Function",
+            "tags": [],
             "label": "setup",
+            "description": [],
             "signature": [
               "({ pluginName, logger }: SetupSettings) => void"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.License.setup.$1",
-                "type": "Object",
-                "label": "{ pluginName, logger }",
-                "isRequired": true,
-                "signature": [
-                  "SetupSettings"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
-                  "lineNumber": 41
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/license_api_guard/server/license.ts",
               "lineNumber": 41
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "licenseApiGuard",
+                "id": "def-server.License.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ pluginName, logger }",
+                "description": [],
+                "signature": [
+                  "SetupSettings"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                  "lineNumber": 41
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "licenseApiGuard",
             "id": "def-server.License.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
+            "description": [],
             "signature": [
               "({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"
             ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-server.License.start.$1",
-                "type": "Object",
-                "label": "{ pluginId, minimumLicenseType, licensing }",
-                "isRequired": true,
-                "signature": [
-                  "StartSettings"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
-                  "lineNumber": 46
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/license_api_guard/server/license.ts",
               "lineNumber": 46
-            }
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "licenseApiGuard",
+                "id": "def-server.License.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ pluginId, minimumLicenseType, licensing }",
+                "description": [],
+                "signature": [
+                  "StartSettings"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                  "lineNumber": 46
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
+            "parentPluginId": "licenseApiGuard",
             "id": "def-server.License.guardApiRoute",
             "type": "Function",
+            "tags": [],
             "label": "guardApiRoute",
+            "description": [],
             "signature": [
               "<Context extends ",
               {
@@ -113,13 +132,19 @@
               "<T>) => ",
               "KibanaResponse"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/license_api_guard/server/license.ts",
+              "lineNumber": 92
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "licenseApiGuard",
                 "id": "def-server.License.guardApiRoute.$1",
                 "type": "Function",
+                "tags": [],
                 "label": "handler",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -149,36 +174,30 @@
                     "text": "ErrorHttpResponseOptions"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/license_api_guard/server/license.ts",
                   "lineNumber": 93
-                }
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/license_api_guard/server/license.ts",
-              "lineNumber": 92
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "licenseApiGuard",
             "id": "def-server.License.isEsSecurityEnabled",
             "type": "boolean",
-            "label": "isEsSecurityEnabled",
             "tags": [],
+            "label": "isEsSecurityEnabled",
             "description": [],
             "source": {
               "path": "x-pack/plugins/license_api_guard/server/license.ts",
               "lineNumber": 116
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/license_api_guard/server/license.ts",
-          "lineNumber": 33
-        },
         "initialIsOpen": false
       }
     ],
