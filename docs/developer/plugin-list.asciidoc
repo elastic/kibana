@@ -125,7 +125,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_usage_collection/README.md[kibanaUsageCollection]
-|This plugin registers the basic usage collectors from Kibana:
+|This plugin registers the Platform Usage Collectors in Kibana.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_utils/README.md[kibanaUtils]
