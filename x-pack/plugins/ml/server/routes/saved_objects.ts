@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
@@ -16,7 +17,6 @@ import {
   canDeleteJobSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { JobType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -213,7 +213,7 @@ export function savedObjectsRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
       try {
-        const { jobType, jobIds }: { jobType: JobType; jobIds: string[] } = request.body;
+        const { jobType, jobIds } = request.body;
         const { getCurrentSpaceId } = spacesUtilsProvider(getSpaces, request);
 
         const currentSpaceId = await getCurrentSpaceId();
@@ -308,7 +308,7 @@ export function savedObjectsRoutes(
     {
       path: '/api/ml/saved_objects/can_delete_job/{jobType}',
       validate: {
-        params: jobTypeSchema,
+        params: schema.object({ jobType: jobTypeSchema }),
         body: canDeleteJobSchema,
       },
       options: {
@@ -318,7 +318,7 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService, client }) => {
       try {
         const { jobType } = request.params;
-        const { jobIds }: { jobIds: string[] } = request.body;
+        const { jobIds } = request.body;
 
         const { canDeleteJobs } = checksFactory(client, jobSavedObjectService);
         const body = await canDeleteJobs(
