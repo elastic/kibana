@@ -6,10 +6,9 @@
  */
 
 import { get } from 'lodash/fp';
+import { NamespaceType, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-utils';
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
-import { NamespaceType } from '../../common/schemas';
-import { NamespaceTypeArray } from '../../common/schemas/types/default_namespace_array';
 import {
   SavedObjectType,
   exceptionListAgnosticSavedObjectType,
