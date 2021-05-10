@@ -199,10 +199,10 @@ export async function getHostData(
     return undefined;
   }
 
-  const es = (metadataRequestContext?.esClient ??
+  const esClient = (metadataRequestContext?.esClient ??
     metadataRequestContext.requestHandlerContext?.core.elasticsearch
       .client) as IScopedClusterClient;
-  const response = await es.asCurrentUser.search<HostMetadata>(query);
+  const response = await esClient.asCurrentUser.search<HostMetadata>(query);
 
   const hostResult = queryStrategy!.queryResponseToHostResult(response.body);
 
@@ -234,17 +234,23 @@ export async function getHostData(
 
 async function findAgent(
   metadataRequestContext: MetadataRequestContext,
-  hostMetadata: HostMetadata,
-  includeAgentData?: boolean
+  hostMetadata: HostMetadata
 ): Promise<Agent | undefined> {
   try {
-    if (metadataRequestContext.esClient == null) {
-      throw new Error(`esClient not found`);
+    if (
+      !metadataRequestContext.esClient &&
+      !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
+    ) {
+      throw new Error('esClient not found');
     }
+
+    const esClient = (metadataRequestContext?.esClient ??
+      metadataRequestContext.requestHandlerContext?.core.elasticsearch
+        .client) as IScopedClusterClient;
 
     return await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
-      ?.getAgent(metadataRequestContext.esClient.asCurrentUser, hostMetadata.elastic.agent.id);
+      ?.getAgent(esClient.asCurrentUser, hostMetadata.elastic.agent.id);
   } catch (e) {
     if (e instanceof AgentNotFoundError) {
       metadataRequestContext.logger.warn(
@@ -299,6 +305,35 @@ export async function enrichHostMetadata(
   let hostStatus = HostStatus.UNHEALTHY;
   let elasticAgentId = hostMetadata?.elastic?.agent?.id;
   const log = metadataRequestContext.logger;
+
+  try {
+    if (
+      !metadataRequestContext.esClient &&
+      !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
+    ) {
+      throw new Error('esClient not found');
+    }
+
+    if (
+      !metadataRequestContext.savedObjectsClient &&
+      !metadataRequestContext.requestHandlerContext?.core.savedObjects
+    ) {
+      throw new Error('esSavedObjectClient not found');
+    }
+  } catch (e) {
+    log.error(e);
+    throw e;
+  }
+
+  const esClient = (metadataRequestContext?.esClient ??
+    metadataRequestContext.requestHandlerContext?.core.elasticsearch
+      .client) as IScopedClusterClient;
+
+  const esSavedObjectClient =
+    metadataRequestContext?.savedObjectsClient ??
+    (metadataRequestContext.requestHandlerContext?.core.savedObjects
+      .client as SavedObjectsClientContract);
+
   try {
     /**
      * Get agent status by elastic agent id if available or use the endpoint-agent id.
@@ -309,16 +344,9 @@ export async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    if (metadataRequestContext.requestHandlerContext == null) {
-      throw new Error(`requestHandlerContext not found`);
-    }
-
     const status = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
-      ?.getAgentStatusById(
-        metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
-        elasticAgentId
-      );
+      ?.getAgentStatusById(esClient.asCurrentUser, elasticAgentId);
     hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.UNHEALTHY;
   } catch (e) {
     if (e instanceof AgentNotFoundError) {
@@ -331,22 +359,12 @@ export async function enrichHostMetadata(
 
   let policyInfo: HostInfo['policy_info'];
   try {
-    if (metadataRequestContext.requestHandlerContext == null) {
-      throw new Error(`requestHandlerContext not found`);
-    }
     const agent = await metadataRequestContext.endpointAppContextService
       ?.getAgentService()
-      ?.getAgent(
-        metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
-        elasticAgentId
-      );
+      ?.getAgent(esClient.asCurrentUser, elasticAgentId);
     const agentPolicy = await metadataRequestContext.endpointAppContextService
       .getAgentPolicyService()
-      ?.get(
-        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-        agent?.policy_id!,
-        true
-      );
+      ?.get(esSavedObjectClient, agent?.policy_id!, true);
     const endpointPolicy = ((agentPolicy?.package_policies || []) as PackagePolicy[]).find(
       (policy: PackagePolicy) => policy.package?.name === 'endpoint'
     );

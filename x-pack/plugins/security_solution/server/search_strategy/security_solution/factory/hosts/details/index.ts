@@ -42,6 +42,11 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
     const inspect = {
       dsl: [inspectStringifyObject(buildHostDetailsQuery(options))],
     };
+
+    if (aggregations == null) {
+      return { ...response, inspect, hostDetails: {} };
+    }
+
     const formattedHostItem = formatHostItem(aggregations);
     const ident = // endpoint-generated ID, NOT elastic-agent-id
       formattedHostItem.endpoint && formattedHostItem.endpoint.id

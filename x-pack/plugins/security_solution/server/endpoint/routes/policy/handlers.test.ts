@@ -30,10 +30,12 @@ import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__
 import { Agent } from '../../../../../fleet/common/types/models';
 import { AgentService } from '../../../../../fleet/server/services';
 import { get } from 'lodash';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ScopedClusterClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
-  let mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+  let mockScopedClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
 
