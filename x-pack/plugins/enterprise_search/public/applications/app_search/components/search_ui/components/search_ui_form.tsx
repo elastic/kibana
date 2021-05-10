@@ -18,7 +18,6 @@ import {
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
-import { EngineLogic } from '../../engine';
 import {
   TITLE_FIELD_LABEL,
   TITLE_FIELD_HELP_TEXT,
