@@ -4,9 +4,14 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 PKG_BASE_NAME = "kbn-plugin-generator"
 PKG_REQUIRE_NAME = "@kbn/plugin-generator"
 
-SOURCE_FILES = glob([
-  "src/**/*.ts"
-])
+SOURCE_FILES = glob(
+  [
+    "src/**/*.ts",
+  ],
+  exclude = [
+    "**/integration_tests/**/*",
+  ],
+)
 
 SRCS = SOURCE_FILES
 
@@ -15,9 +20,19 @@ filegroup(
   srcs = SRCS,
 )
 
+filegroup(
+  name = "template",
+  srcs = glob(
+    [
+      "template/**/*",
+    ],
+  ),
+)
+
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
   "README.md",
+  ":template",
 ]
 
 SRC_DEPS = [
