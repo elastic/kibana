@@ -56,6 +56,9 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', async () 
     allowRoleDocumentLevelSecurity: true,
   } as any);
 
+  const indicesAPIClient = indicesAPIClientMock.create();
+  indicesAPIClient.getFields.mockResolvedValue(['foo']);
+
   const props = {
     role: {
       name: '',
@@ -80,7 +83,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', async () 
     editable: true,
     validator: new RoleValidator(),
     availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    indicesAPIClient: indicesAPIClientMock.create(),
+    indicesAPIClient,
     license,
   };
   const wrapper = mountWithIntl(<IndexPrivileges {...props} />);

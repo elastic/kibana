@@ -28,11 +28,11 @@ export function getEsQuerySearchAfter(
     // already surrounding docs -> first or last record  is used
     const afterTimeRecIdx = type === 'successors' && documents.length ? documents.length - 1 : 0;
     const afterTimeDoc = documents[afterTimeRecIdx];
-    let afterTimeValue = afterTimeDoc.sort[0];
+    let afterTimeValue: string | number = afterTimeDoc.sort[0];
     if (nanoSeconds) {
       afterTimeValue = useNewFieldsApi
-        ? afterTimeDoc.fields[timeFieldName][0]
-        : afterTimeDoc._source[timeFieldName];
+        ? (afterTimeDoc.fields[timeFieldName] as Array<string | number>)[0]
+        : (afterTimeDoc._source[timeFieldName] as string | number);
     }
     return [afterTimeValue, afterTimeDoc.sort[1]];
   }
@@ -42,8 +42,8 @@ export function getEsQuerySearchAfter(
   searchAfter[0] = anchor.sort[0];
   if (nanoSeconds) {
     searchAfter[0] = useNewFieldsApi
-      ? anchor.fields[timeFieldName][0]
-      : anchor._source[timeFieldName];
+      ? (anchor.fields[timeFieldName] as Array<string | number>)[0]
+      : (anchor._source[timeFieldName] as string | number);
   }
   searchAfter[1] = anchor.sort[1];
   return searchAfter;
