@@ -101,7 +101,14 @@ export const mapColumn: ExpressionFunctionDefinition<
     });
 
     return Promise.all(rowPromises).then((rows) => {
-      const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
+      const existingColumnIndex = columns.findIndex(({ id, name }) => {
+        // Columns that have IDs are allowed to have duplicate names, for example esaggs
+        if (id) {
+          return id === args.id && name === args.name;
+        }
+        // If no ID, name is the unique key. For example, SQL output does not have IDs
+        return name === args.name;
+      });
       const type = rows.length ? getType(rows[0][columnId]) : 'null';
       const newColumn = {
         id: columnId,

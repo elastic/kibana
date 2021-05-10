@@ -9,7 +9,7 @@
 import { of } from 'rxjs';
 import { Datatable } from '../../../expression_types';
 import { mapColumn, MapColumnArguments } from '../map_column';
-import { emptyTable, functionWrapper, testTable } from './utils';
+import { emptyTable, functionWrapper, testTable, sqlTable } from './utils';
 
 const pricePlusTwo = (datatable: Datatable) => of(datatable.rows[0].price + 2);
 
@@ -35,16 +35,33 @@ describe('mapColumn', () => {
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('pricePlusTwo');
   });
 
-  it('overwrites existing column with the new column if an existing column name is provided', async () => {
-    const result = await runFn(testTable, { name: 'name', expression: pricePlusTwo });
+  it('overwrites existing column with the new column if an existing column name is missing an id', async () => {
+    const result = await runFn(sqlTable, { name: 'name', expression: pricePlusTwo });
     const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
     const arbitraryRowIndex = 4;
 
     expect(result.type).toBe('datatable');
-    expect(result.columns).toHaveLength(testTable.columns.length);
+    expect(result.columns).toHaveLength(sqlTable.columns.length);
     expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
     expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
+  });
+
+  it('inserts a new column with a duplicate name if an id and name are provided', async () => {
+    const result = await runFn(testTable, {
+      id: 'new',
+      name: 'name label',
+      expression: pricePlusTwo,
+    });
+    const nameColumnIndex = result.columns.findIndex(({ id }) => id === 'new');
+    const arbitraryRowIndex = 4;
+
+    expect(result.type).toBe('datatable');
+    expect(result.columns).toHaveLength(testTable.columns.length + 1);
+    expect(result.columns[nameColumnIndex]).toHaveProperty('id', 'new');
+    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name label');
+    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
+    expect(result.rows[arbitraryRowIndex]).toHaveProperty('new', 202);
   });
 
   it('adds a column to empty tables', async () => {
@@ -64,18 +81,6 @@ describe('mapColumn', () => {
     expect(result.columns[0]).toHaveProperty('name', 'name');
     expect(result.columns[0]).toHaveProperty('id', 'myid');
     expect(result.columns[0].meta).toHaveProperty('type', 'null');
-  });
-
-  it('should assign specific id, different from name, when id arg is passed for copied column', async () => {
-    const result = await runFn(testTable, { name: 'name', id: 'myid', expression: pricePlusTwo });
-    const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
-
-    expect(result.type).toBe('datatable');
-    expect(result.columns[nameColumnIndex]).toEqual({
-      id: 'myid',
-      name: 'name',
-      meta: { type: 'number' },
-    });
   });
 
   it('should copy over the meta information from the specified column', async () => {

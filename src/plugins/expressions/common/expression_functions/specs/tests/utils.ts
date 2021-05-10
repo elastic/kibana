@@ -9,7 +9,7 @@
 import { mapValues } from 'lodash';
 import { AnyExpressionFunctionDefinition } from '../../types';
 import { ExecutionContext } from '../../../execution/types';
-import { Datatable } from '../../../expression_types';
+import { Datatable, DatatableColumn } from '../../../expression_types';
 
 /**
  * Takes a function spec and passes in default args,
@@ -37,27 +37,27 @@ const testTable: Datatable = {
   columns: [
     {
       id: 'name',
-      name: 'name',
+      name: 'name label',
       meta: { type: 'string' },
     },
     {
       id: 'time',
-      name: 'time',
+      name: 'time label',
       meta: { type: 'date' },
     },
     {
       id: 'price',
-      name: 'price',
+      name: 'price label',
       meta: { type: 'number' },
     },
     {
       id: 'quantity',
-      name: 'quantity',
+      name: 'quantity label',
       meta: { type: 'number' },
     },
     {
       id: 'in_stock',
-      name: 'in_stock',
+      name: 'in_stock label',
       meta: { type: 'boolean' },
     },
   ],
@@ -224,4 +224,32 @@ const stringTable: Datatable = {
   ],
 };
 
-export { emptyTable, testTable, stringTable };
+// Emulates a SQL table that doesn't have any IDs
+const sqlTable: Datatable = {
+  type: 'datatable',
+  columns: [
+    ({
+      name: 'name',
+      meta: { type: 'string' },
+    } as unknown) as DatatableColumn,
+    ({
+      name: 'time',
+      meta: { type: 'date' },
+    } as unknown) as DatatableColumn,
+    ({
+      name: 'price',
+      meta: { type: 'number' },
+    } as unknown) as DatatableColumn,
+    ({
+      name: 'quantity',
+      meta: { type: 'number' },
+    } as unknown) as DatatableColumn,
+    ({
+      name: 'in_stock',
+      meta: { type: 'boolean' },
+    } as unknown) as DatatableColumn,
+  ],
+  rows: [...testTable.rows],
+};
+
+export { emptyTable, testTable, stringTable, sqlTable };

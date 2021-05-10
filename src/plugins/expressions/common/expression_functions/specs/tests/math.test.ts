@@ -7,7 +7,7 @@
  */
 
 import { errors, math } from '../math';
-import { emptyTable, functionWrapper, testTable } from './utils';
+import { emptyTable, functionWrapper, testTable, sqlTable } from './utils';
 
 describe('math', () => {
   const fn = functionWrapper<unknown>(math);
@@ -27,13 +27,22 @@ describe('math', () => {
     expect(fn(-103, { expression: 'abs(value)' })).toBe(103);
   });
 
-  it('evaluates math expressions with references to columns in a datatable', () => {
+  it('evaluates math expressions with references to columns by id in a datatable', () => {
     expect(fn(testTable, { expression: 'unique(in_stock)' })).toBe(2);
     expect(fn(testTable, { expression: 'sum(quantity)' })).toBe(2508);
     expect(fn(testTable, { expression: 'mean(price)' })).toBe(320);
     expect(fn(testTable, { expression: 'min(price)' })).toBe(67);
     expect(fn(testTable, { expression: 'median(quantity)' })).toBe(256);
     expect(fn(testTable, { expression: 'max(price)' })).toBe(605);
+  });
+
+  it('evaluates math expressions with references to columns in a datatable', () => {
+    expect(fn(sqlTable, { expression: 'unique(in_stock)' })).toBe(2);
+    expect(fn(sqlTable, { expression: 'sum(quantity)' })).toBe(2508);
+    expect(fn(sqlTable, { expression: 'mean(price)' })).toBe(320);
+    expect(fn(sqlTable, { expression: 'min(price)' })).toBe(67);
+    expect(fn(sqlTable, { expression: 'median(quantity)' })).toBe(256);
+    expect(fn(sqlTable, { expression: 'max(price)' })).toBe(605);
   });
 
   describe('args', () => {
