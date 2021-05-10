@@ -15,7 +15,7 @@ import {
   DocTableLegacyProps,
 } from '../../angular/doc_table/create_doc_table_react';
 import { IIndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
-import { LOADING_STATUS } from './constants';
+import { LoadingStatus } from '../../angular/context_app_state';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
 import { TopNavMenuProps } from '../../../../../navigation/public';
 
@@ -45,13 +45,13 @@ const PREDECESSOR_TYPE = 'predecessors';
 const SUCCESSOR_TYPE = 'successors';
 
 function isLoading(status: string) {
-  return status !== LOADING_STATUS.LOADED && status !== LOADING_STATUS.FAILED;
+  return status !== LoadingStatus.LOADED && status !== LoadingStatus.FAILED;
 }
 
 export function ContextAppLegacy(renderProps: ContextAppProps) {
   const status = renderProps.status;
-  const isLoaded = status === LOADING_STATUS.LOADED;
-  const isFailed = status === LOADING_STATUS.FAILED;
+  const isLoaded = status === LoadingStatus.LOADED;
+  const isFailed = status === LoadingStatus.FAILED;
 
   const actionBarProps = (type: string) => {
     const {
@@ -114,7 +114,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   };
 
   const loadingFeedback = () => {
-    if (status === LOADING_STATUS.UNINITIALIZED || status === LOADING_STATUS.LOADING) {
+    if (status === LoadingStatus.UNINITIALIZED || status === LoadingStatus.LOADING) {
       return (
         <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
           <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
