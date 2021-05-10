@@ -33,10 +33,6 @@ import { SearchUILogic } from '../search_ui_logic';
 import { ActiveField } from '../types';
 import { generatePreviewUrl } from '../utils';
 
-interface Option<T> extends Omit<EuiComboBoxOptionOption<T>, 'value'> {
-  value: string;
-}
-
 export const SearchUIForm: React.FC = () => {
   const {
     validFields,
@@ -98,9 +94,7 @@ export const SearchUIForm: React.FC = () => {
         <EuiComboBox
           options={facetOptionFields}
           selectedOptions={selectedFacetOptions}
-          onChange={(newValues) =>
-            onFacetFieldsChange(newValues.map((field) => (field as Option<string>).value))
-          }
+          onChange={(newValues) => onFacetFieldsChange(newValues.map((field) => field.value!))}
           onFocus={() => onActiveFieldChange(ActiveField.Filter)}
           onBlur={() => onActiveFieldChange(ActiveField.None)}
           fullWidth
@@ -111,9 +105,7 @@ export const SearchUIForm: React.FC = () => {
         <EuiComboBox
           options={sortOptionFields}
           selectedOptions={selectedSortOptions}
-          onChange={(newValues) =>
-            onSortFieldsChange(newValues.map((field) => (field as Option<string>).value))
-          }
+          onChange={(newValues) => onSortFieldsChange(newValues.map((field) => field.value!))}
           onFocus={() => onActiveFieldChange(ActiveField.Sort)}
           onBlur={() => onActiveFieldChange(ActiveField.None)}
           fullWidth
