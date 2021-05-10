@@ -91,74 +91,72 @@ export const SearchUIForm: React.FC = () => {
   const selectedFacetOptions = formatMultiOptions(facetFields);
 
   return (
-    <div>
-      <EuiForm>
-        <EuiFormRow label={TITLE_FIELD_LABEL} helpText={TITLE_FIELD_HELP_TEXT} fullWidth>
-          <EuiSelect
-            options={optionFields}
-            value={selectedTitleOption && selectedTitleOption.value}
-            onChange={(e) => onTitleFieldChange(e.target.value)}
-            fullWidth
-            placeholder={TITLE_FIELD_PLACEHOLDER}
-            onFocus={() => onActiveFieldChange(ActiveField.Title)}
-            onBlur={() => onActiveFieldChange(ActiveField.None)}
-            hasNoInitialSelection
-            data-test-subj="selectTitle"
-          />
-        </EuiFormRow>
-        <EuiFormRow label={FILTER_FIELD_LABEL} helpText={FILTER_FIELD_HELP_TEXT} fullWidth>
-          <EuiComboBox
-            options={facetOptionFields}
-            selectedOptions={selectedFacetOptions}
-            onChange={(newValues) =>
-              onFacetFieldsChange(newValues.map((field) => (field as Option<string>).value))
-            }
-            onFocus={() => onActiveFieldChange(ActiveField.Filter)}
-            onBlur={() => onActiveFieldChange(ActiveField.None)}
-            fullWidth
-            placeholder={FILTER_FIELD_PLACEHOLDER}
-            data-test-subj="selectFilters"
-          />
-        </EuiFormRow>
-        <EuiFormRow label={SORT_FIELD_LABEL} helpText={SORT_FIELD_HELP_TEXT} fullWidth>
-          <EuiComboBox
-            options={sortOptionFields}
-            selectedOptions={selectedSortOptions}
-            onChange={(newValues) =>
-              onSortFieldsChange(newValues.map((field) => (field as Option<string>).value))
-            }
-            onFocus={() => onActiveFieldChange(ActiveField.Sort)}
-            onBlur={() => onActiveFieldChange(ActiveField.None)}
-            fullWidth
-            placeholder={SORT_FIELD_PLACEHOLDER}
-            data-test-subj="selectSort"
-          />
-        </EuiFormRow>
+    <EuiForm>
+      <EuiFormRow label={TITLE_FIELD_LABEL} helpText={TITLE_FIELD_HELP_TEXT} fullWidth>
+        <EuiSelect
+          options={optionFields}
+          value={selectedTitleOption && selectedTitleOption.value}
+          onChange={(e) => onTitleFieldChange(e.target.value)}
+          fullWidth
+          placeholder={TITLE_FIELD_PLACEHOLDER}
+          onFocus={() => onActiveFieldChange(ActiveField.Title)}
+          onBlur={() => onActiveFieldChange(ActiveField.None)}
+          hasNoInitialSelection
+          data-test-subj="selectTitle"
+        />
+      </EuiFormRow>
+      <EuiFormRow label={FILTER_FIELD_LABEL} helpText={FILTER_FIELD_HELP_TEXT} fullWidth>
+        <EuiComboBox
+          options={facetOptionFields}
+          selectedOptions={selectedFacetOptions}
+          onChange={(newValues) =>
+            onFacetFieldsChange(newValues.map((field) => (field as Option<string>).value))
+          }
+          onFocus={() => onActiveFieldChange(ActiveField.Filter)}
+          onBlur={() => onActiveFieldChange(ActiveField.None)}
+          fullWidth
+          placeholder={FILTER_FIELD_PLACEHOLDER}
+          data-test-subj="selectFilters"
+        />
+      </EuiFormRow>
+      <EuiFormRow label={SORT_FIELD_LABEL} helpText={SORT_FIELD_HELP_TEXT} fullWidth>
+        <EuiComboBox
+          options={sortOptionFields}
+          selectedOptions={selectedSortOptions}
+          onChange={(newValues) =>
+            onSortFieldsChange(newValues.map((field) => (field as Option<string>).value))
+          }
+          onFocus={() => onActiveFieldChange(ActiveField.Sort)}
+          onBlur={() => onActiveFieldChange(ActiveField.None)}
+          fullWidth
+          placeholder={SORT_FIELD_PLACEHOLDER}
+          data-test-subj="selectSort"
+        />
+      </EuiFormRow>
 
-        <EuiFormRow label={URL_FIELD_LABEL} helpText={URL_FIELD_HELP_TEXT} fullWidth>
-          <EuiSelect
-            options={optionFields}
-            value={selectedURLOption && selectedURLOption.value}
-            onChange={(e) => onUrlFieldChange(e.target.value)}
-            fullWidth
-            placeholder={URL_FIELD_PLACEHOLDER}
-            onFocus={() => onActiveFieldChange(ActiveField.Url)}
-            onBlur={() => onActiveFieldChange(ActiveField.None)}
-            hasNoInitialSelection
-            data-test-subj="selectUrl"
-          />
-        </EuiFormRow>
-        <EuiButton
-          href={previewHref}
-          target="_blank"
-          fill
-          iconType="popout"
-          iconSide="right"
-          data-test-subj="generateSearchUiPreview"
-        >
-          {GENERATE_PREVIEW_BUTTON_LABEL}
-        </EuiButton>
-      </EuiForm>
-    </div>
+      <EuiFormRow label={URL_FIELD_LABEL} helpText={URL_FIELD_HELP_TEXT} fullWidth>
+        <EuiSelect
+          options={optionFields}
+          value={selectedURLOption && selectedURLOption.value}
+          onChange={(e) => onUrlFieldChange(e.target.value)}
+          fullWidth
+          placeholder={URL_FIELD_PLACEHOLDER}
+          onFocus={() => onActiveFieldChange(ActiveField.Url)}
+          onBlur={() => onActiveFieldChange(ActiveField.None)}
+          hasNoInitialSelection
+          data-test-subj="selectUrl"
+        />
+      </EuiFormRow>
+      <EuiButton
+        href={previewHref}
+        target="_blank"
+        fill
+        iconType="popout"
+        iconSide="right"
+        data-test-subj="generateSearchUiPreview"
+      >
+        {GENERATE_PREVIEW_BUTTON_LABEL}
+      </EuiButton>
+    </EuiForm>
   );
 };
