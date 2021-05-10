@@ -6,30 +6,52 @@
  */
 
 import { Action } from 'redux';
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../../shared_imports';
 import { AsyncResourceState } from '../../../state/async_resource_state';
+import { EventFiltersListPageState } from '../state';
+
+export type EventFiltersListPageStateChanged = Action<'eventFiltersListPageStateChanged'> & {
+  payload: EventFiltersListPageState['listPage'];
+};
+
+export type EventFiltersListPageDataChanged = Action<'eventFiltersListPageDataChanged'> & {
+  payload: EventFiltersListPageState['listPage']['data'];
+};
+
+export type EventFiltersListPageDataExistsChanged = Action<'eventFiltersListPageDataExistsChanged'> & {
+  payload: EventFiltersListPageState['listPage']['dataExist'];
+};
 
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
-    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
+  };
+};
+
+export type EventFiltersInitFromId = Action<'eventFiltersInitFromId'> & {
+  payload: {
+    id: string;
   };
 };
 
 export type EventFiltersChangeForm = Action<'eventFiltersChangeForm'> & {
   payload: {
-    entry: ExceptionListItemSchema | CreateExceptionListItemSchema;
+    entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
     hasNameError?: boolean;
     hasItemsError?: boolean;
     hasOSError?: boolean;
+    newComment?: string;
   };
 };
 
+export type EventFiltersUpdateStart = Action<'eventFiltersUpdateStart'>;
+export type EventFiltersUpdateSuccess = Action<'eventFiltersUpdateSuccess'>;
 export type EventFiltersCreateStart = Action<'eventFiltersCreateStart'>;
-export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'> & {
-  payload: {
-    exception: ExceptionListItemSchema;
-  };
-};
+export type EventFiltersCreateSuccess = Action<'eventFiltersCreateSuccess'>;
 export type EventFiltersCreateError = Action<'eventFiltersCreateError'>;
 
 export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'> & {
@@ -37,9 +59,14 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
 };
 
 export type EventFiltersPageAction =
-  | EventFiltersCreateStart
+  | EventFiltersListPageStateChanged
+  | EventFiltersListPageDataChanged
+  | EventFiltersListPageDataExistsChanged
   | EventFiltersInitForm
+  | EventFiltersInitFromId
   | EventFiltersChangeForm
+  | EventFiltersUpdateStart
+  | EventFiltersUpdateSuccess
   | EventFiltersCreateStart
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
