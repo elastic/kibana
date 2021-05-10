@@ -17,6 +17,7 @@ import {
 import {
   HostInfo,
   HostMetadata,
+  HostResult,
   HostResultList,
   HostStatus,
   MetadataQueryStrategyVersions,
@@ -158,8 +159,7 @@ export const getMetadataRequestHandler = function (
       const doc = await getHostData(
         metadataRequestContext,
         request?.params?.id,
-        queryStrategyVersion,
-        true
+        queryStrategyVersion
       );
       if (doc) {
         return response.ok({ body: doc });
@@ -178,30 +178,39 @@ export const getMetadataRequestHandler = function (
   };
 };
 
-export async function getHostData(
+export async function getHostInfo(
   metadataRequestContext: MetadataRequestContext,
   id: string,
-  queryStrategyVersion?: MetadataQueryStrategyVersions,
-  includeAgentData?: boolean
-): Promise<HostInfo | undefined> {
-  if (!metadataRequestContext.savedObjectsClient) {
-    return undefined;
-  }
-  const queryStrategy = await metadataRequestContext.endpointAppContextService
-    ?.getMetadataService()
-    ?.queryStrategy(metadataRequestContext.savedObjectsClient, queryStrategyVersion);
-  const query = getESQueryHostMetadataByID(id, queryStrategy!);
-
+  queryStrategyVersion?: MetadataQueryStrategyVersions
+): Promise<HostResult | undefined> {
   if (
     !metadataRequestContext.esClient &&
     !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
   ) {
-    return undefined;
+    throw Boom.badRequest('esClient not found');
+  }
+
+  if (
+    !metadataRequestContext.savedObjectsClient &&
+    !metadataRequestContext.requestHandlerContext?.core.savedObjects
+  ) {
+    throw Boom.badRequest('savedObjectsClient not found');
   }
 
   const esClient = (metadataRequestContext?.esClient ??
     metadataRequestContext.requestHandlerContext?.core.elasticsearch
       .client) as IScopedClusterClient;
+
+  const esSavedObjectClient =
+    metadataRequestContext?.savedObjectsClient ??
+    (metadataRequestContext.requestHandlerContext?.core.savedObjects
+      .client as SavedObjectsClientContract);
+
+  const queryStrategy = await metadataRequestContext.endpointAppContextService
+    ?.getMetadataService()
+    ?.queryStrategy(esSavedObjectClient, queryStrategyVersion);
+  const query = getESQueryHostMetadataByID(id, queryStrategy!);
+
   const response = await esClient.asCurrentUser.search<HostMetadata>(query);
 
   const hostResult = queryStrategy!.queryResponseToHostResult(response.body);
@@ -211,25 +220,44 @@ export async function getHostData(
     return undefined;
   }
 
-  /* Skip agent data if we only need meta data, by doing this
-   **  we can avoid users get 404 error from findAgent and
-   ** therefore unable to get endpoint meta data
-   */
-  if (includeAgentData) {
-    const agent = await findAgent(metadataRequestContext, hostMetadata);
-
-    if (agent && !agent.active) {
-      throw Boom.badRequest('the requested endpoint is unenrolled');
-    }
-
-    const metadata = await enrichHostMetadata(
-      hostMetadata,
-      metadataRequestContext,
-      hostResult.queryStrategyVersion
-    );
-    return { ...metadata, query_strategy_version: hostResult.queryStrategyVersion };
-  }
   return { metadata: hostMetadata, query_strategy_version: hostResult.queryStrategyVersion };
+}
+
+export async function getHostData(
+  metadataRequestContext: MetadataRequestContext,
+  id: string,
+  queryStrategyVersion?: MetadataQueryStrategyVersions
+): Promise<HostInfo | undefined> {
+  if (!metadataRequestContext.savedObjectsClient) {
+    throw Boom.badRequest('savedObjectsClient not found');
+  }
+
+  if (
+    !metadataRequestContext.esClient &&
+    !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
+  ) {
+    throw Boom.badRequest('esClient not found');
+  }
+
+  const hostResult = await getHostInfo(metadataRequestContext, id, queryStrategyVersion);
+
+  if (!hostResult) {
+    return undefined;
+  }
+
+  const agent = await findAgent(metadataRequestContext, hostResult.metadata);
+
+  if (agent && !agent.active) {
+    throw Boom.badRequest('the requested endpoint is unenrolled');
+  }
+
+  const metadata = await enrichHostMetadata(
+    hostResult.metadata,
+    metadataRequestContext,
+    hostResult.query_strategy_version
+  );
+
+  return { ...metadata, query_strategy_version: hostResult.query_strategy_version };
 }
 
 async function findAgent(
