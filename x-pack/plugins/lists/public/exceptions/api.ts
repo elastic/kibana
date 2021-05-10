@@ -7,8 +7,8 @@
 
 import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
+import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 
-import { validateEither } from '../../common/shared_imports';
 import { toError, toPromise } from '../common/fp_utils';
 import {
   ENDPOINT_LIST_URL,

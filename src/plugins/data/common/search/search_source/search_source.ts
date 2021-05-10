@@ -682,6 +682,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS);
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
@@ -712,7 +713,7 @@ export class SearchSource {
         body._source = sourceFilters;
       }
 
-      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
+      const filter = fieldWildcardFilter(body._source.excludes, metaFields);
       // also apply filters to provided fields & default docvalueFields
       body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
       fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
@@ -793,17 +794,21 @@ export class SearchSource {
             const field2Name = this.getFieldName(fld2);
             return field1Name === field2Name;
           }
-        ).map((fld: SearchFieldValue) => {
-          const fieldName = this.getFieldName(fld);
-          if (Object.keys(docvaluesIndex).includes(fieldName)) {
-            // either provide the field object from computed docvalues,
-            // or merge the user-provided field with the one in docvalues
-            return typeof fld === 'string'
-              ? docvaluesIndex[fld]
-              : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
-          }
-          return fld;
-        });
+        )
+          .filter((fld: SearchFieldValue) => {
+            return !metaFields.includes(this.getFieldName(fld));
+          })
+          .map((fld: SearchFieldValue) => {
+            const fieldName = this.getFieldName(fld);
+            if (Object.keys(docvaluesIndex).includes(fieldName)) {
+              // either provide the field object from computed docvalues,
+              // or merge the user-provided field with the one in docvalues
+              return typeof fld === 'string'
+                ? docvaluesIndex[fld]
+                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
+            }
+            return fld;
+          });
       }
     } else {
       body.fields = filteredDocvalueFields;
