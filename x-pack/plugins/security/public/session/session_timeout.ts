@@ -116,11 +116,11 @@ export class SessionTimeout {
    */
   private handleHttpRequest = (fetchOptions: HttpFetchOptionsWithPath) => {
     // Ignore requests to external URLs
-    if (fetchOptions.path.indexOf('://') !== -1) {
+    if (fetchOptions.path.indexOf('://') !== -1 || fetchOptions.path.startsWith('//')) {
       return;
     }
 
-    if (fetchOptions.asSystemRequest === undefined) {
+    if (!fetchOptions.asSystemRequest) {
       return { ...fetchOptions, asSystemRequest: !this.isVisible };
     }
   };
@@ -187,10 +187,9 @@ export class SessionTimeout {
     }
   };
 
-  private toggleEventHandlers = async ({ expiresInMs, canBeExtended }: SessionState) => {
+  private toggleEventHandlers = ({ expiresInMs, canBeExtended }: SessionState) => {
     if (expiresInMs !== null) {
-      // Monitor activity if session can be extended. No need to do it if idleTimeout hasn't been
-      // configured.
+      // Monitor activity if session can be extended
       if (canBeExtended && !this.stopActivityMonitor) {
         this.stopActivityMonitor = monitorActivity(this.handleUserActivity);
       }
@@ -282,20 +281,16 @@ export class SessionTimeout {
  * executed.
  * @returns Function to stop the timer.
  */
-export function startTimer(
-  callback: () => void,
-  timeout: number,
-  updater?: (id: NodeJS.Timeout) => void
-) {
+export function startTimer(callback: () => void, timeout: number, updater?: (id: number) => void) {
   // Max timeout is the largest possible 32-bit signed integer or 2,147,483,647 or 0x7fffffff.
   const maxTimeout = 0x7fffffff;
-  let timeoutID: NodeJS.Timeout;
-  updater = updater ?? ((id: NodeJS.Timeout) => (timeoutID = id));
+  let timeoutID: number;
+  updater = updater ?? ((id: number) => (timeoutID = id));
 
   updater(
     timeout > maxTimeout
-      ? setTimeout(() => startTimer(callback, timeout - maxTimeout, updater), maxTimeout)
-      : setTimeout(callback, timeout)
+      ? window.setTimeout(() => startTimer(callback, timeout - maxTimeout, updater), maxTimeout)
+      : window.setTimeout(callback, timeout)
   );
 
   return () => clearTimeout(timeoutID);
@@ -320,7 +315,7 @@ function monitorActivity(callback: () => void) {
 }
 
 /**
- * Adds event handlers to the document object that track page visility.
+ * Adds event handlers to the document object that track page visibility.
  * @param callback Function to be executed when page visibility changes.
  * @returns Function to remove all event handlers from document.
  */

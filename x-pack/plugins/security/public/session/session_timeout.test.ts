@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BroadcastChannel } from 'broadcast-channel';
+
 import type { ToastInputFields } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 
@@ -17,6 +19,7 @@ import {
 } from '../../common/constants';
 import type { SessionInfo } from '../../common/types';
 import { createSessionExpiredMock } from './session_expired.mock';
+import type { SessionState } from './session_timeout';
 import { SessionTimeout, startTimer } from './session_timeout';
 
 jest.mock('broadcast-channel');
@@ -74,7 +77,12 @@ describe('SessionTimeout', () => {
 
   it('adds event handlers when starting', async () => {
     const { sessionTimeout } = createSessionTimeout();
+
+    expect(window.addEventListener).not.toHaveBeenCalled();
+    expect(document.addEventListener).not.toHaveBeenCalled();
+
     await sessionTimeout.start();
+
     expect(window.addEventListener).toHaveBeenCalledWith('mousemove', expect.any(Function));
     expect(window.addEventListener).toHaveBeenCalledWith('mousedown', expect.any(Function));
     expect(window.addEventListener).toHaveBeenCalledWith('wheel', expect.any(Function));
@@ -88,7 +96,12 @@ describe('SessionTimeout', () => {
 
   it('removes event handlers when stopping', async () => {
     const { sessionTimeout } = createSessionTimeout();
+
     await sessionTimeout.start();
+
+    expect(window.removeEventListener).not.toHaveBeenCalled();
+    expect(document.removeEventListener).not.toHaveBeenCalled();
+
     sessionTimeout.stop();
 
     expect(window.removeEventListener).toHaveBeenCalledWith('mousemove', expect.any(Function));
@@ -193,8 +206,10 @@ describe('SessionTimeout', () => {
 
     jest.advanceTimersByTime(30 * 1000);
 
-    // eslint-disable-next-line dot-notation
-    sessionTimeout['channel']!.onmessage!({
+    const [broadcastChannelMock] = jest.requireMock('broadcast-channel').BroadcastChannel.mock
+      .instances as [BroadcastChannel<SessionState>];
+
+    broadcastChannelMock.onmessage!({
       lastExtensionTime: Date.now(),
       expiresInMs: 60 * 1000,
       canBeExtended: true,
@@ -344,7 +359,7 @@ describe('SessionTimeout', () => {
   it('does not log user out if session does not exist', async () => {
     const { sessionTimeout, sessionExpired, http } = createSessionTimeout();
 
-    http.fetch.mockResolvedValue(''); // Session endpoint return 402 No content when session does not exist
+    http.fetch.mockResolvedValue(''); // Session endpoint return 204 No content when session does not exist
     await sessionTimeout.start();
 
     jest.runOnlyPendingTimers();

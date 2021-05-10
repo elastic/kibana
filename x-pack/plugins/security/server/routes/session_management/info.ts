@@ -12,7 +12,7 @@ import type { SessionInfo } from '../../../common/types';
 /**
  * Defines routes required for the session info.
  */
-export function defineSessionInfoRoutes({ router, getSession, config }: RouteDefinitionParams) {
+export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionParams) {
   router.get(
     { path: '/internal/security/session', validate: false },
     async (_context, request, response) => {

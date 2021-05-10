@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return current session information', async () => {
         const { body } = await getSessionInfo();
         expect(body.expiresInMs).to.be.a('number');
-        expect(body.canBeExtended).to.be.a('boolean');
+        expect(body.canBeExtended).to.be(true);
         expect(body.provider).to.eql({ type: 'basic', name: 'basic1' });
       });
 
