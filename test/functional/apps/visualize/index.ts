@@ -62,7 +62,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       if (!isOss) load('./_chart_types');
     });
 
-    describe.only('visualize ciGroup10', function () {
+    describe('visualize ciGroup10', function () {
       this.tags('ciGroup10');
 
       [
