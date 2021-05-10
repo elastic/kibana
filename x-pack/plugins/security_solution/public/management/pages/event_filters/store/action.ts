@@ -26,6 +26,12 @@ export type EventFiltersListPageDataExistsChanged = Action<'eventFiltersListPage
   payload: EventFiltersListPageState['listPage']['dataExist'];
 };
 
+export type EventFilterForDeletion = Action<'eventFilterForDeletion'> & {
+  payload: {
+    id: string;
+  };
+};
+
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
     entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema;
@@ -70,4 +76,5 @@ export type EventFiltersPageAction =
   | EventFiltersCreateStart
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
-  | EventFiltersFormStateChanged;
+  | EventFiltersFormStateChanged
+  | EventFilterForDeletion;

@@ -196,3 +196,13 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
     );
   }
 );
+
+export const showDeleteModal: EventFiltersSelector<boolean> = (state) => {
+  // FIXME:PT implement
+  return true;
+};
+
+export const isDeletionInProgress: EventFiltersSelector<boolean> = (state) => {
+  // FIXME:PT implement
+  return false;
+};

@@ -30,6 +30,7 @@ import {
   getListPageDoesDataExist,
   getActionError,
   getFormEntry,
+  showDeleteModal,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
@@ -38,6 +39,7 @@ import {
   ExceptionItem,
   ExceptionItemProps,
 } from '../../../../common/components/exceptions/viewer/exception_item';
+import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -65,6 +67,7 @@ export const EventFiltersListPage = memo(() => {
   const fetchError = useEventFiltersSelector(getListFetchError);
   const location = useEventFiltersSelector(getCurrentLocation);
   const doesDataExist = useEventFiltersSelector(getListPageDoesDataExist);
+  const showDelete = useEventFiltersSelector(showDeleteModal);
 
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
@@ -126,9 +129,15 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback((args) => {
-    // TODO: implement delete item
-  }, []);
+  const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback(
+    ({ id }) => {
+      dispatch({
+        type: 'eventFilterForDeletion',
+        payload: { id },
+      });
+    },
+    [dispatch]
+  );
 
   const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(
     (exceptionItem) => ({
@@ -152,6 +161,10 @@ export const EventFiltersListPage = memo(() => {
     },
     [navigateCallback]
   );
+
+  const handleDeleteCancel = useCallback(() => {}, []);
+
+  const handleDeleteDone = useCallback(() => {}, []);
 
   return (
     <AdministrationListPage
@@ -190,6 +203,10 @@ export const EventFiltersListPage = memo(() => {
           id={location.id}
           type={location.show}
         />
+      )}
+
+      {showDelete && (
+        <EventFilterDeleteModal onCancel={handleDeleteCancel} onDone={handleDeleteDone} />
       )}
 
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
