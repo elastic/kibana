@@ -49,7 +49,6 @@ export function GeoFieldWorkspacePanel(props: Props) {
       <EuiText
         className="lnsWorkspacePanel__emptyContent"
         textAlign="center"
-        color="subdued"
         size="s"
       >
         <h2>
