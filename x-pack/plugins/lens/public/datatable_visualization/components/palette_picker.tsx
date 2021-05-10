@@ -15,6 +15,7 @@ import {
   DEFAULT_COLOR_STEPS,
   FIXED_PROGRESSION,
 } from './coloring/constants';
+import { remapStopsByNewInterval } from './coloring/utils';
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,
@@ -41,12 +42,21 @@ function getCustomPaletteConfig(
     return { value: id, title, type: 'text' as const };
   }
 
+  const referenceStops = activePalette.params.colorStops || activePalette.params.stops;
+
+  const oldInterval = referenceStops[referenceStops.length - 1].stop - referenceStops[0].stop;
+
   // full custom palette
   return {
     value: id,
     title,
     type: FIXED_PROGRESSION,
-    palette: activePalette.params.stops,
+    palette: remapStopsByNewInterval(activePalette.params.stops, {
+      newInterval: 100,
+      oldInterval,
+      newMin: 0,
+      oldMin: referenceStops[0].stop,
+    }),
   };
 }
 

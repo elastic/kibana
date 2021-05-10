@@ -161,22 +161,22 @@ export function isValidColor(colorString: string) {
   return colorString !== '' && isValidHex(colorString);
 }
 
-export function roundStopValues(colorStops: ColorStop[]) {
-  return colorStops.map(({ color, stop }) => {
-    const roundedStop = stop > 1 ? Math.round(stop) : stop;
-    return { color, stop: roundedStop };
-  });
+function shouldRoundDigits(value: number) {
+  return !Number.isInteger(value);
 }
 
-function shouldRoundDigits(value: number) {
-  return value > 1;
+export function roundStopValues(colorStops: ColorStop[]) {
+  return colorStops.map(({ color, stop }) => {
+    const roundedStop = shouldRoundDigits(stop) ? Number(stop.toFixed(2)) : stop;
+    return { color, stop: roundedStop };
+  });
 }
 
 export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[], max: number) {
   const length = newColorStops.length;
   // workout the steps from the last 2 items
   const dataStep = newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1;
-  let step = shouldRoundDigits(dataStep) ? Math.round(dataStep) : dataStep;
+  let step = shouldRoundDigits(dataStep) ? Number(dataStep.toFixed(2)) : dataStep;
   if (max < colorStops[length - 1].stop + step) {
     const diffToMax = max - colorStops[length - 1].stop;
     // if the computed step goes way out of bound, fallback to 1, otherwise reach max

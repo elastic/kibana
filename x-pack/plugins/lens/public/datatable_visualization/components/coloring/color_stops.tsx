@@ -34,19 +34,19 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
 
   const [onBlurOption, setOnBlur] = useState('row');
 
-  const [localColorStops, setLocalColorStops] = useState<ColorStop[]>(colorStops);
+  const [localColorStops, setLocalColorStops] = useState<Array<{ color: string; stop: string }>>(
+    colorStops.map(({ color, stop }) => ({ color, stop: String(stop) }))
+  );
 
   useDebounceWithOptions(
     () => {
-      if (
-        localColorStops.every(
-          ({ color, stop }, i) =>
-            isValidColor(color) &&
-            !Number.isNaN(stop) &&
-            stop > (localColorStops[i - 1]?.stop ?? -Infinity)
-        )
-      ) {
-        onChange(localColorStops);
+      const areStopsValid = localColorStops.every(({ color, stop }, i) => {
+        const numberStop = Number(stop);
+        const prevNumberStop = Number(localColorStops[i - 1]?.stop ?? -Infinity);
+        return isValidColor(color) && !Number.isNaN(numberStop) && numberStop > prevNumberStop;
+      });
+      if (areStopsValid) {
+        onChange(localColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })));
       }
     },
     { skipFirstRender: true },
@@ -78,18 +78,21 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                 );
                 if (shouldSort && !isFocusStillInContent) {
                   setLocalColorStops(
-                    [...localColorStops].sort(({ stop: stopA }, { stop: stopB }) => stopA - stopB)
+                    [...localColorStops].sort(
+                      ({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB)
+                    )
                   );
                 }
               }
             }}
           >
             {remappedControlStops.map(({ color, stop }, index) => {
-              const prevStopValue = localColorStops[index - 1]?.stop ?? -Infinity;
+              const prevStopValue = Number(localColorStops[index - 1]?.stop ?? -Infinity);
               const stopValue = localColorStops[index]?.stop ?? stop;
               const colorValue = localColorStops[index]?.color ?? color;
-              const nextStopValue =
-                localColorStops[index + 1]?.stop ?? colorStops[index + 1]?.stop ?? Infinity;
+              const nextStopValue = Number(
+                localColorStops[index + 1]?.stop ?? colorStops[index + 1]?.stop ?? Infinity
+              );
 
               const errorMessages = [];
               // do not show color error messages if number field is already in error
@@ -109,14 +112,15 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                   onBlur={(e: FocusEvent<HTMLDivElement>) => {
                     if (onBlurOption === 'row') {
                       // sort the stops when the focus leaves the row container
-                      const shouldSort = stopValue > nextStopValue || prevStopValue > stopValue;
+                      const shouldSort =
+                        Number(stopValue) > nextStopValue || prevStopValue > Number(stopValue);
                       const isFocusStillInContent = (e.currentTarget as Node)?.contains(
                         e.relatedTarget as Node
                       );
                       if (shouldSort && !isFocusStillInContent) {
                         setLocalColorStops(
                           [...localColorStops].sort(
-                            ({ stop: stopA }, { stop: stopB }) => stopA - stopB
+                            ({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB)
                           )
                         );
                       }
@@ -129,12 +133,13 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                         compressed
                         data-test-subj={`lnsDatatable_dynamicColoring_stop_${index}`}
                         value={stopValue}
+                        min={-Infinity}
                         onChange={({ target }) => {
                           const newStopString = target.value.trim();
-                          const newColorStops = [...colorStops];
+                          const newColorStops = [...localColorStops];
                           newColorStops[index] = {
                             color: colorValue,
-                            stop: Number(newStopString),
+                            stop: newStopString,
                           };
                           if (onBlurOption === 'input') {
                             if (
@@ -142,7 +147,7 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                               Number(newStopString) > nextStopValue
                             ) {
                               newColorStops.sort(
-                                ({ stop: stopA }, { stop: stopB }) => stopA - stopB
+                                ({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB)
                               );
                             }
                           }
@@ -164,7 +169,7 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                       <EuiColorPicker
                         key={stop}
                         onChange={(newColor) => {
-                          const newColorStops = [...colorStops];
+                          const newColorStops = [...localColorStops];
                           newColorStops[index] = { color: newColor, stop: stopValue };
                           setLocalColorStops(newColorStops);
                         }}
@@ -202,7 +207,7 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                             }
                           )}
                           onClick={() => {
-                            const newColorStops = colorStops.filter((_, i) => i !== index);
+                            const newColorStops = localColorStops.filter((_, i) => i !== index);
                             setLocalColorStops(newColorStops);
                           }}
                           data-test-subj="lnsDatatable_dynamicColoring_removeStop"
@@ -231,13 +236,17 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                 }
               )}
               onClick={() => {
-                const newColorStops = [...colorStops];
+                const newColorStops = [...localColorStops];
                 const length = newColorStops.length;
                 const { max } = getDataMinMax(rangeType, dataBounds);
-                const step = getStepValue(colorStops, newColorStops, max);
+                const step = getStepValue(
+                  colorStops,
+                  newColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })),
+                  max
+                );
                 newColorStops.push({
                   color: DEFAULT_COLOR,
-                  stop: colorStops[length - 1].stop + step,
+                  stop: String(localColorStops[length - 1].stop + step),
                 });
                 setLocalColorStops(newColorStops);
               }}
