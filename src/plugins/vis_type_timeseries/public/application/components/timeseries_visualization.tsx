@@ -21,7 +21,8 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 // @ts-expect-error
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
-import { TimeseriesVisData, PanelData, isVisSeriesData } from '../../../common/types';
+import type { TimeseriesVisData, PanelData } from '../../../common/types';
+import { isVisSeriesData } from '../../../common/vis_data_utils';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 import { TimeseriesVisParams } from '../../types';
 import { getDataStart } from '../../services';
@@ -31,8 +32,7 @@ import { X_ACCESSOR_INDEX } from '../visualizations/constants';
 import { LastValueModeIndicator } from './last_value_mode_indicator';
 import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
-import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
-import { PANEL_TYPES } from '../../../common/panel_types';
+import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../../common/enums';
 
 interface TimeseriesVisualizationProps {
   className?: string;

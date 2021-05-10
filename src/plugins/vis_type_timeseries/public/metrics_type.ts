@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
-import { PANEL_TYPES } from '../common/panel_types';
+import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import { isStringTypeIndexPattern } from '../common/index_patterns_utils';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
@@ -61,7 +61,7 @@ export const metricsVisDefinition = {
       axis_scale: 'normal',
       show_legend: 1,
       show_grid: 1,
-      tooltip_mode: 'show_all',
+      tooltip_mode: TOOLTIP_MODES.SHOW_ALL,
       drop_last_bucket: 0,
     },
   },
