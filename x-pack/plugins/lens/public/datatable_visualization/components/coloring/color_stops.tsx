@@ -95,7 +95,7 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
               // do not show color error messages if number field is already in error
               if (!isValidColor(colorValue) && errorMessages.length === 0) {
                 errorMessages.push(
-                  i18n.translate('xpack.maps.styles.colorStops.hexWarningLabel', {
+                  i18n.translate('xpack.lens.table.dynamicColoring.customPalette.hexWarningLabel', {
                     defaultMessage: 'Color must provide a valid hex value',
                   })
                 );
