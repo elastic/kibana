@@ -22,7 +22,7 @@ import {
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
-import { getHostInfo } from '../../../../../endpoint/routes/metadata/handlers';
+import { getHostMetaData } from '../../../../../endpoint/routes/metadata/handlers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
 
 export const HOST_FIELDS = [
@@ -197,7 +197,7 @@ export const getHostEndpoint = async (
     };
     const endpointData =
       id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
-        ? await getHostInfo(metadataRequestContext, id, undefined)
+        ? await getHostMetaData(metadataRequestContext, id, undefined)
         : null;
 
     return endpointData != null && endpointData.metadata
