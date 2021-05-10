@@ -132,7 +132,7 @@ export function useDiscoverState({
         data,
         savedSearch: newSavedSearch,
       });
-      stateContainer.setAppState(newAppState);
+      await stateContainer.replaceUrlAppState(newAppState);
       setSavedSearch(newSavedSearch);
     },
     [indexPattern, services, config, data, stateContainer]

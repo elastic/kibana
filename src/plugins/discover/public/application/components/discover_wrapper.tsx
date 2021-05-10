@@ -17,7 +17,6 @@ import { useSearchSession } from './use_search_session';
 import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../data/common';
 import { DiscoverServices } from '../../build_services';
 import { SavedSearch } from '../../saved_searches';
-import { getStateDefaults } from '../helpers/get_state_defaults';
 
 const DiscoverMemoized = React.memo(Discover);
 
@@ -114,17 +113,9 @@ export function DiscoverWrapper(props: DiscoverWrapperProps) {
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
     setBreadcrumbsTitle(savedSearch, chrome);
 
-    const newAppState = getStateDefaults({
-      config,
-      data,
-      savedSearch,
-    });
-    // Propagate current app state to url, then start syncing and fetching
-    stateContainer.replaceUrlAppState(newAppState).then(() => {
-      if (shouldSearchOnPageLoad()) {
-        refetch$.next();
-      }
-    });
+    if (shouldSearchOnPageLoad()) {
+      refetch$.next();
+    }
     return () => {
       data.search.session.clear();
     };
