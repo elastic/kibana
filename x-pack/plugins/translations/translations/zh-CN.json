@@ -24333,7 +24333,6 @@
     "xpack.upgradeAssistant.checkupTab.changeFiltersShowMoreLabel": "更改筛选以显示更多内容。",
     "xpack.upgradeAssistant.checkupTab.confirmationModal.removeButtonLabel": "移除",
     "xpack.upgradeAssistant.checkupTab.controls.filterBar.criticalButtonLabel": "紧急",
-    "xpack.upgradeAssistant.checkupTab.controls.filterBar.warningButtonLabel": "警告",
     "xpack.upgradeAssistant.checkupTab.controls.groupByBar.byIndexLabel": "按索引",
     "xpack.upgradeAssistant.checkupTab.controls.groupByBar.byIssueLabel": "按问题",
     "xpack.upgradeAssistant.checkupTab.deprecations.criticalActionTooltip": "请解决此问题后再升级。",

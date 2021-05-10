@@ -23961,7 +23961,6 @@
     "xpack.upgradeAssistant.checkupTab.changeFiltersShowMoreLabel": "より多く表示させるにはフィルターを変更します。",
     "xpack.upgradeAssistant.checkupTab.confirmationModal.removeButtonLabel": "削除",
     "xpack.upgradeAssistant.checkupTab.controls.filterBar.criticalButtonLabel": "致命的",
-    "xpack.upgradeAssistant.checkupTab.controls.filterBar.warningButtonLabel": "警告",
     "xpack.upgradeAssistant.checkupTab.controls.groupByBar.byIndexLabel": "インデックス別",
     "xpack.upgradeAssistant.checkupTab.controls.groupByBar.byIssueLabel": "問題別",
     "xpack.upgradeAssistant.checkupTab.deprecations.criticalActionTooltip": "アップグレード前にこの問題を解決してください。",
