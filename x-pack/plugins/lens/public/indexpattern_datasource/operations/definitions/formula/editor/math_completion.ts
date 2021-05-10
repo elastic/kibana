@@ -15,10 +15,10 @@ import {
   TinymathNamedArgument,
 } from '@kbn/tinymath';
 import { DataPublicPluginStart, QuerySuggestion } from 'src/plugins/data/public';
-import { IndexPattern } from '../../../types';
-import { memoizedGetAvailableOperationsByMetadata } from '../../operations';
-import { tinymathFunctions, groupArgsByType } from './util';
-import type { GenericOperationDefinition } from '..';
+import { IndexPattern } from '../../../../types';
+import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
+import { tinymathFunctions, groupArgsByType } from '../util';
+import type { GenericOperationDefinition } from '../..';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',

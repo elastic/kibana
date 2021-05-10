@@ -6,12 +6,12 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { createMockedIndexPattern } from '../../../mocks';
-import { GenericOperationDefinition } from '../index';
-import type { IndexPatternField } from '../../../types';
-import type { OperationMetadata } from '../../../../types';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { tinymathFunctions } from './util';
+import { createMockedIndexPattern } from '../../../../mocks';
+import { GenericOperationDefinition } from '../../index';
+import type { IndexPatternField } from '../../../../types';
+import type { OperationMetadata } from '../../../../../types';
+import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
+import { tinymathFunctions } from '../util';
 import { getSignatureHelp, getHover, suggest } from './math_completion';
 
 const buildGenericColumn = (type: string) => {
