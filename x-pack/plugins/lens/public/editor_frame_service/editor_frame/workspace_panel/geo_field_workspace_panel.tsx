@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPageContentBody, EuiText } from '@elastic/eui';
+import { EuiPageContentBody, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,8 +28,8 @@ interface Props {
 const dragDropIdentifier = {
   id: 'lnsGeoFieldWorkspace',
   humanData: {
-    label: i18n.translate('xpack.lens.geoFieldWorkspace.workspaceLabel', {
-      defaultMessage: 'Geo field workspace',
+    label: i18n.translate('xpack.lens.geoFieldWorkspace.dropZoneLabel', {
+      defaultMessage: 'drop zone to open in maps',
     }),
   },
 };
@@ -46,15 +46,12 @@ export function GeoFieldWorkspacePanel(props: Props) {
 
   return (
     <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-      <EuiText
-        className="lnsWorkspacePanel__emptyContent"
-        textAlign="center"
-        size="s"
-      >
+      <EuiText className="lnsWorkspacePanel__emptyContent" textAlign="center" size="s">
         <h2>
           <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
         </h2>
         <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
+        <EuiSpacer size="l" />
         <DragDrop
           className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
           dataTestSubj="lnsGeoFieldWorkspace"
