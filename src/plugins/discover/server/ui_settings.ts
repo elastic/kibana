@@ -155,13 +155,13 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   },
   [DOC_TABLE_LEGACY]: {
     name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use legacy table',
+      defaultMessage: 'Use classic table',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
-        'view. Enable this option if you prefer to fall back to the legacy table.',
+        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
+        'Turn on this option to use the classic table. Turn off to use the new table. ',
     }),
     category: ['discover'],
     schema: schema.boolean(),
