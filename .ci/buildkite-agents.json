@@ -15,8 +15,7 @@
         "idleTimeoutMins": 60,
         "exitAfterOneJob": false,
         "imageFamily": "kibana-bk-dev-agents",
-        "machineType": "n1-standard-1",
-        "localSsds": 1,
+        "machineType": "e2-small",
         "diskType": "pd-ssd",
         "diskSizeGb": 75
       },
