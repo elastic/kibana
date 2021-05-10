@@ -27,7 +27,11 @@ import {
   secOnly,
   secOnlyRead,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
+import {
+  obsOnlyDefaultSpaceAuth,
+  secOnlyDefaultSpaceAuth,
+  superUserDefaultSpaceAuth,
+} from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -52,14 +56,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
         params: postCommentUserReq,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
@@ -72,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
           version: patchedCase.comments![0].version,
           comment: newComment,
         },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       const userComment = updatedCase.comments![0] as AttributesTypeUser;
@@ -87,14 +91,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       const patchedCase = await createComment({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
@@ -107,7 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
           version: patchedCase.comments![0].version,
           comment: newComment,
         },
-        auth: obsOnlyNoSpaceAuth,
+        auth: obsOnlyDefaultSpaceAuth,
         expectedHttpCode: 403,
       });
     });
@@ -120,14 +124,14 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest(),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         );
 
         const patchedCase = await createComment({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           params: postCommentUserReq,
-          auth: superUserNoSpaceAuth,
+          auth: superUserDefaultSpaceAuth,
         });
 
         const newComment = 'Well I decided to update my comment. So what? Deal with it.';
@@ -151,14 +155,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       const patchedCase = await createComment({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';

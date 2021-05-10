@@ -25,10 +25,10 @@ import {
   obsSecRead,
 } from '../../../../common/lib/authentication/users';
 import {
-  obsOnlyNoSpaceAuth,
-  obsSecNoSpaceAuth,
-  secOnlyNoSpaceAuth,
-  superUserNoSpaceAuth,
+  obsOnlyDefaultSpaceAuth,
+  obsSecDefaultSpaceAuth,
+  secOnlyDefaultSpaceAuth,
+  superUserDefaultSpaceAuth,
 } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -49,14 +49,14 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           200,
-          secOnlyNoSpaceAuth
+          secOnlyDefaultSpaceAuth
         ),
         // Create case owned by the observability user
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          obsOnlyNoSpaceAuth
+          obsOnlyDefaultSpaceAuth
         ),
       ]);
 
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it(`User ${
       noKibanaPrivileges.username
     } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT read a case`, async () => {
-      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth);
+      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserDefaultSpaceAuth);
 
       await findCases({
         supertest: supertestWithoutAuth,
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a 404 when attempting to access a space', async () => {
-      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth);
+      await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserDefaultSpaceAuth);
 
       await findCases({
         supertest: supertestWithoutAuth,
@@ -119,13 +119,13 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
       await Promise.all([
         // super user creates a case with owner securitySolutionFixture
-        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserNoSpaceAuth),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, superUserDefaultSpaceAuth),
         // super user creates a case with owner observabilityFixture
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         ),
       ]);
 
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
           search: 'securitySolutionFixture observabilityFixture',
           searchFields: 'owner',
         },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
@@ -183,13 +183,13 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          obsOnlyNoSpaceAuth
+          obsOnlyDefaultSpaceAuth
         ),
       ]);
 
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext): void => {
           owner: 'securitySolutionFixture',
           searchFields: 'owner',
         },
-        auth: obsSecNoSpaceAuth,
+        auth: obsSecDefaultSpaceAuth,
       });
 
       ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
@@ -211,13 +211,13 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
       ]);
 
@@ -227,7 +227,7 @@ export default ({ getService }: FtrProviderContext): void => {
         query: {
           owner: ['securitySolutionFixture', 'observabilityFixture'],
         },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       // Only security solution cases are being returned

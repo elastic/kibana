@@ -25,7 +25,11 @@ import {
   secOnly,
   secOnlyRead,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
+import {
+  obsOnlyDefaultSpaceAuth,
+  secOnlyDefaultSpaceAuth,
+  superUserDefaultSpaceAuth,
+} from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -49,14 +53,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'securitySolutionFixture' }),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
     });
 
@@ -65,14 +69,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'observabilityFixture' }),
         200,
-        obsOnlyNoSpaceAuth
+        obsOnlyDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: { ...postCommentUserReq, owner: 'observabilityFixture' },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
         expectedHttpCode: 403,
       });
     });
@@ -85,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         );
 
         await createComment({
@@ -103,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'securitySolutionFixture' }),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({

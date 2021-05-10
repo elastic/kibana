@@ -20,10 +20,10 @@ import {
   noKibanaPrivileges,
 } from '../../../../../common/lib/authentication/users';
 import {
-  secOnlyNoSpaceAuth,
-  obsOnlyNoSpaceAuth,
-  obsSecNoSpaceAuth,
-  superUserNoSpaceAuth,
+  secOnlyDefaultSpaceAuth,
+  obsOnlyDefaultSpaceAuth,
+  obsSecDefaultSpaceAuth,
+  superUserDefaultSpaceAuth,
 } from '../../../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -41,14 +41,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       await createCase(
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
         200,
-        obsOnlyNoSpaceAuth
+        obsOnlyDefaultSpaceAuth
       );
 
       for (const scenario of [
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       // user should not be able to get all tags at the appropriate space
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await getTags({
@@ -121,19 +121,19 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
       ]);
 
       const tags = await getTags({
         supertest: supertestWithoutAuth,
-        auth: obsSecNoSpaceAuth,
+        auth: obsSecDefaultSpaceAuth,
         query: { owner: 'securitySolutionFixture' },
       });
 
@@ -146,20 +146,20 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
       ]);
 
       // User with permissions only to security solution request tags from observability
       const tags = await getTags({
         supertest: supertestWithoutAuth,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
         query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
       });
 

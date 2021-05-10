@@ -24,7 +24,11 @@ import {
   obsSecRead,
   noKibanaPrivileges,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
+import {
+  obsOnlyDefaultSpaceAuth,
+  secOnlyDefaultSpaceAuth,
+  superUserDefaultSpaceAuth,
+} from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -43,14 +47,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       await deleteCases({
         supertest: supertestWithoutAuth,
         caseIDs: [postedCase.id],
         expectedHttpCode: 204,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
     });
 
@@ -59,14 +63,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       await deleteCases({
         supertest: supertestWithoutAuth,
         caseIDs: [postedCase.id],
         expectedHttpCode: 403,
-        auth: obsOnlyNoSpaceAuth,
+        auth: obsOnlyDefaultSpaceAuth,
       });
     });
 
@@ -75,21 +79,21 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       const caseObs = await createCase(
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'observabilityFixture' }),
         200,
-        obsOnlyNoSpaceAuth
+        obsOnlyDefaultSpaceAuth
       );
 
       await deleteCases({
         supertest: supertestWithoutAuth,
         caseIDs: [caseSec.id, caseObs.id],
         expectedHttpCode: 403,
-        auth: obsOnlyNoSpaceAuth,
+        auth: obsOnlyDefaultSpaceAuth,
       });
 
       // Cases should have not been deleted.
@@ -97,14 +101,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         caseId: caseSec.id,
         expectedHttpCode: 200,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
 
       await getCase({
         supertest: supertestWithoutAuth,
         caseId: caseObs.id,
         expectedHttpCode: 200,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
     });
 
@@ -116,7 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest(),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         );
 
         await deleteCases({
@@ -133,7 +137,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await deleteCases({

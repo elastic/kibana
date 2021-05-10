@@ -8,7 +8,7 @@
 import { obsOnly, obsSec, secOnly } from '../common/lib/authentication/users';
 import { getAuthWithSuperUser } from '../common/lib/utils';
 
-export const secOnlyNoSpaceAuth = { user: secOnly, space: null };
-export const obsOnlyNoSpaceAuth = { user: obsOnly, space: null };
-export const obsSecNoSpaceAuth = { user: obsSec, space: null };
-export const superUserNoSpaceAuth = getAuthWithSuperUser(null);
+export const secOnlyDefaultSpaceAuth = { user: secOnly, space: null };
+export const obsOnlyDefaultSpaceAuth = { user: obsOnly, space: null };
+export const obsSecDefaultSpaceAuth = { user: obsSec, space: null };
+export const superUserDefaultSpaceAuth = getAuthWithSuperUser(null);

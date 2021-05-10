@@ -26,7 +26,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { superUserNoSpaceAuth } from '../../../utils';
+import { superUserDefaultSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -44,21 +44,21 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         params: postCommentUserReq,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
 
       await createComment({
         supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         params: postCommentUserReq,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
 
       for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
@@ -77,14 +77,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         params: postCommentUserReq,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
 
       for (const scenario of [
@@ -111,14 +111,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
         params: postCommentUserReq,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
 
       await getAllComments({

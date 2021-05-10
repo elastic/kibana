@@ -35,7 +35,11 @@ import {
   globalRead,
   obsSecRead,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
+import {
+  obsOnlyDefaultSpaceAuth,
+  secOnlyDefaultSpaceAuth,
+  superUserDefaultSpaceAuth,
+} from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -58,12 +62,12 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return the correct comments', async () => {
       const [secCase, obsCase] = await Promise.all([
         // Create case owned by the security solution user
-        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, secOnlyNoSpaceAuth),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, secOnlyDefaultSpaceAuth),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          obsOnlyNoSpaceAuth
+          obsOnlyDefaultSpaceAuth
         ),
         // Create case owned by the observability user
       ]);
@@ -73,13 +77,13 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
           params: postCommentUserReq,
-          auth: secOnlyNoSpaceAuth,
+          auth: secOnlyDefaultSpaceAuth,
         }),
         createComment({
           supertest: supertestWithoutAuth,
           caseId: obsCase.id,
           params: { ...postCommentAlertReq, owner: 'observabilityFixture' },
-          auth: obsOnlyNoSpaceAuth,
+          auth: obsOnlyDefaultSpaceAuth,
         }),
       ]);
 
@@ -154,7 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({
@@ -176,12 +180,12 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
         params: { ...postCommentUserReq, owner: 'securitySolutionFixture' },
         caseId: caseInfo.id,
       });
@@ -197,12 +201,12 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'observabilityFixture' }),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
         params: { ...postCommentUserReq, owner: 'observabilityFixture' },
         caseId: obsCase.id,
       });
@@ -225,12 +229,12 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'observabilityFixture' }),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
         params: { ...postCommentUserReq, owner: 'observabilityFixture' },
         caseId: obsCase.id,
       });

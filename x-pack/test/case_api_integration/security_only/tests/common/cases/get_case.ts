@@ -29,7 +29,7 @@ import {
   obsSec,
 } from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
-import { secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
+import { secOnlyDefaultSpaceAuth, superUserDefaultSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       await createComment({
@@ -73,14 +73,14 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: postCommentUserReq,
         expectedHttpCode: 200,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       const theCase = await getCase({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         includeComments: true,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await getCase({

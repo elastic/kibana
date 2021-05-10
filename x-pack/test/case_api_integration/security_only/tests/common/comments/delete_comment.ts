@@ -27,7 +27,7 @@ import {
   secOnly,
   secOnlyRead,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth } from '../../../utils';
+import { obsOnlyDefaultSpaceAuth, secOnlyDefaultSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -52,21 +52,21 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       const commentResp = await createComment({
         supertest: supertestWithoutAuth,
         caseId: secCase.id,
         params: postCommentUserReq,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       await deleteComment({
         supertest: supertestWithoutAuth,
         caseId: secCase.id,
         commentId: commentResp.comments![0].id,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
     });
 
@@ -75,27 +75,27 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       await createComment({
         supertest: supertestWithoutAuth,
         caseId: secCase.id,
         params: postCommentUserReq,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       await createComment({
         supertest: supertestWithoutAuth,
         caseId: secCase.id,
         params: postCommentUserReq,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       await deleteAllComments({
         supertest: supertestWithoutAuth,
         caseId: secCase.id,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
     });
 
@@ -104,28 +104,28 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       const commentResp = await createComment({
         supertest: supertestWithoutAuth,
         caseId: secCase.id,
         params: postCommentUserReq,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       await deleteComment({
         supertest: supertestWithoutAuth,
         caseId: secCase.id,
         commentId: commentResp.comments![0].id,
-        auth: obsOnlyNoSpaceAuth,
+        auth: obsOnlyDefaultSpaceAuth,
         expectedHttpCode: 403,
       });
 
       await deleteAllComments({
         supertest: supertestWithoutAuth,
         caseId: secCase.id,
-        auth: obsOnlyNoSpaceAuth,
+        auth: obsOnlyDefaultSpaceAuth,
         expectedHttpCode: 403,
       });
     });

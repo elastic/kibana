@@ -23,7 +23,7 @@ import {
   globalRead,
   obsSecRead,
 } from '../../../../common/lib/authentication/users';
-import { secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
+import { secOnlyDefaultSpaceAuth, superUserDefaultSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getConfigurationRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       const newConfiguration = await updateConfiguration(
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
           version: configuration.version,
         },
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       expect(newConfiguration.owner).to.eql('securitySolutionFixture');
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         { ...getConfigurationRequest(), owner: 'observabilityFixture' },
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await updateConfiguration(
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
           version: configuration.version,
         },
         403,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
     });
 
@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getConfigurationRequest(),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         );
 
         await updateConfiguration(
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         { ...getConfigurationRequest(), owner: 'securitySolutionFixture' },
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await updateConfiguration(

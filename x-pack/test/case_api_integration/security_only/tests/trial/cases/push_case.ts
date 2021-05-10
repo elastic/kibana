@@ -26,7 +26,7 @@ import {
   secOnly,
   secOnlyRead,
 } from '../../../../common/lib/authentication/users';
-import { secOnlyNoSpaceAuth } from '../../../utils';
+import { secOnlyDefaultSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         connectorId: connector.id,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
     });
 
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         connectorId: connector.id,
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
         expectedHttpCode: 403,
       });
     });

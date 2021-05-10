@@ -25,7 +25,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { superUserNoSpaceAuth } from '../../../utils';
+import { superUserDefaultSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await updateCase({
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         },
-        auth: superUserNoSpaceAuth,
+        auth: superUserDefaultSpaceAuth,
       });
     });
 

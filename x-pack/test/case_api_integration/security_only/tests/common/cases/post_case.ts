@@ -18,7 +18,7 @@ import {
   noKibanaPrivileges,
 } from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
+import { secOnlyDefaultSpaceAuth, superUserDefaultSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'securitySolutionFixture' }),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
       expect(theCase.owner).to.eql('securitySolutionFixture');
     });
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'observabilityFixture' }),
         403,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
     });
 
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           403,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         );
       });
     }

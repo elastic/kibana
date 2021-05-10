@@ -26,7 +26,11 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { obsOnlyNoSpaceAuth, secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
+import {
+  obsOnlyDefaultSpaceAuth,
+  secOnlyDefaultSpaceAuth,
+  superUserDefaultSpaceAuth,
+} from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -45,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         postCaseReq,
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       const patchedCases = await updateCase({
@@ -59,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       expect(patchedCases[0].owner).to.eql('securitySolutionFixture');
@@ -67,9 +71,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should update multiple cases when the user has the correct permissions', async () => {
       const [case1, case2, case3] = await Promise.all([
-        createCase(supertestWithoutAuth, postCaseReq, 200, superUserNoSpaceAuth),
-        createCase(supertestWithoutAuth, postCaseReq, 200, superUserNoSpaceAuth),
-        createCase(supertestWithoutAuth, postCaseReq, 200, superUserNoSpaceAuth),
+        createCase(supertestWithoutAuth, postCaseReq, 200, superUserDefaultSpaceAuth),
+        createCase(supertestWithoutAuth, postCaseReq, 200, superUserDefaultSpaceAuth),
+        createCase(supertestWithoutAuth, postCaseReq, 200, superUserDefaultSpaceAuth),
       ]);
 
       const patchedCases = await updateCase({
@@ -93,7 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       expect(patchedCases[0].owner).to.eql('securitySolutionFixture');
@@ -106,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getPostCaseRequest({ owner: 'observabilityFixture' }),
         200,
-        obsOnlyNoSpaceAuth
+        obsOnlyDefaultSpaceAuth
       );
 
       await updateCase({
@@ -120,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
         expectedHttpCode: 403,
       });
     });
@@ -131,19 +135,19 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         ),
         createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture' }),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         ),
       ]);
 
@@ -168,7 +172,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
         expectedHttpCode: 403,
       });
 
@@ -188,7 +192,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest(),
           200,
-          superUserNoSpaceAuth
+          superUserDefaultSpaceAuth
         );
 
         await updateCase({

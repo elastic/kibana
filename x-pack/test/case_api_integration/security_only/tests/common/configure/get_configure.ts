@@ -24,10 +24,10 @@ import {
   obsSecRead,
 } from '../../../../common/lib/authentication/users';
 import {
-  obsOnlyNoSpaceAuth,
-  obsSecNoSpaceAuth,
-  secOnlyNoSpaceAuth,
-  superUserNoSpaceAuth,
+  obsOnlyDefaultSpaceAuth,
+  obsSecDefaultSpaceAuth,
+  secOnlyDefaultSpaceAuth,
+  superUserDefaultSpaceAuth,
 } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -45,14 +45,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getConfigurationRequest(),
         200,
-        secOnlyNoSpaceAuth
+        secOnlyDefaultSpaceAuth
       );
 
       await createConfiguration(
         supertestWithoutAuth,
         { ...getConfigurationRequest(), owner: 'observabilityFixture' },
         200,
-        obsOnlyNoSpaceAuth
+        obsOnlyDefaultSpaceAuth
       );
 
       for (const scenario of [
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getConfigurationRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       // user should not be able to read configurations at the appropriate space
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertestWithoutAuth,
         getConfigurationRequest(),
         200,
-        superUserNoSpaceAuth
+        superUserDefaultSpaceAuth
       );
 
       await getConfiguration({
@@ -138,20 +138,20 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getConfigurationRequest(),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
         createConfiguration(
           supertestWithoutAuth,
           { ...getConfigurationRequest(), owner: 'observabilityFixture' },
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
       ]);
 
       const res = await getConfiguration({
         supertest: supertestWithoutAuth,
         query: { owner: 'securitySolutionFixture' },
-        auth: obsSecNoSpaceAuth,
+        auth: obsSecDefaultSpaceAuth,
       });
 
       ensureSavedObjectIsAuthorized(res, 1, ['securitySolutionFixture']);
@@ -163,13 +163,13 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getConfigurationRequest(),
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
         createConfiguration(
           supertestWithoutAuth,
           { ...getConfigurationRequest(), owner: 'observabilityFixture' },
           200,
-          obsSecNoSpaceAuth
+          obsSecDefaultSpaceAuth
         ),
       ]);
 
@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const res = await getConfiguration({
         supertest: supertestWithoutAuth,
         query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
-        auth: secOnlyNoSpaceAuth,
+        auth: secOnlyDefaultSpaceAuth,
       });
 
       // Only security solution cases are being returned
