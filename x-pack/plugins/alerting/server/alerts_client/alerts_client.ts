@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
-import { createHash } from 'crypto';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -383,55 +382,6 @@ export class AlertsClient {
     return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
   }
 
-  public async getBulk<Params extends AlertTypeParams = never>({
-    ids,
-  }: {
-    ids: string[];
-  }): Promise<Array<SanitizedAlert<Params>>> {
-    const objects = ids.map((id) => ({
-      id,
-      type: 'alert',
-    }));
-    const results = await this.unsecuredSavedObjectsClient.bulkGet<RawAlert>(objects);
-    const validResults = results.saved_objects.filter((result) => result.error == null);
-    const authorizations: string[] = [];
-    for (const result of validResults) {
-      const hash = createHash('sha256')
-        .update(result.attributes.alertTypeId)
-        .update(result.attributes.consumer)
-        .digest('hex');
-      if (!authorizations.includes(hash)) {
-        try {
-          await this.authorization.ensureAuthorized(
-            result.attributes.alertTypeId,
-            result.attributes.consumer,
-            ReadOperations.Get
-          );
-          authorizations.push(hash);
-        } catch (error) {
-          this.auditLogger?.log(
-            alertAuditEvent({
-              action: AlertAuditAction.GET,
-              savedObject: { type: 'alert', id: result.id },
-              error,
-            })
-          );
-          throw error;
-        }
-      }
-    }
-
-    return validResults.map((result) => {
-      this.auditLogger?.log(
-        alertAuditEvent({
-          action: AlertAuditAction.GET,
-          savedObject: { type: 'alert', id: result.id },
-        })
-      );
-      return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
-    });
-  }
-
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
     const alert = await this.get({ id });
     await this.authorization.ensureAuthorized(
@@ -514,6 +464,7 @@ export class AlertsClient {
       ensureAlertTypeIsAuthorized,
       logSuccessfulAuthorization,
     } = authorizationTuple;
+
     const {
       page,
       per_page: perPage,
@@ -529,6 +480,7 @@ export class AlertsClient {
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
+
     const authorizedData = data.map(({ id, attributes, references }) => {
       try {
         ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);

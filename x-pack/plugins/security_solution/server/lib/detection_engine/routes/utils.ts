@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import Joi from 'joi';
 import { errors } from '@elastic/elasticsearch';
-import { chunk } from 'lodash';
 import { has, snakeCase } from 'lodash/fp';
 import { SanitizedAlert } from '../../../../../alerting/common';
 
@@ -342,7 +341,13 @@ export const getFailingRules = async (
   alertsClient: AlertsClient
 ): Promise<GetFailingRulesResult> => {
   try {
-    const errorRules = await alertsClient.getBulk({ ids });
+    const errorRules = await Promise.all(
+      ids.map(async (id) =>
+        alertsClient.get({
+          id,
+        })
+      )
+    );
     return errorRules
       .filter((rule) => rule.executionStatus.status === 'error')
       .reduce<GetFailingRulesResult>((acc, failingRule) => {
