@@ -224,9 +224,7 @@ export function PieComponent(
   });
   const isEmpty =
     firstTable.rows.length === 0 ||
-    firstTable.rows.every((row) =>
-      groups.every((colId) => !row[colId] || typeof row[colId] === 'undefined')
-    );
+    firstTable.rows.every((row) => groups.every((colId) => typeof row[colId] === 'undefined'));
 
   if (isEmpty) {
     return <EmptyPlaceholder icon={LensIconChartDonut} />;

@@ -13,6 +13,7 @@ import {
   NodeColorAccessor,
   ShapeTreeNode,
   HierarchyOfArrays,
+  Chart,
 } from '@elastic/charts';
 import { shallow } from 'enzyme';
 import { LensMultiTable } from '../types';
@@ -290,6 +291,28 @@ describe('PieVisualization component', () => {
         <PieComponent args={{ ...args }} {...defaultArgs} renderMode="noInteractivity" />
       );
       expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
+    });
+
+    test('it renders the chart for only 0 data', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            rows: [
+              { a: 0, b: 0, c: 'I', d: 'Row 1' },
+              { a: 0, b: 0, c: 'J', d: 'Row 2' },
+            ],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+      expect(component.find(EmptyPlaceholder)).toHaveLength(0);
+      expect(component.find(Chart)).toHaveLength(1);
     });
 
     test('it shows emptyPlaceholder for undefined grouped data', () => {
