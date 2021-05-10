@@ -33,7 +33,7 @@ import { SetupModeFeature } from '../../../../common/enums';
 function getColumns(alerts, setupMode, cgroup) {
   const memoryField = cgroup
     ? {
-        name: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
+        name: i18n.translate('xpack.monitoring.apm.instances.cgroupMemoryUsageTitle', {
           defaultMessage: 'Memory Usage (cgroup)',
         }),
         field: 'cgroup_memory',
