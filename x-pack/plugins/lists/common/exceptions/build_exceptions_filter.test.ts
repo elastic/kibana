@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EntryMatchAny } from '@kbn/securitysolution-io-ts-utils';
+
 import { getEntryMatchExcludeMock, getEntryMatchMock } from '../schemas/types/entry_match.mock';
 import {
   getEntryMatchAnyExcludeMock,
@@ -16,14 +18,10 @@ import {
   getEntryNestedMixedEntries,
   getEntryNestedMock,
 } from '../schemas/types/entry_nested.mock';
-import {
-  getExceptionListItemSchemaMock,
-  getExceptionListItemSchemaXMock,
-} from '../schemas/response/exception_list_item_schema.mock';
-import { EntryMatchAny, ExceptionListItemSchema } from '../schemas';
+import { getExceptionListItemSchemaMock } from '../schemas/response/exception_list_item_schema.mock';
+import { ExceptionListItemSchema } from '../schemas';
 
 import {
-  ExceptionItemSansLargeValueLists,
   buildExceptionFilter,
   buildExceptionItemFilter,
   buildExclusionClause,
@@ -31,23 +29,14 @@ import {
   buildMatchAnyClause,
   buildMatchClause,
   buildNestedClause,
-  chunkExceptions,
   createOrClauses,
 } from './build_exceptions_filter';
-import { hasLargeValueList } from './utils';
 
 const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   ...getEntryMatchAnyMock(),
   operator: 'included',
   value: ['some "host" name', 'some other host name'],
 });
-
-const getExceptionListItemsWoValueLists = (num: number): ExceptionItemSansLargeValueLists[] => {
-  const items = getExceptionListItemSchemaXMock(num);
-  return items.filter(
-    ({ entries }) => !hasLargeValueList(entries)
-  ) as ExceptionItemSansLargeValueLists[];
-};
 
 describe('build_exceptions_filter', () => {
   describe('buildExceptionFilter', () => {
@@ -428,55 +417,6 @@ describe('build_exceptions_filter', () => {
           },
         },
       });
-    });
-  });
-
-  describe('chunkExceptions', () => {
-    test('it should NOT split a single should clause as there is nothing to split on with chunkSize 1', () => {
-      const exceptions = getExceptionListItemsWoValueLists(1);
-      const chunks = chunkExceptions(exceptions, 1);
-      expect(chunks).toHaveLength(1);
-    });
-
-    test('it should NOT split a single should clause as there is nothing to split on with chunkSize 2', () => {
-      const exceptions = getExceptionListItemsWoValueLists(1) as ExceptionItemSansLargeValueLists[];
-      const chunks = chunkExceptions(exceptions, 2);
-      expect(chunks).toHaveLength(1);
-    });
-
-    test('it should return an empty array if no exception items passed in', () => {
-      const chunks = chunkExceptions([], 2);
-      expect(chunks).toEqual([]);
-    });
-
-    test('it should split an array of size 2 into a length 2 array with chunks on "chunkSize: 1"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(2);
-      const chunks = chunkExceptions(exceptions, 1);
-      expect(chunks).toHaveLength(2);
-    });
-
-    test('it should split an array of size 2 into a length 4 array with chunks on "chunkSize: 1"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(4);
-      const chunks = chunkExceptions(exceptions, 1);
-      expect(chunks).toHaveLength(4);
-    });
-
-    test('it should split an array of size 4 into a length 2 array with chunks on "chunkSize: 2"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(4);
-      const chunks = chunkExceptions(exceptions, 2);
-      expect(chunks).toHaveLength(2);
-    });
-
-    test('it should NOT split an array of size 4 into any groups on "chunkSize: 5"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(4);
-      const chunks = chunkExceptions(exceptions, 5);
-      expect(chunks).toHaveLength(1);
-    });
-
-    test('it should split an array of size 4 into 2 groups on "chunkSize: 3"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(4);
-      const chunks = chunkExceptions(exceptions, 3);
-      expect(chunks).toHaveLength(2);
     });
   });
 
