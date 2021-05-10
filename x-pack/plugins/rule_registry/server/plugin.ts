@@ -5,24 +5,56 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup, CoreStart, Logger } from 'src/core/server';
+import { SpacesPluginStart } from '../../spaces/server';
+
+import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
-import { RuleRegistryPluginConfig } from '.';
+import { EventLogService, IEventLogService } from './event_log';
 
-export type RuleRegistryPluginSetupContract = RuleDataPluginService;
-export type RuleRegistryPluginStartContract = void;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface RuleRegistryPluginSetupDependencies {}
 
-export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContract> {
-  constructor(private readonly initContext: PluginInitializerContext) {
+interface RuleRegistryPluginStartDependencies {
+  spaces: SpacesPluginStart;
+}
+
+export interface RuleRegistryPluginSetupContract {
+  ruleDataService: RuleDataPluginService;
+}
+
+export interface RuleRegistryPluginStartContract {
+  eventLogService: IEventLogService;
+}
+
+export class RuleRegistryPlugin
+  implements
+    Plugin<
+      RuleRegistryPluginSetupContract,
+      RuleRegistryPluginStartContract,
+      RuleRegistryPluginSetupDependencies,
+      RuleRegistryPluginStartDependencies
+    > {
+  private readonly initContext: PluginInitializerContext;
+  private readonly config: RuleRegistryPluginConfig;
+  private readonly logger: Logger;
+  private eventLogService: EventLogService | null;
+
+  constructor(initContext: PluginInitializerContext) {
     this.initContext = initContext;
+    this.config = initContext.config.get<RuleRegistryPluginConfig>();
+    this.logger = initContext.logger.get();
+    this.eventLogService = null;
   }
 
-  public setup(core: CoreSetup): RuleRegistryPluginSetupContract {
+  public setup(
+    core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>
+  ): RuleRegistryPluginSetupContract {
     const config = this.initContext.config.get<RuleRegistryPluginConfig>();
 
     const logger = this.initContext.logger.get();
 
-    const service = new RuleDataPluginService({
+    const ruleDataService = new RuleDataPluginService({
       logger,
       isWriteEnabled: config.write.enabled,
       index: config.index,
@@ -33,17 +65,42 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
       },
     });
 
-    service.init().catch((originalError) => {
+    ruleDataService.init().catch((originalError) => {
       const error = new Error('Failed installing assets');
       // @ts-ignore
       error.stack = originalError.stack;
       logger.error(error);
     });
 
-    return service;
+    return { ruleDataService };
   }
 
-  public start(): RuleRegistryPluginStartContract {}
+  public start(
+    core: CoreStart,
+    plugins: RuleRegistryPluginStartDependencies
+  ): RuleRegistryPluginStartContract {
+    this.eventLogService = new EventLogService({
+      config: {
+        indexPrefix: this.config.index,
+        isWriteEnabled: this.config.write.enabled,
+      },
+      dependencies: {
+        clusterClient: Promise.resolve(core.elasticsearch.client), // TODO: get rid of Promise
+        spaces: plugins.spaces.spacesService,
+        logger: this.logger.get('eventLog'),
+      },
+    });
 
-  public stop() {}
+    return {
+      eventLogService: this.eventLogService,
+    };
+  }
+
+  public stop() {
+    if (this.eventLogService) {
+      this.eventLogService.stop().catch((e) => {
+        this.logger.error(e);
+      });
+    }
+  }
 }
