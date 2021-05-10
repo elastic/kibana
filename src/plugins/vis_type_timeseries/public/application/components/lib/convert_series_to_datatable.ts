@@ -9,6 +9,7 @@ import { IndexPattern } from 'src/plugins/data/public';
 import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData } from '../../../../common/types';
+import { BUCKET_TYPES } from '../../../../common/enums';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import { getDataStart } from '../../../services';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
@@ -35,17 +36,18 @@ export const addMetaToColumns = (
   return columns.map((column) => {
     const field = indexPattern.getFieldByName(column.name);
     const type = (field?.spec.type as DatatableColumnType) || 'number';
-    let params = {
+
+    let params: unknown = {
       field: field?.spec.name,
     };
-    if (column.type === 'filters' && column.params) {
+    if (column.type === BUCKET_TYPES.FILTERS && column.params) {
       const filters = column.params.map((col) => ({
         input: col.filter,
         label: col.label,
       }));
       params = {
         filters,
-      } as any;
+      };
     }
 
     const cleanedColumn = {
@@ -64,7 +66,7 @@ export const addMetaToColumns = (
           params,
         },
       },
-    };
+    } as DatatableColumn;
     return cleanedColumn;
   });
 };
@@ -87,8 +89,8 @@ export const convertSeriesToDataTable = async (
         usedIndexPattern = indexPattern;
       }
     }
-    const isGroupedByTerms = layer.split_mode === 'terms';
-    const isGroupedByFilters = layer.split_mode === 'filters';
+    const isGroupedByTerms = layer.split_mode === BUCKET_TYPES.TERMS;
+    const isGroupedByFilters = layer.split_mode === BUCKET_TYPES.FILTERS;
     const seriesPerLayer = series.filter((s) => s.seriesId === layer.id);
     let id = X_ACCESSOR_INDEX;
 
@@ -115,16 +117,16 @@ export const convertSeriesToDataTable = async (
           id,
           name: layer.terms_field || '',
           isMetric: false,
-          type: 'terms',
+          type: BUCKET_TYPES.TERMS,
         });
       } else if (isGroupedByFilters) {
         id++;
         columns.push({
           id,
-          name: 'filters',
+          name: BUCKET_TYPES.FILTERS,
           isMetric: false,
           params: layer?.split_filters as FilterParams[],
-          type: 'filters',
+          type: BUCKET_TYPES.FILTERS,
         });
       }
     }

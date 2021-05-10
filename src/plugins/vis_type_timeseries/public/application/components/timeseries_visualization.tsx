@@ -125,7 +125,7 @@ function TimeseriesVisualization({
         data: {
           data,
           negate: false,
-          timeFieldName: indexPattern?.timeFieldName,
+          timeFieldName: indexPattern.timeFieldName,
         },
       };
 

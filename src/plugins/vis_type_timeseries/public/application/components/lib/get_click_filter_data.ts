@@ -8,6 +8,7 @@
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { ValueClickContext } from 'src/plugins/embeddable/public';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
+import { BUCKET_TYPES } from '../../../../common/enums';
 import { TimeseriesVisParams } from '../../../types';
 import type { TSVBTables } from './types';
 
@@ -26,11 +27,11 @@ export const getClickFilterData = (
     const table = tables[termArray[0]];
 
     const layer = model.series.filter(({ id }) => id === termArray[0]);
-    let splitLabel: string | null = termArray.length > 1 ? termArray[1] : null;
+    let splitLabel = termArray.length > 1 ? termArray[1] : undefined;
     // compute label for filters split mode
-    if (layer.length && layer[0].split_mode === 'filters') {
+    if (layer.length && layer[0].split_mode === BUCKET_TYPES.FILTERS) {
       const filter = layer[0]?.split_filters?.filter(({ id }) => id === termArray[1]);
-      splitLabel = filter?.[0].filter?.query;
+      splitLabel = filter?.[0].filter?.query as string;
     }
     const index = table.rows.findIndex((row) => {
       const condition =
