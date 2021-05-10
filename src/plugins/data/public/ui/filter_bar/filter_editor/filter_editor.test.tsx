@@ -45,7 +45,7 @@ describe('<FilterEditor />', () => {
       testBed = await registerTestBed(FilterEditor, { defaultProps })();
     });
 
-    it('requires a non-object empty JSON object', async () => {
+    it('requires a non-empty JSON object', async () => {
       const { exists, find } = testBed;
 
       expect(exists('customEditorInput')).toBe(true);
