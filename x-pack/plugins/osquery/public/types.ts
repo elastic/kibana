@@ -35,7 +35,6 @@ export interface StartPlugins {
 
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  security?: SecurityPluginSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;
