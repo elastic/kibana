@@ -26,6 +26,7 @@ import {
   EventFiltersListPageDataChanged,
   EventFiltersListPageDataExistsChanged,
   EventFilterForDeletion,
+  EventFilterDeletionReset,
 } from './action';
 
 import { EventFiltersListPageState } from '../state';
@@ -187,8 +188,26 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
 };
 
 const handleEventFilterForDeletion: CaseReducer<EventFilterForDeletion> = (state, action) => {
-  // FIXME:PT implement
-  return state;
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      deletion: {
+        ...state.listPage.deletion,
+        item: action.payload,
+      },
+    },
+  };
+};
+
+const handleEventFilterDeletionReset: CaseReducer<EventFilterDeletionReset> = (state) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      deletion: initialEventFiltersPageState().listPage.deletion,
+    },
+  };
 };
 
 export const eventFiltersPageReducer: StateReducer = (
@@ -221,6 +240,8 @@ export const eventFiltersPageReducer: StateReducer = (
         return handleEventFiltersListPageDataExistChanges(state, action);
       case 'eventFilterForDeletion':
         return handleEventFilterForDeletion(state, action);
+      case 'eventFilterDeletionReset':
+        return handleEventFilterDeletionReset(state, action);
     }
   }
 

@@ -27,10 +27,10 @@ export type EventFiltersListPageDataExistsChanged = Action<'eventFiltersListPage
 };
 
 export type EventFilterForDeletion = Action<'eventFilterForDeletion'> & {
-  payload: {
-    id: string;
-  };
+  payload: Pick<ExceptionListItemSchema, 'id' | 'name'>;
 };
+
+export type EventFilterDeletionReset = Action<'eventFilterDeletionReset'>;
 
 export type EventFiltersInitForm = Action<'eventFiltersInitForm'> & {
   payload: {
@@ -77,4 +77,5 @@ export type EventFiltersPageAction =
   | EventFiltersCreateSuccess
   | EventFiltersCreateError
   | EventFiltersFormStateChanged
-  | EventFilterForDeletion;
+  | EventFilterForDeletion
+  | EventFilterDeletionReset;

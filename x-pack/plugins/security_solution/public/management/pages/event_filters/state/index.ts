@@ -30,5 +30,10 @@ export interface EventFiltersListPageState {
     }>;
     /** tracks if the overall list (not filtered or with invalid page numbers) contains data */
     dataExist: AsyncResourceState<boolean>;
+    /** state for deletion of items from the list */
+    deletion: {
+      item: Pick<ExceptionListItemSchema, 'id' | 'name'> | undefined;
+      status: AsyncResourceState<unknown>;
+    };
   };
 }

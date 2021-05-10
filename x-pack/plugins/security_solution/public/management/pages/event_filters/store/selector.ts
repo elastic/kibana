@@ -197,12 +197,22 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
   }
 );
 
-export const showDeleteModal: EventFiltersSelector<boolean> = (state) => {
-  // FIXME:PT implement
-  return true;
-};
+const getDeletionState = createSelector(getCurrentListPageState, (listState) => listState.deletion);
 
-export const isDeletionInProgress: EventFiltersSelector<boolean> = (state) => {
-  // FIXME:PT implement
-  return false;
-};
+export const showDeleteModal: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ item }) => {
+    return Boolean(item);
+  }
+);
+
+export const getItemToDelete: EventFiltersSelector<
+  StoreState['listPage']['deletion']['item']
+> = createSelector(getDeletionState, ({ item }) => item);
+
+export const isDeletionInProgress: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadedResourceState(status);
+  }
+);

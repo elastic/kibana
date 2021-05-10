@@ -133,10 +133,10 @@ export const EventFiltersListPage = memo(() => {
     ({ id }) => {
       dispatch({
         type: 'eventFilterForDeletion',
-        payload: { id },
+        payload: listItems.find((item) => item.id === id)!,
       });
     },
-    [dispatch]
+    [dispatch, listItems]
   );
 
   const handleItemComponentProps: EventListPaginatedContent['itemComponentProps'] = useCallback(

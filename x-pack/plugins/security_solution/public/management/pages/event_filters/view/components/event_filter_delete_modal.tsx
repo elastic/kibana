@@ -17,16 +17,21 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
 import { useEventFiltersSelector } from '../hooks';
-import { isDeletionInProgress } from '../../store/selector';
+import { getItemToDelete, isDeletionInProgress } from '../../store/selector';
+import { AppAction } from '../../../../../common/store/actions';
 
-export interface EventFilterDeleteModalProps {
-  onCancel: () => void;
-  onDone: () => void;
-}
+export const EventFilterDeleteModal = memo<{}>(() => {
+  const dispatch = useDispatch<Dispatch<AppAction>>();
 
-export const EventFilterDeleteModal = memo<EventFilterDeleteModalProps>(({ onCancel, onDone }) => {
   const isDeleting = useEventFiltersSelector(isDeletionInProgress);
+  const eventFilter = useEventFiltersSelector(getItemToDelete);
+
+  const onCancel = useCallback(() => {
+    dispatch({ type: 'eventFilterDeletionReset' });
+  }, [dispatch]);
 
   const onConfirm = useCallback(() => {}, []);
 
@@ -47,7 +52,7 @@ export const EventFilterDeleteModal = memo<EventFilterDeleteModalProps>(({ onCan
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.deletionDialog.mainMessage"
               defaultMessage='You are removing event filter "{name}".'
-              values={{ name: <strong>{'TODO: name goes here'}</strong> }}
+              values={{ name: <strong>{eventFilter?.name}</strong> }}
             />
           </p>
           <p>
