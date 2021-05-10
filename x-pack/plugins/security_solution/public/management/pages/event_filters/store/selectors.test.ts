@@ -47,14 +47,14 @@ describe('event filters selectors', () => {
 
   const setToLoadedState = () => {
     initialState.listPage.data = createLoadedResourceState({
-      query: { page: 2, perPage: 10 },
+      query: { page: 2, perPage: 10, filter: '' },
       content: getFoundExceptionListItemSchemaMock(),
     });
   };
 
   const setToLoadingState = (
     previousState: EventFiltersListPageState['listPage']['data'] = createLoadedResourceState({
-      query: { page: 5, perPage: 50 },
+      query: { page: 5, perPage: 50, filter: '' },
       content: getFoundExceptionListItemSchemaMock(),
     })
   ) => {
@@ -128,12 +128,12 @@ describe('event filters selectors', () => {
 
     it('should return query from current loaded state', () => {
       setToLoadedState();
-      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 2, perPage: 10 });
+      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 2, perPage: 10, filter: '' });
     });
 
     it('should return query from previous state while Loading new page', () => {
       setToLoadingState();
-      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 5, perPage: 50 });
+      expect(getCurrentListItemsQuery(initialState)).toEqual({ page: 5, perPage: 50, filter: '' });
     });
   });
 
@@ -235,6 +235,11 @@ describe('event filters selectors', () => {
 
     it('should should return true if any of the url params differ from last api call', () => {
       initialState.location.page_index = 10;
+      expect(listDataNeedsRefresh(initialState)).toBe(true);
+    });
+
+    it('should should return true if filter param differ from last api call', () => {
+      initialState.location.filter = 'query';
       expect(listDataNeedsRefresh(initialState)).toBe(true);
     });
   });
