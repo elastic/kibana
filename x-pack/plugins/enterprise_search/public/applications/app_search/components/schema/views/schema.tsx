@@ -18,11 +18,11 @@ import { Loading } from '../../../../shared/loading';
 import { SchemaLogic } from '../schema_logic';
 
 export const Schema: React.FC = () => {
-  const { loadIndexedEngineSchema } = useActions(SchemaLogic);
+  const { loadSchema } = useActions(SchemaLogic);
   const { dataLoading } = useValues(SchemaLogic);
 
   useEffect(() => {
-    loadIndexedEngineSchema();
+    loadSchema();
   }, []);
 
   if (dataLoading) return <Loading />;

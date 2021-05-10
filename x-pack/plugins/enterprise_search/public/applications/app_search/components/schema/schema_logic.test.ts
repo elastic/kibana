@@ -77,10 +77,14 @@ describe('SchemaLogic', () => {
 
         expect(SchemaLogic.values).toEqual({
           ...DEFAULT_VALUES,
+          // SchemaBaseLogic
+          dataLoading: false,
+          schema: MOCK_RESPONSE.schema,
+          // SchemaLogic
           isUpdating: false,
           isModalOpen: false,
           cachedSchema: MOCK_RESPONSE.schema,
-          hasSchemaChanged: true, // see the hasSchemaChanged tests for more info. In production/reality loadSchema would update schema & cachedSchema simultaneously
+          hasSchema: true,
           mostRecentIndexJob: MOCK_RESPONSE.mostRecentIndexJob,
           unconfirmedFields: MOCK_RESPONSE.unconfirmedFields,
           hasUnconfirmedFields: true,
@@ -177,21 +181,6 @@ describe('SchemaLogic', () => {
   });
 
   describe('listeners', () => {
-    describe('loadIndexedEngineSchema', () => {
-      it('calls the base loadSchema listener and onSchemaLoad', async () => {
-        http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
-        mount();
-        jest.spyOn(SchemaLogic.actions, 'loadSchema');
-        jest.spyOn(SchemaLogic.actions, 'onSchemaLoad');
-
-        SchemaLogic.actions.loadIndexedEngineSchema();
-        await nextTick();
-
-        expect(SchemaLogic.actions.loadSchema).toHaveBeenCalled();
-        expect(SchemaLogic.actions.onSchemaLoad).toHaveBeenCalledWith(MOCK_RESPONSE);
-      });
-    });
-
     describe('addSchemaField', () => {
       describe('if the schema field already exists', () => {
         it('flashes an error and closes the modal', () => {

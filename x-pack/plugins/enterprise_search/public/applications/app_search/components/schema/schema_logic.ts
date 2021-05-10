@@ -35,7 +35,6 @@ interface SchemaValues extends SchemaBaseValues {
 }
 
 interface SchemaActions extends SchemaBaseActions {
-  loadIndexedEngineSchema(): void;
   onSchemaLoad(response: SchemaApiResponse): SchemaApiResponse;
   addSchemaField(
     fieldName: string,
@@ -55,11 +54,9 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
   path: ['enterprise_search', 'app_search', 'schema_logic'],
   connect: {
     values: [SchemaBaseLogic, ['dataLoading', 'schema']],
-    actions: [SchemaBaseLogic, ['loadSchema', 'setSchema']],
+    actions: [SchemaBaseLogic, ['loadSchema', 'onSchemaLoad', 'setSchema']],
   },
   actions: {
-    loadIndexedEngineSchema: true,
-    onSchemaLoad: (response) => response,
     addSchemaField: (fieldName, fieldType) => ({ fieldName, fieldType }),
     updateSchemaFieldType: (fieldName, fieldType) => ({ fieldName, fieldType }),
     updateSchema: (successMessage) => successMessage,
@@ -122,9 +119,6 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     ],
   },
   listeners: ({ actions, values }) => ({
-    loadIndexedEngineSchema: () => {
-      actions.loadSchema(actions.onSchemaLoad);
-    },
     addSchemaField: ({ fieldName, fieldType }) => {
       if (values.schema.hasOwnProperty(fieldName)) {
         setErrorMessage(ADD_SCHEMA_ERROR(fieldName));

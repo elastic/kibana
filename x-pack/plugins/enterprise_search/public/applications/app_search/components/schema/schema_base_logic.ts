@@ -12,20 +12,26 @@ import { HttpLogic } from '../../../shared/http';
 import { Schema } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
+import { SchemaApiResponse, MetaEngineSchemaApiResponse } from './types';
+
 export interface SchemaBaseValues {
   dataLoading: boolean;
   schema: Schema;
 }
 
 export interface SchemaBaseActions {
-  loadSchema(callback: Function): Function;
+  loadSchema(): void;
+  onSchemaLoad(
+    response: SchemaApiResponse | MetaEngineSchemaApiResponse
+  ): SchemaApiResponse | MetaEngineSchemaApiResponse;
   setSchema(schema: Schema): { schema: Schema };
 }
 
 export const SchemaBaseLogic = kea<MakeLogicType<SchemaBaseValues, SchemaBaseActions>>({
   path: ['enterprise_search', 'app_search', 'schema_base_logic'],
   actions: {
-    loadSchema: (callback) => callback,
+    loadSchema: true,
+    onSchemaLoad: (response) => response,
     setSchema: (schema) => ({ schema }),
   },
   reducers: {
@@ -33,25 +39,25 @@ export const SchemaBaseLogic = kea<MakeLogicType<SchemaBaseValues, SchemaBaseAct
       true,
       {
         loadSchema: () => true,
-        setSchema: () => false,
+        onSchemaLoad: () => false,
       },
     ],
     schema: [
       {},
       {
+        onSchemaLoad: (_, { schema }) => schema,
         setSchema: (_, { schema }) => schema,
       },
     ],
   },
   listeners: ({ actions }) => ({
-    loadSchema: async (callback) => {
+    loadSchema: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
         const response = await http.get(`/api/app_search/engines/${engineName}/schema`);
-        actions.setSchema(response.schema);
-        callback(response);
+        actions.onSchemaLoad(response);
       } catch (e) {
         flashAPIErrors(e);
       }

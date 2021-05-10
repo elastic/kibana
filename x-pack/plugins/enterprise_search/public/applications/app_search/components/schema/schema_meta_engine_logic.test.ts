@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
-
-import { nextTick } from '@kbn/test/jest';
+import { LogicMounter } from '../../../__mocks__';
 
 import { SchemaType } from '../../../shared/schema/types';
 
@@ -15,7 +13,6 @@ import { MetaEngineSchemaLogic } from './schema_meta_engine_logic';
 
 describe('MetaEngineSchemaLogic', () => {
   const { mount } = new LogicMounter(MetaEngineSchemaLogic);
-  const { http } = mockHttpValues;
 
   const MOCK_RESPONSE = {
     schema: {
@@ -54,14 +51,18 @@ describe('MetaEngineSchemaLogic', () => {
   });
 
   describe('actions', () => {
-    describe('onMetaEngineSchemaLoad', () => {
+    describe('onSchemaLoad', () => {
       it('stores the API response in state', () => {
         mount();
 
-        MetaEngineSchemaLogic.actions.onMetaEngineSchemaLoad(MOCK_RESPONSE);
+        MetaEngineSchemaLogic.actions.onSchemaLoad(MOCK_RESPONSE);
 
         expect(MetaEngineSchemaLogic.values).toEqual({
           ...DEFAULT_VALUES,
+          // SchemaBaseLogic
+          dataLoading: false,
+          schema: MOCK_RESPONSE.schema,
+          // MetaEngineSchemaLogic
           fields: MOCK_RESPONSE.fields,
           conflictingFields: MOCK_RESPONSE.conflictingFields,
           hasConflicts: true,
@@ -88,25 +89,6 @@ describe('MetaEngineSchemaLogic', () => {
       it('returns false when the conflictingFields obj is empty', () => {
         mount({ conflictingFields: {} });
         expect(MetaEngineSchemaLogic.values.hasConflicts).toEqual(false);
-      });
-    });
-  });
-
-  describe('listeners', () => {
-    describe('loadSourceEngineSchema', () => {
-      it('calls the base loadSchema listener and onSchemaLoad', async () => {
-        http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
-        mount();
-        jest.spyOn(MetaEngineSchemaLogic.actions, 'loadSchema');
-        jest.spyOn(MetaEngineSchemaLogic.actions, 'onMetaEngineSchemaLoad');
-
-        MetaEngineSchemaLogic.actions.loadMetaEngineSchema();
-        await nextTick();
-
-        expect(MetaEngineSchemaLogic.actions.loadSchema).toHaveBeenCalled();
-        expect(MetaEngineSchemaLogic.actions.onMetaEngineSchemaLoad).toHaveBeenCalledWith(
-          MOCK_RESPONSE
-        );
       });
     });
   });

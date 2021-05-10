@@ -18,8 +18,7 @@ interface MetaEngineSchemaValues extends SchemaBaseValues {
 }
 
 interface MetaEngineSchemaActions extends SchemaBaseActions {
-  loadMetaEngineSchema(): void;
-  onMetaEngineSchemaLoad(response: MetaEngineSchemaApiResponse): MetaEngineSchemaApiResponse;
+  onSchemaLoad(response: MetaEngineSchemaApiResponse): MetaEngineSchemaApiResponse;
 }
 
 export const MetaEngineSchemaLogic = kea<
@@ -28,23 +27,19 @@ export const MetaEngineSchemaLogic = kea<
   path: ['enterprise_search', 'app_search', 'meta_engine_schema_logic'],
   connect: {
     values: [SchemaBaseLogic, ['dataLoading', 'schema']],
-    actions: [SchemaBaseLogic, ['loadSchema', 'setSchema']],
-  },
-  actions: {
-    loadMetaEngineSchema: true,
-    onMetaEngineSchemaLoad: (response) => response,
+    actions: [SchemaBaseLogic, ['loadSchema', 'onSchemaLoad']],
   },
   reducers: {
     fields: [
       {},
       {
-        onMetaEngineSchemaLoad: (_, { fields }) => fields,
+        onSchemaLoad: (_, { fields }) => fields,
       },
     ],
     conflictingFields: [
       {},
       {
-        onMetaEngineSchemaLoad: (_, { conflictingFields }) => conflictingFields,
+        onSchemaLoad: (_, { conflictingFields }) => conflictingFields,
       },
     ],
   },
@@ -58,9 +53,4 @@ export const MetaEngineSchemaLogic = kea<
       (conflictingFieldsCount) => conflictingFieldsCount > 0,
     ],
   },
-  listeners: ({ actions }) => ({
-    loadMetaEngineSchema: () => {
-      actions.loadSchema(actions.onMetaEngineSchemaLoad);
-    },
-  }),
 });

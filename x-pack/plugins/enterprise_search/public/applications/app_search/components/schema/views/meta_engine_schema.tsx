@@ -18,11 +18,11 @@ import { Loading } from '../../../../shared/loading';
 import { MetaEngineSchemaLogic } from '../schema_meta_engine_logic';
 
 export const MetaEngineSchema: React.FC = () => {
-  const { loadMetaEngineSchema } = useActions(MetaEngineSchemaLogic);
+  const { loadSchema } = useActions(MetaEngineSchemaLogic);
   const { dataLoading } = useValues(MetaEngineSchemaLogic);
 
   useEffect(() => {
-    loadMetaEngineSchema();
+    loadSchema();
   }, []);
 
   if (dataLoading) return <Loading />;

@@ -23,6 +23,9 @@ describe('SchemaBaseLogic', () => {
     some_text_field: SchemaType.Text,
     some_number_field: SchemaType.Number,
   };
+  const MOCK_RESPONSE = {
+    schema: MOCK_SCHEMA,
+  } as any;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -39,55 +42,53 @@ describe('SchemaBaseLogic', () => {
   });
 
   describe('actions', () => {
-    describe('setSchema', () => {
+    describe('onSchemaLoad', () => {
       it('stores schema state and sets dataLoading to false', () => {
         mount({ schema: {}, dataLoading: true });
+
+        SchemaBaseLogic.actions.onSchemaLoad(MOCK_RESPONSE);
+
+        expect(SchemaBaseLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          dataLoading: false,
+          schema: MOCK_SCHEMA,
+        });
+      });
+    });
+
+    describe('setSchema', () => {
+      it('updates schema state', () => {
+        mount({ schema: {} });
 
         SchemaBaseLogic.actions.setSchema(MOCK_SCHEMA);
 
         expect(SchemaBaseLogic.values).toEqual({
           ...DEFAULT_VALUES,
           schema: MOCK_SCHEMA,
-          dataLoading: false,
         });
       });
     });
   });
 
   describe('listeners', () => {
-    const MOCK_RESPONSE = {
-      schema: MOCK_SCHEMA,
-    };
-    const mockCallback = jest.fn();
-
     describe('loadSchema', () => {
       it('should make an API call and then set schema state', async () => {
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
         mount();
-        jest.spyOn(SchemaBaseLogic.actions, 'setSchema');
+        jest.spyOn(SchemaBaseLogic.actions, 'onSchemaLoad');
 
-        SchemaBaseLogic.actions.loadSchema(mockCallback);
+        SchemaBaseLogic.actions.loadSchema();
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/schema');
-        expect(SchemaBaseLogic.actions.setSchema).toHaveBeenCalledWith(MOCK_SCHEMA);
-      });
-
-      it('should send the entire API response to the passed callback', async () => {
-        http.get.mockReturnValueOnce(Promise.resolve(MOCK_RESPONSE));
-        mount();
-
-        SchemaBaseLogic.actions.loadSchema(mockCallback);
-        await nextTick();
-
-        expect(mockCallback).toHaveBeenCalledWith(MOCK_RESPONSE);
+        expect(SchemaBaseLogic.actions.onSchemaLoad).toHaveBeenCalledWith(MOCK_RESPONSE);
       });
 
       it('handles errors', async () => {
         http.get.mockReturnValueOnce(Promise.reject('error'));
         mount();
 
-        SchemaBaseLogic.actions.loadSchema(mockCallback);
+        SchemaBaseLogic.actions.loadSchema();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');

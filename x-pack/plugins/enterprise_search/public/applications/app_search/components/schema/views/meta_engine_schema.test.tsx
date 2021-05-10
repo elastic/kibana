@@ -21,7 +21,7 @@ describe('MetaEngineSchema', () => {
     dataLoading: false,
   };
   const actions = {
-    loadMetaEngineSchema: jest.fn(),
+    loadSchema: jest.fn(),
   };
 
   beforeEach(() => {
@@ -37,10 +37,10 @@ describe('MetaEngineSchema', () => {
     // TODO: Check for schema components
   });
 
-  it('calls loadSourceEngineSchema on mount', () => {
+  it('calls loadSchema on mount', () => {
     shallow(<MetaEngineSchema />);
 
-    expect(actions.loadMetaEngineSchema).toHaveBeenCalled();
+    expect(actions.loadSchema).toHaveBeenCalled();
   });
 
   it('renders a loading state', () => {

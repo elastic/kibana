@@ -23,7 +23,7 @@ describe('Schema', () => {
     dataLoading: false,
   };
   const actions = {
-    loadIndexedEngineSchema: jest.fn(),
+    loadSchema: jest.fn(),
   };
 
   beforeEach(() => {
@@ -39,10 +39,10 @@ describe('Schema', () => {
     // TODO: Check for schema components
   });
 
-  it('calls loadIndexedEngineSchema on mount', () => {
+  it('calls loadSchema on mount', () => {
     shallow(<Schema />);
 
-    expect(actions.loadIndexedEngineSchema).toHaveBeenCalled();
+    expect(actions.loadSchema).toHaveBeenCalled();
   });
 
   it('renders a loading state', () => {
