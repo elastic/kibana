@@ -50,9 +50,6 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useHostDetails } from '../../containers/hosts/details';
-import { manageQuery } from '../../../common/components/page/manage_query';
-
-const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
@@ -96,12 +93,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const [loading, { hostDetails: hostOverview, id, refetch }] = useHostDetails({
+  const [loading, { hostDetails: hostOverview, id }] = useHostDetails({
     endDate: to,
     startDate: from,
     hostName: detailName,
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0,
   });
   const filterQuery = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -145,7 +141,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 skip={isInitializing}
               >
                 {({ isLoadingAnomaliesData, anomaliesData }) => (
-                  <HostOverviewManage
+                  <HostOverview
                     docValueFields={docValueFields}
                     id={id}
                     isInDetailsSidePanel={false}
@@ -164,8 +160,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                         to: fromTo.to,
                       });
                     }}
-                    setQuery={setQuery}
-                    refetch={refetch}
                   />
                 )}
               </AnomalyTableProvider>

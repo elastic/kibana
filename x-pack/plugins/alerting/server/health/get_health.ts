@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository } from 'src/core/server';
+import { ISavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
 import { AlertsHealth, HealthStatus, RawAlert, AlertExecutionStatusErrorReasons } from '../types';
 
 export const getHealth = async (
@@ -96,4 +96,17 @@ export const getHealth = async (
   }
 
   return healthStatuses;
+};
+
+export const getAlertingHealthStatus = async (
+  savedObjects: SavedObjectsServiceStart,
+  stateRuns?: number
+) => {
+  const alertingHealthStatus = await getHealth(savedObjects.createInternalRepository(['alert']));
+  return {
+    state: {
+      runs: (stateRuns || 0) + 1,
+      health_status: alertingHealthStatus.decryptionHealth.status,
+    },
+  };
 };

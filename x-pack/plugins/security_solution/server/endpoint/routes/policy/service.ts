@@ -5,21 +5,18 @@
  * 2.0.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import {
   ElasticsearchClient,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
+} from 'kibana/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from './index';
 import { Agent } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext } from '../../types';
-import { ISearchRequestParams } from '../../../../../../../src/plugins/data/common';
 
-export const getESQueryPolicyResponseByAgentID = (
-  agentID: string,
-  index: string
-): ISearchRequestParams => {
+export function getESQueryPolicyResponseByAgentID(agentID: string, index: string) {
   return {
     body: {
       query: {
@@ -47,23 +44,26 @@ export const getESQueryPolicyResponseByAgentID = (
     },
     index,
   };
-};
+}
 
 export async function getPolicyResponseByAgentId(
   index: string,
   agentID: string,
-  dataClient: IScopedClusterClient
+  dataClient: ILegacyScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
   const query = getESQueryPolicyResponseByAgentID(agentID, index);
-  const response = await dataClient.asCurrentUser.search<HostPolicyResponse>(query);
+  const response = (await dataClient.callAsCurrentUser(
+    'search',
+    query
+  )) as SearchResponse<HostPolicyResponse>;
 
-  if (response.body.hits.hits.length > 0 && response.body.hits.hits[0]._source != null) {
-    return {
-      policy_response: response.body.hits.hits[0]._source,
-    };
+  if (response.hits.hits.length === 0) {
+    return undefined;
   }
 
-  return undefined;
+  return {
+    policy_response: response.hits.hits[0]._source,
+  };
 }
 
 const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: string]: number } => {
