@@ -6,9 +6,10 @@
  */
 
 import * as t from 'io-ts';
+import { type } from '@kbn/securitysolution-io-ts-utils';
 
 import { RequiredKeepUndefined } from '../../types';
-import { deserializer, list_id, serializer, type } from '../common/schemas';
+import { deserializer, list_id, serializer } from '../common/schemas';
 
 export const importListItemQuerySchema = t.exact(
   t.partial({ deserializer, list_id, serializer, type })

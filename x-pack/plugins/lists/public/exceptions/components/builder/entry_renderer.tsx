@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
+import { OsTypeArray } from '@kbn/securitysolution-io-ts-utils';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
@@ -22,7 +23,6 @@ import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_
 import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
 import { ExceptionListType, ListSchema, OperatorTypeEnum } from '../../../../common';
 import { getEmptyValue } from '../../../common/empty_value';
-import { OsTypeArray } from '../../../../common/schemas/common';
 
 import {
   getEntryOnFieldChange,
