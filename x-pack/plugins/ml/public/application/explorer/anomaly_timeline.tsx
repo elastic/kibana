@@ -36,6 +36,7 @@ import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
+import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -236,6 +237,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiPopover>
               </EuiFlexItem>
             )}
+
+            <EuiFlexItem grow={false}>
+              <AnomalyTimelineHelpPopover />
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
