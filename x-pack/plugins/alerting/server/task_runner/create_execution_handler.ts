@@ -10,6 +10,7 @@ import { transformActionParams } from './transform_action_params';
 import {
   asSavedObjectExecutionSource,
   PluginStartContract as ActionsPluginStartContract,
+  EnqueueExecutionOptions,
 } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -159,6 +160,9 @@ export function createExecutionHandler<
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
     const tasks: EphemeralTask[] = [];
+    const nonEphemeralActionOptions: EnqueueExecutionOptions[] = [];
+    const ephemeralEventLogs: Array<() => void> = [];
+    const nonEphemeralEventLogs: Array<() => void> = [];
 
     let actionsQueued = 0;
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
@@ -188,8 +192,9 @@ export function createExecutionHandler<
           },
           state: {},
         });
+        ephemeralEventLogs.push(() => logToEventLog());
       } else {
-        await actionsClient.enqueueExecution({
+        nonEphemeralActionOptions.push({
           id: action.id,
           params: action.params,
           spaceId,
@@ -199,31 +204,34 @@ export function createExecutionHandler<
             type: 'alert',
           }),
         });
+        nonEphemeralEventLogs.push(() => logToEventLog());
       }
 
-      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+      function logToEventLog() {
+        const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
-      const event: IEvent = {
-        event: { action: EVENT_LOG_ACTIONS.executeAction },
-        kibana: {
-          alerting: {
-            instance_id: alertInstanceId,
-            action_group_id: actionGroup,
-            action_subgroup: actionSubgroup,
+        const event: IEvent = {
+          event: { action: EVENT_LOG_ACTIONS.executeAction },
+          kibana: {
+            alerting: {
+              instance_id: alertInstanceId,
+              action_group_id: actionGroup,
+              action_subgroup: actionSubgroup,
+            },
+            saved_objects: [
+              { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
+              { type: 'action', id: action.id, ...namespace },
+            ],
           },
-          saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
-            { type: 'action', id: action.id, ...namespace },
-          ],
-        },
-      };
+        };
 
-      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
-        actionSubgroup
-          ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-          : `actionGroup: '${actionGroup}'`
-      } action: ${actionLabel}`;
-      eventLogger.logEvent(event);
+        event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+          actionSubgroup
+            ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
+            : `actionGroup: '${actionGroup}'`
+        } action: ${actionLabel}`;
+        eventLogger.logEvent(event);
+      }
     }
 
     if (supportsEphemeralTasks && tasks.length) {
@@ -249,6 +257,16 @@ export function createExecutionHandler<
             }
           }
         });
+      ephemeralEventLogs.forEach((eventLog) => eventLog());
+    }
+
+    if (nonEphemeralActionOptions.length) {
+      await Promise.all(
+        nonEphemeralActionOptions.map(async (nonEphemeralActionOption, index) => {
+          await actionsClient.enqueueExecution(nonEphemeralActionOption);
+          nonEphemeralEventLogs[index]();
+        })
+      );
     }
   };
 }

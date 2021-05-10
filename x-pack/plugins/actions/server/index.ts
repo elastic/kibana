@@ -48,6 +48,8 @@ export type {
   TeamsActionParams,
 } from './builtin_action_types';
 
+export { ExecuteOptions as EnqueueExecutionOptions } from './create_execute_function';
+
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';

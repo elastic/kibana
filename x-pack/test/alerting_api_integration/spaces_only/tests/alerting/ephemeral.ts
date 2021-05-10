@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { flatten } from 'lodash';
+import { flatten, sortBy } from 'lodash';
 import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
@@ -214,6 +214,92 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
           resolve(true);
         }, waitForInMs)
       );
+    });
+
+    it('should ensure ephemeral actions are scheduled before non-ephemeral ones', async () => {
+      const nonEphemeralTasks = 3;
+      const actionPromises = [];
+      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + nonEphemeralTasks; i++) {
+        actionPromises.push(
+          supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: `My action${i}`,
+              connector_type_id: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200)
+        );
+      }
+      const createdActions = await Promise.all(actionPromises);
+      createdActions.forEach((createdAction) =>
+        objectRemover.add(Spaces.space1.id, createdAction.body.id, 'action', 'actions')
+      );
+
+      const pattern = {
+        instance: [true, true, true, false, true, true],
+      };
+      const alertData = getTestAlertData({
+        rule_type_id: 'test.patternFiring',
+        params: { pattern },
+        schedule: { interval: '1m' },
+        throttle: null,
+        notify_when: 'onActiveAlert',
+        actions: createdActions.map((createdAction) => {
+          return {
+            id: createdAction.body.id,
+            group: 'default',
+            params: {
+              index: ES_TEST_INDEX_NAME,
+              reference: '',
+              message: 'test message',
+            },
+          };
+        }),
+      });
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(alertData)
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+      const events = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert.id,
+          provider: 'alerting',
+          actions: new Map([
+            ['execute-action', { gte: DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE + nonEphemeralTasks }],
+          ]),
+        });
+      });
+
+      const ids = createdActions.map((ca) => ca.body.id);
+      const sorted = sortBy(events, '@timestamp');
+      const indexPairs = [];
+
+      let indexInEventLog = 0;
+      for (const log of sorted) {
+        const sos = log?.kibana?.saved_objects;
+        if (sos && sos.length === 2) {
+          const actionIndex = ids.indexOf(sos[1].id);
+          indexPairs.push({ actionIndex, indexInEventLog });
+        }
+        indexInEventLog++;
+      }
+
+      for (let i = 0; i < DEFAULT_MAX_EPHEMERAL_TASKS_PER_CYCLE; i++) {
+        expect(indexPairs[i].actionIndex).equal(indexPairs[i].indexInEventLog);
+      }
     });
 
     // it.only('should ensure ephemeral actions are not lost if TM is at capacity', async () => {
