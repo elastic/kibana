@@ -6,7 +6,7 @@
  */
 
 import { countBy } from 'lodash/fp';
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObject } from 'kibana/server';
 import uuid from 'uuid';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
@@ -17,10 +17,8 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
   isAlertType,
-  isAlertTypes,
   IRuleSavedAttributesSavedObjectAttributes,
   isRuleStatusFindType,
-  isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
   IRuleStatusSOAttributes,
 } from '../../rules/types';

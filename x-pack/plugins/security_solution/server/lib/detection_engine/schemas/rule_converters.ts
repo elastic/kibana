@@ -6,7 +6,6 @@
  */
 
 import uuid from 'uuid';
-import { SavedObject } from 'kibana/server';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
@@ -30,7 +29,7 @@ import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { SanitizedAlert } from '../../../../../alerting/common';
-import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema

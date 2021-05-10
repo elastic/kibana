@@ -50,7 +50,7 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
       try {
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const [statusesById, failingRules] = await Promise.all([
-          ruleStatusClient.findBulk(ids),
+          ruleStatusClient.findBulk(ids, 6),
           getFailingRules(ids, alertsClient),
         ]);
 

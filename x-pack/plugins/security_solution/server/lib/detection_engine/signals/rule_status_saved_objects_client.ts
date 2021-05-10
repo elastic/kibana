@@ -21,7 +21,7 @@ export interface RuleStatusSavedObjectsClient {
   find: (
     options?: Omit<SavedObjectsFindOptions, 'type'>
   ) => Promise<SavedObjectsFindResponse<IRuleStatusSOAttributes>>;
-  findBulk: (ids: string[]) => Promise<FindBulkResponse>;
+  findBulk: (ids: string[], statusesPerId: number) => Promise<FindBulkResponse>;
   create: (attributes: IRuleStatusSOAttributes) => Promise<SavedObject<IRuleStatusSOAttributes>>;
   update: (
     id: string,
@@ -42,7 +42,7 @@ export const ruleStatusSavedObjectsClientFactory = (
       ...options,
       type: ruleStatusSavedObjectType,
     }),
-  findBulk: async (ids) => {
+  findBulk: async (ids, statusesPerId) => {
     if (ids.length === 0) {
       return {};
     }
@@ -64,7 +64,7 @@ export const ruleStatusSavedObjectsClientFactory = (
                   },
                 },
               ],
-              size: 6,
+              size: statusesPerId,
             },
           },
         },

@@ -60,7 +60,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
         });
         const alertIds = rules.data.map((rule) => rule.id);
         const [ruleStatuses, ruleActions] = await Promise.all([
-          ruleStatusClient.findBulk(alertIds),
+          ruleStatusClient.findBulk(alertIds, 1),
           getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
         const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);

@@ -871,10 +871,13 @@ export const getSafeSortIds = (sortIds: SortResults | undefined) => {
 };
 
 export const buildChunkedOrFilter = (field: string, values: string[], chunkSize: number = 1024) => {
+  if (values.length === 0) {
+    return undefined;
+  }
   const chunkedValues = chunk(values, chunkSize);
   return chunkedValues
     .map((subArray) => {
-      const joinedValues = subArray.join(' OR ');
+      const joinedValues = subArray.map((value) => `"${value}"`).join(' OR ');
       return `${field}: (${joinedValues})`;
     })
     .join(' OR ');
