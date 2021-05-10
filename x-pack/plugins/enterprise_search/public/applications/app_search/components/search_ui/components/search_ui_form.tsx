@@ -17,65 +17,26 @@ import {
   EuiButton,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { EngineLogic } from '../../engine';
+import {
+  TITLE_FIELD_LABEL,
+  TITLE_FIELD_HELP_TEXT,
+  TITLE_FIELD_PLACEHOLDER,
+  FILTER_FIELD_LABEL,
+  FILTER_FIELD_HELP_TEXT,
+  FILTER_FIELD_PLACEHOLDER,
+  SORT_FIELD_LABEL,
+  SORT_FIELD_HELP_TEXT,
+  SORT_FIELD_PLACEHOLDER,
+  URL_FIELD_LABEL,
+  URL_FIELD_HELP_TEXT,
+  URL_FIELD_PLACEHOLDER,
+  GENERATE_PREVIEW_BUTTON_LABEL,
+} from '../i18n';
 import { SearchUILogic } from '../search_ui_logic';
 import { ActiveField } from '../types';
 import { generatePreviewUrl } from '../utils';
-
-const TITLE_FIELD_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.titleFieldLabel',
-  { defaultMessage: 'Title field (Optional)' }
-);
-const TITLE_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.titleFieldHelpText',
-  { defaultMessage: 'Used as the top-level visual identifier for every rendered result' }
-);
-const TITLE_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.titleFieldPlaceholder',
-  { defaultMessage: 'Select a title field' }
-);
-const FILTER_FIELD_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.filterFieldLabel',
-  { defaultMessage: 'Filter fields (Optional)' }
-);
-const FILTER_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.filterFieldHelpText',
-  { defaultMessage: 'Faceted values rendered as filters and available as query refinement' }
-);
-const FILTER_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.filterFieldPlaceholder',
-  { defaultMessage: 'Click to select' }
-);
-const SORT_FIELD_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.sortFieldLabel',
-  { defaultMessage: 'Sort fields (Optional)' }
-);
-const SORT_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.sortHelpText',
-  { defaultMessage: 'Used to display result sorting options, ascending and descending' }
-);
-const SORT_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.sortFieldPlaceholder',
-  { defaultMessage: 'Click to select' }
-);
-const URL_FIELD_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldLabel',
-  { defaultMessage: 'URL field (Optional)' }
-);
-const URL_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldHelpText',
-  { defaultMessage: "Used as a result's link target, if applicable" }
-);
-const URL_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.urlFieldPlaceholder',
-  { defaultMessage: 'Select a URL field' }
-);
-const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.generatePreviewButtonLabel',
-  { defaultMessage: 'Generate preview' }
-);
 
 interface Option<T> extends Omit<EuiComboBoxOptionOption<T>, 'value'> {
   value: string;

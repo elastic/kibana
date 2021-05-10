@@ -28,13 +28,15 @@ import { getEngineBreadcrumbs } from '../engine';
 
 import { SearchUIForm } from './components/search_ui_form';
 import { SearchUIGraphic } from './components/search_ui_graphic';
-import { SEARCH_UI_TITLE } from './constants';
+import { SEARCH_UI_TITLE } from './i18n';
+import { GUIDE_LINK_TEXT, REPOSITORY_LINK_TEXT, SEARCH_UI_BODY_TEXT } from './i18n';
 import { SearchUILogic } from './search_ui_logic';
 
 const DESCRIPTION = i18n.translate('xpack.enterpriseSearch.appSearch.engine.searchUI.description', {
   defaultMessage: 'Preview search or kickstart your next search experience.',
 });
 
+<<<<<<< HEAD
 const SEARCH_UI_BODY_TEXT = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.bodyDescription',
   {
@@ -53,6 +55,8 @@ const GUIDE_LINK_TEXT = i18n.translate(
   { defaultMessage: 'Read the guide to using this generator' }
 );
 
+=======
+>>>>>>> 516f098e561... Use i18n.ts
 export const SearchUI: React.FC = () => {
   const { loadFieldData } = useActions(SearchUILogic);
 
