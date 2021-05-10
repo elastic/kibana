@@ -8,6 +8,7 @@
 
 import { ContextAppLegacy } from './context_app_legacy';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createContextAppLegacy(reactDirective: any) {
   return reactDirective(ContextAppLegacy, [
     ['filter', { watchDepth: 'reference' }],

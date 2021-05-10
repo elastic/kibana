@@ -14,6 +14,7 @@ import { PositiveIntegerGreaterThanZero } from './positive_integer_greater_than_
  *   - If a string this will convert the string to a number
  *   - If null or undefined, then a default of 1 will be used
  *   - If the number is 0 or less this will not validate as it has to be a positive number greater than zero
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultPage = new t.Type<number, number | undefined, unknown>(
   'DefaultPerPage',

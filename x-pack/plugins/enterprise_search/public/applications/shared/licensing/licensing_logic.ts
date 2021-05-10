@@ -15,6 +15,7 @@ interface LicensingValues {
   licenseSubscription: Subscription | null;
   hasPlatinumLicense: boolean;
   hasGoldLicense: boolean;
+  isTrial: boolean;
 }
 interface LicensingActions {
   setLicense(license: ILicense): ILicense;
@@ -55,6 +56,10 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
         const qualifyingLicenses = ['gold', 'platinum', 'enterprise', 'trial'];
         return license?.isActive && qualifyingLicenses.includes(license?.type);
       },
+    ],
+    isTrial: [
+      (selectors) => [selectors.license],
+      (license) => license?.isActive && license?.type === 'trial',
     ],
   },
   events: ({ props, actions, values }) => ({
