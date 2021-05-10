@@ -35,19 +35,21 @@ describe('Processor: Append', () => {
       });
     });
     testBed.component.update();
-  });
-
-  test('prevents form submission if required fields are not provided', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
-      form,
+      actions: { addProcessor, addProcessorType },
     } = testBed;
-
-    // Open flyout to add new processor
+    // Open the processor flyout
     addProcessor();
 
     // Add type (the other fields are not visible until a type is selected)
     await addProcessorType(APPEND_TYPE);
+  });
+
+  test('prevents form submission if required fields are not provided', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -59,25 +61,21 @@ describe('Processor: Append', () => {
     ]);
   });
 
-  test('saves with default parameter values', async () => {
+  test('saves with required parameter values', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
+      actions: { saveNewProcessor },
       form,
       find,
       component,
     } = testBed;
 
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(APPEND_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
     await act(async () => {
       find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
-      component.update();
     });
+    component.update();
 
     // Save the field
     await saveNewProcessor();
@@ -91,16 +89,12 @@ describe('Processor: Append', () => {
 
   test('allows optional parameters to be set', async () => {
     const {
-      actions: { addProcessor, addProcessorType, saveNewProcessor },
+      actions: { saveNewProcessor },
       form,
       find,
       component,
     } = testBed;
 
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(APPEND_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
