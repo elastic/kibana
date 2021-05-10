@@ -24,13 +24,10 @@ describe('palette utilities', () => {
           { type: 'palette', name: 'positive' },
           { min: 0, max: 100 }
         )
-      ).toEqual({
-        colorStops: [
-          { color: 'blue', stop: 0 },
-          { color: 'yellow', stop: 10 },
-        ],
-        mode: 'fixed',
-      });
+      ).toEqual([
+        { color: 'blue', stop: 20 },
+        { color: 'yellow', stop: 70 },
+      ]);
     });
 
     it('should reverse the palette color stops correctly', () => {
@@ -44,238 +41,10 @@ describe('palette utilities', () => {
           },
           { min: 0, max: 100 }
         )
-      ).toEqual({
-        colorStops: [
-          { color: 'yellow', stop: 0 },
-          { color: 'blue', stop: 10 }, // default steps is set to 10
-        ],
-        mode: 'fixed',
-      });
-    });
-
-    it('should preserve existing custom stops if matching with the number of steps', () => {
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'positive',
-            params: {
-              steps: 3,
-              stops: [
-                { color: 'yellow', stop: 0 },
-                { color: 'red', stop: 0.5 },
-                { color: 'green', stop: 1 },
-              ],
-            },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({
-        colorStops: [
-          { color: 'yellow', stop: 0 },
-          { color: 'red', stop: 0.5 },
-          { color: 'green', stop: 1 },
-        ],
-        mode: 'fixed',
-      });
-    });
-
-    it('should preserve existing custom stops if matching with the number of steps, but reversed', () => {
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'positive',
-            params: {
-              reverse: true,
-              steps: 3,
-              stops: [
-                { color: 'yellow', stop: 0 },
-                { color: 'red', stop: 0.5 },
-                { color: 'green', stop: 1 },
-              ],
-            },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({
-        colorStops: [
-          { color: 'green', stop: 0 },
-          { color: 'red', stop: 0.5 },
-          { color: 'yellow', stop: 1 },
-        ],
-        mode: 'fixed',
-      });
-    });
-
-    it('should regenerate color stops if mismatch with steps value', () => {
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'positive',
-            params: {
-              steps: 2,
-              stops: [
-                { color: 'yellow', stop: 0 },
-                { color: 'red', stop: 0.5 },
-                { color: 'green', stop: 1 },
-              ],
-            },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({
-        // color change here is dictated from paletteRegistryMock
-        colorStops: [
-          { color: 'blue', stop: 0 },
-          { color: 'yellow', stop: 100 / 3 }, // side effect of palette mock, as preconfigured palette is usually made of 10 colors
-        ],
-        mode: 'fixed',
-      });
-    });
-
-    it('should shift color stops only for custom palettes is in fixed mode', () => {
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'custom',
-            params: {
-              name: 'custom',
-              progression: 'fixed',
-              steps: 3,
-              stops: [
-                { color: 'yellow', stop: 0 },
-                { color: 'red', stop: 50 },
-                { color: 'green', stop: 100 },
-              ],
-            },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({
-        colorStops: [
-          { color: 'yellow', stop: 50 },
-          { color: 'red', stop: 100 },
-        ],
-        mode: 'fixed',
-      });
-      // keep it the same
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'custom',
-            params: {
-              name: 'custom',
-              steps: 3,
-              stops: [
-                { color: 'yellow', stop: 0 },
-                { color: 'red', stop: 50 },
-                { color: 'green', stop: 100 },
-              ],
-            },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({
-        colorStops: [
-          { color: 'yellow', stop: 0 },
-          { color: 'red', stop: 50 },
-          { color: 'green', stop: 100 },
-        ],
-        mode: 'gradient',
-      });
-      // same
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'positive',
-            params: {
-              name: 'positive',
-              progression: 'fixed',
-              steps: 3,
-              stops: [
-                { color: 'yellow', stop: 0 },
-                { color: 'red', stop: 50 },
-                { color: 'green', stop: 100 },
-              ],
-            },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({
-        colorStops: [
-          { color: 'yellow', stop: 0 },
-          { color: 'red', stop: 50 },
-          { color: 'green', stop: 100 },
-        ],
-        mode: 'fixed',
-      });
-    });
-    it('should shift color stops and set last stop at 100 if the last one is not lower than that, only for display', () => {
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'custom',
-            params: {
-              name: 'custom',
-              progression: 'fixed',
-              steps: 3,
-              stops: [
-                { color: 'yellow', stop: 0 },
-                { color: 'red', stop: 50 },
-                { color: 'green', stop: 90 },
-              ],
-            },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({
-        colorStops: [
-          { color: 'yellow', stop: 50 },
-          { color: 'red', stop: 90 },
-          { color: 'green', stop: 100 },
-        ],
-        mode: 'fixed',
-      });
-      // same
-      expect(
-        applyPaletteParams(
-          paletteRegistry,
-          {
-            type: 'palette',
-            name: 'custom',
-            params: {
-              name: 'custom',
-              steps: 3,
-              stops: [
-                { color: 'yellow', stop: 0 },
-                { color: 'red', stop: 50 },
-                { color: 'green', stop: 90 },
-              ],
-            },
-          },
-          { min: 0, max: 100 }
-        )
-      ).toEqual({
-        colorStops: [
-          { color: 'yellow', stop: 0 },
-          { color: 'red', stop: 50 },
-          { color: 'green', stop: 90 },
-        ],
-        mode: 'gradient',
-      });
+      ).toEqual([
+        { color: 'yellow', stop: 20 },
+        { color: 'blue', stop: 70 },
+      ]);
     });
   });
 });
@@ -316,12 +85,13 @@ describe('palette panel', () => {
 
       expect(paletteOptions[paletteOptions.length - 1]).toEqual({
         title: 'Custom Mocked Palette', // <- picks the title of the custom palette
-        type: 'text',
+        type: 'fixed',
         value: 'custom',
+        palette: ['blue', 'yellow'],
       });
     });
 
-    it('should set the number of steps to 3 when selecting a custom palette', () => {
+    it('should set the colorStops and stops when selecting the Custom palette from the list', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
       changePaletteIn(instance, 'custom');
@@ -330,7 +100,14 @@ describe('palette panel', () => {
         type: 'palette',
         name: 'custom',
         params: expect.objectContaining({
-          steps: 3,
+          colorStops: [
+            { color: 'blue', stop: 0 },
+            { color: 'yellow', stop: 50 },
+          ],
+          stops: [
+            { color: 'blue', stop: 50 },
+            { color: 'yellow', stop: 100 },
+          ],
           name: 'custom',
         }),
       });
@@ -389,13 +166,11 @@ describe('palette panel', () => {
           dataBounds: { min: 0, max: 100 },
         };
       });
-      it('should be hidden for predefined palettes', () => {
+      it('should be visible for predefined palettes', () => {
         const instance = mountWithIntl(<CustomizablePalette {...props} />);
         expect(
-          instance
-            .find('[data-test-subj="lnsDatatable_dynamicColoring_progression_custom_stops"]')
-            .exists()
-        ).toEqual(false);
+          instance.find('[data-test-subj="lnsDatatable_dynamicColoring_custom_stops"]').exists()
+        ).toEqual(true);
       });
 
       it('should be visible for custom palettes', () => {
@@ -412,9 +187,7 @@ describe('palette panel', () => {
           />
         );
         expect(
-          instance
-            .find('[data-test-subj="lnsDatatable_dynamicColoring_progression_custom_stops"]')
-            .exists()
+          instance.find('[data-test-subj="lnsDatatable_dynamicColoring_custom_stops"]').exists()
         ).toEqual(true);
       });
     });

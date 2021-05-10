@@ -55,7 +55,7 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
   );
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem data-test-subj={`lnsDatatable_dynamicColoring_custom_stops`}>
       <EuiFormRow display="row">
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem
