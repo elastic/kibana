@@ -9,41 +9,46 @@
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { ClassDeclaration } from 'ts-morph';
 import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
-import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
 import { buildApiDeclaration } from './build_api_declaration';
-import { getSourceForNode, isPrivate } from './utils';
-import { getApiSectionId, isInternal } from '../utils';
-import { getSignature } from './get_signature';
+import { isPrivate } from './utils';
+import { isInternal } from '../utils';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 
 export function buildClassDec(
   node: ClassDeclaration,
   plugins: KibanaPlatformPlugin[],
   anchorLink: AnchorLink,
-  log: ToolingLog
+  currentPluginId: string,
+  log: ToolingLog,
+  captureReferences: boolean
 ): ApiDeclaration {
   return {
-    id: getApiSectionId(anchorLink),
+    ...buildBasicApiDeclaration({
+      currentPluginId,
+      anchorLink,
+      node,
+      plugins,
+      log,
+      captureReferences,
+      apiName: node.getName() || 'Missing label',
+    }),
     type: TypeKind.ClassKind,
-    tags: getJSDocTagNames(node),
-    label: node.getName() || 'Missing label',
-    description: getCommentsFromNode(node),
-    signature: getSignature(node, plugins, log),
     children: node.getMembers().reduce((acc, m) => {
       if (!isPrivate(m)) {
-        const child = buildApiDeclaration(
-          m,
+        const child = buildApiDeclaration({
+          node: m,
           plugins,
           log,
-          anchorLink.pluginName,
-          anchorLink.scope,
-          anchorLink.apiName
-        );
+          currentPluginId: anchorLink.pluginName,
+          scope: anchorLink.scope,
+          captureReferences,
+          parentApiId: anchorLink.apiName,
+        });
         if (!isInternal(child)) {
           acc.push(child);
         }
       }
       return acc;
     }, [] as ApiDeclaration[]),
-    source: getSourceForNode(node),
   };
 }
