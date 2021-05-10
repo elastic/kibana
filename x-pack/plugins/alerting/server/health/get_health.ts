@@ -98,14 +98,15 @@ export const getHealth = async (
   return healthStatuses;
 };
 
-export const getAlertingHealthStatus = async (savedObjects: SavedObjectsServiceStart, stateRuns?: number) => {
-  const alertingHealthStatus = await getHealth(
-    savedObjects.createInternalRepository(['alert'])
-  );
+export const getAlertingHealthStatus = async (
+  savedObjects: SavedObjectsServiceStart,
+  stateRuns?: number
+) => {
+  const alertingHealthStatus = await getHealth(savedObjects.createInternalRepository(['alert']));
   return {
     state: {
       runs: (stateRuns || 0) + 1,
       health_status: alertingHealthStatus.decryptionHealth.status,
     },
   };
-}
+};

@@ -16,6 +16,15 @@ import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { HealthStatus } from '../types';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 
+jest.mock('./get_health', () => ({
+  getAlertingHealthStatus: jest.fn().mockReturnValue({
+    state: {
+      runs: 0,
+      health_status: 'warn',
+    },
+  }),
+}));
+
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
 const getHealthCheckTask = (overrides = {}): ConcreteTaskInstance => ({
@@ -234,6 +243,7 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
       retryDelay
     ).subscribe((status) => {
       expect(status.level).toEqual(ServiceStatusLevels.available);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(status.summary).toEqual('Alerting framework is available');
     });
 
@@ -272,5 +282,35 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
       jest.advanceTimersByTime(retryDelay);
     }
     expect(mockTaskManager.get).toHaveBeenCalledTimes(MAX_RETRY_ATTEMPTS + 1);
+  });
+
+  it('should schedule a new health check task if it does not exist without throwing an error', async () => {
+    const mockTaskManager = taskManagerMock.createStart();
+    mockTaskManager.get.mockRejectedValue({
+      output: {
+        statusCode: 404,
+        message: 'Not Found',
+      },
+    });
+
+    const status = await getHealthServiceStatusWithRetryAndErrorHandling(
+      mockTaskManager,
+      logger,
+      savedObjects,
+      Promise.resolve({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+      })
+    ).toPromise();
+
+    expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(status.level).toEqual(ServiceStatusLevels.degraded);
+    expect(status.summary).toEqual('Alerting framework is degraded');
+    expect(status.meta).toBeUndefined();
   });
 });

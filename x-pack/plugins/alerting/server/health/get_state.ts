@@ -8,7 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { defer, of, interval, Observable, throwError, timer } from 'rxjs';
 import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
-import { Logger, SavedObjectsServiceStart, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import {
+  Logger,
+  SavedObjectsServiceStart,
+  ServiceStatus,
+  ServiceStatusLevels,
+} from '../../../../../src/core/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { HEALTH_TASK_ID, scheduleAlertingHealthCheck } from './task';
 import { HealthStatus } from '../types';
@@ -19,15 +24,19 @@ export const MAX_RETRY_ATTEMPTS = 3;
 const HEALTH_STATUS_INTERVAL = 60000 * 5; // Five minutes
 const RETRY_DELAY = 5000; // Wait 5 seconds before retrying on errors
 
-async function getLatestTaskState(taskManager: TaskManagerStartContract, logger: Logger, savedObjects: SavedObjectsServiceStart, config: Promise<AlertsConfig>) {
+async function getLatestTaskState(
+  taskManager: TaskManagerStartContract,
+  logger: Logger,
+  savedObjects: SavedObjectsServiceStart,
+  config: Promise<AlertsConfig>
+) {
   try {
-    const result = await taskManager.get(HEALTH_TASK_ID);
-    return result;
+    return await taskManager.get(HEALTH_TASK_ID);
   } catch (err) {
     // if task is not found
     if (err?.output?.statusCode === 404) {
-      scheduleAlertingHealthCheck(logger, config, taskManager);
-      return getAlertingHealthStatus(savedObjects);
+      await scheduleAlertingHealthCheck(logger, config, taskManager);
+      return await getAlertingHealthStatus(savedObjects);
     }
     throw err;
   }
@@ -93,9 +102,7 @@ export const getHealthServiceStatusWithRetryAndErrorHandling = (
       );
     }),
     catchError((error) => {
-      logger.warn(
-        `Alerting framework is unavailable due to the error: ${error}`
-      );
+      logger.warn(`Alerting framework is unavailable due to the error: ${error}`);
       return of({
         level: ServiceStatusLevels.unavailable,
         summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
@@ -114,5 +121,13 @@ export const getHealthStatusStream = (
   retryDelay?: number
 ): Observable<ServiceStatus<unknown>> =>
   interval(healthStatusInterval ?? HEALTH_STATUS_INTERVAL).pipe(
-    switchMap(() => getHealthServiceStatusWithRetryAndErrorHandling(taskManager, logger, savedObjects, config, retryDelay))
+    switchMap(() =>
+      getHealthServiceStatusWithRetryAndErrorHandling(
+        taskManager,
+        logger,
+        savedObjects,
+        config,
+        retryDelay
+      )
+    )
   );
