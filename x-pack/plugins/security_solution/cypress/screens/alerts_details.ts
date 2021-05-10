@@ -16,3 +16,9 @@ export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
 export const TABLE_ROWS = '.euiTableRow';
+
+export const THREAT_CONTENT = '[data-test-subj^=draggable-content-threat]';
+
+export const THREAT_SUMMARY_VIEW = '[data-test-subj="threat-summary-view"]';
+
+export const TITLE = '.euiTitle';

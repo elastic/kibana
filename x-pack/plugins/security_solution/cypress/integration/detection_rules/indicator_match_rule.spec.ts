@@ -16,7 +16,13 @@ import {
   ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
-import { JSON_LINES } from '../../screens/alerts_details';
+import {
+  JSON_LINES,
+  TABLE_ROWS,
+  THREAT_CONTENT,
+  THREAT_SUMMARY_VIEW,
+  TITLE,
+} from '../../screens/alerts_details';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
@@ -582,6 +588,28 @@ describe('indicator match', () => {
             cy.wrap(elements)
               .eq(length - enrichment.line)
               .should('have.text', enrichment.text);
+          });
+        });
+      });
+
+      it('Displays threat summary data on alerts details', () => {
+        const expectedThreatSummary = [
+          { field: 'matched.field', value: 'myhash.mysha256' },
+          { field: 'matched.type', value: 'file' },
+          { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
+        ];
+
+        expandFirstAlert();
+        cy.get(THREAT_SUMMARY_VIEW).within(() => {
+          cy.get(TABLE_ROWS).should('have.length', expectedThreatSummary.length);
+
+          expectedThreatSummary.forEach((row, index) => {
+            cy.get(TABLE_ROWS)
+              .eq(index)
+              .within(() => {
+                cy.get(TITLE).should('have.text', row.field);
+                cy.get(THREAT_CONTENT).should('have.text', row.value);
+              });
           });
         });
       });
