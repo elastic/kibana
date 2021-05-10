@@ -20,7 +20,8 @@ async function removeLogFile() {
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
 
-describe('migration v2 with corrupt saved object documents', () => {
+// relies on archive with SO from v8
+describe.skip('migration v2 with corrupt saved object documents', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
 
