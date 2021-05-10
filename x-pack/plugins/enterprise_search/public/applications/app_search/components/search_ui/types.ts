@@ -6,9 +6,9 @@
  */
 
 export enum ActiveField {
-  Title = 'title',
-  Filter = 'filter',
-  Sort = 'sort',
-  Url = 'url',
+  Title = 'Title',
+  Filter = 'Filter',
+  Sort = 'Sort',
+  Url = 'Url',
   None = '',
 }

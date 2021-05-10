@@ -27,6 +27,6 @@ describe('SearchUIGraphic', () => {
 
   it('renders an svg with a className determined by the currently active field', () => {
     const wrapper = shallow(<SearchUIGraphic />);
-    expect(wrapper.hasClass('active-sort')).toBe(true);
+    expect(wrapper.hasClass('activeSort')).toBe(true);
   });
 });

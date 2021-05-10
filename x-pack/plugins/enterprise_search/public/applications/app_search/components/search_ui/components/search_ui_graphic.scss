@@ -1,15 +1,15 @@
-.search-ui-graphic {
+.searchUIGraphic {
   transform-style: preserve-3d;
   transform: rotate3d(0, 1, 0, -8deg);
 
   #search-area {
-    .outer-box {
+    .outerBox {
       fill:  $euiColorLightShade;
     }
     .field {
       fill: $euiColorEmptyShade;
     }
-    .search-icon {
+    .searchIcon {
       fill: $euiColorDarkShade;
     }
     .type {
@@ -20,7 +20,7 @@
     fill: $euiColorLightestShade;
   }
   #results {
-    .outer-box {
+    .outerBox {
       fill: $euiColorEmptyShade;
       stroke: $euiColorLightShade;
       stroke-width: 1px;
@@ -32,18 +32,18 @@
       fill: $euiColorDarkShade;
       transform: translateY(5px);
     }
-    .title-copy {
+    .titleCopy {
       fill: $euiColorDarkShade;
     }
-    .title-box {
+    .titleBox {
       fill: $euiColorEmptyShade;
     }
-    .block-in {
+    .blockIn {
       fill: $euiColorLightShade;
     }
   }
   #filter {
-    .outer-box {
+    .outerBox {
       fill: $euiColorEmptyShade;
       stroke: $euiColorLightShade;
       stroke-width: 1px;
@@ -57,12 +57,12 @@
     .check {
       fill: $euiColorEmptyShade;
     }
-    .filter-copy {
+    .filterCopy {
       fill: $euiColorDarkShade;
     }
   }
   #sort {
-    .outer-box {
+    .outerBox {
       fill: $euiColorEmptyShade;
       stroke: $euiColorLightShade;
       stroke-width: 1px;
@@ -70,20 +70,20 @@
     .header {
       fill: $euiColorDarkShade;
     }
-    .select-copy {
+    .selectCopy {
       fill: $euiColorDarkShade;
     }
-    .select-box {
+    .selectBox {
       fill: $euiColorEmptyShade;
       stroke: $euiColorLightShade;
       stroke-width: 1px;
     }
-    .select-control {
+    .selectControl {
       fill: $euiColorDarkShade;
     }
   }
   #pagination {
-    .outer-box {
+    .outerBox {
       fill:  $euiColorLightShade;
     }
     .arrow {
@@ -91,17 +91,17 @@
     }
   }
 
-  &.active-title {
+  &.activeTitle {
     #results {
-      .title-box {
+      .titleBox {
         fill: $euiColorEmptyShade;
         stroke: $euiColorPrimary;
         stroke-width: 1px;
       }
-      .title-copy {
+      .titleCopy {
         fill: $euiColorPrimary;
       }
-      .outer-box {
+      .outerBox {
         fill: $euiColorEmptyShade;
         stroke: $euiColorPrimary;
       }
@@ -116,9 +116,9 @@
     }
   }
 
-  &.active-url {
+  &.activeUrl {
     #results {
-      .outer-box {
+      .outerBox {
         fill: $euiColorEmptyShade;
         stroke: $euiColorPrimary;
         stroke-width: 1px;
@@ -126,10 +126,10 @@
       .url {
         fill: $euiColorPrimary;
       }
-      .title-box {
+      .titleBox {
         fill: $euiColorEmptyShade;
       }
-      .title-copy {
+      .titleCopy {
         fill: $euiColorPrimary;
         opacity: .1;
       }
@@ -140,9 +140,9 @@
     }
   }
 
-  &.active-filter {
+  &.activeFilter {
     #filter {
-      .outer-box {
+      .outerBox {
         fill: $euiColorEmptyShade;
         stroke: $euiColorPrimary;
         stroke-width: 2px;
@@ -156,15 +156,15 @@
       .check {
         fill: $euiColorEmptyShade;
       }
-      .filter-copy {
+      .filterCopy {
         fill: $euiColorPrimary;
       }
     }
   }
 
-  &.active-sort {
+  &.activeSort {
     #sort {
-      .outer-box {
+      .outerBox {
         fill: $euiColorEmptyShade;
         stroke: $euiColorPrimary;
         stroke-width: 2px;
@@ -172,15 +172,15 @@
       .header {
         fill:  $euiColorPrimary;
       }
-      .select-copy {
+      .selectCopy {
         fill:  $euiColorPrimary;
       }
-      .select-box {
+      .selectBox {
         fill: $euiColorEmptyShade;
         stroke:  $euiColorPrimary;
         stroke-width: 1px;
       }
-      .select-control {
+      .selectControl {
         fill:  $euiColorPrimary;
       }
     }
