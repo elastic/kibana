@@ -30,7 +30,6 @@ const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation
       message: `Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`,
     });
   }
-  return config;
 };
 
 export const spacesConfigDeprecationProvider: ConfigDeprecationProvider = () => {

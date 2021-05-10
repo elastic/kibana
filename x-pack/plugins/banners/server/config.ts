@@ -46,10 +46,10 @@ export const config: PluginConfigDescriptor<BannersConfigType> = {
         addDeprecation({
           message: 'The `header` value for xpack.banners.placement has been replaced by `top`',
         });
-        pluginConfig.placement = 'top';
+        return {
+          set: [{ key: `${fromPath}.placement`, value: 'top' }],
+        };
       }
-
-      return rootConfig;
     },
   ],
 };
