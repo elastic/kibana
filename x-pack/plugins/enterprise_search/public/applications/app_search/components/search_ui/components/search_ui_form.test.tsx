@@ -27,7 +27,7 @@ describe('SearchUIForm', () => {
     validFacetFields: ['title', 'url', 'category', 'size'],
     titleField: 'title',
     urlField: 'url',
-    facetFields: ['cateegory'],
+    facetFields: ['category'],
     sortFields: ['size'],
   };
   const actions = {
