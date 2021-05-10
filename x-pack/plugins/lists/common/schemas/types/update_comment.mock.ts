@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ID } from '../../constants.mock';
+import { UpdateComment, UpdateCommentsArray } from '@kbn/securitysolution-io-ts-utils';
 
-import { UpdateComment, UpdateCommentsArray } from './update_comment';
+import { ID } from '../../constants.mock';
 
 export const getUpdateCommentMock = (): UpdateComment => ({
   comment: 'some comment',
