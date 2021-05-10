@@ -17,9 +17,8 @@ import {
 } from '../../__fixtures__';
 
 import { initGetCaseConfigure } from './get_configure';
-import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { CASE_CONFIGURE_URL, ConnectorTypes } from '../../../../../common';
 import { mappings } from '../../../../client/configure/mock';
-import { ConnectorTypes } from '../../../../../common/api/connectors';
 import { CasesClient } from '../../../../client';
 
 describe('GET configuration', () => {

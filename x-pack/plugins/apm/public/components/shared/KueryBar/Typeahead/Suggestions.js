@@ -72,7 +72,12 @@ class Suggestions extends Component {
     });
 
     return (
-      <List innerRef={(node) => (this.parentNode = node)}>{suggestions}</List>
+      <List
+        data-test-subj="suggestionContainer"
+        innerRef={(node) => (this.parentNode = node)}
+      >
+        {suggestions}
+      </List>
     );
   }
 }

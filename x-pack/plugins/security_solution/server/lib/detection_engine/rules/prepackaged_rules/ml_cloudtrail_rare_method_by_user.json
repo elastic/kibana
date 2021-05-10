@@ -7,7 +7,7 @@
   "false_positives": [
     "New or unusual user command activity can be due to manual troubleshooting or reconfiguration; changes in cloud automation scripts or workflows; adoption of new services; or changes in the way services are used."
   ],
-  "from": "now-60m",
+  "from": "now-2h",
   "interval": "15m",
   "license": "Elastic License v2",
   "machine_learning_job_id": "rare_method_for_a_username",
@@ -26,5 +26,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 3
+  "version": 4
 }

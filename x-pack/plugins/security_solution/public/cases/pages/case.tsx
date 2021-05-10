@@ -25,7 +25,7 @@ export const CasesPage = React.memo(() => {
         {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
           <CaseCallOut
             title={savedObjectReadOnlyErrorMessage.title}
-            messages={[{ ...savedObjectReadOnlyErrorMessage }]}
+            messages={[{ ...savedObjectReadOnlyErrorMessage, title: '' }]}
           />
         )}
         <AllCases userCanCrud={userPermissions?.crud ?? false} />

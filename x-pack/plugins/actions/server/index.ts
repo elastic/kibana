@@ -51,6 +51,7 @@ export type {
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';
+export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
 
