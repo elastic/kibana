@@ -9,16 +9,6 @@
     @include lnsDroppable;
     @include lnsDroppableActive;
 
-    p {
-      transition: filter $euiAnimSpeedFast ease-in-out;
-      filter: blur(5px);
-    }
-
-    .lnsExpressionRenderer {
-      transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
-      filter: blur($euiSizeXS);
-      opacity: .25;
-    }
   }
 
   &.lnsDragDrop-isActiveDropTarget {
