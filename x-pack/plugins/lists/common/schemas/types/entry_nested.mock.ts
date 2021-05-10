@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { EntryNested } from '@kbn/securitysolution-io-ts-utils';
+
 import { NESTED, NESTED_FIELD } from '../../constants.mock';
 
-import { EntryNested } from './entry_nested';
 import { getEntryMatchExcludeMock, getEntryMatchMock } from './entry_match.mock';
 import { getEntryMatchAnyExcludeMock, getEntryMatchAnyMock } from './entry_match_any.mock';
 import { getEntryExistsMock } from './entry_exists.mock';
