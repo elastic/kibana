@@ -344,7 +344,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const quickFunctions = (
     <>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
             defaultMessage: 'Select a function',
@@ -363,7 +363,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         />
       </div>
       <EuiSpacer size="s" />
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         {!incompleteInfo &&
         selectedColumn &&
         'references' in selectedColumn &&
@@ -613,7 +613,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       )}
 
       {!isFullscreen && !currentFieldIsInvalid && (
-        <div className="lnsIndexPatternDimensionEditor__section">
+        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
           {!incompleteInfo && selectedColumn && (
             <LabelInput
               value={selectedColumn.label}

@@ -2,7 +2,7 @@
   height: 100%;
 }
 
-.lnsIndexPatternDimensionEditor-fullscreen {
+.lnsIndexPatternDimensionEditor-isFullscreen {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -10,20 +10,12 @@
   flex-direction: column;
 }
 
-.lnsIndexPatternDimensionEditor__section {
+.lnsIndexPatternDimensionEditor__section--padded {
   padding: $euiSizeS;
 }
 
 .lnsIndexPatternDimensionEditor__section--shaded {
   background-color: $euiColorLightestShade;
-}
-
-.lnsIndexPatternDimensionEditor__section--top {
-  border-bottom: $euiBorderThin;
-}
-
-.lnsIndexPatternDimensionEditor__section--bottom {
-  border-top: $euiBorderThin;
 }
 
 .lnsIndexPatternDimensionEditor__columns {

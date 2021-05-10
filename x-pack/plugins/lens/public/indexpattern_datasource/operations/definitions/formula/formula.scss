@@ -1,3 +1,16 @@
+.lnsFormula {
+  border-bottom: $euiBorderThin;
+
+  & > * + * {
+    border-top: $euiBorderThin;
+  }
+}
+
+.lnsFormula__header,
+.lnsFormula__footer {
+  padding: $euiSizeS;
+}
+
 .lnsFormulaOverflow {
   // Needs to be higher than the modal and all flyouts
   z-index: $euiZLevel9 + 1;

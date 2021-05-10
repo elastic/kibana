@@ -647,88 +647,92 @@ function FormulaEditor({
   return (
     <div
       className={classNames({
-        'lnsIndexPatternDimensionEditor--fullscreen': isFullscreen,
+        lnsIndexPatternDimensionEditor: true,
+        'lnsIndexPatternDimensionEditor-isFullscreen': isFullscreen,
       })}
     >
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top">
-        <EuiFlexGroup>
-          <EuiFlexItem />
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsFormula">
+        <div className="lnsFormula__header">
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem>{/* TODO: Word wrap button */}</EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiButtonEmpty
-              onClick={() => {
-                toggleFullscreen();
-              }}
-              iconType="fullScreen"
-              size="s"
-              color="text"
-              flush="right"
-            >
-              {isFullscreen
-                ? i18n.translate('xpack.lens.formula.fullScreenCloseLabel', {
-                    defaultMessage: 'Collapse formula',
-                  })
-                : i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
-                    defaultMessage: 'Expand formula',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-        <CodeEditor
-          {...codeEditorOptions}
-          height={200}
-          width={'100%'}
-          options={{
-            ...codeEditorOptions.options,
-            // Shared model and overflow node
-            overflowWidgetsDomNode: overflowDiv1.current,
-            model: editorModel.current,
-          }}
-          editorDidMount={(editor) => {
-            editor1.current = editor;
-            registerOnTypeHandler(editor);
-          }}
-        />
-        <EuiSpacer />
-      </div>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top lnsIndexPatternDimensionEditor__section--bottom">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            {isFullscreen ? (
-              <MemoizedFormulaHelp
-                indexPattern={indexPattern}
-                operationDefinitionMap={operationDefinitionMap}
-              />
-            ) : (
-              <EuiPopover
-                isOpen={isHelpOpen}
-                closePopover={() => setIsHelpOpen(false)}
-                button={
-                  <EuiButtonEmpty
-                    onClick={() => setIsHelpOpen(!isHelpOpen)}
-                    iconType="help"
-                    size="s"
-                    color="text"
-                  >
-                    {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
-                      defaultMessage: 'Function reference',
-                    })}
-                  </EuiButtonEmpty>
-                }
-                anchorPosition="leftDown"
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={() => {
+                  toggleFullscreen();
+                }}
+                iconType="fullScreen"
+                size="xs"
+                color="text"
+                flush="right"
               >
+                {isFullscreen
+                  ? i18n.translate('xpack.lens.formula.fullScreenCloseLabel', {
+                      defaultMessage: 'Collapse',
+                    })
+                  : i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
+                      defaultMessage: 'Expand',
+                    })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+
+        <div className="lnsFormula__editor">
+          <CodeEditor
+            {...codeEditorOptions}
+            height={200}
+            width={'100%'}
+            options={{
+              ...codeEditorOptions.options,
+              // Shared model and overflow node
+              overflowWidgetsDomNode: overflowDiv1.current,
+              model: editorModel.current,
+            }}
+            editorDidMount={(editor) => {
+              editor1.current = editor;
+              registerOnTypeHandler(editor);
+            }}
+          />
+        </div>
+
+        <div className="lnsFormula__footer">
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {isFullscreen ? (
                 <MemoizedFormulaHelp
                   indexPattern={indexPattern}
                   operationDefinitionMap={operationDefinitionMap}
                 />
-              </EuiPopover>
-            )}
-          </EuiFlexItem>
+              ) : (
+                <EuiPopover
+                  isOpen={isHelpOpen}
+                  closePopover={() => setIsHelpOpen(false)}
+                  button={
+                    <EuiButtonEmpty
+                      onClick={() => setIsHelpOpen(!isHelpOpen)}
+                      iconType="help"
+                      size="s"
+                      color="text"
+                    >
+                      {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
+                        defaultMessage: 'Function reference',
+                      })}
+                    </EuiButtonEmpty>
+                  }
+                  anchorPosition="leftDown"
+                >
+                  <MemoizedFormulaHelp
+                    indexPattern={indexPattern}
+                    operationDefinitionMap={operationDefinitionMap}
+                  />
+                </EuiPopover>
+              )}
+            </EuiFlexItem>
 
-          <EuiFlexItem>{/* Errors go here */}</EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem>{/* Errors go here */}</EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </div>
     </div>
   );
