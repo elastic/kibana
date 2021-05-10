@@ -135,8 +135,11 @@ export function DiscoverWrapper(props: DiscoverWrapperProps) {
    */
 
   useEffect(() => {
-    stateContainer.startSync();
     addHelpMenuToAppChrome(chrome, docLinks);
+    stateContainer.replaceUrlAppState({}).then(() => {
+      stateContainer.startSync();
+    });
+
     return () => stateContainer.stopSync();
   }, [stateContainer, chrome, docLinks]);
 
