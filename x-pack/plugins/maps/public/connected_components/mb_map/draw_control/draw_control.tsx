@@ -44,6 +44,8 @@ export interface Props {
   mbMap: MbMap;
   drawActive: boolean;
   setShapeToDraw: (shapeToDraw: DRAW_TYPE) => void;
+  indexPatternId: string | undefined;
+  geoField: string | undefined;
 }
 
 export class DrawControl extends Component<Props> {
@@ -135,19 +137,14 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);
     } else if (drawMode !== DRAW_CIRCLE && this.props.drawType === DRAW_TYPE.DISTANCE) {
       this._mbDrawControl.changeMode(DRAW_CIRCLE);
-    } else if (drawMode !== DRAW_LINE && this.props.drawType === DRAW_TYPE.LINE) {
-      this._mbDrawControl.changeMode(DRAW_LINE);
     } else if (drawMode !== DRAW_POLYGON && this.props.drawType === DRAW_TYPE.POLYGON) {
       this._mbDrawControl.changeMode(DRAW_POLYGON);
+    } else if (drawMode !== DRAW_LINE && this.props.drawType === DRAW_TYPE.LINE) {
+      this._mbDrawControl.changeMode(DRAW_LINE);
     } else if (drawMode !== DRAW_POINT && this.props.drawType === DRAW_TYPE.POINT) {
       this._mbDrawControl.changeMode(DRAW_POINT);
     } else if (drawMode !== SIMPLE_SELECT && this.props.drawType === DRAW_TYPE.SIMPLE_SELECT) {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
-    } else if (
-      drawMode !== this._mbDrawControl.modes.DRAW_POLYGON &&
-      this.props.drawType === DRAW_TYPE.POLYGON
-    ) {
-      this._mbDrawControl.changeMode(this._mbDrawControl.modes.DRAW_POLYGON);
     }
   }
 
@@ -156,6 +153,13 @@ export class DrawControl extends Component<Props> {
       return null;
     }
 
-    return <DrawTooltip mbMap={this.props.mbMap} drawType={this.props.drawType} />;
+    return (
+      <DrawTooltip
+        mbMap={this.props.mbMap}
+        drawType={this.props.drawType}
+        indexPatternId={this.props.indexPatternId}
+        geoField={this.props.geoField}
+      />
+    );
   }
 }

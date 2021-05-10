@@ -17,6 +17,8 @@ const noop = () => {};
 interface Props {
   mbMap: MbMap;
   drawType: DRAW_TYPE;
+  indexPatternId: string | undefined;
+  geoField: string | undefined;
 }
 
 interface State {
@@ -54,6 +56,23 @@ export class DrawTooltip extends Component<Props, State> {
     this._updateTooltipLocation.cancel();
   }
 
+  _hideTooltip = () => {
+    this._updateTooltipLocation.cancel();
+    this.setState({ isOpen: false });
+  };
+
+  _updateTooltipLocation = _.throttle(({ lngLat }) => {
+    const mouseLocation = this.props.mbMap.project(lngLat);
+    if (!this._isMounted) {
+      return;
+    }
+    this.setState({
+      isOpen: true,
+      x: mouseLocation.x,
+      y: mouseLocation.y,
+    });
+  }, 100);
+
   render() {
     if (this.state.x === undefined || this.state.y === undefined) {
       return null;
@@ -73,6 +92,14 @@ export class DrawTooltip extends Component<Props, State> {
       instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
         defaultMessage: 'Click to start shape. Click to add vertex. Double click to finish.',
       });
+    } else if (this.props.drawType === DRAW_TYPE.LINE) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
+        defaultMessage: 'Click to start line. Click to add vertex. Double click to finish.',
+      });
+    } else if (this.props.drawType === DRAW_TYPE.POINT) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.polygonInstructions', {
+        defaultMessage: 'Click to create point.',
+      });
     } else {
       // unknown draw type, tooltip not needed
       return null;
@@ -81,6 +108,13 @@ export class DrawTooltip extends Component<Props, State> {
     const tooltipAnchor = (
       <div style={{ height: '26px', width: '26px', background: 'transparent' }} />
     );
+
+    const title =
+      this.props.indexPatternId && this.props.geoField ? (
+        <EuiPopoverTitle paddingSize="s">
+          {`${this.props.indexPatternId}: ${this.props.geoField}`}
+        </EuiPopoverTitle>
+      ) : undefined;
 
     return (
       <EuiPopover
@@ -96,28 +130,11 @@ export class DrawTooltip extends Component<Props, State> {
           transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`,
         }}
       >
-        <EuiPopoverTitle paddingSize="s">Hello, I&rsquo;m a popover title</EuiPopoverTitle>
+        {title ? title : null}
         <EuiText color="subdued" size="xs">
           {instructions}
         </EuiText>
       </EuiPopover>
     );
   }
-
-  _hideTooltip = () => {
-    this._updateTooltipLocation.cancel();
-    this.setState({ isOpen: false });
-  };
-
-  _updateTooltipLocation = _.throttle(({ lngLat }) => {
-    const mouseLocation = this.props.mbMap.project(lngLat);
-    if (!this._isMounted) {
-      return;
-    }
-    this.setState({
-      isOpen: true,
-      x: mouseLocation.x,
-      y: mouseLocation.y,
-    });
-  }, 100);
 }

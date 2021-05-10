@@ -12,6 +12,15 @@ import { setShapeToDraw } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { DrawControl } from './draw_control';
 import { DRAW_TYPE } from '../../../../common';
+import { getDrawState } from '../../../selectors/map_selectors';
+
+function mapStateToProps(state: MapStoreState) {
+  const drawState = getDrawState(state);
+  return {
+    indexPatternId: drawState ? drawState.indexPatternId : undefined,
+    geoField: drawState ? drawState.geoFieldName : undefined,
+  };
+}
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
@@ -21,5 +30,5 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   };
 }
 
-const connected = connect(null, mapDispatchToProps)(DrawControl);
+const connected = connect(mapStateToProps, mapDispatchToProps)(DrawControl);
 export { connected as DrawControl };
