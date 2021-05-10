@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
 import { AlertSearchResponse, AlertsIndex, Privilege } from './types';
 
 export const alertsMock: AlertSearchResponse<unknown, unknown> = {
@@ -1038,4 +1039,8 @@ export const mockUserPrivilege: Privilege = {
   application: {},
   is_authenticated: true,
   has_encryption_key: true,
+};
+
+export const mockHostIsolation: HostIsolationResponse = {
+  action: '713085d6-ab45-4e9e-b41d-96563cafdd97',
 };
