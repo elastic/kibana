@@ -8,12 +8,7 @@
 import { curry } from 'lodash';
 import { Logger } from 'src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import {
-  CasePatchRequest,
-  CasePostRequest,
-  CommentRequest,
-  CommentType,
-} from '../../../common/api';
+import { CasePatchRequest, CasePostRequest, CommentRequest, CommentType } from '../../../common';
 import { createExternalCasesClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {

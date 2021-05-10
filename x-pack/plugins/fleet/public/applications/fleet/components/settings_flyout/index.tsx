@@ -42,6 +42,9 @@ import { isDiffPathProtocol } from '../../../../../common/';
 import { SettingsConfirmModal } from './confirm_modal';
 import type { SettingsConfirmModalProps } from './confirm_modal';
 
+import 'brace/mode/yaml';
+import 'brace/theme/textmate';
+
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 
 interface Props {
@@ -323,6 +326,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             maxLines: 30,
             tabSize: 2,
             showGutter: false,
+            showPrintMargin: false,
           }}
           {...inputs.additionalYamlConfig.props}
           onChange={inputs.additionalYamlConfig.setValue}
@@ -340,7 +344,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           onClose={onConfirmModalClose}
         />
       )}
-      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+      <EuiFlyout onClose={onClose} size="m">
         <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerSettingsFlyoutTitle">
           <EuiTitle size="m">
             <h2 id="IngestManagerSettingsFlyoutTitle">

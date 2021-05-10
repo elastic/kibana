@@ -8,9 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const USE_DATA_SERVICE = 'labs:canvas:useDataService';
 export const TIME_TO_PRESENT = 'labs:presentation:timeToPresent';
 
-export const projectIDs = [TIME_TO_PRESENT] as const;
+export const projectIDs = [TIME_TO_PRESENT, USE_DATA_SERVICE] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
 export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 
@@ -30,6 +31,22 @@ export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
     description: i18n.translate('presentationUtil.labs.enableUnifiedToolbarProjectDescription', {
       defaultMessage: 'Enable the new presentation-oriented UI for Canvas.',
     }),
+    solutions: ['canvas'],
+  },
+  [USE_DATA_SERVICE]: {
+    id: USE_DATA_SERVICE,
+    isActive: true,
+    isDisplayed: true,
+    environments: ['kibana', 'browser', 'session'],
+    name: i18n.translate('presentationUtil.experiments.enableUseDataServiceExperimentName', {
+      defaultMessage: 'Use data service',
+    }),
+    description: i18n.translate(
+      'presentationUtil.experiments.enableUseDataServiceExperimentDescription',
+      {
+        defaultMessage: 'An experiment of using the new data.search service for Canvas datasources',
+      }
+    ),
     solutions: ['canvas'],
   },
 };

@@ -6,9 +6,10 @@
  */
 
 import uuid from 'uuid';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import { OsTypeArray, validate } from '@kbn/securitysolution-io-ts-utils';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { addIdToItem, removeIdFromItem, validate } from '../../../../common/shared_imports';
 import {
   CreateExceptionListItemSchema,
   EntriesArray,
@@ -279,9 +280,10 @@ export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IIndexPattern, t: ExceptionListType) => IIndexPattern
+  preFilter?: (i: IIndexPattern, t: ExceptionListType, o?: OsTypeArray) => IIndexPattern,
+  osTypes?: OsTypeArray
 ): IIndexPattern => {
-  const indexPatterns = preFilter != null ? preFilter(patterns, type) : patterns;
+  const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown

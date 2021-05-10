@@ -37,9 +37,10 @@ describe('reducer', () => {
     it('change form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       const nameChanged = 'name changed';
+      const newComment = 'new comment';
       const result = eventFiltersPageReducer(initialState, {
         type: 'eventFiltersChangeForm',
-        payload: { entry: { ...entry, name: nameChanged } },
+        payload: { entry: { ...entry, name: nameChanged }, newComment },
       });
 
       expect(result).toStrictEqual({
@@ -50,6 +51,7 @@ describe('reducer', () => {
             ...entry,
             name: nameChanged,
           },
+          newComment,
           hasNameError: false,
           submissionResourceState: {
             type: 'UninitialisedResourceState',
@@ -75,6 +77,45 @@ describe('reducer', () => {
             type: 'LoadedResourceState',
             data: createdEventFilterEntryMock(),
           },
+        },
+      });
+    });
+
+    it('create is success and force list refresh', () => {
+      const initialStateWithListPageActive = {
+        ...initialState,
+        listPage: { ...initialState.listPage, active: true },
+      };
+      const result = eventFiltersPageReducer(initialStateWithListPageActive, {
+        type: 'eventFiltersCreateSuccess',
+      });
+
+      expect(result).toStrictEqual({
+        ...initialStateWithListPageActive,
+        listPage: {
+          ...initialStateWithListPageActive.listPage,
+          forceRefresh: true,
+        },
+      });
+    });
+  });
+  describe('UserChangedUrl', () => {
+    it('receives a url change with show=create', () => {
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'userChangedUrl',
+        payload: { search: '?show=create', pathname: '/event_filters', hash: '' },
+      });
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        location: {
+          ...initialState.location,
+          id: undefined,
+          show: 'create',
+        },
+        listPage: {
+          ...initialState.listPage,
+          active: true,
         },
       });
     });

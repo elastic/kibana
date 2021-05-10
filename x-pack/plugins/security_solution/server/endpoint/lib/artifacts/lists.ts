@@ -7,10 +7,10 @@
 
 import { createHash } from 'crypto';
 import { deflate } from 'zlib';
+import { Entry, EntryNested } from '@kbn/securitysolution-io-ts-utils';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
@@ -22,6 +22,8 @@ import {
   translatedEntryMatchAnyMatcher,
   TranslatedEntryMatcher,
   translatedEntryMatchMatcher,
+  TranslatedEntryMatchWildcardMatcher,
+  translatedEntryMatchWildcardMatcher,
   TranslatedEntryNestedEntry,
   translatedEntryNestedEntry,
   TranslatedExceptionListItem,
@@ -203,6 +205,10 @@ function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryM
     : 'exact_cased';
 }
 
+function getMatcherWildcardFunction(field: string): TranslatedEntryMatchWildcardMatcher {
+  return field.endsWith('.caseless') ? 'wildcard_caseless' : 'wildcard_cased';
+}
+
 function normalizeFieldName(field: string): string {
   return field.endsWith('.caseless') ? field.substring(0, field.lastIndexOf('.')) : field;
 }
@@ -264,6 +270,17 @@ function translateEntry(
     case 'match_any': {
       const matcher = getMatcherFunction(entry.field, true);
       return translatedEntryMatchAnyMatcher.is(matcher)
+        ? {
+            field: normalizeFieldName(entry.field),
+            operator: entry.operator,
+            type: matcher,
+            value: entry.value,
+          }
+        : undefined;
+    }
+    case 'wildcard': {
+      const matcher = getMatcherWildcardFunction(entry.field);
+      return translatedEntryMatchWildcardMatcher.is(matcher)
         ? {
             field: normalizeFieldName(entry.field),
             operator: entry.operator,
