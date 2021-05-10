@@ -46,7 +46,7 @@ import {
   ROLLBACK_MAP_SETTINGS,
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
-  UPDATE_DRAW_FEATURE_STATE,
+  SET_SHAPE_TO_DRAW,
   UPDATE_EDIT_MODE,
   ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
@@ -85,7 +85,7 @@ export const DEFAULT_MAP_STATE: MapState = {
     refreshTimerLastTriggeredAt: undefined,
     vectorLayerIndexName: '',
     drawState: undefined,
-    drawFeatureState: undefined,
+    shapeToDraw: undefined,
     editModeActive: false,
     featuresToIndexQueue: [],
   },
@@ -106,12 +106,12 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
           drawState: action.drawState,
         },
       };
-    case UPDATE_DRAW_FEATURE_STATE:
+    case SET_SHAPE_TO_DRAW:
       return {
         ...state,
         mapState: {
           ...state.mapState,
-          drawFeatureState: action.drawFeatureState,
+          shapeToDraw: action.shapeToDraw,
         },
       };
     case UPDATE_EDIT_MODE:
@@ -131,7 +131,9 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         },
       };
     case REMOVE_FEATURES_FROM_INDEX_QUEUE:
-      const newFeatureArr = state.mapState.featuresToIndexQueue.filter(({ id }: { id: string }) => !action.featureIds.includes(id))
+      const newFeatureArr = state.mapState.featuresToIndexQueue.filter(
+        ({ id }: { id: string }) => !action.featureIds.includes(id)
+      );
       return {
         ...state,
         mapState: {
@@ -153,7 +155,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           drawState: undefined,
-          drawFeatureState: undefined,
+          shapeToDraw: undefined,
           editModeActive: false,
           featuresToIndexQueue: [],
         },

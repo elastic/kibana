@@ -43,7 +43,7 @@ export interface Props {
   onFeaturesSelected?: (drawControl: MapboxDraw) => (event: { features: Feature[] }) => void;
   mbMap: MbMap;
   drawActive: boolean;
-  updateDrawFeatureState: (drawFeatureState: DRAW_TYPE) => void;
+  setShapeToDraw: (shapeToDraw: DRAW_TYPE) => void;
 }
 
 export class DrawControl extends Component<Props> {
@@ -84,7 +84,7 @@ export class DrawControl extends Component<Props> {
 
   _onModeChange = ({ mode }: { mode: string }) => {
     if (mbModeEquivalencies.has(mode)) {
-      this.props.updateDrawFeatureState(mbModeEquivalencies.get(mode) as DRAW_TYPE);
+      this.props.setShapeToDraw(mbModeEquivalencies.get(mode) as DRAW_TYPE);
     }
   };
 

@@ -15,7 +15,7 @@ import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_f
 export interface Props {
   cancelDraw: () => void;
   drawType: string;
-  updateCompletedShape: (drawFeatureState: DRAW_TYPE) => void;
+  updateCompletedShape: (shapeToDraw: DRAW_TYPE) => void;
   pointsOnly?: boolean;
 }
 

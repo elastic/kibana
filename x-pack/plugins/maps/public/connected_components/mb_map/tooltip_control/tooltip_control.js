@@ -93,7 +93,7 @@ export class TooltipControl extends React.Component {
   }
 
   _lockTooltip = (e) => {
-    if (this.props.isDrawingFilter) {
+    if (this.props.filterModeActive) {
       // ignore click events when in draw mode
       return;
     }
@@ -117,7 +117,7 @@ export class TooltipControl extends React.Component {
   };
 
   _updateHoverTooltipState = _.debounce((e) => {
-    if (this.props.isDrawingFilter || this.props.hasLockedTooltips) {
+    if (this.props.filterModeActive || this.props.hasLockedTooltips) {
       // ignore hover events when in draw mode or when there are locked tooltips
       return;
     }

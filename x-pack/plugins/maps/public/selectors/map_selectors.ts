@@ -196,10 +196,6 @@ export const isUsingSearch = (state: MapStoreState): boolean => {
 export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
-export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
-  return !!map.mapState.drawState;
-};
-
 export const getEditModeActive = ({ map }: MapStoreState): boolean => map.mapState.editModeActive;
 
 export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {

@@ -54,7 +54,6 @@ const defaultProps = {
   closeOnHoverTooltip: () => {},
   openOnHoverTooltip: () => {},
   layerList: [mockLayer],
-  isDrawingFilter: false,
   addFilters: () => {},
   geoFields: [{}],
   openTooltips: [],
@@ -185,7 +184,6 @@ describe('TooltipControl', () => {
           {...defaultProps}
           closeOnClickTooltip={closeOnClickTooltipStub}
           openOnClickTooltip={openOnClickTooltipStub}
-          isDrawingFilter={true}
         />
       );
 

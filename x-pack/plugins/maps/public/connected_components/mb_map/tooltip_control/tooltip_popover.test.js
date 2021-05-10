@@ -60,7 +60,6 @@ const defaultProps = {
   mbMap: mockMBMap,
   closeTooltip: () => {},
   layerList: [],
-  isDrawingFilter: false,
   addFilters: () => {},
   geoFields: [{}],
   location: [-120, 30],

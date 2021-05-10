@@ -13,13 +13,13 @@ import { DrawFeatureControl } from './draw_feature_control';
 import {
   addFeaturesToIndexQueue,
   removeFeaturesFromIndexQueue,
-  updateDrawFeatureState,
+  setShapeToDraw,
 } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    drawType: state.map.mapState.drawFeatureState,
+    drawType: state.map.mapState.shapeToDraw,
   };
 }
 
@@ -29,7 +29,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(addFeaturesToIndexQueue(features));
     },
     disableDrawState() {
-      dispatch(updateDrawFeatureState(null));
+      dispatch(setShapeToDraw(null));
     },
     removeFeatures(featureIds: string[]) {
       dispatch(removeFeaturesFromIndexQueue(featureIds));

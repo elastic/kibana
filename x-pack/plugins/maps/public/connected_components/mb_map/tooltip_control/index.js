@@ -17,14 +17,15 @@ import {
   getLayerList,
   getOpenTooltips,
   getHasLockedTooltips,
-  isDrawingFilter,
 } from '../../../selectors/map_selectors';
+import { getDrawMode } from '../../../selectors/ui_selectors';
+import { DRAW_MODE } from '../../../../common';
 
 function mapStateToProps(state = {}) {
   return {
     layerList: getLayerList(state),
     hasLockedTooltips: getHasLockedTooltips(state),
-    isDrawingFilter: isDrawingFilter(state),
+    filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
     openTooltips: getOpenTooltips(state),
   };
 }

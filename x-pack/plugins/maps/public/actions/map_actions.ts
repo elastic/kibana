@@ -44,7 +44,7 @@ import {
   TRACK_MAP_SETTINGS,
   TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
-  UPDATE_DRAW_FEATURE_STATE,
+  SET_SHAPE_TO_DRAW,
   UPDATE_EDIT_MODE,
   UPDATE_MAP_SETTING,
   ADD_FEATURES_TO_INDEX_QUEUE,
@@ -318,6 +318,15 @@ export function triggerRefreshTimer() {
   };
 }
 
+export function setShapeToDraw(shapeToDraw: DRAW_TYPE | null) {
+  return (dispatch: Dispatch) => {
+    dispatch({
+      type: SET_SHAPE_TO_DRAW,
+      shapeToDraw,
+    });
+  };
+}
+
 export function updateDrawState(drawState: DrawState | null) {
   return (dispatch: Dispatch) => {
     if (drawState !== null) {
@@ -326,18 +335,6 @@ export function updateDrawState(drawState: DrawState | null) {
     dispatch({
       type: UPDATE_DRAW_STATE,
       drawState,
-    });
-  };
-}
-
-export function updateDrawFeatureState(drawFeatureState: DRAW_TYPE | null) {
-  return (dispatch: Dispatch) => {
-    if (drawFeatureState !== null) {
-      dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
-    }
-    dispatch({
-      type: UPDATE_DRAW_FEATURE_STATE,
-      drawFeatureState,
     });
   };
 }

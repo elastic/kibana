@@ -9,25 +9,25 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { FeatureDrawControl } from './feature_draw_control';
-import { isDrawingFilter } from '../../../../selectors/map_selectors';
-import { updateDrawFeatureState } from '../../../../actions';
+import { setShapeToDraw } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
-import { DRAW_TYPE } from '../../../../../common';
+import { DRAW_MODE, DRAW_TYPE } from '../../../../../common';
+import { getDrawMode } from '../../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    isDrawingFilter: isDrawingFilter(state),
-    drawType: state.map.mapState.drawFeatureState,
+    filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
+    drawType: state.map.mapState.shapeToDraw,
   };
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    updateCompletedShape: (drawFeatureState: DRAW_TYPE) => {
-      dispatch(updateDrawFeatureState(drawFeatureState));
+    updateCompletedShape: (shapeToDraw: DRAW_TYPE) => {
+      dispatch(setShapeToDraw(shapeToDraw));
     },
     cancelDraw: () => {
-      dispatch(updateDrawFeatureState(null));
+      dispatch(setShapeToDraw(null));
     },
   };
 }

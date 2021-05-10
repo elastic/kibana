@@ -13,10 +13,10 @@ import { DRAW_TYPE } from '../../../../../common/constants';
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 export interface Props {
-  isDrawingFilter: boolean;
+  filterModeActive: boolean;
   drawType: string;
   cancelDraw: () => void;
-  initiateDraw: (drawFeatureState: DRAW_TYPE) => void;
+  initiateDraw: (shapeToDraw: DRAW_TYPE) => void;
 }
 
 export function FeatureEditControl(props: Props) {

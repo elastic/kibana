@@ -38,7 +38,7 @@ export type MapContext = {
   refreshTimerLastTriggeredAt?: string;
   vectorLayerIndexName: string;
   drawState?: DrawState;
-  drawFeatureState?: DRAW_TYPE;
+  shapeToDraw?: DRAW_TYPE;
   featuresToIndexQueue: Feature[];
   editModeActive: boolean;
   searchSessionId?: string;
