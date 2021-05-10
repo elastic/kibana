@@ -43,8 +43,6 @@ export interface Props {
   errorMsg?: string;
   className: string;
   isLoading?: boolean;
-  activateDrawFilterMode: () => void;
-  deactivateDrawMode: () => void;
 }
 
 interface State {
@@ -61,14 +59,6 @@ export class GeometryFilterForm extends Component<Props> {
     geometryLabel: this.props.intitialGeometryLabel,
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
-
-  componentDidMount() {
-    this.props.activateDrawFilterMode();
-  }
-
-  componentWillUnmount() {
-    this.props.deactivateDrawMode();
-  }
 
   _onGeoFieldChange = (selectedField: GeoFieldWithIndex | undefined) => {
     this.setState({ selectedField });

@@ -25,16 +25,22 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    updateCompletedShape: (drawState: DrawState) => {
-      dispatch(updateDrawState(drawState));
-    },
     cancelDraw: () => {
       dispatch(updateDrawState(null));
       dispatch(setDrawMode(DRAW_MODE.NONE));
     },
-    activateDrawFilterMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_FILTERS)),
-    activateDrawPointsMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_POINTS)),
-    activateDrawShapesMode: () => dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES)),
+    activateDrawFilterMode: (drawState: DrawState) => {
+      dispatch(setDrawMode(DRAW_MODE.DRAW_FILTERS));
+      dispatch(updateDrawState(drawState));
+    },
+    activateDrawPointsMode: (drawState: DrawState) => {
+      dispatch(setDrawMode(DRAW_MODE.DRAW_POINTS));
+      dispatch(updateDrawState(drawState));
+    },
+    activateDrawShapesMode: (drawState: DrawState) => {
+      dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
+      dispatch(updateDrawState(drawState));
+    },
     deactivateDrawMode: () => dispatch(setDrawMode(DRAW_MODE.NONE)),
   };
 }

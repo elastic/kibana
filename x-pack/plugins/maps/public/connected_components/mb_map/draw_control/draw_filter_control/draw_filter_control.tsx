@@ -27,7 +27,7 @@ export interface Props {
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;
   disableDrawState: () => void;
   drawState?: DrawState;
-  isDrawingFilter: boolean;
+  filterModeActive: boolean;
   mbMap: MbMap;
 }
 
@@ -107,13 +107,13 @@ export class DrawFilterControl extends Component<Props, {}> {
     return (
       <DrawControl
         drawType={
-          this.props.isDrawingFilter && this.props.drawState
+          this.props.filterModeActive && this.props.drawState
             ? this.props.drawState.drawType
             : undefined
         }
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
-        drawActive={!!(this.props.drawState && this.props.drawState.drawType)}
+        drawActive={this.props.filterModeActive}
       />
     );
   }

@@ -56,7 +56,7 @@ export type TooltipState = {
 
 export type DrawState = {
   actionId: string;
-  drawType: DRAW_TYPE;
+  drawType?: DRAW_TYPE;
   filterLabel?: string; // point radius filter alias
   geoFieldName?: string;
   geoFieldType?: ES_GEO_FIELD_TYPE;

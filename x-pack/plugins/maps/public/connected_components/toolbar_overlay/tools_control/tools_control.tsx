@@ -67,14 +67,13 @@ const ADD_FEATURES_LABEL_SHORT = i18n.translate(
 export interface Props {
   cancelDraw: () => void;
   geoFields: GeoFieldWithIndex[];
-  updateCompletedShape: (drawState: DrawState) => void;
   filterModeActive: boolean;
   featureModeActive: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  activateDrawFilterMode: () => void;
-  activateDrawPointsMode: () => void;
-  activateDrawShapesMode: () => void;
+  activateDrawFilterMode: (drawState: DrawState) => void;
+  activateDrawPointsMode: (drawState: DrawState) => void;
+  activateDrawShapesMode: (drawState: DrawState) => void;
   deactivateDrawMode: () => void;
 }
 
@@ -108,7 +107,7 @@ export class ToolsControl extends Component<Props, State> {
     geoFieldType?: ES_GEO_FIELD_TYPE;
     relation?: ES_SPATIAL_RELATIONS;
   }) => {
-    this.props.updateCompletedShape({
+    this.props.activateDrawFilterMode({
       drawType: DRAW_TYPE.POLYGON,
       ...options,
     });
@@ -123,7 +122,7 @@ export class ToolsControl extends Component<Props, State> {
     geoFieldType?: ES_GEO_FIELD_TYPE;
     relation?: ES_SPATIAL_RELATIONS;
   }) => {
-    this.props.updateCompletedShape({
+    this.props.activateDrawFilterMode({
       drawType: DRAW_TYPE.BOUNDS,
       ...options,
     });
@@ -136,11 +135,26 @@ export class ToolsControl extends Component<Props, State> {
     indexPatternId: string;
     geoFieldName: string;
   }) => {
-    this.props.updateCompletedShape({
+    this.props.activateDrawFilterMode({
       drawType: DRAW_TYPE.DISTANCE,
       ...options,
     });
     this._closePopover();
+  };
+
+  _initiateFeatureEdit = (options: {
+    actionId: string;
+    filterLabel: string;
+    indexPatternId: string;
+    geoFieldName: string;
+    geoFieldType?: ES_GEO_FIELD_TYPE;
+  }) => {
+    this._closePopover();
+    if (options.geoFieldType === 'geo_point') {
+      this.props.activateDrawPointsMode(options);
+    } else {
+      this.props.activateDrawShapesMode(options);
+    }
   };
 
   _getDrawPanels() {
@@ -188,8 +202,6 @@ export class ToolsControl extends Component<Props, State> {
               }
             )}
             onSubmit={this._initiateShapeDraw}
-            activateDrawFilterMode={this.props.activateDrawFilterMode}
-            deactivateDrawMode={this.props.deactivateDrawMode}
           />
         ),
       },
@@ -210,8 +222,6 @@ export class ToolsControl extends Component<Props, State> {
               }
             )}
             onSubmit={this._initiateBoundsDraw}
-            activateDrawFilterMode={this.props.activateDrawFilterMode}
-            deactivateDrawMode={this.props.deactivateDrawMode}
           />
         ),
       },
@@ -226,8 +236,6 @@ export class ToolsControl extends Component<Props, State> {
             getFilterActions={this.props.getFilterActions}
             getActionContext={this.props.getActionContext}
             onSubmit={this._initiateDistanceDraw}
-            activateDrawFilterMode={this.props.activateDrawFilterMode}
-            deactivateDrawMode={this.props.deactivateDrawMode}
           />
         ),
       },
@@ -238,14 +246,7 @@ export class ToolsControl extends Component<Props, State> {
           <IndexGeometrySelectPopoverForm
             className="mapDrawControl__geometryFilterForm"
             geoFields={this.props.geoFields}
-            onSubmit={({ geoFieldType }: { geoFieldType: string }) => {
-              this._closePopover();
-              if (geoFieldType === 'geo_point') {
-                this.props.activateDrawPointsMode();
-              } else {
-                this.props.activateDrawShapesMode();
-              }
-            }}
+            onSubmit={this._initiateFeatureEdit}
           />
         ),
       },

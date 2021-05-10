@@ -54,12 +54,13 @@ export class DrawControl extends Component<Props> {
     modes: mbDrawModes,
   });
 
-  componentDidUpdate() {
+  componentWillReceiveProps() {
     this._syncDrawControl();
   }
 
   componentDidMount() {
     this._isMounted = true;
+    this._syncDrawControl();
   }
 
   componentWillUnmount() {

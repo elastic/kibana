@@ -27,6 +27,7 @@ interface State {
 
 export class DrawTooltip extends Component<Props, State> {
   private readonly _popoverRef: RefObject<EuiPopover> = React.createRef();
+  private _isMounted = false;
 
   state: State = {
     x: undefined,
@@ -35,6 +36,7 @@ export class DrawTooltip extends Component<Props, State> {
   };
 
   componentDidMount() {
+    this._isMounted = true;
     this.props.mbMap.on('mousemove', this._updateTooltipLocation);
     this.props.mbMap.on('mouseout', this._hideTooltip);
   }
@@ -46,6 +48,7 @@ export class DrawTooltip extends Component<Props, State> {
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     this.props.mbMap.off('mousemove', this._updateTooltipLocation);
     this.props.mbMap.off('mouseout', this._hideTooltip);
     this._updateTooltipLocation.cancel();
@@ -106,6 +109,9 @@ export class DrawTooltip extends Component<Props, State> {
 
   _updateTooltipLocation = _.throttle(({ lngLat }) => {
     const mouseLocation = this.props.mbMap.project(lngLat);
+    if (!this._isMounted) {
+      return;
+    }
     this.setState({
       isOpen: true,
       x: mouseLocation.x,

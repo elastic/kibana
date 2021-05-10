@@ -38,8 +38,6 @@ export interface Props {
     indexPatternId: string;
     geoFieldName: string;
   }) => void;
-  activateDrawFilterMode: () => void;
-  deactivateDrawMode: () => void;
 }
 
 interface State {
@@ -54,14 +52,6 @@ export class DistanceFilterForm extends Component<Props, State> {
     selectedField: this.props.geoFields.length ? this.props.geoFields[0] : undefined,
     filterLabel: '',
   };
-
-  componentDidMount() {
-    // this.props.activateDrawFilterMode();
-  }
-
-  componentWillUnmount() {
-    this.props.deactivateDrawMode();
-  }
 
   _onGeoFieldChange = (selectedField: GeoFieldWithIndex | undefined) => {
     this.setState({ selectedField });
