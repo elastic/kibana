@@ -8,7 +8,3 @@
 import { LicenseService } from '../../../common/license';
 
 export const licenseService = new LicenseService();
-
-export function useLicense() {
-  return licenseService;
-}

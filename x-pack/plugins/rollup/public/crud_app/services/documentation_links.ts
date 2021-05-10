@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LicenseService } from '../../../common/license';
+import type { DocLinksStart } from 'src/core/public';
 
-export const licenseService = new LicenseService();
+export let documentationLinks: DocLinksStart['links'];
 
-export function useLicense() {
-  return licenseService;
-}
+export const init = (docLinks: DocLinksStart) => {
+  documentationLinks = docLinks.links;
+};
