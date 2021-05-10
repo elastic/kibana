@@ -31,7 +31,8 @@ import { LANGUAGE_ID } from './math_tokenization';
 import { MemoizedFormulaHelp } from './formula_help';
 
 import './formula.scss';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from '../formula';
+import { FormulaIndexPatternColumn } from '../formula';
+import { regenerateLayerFromAst } from '../parse';
 
 export function FormulaEditor({
   layer,

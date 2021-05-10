@@ -13,8 +13,10 @@ import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
 import { findVariables, getOperationParams, groupArgsByType } from './util';
+import { FormulaIndexPatternColumn } from './formula';
+import { getColumnOrder } from '../../layer_helpers';
 
-export function parseAndExtract(
+function parseAndExtract(
   text: string,
   layer: IndexPatternLayer,
   columnId: string,
@@ -147,4 +149,62 @@ function extractColumns(
   mathColumn.label = newColId;
   columns.push({ column: mathColumn });
   return columns;
+}
+
+export function regenerateLayerFromAst(
+  text: string,
+  layer: IndexPatternLayer,
+  columnId: string,
+  currentColumn: FormulaIndexPatternColumn,
+  indexPattern: IndexPattern,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  const { extracted, isValid } = parseAndExtract(
+    text,
+    layer,
+    columnId,
+    indexPattern,
+    operationDefinitionMap
+  );
+
+  const columns = { ...layer.columns };
+
+  const locations: Record<string, TinymathLocation> = {};
+
+  Object.keys(columns).forEach((k) => {
+    if (k.startsWith(columnId)) {
+      delete columns[k];
+    }
+  });
+
+  extracted.forEach(({ column, location }, index) => {
+    columns[`${columnId}X${index}`] = column;
+    if (location) locations[`${columnId}X${index}`] = location;
+  });
+
+  columns[columnId] = {
+    ...currentColumn,
+    params: {
+      ...currentColumn.params,
+      formula: text,
+      isFormulaBroken: !isValid,
+    },
+    references: !isValid ? [] : [`${columnId}X${extracted.length - 1}`],
+  };
+
+  return {
+    newLayer: {
+      ...layer,
+      columns,
+      columnOrder: getColumnOrder({
+        ...layer,
+        columns,
+      }),
+    },
+    locations,
+  };
+
+  // TODO
+  // turn ast into referenced columns
+  // set state
 }

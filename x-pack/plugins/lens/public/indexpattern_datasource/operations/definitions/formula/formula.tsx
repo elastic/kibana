@@ -6,14 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TinymathLocation } from '@kbn/tinymath';
-import { OperationDefinition, GenericOperationDefinition } from '../index';
+import { OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern, IndexPatternLayer } from '../../../types';
-import { getColumnOrder } from '../../layer_helpers';
+import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { FormulaEditor } from './editor';
-import { parseAndExtract } from './parse';
+import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
@@ -158,61 +156,3 @@ export const formulaOperation: OperationDefinition<
 
   paramEditor: FormulaEditor,
 };
-
-export function regenerateLayerFromAst(
-  text: string,
-  layer: IndexPatternLayer,
-  columnId: string,
-  currentColumn: FormulaIndexPatternColumn,
-  indexPattern: IndexPattern,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
-) {
-  const { extracted, isValid } = parseAndExtract(
-    text,
-    layer,
-    columnId,
-    indexPattern,
-    operationDefinitionMap
-  );
-
-  const columns = { ...layer.columns };
-
-  const locations: Record<string, TinymathLocation> = {};
-
-  Object.keys(columns).forEach((k) => {
-    if (k.startsWith(columnId)) {
-      delete columns[k];
-    }
-  });
-
-  extracted.forEach(({ column, location }, index) => {
-    columns[`${columnId}X${index}`] = column;
-    if (location) locations[`${columnId}X${index}`] = location;
-  });
-
-  columns[columnId] = {
-    ...currentColumn,
-    params: {
-      ...currentColumn.params,
-      formula: text,
-      isFormulaBroken: !isValid,
-    },
-    references: !isValid ? [] : [`${columnId}X${extracted.length - 1}`],
-  };
-
-  return {
-    newLayer: {
-      ...layer,
-      columns,
-      columnOrder: getColumnOrder({
-        ...layer,
-        columns,
-      }),
-    },
-    locations,
-  };
-
-  // TODO
-  // turn ast into referenced columns
-  // set state
-}
