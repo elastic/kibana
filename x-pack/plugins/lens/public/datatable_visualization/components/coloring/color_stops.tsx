@@ -232,6 +232,7 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
               )}
               onClick={() => {
                 const newColorStops = [...colorStops];
+                const length = newColorStops.length;
                 const { max } = getDataMinMax(rangeType, dataBounds);
                 const step = getStepValue(colorStops, newColorStops, max);
                 newColorStops.push({
