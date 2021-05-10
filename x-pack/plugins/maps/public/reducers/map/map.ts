@@ -66,6 +66,7 @@ import {
 } from './layer_utils';
 import { startDataRequest, stopDataRequest, updateSourceDataRequest } from './data_request_utils';
 import { MapState } from './types';
+import { DRAW_TYPE } from '../../../common';
 
 export const DEFAULT_MAP_STATE: MapState = {
   ready: false,

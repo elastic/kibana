@@ -13,11 +13,12 @@ import { setShapeToDraw } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { DRAW_MODE, DRAW_TYPE } from '../../../../../common';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
+import { getShapeToDraw } from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
-    drawType: state.map.mapState.shapeToDraw,
+    drawType: getShapeToDraw(state),
   };
 }
 

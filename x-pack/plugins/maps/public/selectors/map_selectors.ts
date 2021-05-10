@@ -27,6 +27,7 @@ import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
+  DRAW_TYPE,
   SOURCE_DATA_REQUEST_ID,
   SOURCE_TYPES,
   SPATIAL_FILTERS_LAYER_ID,
@@ -197,6 +198,9 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
 export const getEditModeActive = ({ map }: MapStoreState): boolean => map.mapState.editModeActive;
+
+export const getShapeToDraw = ({ map }: MapStoreState): DRAW_TYPE | undefined =>
+  map.mapState.shapeToDraw;
 
 export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
   if (map.mapState.refreshConfig) {
