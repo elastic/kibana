@@ -38,6 +38,14 @@ export function toggleOsqueryPlugin(
   http: CoreStart['http'],
   registerExtension?: StartPlugins['fleet']['registerExtension']
 ) {
+  if (http.anonymousPaths.isAnonymous(window.location.pathname)) {
+    updater$.next(() => ({
+      status: AppStatus.inaccessible,
+      navLinkStatus: AppNavLinkStatus.hidden,
+    }));
+    return;
+  }
+
   http
     .fetch<GetPackagesResponse>(epmRouteService.getListPath(), { query: { experimental: true } })
     .then(({ response }) => {
@@ -134,22 +142,23 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
       if (config.enabled) {
         toggleOsqueryPlugin(this.appUpdater$, core.http, registerExtension);
+
+        registerExtension({
+          package: OSQUERY_INTEGRATION_NAME,
+          view: 'package-policy-create',
+          component: LazyOsqueryManagedPolicyCreateImportExtension,
+        });
+
+        registerExtension({
+          package: OSQUERY_INTEGRATION_NAME,
+          view: 'package-policy-edit',
+          component: LazyOsqueryManagedPolicyEditExtension,
+        });
       }
-
-      registerExtension({
-        package: OSQUERY_INTEGRATION_NAME,
-        view: 'package-policy-create',
-        component: LazyOsqueryManagedPolicyCreateImportExtension,
-      });
-
-      registerExtension({
-        package: OSQUERY_INTEGRATION_NAME,
-        view: 'package-policy-edit',
-        component: LazyOsqueryManagedPolicyEditExtension,
-      });
     } else {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
+        navLinkStatus: AppNavLinkStatus.hidden,
       }));
     }
 
