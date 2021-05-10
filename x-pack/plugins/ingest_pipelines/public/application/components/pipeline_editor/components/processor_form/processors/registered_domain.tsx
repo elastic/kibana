@@ -18,13 +18,13 @@ export const RegisteredDomain: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.registeredDomain.fieldNameHelpText',
-          { defaultMessage: 'Field containing the source FQDN.' }
+          { defaultMessage: 'Field containing the fully qualified domain name.' }
         )}
       />
 
       <TargetField />
 
-      <IgnoreMissingField />
+      <IgnoreMissingField defaultValue={true} />
     </>
   );
 };

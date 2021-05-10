@@ -523,18 +523,21 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: RegisteredDomain,
     docLinkPath: '/registered-domain-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.registeredDomain', {
-      defaultMessage: 'Registered Domain',
+      defaultMessage: 'Registered domain',
     }),
-    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.registeredDomain', {
-      defaultMessage:
-        'Extracts the registered domain (also known as the effective top-level domain or eTLD), sub-domain, and top-level domain from a fully qualified domain name.',
-    }),
+    typeDescription: i18n.translate(
+      'xpack.ingestPipelines.processors.description.registeredDomain',
+      {
+        defaultMessage:
+          'Extracts the registered domain (also known as the effective top-level domain or eTLD), sub-domain, and top-level domain from a fully qualified domain name.',
+      }
+    ),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.registeredDomain', {
         defaultMessage:
           'Extracts the registered domain, sub-domain and top-level domain from "{field}"',
         values: {
-          field
+          field,
         },
       }),
   },

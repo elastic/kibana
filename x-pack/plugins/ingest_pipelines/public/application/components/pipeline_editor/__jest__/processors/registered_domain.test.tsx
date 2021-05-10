@@ -10,9 +10,10 @@ import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 // Default parameter values automatically added to the registered domain processor when saved
 const defaultRegisteredDomainParameters = {
-  ignore_failure: undefined,
-  ignore_missing: undefined,
   description: undefined,
+  if: undefined,
+  ignore_missing: true,
+  ignore_failure: undefined,
 };
 
 const REGISTERED_DOMAIN_TYPE = 'registered_domain';
@@ -41,20 +42,20 @@ describe('Processor: Registered Domain', () => {
         onUpdate,
       });
     });
+
     testBed.component.update();
+
+    // Open flyout to add new processor
+    testBed.actions.addProcessor();
+    // Add type (the other fields are not visible until a type is selected)
+    await testBed.actions.addProcessorType(REGISTERED_DOMAIN_TYPE);
   });
 
   test('prevents form submission if required fields are not provided', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
+      actions: { saveNewProcessor },
       form,
     } = testBed;
-
-    // Open flyout to add new processor
-    addProcessor();
-
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(REGISTERED_DOMAIN_TYPE);
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -65,14 +66,10 @@ describe('Processor: Registered Domain', () => {
 
   test('saves with default parameter values', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
+      actions: { saveNewProcessor },
       form,
     } = testBed;
 
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(REGISTERED_DOMAIN_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
@@ -87,14 +84,10 @@ describe('Processor: Registered Domain', () => {
 
   test('allows optional parameters to be set', async () => {
     const {
-      actions: { addProcessor, addProcessorType, saveNewProcessor },
+      actions: { saveNewProcessor },
       form,
     } = testBed;
 
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(REGISTERED_DOMAIN_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
