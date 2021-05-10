@@ -36,7 +36,7 @@ const DESCRIPTION = i18n.translate('xpack.enterpriseSearch.appSearch.engine.sear
 });
 
 const SEARCH_UI_BODY_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.bodyText',
+  'xpack.enterpriseSearch.appSearch.engine.searchUI.bodyDescription',
   {
     defaultMessage:
       "Search UI is an open source library for building search experiences, written in React. Use the fields below to generate a pre-built search experience created with Search UI. Generate an interactive preview, then download the .zip and build upon it however you'd like.",
