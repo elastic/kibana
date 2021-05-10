@@ -77,7 +77,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  updateGroups(updatedJobs: string[]) {
+  updateGroups(updatedJobs: Array<{ jobId: string; groups: string[] }>) {
     const body = JSON.stringify({ jobs: updatedJobs });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/update_groups`,
