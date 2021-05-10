@@ -27,6 +27,7 @@ import { EmbeddableStateWithType } from '../common/types';
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  getMigrationVersions: () => string[];
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
@@ -41,6 +42,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEnhancement: this.getEnhancement,
     };
     return {
+      getMigrationVersions: this.getMigrationVersions,
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
       telemetry: getTelemetryFunction(commonContract),
@@ -124,5 +126,14 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
         migrations: {},
       }
     );
+  };
+
+  private getMigrationVersions = () => {
+    const uniqueVersions = new Set<string>();
+    const factories = this.embeddableFactories.values();
+    for (const factory of factories) {
+      Object.keys(factory.migrations).forEach((version) => uniqueVersions.add(version));
+    }
+    return Array.from(uniqueVersions);
   };
 }

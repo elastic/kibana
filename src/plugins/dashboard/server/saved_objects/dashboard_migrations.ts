@@ -6,13 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { SemVer } from 'semver';
 import { get, flow } from 'lodash';
 import { SavedObjectAttributes, SavedObjectMigrationFn } from 'kibana/server';
+
 import { migrations730 } from './migrations_730';
+import { SavedDashboardPanel } from '../../common/types';
+import { EmbeddableSetup } from '../../../embeddable/server';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { DashboardDoc700To720, DashboardDoc730ToLatest } from '../../common';
-import { EmbeddableSetup } from '../../../embeddable/server';
 import { injectReferences, extractReferences } from '../../common/saved_dashboard_references';
+import {
+  convertPanelStateToSavedDashboardPanel,
+  convertSavedDashboardPanelToPanelState,
+} from '../../common/embeddable/embeddable_saved_object_converters';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -134,26 +141,86 @@ function createExtractPanelReferencesMigration(
   };
 }
 
+// Runs the embeddable migrations on each panel
+const migrateEmbeddablePanels = (
+  deps: DashboardSavedObjectTypeMigrationsDeps,
+  version: string
+): SavedObjectMigrationFn => (doc: any) => {
+  const { attributes } = doc;
+  console.log('GOT DEEZ ATTRIBUTES', JSON.stringify(attributes, null, 1));
+  // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
+  // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
+  // object has panelsJSON in all previous versions of kibana.
+  if (typeof attributes.panelsJSON !== 'string') {
+    return attributes;
+  }
+  const panels = JSON.parse(attributes.panelsJSON);
+  // Same here, prevent failing saved object import if ever panels aren't an array.
+  if (!Array.isArray(panels)) {
+    return attributes;
+  }
+  const newPanels: SavedDashboardPanel[] = [];
+  panels.forEach((panel) => {
+    // Convert each panel into a state that can be passed to EmbeddablesSetup.migrate
+    const originalPanelState = convertSavedDashboardPanelToPanelState(panel);
+    // Migrate the state using migrations defined by embeddables
+    const migratedInput = deps.embeddable.migrate(
+      {
+        ...originalPanelState.explicitInput,
+        type: originalPanelState.type,
+      },
+      version
+    );
+    // Convert the embeddable state back into the panel shape
+    newPanels.push(
+      convertPanelStateToSavedDashboardPanel(
+        {
+          ...originalPanelState,
+          explicitInput: { ...migratedInput, id: migratedInput.id as string },
+        },
+        version
+      )
+    );
+  });
+  return {
+    ...doc,
+    attributes: {
+      ...attributes,
+      panelsJSON: JSON.stringify(newPanels),
+    },
+  };
+};
+
 export interface DashboardSavedObjectTypeMigrationsDeps {
   embeddable: EmbeddableSetup;
 }
 
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
-) => ({
-  /**
-   * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
-   * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already
-   * released. Thus a user who already had 7.0.0 installed already got the 7.0.0 migrations below running,
-   * so we need a version higher than that. But this fix was backported to the 6.7 release, meaning if we
-   * would only have the 7.0.1 migration in here a user on the 6.7 release will migrate their saved objects
-   * to the 7.0.1 state, and thus when updating their Kibana to 7.0, will never run the 7.0.0 migrations introduced
-   * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
-   * only contained the 6.7.2 migration and not the 7.0.1 migration.
-   */
-  '6.7.2': flow(migrateMatchAllQuery),
-  '7.0.0': flow(migrations700),
-  '7.3.0': flow(migrations730),
-  '7.9.3': flow(migrateMatchAllQuery),
-  '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
-});
+) => {
+  const embeddableMigrations = deps.embeddable
+    .getMigrationVersions()
+    .filter((version) => new SemVer(version) >= new SemVer('7.12.0'))
+    .map((version): [string, SavedObjectMigrationFn] => {
+      return [version, migrateEmbeddablePanels(deps, version)];
+    });
+
+  return {
+    /**
+     * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
+     * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already
+     * released. Thus a user who already had 7.0.0 installed already got the 7.0.0 migrations below running,
+     * so we need a version higher than that. But this fix was backported to the 6.7 release, meaning if we
+     * would only have the 7.0.1 migration in here a user on the 6.7 release will migrate their saved objects
+     * to the 7.0.1 state, and thus when updating their Kibana to 7.0, will never run the 7.0.0 migrations introduced
+     * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
+     * only contained the 6.7.2 migration and not the 7.0.1 migration.
+     */
+    '6.7.2': flow(migrateMatchAllQuery),
+    '7.0.0': flow(migrations700),
+    '7.3.0': flow(migrations730),
+    '7.9.3': flow(migrateMatchAllQuery),
+    '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
+    ...Object.fromEntries(embeddableMigrations),
+  };
+};
