@@ -41,7 +41,7 @@ function findColorsByStops(
   colors: string[],
   stops: number[]
 ) {
-  const index = stops.findIndex((s) => comparison(value, s) <= 0);
+  const index = stops.findIndex((s) => comparison(value, s) < 0);
   return colors[index] || colors[0];
 }
 
