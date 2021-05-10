@@ -72,7 +72,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   isInspected,
   loading,
   inspectIndex = 0,
-  multiple = false,
+  multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
   onCloseInspect,
   queryId = '',
   selectedInspectIndex,
