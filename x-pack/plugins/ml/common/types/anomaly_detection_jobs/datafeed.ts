@@ -15,4 +15,9 @@ export type ChunkingConfig = estypes.ChunkingConfig;
 
 export type Aggregation = Record<string, estypes.AggregationContainer>;
 
-export type IndicesOptions = estypes.IndicesOptions;
+// export type IndicesOptions = estypes.IndicesOptions;
+export interface IndicesOptions {
+  allow_no_indices?: boolean;
+  expand_wildcards?: estypes.ExpandWildcards;
+  ignore_unavailable?: boolean;
+}
