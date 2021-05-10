@@ -273,33 +273,33 @@ export function CustomizablePalette({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.table.dynamicColoring.continuity.label', {
+          label={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
             defaultMessage: 'Value type',
           })}
           display="rowCompressed"
         >
           <EuiButtonGroup
             isFullWidth
-            legend={i18n.translate('xpack.lens.table.dynamicColoring.stopValue.label', {
+            legend={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
               defaultMessage: 'Value type',
             })}
             data-test-subj="lnsDatatable_dynamicColoring_custom_range_groups"
-            name="dynamicColoringStopValue"
+            name="dynamicColoringRangeType"
             buttonSize="compressed"
             options={[
               {
                 id: `${idPrefix}percent`,
-                label: i18n.translate('xpack.lens.table.dynamicColoring.stopValue.percent', {
+                label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.percent', {
                   defaultMessage: 'Percent',
                 }),
-                'data-test-subj': 'lnsDatatable_dynamicColoring_stopValue_groups_percent',
+                'data-test-subj': 'lnsDatatable_dynamicColoring_rangeType_groups_percent',
               },
               {
                 id: `${idPrefix}number`,
-                label: i18n.translate('xpack.lens.table.dynamicColoring.stopValue.number', {
+                label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.number', {
                   defaultMessage: 'Number',
                 }),
-                'data-test-subj': 'lnsDatatable_dynamicColoring_stopValue_groups_number',
+                'data-test-subj': 'lnsDatatable_dynamicColoring_rangeType_groups_number',
               },
             ]}
             idSelected={
