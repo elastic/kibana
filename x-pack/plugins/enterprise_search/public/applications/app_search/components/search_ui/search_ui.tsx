@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -29,12 +29,7 @@ import { getEngineBreadcrumbs } from '../engine';
 import { SearchUIForm } from './components/search_ui_form';
 import { SearchUIGraphic } from './components/search_ui_graphic';
 import { SEARCH_UI_TITLE } from './i18n';
-import { GUIDE_LINK_TEXT, REPOSITORY_LINK_TEXT, SEARCH_UI_BODY_TEXT } from './i18n';
 import { SearchUILogic } from './search_ui_logic';
-
-const DESCRIPTION = i18n.translate('xpack.enterpriseSearch.appSearch.engine.searchUI.description', {
-  defaultMessage: 'Preview search or kickstart your next search experience.',
-});
 
 export const SearchUI: React.FC = () => {
   const { loadFieldData } = useActions(SearchUILogic);
@@ -46,21 +41,43 @@ export const SearchUI: React.FC = () => {
   return (
     <>
       <SetPageChrome trail={getEngineBreadcrumbs([SEARCH_UI_TITLE])} />
-      <EuiPageHeader pageTitle={SEARCH_UI_TITLE} description={DESCRIPTION} />
+      <EuiPageHeader pageTitle={SEARCH_UI_TITLE} />
       <FlashMessages />
       <EuiPageContentBody>
         <EuiFlexGroup alignItems="flexStart">
           <EuiFlexItem>
             <EuiText size="s" color="subdued">
-              <p>{SEARCH_UI_BODY_TEXT}</p>
               <p>
-                <EuiLink target="_blank" href="https://github.com/elastic/search-ui">
-                  {REPOSITORY_LINK_TEXT}
-                </EuiLink>{' '}
-                |{' '}
-                <EuiLink target="_blank" href={`${DOCS_PREFIX}/reference-ui-guide.html`}>
-                  {GUIDE_LINK_TEXT}
-                </EuiLink>{' '}
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.engine.searchUI.bodyDescription"
+                  defaultMessage="Search UI is a free and open library for building search experiences with React. {link}."
+                  values={{
+                    link: (
+                      <EuiLink target="_blank" href="https://github.com/elastic/search-ui">
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.appSearch.engine.searchUI.repositoryLinkText"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.engine.searchUI.bodyDescription"
+                  defaultMessage="Use the fields below to generate a sample search experience built with Search UI. Use the search experience to preview search results, or build upon it to create a custom search experience. {link}."
+                  values={{
+                    link: (
+                      <EuiLink target="_blank" href={`${DOCS_PREFIX}/reference-ui-guide.html`}>
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.appSearch.engine.searchUI.guideLinkText"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
               </p>
             </EuiText>
             <EuiSpacer />

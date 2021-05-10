@@ -12,24 +12,6 @@ export const SEARCH_UI_TITLE = i18n.translate(
   { defaultMessage: 'Search UI' }
 );
 
-export const SEARCH_UI_BODY_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.bodyDescription',
-  {
-    defaultMessage:
-      "Search UI is an open source library for building search experiences, written in React. Use the fields below to generate a pre-built search experience created with Search UI. Generate an interactive preview, then download the .zip and build upon it however you'd like.",
-  }
-);
-
-export const REPOSITORY_LINK_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.repositoryLinkText',
-  { defaultMessage: 'Read more about Search UI' }
-);
-
-export const GUIDE_LINK_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.guideLinkText',
-  { defaultMessage: 'Read the guide to using this generator' }
-);
-
 export const TITLE_FIELD_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.titleFieldLabel',
   { defaultMessage: 'Title field (Optional)' }
@@ -64,5 +46,5 @@ export const URL_FIELD_HELP_TEXT = i18n.translate(
 );
 export const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.searchUI.generatePreviewButtonLabel',
-  { defaultMessage: 'Generate preview' }
+  { defaultMessage: 'Generate search experience' }
 );
