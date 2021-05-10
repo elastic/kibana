@@ -53,6 +53,7 @@ describe('reference editor', () => {
       dimensionGroups: [],
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
+      setIsCloseable: jest.fn(),
     };
   }
 

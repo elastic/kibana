@@ -11,7 +11,6 @@ import {
   registerRoleMappingsRoute,
   registerRoleMappingRoute,
   registerNewRoleMappingRoute,
-  registerResetRoleMappingRoute,
 } from './role_mappings';
 
 const roleMappingBaseSchema = {
@@ -181,29 +180,6 @@ describe('role mappings routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/role_mappings/new',
-      });
-    });
-  });
-
-  describe('GET /api/app_search/role_mappings/reset', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'post',
-        path: '/api/app_search/role_mappings/reset',
-      });
-
-      registerResetRoleMappingRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/reset',
       });
     });
   });

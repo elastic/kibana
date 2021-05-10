@@ -93,6 +93,7 @@ const defaultOptions = {
   operationDefinitionMap: {},
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
 };
 
 describe('ranges', () => {

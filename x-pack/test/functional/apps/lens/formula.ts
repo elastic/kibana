@@ -54,5 +54,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14005');
     });
+
+    it('should duplicate a moving average formula and be a valid table', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_rows > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `moving_average(sum(bytes), window=5`,
+        keepOpen: true,
+      });
+      await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.dragDimensionToDimension(
+        'lnsDatatable_metrics > lns-dimensionTrigger',
+        'lnsDatatable_metrics > lns-empty-dimension'
+      );
+      expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('222420');
+      expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('222420');
+    });
   });
 }

@@ -15,7 +15,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import { operationDefinitionMap, getErrorMessages } from './operations';
-import { createMockedReferenceOperation } from './operations/mocks';
+import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 
 jest.mock('./loader');
@@ -839,7 +839,7 @@ describe('IndexPattern Data Source', () => {
     describe('references', () => {
       beforeEach(() => {
         // @ts-expect-error we are inserting an invalid type
-        operationDefinitionMap.testReference = createMockedReferenceOperation();
+        operationDefinitionMap.testReference = createMockedFullReference();
 
         // @ts-expect-error we are inserting an invalid type
         operationDefinitionMap.testReference.toExpression.mockReturnValue(['mock']);

@@ -52,6 +52,7 @@ export interface ReferenceEditorProps {
   dimensionGroups: VisualizationDimensionGroupConfig[];
   isFullscreen: boolean;
   toggleFullscreen: () => void;
+  setIsCloseable: (isCloseable: boolean) => void;
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -75,6 +76,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     dimensionGroups,
     isFullscreen,
     toggleFullscreen,
+    setIsCloseable,
     ...services
   } = props;
 
@@ -351,6 +353,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               operationDefinitionMap={operationDefinitionMap}
               isFullscreen={isFullscreen}
               toggleFullscreen={toggleFullscreen}
+              setIsCloseable={setIsCloseable}
               {...services}
             />
           </>

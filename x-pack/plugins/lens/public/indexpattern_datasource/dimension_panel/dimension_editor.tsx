@@ -143,6 +143,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
     });
   };
 
+  const setIsCloseable = (isCloseable: boolean) => {
+    setState({ ...state, isDimensionClosePrevented: !isCloseable });
+  };
+
   const selectedOperationDefinition =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
 
@@ -393,6 +397,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   dimensionGroups={dimensionGroups}
                   isFullscreen={isFullscreen}
                   toggleFullscreen={toggleFullscreen}
+                  setIsCloseable={setIsCloseable}
                   {...services}
                 />
               );
@@ -466,6 +471,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             operationDefinitionMap={operationDefinitionMap}
             toggleFullscreen={toggleFullscreen}
             isFullscreen={isFullscreen}
+            setIsCloseable={setIsCloseable}
             {...services}
           />
         )}
@@ -563,6 +569,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             operationDefinitionMap={operationDefinitionMap}
             toggleFullscreen={toggleFullscreen}
             isFullscreen={isFullscreen}
+            setIsCloseable={setIsCloseable}
             {...services}
           />
         </>

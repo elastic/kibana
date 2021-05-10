@@ -32,7 +32,7 @@ export function DimensionContainer({
   isFullscreen,
 }: {
   isOpen: boolean;
-  handleClose: () => void;
+  handleClose: () => boolean;
   panel: React.ReactElement | null;
   groupLabel: string;
   isFullscreen: boolean;
@@ -40,8 +40,11 @@ export function DimensionContainer({
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
   const closeFlyout = useCallback(() => {
-    handleClose();
-    setFocusTrapIsEnabled(false);
+    const canClose = handleClose();
+    if (canClose) {
+      setFocusTrapIsEnabled(false);
+    }
+    return canClose;
   }, [handleClose]);
 
   useEffect(() => {
@@ -56,8 +59,10 @@ export function DimensionContainer({
   const closeOnEscape = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === keys.ESCAPE) {
-        event.preventDefault();
-        closeFlyout();
+        const canClose = closeFlyout();
+        if (canClose) {
+          event.preventDefault();
+        }
       }
     },
     [closeFlyout]
@@ -78,16 +83,9 @@ export function DimensionContainer({
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
       <EuiWindowEvent event="keydown" handler={closeOnEscape} />
       <EuiOutsideClickDetector
-        onOutsideClick={(e) => {
+        onOutsideClick={() => {
           if (isFullscreen) {
             return;
-          }
-          let current = e.target as HTMLElement;
-          while (current) {
-            if (current?.getAttribute?.('data-test-subj') === 'lnsFormulaWidget') {
-              return;
-            }
-            current = current.parentNode as HTMLElement;
           }
           closeFlyout();
         }}

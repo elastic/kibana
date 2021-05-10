@@ -151,6 +151,7 @@ export interface ParamEditorProps<C> {
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
   toggleFullscreen: () => void;
+  setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
   columnId: string;
   indexPattern: IndexPattern;
@@ -462,6 +463,17 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     columnId: string,
     indexPattern: IndexPattern
   ) => ExpressionAstFunction[];
+  /**
+   * Managed references control the IDs of their inner columns, so we need to be able to copy from the
+   * root level
+   */
+  createCopy: (
+    layer: IndexPatternLayer,
+    sourceColumnId: string,
+    targetColumnId: string,
+    indexPattern: IndexPattern,
+    operationDefinitionMap: Record<string, GenericOperationDefinition>
+  ) => IndexPatternLayer;
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
