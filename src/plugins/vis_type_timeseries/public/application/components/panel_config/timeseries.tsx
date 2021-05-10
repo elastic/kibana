@@ -38,6 +38,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
+import { TOOLTIP_MODES } from '../../../../common/enums';
 
 const positionOptions = [
   {
@@ -126,7 +127,7 @@ export class TimeseriesPanelConfig extends Component<
       axis_min: '',
       legend_position: 'right',
       show_grid: 1,
-      tooltip_mode: 'show_all',
+      tooltip_mode: TOOLTIP_MODES.SHOW_ALL,
       ignore_daylight_time: false,
     };
     const model = { ...defaults, ...this.props.model };
