@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/logging';
+import { ESSearchRequest } from 'typings/elasticsearch';
 
 import { buildEsQuery, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
@@ -14,12 +17,13 @@ import {
   createPersistenceRuleTypeFactory,
 } from '../../../../../rule_registry/server';
 import { CUSTOM_ALERT_TYPE_ID } from '../../../../common/constants';
-import { SecurityRuleRegistry } from '../../../plugin';
 
-const createSecurityCustomRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
-
-export const createQueryAlertType = (ruleDataClient: RuleDataClient) => {
-  return createSecurityCustomRuleType({
+export const createQueryAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
+  const createPersistenceRuleType = createPersistenceRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
+  return createPersistenceRuleType({
     id: CUSTOM_ALERT_TYPE_ID,
     name: 'Custom Query Rule',
     validate: {
@@ -51,8 +55,12 @@ export const createQueryAlertType = (ruleDataClient: RuleDataClient) => {
 
       // TODO: kql or lucene?
 
-      const esQuery = buildEsQuery(indexPattern, { query: customQuery, language: 'kuery' }, []);
-      const query = {
+      const esQuery = buildEsQuery(
+        indexPattern,
+        { query: customQuery, language: 'kuery' },
+        []
+      ) as QueryContainer;
+      const query: ESSearchRequest = {
         body: {
           query: esQuery,
           fields: ['*'],

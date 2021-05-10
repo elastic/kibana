@@ -10,13 +10,17 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 
 import { createRuleTypeMocks } from './__mocks__/rule_type';
 import { mockThresholdResults } from './__mocks__/threshold';
-import { thresholdAlertType } from './threshold';
+import { createThresholdAlertType } from './threshold';
 
 describe('Threshold alerts', () => {
   it('does not send an alert when threshold is not met', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
+    const thresholdAlertType = createThresholdAlertType(
+      dependencies.ruleDataClient,
+      dependencies.logger
+    );
 
-    dependencies.registry.registerType(thresholdAlertType);
+    dependencies.alerting.registerType(thresholdAlertType);
 
     const params = {
       indexPatterns: ['*'],
@@ -58,8 +62,12 @@ describe('Threshold alerts', () => {
 
   it('sends a properly formatted alert when threshold is met', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
+    const thresholdAlertType = createThresholdAlertType(
+      dependencies.ruleDataClient,
+      dependencies.logger
+    );
 
-    dependencies.registry.registerType(thresholdAlertType);
+    dependencies.alerting.registerType(thresholdAlertType);
 
     const params = {
       indexPatterns: ['*'],
@@ -111,12 +119,14 @@ describe('Threshold alerts', () => {
 
     await executor({ params });
     expect(services.alertInstanceFactory).toBeCalled();
-    expect(services.scopedRuleRegistryClient.bulkIndex).toBeCalledWith(
+    /*
+    expect(services.alertWithPersistence).toBeCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           'event.kind': 'signal',
         }),
       ])
     );
+    */
   });
 });

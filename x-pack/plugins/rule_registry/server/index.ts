@@ -14,7 +14,7 @@ export { RuleDataClient } from './rule_data_client';
 export { IRuleDataClient } from './rule_data_client/types';
 export { getRuleExecutorData, RuleExecutorData } from './utils/get_rule_executor_data';
 export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
-export { createPersistenceRuleTypeFactory } from './rule_registry/rule_type_helpers/create_persistence_rule_type_factory';
+export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
 
 export const config = {
   schema: schema.object({

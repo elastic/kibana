@@ -11,12 +11,13 @@ import { v4 } from 'uuid';
 import { Logger } from 'kibana/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
-import { SecurityRuleRegistry } from '../../../../plugin';
+import type { RuleDataClient } from '../../../../../../rule_registry/server';
+import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 
 export const createRuleTypeMocks = () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  let alertExecutor: (...args: any[]) => Promise<Record<string, any>>;
+  let alertExecutor: (...args: any[]) => Promise<any>;
 
   const mockedConfig$ = of({} as ConfigType);
 
@@ -27,19 +28,16 @@ export const createRuleTypeMocks = () => {
     error: jest.fn(),
   } as unknown) as Logger;
 
-  const registry = {
+  const alerting = {
     registerType: ({ executor }) => {
       alertExecutor = executor;
     },
-  } as SecurityRuleRegistry;
+  } as AlertingPluginSetupContract;
 
   const scheduleActions = jest.fn();
 
   const services = {
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    scopedRuleRegistryClient: {
-      bulkIndex: jest.fn(),
-    },
     alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     findAlerts: jest.fn(), // TODO: does this stay?
     alertWithPersistence: jest.fn(),
@@ -48,9 +46,21 @@ export const createRuleTypeMocks = () => {
 
   return {
     dependencies: {
-      registry,
+      alerting,
       config$: mockedConfig$,
       logger: loggerMock,
+      ruleDataClient: ({
+        getReader: () => {
+          return {
+            search: jest.fn(),
+          };
+        },
+        getWriter: () => {
+          return {
+            bulk: jest.fn(),
+          };
+        },
+      } as unknown) as RuleDataClient,
     },
     services,
     scheduleActions,
@@ -58,9 +68,7 @@ export const createRuleTypeMocks = () => {
       return alertExecutor({
         services,
         params,
-        rule: {
-          id: v4(),
-        },
+        alertId: v4(),
         startedAt: new Date(),
       });
     },

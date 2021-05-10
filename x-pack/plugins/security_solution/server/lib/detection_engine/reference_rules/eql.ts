@@ -10,6 +10,7 @@ import v4 from 'uuid/v4';
 
 import { ApiResponse } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/logging';
 
 import {
   RuleDataClient,
@@ -17,13 +18,14 @@ import {
 } from '../../../../../rule_registry/server';
 import { EQL_ALERT_TYPE_ID } from '../../../../common/constants';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
-import { SecurityRuleRegistry } from '../../../plugin';
 import { BaseSignalHit, EqlSignalSearchResponse } from '../signals/types';
 
-const createSecurityEQLRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
-
-export const createEqlAlertType = (ruleDataClient: RuleDataClient) => {
-  return createSecurityEQLRuleType({
+export const createEqlAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
+  const createPersistenceRuleType = createPersistenceRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
+  return createPersistenceRuleType({
     id: EQL_ALERT_TYPE_ID,
     name: 'EQL Rule',
     validate: {
@@ -45,8 +47,6 @@ export const createEqlAlertType = (ruleDataClient: RuleDataClient) => {
     minimumLicenseRequired: 'basic',
     producer: 'security-solution',
     async executor({
-      // previousStartedAt,
-      rule,
       startedAt,
       services: { alertWithPersistence, findAlerts, scopedClusterClient },
       params: { indexPatterns, eqlQuery },
@@ -78,6 +78,7 @@ export const createEqlAlertType = (ruleDataClient: RuleDataClient) => {
         };
       };
 
+      /* eslint-disable @typescript-eslint/no-explicit-any */
       let alerts: any[] = [];
       if (response.hits.sequences !== undefined) {
         alerts = response.hits.sequences.reduce((allAlerts: any[], sequence) => {

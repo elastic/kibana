@@ -87,8 +87,6 @@ import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_stra
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 
-export type SecurityRuleRegistry = SetupPlugins['ruleRegistry'];
-
 export interface SetupPlugins {
   alerting: AlertingSetup;
   data: DataPluginSetup;
@@ -222,9 +220,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       // Register reference rule types via rule-registry
-      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient));
-      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient));
-      this.setupPlugins.alerting.registerType(createThresholdAlertType(ruleDataClient));
+      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
+      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
+      this.setupPlugins.alerting.registerType(
+        createThresholdAlertType(ruleDataClient, this.logger)
+      );
     }
 
     // TO DO We need to get the endpoint routes inside of initRoutes

@@ -9,8 +9,7 @@ import moment from 'moment';
 import v4 from 'uuid/v4';
 
 import { schema } from '@kbn/config-schema';
-
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger } from '@kbn/logging';
 
 import { AlertServices } from '../../../../../alerting/server';
 import {
@@ -18,7 +17,6 @@ import {
   createPersistenceRuleTypeFactory,
 } from '../../../../../rule_registry/server';
 import { THRESHOLD_ALERT_TYPE_ID } from '../../../../common/constants';
-import { SecurityRuleRegistry } from '../../../plugin';
 import { SignalSearchResponse, ThresholdSignalHistory } from '../signals/types';
 import {
   findThresholdSignals,
@@ -28,15 +26,6 @@ import {
 } from '../signals/threshold';
 import { getFilter } from '../signals/get_filter';
 import { BuildRuleMessage } from '../signals/rule_messages';
-
-const createSecurityThresholdRuleType = createPersistenceRuleTypeFactory<SecurityRuleRegistry>();
-
-interface Rule {
-  id: string;
-  uuid: string;
-  name: string;
-  category: string;
-}
 
 interface RuleParams {
   indexPatterns: string[];
@@ -54,13 +43,14 @@ interface BulkCreateThresholdSignalParams {
   ruleParams: RuleParams;
   services: AlertServices & { logger: Logger };
   inputIndexPattern: string[];
-  rule: Rule;
+  ruleId: string;
   startedAt: Date;
   from: Date;
   thresholdSignalHistory: ThresholdSignalHistory;
   buildRuleMessage: BuildRuleMessage;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): any[] => {
   const thresholdResults = params.results;
   const threshold = {
@@ -75,7 +65,7 @@ const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): any[] 
     undefined,
     params.services.logger,
     threshold,
-    params.rule.id,
+    params.ruleId,
     undefined,
     params.thresholdSignalHistory
   );
@@ -90,8 +80,12 @@ const formatThresholdSignals = (params: BulkCreateThresholdSignalParams): any[] 
   });
 };
 
-export const createThresholdAlertType = (ruleDataClient: RuleDataClient) => {
-  return createSecurityThresholdRuleType({
+export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger: Logger) => {
+  const createPersistenceRuleType = createPersistenceRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
+  return createPersistenceRuleType({
     id: THRESHOLD_ALERT_TYPE_ID,
     name: 'Threshold Rule',
     validate: {
@@ -120,13 +114,7 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient) => {
     },
     minimumLicenseRequired: 'basic',
     producer: 'security-solution',
-    async executor({
-      // previousStartedAt,
-      rule,
-      startedAt,
-      services,
-      params,
-    }) {
+    async executor({ startedAt, services, params, alertId }) {
       const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
       const from = fromDate.toISOString();
       const to = startedAt.toISOString();
@@ -144,8 +132,8 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient) => {
         from,
         to,
         services: (services as unknown) as AlertServices,
-        logger: services.logger,
-        ruleId: rule.id,
+        logger,
+        ruleId: alertId,
         bucketByFields: params.thresholdFields,
         timestampOverride,
         buildRuleMessage,
@@ -176,7 +164,7 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient) => {
         from,
         to,
         services: (services as unknown) as AlertServices,
-        logger: services.logger,
+        logger,
         filter: esFilter,
         threshold: {
           field: params.thresholdFields,
@@ -187,14 +175,14 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient) => {
         buildRuleMessage,
       });
 
-      services.logger.info(`Threshold search took ${thresholdSearchDuration}ms`); // TODO: rule status service
+      logger.info(`Threshold search took ${thresholdSearchDuration}ms`); // TODO: rule status service
 
       const alerts = formatThresholdSignals({
         results: thresholdResults,
         ruleParams: params,
         services: (services as unknown) as AlertServices & { logger: Logger },
         inputIndexPattern: ['TODO'],
-        rule,
+        ruleId: alertId,
         startedAt,
         from: fromDate.toDate(),
         thresholdSignalHistory,
