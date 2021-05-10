@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component, RefObject } from 'react';
-import { EuiPopover, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Map as MbMap } from 'mapbox-gl';
 import { DRAW_TYPE } from '../../../../common/constants';
@@ -84,6 +84,7 @@ export class DrawTooltip extends Component<Props, State> {
 
     return (
       <EuiPopover
+        panelPaddingSize="s"
         id="drawInstructionsTooltip"
         button={tooltipAnchor}
         anchorPosition="rightCenter"
@@ -95,6 +96,7 @@ export class DrawTooltip extends Component<Props, State> {
           transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`,
         }}
       >
+        <EuiPopoverTitle paddingSize="s">Hello, I&rsquo;m a popover title</EuiPopoverTitle>
         <EuiText color="subdued" size="xs">
           {instructions}
         </EuiText>
