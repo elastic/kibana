@@ -6,14 +6,26 @@
  */
 
 export const uptimeRuleFieldMap = {
-  'service.environment': {
+  'monitor.id': {
     type: 'keyword',
   },
-  'transaction.type': {
+  'monitor.url': {
     type: 'keyword',
   },
-  'processor.event': {
+  'monitor.name': {
     type: 'keyword',
+  },
+  'monitor.type': {
+    type: 'keyword',
+  },
+  reason: {
+    type: 'text',
+  },
+  'observer.geo.name': {
+    type: 'keyword',
+  },
+  'error.message': {
+    type: 'text',
   },
 } as const;
 
