@@ -101,6 +101,25 @@ export class UptimePlugin
       });
     }
 
+    const uptimeRuleRegistry = plugins.observability.ruleRegistry.create({
+      ...uptimeRuleRegistrySettings,
+      fieldMap: {} as UptimeRuleFieldMap,
+      ctor: FormatterRuleRegistry,
+    });
+
+    alertTypeInitializers.forEach((init) => {
+      const alertInitializer = init({
+        core,
+        plugins,
+      });
+      if (
+        plugins.triggersActionsUi &&
+        !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
+      ) {
+        uptimeRuleRegistry.registerType(alertInitializer);
+      }
+    });
+
     core.application.register({
       id: PLUGIN.ID,
       euiIconType: 'logoObservability',
@@ -133,21 +152,6 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-
-        const uptimeRuleRegistry = plugins.observability.ruleRegistry.create({
-          ...uptimeRuleRegistrySettings,
-          fieldMap: {} as UptimeRuleFieldMap,
-          ctor: FormatterRuleRegistry,
-        });
-
-        alertTypeInitializers.forEach((init) => {
-          const alertInitializer = init({
-            core: coreStart,
-            plugins: corePlugins,
-          });
-          uptimeRuleRegistry.registerType(alertInitializer);
-        });
-
         return renderApp(coreStart, plugins, corePlugins, params);
       },
     });

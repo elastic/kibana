@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreSetup } from 'kibana/public';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
-import { ClientPluginsStart } from '../../apps/plugin';
+import { ClientPluginsSetup } from '../../apps/plugin';
 import { initDurationAnomalyAlertType } from './duration_anomaly';
 
 export type AlertTypeInitializer = (dependenies: {
-  core: CoreStart;
-  plugins: ClientPluginsStart;
+  core: CoreSetup;
+  plugins: ClientPluginsSetup;
 }) => AlertTypeModel;
 
 export const alertTypeInitializers: AlertTypeInitializer[] = [

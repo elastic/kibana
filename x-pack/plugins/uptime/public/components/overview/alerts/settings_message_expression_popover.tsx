@@ -27,7 +27,7 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
   id,
 }) => {
   const kibana = useKibana();
-  const path = kibana.services?.application?.getUrlForApp('uptime', { path: 'settings' });
+  const settingsPath = kibana.services?.http?.basePath.prepend('uptime/settings');
   const [isOpen, setIsOpen] = useState(false);
   return (
     <EuiPopover
@@ -54,7 +54,10 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
           settingsPageLink: (
             // this link is wrapped around a span so we can also change the UI state
             // and hide the alert flyout before triggering the navigation to the settings page
-            <EuiLink href={path} data-test-subj="xpack.uptime.alerts.tlsFlyout.linkToSettings">
+            <EuiLink
+              href={settingsPath}
+              data-test-subj="xpack.uptime.alerts.tlsFlyout.linkToSettings"
+            >
               <span
                 onClick={() => {
                   setAlertFlyoutVisible(false);
