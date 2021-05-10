@@ -138,7 +138,6 @@ export const SearchUIForm: React.FC = () => {
 
         <EuiFormRow label={URL_FIELD_LABEL} helpText={URL_FIELD_HELP_TEXT} fullWidth>
           <EuiSelect
-            name="url-field"
             options={optionFields}
             value={selectedURLOption && selectedURLOption.value}
             onChange={(e) => onUrlFieldChange(e.target.value)}
