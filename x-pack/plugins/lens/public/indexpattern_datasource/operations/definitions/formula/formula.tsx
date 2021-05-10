@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiSpacer,
   EuiPopover,
   EuiSelectable,
   EuiSelectableOption,
@@ -650,103 +650,106 @@ function FormulaEditor({
         'lnsIndexPatternDimensionEditor-isFullscreen': isFullscreen,
       })}
     >
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsFormula">
-        <div className="lnsFormula__header">
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-            <EuiFlexItem>{/* TODO: Word wrap button */}</EuiFlexItem>
+      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+        <div className="lnsFormula">
+          <div className="lnsFormula__header">
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem>{/* TODO: Word wrap button */}</EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => {
-                  toggleFullscreen();
-                }}
-                iconType="fullScreen"
-                size="xs"
-                color="text"
-                flush="right"
-              >
-                {isFullscreen
-                  ? i18n.translate('xpack.lens.formula.fullScreenCloseLabel', {
-                      defaultMessage: 'Collapse',
-                    })
-                  : i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
-                      defaultMessage: 'Expand',
-                    })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-
-        <div className="lnsFormula__editor">
-          <CodeEditor
-            {...codeEditorOptions}
-            height={200}
-            width={'100%'}
-            options={{
-              ...codeEditorOptions.options,
-              // Shared model and overflow node
-              overflowWidgetsDomNode: overflowDiv1.current,
-              model: editorModel.current,
-            }}
-            editorDidMount={(editor) => {
-              editor1.current = editor;
-              disposables.current.push(
-                editor.onDidFocusEditorWidget(() => {
-                  setIsCloseable(false);
-                })
-              );
-              disposables.current.push(
-                editor.onDidBlurEditorWidget(() => {
-                  setIsCloseable(true);
-                })
-              );
-              // If we ever introduce a second Monaco editor, we need to toggle
-              // the typing handler to the active editor to maintain the cursor
-              disposables.current.push(
-                editor.onDidChangeModelContent((e) => {
-                  onTypeHandler(e, editor);
-                })
-              );
-            }}
-          />
-        </div>
-
-        <div className="lnsFormula__footer">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              {isFullscreen ? (
-                <MemoizedFormulaHelp
-                  indexPattern={indexPattern}
-                  operationDefinitionMap={operationDefinitionMap}
-                />
-              ) : (
-                <EuiPopover
-                  isOpen={isHelpOpen}
-                  closePopover={() => setIsHelpOpen(false)}
-                  button={
-                    <EuiButtonEmpty
-                      onClick={() => setIsHelpOpen(!isHelpOpen)}
-                      iconType="help"
-                      size="s"
-                      color="text"
-                    >
-                      {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
-                        defaultMessage: 'Function reference',
-                      })}
-                    </EuiButtonEmpty>
-                  }
-                  anchorPosition="leftDown"
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={() => {
+                    toggleFullscreen();
+                  }}
+                  iconType="fullScreen"
+                  size="xs"
+                  color="text"
+                  flush="right"
                 >
+                  {isFullscreen
+                    ? i18n.translate('xpack.lens.formula.fullScreenCloseLabel', {
+                        defaultMessage: 'Collapse',
+                      })
+                    : i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
+                        defaultMessage: 'Expand',
+                      })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+
+          <div className="lnsFormula__editor">
+            <CodeEditor
+              {...codeEditorOptions}
+              height={200}
+              width={'100%'}
+              options={{
+                ...codeEditorOptions.options,
+                // Shared model and overflow node
+                overflowWidgetsDomNode: overflowDiv1.current,
+                model: editorModel.current,
+              }}
+              editorDidMount={(editor) => {
+                editor1.current = editor;
+                disposables.current.push(
+                  editor.onDidFocusEditorWidget(() => {
+                    setIsCloseable(false);
+                  })
+                );
+                disposables.current.push(
+                  editor.onDidBlurEditorWidget(() => {
+                    setIsCloseable(true);
+                  })
+                );
+                // If we ever introduce a second Monaco editor, we need to toggle
+                // the typing handler to the active editor to maintain the cursor
+                disposables.current.push(
+                  editor.onDidChangeModelContent((e) => {
+                    onTypeHandler(e, editor);
+                  })
+                );
+              }}
+            />
+          </div>
+
+          <div className="lnsFormula__footer">
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem>
+                {isFullscreen ? (
                   <MemoizedFormulaHelp
                     indexPattern={indexPattern}
                     operationDefinitionMap={operationDefinitionMap}
                   />
-                </EuiPopover>
-              )}
-            </EuiFlexItem>
+                ) : (
+                  <EuiPopover
+                    isOpen={isHelpOpen}
+                    closePopover={() => setIsHelpOpen(false)}
+                    button={
+                      <EuiButtonIcon
+                        onClick={() => setIsHelpOpen(!isHelpOpen)}
+                        iconType="help"
+                        color="text"
+                        aria-label={i18n.translate(
+                          'xpack.lens.formula.functionReferenceEditorLabel',
+                          {
+                            defaultMessage: 'Function reference',
+                          }
+                        )}
+                      />
+                    }
+                    anchorPosition="leftDown"
+                  >
+                    <MemoizedFormulaHelp
+                      indexPattern={indexPattern}
+                      operationDefinitionMap={operationDefinitionMap}
+                    />
+                  </EuiPopover>
+                )}
+              </EuiFlexItem>
 
-            <EuiFlexItem>{/* Errors go here */}</EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>{/* TODO: Errors go here */}</EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         </div>
       </div>
     </div>
