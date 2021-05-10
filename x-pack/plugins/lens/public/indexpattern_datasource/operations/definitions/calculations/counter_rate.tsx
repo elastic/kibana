@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import {
@@ -18,6 +19,7 @@ import {
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
+import { Markdown } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -126,4 +128,23 @@ export const counterRateOperation: OperationDefinition<
   },
   timeScalingMode: 'mandatory',
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    description: (
+      <Markdown
+        markdown={i18n.translate('xpack.lens.indexPattern.counterRate.documentation', {
+          defaultMessage: `
+# counter_rate
+
+Calculates the rate of an ever increasing counter. This function will only yield helpful results on counter metric fields which contain a measurement of some kind monotonically growing over time.
+If the value does get smaller, it will interpret this as a counter reset. To get most precise results, \`counter_rate\` should be calculated on the \`max\` of a field.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+
+Example: Visualize the rate of bytes received over time by a memcached server: \`counter_rate(max(memcached.stats.read.bytes))\`
+      `,
+        })}
+      />
+    ),
+  },
 };

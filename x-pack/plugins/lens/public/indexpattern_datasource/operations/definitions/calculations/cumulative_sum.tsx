@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import {
@@ -16,6 +17,7 @@ import {
 } from './utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
+import { Markdown } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
@@ -119,4 +121,22 @@ export const cumulativeSumOperation: OperationDefinition<
     )?.join(', ');
   },
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    description: (
+      <Markdown
+        markdown={i18n.translate('xpack.lens.indexPattern.cumulateSum.documentation', {
+          defaultMessage: `
+# cumulative_sum
+
+Calculates the cumulative sum of a metric over time, adding all previous values of a series to each value. To use this function, you need to configure a date histogram dimension as well.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+
+Example: Visualize the received bytes accumulated over time: \`cumulative_sum(sum(bytes))\`
+      `,
+        })}
+      />
+    ),
+  },
 };

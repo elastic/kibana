@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -15,25 +15,37 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { GenericOperationDefinition, ParamEditorProps } from '../../index';
+import { GenericOperationDefinition } from '../../index';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
 
-import { FormulaIndexPatternColumn } from '../formula';
-
 function FormulaHelp({
   indexPattern,
   operationDefinitionMap,
+  isFullscreen,
 }: {
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  isFullscreen: boolean;
 }) {
   const [selectedFunction, setSelectedFunction] = useState<string | undefined>();
+  const scrollTargets = useRef<Record<string, HTMLDivElement>>({});
+
+  useEffect(() => {
+    if (selectedFunction && scrollTargets.current[selectedFunction]) {
+      scrollTargets.current[selectedFunction].scrollIntoView();
+    }
+  }, [selectedFunction]);
 
   const helpItems: Array<EuiSelectableOption & { description?: JSX.Element }> = [];
 
-  helpItems.push({ label: 'Math', isGroupLabel: true });
+  helpItems.push({
+    label: i18n.translate('xpack.lens.formulaDocumentation.mathSection', {
+      defaultMessage: 'Math',
+    }),
+    isGroupLabel: true,
+  });
 
   helpItems.push(
     ...getPossibleFunctions(indexPattern)
@@ -45,15 +57,49 @@ function FormulaHelp({
       }))
   );
 
-  helpItems.push({ label: 'Elasticsearch', isGroupLabel: true });
+  helpItems.push({
+    label: i18n.translate('xpack.lens.formulaDocumentation.elasticsearchSection', {
+      defaultMessage: 'Elasticsearch',
+    }),
+    isGroupLabel: true,
+  });
 
   // Es aggs
   helpItems.push(
     ...getPossibleFunctions(indexPattern)
-      .filter((key) => key in operationDefinitionMap)
+      .filter(
+        (key) =>
+          key in operationDefinitionMap &&
+          operationDefinitionMap[key].documentation?.section === 'elasticsearch'
+      )
       .map((key) => ({
         label: `${key}: ${operationDefinitionMap[key].displayName}`,
-        description: getHelpText(key, operationDefinitionMap),
+        description: operationDefinitionMap[key].documentation?.description,
+        checked:
+          selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
+            ? ('on' as const)
+            : undefined,
+      }))
+  );
+
+  helpItems.push({
+    label: i18n.translate('xpack.lens.formulaDocumentation.columnCalculationSection', {
+      defaultMessage: 'Column-wise calculation',
+    }),
+    isGroupLabel: true,
+  });
+
+  // Calculations aggs
+  helpItems.push(
+    ...getPossibleFunctions(indexPattern)
+      .filter(
+        (key) =>
+          key in operationDefinitionMap &&
+          operationDefinitionMap[key].documentation?.section === 'calculation'
+      )
+      .map((key) => ({
+        label: `${key}: ${operationDefinitionMap[key].displayName}`,
+        description: operationDefinitionMap[key].documentation?.description,
         checked:
           selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
             ? ('on' as const)
@@ -62,7 +108,7 @@ function FormulaHelp({
   );
 
   return (
-    <EuiFlexGroup style={{ height: '100%' }}>
+    <EuiFlexGroup style={isFullscreen ? { height: '100%' } : { height: 400, width: 800 }}>
       <EuiFlexItem grow={false}>
         <EuiSelectable
           options={helpItems}
@@ -87,12 +133,9 @@ function FormulaHelp({
       </EuiFlexItem>
       <EuiFlexItem className="eui-yScroll">
         <EuiText size="s">
-          {selectedFunction ? (
-            helpItems.find(({ label }) => label === selectedFunction)?.description
-          ) : (
-            <Markdown
-              markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-                defaultMessage: `
+          <Markdown
+            markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+              defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -127,11 +170,27 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-                description:
-                  'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-              })}
-            />
-          )}
+              description:
+                'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+            })}
+          />
+          {helpItems.map((item, index) => {
+            if (item.isGroupLabel) {
+              return null;
+            } else {
+              return (
+                <div
+                  ref={(el) => {
+                    if (el) {
+                      scrollTargets.current[item.label] = el;
+                    }
+                  }}
+                >
+                  <React.Fragment key={index}>{item.description}</React.Fragment>
+                </div>
+              );
+            }
+          })}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -139,37 +198,3 @@ Use the symbols +, -, /, and * to perform basic math.
 }
 
 export const MemoizedFormulaHelp = React.memo(FormulaHelp);
-
-// TODO: i18n this whole thing, or move examples into the operation definitions with i18n
-function getHelpText(
-  type: string,
-  operationDefinitionMap: ParamEditorProps<FormulaIndexPatternColumn>['operationDefinitionMap']
-) {
-  const definition = operationDefinitionMap[type];
-
-  if (type === 'count') {
-    return (
-      <EuiText size="s">
-        <p>Example: count()</p>
-      </EuiText>
-    );
-  }
-
-  return (
-    <EuiText size="s">
-      {definition.input === 'field' ? <p>Example: {type}(bytes)</p> : null}
-      {definition.input === 'fullReference' && !('operationParams' in definition) ? (
-        <p>Example: {type}(sum(bytes))</p>
-      ) : null}
-
-      {'operationParams' in definition && definition.operationParams ? (
-        <p>
-          <p>
-            Example: {type}(sum(bytes),{' '}
-            {definition.operationParams.map((p) => `${p.name}=5`).join(', ')})
-          </p>
-        </p>
-      ) : null}
-    </EuiText>
-  );
-}

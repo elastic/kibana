@@ -16,6 +16,7 @@ import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
 import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
+import { Markdown } from '../../../../../../../src/plugins/kibana_react/public';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
@@ -267,5 +268,23 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
         </EuiFormRow>
       </>
     );
+  },
+  documentation: {
+    section: 'elasticsearch',
+    description: (
+      <Markdown
+        markdown={i18n.translate('xpack.lens.indexPattern.lastValue.documentation', {
+          defaultMessage: `
+# last_value
+
+Returns the value of a field from the last document, ordered by the default time field of the index pattern.
+
+This function is usefull the retrieve the latest state of an entity.
+
+Example: Get the current status of a server: \`last_value(server.status)\`
+      `,
+        })}
+      />
+    ),
   },
 };

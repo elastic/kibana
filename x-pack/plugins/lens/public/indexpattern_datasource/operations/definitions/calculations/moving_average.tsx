@@ -23,6 +23,7 @@ import { getFormatFromPreviousColumn, isValidNumber, useDebounceWithOptions } fr
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
+import { Markdown } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {
@@ -136,6 +137,26 @@ export const movingAverageOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
+  documentation: {
+    section: 'calculation',
+    description: (
+      <Markdown
+        markdown={i18n.translate('xpack.lens.indexPattern.movingAverage.documentation', {
+          defaultMessage: `
+# moving_average
+
+Calculates the moving average of a metric over time, averaging the last n-th values to calculate the current value. To use this function, you need to configure a date histogram dimension as well.
+
+This calculation will be done separately for separate series defined by filters or top values dimensions.
+
+Takes a named parameter \`window\` which specifies how many last values to include in the average calculation for the current value.
+
+Example: Smooth a line of measurements: \`moving_average(sum(bytes), window=5)\`
+      `,
+        })}
+      />
+    ),
+  },
 };
 
 function MovingAverageParamEditor({

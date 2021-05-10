@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
@@ -18,6 +19,7 @@ import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
+import { Markdown } from '../../../../../../../src/plugins/kibana_react/public';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
@@ -128,6 +130,27 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     getErrorMessage: (layer, columnId, indexPattern) =>
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
     filterable: true,
+    documentation: {
+      section: 'elasticsearch',
+      description: (
+        <Markdown
+          markdown={i18n.translate('xpack.lens.indexPattern.metric.documentation', {
+            defaultMessage: `
+# {metric}
+
+Returns the {metric} of a field. This function only works for number fields.
+
+Example: Get the {metric} of price: \`{metric}(price)\`
+
+Example: Get the {metric} of price for orders from the UK: \`{metric}(price, kql="location:UK")\`
+      `,
+            values: {
+              metric: type,
+            },
+          })}
+        />
+      ),
+    },
   } as OperationDefinition<T, 'field'>;
 }
 

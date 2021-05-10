@@ -512,6 +512,7 @@ export function FormulaEditor({
             {isFullscreen ? (
               <MemoizedFormulaHelp
                 indexPattern={indexPattern}
+                isFullscreen={true}
                 operationDefinitionMap={operationDefinitionMap}
               />
             ) : (
@@ -533,6 +534,7 @@ export function FormulaEditor({
                 anchorPosition="leftDown"
               >
                 <MemoizedFormulaHelp
+                  isFullscreen={false}
                   indexPattern={indexPattern}
                   operationDefinitionMap={operationDefinitionMap}
                 />
