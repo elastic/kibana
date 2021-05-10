@@ -31,6 +31,8 @@ export const CASE_STATUS_URL = `${CASES_URL}/status`;
 export const CASE_TAGS_URL = `${CASES_URL}/tags`;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
 
+export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}`;
+
 /**
  * Action routes
  */
