@@ -546,7 +546,9 @@ export const superUserSpace1Auth = getAuthWithSuperUser();
  * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
  * functions.
  */
-export function getAuthWithSuperUser(space: string = 'space1'): { user: User; space: string } {
+export function getAuthWithSuperUser(
+  space: string | null = 'space1'
+): { user: User; space: string | null } {
   return { user: superUser, space };
 }
 

@@ -12,19 +12,17 @@ import { deleteCasesByESQuery, createCase, getTags } from '../../../../../common
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   secOnly,
-  obsOnly,
   globalRead,
   superUser,
   secOnlyRead,
   obsOnlyRead,
   obsSecRead,
   noKibanaPrivileges,
-  obsSec,
 } from '../../../../../common/lib/authentication/users';
+import { secOnlyNoSpaceAuth, obsOnlyNoSpaceAuth, obsSecNoSpaceAuth } from '../../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
@@ -33,169 +31,141 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCasesByESQuery(es);
     });
 
-    it('should return case tags', async () => {
-      await createCase(supertest, getPostCaseRequest());
-      await createCase(supertest, getPostCaseRequest({ tags: ['unique'] }));
+    it('should read the correct tags', async () => {
+      await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
+        200,
+        secOnlyNoSpaceAuth
+      );
 
-      const tags = await getTags({ supertest });
-      expect(tags).to.eql(['defacement', 'unique']);
+      await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
+        200,
+        obsOnlyNoSpaceAuth
+      );
+
+      for (const scenario of [
+        {
+          user: globalRead,
+          expectedTags: ['sec', 'obs'],
+        },
+        {
+          user: superUser,
+          expectedTags: ['sec', 'obs'],
+        },
+        { user: secOnlyRead, expectedTags: ['sec'] },
+        { user: obsOnlyRead, expectedTags: ['obs'] },
+        {
+          user: obsSecRead,
+          expectedTags: ['sec', 'obs'],
+        },
+      ]) {
+        const tags = await getTags({
+          supertest: supertestWithoutAuth,
+          expectedHttpCode: 200,
+          auth: {
+            user: scenario.user,
+            space: null,
+          },
+        });
+
+        expect(tags).to.eql(scenario.expectedTags);
+      }
     });
 
-    it('should return unique tags', async () => {
-      await createCase(supertest, getPostCaseRequest());
-      await createCase(supertest, getPostCaseRequest());
+    it(`User ${
+      noKibanaPrivileges.username
+    } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT get all tags`, async () => {
+      // super user creates a case at the appropriate space
+      await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
+        200,
+        {
+          user: superUser,
+          space: null,
+        }
+      );
 
-      const tags = await getTags({ supertest });
-      expect(tags).to.eql(['defacement']);
+      // user should not be able to get all tags at the appropriate space
+      await getTags({
+        supertest: supertestWithoutAuth,
+        expectedHttpCode: 403,
+        auth: { user: noKibanaPrivileges, space: null },
+      });
     });
 
-    describe('rbac', () => {
-      it('should read the correct tags', async () => {
-        await createCase(
+    it('should return a 404 when attempting to access a space', async () => {
+      // super user creates a case at the appropriate space
+      await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
+        200,
+        {
+          user: superUser,
+          space: null,
+        }
+      );
+
+      await getTags({
+        supertest: supertestWithoutAuth,
+        expectedHttpCode: 404,
+        auth: { user: secOnly, space: 'space1' },
+      });
+    });
+
+    it('should respect the owner filter when having permissions', async () => {
+      await Promise.all([
+        createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
           200,
-          {
-            user: secOnly,
-            space: 'space1',
-          }
-        );
-
-        await createCase(
+          obsSecNoSpaceAuth
+        ),
+        createCase(
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
           200,
-          {
-            user: obsOnly,
-            space: 'space1',
-          }
-        );
+          obsSecNoSpaceAuth
+        ),
+      ]);
 
-        for (const scenario of [
-          {
-            user: globalRead,
-            expectedTags: ['sec', 'obs'],
-          },
-          {
-            user: superUser,
-            expectedTags: ['sec', 'obs'],
-          },
-          { user: secOnlyRead, expectedTags: ['sec'] },
-          { user: obsOnlyRead, expectedTags: ['obs'] },
-          {
-            user: obsSecRead,
-            expectedTags: ['sec', 'obs'],
-          },
-        ]) {
-          const tags = await getTags({
-            supertest: supertestWithoutAuth,
-            expectedHttpCode: 200,
-            auth: {
-              user: scenario.user,
-              space: 'space1',
-            },
-          });
-
-          expect(tags).to.eql(scenario.expectedTags);
-        }
+      const tags = await getTags({
+        supertest: supertestWithoutAuth,
+        auth: obsSecNoSpaceAuth,
+        query: { owner: 'securitySolutionFixture' },
       });
 
-      for (const scenario of [
-        { user: noKibanaPrivileges, space: 'space1' },
-        { user: secOnly, space: 'space2' },
-      ]) {
-        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
-          scenario.space
-        } - should NOT get all tags`, async () => {
-          // super user creates a case at the appropriate space
-          await createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
-            200,
-            {
-              user: superUser,
-              space: scenario.space,
-            }
-          );
+      expect(tags).to.eql(['sec']);
+    });
 
-          // user should not be able to get all tags at the appropriate space
-          await getTags({
-            supertest: supertestWithoutAuth,
-            expectedHttpCode: 403,
-            auth: { user: scenario.user, space: scenario.space },
-          });
-        });
-      }
+    it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
+      await Promise.all([
+        createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
+          200,
+          obsSecNoSpaceAuth
+        ),
+        createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
+          200,
+          obsSecNoSpaceAuth
+        ),
+      ]);
 
-      it('should respect the owner filter when having permissions', async () => {
-        await Promise.all([
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
-            200,
-            {
-              user: obsSec,
-              space: 'space1',
-            }
-          ),
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
-            200,
-            {
-              user: obsSec,
-              space: 'space1',
-            }
-          ),
-        ]);
-
-        const tags = await getTags({
-          supertest: supertestWithoutAuth,
-          auth: {
-            user: obsSec,
-            space: 'space1',
-          },
-          query: { owner: 'securitySolutionFixture' },
-        });
-
-        expect(tags).to.eql(['sec']);
+      // User with permissions only to security solution request tags from observability
+      const tags = await getTags({
+        supertest: supertestWithoutAuth,
+        auth: secOnlyNoSpaceAuth,
+        query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
       });
 
-      it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
-        await Promise.all([
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture', tags: ['sec'] }),
-            200,
-            {
-              user: obsSec,
-              space: 'space1',
-            }
-          ),
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'observabilityFixture', tags: ['obs'] }),
-            200,
-            {
-              user: obsSec,
-              space: 'space1',
-            }
-          ),
-        ]);
-
-        // User with permissions only to security solution request tags from observability
-        const tags = await getTags({
-          supertest: supertestWithoutAuth,
-          auth: {
-            user: secOnly,
-            space: 'space1',
-          },
-          query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
-        });
-
-        // Only security solution tags are being returned
-        expect(tags).to.eql(['sec']);
-      });
+      // Only security solution tags are being returned
+      expect(tags).to.eql(['sec']);
     });
   });
 };

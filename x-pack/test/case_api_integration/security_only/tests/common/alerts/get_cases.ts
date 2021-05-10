@@ -26,6 +26,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { secOnlyNoSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -38,6 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     const supertestWithoutAuth = getService('supertestWithoutAuth');
+    const obsSecAuth = { user: obsSec, space: null };
 
     it('should return the correct case IDs', async () => {
       const secOnlyAuth = { user: secOnly, space: null };
@@ -107,30 +109,28 @@ export default ({ getService }: FtrProviderContext): void => {
       }
     });
 
-    for (const scenario of [{ user: noKibanaPrivileges, space: null }]) {
-      it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
-        scenario.space
-      } - should not get cases`, async () => {
-        const caseInfo = await createCase(supertest, getPostCaseRequest(), 200, {
-          user: superUser,
-          space: scenario.space,
-        });
-
-        await createComment({
-          supertest: supertestWithoutAuth,
-          caseId: caseInfo.id,
-          params: postCommentAlertReq,
-          auth: { user: superUser, space: scenario.space },
-        });
-
-        await getCaseIDsByAlert({
-          supertest: supertestWithoutAuth,
-          alertID: postCommentAlertReq.alertId as string,
-          auth: { user: scenario.user, space: scenario.space },
-          expectedHttpCode: 403,
-        });
+    it(`User ${
+      noKibanaPrivileges.username
+    } with role(s) ${noKibanaPrivileges.roles.join()} - should not get cases`, async () => {
+      const caseInfo = await createCase(supertest, getPostCaseRequest(), 200, {
+        user: superUser,
+        space: null,
       });
-    }
+
+      await createComment({
+        supertest: supertestWithoutAuth,
+        caseId: caseInfo.id,
+        params: postCommentAlertReq,
+        auth: { user: superUser, space: null },
+      });
+
+      await getCaseIDsByAlert({
+        supertest: supertestWithoutAuth,
+        alertID: postCommentAlertReq.alertId as string,
+        auth: { user: noKibanaPrivileges, space: null },
+        expectedHttpCode: 403,
+      });
+    });
 
     it('should return a 404 when attempting to access a space', async () => {
       const auth = { user: obsSec, space: null };
@@ -169,14 +169,13 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should respect the owner filter when have permissions', async () => {
-      const auth = { user: obsSec, space: null };
       const [case1, case2] = await Promise.all([
-        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, auth),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, obsSecAuth),
         createCase(
           supertestWithoutAuth,
           { ...getPostCaseRequest(), owner: 'observabilityFixture' },
           200,
-          auth
+          obsSecAuth
         ),
       ]);
 
@@ -185,20 +184,20 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: case1.id,
           params: postCommentAlertReq,
-          auth,
+          auth: obsSecAuth,
         }),
         createComment({
           supertest: supertestWithoutAuth,
           caseId: case2.id,
           params: { ...postCommentAlertReq, owner: 'observabilityFixture' },
-          auth,
+          auth: obsSecAuth,
         }),
       ]);
 
       const res = await getCaseIDsByAlert({
         supertest: supertestWithoutAuth,
         alertID: postCommentAlertReq.alertId as string,
-        auth,
+        auth: obsSecAuth,
         query: { owner: 'securitySolutionFixture' },
       });
 
@@ -206,14 +205,13 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return the correct case IDs when the owner query parameter contains unprivileged values', async () => {
-      const auth = { user: obsSec, space: null };
       const [case1, case2] = await Promise.all([
-        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, auth),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, obsSecAuth),
         createCase(
           supertestWithoutAuth,
           { ...getPostCaseRequest(), owner: 'observabilityFixture' },
           200,
-          auth
+          obsSecAuth
         ),
       ]);
 
@@ -222,20 +220,20 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: case1.id,
           params: postCommentAlertReq,
-          auth,
+          auth: obsSecAuth,
         }),
         createComment({
           supertest: supertestWithoutAuth,
           caseId: case2.id,
           params: { ...postCommentAlertReq, owner: 'observabilityFixture' },
-          auth,
+          auth: obsSecAuth,
         }),
       ]);
 
       const res = await getCaseIDsByAlert({
         supertest: supertestWithoutAuth,
         alertID: postCommentAlertReq.alertId as string,
-        auth: { user: secOnly, space: null },
+        auth: secOnlyNoSpaceAuth,
         // The secOnly user does not have permissions for observability cases, so it should only return the security solution one
         query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
       });

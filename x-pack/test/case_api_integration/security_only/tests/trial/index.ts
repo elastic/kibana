@@ -25,8 +25,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // Trial
     loadTestFile(require.resolve('./cases/push_case'));
-    loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
-    loadTestFile(require.resolve('./configure/index'));
 
     // Common
     loadTestFile(require.resolve('../common'));

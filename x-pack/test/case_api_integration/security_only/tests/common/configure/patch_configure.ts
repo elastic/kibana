@@ -11,8 +11,6 @@ import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_int
 
 import {
   getConfigurationRequest,
-  removeServerGeneratedPropertiesFromSavedObject,
-  getConfigurationOutput,
   deleteConfiguration,
   createConfiguration,
   updateConfiguration,
@@ -24,8 +22,8 @@ import {
   noKibanaPrivileges,
   globalRead,
   obsSecRead,
-  superUser,
 } from '../../../../common/lib/authentication/users';
+import { secOnlyNoSpaceAuth, superUserNoSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -41,131 +39,57 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it('should patch a configuration', async () => {
-      const configuration = await createConfiguration(supertest);
-      const newConfiguration = await updateConfiguration(supertest, configuration.id, {
-        closure_type: 'close-by-pushing',
-        version: configuration.version,
-      });
+    it('User: security solution only - should update a configuration', async () => {
+      const configuration = await createConfiguration(
+        supertestWithoutAuth,
+        getConfigurationRequest(),
+        200,
+        secOnlyNoSpaceAuth
+      );
 
-      const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
-      expect(data).to.eql({ ...getConfigurationOutput(true), closure_type: 'close-by-pushing' });
+      const newConfiguration = await updateConfiguration(
+        supertestWithoutAuth,
+        configuration.id,
+        {
+          closure_type: 'close-by-pushing',
+          version: configuration.version,
+        },
+        200,
+        secOnlyNoSpaceAuth
+      );
+
+      expect(newConfiguration.owner).to.eql('securitySolutionFixture');
     });
 
-    it('should not patch a configuration with unsupported connector type', async () => {
-      const configuration = await createConfiguration(supertest);
+    it('User: security solution only - should NOT update a configuration of different owner', async () => {
+      const configuration = await createConfiguration(
+        supertestWithoutAuth,
+        { ...getConfigurationRequest(), owner: 'observabilityFixture' },
+        200,
+        superUserNoSpaceAuth
+      );
+
       await updateConfiguration(
-        supertest,
+        supertestWithoutAuth,
         configuration.id,
-        // @ts-expect-error
-        getConfigurationRequest({ type: '.unsupported' }),
-        400
+        {
+          closure_type: 'close-by-pushing',
+          version: configuration.version,
+        },
+        403,
+        secOnlyNoSpaceAuth
       );
     });
 
-    it('should not patch a configuration with unsupported connector fields', async () => {
-      const configuration = await createConfiguration(supertest);
-      await updateConfiguration(
-        supertest,
-        configuration.id,
-        // @ts-expect-error
-        getConfigurationRequest({ type: '.jira', fields: { unsupported: 'value' } }),
-        400
-      );
-    });
-
-    it('should handle patch request when there is no configuration', async () => {
-      const error = await updateConfiguration(
-        supertest,
-        'not-exist',
-        { closure_type: 'close-by-pushing', version: 'no-version' },
-        404
-      );
-
-      expect(error).to.eql({
-        error: 'Not Found',
-        message: 'Saved object [cases-configure/not-exist] not found',
-        statusCode: 404,
-      });
-    });
-
-    it('should handle patch request when versions are different', async () => {
-      const configuration = await createConfiguration(supertest);
-      const error = await updateConfiguration(
-        supertest,
-        configuration.id,
-        { closure_type: 'close-by-pushing', version: 'no-version' },
-        409
-      );
-
-      expect(error).to.eql({
-        error: 'Conflict',
-        message:
-          'This configuration has been updated. Please refresh before saving additional updates.',
-        statusCode: 409,
-      });
-    });
-
-    it('should not allow to change the owner of the configuration', async () => {
-      const configuration = await createConfiguration(supertest);
-      await updateConfiguration(
-        supertest,
-        configuration.id,
-        // @ts-expect-error
-        { owner: 'observabilityFixture', version: configuration.version },
-        400
-      );
-    });
-
-    it('should not allow excess attributes', async () => {
-      const configuration = await createConfiguration(supertest);
-      await updateConfiguration(
-        supertest,
-        configuration.id,
-        // @ts-expect-error
-        { notExist: 'not-exist', version: configuration.version },
-        400
-      );
-    });
-
-    describe('rbac', () => {
-      it('User: security solution only - should update a configuration', async () => {
+    for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} - should NOT update a configuration`, async () => {
         const configuration = await createConfiguration(
           supertestWithoutAuth,
           getConfigurationRequest(),
           200,
-          {
-            user: secOnly,
-            space: 'space1',
-          }
-        );
-
-        const newConfiguration = await updateConfiguration(
-          supertestWithoutAuth,
-          configuration.id,
-          {
-            closure_type: 'close-by-pushing',
-            version: configuration.version,
-          },
-          200,
-          {
-            user: secOnly,
-            space: 'space1',
-          }
-        );
-
-        expect(newConfiguration.owner).to.eql('securitySolutionFixture');
-      });
-
-      it('User: security solution only - should NOT update a configuration of different owner', async () => {
-        const configuration = await createConfiguration(
-          supertestWithoutAuth,
-          { ...getConfigurationRequest(), owner: 'observabilityFixture' },
-          200,
-          {
-            user: superUser,
-            space: 'space1',
-          }
+          superUserNoSpaceAuth
         );
 
         await updateConfiguration(
@@ -177,67 +101,34 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           403,
           {
-            user: secOnly,
-            space: 'space1',
+            user,
+            space: null,
           }
         );
       });
+    }
 
-      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
-        it(`User ${
-          user.username
-        } with role(s) ${user.roles.join()} - should NOT update a configuration`, async () => {
-          const configuration = await createConfiguration(
-            supertestWithoutAuth,
-            getConfigurationRequest(),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          );
+    it('should return a 404 when attempting to access a space', async () => {
+      const configuration = await createConfiguration(
+        supertestWithoutAuth,
+        { ...getConfigurationRequest(), owner: 'securitySolutionFixture' },
+        200,
+        superUserNoSpaceAuth
+      );
 
-          await updateConfiguration(
-            supertestWithoutAuth,
-            configuration.id,
-            {
-              closure_type: 'close-by-pushing',
-              version: configuration.version,
-            },
-            403,
-            {
-              user,
-              space: 'space1',
-            }
-          );
-        });
-      }
-
-      it('should NOT update a configuration in a space with no permissions', async () => {
-        const configuration = await createConfiguration(
-          supertestWithoutAuth,
-          { ...getConfigurationRequest(), owner: 'securitySolutionFixture' },
-          200,
-          {
-            user: superUser,
-            space: 'space2',
-          }
-        );
-
-        await updateConfiguration(
-          supertestWithoutAuth,
-          configuration.id,
-          {
-            closure_type: 'close-by-pushing',
-            version: configuration.version,
-          },
-          404,
-          {
-            user: secOnly,
-            space: 'space1',
-          }
-        );
-      });
+      await updateConfiguration(
+        supertestWithoutAuth,
+        configuration.id,
+        {
+          closure_type: 'close-by-pushing',
+          version: configuration.version,
+        },
+        404,
+        {
+          user: secOnly,
+          space: 'space1',
+        }
+      );
     });
   });
 };
