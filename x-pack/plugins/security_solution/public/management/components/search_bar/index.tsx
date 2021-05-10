@@ -28,7 +28,7 @@ export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) 
       <EuiFlexItem>
         <EuiFieldSearch
           defaultValue={defaultValue}
-          placeholder={i18n.translate('xpack.securitySolution.list.search.placeholder', {
+          placeholder={i18n.translate('xpack.securitySolution.management.search.placeholder', {
             defaultMessage: 'Search',
           })}
           onChange={handleOnChangeSearchField}
@@ -40,7 +40,7 @@ export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) 
       </EuiFlexItem>
       <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="searchButton">
         <EuiButton iconType="refresh">
-          {i18n.translate('xpack.securitySolution.list.search.button', {
+          {i18n.translate('xpack.securitySolution.management.search.button', {
             defaultMessage: 'Refresh',
           })}
         </EuiButton>
