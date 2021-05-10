@@ -15,6 +15,7 @@ import {
   ESSearchSourceResponseMeta,
   MapExtent,
   MapQuery,
+  Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -39,6 +40,7 @@ export interface BoundsFilters {
   query?: MapQuery;
   sourceQuery?: MapQuery;
   timeFilters: TimeRange;
+  timeslice?: Timeslice;
 }
 
 export interface IVectorSource extends ISource {
