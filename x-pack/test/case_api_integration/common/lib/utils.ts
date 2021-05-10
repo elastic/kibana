@@ -552,6 +552,13 @@ export function getAuthWithSuperUser(
   return { user: superUser, space };
 }
 
+/**
+ * Converts the space into the appropriate string for use by the actions remover utility object.
+ */
+export function getActionsSpace(space: string | null) {
+  return space ?? 'default';
+}
+
 export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
