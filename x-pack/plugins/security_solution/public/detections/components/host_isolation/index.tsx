@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import {
   CANCEL,
   CASES_ASSOCIATED_WITH_ALERT,
@@ -32,6 +31,10 @@ import {
 } from './translations';
 import { Maybe } from '../../../../../observability/common/typings';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
+import { CaseDetailsLink } from '../../../common/components/links';
+import { useKibana } from '../../../common/lib/kibana';
+import { SecurityPageName } from '../../../app/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 export const HostIsolationPanel = React.memo(
   ({
@@ -43,6 +46,9 @@ export const HostIsolationPanel = React.memo(
   }) => {
     const [comment, setComment] = useState('');
     const [isIsolated, setIsIsolated] = useState(false);
+    const {
+      application: { navigateToApp },
+    } = useKibana().services;
 
     const agentId = useMemo(() => {
       const findAgentId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
@@ -75,6 +81,21 @@ export const HostIsolationPanel = React.memo(
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
 
+    const casesList = useMemo(() => {
+      for (const id of caseIds) {
+        return (
+          <li>
+            <CaseDetailsLink detailName={id}>
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
+                defaultMessage="Case"
+              />
+            </CaseDetailsLink>
+          </li>
+        );
+      }
+    }, [caseIds]);
+
     const caseCount: number = caseIds.length;
 
     const hostIsolated = useMemo(() => {
@@ -104,14 +125,7 @@ export const HostIsolationPanel = React.memo(
                   </p>
                 </EuiText>
                 <EuiText size="s">
-                  <ul>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
-                        defaultMessage="Case"
-                      />
-                    </li>
-                  </ul>
+                  <ul>{casesList}</ul>
                 </EuiText>
               </>
             )}
@@ -127,7 +141,7 @@ export const HostIsolationPanel = React.memo(
           </EuiFlexGroup>
         </>
       );
-    }, [backToAlertDetails, hostName, caseCount]);
+    }, [backToAlertDetails, hostName, caseCount, casesList]);
 
     const hostNotIsolated = useMemo(() => {
       return (
