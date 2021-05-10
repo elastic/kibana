@@ -10,7 +10,6 @@ import { InternalArtifactCompleteSchema } from '../../schemas';
 import { getArtifactId } from './common';
 import { isEmptyManifestDiff, Manifest } from './manifest';
 import { getMockArtifacts, toArtifactRecords } from './mocks';
-import { cloneDeepWith, CloneDeepWithCustomizer } from 'lodash';
 
 describe('manifest', () => {
   const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -28,10 +27,12 @@ describe('manifest', () => {
   let ARTIFACTS_COPY: InternalArtifactCompleteSchema[] = [];
   let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_EXCEPTIONS_LINUX: InternalArtifactCompleteSchema;
   let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
   let ARTIFACT_COPY_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_COPY_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_COPY_EXCEPTIONS_LINUX: InternalArtifactCompleteSchema;
   let ARTIFACT_COPY_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_COPY_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
@@ -40,12 +41,14 @@ describe('manifest', () => {
     ARTIFACTS_COPY = await getMockArtifacts({ compress: true });
     ARTIFACT_EXCEPTIONS_MACOS = ARTIFACTS[0];
     ARTIFACT_EXCEPTIONS_WINDOWS = ARTIFACTS[1];
-    ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[2];
-    ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[3];
+    ARTIFACT_EXCEPTIONS_LINUX = ARTIFACTS[2];
+    ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[3];
+    ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[4];
     ARTIFACT_COPY_EXCEPTIONS_MACOS = ARTIFACTS_COPY[0];
     ARTIFACT_COPY_EXCEPTIONS_WINDOWS = ARTIFACTS_COPY[1];
-    ARTIFACT_COPY_TRUSTED_APPS_MACOS = ARTIFACTS_COPY[2];
-    ARTIFACT_COPY_TRUSTED_APPS_WINDOWS = ARTIFACTS_COPY[3];
+    ARTIFACT_COPY_EXCEPTIONS_LINUX = ARTIFACTS_COPY[2];
+    ARTIFACT_COPY_TRUSTED_APPS_MACOS = ARTIFACTS_COPY[3];
+    ARTIFACT_COPY_TRUSTED_APPS_WINDOWS = ARTIFACTS_COPY[4];
   });
 
   describe('Manifest constructor', () => {
@@ -140,12 +143,13 @@ describe('manifest', () => {
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
       manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_LINUX);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
 
-      expect(manifest.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 4));
+      expect(manifest.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 5));
       expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
       expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(false);
       expect(manifest.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_MACOS)).toBe(true);
@@ -373,10 +377,11 @@ describe('manifest', () => {
 
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_LINUX);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       expect(manifest.diff(Manifest.getDefault())).toStrictEqual({
-        additions: ARTIFACTS.slice(0, 3),
+        additions: ARTIFACTS.slice(0, 4),
         removals: [],
         transitions: [],
       });
@@ -517,6 +522,7 @@ describe('manifest', () => {
       manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
       manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_LINUX);
       manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
       manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
@@ -525,6 +531,7 @@ describe('manifest', () => {
       // transition to default policy only
       manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
       manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_LINUX);
       // transition to second policy
       manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
       // transition to one policy only
@@ -533,7 +540,11 @@ describe('manifest', () => {
       expect(manifest2.diff(manifest1)).toStrictEqual({
         additions: [],
         removals: [],
-        transitions: ARTIFACTS_COPY.slice(0, 3),
+        transitions: [
+          ARTIFACT_EXCEPTIONS_MACOS,
+          ARTIFACT_COPY_EXCEPTIONS_WINDOWS,
+          ARTIFACT_COPY_TRUSTED_APPS_MACOS,
+        ],
       });
     });
 
@@ -693,52 +704,6 @@ describe('manifest', () => {
       };
 
       expect(isEmptyManifestDiff(diff)).toBe(false);
-    });
-  });
-
-  describe('and Fleet Server is enabled', () => {
-    const convertToFleetServerRelativeUrl: CloneDeepWithCustomizer<unknown> = (value, key) => {
-      if (key === 'relative_url') {
-        return value.replace('/api/endpoint/artifacts/download/', '/api/fleet/artifacts/');
-      }
-    };
-    let manifest: Manifest;
-
-    beforeEach(() => {
-      manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' }, true);
-
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
-      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
-    });
-
-    test('should write manifest for global artifacts with fleet-server relative url', () => {
-      expect(manifest.toPackagePolicyManifest()).toStrictEqual({
-        schema_version: 'v1',
-        manifest_version: '1.0.0',
-        artifacts: cloneDeepWith(
-          toArtifactRecords({
-            'endpoint-exceptionlist-windows-v1': ARTIFACT_EXCEPTIONS_WINDOWS,
-            'endpoint-exceptionlist-macos-v1': ARTIFACT_EXCEPTIONS_MACOS,
-          }),
-          convertToFleetServerRelativeUrl
-        ),
-      });
-    });
-
-    test('should write policy specific manifest with fleet-server relative url', () => {
-      expect(manifest.toPackagePolicyManifest(TEST_POLICY_ID_1)).toStrictEqual({
-        schema_version: 'v1',
-        manifest_version: '1.0.0',
-        artifacts: cloneDeepWith(
-          toArtifactRecords({
-            'endpoint-exceptionlist-windows-v1': ARTIFACT_EXCEPTIONS_WINDOWS,
-            'endpoint-trustlist-macos-v1': ARTIFACT_TRUSTED_APPS_MACOS,
-          }),
-          convertToFleetServerRelativeUrl
-        ),
-      });
     });
   });
 });

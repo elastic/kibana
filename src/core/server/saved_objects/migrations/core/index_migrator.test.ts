@@ -27,6 +27,7 @@ describe('IndexMigrator', () => {
       index: '.kibana',
       kibanaVersion: '7.10.0',
       log: loggingSystemMock.create().get(),
+      setStatus: jest.fn(),
       mappingProperties: {},
       pollInterval: 1,
       scrollDuration: '1m',

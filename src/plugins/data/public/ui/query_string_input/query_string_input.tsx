@@ -682,7 +682,14 @@ export default class QueryStringInputUI extends Component<Props, State> {
     );
     const inputClassName = classNames(
       'kbnQueryBar__textarea',
-      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null
+      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,
+      this.props.prepend ? 'kbnQueryBar__textarea--hasPrepend' : null,
+      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textarea--hasAppend' : null
+    );
+    const inputWrapClassName = classNames(
+      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
+      this.props.prepend ? 'kbnQueryBar__textareaWrap--hasPrepend' : null,
+      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textareaWrap--hasAppend' : null
     );
 
     return (
@@ -711,7 +718,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           >
             <div
               role="search"
-              className="euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap"
+              className={inputWrapClassName}
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea

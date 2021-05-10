@@ -161,6 +161,9 @@ export class APIKeys {
 
   /**
    * Tries to create an API key for the current user.
+   *
+   * Returns newly created API key or `null` if API keys are disabled.
+   *
    * @param request Request instance.
    * @param params The params to create an API key
    */

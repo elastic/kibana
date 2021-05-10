@@ -14,9 +14,11 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
         <EuiPanel
           className="euiPageContent euiPageContent--horizontalCenter"
           paddingSize="l"
+          role="main"
         >
           <div
             className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--horizontalCenter"
+            role="main"
           >
             <EuiEmptyPrompt
               body={

@@ -19,9 +19,10 @@ export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
 export const DOCS_PREFIX = docLinks.workplaceSearchBase;
+export const PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-permissions.html`;
 export const DOCUMENT_PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sources-document-permissions.html`;
 export const DOCUMENT_PERMISSIONS_SYNC_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-synchronizing`;
-export const PRIVATE_SOURCES_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-org-private`;
+export const PRIVATE_SOURCES_DOCS_URL = `${PERMISSIONS_DOCS_URL}#organizational-sources-private-sources`;
 export const EXTERNAL_IDENTITIES_DOCS_URL = `${DOCS_PREFIX}/workplace-search-external-identities-api.html`;
 export const SECURITY_DOCS_URL = `${DOCS_PREFIX}/workplace-search-security.html`;
 export const SMTP_DOCS_URL = `${DOCS_PREFIX}/workplace-search-smtp-mailer.html`;
@@ -59,7 +60,6 @@ export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
 export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
-export const ALPHA_PATH = '/alpha';
 export const SOURCES_PATH = '/sources';
 export const PERSONAL_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
 

@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'lens',
   ]);
 
-  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardExpect = getService('dashboardExpect');
   const testSubjects = getService('testSubjects');
@@ -29,7 +29,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const find = getService('find');
 
-  describe('dashboard time to visualize security', () => {
+  // flaky https://github.com/elastic/kibana/issues/98249
+  describe.skip('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -85,7 +86,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can add a lens panel by value', async () => {
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
         await PageObjects.lens.createAndAddLensFromDashboard({});
         const newPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
@@ -171,9 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await testSubjects.click('dashboardAddNewPanelButton');
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-        await PageObjects.visualize.clickMarkdownWidget();
+        await dashboardAddPanel.clickMarkdownQuickButton();
         await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
         await PageObjects.visEditor.clickGo();
 

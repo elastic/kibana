@@ -12,12 +12,15 @@ import {
   KibanaRequest,
   CoreStart,
 } from 'src/core/server';
+import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
 import { APMPluginDependencies } from '../types';
+import { APMRuleRegistry } from '../plugin';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
 }
 
 export type InspectResponse = Array<{
@@ -59,22 +62,5 @@ export interface APMRouteHandlerResources {
       start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
     };
   };
+  apmRuleRegistry: APMRuleRegistry;
 }
-
-// export type Client<
-//   TRouteState,
-//   TOptions extends { abortable: boolean } = { abortable: true }
-// > = <TEndpoint extends keyof TRouteState & string>(
-//   options: Omit<
-//     FetchOptions,
-//     'query' | 'body' | 'pathname' | 'method' | 'signal'
-//   > & {
-//     forceCache?: boolean;
-//     endpoint: TEndpoint;
-//   } & MaybeParams<TRouteState, TEndpoint> &
-//     (TOptions extends { abortable: true } ? { signal: AbortSignal | null } : {})
-// ) => Promise<
-//   TRouteState[TEndpoint] extends { ret: any }
-//     ? TRouteState[TEndpoint]['ret']
-//     : unknown
-// >;

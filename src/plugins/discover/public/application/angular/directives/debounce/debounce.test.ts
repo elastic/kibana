@@ -12,7 +12,7 @@ import 'angular-mocks';
 import 'angular-sanitize';
 import 'angular-route';
 
-// @ts-ignore
+// @ts-expect-error
 import { createDebounceProviderTimeout } from './debounce';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { initializeInnerAngularModule } from '../../../../get_inner_angular';
@@ -21,6 +21,7 @@ import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { initAngularBootstrap } from '../../../../../../kibana_legacy/public';
 
 describe('debounce service', function () {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let debounce: (fn: () => void, timeout: number, options?: any) => any;
   let $timeout: ITimeoutService;
   let spy: SinonSpy;

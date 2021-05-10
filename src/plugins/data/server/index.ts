@@ -176,9 +176,6 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
@@ -238,6 +235,8 @@ export {
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
+  AsyncSearchResponse,
+  AsyncSearchStatusResponse,
 } from './search';
 
 // Search namespace
@@ -263,8 +262,6 @@ export const search = {
     toAbsoluteDates,
     calcAutoIntervalLessThan,
   },
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
 };

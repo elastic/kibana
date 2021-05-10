@@ -16,17 +16,30 @@ For more information, see
 ////
 
 [[reporting-app-users]]
-To enable users to generate reports, you must assign them the built-in `reporting_user`
-role.  Users will also need the appropriate <<kibana-privileges, {kib} privileges>> to access the objects
-to report on and the {es} indices.
+Access to reporting features is limited to privileged users. In older versions of Kibana, you could only grant
+users the privilege by assigning them the `reporting_user` role in Elasticsearch. In 7.14 and above, you have
+the option to create your own roles that grant access to reporting features using <<kibana-privileges, {kib} privileges>>.
+
+It is recommended that you set `xpack.reporting.roles.enabled: false` in your kibana.yml to begin using Kibana
+privileges. This will allow users to only see Reporting widgets in applications when they have privilege to use
+them. 
+
+[NOTE]
+============================================================================
+The default value of `xpack.reporting.roles.enabled` is `true` for 7.x versions of Kibana. To migrate users to the
+new method of securing access to *Reporting*, you must explicitly set `xpack.reporting.roles.enabled: false` in
+`kibana.yml`. In the next major version of Kibana, having this set to `false` will be the only valid configuration.
+============================================================================
+
+This document discusses how to create a role that grants access to reporting features using the new method of
+Kibana application privileges. 
 
 [float]
 [[reporting-roles-management-ui]]
-=== If you are using the `native` realm
+=== Create the role in the `native` realm
 
-To assign roles, use the *Roles* UI or <<reporting-roles-user-api, user API>>.
-This example shows how to use *Roles* page to create a user who has a custom role and the
-`reporting_user` role.
+To create roles, use the *Roles* UI or <<reporting-roles-user-api, user API>>. This example shows how to
+create a role that grants reporting feature privileges in {kib} applications.
 
 . Open the main menu, then click *Stack Management > Roles*.
 
@@ -42,60 +55,69 @@ For more information, see {ref}/security-privileges.html[Security privileges].
 [role="screenshot"]
 image::user/security/images/reporting-privileges-example.png["Reporting privileges"]
 
-. Add space privileges.
+. Add space privileges for the {kib} applications that allow access to the reporting options.
 +
-Reporting users typically save searches, create
-visualizations, and build dashboards. They require a space
-that provides read and write privileges in
-*Discover* and *Dashboard*.
-
+To allow users to create CSV reports in *Discover*, or PDF reports in *Canvas*,
+*Visualize Library*, and *Dashboard*, click  *Add Kibana privilege* for each application,
+then select the privileges to generate
+reports. For example, select *All* privileges for all features, or *Customize* to grant
+the privilege to generate reports for only specific applications.
++
+[role="screenshot"]
+image::user/security/images/reporting-custom-role.png["Reporting custom role"]
++
+[NOTE]
+============================================================================
+Granting users access to reporting features in any application also grants them access to manage their reports in *Stack Management > Reporting*.
+============================================================================
++
 . Save your new role.
 
-. Open the main menu, then click *Stack Management > Users*, add a new user, and assign the user the built-in
-`reporting_user` role and your new custom role, `custom_reporting_user`.
-
-[float]
-==== With a custom index
-
-If you are using Reporting with a custom index,
-the `xpack.reporting.index` setting should begin 
-with `.reporting-*`. The default {kib} system user has
-`all` privileges against the `.reporting-*` pattern of indices.
-
-[source,js]
-xpack.reporting.index: '.reporting-custom-index'
-
-If you use a different pattern for the `xpack.reporting.index` setting,
-you must create a custom role with appropriate access to the index, similar
-to the following:
-
-. Open the main menu, then click *Stack Management > Roles*.
-. Click *Create role*, then name the role `custom-reporting-user`.
-. Specify the custom index and assign it the `all` index privilege.
-. Open the main menu, then click *Stack Management > Users* and create a new user with
-the `kibana_system` role and the `custom-reporting-user` role.
-. Configure {kib} to use the new account:
-[source,js]
-elasticsearch.username: 'custom_kibana_system'
+. Open the main menu, then click *Stack Management > Users*, add a new user, and assign the user 
+your new `custom_reporting_user` role.
 
 [float]
 [[reporting-roles-user-api]]
 ==== With the user API
-This example uses the {ref}/security-api-put-user.html[user API] to create a user who has the
-`reporting_user` role and the `kibana_admin` role:
+This example uses the {ref}/security-api-put-role.html[role API] to create a role that
+grants the privilege to generate reports in *Canvas*, *Discover*, *Visualize Library*, and *Dashboard*.
+This role is meant to be granted to users in combination with other roles that grant read access
+to the data in {es}, and at least read access in the applications
+where they'll generate reports.
 
 [source, sh]
 ---------------------------------------------------------------
-POST /_security/user/reporter
+POST /_security/role/custom_reporting_user
 {
-  "password" : "x-pack-test-password",
-  "roles" : ["kibana_admin", "reporting_user"],
-  "full_name" : "Reporting User"
+  metadata: {},
+  elasticsearch: { cluster: [], indices: [], run_as: [] },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        dashboard: [
+          'generate_report', <1>
+          'download_csv_report' <2>
+        ],
+        discover: ['generate_report'], <3>
+        canvas: ['generate_report'], <4>
+        visualize: ['generate_report'], <5>
+      },
+      spaces: ['*'],
+    }
+  ]
 }
 ---------------------------------------------------------------
+// CONSOLE
+
+<1> Grants access to generate PNG and PDF reports in *Dashboard*.
+<2> Grants access to download CSV files from saved search panels in *Dashboard*.
+<3> Grants access to generate CSV reports from saved searches in *Discover*.
+<4> Grants access to generate PDF reports in *Canvas*.
+<5> Grants access to generate PNG and PDF reports in *Visualize Library*.
 
 [float]
-=== If you are using an external identity provider
+=== When using an external provider
 
 If you are using an external identity provider, such as
 LDAP or Active Directory, you can either assign
@@ -112,6 +134,35 @@ kibana_admin:
 reporting_user:
   - "cn=Bill Murray,dc=example,dc=com"
 --------------------------------------------------------------------------------
+
+[float]
+=== With a custom index
+
+If you are using a custom index,
+the `xpack.reporting.index` setting should begin 
+with `.reporting-*`. The default {kib} system user has
+`all` privileges against the `.reporting-*` pattern of indices.
+
+[source,js]
+xpack.reporting.index: '.reporting-custom-index'
+
+If you use a different pattern for the `xpack.reporting.index` setting,
+you must create a custom `kibana_system` user with appropriate access to the index, similar
+to the following:
+
+. Open the main menu, then click *Stack Management > Roles*.
+. Click *Create role*, then name the role `custom-reporting-user`.
+. Specify the custom index and assign it the `all` index privilege.
+. Open the main menu, then click *Stack Management > Users* and create a new user with
+the `kibana_system` role and the `custom-reporting-user` role.
+. Configure {kib} to use the new account:
+[source,js]
+elasticsearch.username: 'custom_kibana_system'
+
+[NOTE]
+============================================================================
+Setting a custom index for *Reporting* is not supported in the next major version of Kibana.
+============================================================================
 
 [role="xpack"]
 [[securing-reporting]]

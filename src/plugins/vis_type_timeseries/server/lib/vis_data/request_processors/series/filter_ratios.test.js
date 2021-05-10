@@ -8,7 +8,7 @@
 
 import { ratios } from './filter_ratios';
 
-describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => {
+describe('ratios(req, panel, series, esQueryConfig, seriesIndex)', () => {
   let panel;
   let series;
   let req;

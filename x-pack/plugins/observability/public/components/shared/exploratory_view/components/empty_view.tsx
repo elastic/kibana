@@ -6,27 +6,89 @@
  */
 
 import React from 'react';
-import { EuiImage } from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { i18n } from '@kbn/i18n';
+import { LOADING_VIEW } from '../series_builder/series_builder';
+import { SeriesUrl } from '../types';
 
-export function EmptyView() {
-  const {
-    services: { http },
-  } = useKibana();
+export function EmptyView({
+  loading,
+  height,
+  series,
+}: {
+  loading: boolean;
+  height: string;
+  series: SeriesUrl;
+}) {
+  const { dataType, reportType, reportDefinitions } = series ?? {};
+
+  let emptyMessage = EMPTY_LABEL;
+
+  if (dataType) {
+    if (reportType) {
+      if (isEmpty(reportDefinitions)) {
+        emptyMessage = CHOOSE_REPORT_DEFINITION;
+      }
+    } else {
+      emptyMessage = SELECT_REPORT_TYPE_BELOW;
+    }
+  } else {
+    emptyMessage = SELECTED_DATA_TYPE_FOR_REPORT;
+  }
 
   return (
-    <Wrapper>
-      <EuiImage
-        alt="Visulization"
-        url={http!.basePath.prepend(`/plugins/observability/assets/kibana_dashboard_light.svg`)}
-      />
+    <Wrapper height={height}>
+      {loading && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          style={{
+            top: 'initial',
+          }}
+        />
+      )}
+      <EuiSpacer />
+      <FlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem>
+          <EuiText>{loading ? LOADING_VIEW : emptyMessage}</EuiText>
+        </EuiFlexItem>
+      </FlexGroup>
     </Wrapper>
   );
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ height: string }>`
   text-align: center;
-  opacity: 0.4;
-  height: 550px;
+  height: ${(props) => props.height};
+  position: relative;
 `;
+
+const FlexGroup = styled(EuiFlexGroup)`
+  height: 100%;
+`;
+
+export const EMPTY_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.emptyview', {
+  defaultMessage: 'Nothing to display.',
+});
+
+export const CHOOSE_REPORT_DEFINITION = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.emptyReportDefinition',
+  {
+    defaultMessage: 'Select a report type to create a visualization.',
+  }
+);
+
+export const SELECT_REPORT_TYPE_BELOW = i18n.translate(
+  'xpack.observability.expView.seriesBuilder.selectReportType.empty',
+  {
+    defaultMessage: 'Select a report type to create a visualization.',
+  }
+);
+
+const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
+  'xpack.observability.expView.reportType.selectDataType',
+  { defaultMessage: 'Select a data type to create a visualization.' }
+);

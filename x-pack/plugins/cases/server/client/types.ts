@@ -18,7 +18,7 @@ import {
   GetFieldsResponse,
   CaseUserActionsResponse,
   User,
-} from '../../common/api';
+} from '../../common';
 import { AlertInfo } from '../common';
 import {
   CaseConfigureServiceSetup,

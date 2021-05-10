@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { DataSeries } from '../../types';
-import { FieldLabels } from '../constants/constants';
-import { OperationType } from '../../../../../../../lens/public';
+import { ConfigProps, DataSeries } from '../../types';
+import { FieldLabels } from '../constants';
+import { buildExistsFilter } from '../utils';
+import { MONITORS_DURATION_LABEL } from '../constants/labels';
 
-interface Props {
-  seriesId: string;
-}
-
-export function getMonitorDurationConfig({ seriesId }: Props): DataSeries {
+export function getMonitorDurationConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
     id: seriesId,
     reportType: 'uptime-duration',
@@ -22,12 +19,14 @@ export function getMonitorDurationConfig({ seriesId }: Props): DataSeries {
     xAxisColumn: {
       sourceField: '@timestamp',
     },
-    yAxisColumn: {
-      operationType: 'average' as OperationType,
-      sourceField: 'monitor.duration.us',
-      label: 'Monitor duration (ms)',
-    },
-    hasMetricType: true,
+    yAxisColumns: [
+      {
+        operationType: 'average',
+        sourceField: 'monitor.duration.us',
+        label: MONITORS_DURATION_LABEL,
+      },
+    ],
+    hasOperationType: true,
     defaultFilters: ['monitor.type', 'observer.geo.name', 'tags'],
     breakdowns: [
       'observer.geo.name',
@@ -37,12 +36,15 @@ export function getMonitorDurationConfig({ seriesId }: Props): DataSeries {
       'tags',
       'url.port',
     ],
-    filters: [],
+    filters: [...buildExistsFilter('summary.up', indexPattern)],
     reportDefinitions: [
       {
-        field: 'monitor.id',
+        field: 'monitor.name',
+      },
+      {
+        field: 'url.full',
       },
     ],
-    labels: { ...FieldLabels },
+    labels: { ...FieldLabels, 'monitor.duration.us': MONITORS_DURATION_LABEL },
   };
 }

@@ -60,7 +60,7 @@ export const Groups: React.FC = () => {
     messages[0].description = (
       <EuiButtonTo
         to={getGroupPath(newGroup.id)}
-        color="primary"
+        color="secondary"
         data-test-subj="NewGroupManageButton"
       >
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action', {

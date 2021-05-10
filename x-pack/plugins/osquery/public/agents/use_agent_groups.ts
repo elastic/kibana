@@ -6,7 +6,9 @@
  */
 import { useState } from 'react';
 import { useQuery } from 'react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
+import { useAgentPolicies } from './use_agent_policies';
 
 import {
   OsqueryQueries,
@@ -23,8 +25,12 @@ interface UseAgentGroups {
 }
 
 export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAgentGroups) => {
-  const { data } = useKibana().services;
+  const {
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
+  const { agentPoliciesLoading, agentPolicyById } = useAgentPolicies(osqueryPolicies);
   const [platforms, setPlatforms] = useState<Group[]>([]);
   const [policies, setPolicies] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,14 +84,28 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
 
         setPlatforms(newPlatforms);
         setOverlap(newOverlap);
-        setPolicies(newPolicies);
+        setPolicies(
+          newPolicies.map((p) => {
+            const name = agentPolicyById[p.id]?.name ?? p.name;
+            return {
+              ...p,
+              name,
+            };
+          })
+        );
       }
 
       setLoading(false);
       setTotalCount(responseData.totalCount);
     },
     {
-      enabled: !osqueryPoliciesLoading,
+      enabled: !osqueryPoliciesLoading && !agentPoliciesLoading,
+      onError: (error) =>
+        toasts.addError(error as Error, {
+          title: i18n.translate('xpack.osquery.agent_groups.fetchError', {
+            defaultMessage: 'Error while fetching agent groups',
+          }),
+        }),
     }
   );
 

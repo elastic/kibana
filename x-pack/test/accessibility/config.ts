@@ -36,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/canvas'),
       require.resolve('./apps/security_solution'),
       require.resolve('./apps/ml_embeddables_in_dashboard'),
+      require.resolve('./apps/remote_clusters'),
     ],
 
     pageObjects,

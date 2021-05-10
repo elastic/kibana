@@ -19,18 +19,26 @@ export interface SourceOverrides {
   timestamp: string;
 }
 
-const transformAndQueryData = async (
-  client: ESSearchClient,
-  snapshotRequest: SnapshotRequest,
-  source: InfraSource,
-  sourceOverrides?: SourceOverrides
-) => {
-  const metricsApiRequest = await transformRequestToMetricsAPIRequest(
+const transformAndQueryData = async ({
+  client,
+  snapshotRequest,
+  source,
+  compositeSize,
+  sourceOverrides,
+}: {
+  client: ESSearchClient;
+  snapshotRequest: SnapshotRequest;
+  source: InfraSource;
+  compositeSize: number;
+  sourceOverrides?: SourceOverrides;
+}) => {
+  const metricsApiRequest = await transformRequestToMetricsAPIRequest({
     client,
     source,
     snapshotRequest,
-    sourceOverrides
-  );
+    compositeSize,
+    sourceOverrides,
+  });
   const metricsApiResponse = await queryAllData(client, metricsApiRequest);
   const snapshotResponse = transformMetricsApiResponseToSnapshotResponse(
     metricsApiRequest,
@@ -45,30 +53,46 @@ export const getNodes = async (
   client: ESSearchClient,
   snapshotRequest: SnapshotRequest,
   source: InfraSource,
-  logQueryFields: LogQueryFields
+  compositeSize: number,
+  logQueryFields?: LogQueryFields
 ) => {
   let nodes;
 
   if (snapshotRequest.metrics.find((metric) => metric.type === 'logRate')) {
     // *Only* the log rate metric has been requested
     if (snapshotRequest.metrics.length === 1) {
-      nodes = await transformAndQueryData(client, snapshotRequest, source, logQueryFields);
+      if (logQueryFields != null) {
+        nodes = await transformAndQueryData({
+          client,
+          snapshotRequest,
+          source,
+          compositeSize,
+          sourceOverrides: logQueryFields,
+        });
+      } else {
+        nodes = { nodes: [], interval: '60s' };
+      }
     } else {
       // A scenario whereby a single host might be shipping metrics and logs.
       const metricsWithoutLogsMetrics = snapshotRequest.metrics.filter(
         (metric) => metric.type !== 'logRate'
       );
-      const nodesWithoutLogsMetrics = await transformAndQueryData(
+      const nodesWithoutLogsMetrics = await transformAndQueryData({
         client,
-        { ...snapshotRequest, metrics: metricsWithoutLogsMetrics },
-        source
-      );
-      const logRateNodes = await transformAndQueryData(
-        client,
-        { ...snapshotRequest, metrics: [{ type: 'logRate' }] },
+        snapshotRequest: { ...snapshotRequest, metrics: metricsWithoutLogsMetrics },
         source,
-        logQueryFields
-      );
+        compositeSize,
+      });
+      const logRateNodes =
+        logQueryFields != null
+          ? await transformAndQueryData({
+              client,
+              snapshotRequest: { ...snapshotRequest, metrics: [{ type: 'logRate' }] },
+              source,
+              compositeSize,
+              sourceOverrides: logQueryFields,
+            })
+          : { nodes: [], interval: '60s' };
       // Merge nodes where possible - e.g. a single host is shipping metrics and logs
       const mergedNodes = nodesWithoutLogsMetrics.nodes.map((node) => {
         const logRateNode = logRateNodes.nodes.find(
@@ -91,7 +115,7 @@ export const getNodes = async (
       };
     }
   } else {
-    nodes = await transformAndQueryData(client, snapshotRequest, source);
+    nodes = await transformAndQueryData({ client, snapshotRequest, source, compositeSize });
   }
 
   return nodes;

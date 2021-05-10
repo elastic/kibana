@@ -15,12 +15,19 @@ import { transformSnapshotMetricsToMetricsAPIMetrics } from './transform_snapsho
 import { META_KEY } from './constants';
 import { SourceOverrides } from './get_nodes';
 
-export const transformRequestToMetricsAPIRequest = async (
-  client: ESSearchClient,
-  source: InfraSource,
-  snapshotRequest: SnapshotRequest,
-  sourceOverrides?: SourceOverrides
-): Promise<MetricsAPIRequest> => {
+export const transformRequestToMetricsAPIRequest = async ({
+  client,
+  source,
+  snapshotRequest,
+  compositeSize,
+  sourceOverrides,
+}: {
+  client: ESSearchClient;
+  source: InfraSource;
+  snapshotRequest: SnapshotRequest;
+  compositeSize: number;
+  sourceOverrides?: SourceOverrides;
+}): Promise<MetricsAPIRequest> => {
   const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, {
     ...snapshotRequest,
     filterQuery: parseFilterQuery(snapshotRequest.filterQuery),
@@ -36,7 +43,9 @@ export const transformRequestToMetricsAPIRequest = async (
       interval: timeRangeWithIntervalApplied.interval,
     },
     metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
-    limit: snapshotRequest.overrideCompositeSize ? snapshotRequest.overrideCompositeSize : 5,
+    limit: snapshotRequest.overrideCompositeSize
+      ? snapshotRequest.overrideCompositeSize
+      : compositeSize,
     alignDataToEnd: true,
   };
 

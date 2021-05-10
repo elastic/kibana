@@ -9,7 +9,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-} from '../../../../../../data_enhanced/common';
+} from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe, PaginationInputPaginated } from '../../..';
 import { TimelineEdges, TimelineEventsAllRequestOptions } from '../..';
 import { EqlSearchResponse } from '../../../../detection_engine/types';

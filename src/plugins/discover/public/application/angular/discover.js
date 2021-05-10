@@ -25,8 +25,6 @@ import { discoverResponseHandler } from './response_handler';
 import {
   getAngularModule,
   getHeaderActionMenuMounter,
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   getServices,
   getUrlTracker,
   redirectWhenMissing,
@@ -153,7 +151,6 @@ function discoverController($route, $scope) {
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
 
-  let inspectorRequest;
   let isChangingIndexPattern = false;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   const persistentSearchSource = savedSearch.searchSource;
@@ -417,13 +414,24 @@ function discoverController($route, $scope) {
 
     $scope.fetchStatus = fetchStatuses.LOADING;
     $scope.resultState = getResultState($scope.fetchStatus, $scope.rows);
-    logInspectorRequest({ searchSessionId });
+
+    inspectorAdapters.requests.reset();
     return $scope.volatileSearchSource
-      .fetch({
+      .fetch$({
         abortSignal: abortController.signal,
         sessionId: searchSessionId,
+        inspector: {
+          adapter: inspectorAdapters.requests,
+          title: i18n.translate('discover.inspectorRequestDataTitle', {
+            defaultMessage: 'data',
+          }),
+          description: i18n.translate('discover.inspectorRequestDescription', {
+            defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+          }),
+        },
       })
-      .then(onResults)
+      .toPromise()
+      .then(({ rawResponse }) => onResults(rawResponse))
       .catch((error) => {
         // If the request was aborted then no need to surface this error in the UI
         if (error instanceof Error && error.name === 'AbortError') return;
@@ -439,10 +447,6 @@ function discoverController($route, $scope) {
   };
 
   function onResults(resp) {
-    inspectorRequest
-      .stats(getResponseInspectorStats(resp, $scope.volatileSearchSource))
-      .ok({ json: resp });
-
     if (getTimeField() && !$scope.state.hideChart) {
       const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.volatileSearchSource.rawResponse = resp;
@@ -463,20 +467,12 @@ function discoverController($route, $scope) {
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
 
-  function logInspectorRequest({ searchSessionId = null } = { searchSessionId: null }) {
-    inspectorAdapters.requests.reset();
-    const title = i18n.translate('discover.inspectorRequestDataTitle', {
-      defaultMessage: 'data',
-    });
-    const description = i18n.translate('discover.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
-    });
-    inspectorRequest = inspectorAdapters.requests.start(title, { description, searchSessionId });
-    inspectorRequest.stats(getRequestInspectorStats($scope.volatileSearchSource));
-    $scope.volatileSearchSource.getSearchRequestBody().then((body) => {
-      inspectorRequest.json(body);
-    });
-  }
+  $scope.refreshAppState = async () => {
+    $scope.hits = [];
+    $scope.rows = [];
+    $scope.fieldCounts = {};
+    await refetch$.next();
+  };
 
   $scope.resetQuery = function () {
     history.push(

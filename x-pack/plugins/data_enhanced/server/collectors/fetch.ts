@@ -10,7 +10,7 @@ import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
-import { SEARCH_SESSION_TYPE } from '../../common';
+import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
 import { ReportedUsage } from './register';
 
 interface SessionPersistedTermsBucket {
