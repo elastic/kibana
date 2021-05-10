@@ -88,9 +88,13 @@ export const buildEventsHistogramQuery = ({
     };
 
     const missing =
-      stackByField != null && showAllOthersBucket.includes(stackByField) && includeMissingData
+      stackByField != null && showAllOthersBucket.includes(stackByField)
         ? {
-            missing: stackByField?.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
+            ...(includeMissingData
+              ? stackByField?.endsWith('.ip')
+                ? { missing: '0.0.0.0' }
+                : { missing: i18n.ALL_OTHERS }
+              : {}),
             ...(stackByField?.endsWith('.ip') ? { value_type: 'ip' } : {}),
           }
         : {};

@@ -450,7 +450,7 @@ export const expectedIpNotIncludingMissingDataDsl = {
   body: {
     aggregations: {
       eventActionGroup: {
-        terms: { field: 'source.ip', order: { _count: 'desc' }, size: 10 },
+        terms: { field: 'source.ip', order: { _count: 'desc' }, size: 10, value_type: 'ip' },
         aggs: {
           events: {
             date_histogram: {
