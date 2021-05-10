@@ -48,12 +48,17 @@ import { PackageService } from '../../../../../fleet/server/services';
 import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import {
+  ClusterClientMock,
+  ScopedClusterClientMock,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../src/core/server/elasticsearch/client/mocks';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockClusterClient = elasticsearchServiceMock.createClusterClient();
-  let mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+  let mockClusterClient: ClusterClientMock;
+  let mockScopedClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockPackageService: jest.Mocked<PackageService>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

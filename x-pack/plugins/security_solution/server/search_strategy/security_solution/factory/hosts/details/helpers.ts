@@ -108,10 +108,7 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
   };
 };
 
-export const formatHostItem = (bucket: HostAggEsItem | undefined): HostItem => {
-  if (bucket == null) {
-    return {};
-  }
+export const formatHostItem = (bucket: HostAggEsItem): HostItem => {
   return HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
