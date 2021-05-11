@@ -414,11 +414,6 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
-export interface HostMetaDataInfo {
-  metadata: HostMetadata;
-  query_strategy_version: MetadataQueryStrategyVersions;
-}
-
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;

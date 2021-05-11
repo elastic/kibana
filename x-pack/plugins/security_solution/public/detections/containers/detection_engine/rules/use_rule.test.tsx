@@ -15,12 +15,10 @@ jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useRule', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.clearAllMocks();
   });
 
   test('init', async () => {
