@@ -17,6 +17,8 @@ import { EuiPageHeader, EuiButton } from '@elastic/eui';
 import { Loading } from '../../../../shared/loading';
 import { SchemaAddFieldModal } from '../../../../shared/schema';
 
+import { SchemaCallouts } from '../components';
+
 import { Schema } from './';
 
 describe('Schema', () => {
@@ -41,7 +43,7 @@ describe('Schema', () => {
   it('renders', () => {
     const wrapper = shallow(<Schema />);
 
-    expect(wrapper.isEmptyRender()).toBe(false);
+    expect(wrapper.find(SchemaCallouts)).toHaveLength(1);
     // TODO: Check for schema components
   });
 
