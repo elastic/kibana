@@ -14,12 +14,13 @@ import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { Loading } from '../../../../shared/loading';
+import { SchemaAddFieldModal } from '../../../../shared/schema';
 
 import { SchemaLogic } from '../schema_logic';
 
 export const Schema: React.FC = () => {
-  const { loadSchema } = useActions(SchemaLogic);
-  const { dataLoading } = useValues(SchemaLogic);
+  const { loadSchema, addSchemaField, openModal, closeModal } = useActions(SchemaLogic);
+  const { dataLoading, isUpdating, isModalOpen } = useValues(SchemaLogic);
 
   useEffect(() => {
     loadSchema();
@@ -44,7 +45,12 @@ export const Schema: React.FC = () => {
               { defaultMessage: 'Update types' }
             )}
           </EuiButton>,
-          <EuiButton color="secondary">
+          <EuiButton
+            color="secondary"
+            disabled={isUpdating}
+            onClick={openModal}
+            data-test-subj="addSchemaFieldModalButton"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.schema.createSchemaFieldButtonLabel',
               { defaultMessage: 'Create a schema field' }
@@ -53,7 +59,12 @@ export const Schema: React.FC = () => {
         ]}
       />
       <FlashMessages />
-      <EuiPageContentBody>TODO</EuiPageContentBody>
+      <EuiPageContentBody>
+        TODO: Callouts, SchemaTable, EmptyState
+        {isModalOpen && (
+          <SchemaAddFieldModal addNewField={addSchemaField} closeAddFieldModal={closeModal} />
+        )}
+      </EuiPageContentBody>
     </>
   );
 };

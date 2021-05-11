@@ -15,15 +15,21 @@ import { shallow } from 'enzyme';
 import { EuiPageHeader, EuiButton } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
+import { SchemaAddFieldModal } from '../../../../shared/schema';
 
 import { Schema } from './';
 
 describe('Schema', () => {
   const values = {
     dataLoading: false,
+    isUpdating: false,
+    isModalOpen: false,
   };
   const actions = {
     loadSchema: jest.fn(),
+    addSchemaField: jest.fn(),
+    openModal: jest.fn(),
+    closeModal: jest.fn(),
   };
 
   beforeEach(() => {
@@ -60,6 +66,17 @@ describe('Schema', () => {
       .dive();
 
     expect(wrapper.find(EuiButton)).toHaveLength(2);
-    // TODO: Expect click actions
+
+    // TODO: Update button
+
+    wrapper.find('[data-test-subj="addSchemaFieldModalButton"]').simulate('click');
+    expect(actions.openModal).toHaveBeenCalled();
+  });
+
+  it('renders a schema add field modal', () => {
+    setMockValues({ isModalOpen: true });
+    const wrapper = shallow(<Schema />);
+
+    expect(wrapper.find(SchemaAddFieldModal)).toHaveLength(1);
   });
 });
