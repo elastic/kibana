@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ValidationErrorItem, AnySchema, CustomValidator } from 'joi';
+import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
 import { SchemaTypeError, ValidationError } from '../errors';
 // import { internals } from '../internals';
 import { Reference } from '../references';
@@ -72,8 +72,7 @@ export abstract class Type<V> {
 
     // Attach generic error handler only if it hasn't been attached yet since
     // only the last error handler is counted.
-    const schemaFlags = (schema.describe().flags as Record<string, any>) || {};
-    if (schemaFlags.error === undefined) {
+    if (schema.$_getFlag('error') === undefined) {
       schema = schema.error(([error]) => this.onError(error));
     }
 
@@ -109,15 +108,22 @@ export abstract class Type<V> {
     return undefined;
   }
 
-  private onError(error: SchemaTypeError | ValidationErrorItem): SchemaTypeError {
+  private onError(error: SchemaTypeError | ErrorReport): SchemaTypeError {
     if (error instanceof SchemaTypeError) {
       return error;
     }
 
-    const { context = {}, type, path, message } = error;
+    // `message` is only initialized once `toString` has been called (...)
+    // see https://github.com/sideway/joi/blob/master/lib/errors.js
+    const { local, code, path, message, value } = error;
     const convertedPath = path.map((entry) => entry.toString());
 
-    const errorHandleResult = this.handleError(type, context, convertedPath);
+    const context: Record<string, any> = {
+      ...local,
+      value,
+    };
+
+    const errorHandleResult = this.handleError(code, context, convertedPath);
     if (errorHandleResult instanceof SchemaTypeError) {
       return errorHandleResult;
     }
@@ -130,10 +136,10 @@ export abstract class Type<V> {
 
     // If error is produced by the custom validator, just extract source message
     // from context and wrap it into `SchemaTypeError` instance.
-    if (type === 'any.custom') {
+    if (code === 'any.custom') {
       return new SchemaTypeError(context.message, convertedPath);
     }
 
-    return new SchemaTypeError(message || type, convertedPath);
+    return new SchemaTypeError(message || code, convertedPath);
   }
 }
