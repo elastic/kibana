@@ -34,19 +34,22 @@ describe('Processor: Fail', () => {
       });
     });
     testBed.component.update();
-  });
 
-  test('prevents form submission if required message field is not provided', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
-      form,
+      actions: { addProcessor, addProcessorType },
     } = testBed;
-
-    // Open flyout to add new processor
+    // Open the processor flyout
     addProcessor();
 
     // Add type (the other fields are not visible until a type is selected)
     await addProcessorType(FAIL_TYPE);
+  });
+
+  test('prevents form submission if required message field is not provided', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -55,16 +58,12 @@ describe('Processor: Fail', () => {
     expect(form.getErrorsMessages()).toEqual(['A message is required.']);
   });
 
-  test('saves with default parameter values', async () => {
+  test('saves with required parameter value', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
+      actions: { saveNewProcessor },
       form,
     } = testBed;
 
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(FAIL_TYPE);
     // Add "message" value (required)
     form.setInputValue('messageField.input', 'Test Error Message');
     // Save the field
