@@ -133,6 +133,9 @@ export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 
 export const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
+  /**
+   * If specified the attachments found will be associated to a sub case instead of a case object
+   */
   subCaseId: rt.string,
 });
 

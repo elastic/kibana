@@ -28,29 +28,80 @@ import { push } from './push';
 import { update } from './update';
 
 interface CaseGet {
+  /**
+   * Case ID
+   */
   id: string;
+  /**
+   * Whether to include the attachments for a case in the response
+   */
   includeComments?: boolean;
+  /**
+   * Whether to include the attachments for all children of a case in the response
+   */
   includeSubCaseComments?: boolean;
 }
 
 interface CasePush {
+  /**
+   * The actions framework's client
+   */
   actionsClient: ActionsClient;
+  /**
+   * The ID of a case
+   */
   caseId: string;
+  /**
+   * The ID of an external system to push to
+   */
   connectorId: string;
 }
 
 /**
- * The public API for interacting with cases.
+ * API for interacting with the cases entities.
+ *
+ * @public
  */
 export interface CasesSubClient {
+  /**
+   * Creates a case.
+   */
   create(data: CasePostRequest): Promise<CaseResponse>;
+  /**
+   * Returns cases that match the search criteria.
+   *
+   * If the `owner` field is left empty then all the cases that the user has access to will be returned.
+   */
   find(params: CasesFindRequest): Promise<CasesFindResponse>;
+  /**
+   * Retrieves a single case with the specified ID.
+   */
   get(params: CaseGet): Promise<CaseResponse>;
+  /**
+   * Pushes a specific case to an external system.
+   */
   push(args: CasePush): Promise<CaseResponse>;
+  /**
+   * Update the specified cases with the passed in values.
+   */
   update(cases: CasesPatchRequest): Promise<CasesResponse>;
+  /**
+   * Delete a case and all its comments.
+   *
+   * @params ids an array of case IDs to delete
+   */
   delete(ids: string[]): Promise<void>;
+  /**
+   * Retrieves all the tags across all cases the user making the request has access to.
+   */
   getTags(params: AllTagsFindRequest): Promise<string[]>;
+  /**
+   * Retrieves all the reporters across all accessible cases.
+   */
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
+  /**
+   * Retrieves the case IDs given a single alert ID
+   */
   getCaseIDsByAlertID(params: CaseIDsByAlertIDParams): Promise<string[]>;
 }
 

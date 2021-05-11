@@ -39,18 +39,39 @@ import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
 export interface FindArgs {
+  /**
+   * The case ID for finding associated attachments
+   */
   caseID: string;
+  /**
+   * Optional parameters for filtering the returned attachments
+   */
   queryParams?: FindQueryParams;
 }
 
 export interface GetAllArgs {
+  /**
+   * The case ID to retrieve all attachments for
+   */
   caseID: string;
+  /**
+   * Optionally include the attachments associated with a sub case
+   */
   includeSubCaseComments?: boolean;
+  /**
+   * If included the case ID will be ignored and the attachments will be retrieved from the specified ID of the sub case
+   */
   subCaseID?: string;
 }
 
 export interface GetArgs {
+  /**
+   * The ID of the case to retrieve an attachment from
+   */
   caseID: string;
+  /**
+   * The ID of the attachment to retrieve
+   */
   attachmentID: string;
 }
 

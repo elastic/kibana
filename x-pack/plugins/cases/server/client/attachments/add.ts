@@ -302,7 +302,13 @@ async function getCombinedCase({
  * The arguments needed for creating a new attachment to a case.
  */
 export interface AddArgs {
+  /**
+   * The case ID that this attachment will be associated with
+   */
   caseId: string;
+  /**
+   * The attachment values.
+   */
   comment: CommentRequest;
 }
 

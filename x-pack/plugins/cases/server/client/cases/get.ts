@@ -38,7 +38,13 @@ import {
 import { CaseService } from '../../services';
 
 export interface CaseIDsByAlertIDParams {
+  /**
+   * The alert ID to search for
+   */
   alertID: string;
+  /**
+   * The filtering options when searching for associated cases.
+   */
   options: CasesByAlertIDRequest;
 }
 

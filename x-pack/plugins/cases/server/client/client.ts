@@ -15,6 +15,9 @@ import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 import { createStatsSubClient, StatsSubClient } from './stats/client';
 
+/**
+ * Client wrapper that contains accessor methods for individual entities within the cases system.
+ */
 export class CasesClient {
   private readonly _casesClientInternal: CasesClientInternal;
   private readonly _cases: CasesSubClient;
@@ -34,18 +37,32 @@ export class CasesClient {
     this._stats = createStatsSubClient(args);
   }
 
+  /**
+   * Retrieves an interface for interacting with cases entities.
+   */
   public get cases() {
     return this._cases;
   }
 
+  /**
+   * Retrieves an interface for interacting with attachments (comments) entities.
+   */
   public get attachments() {
     return this._attachments;
   }
 
+  /**
+   * Retrieves an interface for interacting with the user actions associated with the plugin entities.
+   */
   public get userActions() {
     return this._userActions;
   }
 
+  /**
+   * Retrieves an interface for interacting with the case as a connector entities.
+   *
+   * Currently this functionality is disabled and will throw an error if this function is called.
+   */
   public get subCases() {
     if (!ENABLE_CASE_CONNECTOR) {
       throw new Error('The case connector feature is disabled');
@@ -53,10 +70,16 @@ export class CasesClient {
     return this._subCases;
   }
 
+  /**
+   * Retrieves an interface for interacting with the configuration of external connectors for the plugin entities.
+   */
   public get configure() {
     return this._configure;
   }
 
+  /**
+   * Retrieves an interface for retrieving statistics related to the cases entities.
+   */
   public get stats() {
     return this._stats;
   }

@@ -69,14 +69,31 @@ export interface InternalConfigureSubClient {
 
 /**
  * This is the public API for interacting with the connector configuration for cases.
+ *
+ * @public
  */
 export interface ConfigureSubClient {
+  /**
+   * Retrieves the external connector configuration for a particular case owner.
+   */
   get(params: GetConfigureFindRequest): Promise<CasesConfigureResponse | {}>;
+  /**
+   * Retrieves the valid external connectors supported by the cases plugin.
+   */
   getConnectors(): Promise<FindActionResult[]>;
+  /**
+   * Updates a particular configuration with new values.
+   *
+   * @param configurationId the ID of the configuration to update
+   * @param configurations the new configuration parameters
+   */
   update(
     configurationId: string,
     configurations: CasesConfigurePatch
   ): Promise<CasesConfigureResponse>;
+  /**
+   * Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
+   */
   create(configuration: CasesConfigureRequest): Promise<CasesConfigureResponse>;
 }
 

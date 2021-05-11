@@ -13,8 +13,13 @@ import { constructQueryOptions, getAuthorizationFilter } from '../utils';
 
 /**
  * Statistics API contract.
+ *
+ * @public
  */
 export interface StatsSubClient {
+  /**
+   * Retrieves the total number of open, closed, and in-progress cases.
+   */
   getStatusTotalsByType(): Promise<CasesStatusResponse>;
 }
 

@@ -19,13 +19,41 @@ import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
 import { find, FindArgs, get, getAll, GetAllArgs, GetArgs } from './get';
 import { update, UpdateArgs } from './update';
 
+/**
+ * API for interacting with the attachments to a case.
+ *
+ * @public
+ */
 export interface AttachmentsSubClient {
+  /**
+   * Adds an attachment to a case.
+   */
   add(params: AddArgs): Promise<CaseResponse>;
+  /**
+   * Deletes all attachments associated with a single case.
+   */
   deleteAll(deleteAllArgs: DeleteAllArgs): Promise<void>;
+  /**
+   * Deletes a single attachment for a specific case.
+   */
   delete(deleteArgs: DeleteArgs): Promise<void>;
+  /**
+   * Retrieves all comments matching the search criteria.
+   */
   find(findArgs: FindArgs): Promise<CommentsResponse>;
+  /**
+   * Gets all attachments for a single case.
+   */
   getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
+  /**
+   * Retrieves a single attachment for a case.
+   */
   get(getArgs: GetArgs): Promise<CommentResponse>;
+  /**
+   * Updates a specific attachment.
+   *
+   * The request must include all fields for the attachment. Even the fields that are not changing.
+   */
   update(updateArgs: UpdateArgs): Promise<CaseResponse>;
 }
 

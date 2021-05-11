@@ -55,7 +55,12 @@ export interface PluginsStart {
  * @public
  */
 export interface PluginsStartContract {
-  getCasesClientWithRequestAndContext(request: KibanaRequest): Promise<CasesClient>;
+  /**
+   * Returns a client which can be used to interact with the cases backend entities.
+   *
+   * @param request a KibanaRequest
+   */
+  getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
 }
 
 export class CasePlugin {
@@ -127,19 +132,16 @@ export class CasePlugin {
 
     const client = core.elasticsearch.client;
 
-    const getCasesClientWithRequestAndContext = async (
-      request: KibanaRequest
-    ): Promise<CasesClient> => {
+    const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
       return this.clientFactory.create({
         request,
-        // TODO: test that this works
         scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
       });
     };
 
     return {
-      getCasesClientWithRequestAndContext,
+      getCasesClientWithRequest,
     };
   }
 

@@ -27,22 +27,48 @@ import { defaultPage, defaultPerPage } from '../../routes/api';
 import { update } from './update';
 
 interface FindArgs {
+  /**
+   * The case ID for finding associated sub cases
+   */
   caseID: string;
+  /**
+   * Options for filtering the returned sub cases
+   */
   queryParams: SubCasesFindRequest;
 }
 
 interface GetArgs {
+  /**
+   * A flag to include the attachments with the results
+   */
   includeComments: boolean;
+  /**
+   * The ID of the sub case to retrieve
+   */
   id: string;
 }
 
 /**
  * The API routes for interacting with sub cases.
+ *
+ * @public
  */
 export interface SubCasesClient {
+  /**
+   * Deletes the specified entities and their attachments.
+   */
   delete(ids: string[]): Promise<void>;
+  /**
+   * Retrieves the sub cases matching the search criteria.
+   */
   find(findArgs: FindArgs): Promise<SubCasesFindResponse>;
+  /**
+   * Retrieves a single sub case.
+   */
   get(getArgs: GetArgs): Promise<SubCaseResponse>;
+  /**
+   * Updates the specified sub cases to the new values included in the request.
+   */
   update(subCases: SubCasesPatchRequest): Promise<SubCasesResponse>;
 }
 

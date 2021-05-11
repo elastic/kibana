@@ -16,8 +16,17 @@ import { OWNER_FIELD } from './constants';
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
 const CasesConfigureBasicRt = rt.type({
+  /**
+   * The external connector
+   */
   connector: CaseConnectorRt,
+  /**
+   * Whether to close the case after it has been synced with the external system
+   */
   closure_type: ClosureTypeRT,
+  /**
+   * The plugin owner that manages this configuration
+   */
   owner: rt.string,
 });
 
@@ -53,6 +62,10 @@ export const CaseConfigureResponseRt = rt.intersection([
 ]);
 
 export const GetConfigureFindRequestRt = rt.partial({
+  /**
+   * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
+   * that the user has permissions to access
+   */
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 

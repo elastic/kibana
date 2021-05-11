@@ -10,11 +10,25 @@ import { CasesClientArgs } from '../types';
 import { get } from './get';
 
 export interface UserActionGet {
+  /**
+   * The ID of the case
+   */
   caseId: string;
+  /**
+   * If specified then a sub case will be used for finding all the user actions
+   */
   subCaseId?: string;
 }
 
+/**
+ * API for interacting the actions performed by a user when interacting with the cases entities.
+ *
+ * @public
+ */
 export interface UserActionsSubClient {
+  /**
+   * Retrieves all user actions for a particular case.
+   */
   getAll(clientArgs: UserActionGet): Promise<CaseUserActionsResponse>;
 }
 
