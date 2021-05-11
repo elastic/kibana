@@ -26,7 +26,8 @@ export type {
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
 } from './authentication';
-export type { CheckPrivilegesPayload, AuthorizationServiceSetup } from './authorization';
+export type { CheckPrivilegesPayload } from './authorization';
+export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
 export { LegacyAuditLogger, AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';

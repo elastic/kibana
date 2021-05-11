@@ -32,6 +32,10 @@ export const checkFileUploadPrivileges = async ({
     return { hasImportPermission: true };
   }
 
+  if (!request.auth.isAuthenticated) {
+    return { hasImportPermission: false };
+  }
+
   const checkPrivilegesPayload: CheckPrivilegesPayload = {
     elasticsearch: {
       cluster: checkHasManagePipeline ? ['manage_pipeline'] : [],

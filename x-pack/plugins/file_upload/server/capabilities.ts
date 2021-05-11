@@ -10,7 +10,7 @@ import { checkFileUploadPrivileges } from './check_privileges';
 import { StartDeps } from './types';
 
 export const setupCapabilities = (
-  core: Pick<CoreSetup<StartDeps, unknown>, 'capabilities' | 'getStartServices'>
+  core: Pick<CoreSetup<StartDeps>, 'capabilities' | 'getStartServices'>
 ) => {
   core.capabilities.registerProvider(() => {
     return {
@@ -21,8 +21,7 @@ export const setupCapabilities = (
   });
 
   core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
-    const isAnonymousRequest = !request.route.options.authRequired;
-    if (useDefaultCapabilities || isAnonymousRequest) {
+    if (useDefaultCapabilities) {
       return capabilities;
     }
     const [, { security }] = await core.getStartServices();

@@ -133,7 +133,9 @@ describe('setupCapabilities', () => {
           `);
 
     expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledTimes(1);
+    expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledWith(request);
     expect(security.authz.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledTimes(1);
+    expect(security.authz.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(request);
   });
 
   it('registers a capabilities switcher that enables capabilities for privileged users', async () => {
@@ -176,13 +178,19 @@ describe('setupCapabilities', () => {
           `);
 
     expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledTimes(1);
+    expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledWith(request);
     expect(security.authz.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledTimes(1);
+    expect(security.authz.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(request);
   });
 
-  it('registers a capabilities switcher that skips privilege check for anonymous routes', async () => {
+  it('registers a capabilities switcher that disables capabilities for unauthenticated requests', async () => {
     const coreSetup = coreMock.createSetup();
     const security = securityMock.createStart();
     security.authz.mode.useRbacForRequest.mockReturnValue(true);
+    const mockCheckPrivileges = jest
+      .fn()
+      .mockRejectedValue(new Error('this should not have been called'));
+    security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(mockCheckPrivileges);
     coreSetup.getStartServices.mockResolvedValue([
       (undefined as unknown) as CoreStart,
       { security },
@@ -202,20 +210,17 @@ describe('setupCapabilities', () => {
       },
     } as Capabilities;
 
-    const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
+    const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated: false } });
 
     await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(`
             Object {
-              "catalogue": Object {},
               "fileUpload": Object {
-                "show": true,
+                "show": false,
               },
-              "management": Object {},
-              "navLinks": Object {},
             }
           `);
 
-    expect(security.authz.mode.useRbacForRequest).not.toHaveBeenCalled();
+    expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledTimes(1);
     expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
   });
 
@@ -256,6 +261,7 @@ describe('setupCapabilities', () => {
           `);
 
     expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledTimes(1);
+    expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledWith(request);
     expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
   });
 });
