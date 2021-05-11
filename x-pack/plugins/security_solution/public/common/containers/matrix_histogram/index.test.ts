@@ -71,9 +71,7 @@ describe('useMatrixHistogramCombined', () => {
 
   it('should update request when props has changed', async () => {
     const localProps = { ...props };
-    const { rerender } = renderHook(() => useMatrixHistogramCombined(localProps), {
-      wrapper: TestProviders,
-    });
+    const { rerender } = renderHook(() => useMatrixHistogramCombined(localProps));
 
     localProps.stackByField = 'event.action';
 
@@ -88,9 +86,7 @@ describe('useMatrixHistogramCombined', () => {
 
   it('should do two request when stacking by ip field', async () => {
     const localProps = { ...props, stackByField: 'source.ip' };
-    renderHook(() => useMatrixHistogramCombined(localProps), {
-      wrapper: TestProviders,
-    });
+    renderHook(() => useMatrixHistogramCombined(localProps));
 
     const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
 
@@ -100,9 +96,7 @@ describe('useMatrixHistogramCombined', () => {
   });
 
   it('returns a memoized value', async () => {
-    const { result, rerender } = renderHook(() => useMatrixHistogramCombined(props), {
-      wrapper: TestProviders,
-    });
+    const { result, rerender } = renderHook(() => useMatrixHistogramCombined(props));
 
     const result1 = result.current[1];
     act(() => rerender());
