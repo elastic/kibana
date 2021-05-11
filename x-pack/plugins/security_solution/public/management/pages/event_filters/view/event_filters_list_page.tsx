@@ -139,6 +139,7 @@ export const EventFiltersListPage = memo(() => {
       onDeleteException: handleItemDelete,
       showModified: true,
       showName: true,
+      'data-test-subj': `eventFilterCard`,
     }),
     [handleItemDelete, handleItemEdit]
   );
@@ -201,6 +202,7 @@ export const EventFiltersListPage = memo(() => {
         loading={isLoading}
         pagination={pagination}
         contentClassName="event-filter-container"
+        data-test-subj="eventFiltersContent"
         noItemsMessage={
           !doesDataExist && (
             <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
