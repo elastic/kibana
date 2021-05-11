@@ -1,10 +1,11 @@
 [[create-a-dashboard-of-panels-with-ecommerce-data]]
-== Tutorial: Time series analysis with Lens
+== Time series analysis with Lens
 
-The tutorial will use sample data from the perspective of a shop owner looking
+The tutorial uses sample data from the perspective of a shop owner looking
 at sales trends, but this type of dashboard works on any type of data.
 To create dashboard panels of the data, open the *Lens* visualization builder, then  
 create the visualization panels that best display the data.
+Before using this tutorial, you should be familiar with the <<kibana-concepts-analysts>>.
 
 [role="screenshot"]
 image::images/lens_advanced_result.png[Dashboard view]
@@ -14,7 +15,7 @@ image::images/lens_advanced_result.png[Dashboard view]
 === Add the data and create the dashboard
 
 If you are working with your own data, you should already have an <<index-patterns, index pattern>>.
-To install the sample logs that contain fake sales data:
+To install the sample sales data:
 
 . From the {kib} *Home* page, click *Try our sample data*.
 
@@ -28,13 +29,11 @@ Then create a new dashboard:
 
 . Set the <<set-time-filter,time filter>> to *Last 30 days*.
 
-You don't need to save the dashboard while it's in draft mode.
-
 [float]
 [[open-and-set-up-lens-advanced]]
 === Open and set up Lens
 
-*Lens* is designed to help you quickly build visualizations for your dashboard, as shown in the previous tutorial, while providing support for advanced usage as well.
+*Lens* is designed to help you quickly build visualizations for your dashboard, as shown in <<create-a-dashboard-of-panels-with-web-server-data,Build your first dashboard>>, while providing support for advanced usage as well.
 
 Open the *Lens* editor, then make sure the correct fields appear.
 
@@ -46,24 +45,21 @@ Open the *Lens* editor, then make sure the correct fields appear.
 [[custom-time-interval]]
 === View a date histogram with a custom time interval
 
-Most *Lens* users use the automatic date histogram interval, but sometimes you want more control over the
-interval. The automatic date histogram will not show a per-second metric unless your time range is 2 minutes,
-and the largest range possible without making changes is a per-second metric on a 5 minute time range.
-The maximum difference between the time range and time interval is controlled by the <<histogram-maxbars, `histogram:maxBars`>>
-advanced setting.
+It is common to use the automatic date histogram interval, but sometimes you want a larger or smaller
+interval. *Lens* only lets you choose the minimum time interval, not the exact time interval, for
+performance reasons. The performance limit is controlled by the <<histogram-maxbars, `histogram:maxBars`>>
+advanced setting and the overall time range. To see hourly sales over a 30 day time period, choose
+one of these options:
 
-*Lens* users have four options for viewing a small time interval:
+* View less than 30 days at a time, then use the time picker to select each day separately.
 
-. If approximation is okay, *Lens* offers a function to *normalize unit*, for example "per second".
+* Increase `histogram:maxBars` from 100 to at least 720, which the number of hours in 30 days.
+This affects all visualizations and can reduce performance.
 
-. You can set a minimum interval that is lower than the automatic interval, but is still affected by the `histogram:maxBars` setting.
+* If approximation is okay, use the *Normalize unit* option. This can convert *Average sales per 12 hours*
+into *Average sales per 12 hours (per hour)* by dividing the number of hours.
 
-. With the automatic date histogram, you will see a smaller interval by reducing the overall time range.
-
-. You can change the {kib} advanced settings, which will affect all visualizations
-
-To determine the order per hour for a 30 day period, you will need to choose one of these options. For the
-sample data, use the *normalize unit* function because approximation is okay:
+For the sample data, approximation is okay. To use the *Normalize unit* option:
 
 . Set the <<set-time-filter,time filter>> to *Last 30 days*.
 
@@ -98,12 +94,12 @@ image::images/lens_advanced_1_2.png[Orders per day]
 [[add-a-data-layer-advanced]]
 === Monitor multiple series within a date histogram
 
-Often it is required to monitor multiple series within a time interval. These series can be have similar configurations with few changes between one and another.
-*Lens* will copy of a function when you drag it to the *Drop a field or click to add*
-button within the same group, or when you drag to the *Duplicate* label on a different group.
-Dragging and dropping can also be done fully by keyboard.
+It is often required to monitor multiple series within a time interval. These series can be have similar configurations with few changes between one and another.
+*Lens* copies a function when you drag and drop it to the *Drop a field or click to add*
+field within the same group, or when you drag and drop to the *Duplicate* field on a different group.
+You can also drag and drop using your keyboard. For more information, refer to <<drag-and-drop-keyboard-navigation,Create visualization panels with keyboard navigation>>.
 
-To quickly create many copies of a percentile metric which will show distribution of price over time:
+To quickly create many copies of a percentile metric that shows distribution of price over time:
 
 . From the *Chart Type* dropdown, select *Line*.
 +
@@ -150,7 +146,7 @@ image::images/lens_advanced_2_3.png[Percentiles for product prices chart]
 ==== Multiple chart types or index patterns in one visualization
 
 You can add multiple metrics to a single chart type, but if you want to overlay
-multiple chart types or index patterns, use a second layer. When building layered charts
+multiple chart types or index patterns, use a second layer. When building layered charts,
 it is important to match the data on the horizontal axis so that it uses the same
 scale. To add a line chart layer on top of an existing chart:
 
@@ -200,7 +196,7 @@ The visualization is done, but the legend uses a lot of space. Change the legend
 [[percentage-stacked-area]]
 === Compare the change in percentage over time
 
-By default *Lens* shows *date histograms* using a stacked chart visualization, which helps understand how distinct sets of documents perform over time. Sometimes it is useful to understand how the distributions of these sets change over time.
+By default, *Lens* shows *date histograms* using a stacked chart visualization, which helps understand how distinct sets of documents perform over time. Sometimes it is useful to understand how the distributions of these sets change over time.
 Combine *filters* and *date histogram* functions to see the change over time in specific
 sets of documents. To view this as a percentage, use a *stacked percentage* bar or area chart.
 
@@ -342,7 +338,7 @@ image::images/lens_advanced_6_1.png[Table with daily customers by continent conf
 [discrete]
 === Save the dashboard
 
-By default the dashboard will attempts to match the palette across panels, but in this case there's no need for that, so it can be disabled.
+By default the dashboard attempts to match the palette across panels, but in this case there's no need for that, so it can be disabled.
 
 [role="screenshot"]
 image::images/lens_advanced_7_1.png[Disable palette sync in dashboard]
