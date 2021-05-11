@@ -17,7 +17,7 @@ import {
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceStart } from '../../../spaces/server';
-import { EVENT_LOG_ACTIONS } from '../plugin';
+import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
