@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
@@ -34,6 +35,8 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
   const [localColorStops, setLocalColorStops] = useState<Array<{ color: string; stop: string }>>(
     colorStops.map(({ color, stop }) => ({ color, stop: String(stop) }))
   );
+
+  const [onBlurOption, setOnBlur] = useState('row');
 
   useDebounceWithOptions(
     () => {
@@ -58,31 +61,35 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
           <EuiFlexItem
             data-test-subj={`lnsDatatable_dynamicColoring_custom_stops`}
             onBlur={(e: FocusEvent<HTMLDivElement>) => {
-              // sort the stops when the focus leaves the block container
-              const shouldSort = localColorStops.some(({ stop }, index) => {
-                if (index === 0) {
-                  return stop > localColorStops[index + 1].stop;
-                }
-                if (index === localColorStops.length - 1) {
-                  return stop < localColorStops[index - 1].stop;
-                }
-                return (
-                  stop < localColorStops[index - 1].stop || stop > localColorStops[index + 1].stop
+              if (onBlurOption === 'block') {
+                // sort the stops when the focus leaves the block container
+                const shouldSort = localColorStops.some(({ stop }, index) => {
+                  if (index === 0) {
+                    return stop > localColorStops[index + 1].stop;
+                  }
+                  if (index === localColorStops.length - 1) {
+                    return stop < localColorStops[index - 1].stop;
+                  }
+                  return (
+                    stop < localColorStops[index - 1].stop || stop > localColorStops[index + 1].stop
+                  );
+                });
+                const isFocusStillInContent = (e.currentTarget as Node)?.contains(
+                  e.relatedTarget as Node
                 );
-              });
-              const isFocusStillInContent = (e.currentTarget as Node)?.contains(
-                e.relatedTarget as Node
-              );
-              if (shouldSort && !isFocusStillInContent) {
-                setLocalColorStops(
-                  [...localColorStops].sort(
-                    ({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB)
-                  )
-                );
+                if (shouldSort && !isFocusStillInContent) {
+                  setLocalColorStops(
+                    [...localColorStops].sort(
+                      ({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB)
+                    )
+                  );
+                }
               }
             }}
           >
             {localColorStops.map(({ color, stop }, index) => {
+              const prevStopValue = Number(localColorStops[index - 1]?.stop ?? -Infinity);
+              const nextStopValue = Number(localColorStops[index + 1]?.stop ?? Infinity);
               const errorMessages = [];
               // do not show color error messages if number field is already in error
               if (!isValidColor(color) && errorMessages.length === 0) {
@@ -99,6 +106,23 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                   isInvalid={Boolean(errorMessages.length)}
                   error={errorMessages[0]}
                   data-test-subj={`lnsDatatable_dynamicColoring_stop_row_${index}`}
+                  onBlur={(e: FocusEvent<HTMLDivElement>) => {
+                    if (onBlurOption === 'row') {
+                      // sort the stops when the focus leaves the row container
+                      const shouldSort =
+                        Number(stop) > nextStopValue || prevStopValue > Number(stop);
+                      const isFocusStillInContent = (e.currentTarget as Node)?.contains(
+                        e.relatedTarget as Node
+                      );
+                      if (shouldSort && !isFocusStillInContent) {
+                        setLocalColorStops(
+                          [...localColorStops].sort(
+                            ({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB)
+                          )
+                        );
+                      }
+                    }
+                  }}
                 >
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
@@ -115,6 +139,21 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                             stop: newStopString,
                           };
                           setLocalColorStops(newColorStops);
+                        }}
+                        onBlur={() => {
+                          if (onBlurOption === 'input') {
+                            // sort the stops when the focus leaves the row container
+                            const shouldSort =
+                              Number(stop) > nextStopValue || prevStopValue > Number(stop);
+                            if (shouldSort) {
+                              setLocalColorStops(
+                                [...localColorStops].sort(
+                                  ({ stop: stopA }, { stop: stopB }) =>
+                                    Number(stopA) - Number(stopB)
+                                )
+                              );
+                            }
+                          }
                         }}
                         append={rangeType === 'percent' ? '%' : undefined}
                         aria-label={i18n.translate(
@@ -224,6 +263,33 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
           </EuiFlexItem>
           <EuiFlexItem />
         </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiFormRow label={'Sort on blur:'} display="rowCompressed">
+        <EuiButtonGroup
+          isFullWidth
+          legend={'Sort on blur:'}
+          data-test-subj="lnsDatatable_dynamicColoring_custom_range_groups"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `input`,
+              label: 'on Input',
+            },
+            {
+              id: `row`,
+              label: 'on Row',
+            },
+            {
+              id: `block`,
+              label: 'on Block',
+            },
+          ]}
+          idSelected={onBlurOption}
+          onChange={(id) => {
+            // TODO: remove this once chosen the onBlur option
+            setOnBlur(id);
+          }}
+        />
       </EuiFormRow>
     </EuiFlexItem>
   );
