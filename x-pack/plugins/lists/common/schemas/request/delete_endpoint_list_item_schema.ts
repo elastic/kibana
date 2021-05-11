@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { id } from '@kbn/securitysolution-io-ts-utils';
 
-import { id, item_id } from '../common/schemas';
+import { item_id } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const deleteEndpointListItemSchema = t.exact(
