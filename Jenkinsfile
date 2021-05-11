@@ -4,7 +4,7 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 210, checkPrChanges: false, setCommitStatus: false) {
-  parallel: [
+  parallel([
     baseline: {
       workers.ci(
         name: 'baseline-worker',
@@ -35,7 +35,7 @@ kibanaPipeline(timeoutMinutes: 210, checkPrChanges: false, setCommitStatus: fals
     },
     pr: {
       workers.ci(
-        name: 'baseline-worker',
+        name: 'baseline-worker-2',
         size: 'xl',
         ramDisk: true,
         runErrorReporter: false,
@@ -50,6 +50,5 @@ kibanaPipeline(timeoutMinutes: 210, checkPrChanges: false, setCommitStatus: fals
         }
       }
     }
-  ]
-
+  ])
 }
