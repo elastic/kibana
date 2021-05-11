@@ -18,10 +18,10 @@ import {
 import {
   globalRead,
   noKibanaPrivileges,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
-  secOnlyRead,
+  obsOnlyReadSpacesAll,
+  obsSecSpacesAll,
+  obsSecReadSpacesAll,
+  secOnlyReadSpacesAll,
   superUser,
 } from '../../../../common/lib/authentication/users';
 import {
@@ -85,10 +85,10 @@ export default ({ getService }: FtrProviderContext): void => {
           user: superUser,
           caseIDs: [case1.id, case2.id, case3.id],
         },
-        { user: secOnlyRead, caseIDs: [case1.id, case2.id] },
-        { user: obsOnlyRead, caseIDs: [case3.id] },
+        { user: secOnlyReadSpacesAll, caseIDs: [case1.id, case2.id] },
+        { user: obsOnlyReadSpacesAll, caseIDs: [case3.id] },
         {
-          user: obsSecRead,
+          user: obsSecReadSpacesAll,
           caseIDs: [case1.id, case2.id, case3.id],
         },
       ]) {
@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await getCaseIDsByAlert({
         supertest: supertestWithoutAuth,
         alertID: postCommentAlertReq.alertId as string,
-        auth: { user: obsSec, space: 'space1' },
+        auth: { user: obsSecSpacesAll, space: 'space1' },
         query: { owner: 'securitySolutionFixture' },
         expectedHttpCode: 404,
       });
@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         alertID: postCommentAlertReq.alertId as string,
         auth: secOnlyDefaultSpaceAuth,
-        // The secOnly user does not have permissions for observability cases, so it should only return the security solution one
+        // The secOnlyDefaultSpace user does not have permissions for observability cases, so it should only return the security solution one
         query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
       });
 

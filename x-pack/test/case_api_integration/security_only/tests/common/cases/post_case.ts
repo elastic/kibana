@@ -10,15 +10,15 @@ import expect from '@kbn/expect';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { deleteCasesByESQuery, createCase } from '../../../../common/lib/utils';
 import {
-  secOnly,
-  secOnlyRead,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
   globalRead,
-  obsOnlyRead,
-  obsSecRead,
+  obsOnlyReadSpacesAll,
+  obsSecReadSpacesAll,
   noKibanaPrivileges,
 } from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { secOnlyDefaultSpaceAuth, superUserDefaultSpaceAuth } from '../../../utils';
+import { secOnlyDefaultSpaceAuth } from '../../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -49,7 +49,13 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+    for (const user of [
+      globalRead,
+      secOnlyReadSpacesAll,
+      obsOnlyReadSpacesAll,
+      obsSecReadSpacesAll,
+      noKibanaPrivileges,
+    ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT create a case`, async () => {
@@ -57,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           getPostCaseRequest({ owner: 'securitySolutionFixture' }),
           403,
-          superUserDefaultSpaceAuth
+          { user, space: null }
         );
       });
     }
@@ -68,7 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
         getPostCaseRequest({ owner: 'securitySolutionFixture' }),
         404,
         {
-          user: secOnly,
+          user: secOnlySpacesAll,
           space: 'space1',
         }
       );

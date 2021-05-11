@@ -16,12 +16,12 @@ import {
   updateConfiguration,
 } from '../../../../common/lib/utils';
 import {
-  secOnly,
-  obsOnlyRead,
-  secOnlyRead,
+  secOnlySpacesAll,
+  obsOnlyReadSpacesAll,
+  secOnlyReadSpacesAll,
   noKibanaPrivileges,
   globalRead,
-  obsSecRead,
+  obsSecReadSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import { secOnlyDefaultSpaceAuth, superUserDefaultSpaceAuth } from '../../../utils';
 
@@ -81,7 +81,13 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+    for (const user of [
+      globalRead,
+      secOnlyReadSpacesAll,
+      obsOnlyReadSpacesAll,
+      obsSecReadSpacesAll,
+      noKibanaPrivileges,
+    ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT update a configuration`, async () => {
@@ -125,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
         404,
         {
-          user: secOnly,
+          user: secOnlySpacesAll,
           space: 'space1',
         }
       );

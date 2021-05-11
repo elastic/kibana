@@ -11,15 +11,15 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import { createCase, deleteCasesByESQuery, getReporters } from '../../../../../common/lib/utils';
 import {
-  secOnly,
-  obsOnly,
+  secOnlySpacesAll,
+  obsOnlySpacesAll,
   globalRead,
   superUser,
-  secOnlyRead,
-  obsOnlyRead,
-  obsSecRead,
+  secOnlyReadSpacesAll,
+  obsOnlyReadSpacesAll,
+  obsSecReadSpacesAll,
   noKibanaPrivileges,
-  obsSec,
+  obsSecSpacesAll,
 } from '../../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../../common/lib/authentication';
 import {
@@ -57,17 +57,17 @@ export default ({ getService }: FtrProviderContext): void => {
       for (const scenario of [
         {
           user: globalRead,
-          expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+          expectedReporters: [getUserInfo(secOnlySpacesAll), getUserInfo(obsOnlySpacesAll)],
         },
         {
           user: superUser,
-          expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+          expectedReporters: [getUserInfo(secOnlySpacesAll), getUserInfo(obsOnlySpacesAll)],
         },
-        { user: secOnlyRead, expectedReporters: [getUserInfo(secOnly)] },
-        { user: obsOnlyRead, expectedReporters: [getUserInfo(obsOnly)] },
+        { user: secOnlyReadSpacesAll, expectedReporters: [getUserInfo(secOnlySpacesAll)] },
+        { user: obsOnlyReadSpacesAll, expectedReporters: [getUserInfo(obsOnlySpacesAll)] },
         {
-          user: obsSecRead,
-          expectedReporters: [getUserInfo(secOnly), getUserInfo(obsOnly)],
+          user: obsSecReadSpacesAll,
+          expectedReporters: [getUserInfo(secOnlySpacesAll), getUserInfo(obsOnlySpacesAll)],
         },
       ]) {
         const reporters = await getReporters({
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await getReporters({
         supertest: supertestWithoutAuth,
         expectedHttpCode: 404,
-        auth: { user: obsSec, space: 'space1' },
+        auth: { user: obsSecSpacesAll, space: 'space1' },
       });
     });
 
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext): void => {
         query: { owner: 'securitySolutionFixture' },
       });
 
-      expect(reporters).to.eql([getUserInfo(secOnly)]);
+      expect(reporters).to.eql([getUserInfo(secOnlySpacesAll)]);
     });
 
     it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Only security solution reporters are being returned
-      expect(reporters).to.eql([getUserInfo(secOnly)]);
+      expect(reporters).to.eql([getUserInfo(secOnlySpacesAll)]);
     });
   });
 };

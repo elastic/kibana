@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { obsOnly, obsSec, secOnly } from '../common/lib/authentication/users';
+import {
+  obsOnlySpacesAll,
+  obsSecSpacesAll,
+  secOnlySpacesAll,
+} from '../common/lib/authentication/users';
 import { getAuthWithSuperUser } from '../common/lib/utils';
 
-export const secOnlyDefaultSpaceAuth = { user: secOnly, space: null };
-export const obsOnlyDefaultSpaceAuth = { user: obsOnly, space: null };
-export const obsSecDefaultSpaceAuth = { user: obsSec, space: null };
+export const secOnlyDefaultSpaceAuth = { user: secOnlySpacesAll, space: null };
+export const obsOnlyDefaultSpaceAuth = { user: obsOnlySpacesAll, space: null };
+export const obsSecDefaultSpaceAuth = { user: obsSecSpacesAll, space: null };
 export const superUserDefaultSpaceAuth = getAuthWithSuperUser(null);

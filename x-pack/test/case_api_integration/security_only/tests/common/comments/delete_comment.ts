@@ -22,10 +22,10 @@ import {
 import {
   globalRead,
   noKibanaPrivileges,
-  obsOnlyRead,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
+  obsOnlyReadSpacesAll,
+  obsSecReadSpacesAll,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import { obsOnlyDefaultSpaceAuth, secOnlyDefaultSpaceAuth } from '../../../utils';
 
@@ -130,7 +130,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead]) {
+    for (const user of [
+      globalRead,
+      secOnlyReadSpacesAll,
+      obsOnlyReadSpacesAll,
+      obsSecReadSpacesAll,
+    ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT delete a comment`, async () => {
@@ -216,14 +221,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         commentId: commentResp.comments![0].id,
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
         expectedHttpCode: 404,
       });
 
       await deleteAllComments({
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
         expectedHttpCode: 404,
       });
     });

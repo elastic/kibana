@@ -24,23 +24,19 @@ export const createSpaces = async (getService: CommonFtrProviderContext['getServ
   }
 };
 
+/**
+ * Creates the users and roles for use in the tests. Defaults to specific users and roles used by the security_and_spaces
+ * scenarios but can be passed specific ones as well.
+ */
 export const createUsersAndRoles = async (
   getService: CommonFtrProviderContext['getService'],
-  overrideSpaces?: string[]
+  usersToCreate: User[] = users,
+  rolesToCreate: Role[] = roles
 ) => {
   const security = getService('security');
 
   const createRole = async ({ name, privileges }: Role) => {
-    const modifiedPrivileges = {
-      ...privileges,
-      // for roles that don't have kibana set this will just return undefined
-      kibana: privileges.kibana?.map((kibanaEntry) => ({
-        ...kibanaEntry,
-        spaces: overrideSpaces != null ? overrideSpaces : kibanaEntry.spaces,
-      })),
-    };
-
-    return await security.role.create(name, modifiedPrivileges);
+    return await security.role.create(name, privileges);
   };
 
   const createUser = async (user: User) => {
@@ -54,11 +50,11 @@ export const createUsersAndRoles = async (
     });
   };
 
-  for (const role of roles) {
+  for (const role of rolesToCreate) {
     await createRole(role);
   }
 
-  for (const user of users) {
+  for (const user of usersToCreate) {
     await createUser(user);
   }
 };
@@ -74,10 +70,14 @@ export const deleteSpaces = async (getService: CommonFtrProviderContext['getServ
   }
 };
 
-export const deleteUsersAndRoles = async (getService: CommonFtrProviderContext['getService']) => {
+export const deleteUsersAndRoles = async (
+  getService: CommonFtrProviderContext['getService'],
+  usersToDelete: User[] = users,
+  rolesToDelete: Role[] = roles
+) => {
   const security = getService('security');
 
-  for (const user of users) {
+  for (const user of usersToDelete) {
     try {
       await security.user.delete(user.username);
     } catch (error) {
@@ -85,7 +85,7 @@ export const deleteUsersAndRoles = async (getService: CommonFtrProviderContext['
     }
   }
 
-  for (const role of roles) {
+  for (const role of rolesToDelete) {
     try {
       await security.role.delete(role.name);
     } catch (error) {

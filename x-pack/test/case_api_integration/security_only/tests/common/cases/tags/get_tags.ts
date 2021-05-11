@@ -11,12 +11,12 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteCasesByESQuery, createCase, getTags } from '../../../../../common/lib/utils';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
-  secOnly,
+  secOnlySpacesAll,
   globalRead,
   superUser,
-  secOnlyRead,
-  obsOnlyRead,
-  obsSecRead,
+  secOnlyReadSpacesAll,
+  obsOnlyReadSpacesAll,
+  obsSecReadSpacesAll,
   noKibanaPrivileges,
 } from '../../../../../common/lib/authentication/users';
 import {
@@ -60,10 +60,10 @@ export default ({ getService }: FtrProviderContext): void => {
           user: superUser,
           expectedTags: ['sec', 'obs'],
         },
-        { user: secOnlyRead, expectedTags: ['sec'] },
-        { user: obsOnlyRead, expectedTags: ['obs'] },
+        { user: secOnlyReadSpacesAll, expectedTags: ['sec'] },
+        { user: obsOnlyReadSpacesAll, expectedTags: ['obs'] },
         {
-          user: obsSecRead,
+          user: obsSecReadSpacesAll,
           expectedTags: ['sec', 'obs'],
         },
       ]) {
@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await getTags({
         supertest: supertestWithoutAuth,
         expectedHttpCode: 404,
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
       });
     });
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { rolesDefaultSpace } from '../../../common/lib/authentication/roles';
+import { usersDefaultSpace } from '../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../common/lib/authentication';
 
@@ -16,11 +18,11 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     before(async () => {
       // since spaces are disabled this changes each role to have access to all available spaces (it'll just be the default one)
-      await createUsersAndRoles(getService, ['*']);
+      await createUsersAndRoles(getService, usersDefaultSpace, rolesDefaultSpace);
     });
 
     after(async () => {
-      await deleteUsersAndRoles(getService);
+      await deleteUsersAndRoles(getService, usersDefaultSpace, rolesDefaultSpace);
     });
 
     // Trial

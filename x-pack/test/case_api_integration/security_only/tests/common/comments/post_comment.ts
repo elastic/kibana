@@ -20,10 +20,10 @@ import {
 import {
   globalRead,
   noKibanaPrivileges,
-  obsOnlyRead,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
+  obsOnlyReadSpacesAll,
+  obsSecReadSpacesAll,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import {
   obsOnlyDefaultSpaceAuth,
@@ -81,7 +81,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+    for (const user of [
+      globalRead,
+      secOnlyReadSpacesAll,
+      obsOnlyReadSpacesAll,
+      obsSecReadSpacesAll,
+      noKibanaPrivileges,
+    ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should not create a comment`, async () => {
@@ -114,7 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
         expectedHttpCode: 404,
       });
     });

@@ -19,10 +19,10 @@ import {
 import {
   globalRead,
   noKibanaPrivileges,
-  obsOnlyRead,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
+  obsOnlyReadSpacesAll,
+  obsSecReadSpacesAll,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
   superUser,
 } from '../../../../../common/lib/authentication/users';
 import { superUserDefaultSpaceAuth } from '../../../../utils';
@@ -89,9 +89,9 @@ export default ({ getService }: FtrProviderContext): void => {
       for (const scenario of [
         { user: globalRead, stats: { open: 1, inProgress: 2, closed: 1 } },
         { user: superUser, stats: { open: 1, inProgress: 2, closed: 1 } },
-        { user: secOnlyRead, stats: { open: 0, inProgress: 1, closed: 1 } },
-        { user: obsOnlyRead, stats: { open: 1, inProgress: 1, closed: 0 } },
-        { user: obsSecRead, stats: { open: 1, inProgress: 2, closed: 1 } },
+        { user: secOnlyReadSpacesAll, stats: { open: 0, inProgress: 1, closed: 1 } },
+        { user: obsOnlyReadSpacesAll, stats: { open: 1, inProgress: 1, closed: 0 } },
+        { user: obsSecReadSpacesAll, stats: { open: 1, inProgress: 2, closed: 1 } },
       ]) {
         const statuses = await getAllCasesStatuses({
           supertest: supertestWithoutAuth,
@@ -123,7 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await getAllCasesStatuses({
         supertest: supertestWithoutAuth,
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
         expectedHttpCode: 404,
       });
     });

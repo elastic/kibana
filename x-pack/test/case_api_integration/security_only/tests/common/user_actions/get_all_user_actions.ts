@@ -19,10 +19,10 @@ import {
 import {
   globalRead,
   noKibanaPrivileges,
-  obsSec,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
+  obsSecSpacesAll,
+  obsSecReadSpacesAll,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
   superUser,
 } from '../../../../common/lib/authentication/users';
 import { superUserDefaultSpaceAuth } from '../../../utils';
@@ -63,7 +63,14 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get the user actions for a case when the user has the correct permissions', async () => {
-      for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+      for (const user of [
+        globalRead,
+        superUser,
+        secOnlySpacesAll,
+        secOnlyReadSpacesAll,
+        obsSecSpacesAll,
+        obsSecReadSpacesAll,
+      ]) {
         const userActions = await getCaseUserActions({
           supertest: supertestWithoutAuth,
           caseID: caseInfo.id,
@@ -89,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await getCaseUserActions({
         supertest: supertestWithoutAuth,
         caseID: caseInfo.id,
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
         expectedHttpCode: 404,
       });
     });

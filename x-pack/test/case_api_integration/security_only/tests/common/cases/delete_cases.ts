@@ -17,11 +17,11 @@ import {
   getCase,
 } from '../../../../common/lib/utils';
 import {
-  secOnly,
-  secOnlyRead,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
   globalRead,
-  obsOnlyRead,
-  obsSecRead,
+  obsOnlyReadSpacesAll,
+  obsSecReadSpacesAll,
   noKibanaPrivileges,
 } from '../../../../common/lib/authentication/users';
 import {
@@ -112,7 +112,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+    for (const user of [
+      globalRead,
+      secOnlyReadSpacesAll,
+      obsOnlyReadSpacesAll,
+      obsSecReadSpacesAll,
+      noKibanaPrivileges,
+    ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT delete a case`, async () => {
@@ -144,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         caseIDs: [postedCase.id],
         expectedHttpCode: 404,
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
       });
     });
   });

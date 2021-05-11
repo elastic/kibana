@@ -15,13 +15,13 @@ import {
   ensureSavedObjectIsAuthorized,
 } from '../../../../common/lib/utils';
 import {
-  secOnly,
-  obsOnlyRead,
-  secOnlyRead,
+  secOnlySpacesAll,
+  obsOnlyReadSpacesAll,
+  secOnlyReadSpacesAll,
   noKibanaPrivileges,
   superUser,
   globalRead,
-  obsSecRead,
+  obsSecReadSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import {
   obsOnlyDefaultSpaceAuth,
@@ -66,10 +66,18 @@ export default ({ getService }: FtrProviderContext): void => {
           numberOfExpectedCases: 2,
           owners: ['securitySolutionFixture', 'observabilityFixture'],
         },
-        { user: secOnlyRead, numberOfExpectedCases: 1, owners: ['securitySolutionFixture'] },
-        { user: obsOnlyRead, numberOfExpectedCases: 1, owners: ['observabilityFixture'] },
         {
-          user: obsSecRead,
+          user: secOnlyReadSpacesAll,
+          numberOfExpectedCases: 1,
+          owners: ['securitySolutionFixture'],
+        },
+        {
+          user: obsOnlyReadSpacesAll,
+          numberOfExpectedCases: 1,
+          owners: ['observabilityFixture'],
+        },
+        {
+          user: obsSecReadSpacesAll,
           numberOfExpectedCases: 2,
           owners: ['securitySolutionFixture', 'observabilityFixture'],
         },
@@ -126,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         expectedHttpCode: 404,
         auth: {
-          user: secOnly,
+          user: secOnlySpacesAll,
           space: 'space1',
         },
       });

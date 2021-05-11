@@ -20,10 +20,10 @@ import {
 import {
   globalRead,
   noKibanaPrivileges,
-  obsOnlyRead,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
+  obsOnlyReadSpacesAll,
+  obsSecReadSpacesAll,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
   superUser,
 } from '../../../../common/lib/authentication/users';
 import {
@@ -184,7 +184,13 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(resp.cases[2].title).to.eql(postCaseReq.title);
     });
 
-    for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+    for (const user of [
+      globalRead,
+      secOnlyReadSpacesAll,
+      obsOnlyReadSpacesAll,
+      obsSecReadSpacesAll,
+      noKibanaPrivileges,
+    ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} - should NOT update a case`, async () => {
@@ -229,7 +235,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         },
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
         expectedHttpCode: 404,
       });
     });

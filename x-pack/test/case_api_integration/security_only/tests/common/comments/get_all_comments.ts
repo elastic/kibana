@@ -18,12 +18,12 @@ import {
 import {
   globalRead,
   noKibanaPrivileges,
-  obsOnly,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
+  obsOnlySpacesAll,
+  obsOnlyReadSpacesAll,
+  obsSecSpacesAll,
+  obsSecReadSpacesAll,
+  secOnlySpacesAll,
+  secOnlyReadSpacesAll,
   superUser,
 } from '../../../../common/lib/authentication/users';
 import { superUserDefaultSpaceAuth } from '../../../utils';
@@ -61,7 +61,14 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: superUserDefaultSpaceAuth,
       });
 
-      for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+      for (const user of [
+        globalRead,
+        superUser,
+        secOnlySpacesAll,
+        secOnlyReadSpacesAll,
+        obsSecSpacesAll,
+        obsSecReadSpacesAll,
+      ]) {
         const comments = await getAllComments({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
@@ -89,8 +96,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       for (const scenario of [
         { user: noKibanaPrivileges, returnCode: 403 },
-        { user: obsOnly, returnCode: 200 },
-        { user: obsOnlyRead, returnCode: 200 },
+        { user: obsOnlySpacesAll, returnCode: 200 },
+        { user: obsOnlyReadSpacesAll, returnCode: 200 },
       ]) {
         const comments = await getAllComments({
           supertest: supertestWithoutAuth,
@@ -124,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await getAllComments({
         supertest: supertestWithoutAuth,
         caseId: caseInfo.id,
-        auth: { user: secOnly, space: 'space1' },
+        auth: { user: secOnlySpacesAll, space: 'space1' },
         expectedHttpCode: 404,
       });
     });

@@ -27,13 +27,13 @@ import {
 } from '../../../../common/lib/utils';
 
 import {
-  secOnly,
-  obsOnlyRead,
-  secOnlyRead,
+  secOnlySpacesAll,
+  obsOnlyReadSpacesAll,
+  secOnlyReadSpacesAll,
   noKibanaPrivileges,
   superUser,
   globalRead,
-  obsSecRead,
+  obsSecReadSpacesAll,
 } from '../../../../common/lib/authentication/users';
 import {
   obsOnlyDefaultSpaceAuth,
@@ -113,25 +113,25 @@ export default ({ getService }: FtrProviderContext): void => {
           caseID: obsCase.id,
         },
         {
-          user: secOnlyRead,
+          user: secOnlyReadSpacesAll,
           numExpectedEntites: 1,
           owners: ['securitySolutionFixture'],
           caseID: secCase.id,
         },
         {
-          user: obsOnlyRead,
+          user: obsOnlyReadSpacesAll,
           numExpectedEntites: 1,
           owners: ['observabilityFixture'],
           caseID: obsCase.id,
         },
         {
-          user: obsSecRead,
+          user: obsSecReadSpacesAll,
           numExpectedEntites: 1,
           owners: ['securitySolutionFixture', 'observabilityFixture'],
           caseID: secCase.id,
         },
         {
-          user: obsSecRead,
+          user: obsSecReadSpacesAll,
           numExpectedEntites: 1,
           owners: ['securitySolutionFixture', 'observabilityFixture'],
           caseID: obsCase.id,
@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await supertestWithoutAuth
         .get(`${getSpaceUrlPrefix('space1')}${CASES_URL}/${caseInfo.id}/comments/_find`)
-        .auth(secOnly.username, secOnly.password)
+        .auth(secOnlySpacesAll.username, secOnlySpacesAll.password)
         .expect(404);
     });
 
@@ -217,7 +217,7 @@ export default ({ getService }: FtrProviderContext): void => {
             obsCase.id
           }/comments/_find?search=securitySolutionFixture+observabilityFixture`
         )
-        .auth(secOnly.username, secOnly.password)
+        .auth(secOnlySpacesAll.username, secOnlySpacesAll.password)
         .expect(200);
 
       // shouldn't find any comments since they were created under the observability ownership
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext): void => {
             obsCase.id
           }/comments/_find?filter=cases-comments.attributes.owner:"observabilityFixture"`
         )
-        .auth(secOnly.username, secOnly.password)
+        .auth(secOnlySpacesAll.username, secOnlySpacesAll.password)
         .expect(200);
       expect(res.comments.length).to.be(0);
     });
