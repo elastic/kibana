@@ -169,7 +169,7 @@ Chromium is not compatible with ARM RHEL/CentOS.
 [[reporting-troubleshooting-maps-ems]]
 === Unable to connect to Elastic Maps Service
 
-https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] is a service that hosts
+https://www.elastic.co/elastic-maps-service[{ems} ({ems-init})] is a service that hosts
 tile layers and vector shapes of administrative boundaries.
 Reports containing Maps with missing basemap layers or administrative boundaries is due to the kibana server not having access to EMS.
 See <<maps-connect-to-ems>> for information on how to connect your {kib} server to EMS.
