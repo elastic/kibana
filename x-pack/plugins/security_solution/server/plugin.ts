@@ -27,8 +27,6 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
-import { ecsFieldMap, pickWithPatterns } from '../../rule_registry/common';
-import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import { RuleDataClient, RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
@@ -143,6 +141,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly config: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
+  private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
