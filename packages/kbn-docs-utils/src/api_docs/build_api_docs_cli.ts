@@ -84,6 +84,9 @@ export function runBuildApiDocsCli() {
         }
       );
 
+      log.info('referencedDeprecations');
+      log.info(JSON.stringify(referencedDeprecations, null, 2));
+
       const reporter = CiStatsReporter.fromEnv(log);
       plugins.forEach((plugin) => {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
@@ -221,7 +224,7 @@ export function runBuildApiDocsCli() {
         boolean: ['references'],
         help: `
           --plugin             Optionally, run for only a specific plugin
-          --stats              Optionally print API stats. Must be one or more of: any, comments or exports. 
+          --stats              Optionally print API stats. Must be one or more of: any, comments or exports.
           --references         Collect references for API items
         `,
       },
