@@ -429,7 +429,7 @@ describe('indicator match', () => {
 
         goToRuleDetails();
 
-        cy.get(RULE_NAME_HEADER).should('have.text', `${newThreatIndicatorRule.name}`);
+        cy.get(RULE_NAME_HEADER).should('contain', `${newThreatIndicatorRule.name}`);
         cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newThreatIndicatorRule.description);
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', newThreatIndicatorRule.severity);

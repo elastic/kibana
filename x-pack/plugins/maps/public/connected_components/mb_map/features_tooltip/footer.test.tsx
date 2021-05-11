@@ -32,6 +32,7 @@ describe('Footer', () => {
         id: 'feature1',
         layerId: 'layer1',
         mbProperties: {},
+        actions: [],
       },
     ];
     describe('mouseover (unlocked)', () => {
@@ -54,11 +55,13 @@ describe('Footer', () => {
         id: 'feature1',
         layerId: 'layer1',
         mbProperties: {},
+        actions: [],
       },
       {
         id: 'feature2',
         layerId: 'layer1',
         mbProperties: {},
+        actions: [],
       },
     ];
     describe('mouseover (unlocked)', () => {
@@ -97,16 +100,19 @@ describe('Footer', () => {
         id: 'feature1',
         layerId: 'layer1',
         mbProperties: {},
+        actions: [],
       },
       {
         id: 'feature2',
         layerId: 'layer1',
         mbProperties: {},
+        actions: [],
       },
       {
         id: 'feature1',
         layerId: 'layer2',
         mbProperties: {},
+        actions: [],
       },
     ];
     describe('mouseover (unlocked)', () => {

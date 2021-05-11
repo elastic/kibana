@@ -86,14 +86,15 @@ export const HostOverview = React.memo<HostSummaryProps>(
       () => [
         {
           title: i18n.HOST_ID,
-          description: data.host
-            ? hostIdRenderer({ host: data.host, noLink: true })
-            : getEmptyTagValue(),
+          description:
+            data && data.host
+              ? hostIdRenderer({ host: data.host, noLink: true })
+              : getEmptyTagValue(),
         },
         {
           title: i18n.FIRST_SEEN,
           description:
-            data.host != null && data.host.name && data.host.name.length ? (
+            data && data.host != null && data.host.name && data.host.name.length ? (
               <FirstLastSeenHost
                 docValueFields={docValueFields}
                 hostName={data.host.name[0]}
@@ -107,7 +108,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
         {
           title: i18n.LAST_SEEN,
           description:
-            data.host != null && data.host.name && data.host.name.length ? (
+            data && data.host != null && data.host.name && data.host.name.length ? (
               <FirstLastSeenHost
                 docValueFields={docValueFields}
                 hostName={data.host.name[0]}
@@ -221,7 +222,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {data.endpoint != null ? (
+        {data && data.endpoint != null ? (
           <>
             <EuiHorizontalRule />
             <OverviewWrapper direction={isInDetailsSidePanel ? 'column' : 'row'}>
