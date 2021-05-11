@@ -11,8 +11,9 @@ import { FeatureCollection } from 'geojson';
 import * as topojson from 'topojson-client';
 import { GeometryCollection } from 'topojson-specification';
 import _ from 'lodash';
-
 import fetch from 'node-fetch';
+import { INDEX_FEATURE_PATH } from '../common';
+
 import {
   GIS_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -156,3 +157,30 @@ export async function fetchGeoJson(
     })
   );
 }
+
+export const addFeatureToIndex = async (indexName: string, geometry: unknown, path: string) => {
+  const data = convertDotNotationStringToObj(path, geometry);
+  return await getHttp().fetch({
+    path: `/${INDEX_FEATURE_PATH}`,
+    method: 'POST',
+    body: convertObjectToBlob({
+      index: indexName,
+      data,
+    }),
+  });
+};
+
+const convertDotNotationStringToObj = (
+  dotNotationStr: string,
+  value: unknown
+): Record<string, any> => {
+  const container: Record<string, any> = {};
+  dotNotationStr.split('.').map((k, i, values) => {
+    container[k] = i === values.length - 1 ? value : {};
+  });
+  return container;
+};
+
+const convertObjectToBlob = (obj: unknown) => {
+  return new Blob([JSON.stringify(obj)], { type: 'application/json' });
+};

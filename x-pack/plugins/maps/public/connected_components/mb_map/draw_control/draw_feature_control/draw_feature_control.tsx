@@ -20,8 +20,8 @@ import { DRAW_TYPE } from '../../../../../common';
 const geoJSONReader = new jsts.io.GeoJSONReader();
 
 export interface Props {
+  addNewFeature: (indexName: string, geometry: unknown, mappings: unknown) => void;
   disableDrawState: () => void;
-  addFeaturesToIndexQueue: (features: Feature[]) => void;
   removeFeatures: (featureIds: string[]) => void;
   drawType: DRAW_TYPE;
   mbMap: MbMap;
@@ -30,7 +30,12 @@ export interface Props {
 export class DrawFeatureControl extends Component<Props, {}> {
   _onFeaturesSelected = (mbDrawControl: MapboxDraw) => (e: { features: Feature[] }) => {
     if (this.props.drawType === DRAW_TYPE.TRASH) {
-      this.props.removeFeatures(e.features.map(({ id }: { id: string }) => id));
+      const featureIds = e.features
+        .map((feature: Feature) => {
+          return feature.id ? `${feature.id}` : '';
+        })
+        .filter((id) => id);
+      this.props.removeFeatures(featureIds);
       mbDrawControl.trash();
     }
   };
@@ -43,8 +48,8 @@ export class DrawFeatureControl extends Component<Props, {}> {
           mbDrawControl.delete(feature.id);
           throw new Error('Invalid geometry detected');
         }
+        this.props.addNewFeature('someIndex', geometry, 'somePath');
       });
-      this.props.addFeaturesToIndexQueue(e.features);
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFeatureControl.unableToCreateFeature', {

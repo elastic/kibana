@@ -6,7 +6,6 @@
  */
 
 import _ from 'lodash';
-import { Feature } from 'geojson';
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
@@ -46,7 +45,6 @@ import {
   UPDATE_DRAW_STATE,
   SET_SHAPE_TO_DRAW,
   UPDATE_MAP_SETTING,
-  ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
   REMOVE_FEATURES_FROM_INDEX_QUEUE,
 } from './map_action_constants';
@@ -63,6 +61,7 @@ import {
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
+import { addFeatureToIndex } from '../util';
 
 export interface MapExtentState {
   zoom: number;
@@ -338,13 +337,6 @@ export function updateDrawState(drawState: DrawState | null) {
   };
 }
 
-export function addFeaturesToIndexQueue(features: Feature[]) {
-  return {
-    type: ADD_FEATURES_TO_INDEX_QUEUE,
-    features,
-  };
-}
-
 export function removeFeaturesFromIndexQueue(featureIds: string[]) {
   return {
     type: REMOVE_FEATURES_FROM_INDEX_QUEUE,
@@ -356,5 +348,11 @@ export function setVectorLayerIndexName(indexName: string) {
   return {
     type: SET_VECTOR_LAYER_INDEX_NAME,
     indexName,
+  };
+}
+
+export function addNewFeatureToIndex(indexName: string, geometry: unknown, path: string) {
+  return async () => {
+    await addFeatureToIndex(indexName, geometry, path);
   };
 }

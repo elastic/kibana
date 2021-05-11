@@ -47,7 +47,6 @@ import {
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
   SET_SHAPE_TO_DRAW,
-  ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
   CLEAR_DRAWING_DATA,
   REMOVE_FEATURES_FROM_INDEX_QUEUE,
@@ -110,14 +109,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           shapeToDraw: action.shapeToDraw,
-        },
-      };
-    case ADD_FEATURES_TO_INDEX_QUEUE:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          featuresToIndexQueue: [...state.mapState.featuresToIndexQueue, ...action.features],
         },
       };
     case REMOVE_FEATURES_FROM_INDEX_QUEUE:
