@@ -36,8 +36,8 @@ export function setupSavedObjects(
     management: {
       defaultSearchField: 'name',
       importableAndExportable: true,
-      getTitle(obj) {
-        return `Connector: [${obj.attributes.name}]`;
+      getTitle(savedObject: SavedObject<RawAction>) {
+        return `Connector: [${savedObject.attributes.name}]`;
       },
       onExport<RawAction>(
         context: SavedObjectsExportTransformContext,

@@ -59,6 +59,7 @@ import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_a
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
+import { ALERT_EXECUTION_STATUS_PENDING } from '../lib/alert_execution_status';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -288,11 +289,7 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      executionStatus: {
-        status: 'pending',
-        lastExecutionDate: new Date().toISOString(),
-        error: null,
-      },
+      executionStatus: ALERT_EXECUTION_STATUS_PENDING,
     };
 
     this.auditLogger?.log(

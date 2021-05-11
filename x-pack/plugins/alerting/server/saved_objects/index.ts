@@ -14,6 +14,8 @@ import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { transformRulesForExport } from './transform_rule_for_export';
+import { RawAlert } from '../types';
+import { ALERT_EXECUTION_STATUS_PENDING } from '../lib/alert_execution_status';
 export { partiallyUpdateAlert } from './partially_update_alert';
 
 export const AlertAttributesExcludedFromAAD = [
@@ -49,8 +51,17 @@ export function setupSavedObjects(
     mappings: mappings.alert,
     management: {
       importableAndExportable: true,
-      getTitle(obj) {
-        return `Rule: [${obj.attributes.name}]`;
+      getTitle(ruleSavedObject: SavedObject<RawAlert>) {
+        return `Rule: [${ruleSavedObject.attributes.name}]`;
+      },
+      onImport(ruleSavedObjects) {
+        (ruleSavedObjects as Array<SavedObject<RawAlert>>).forEach(
+          (rule: SavedObject<RawAlert>) => {
+            rule.attributes.executionStatus = ALERT_EXECUTION_STATUS_PENDING;
+            rule.attributes.updatedAt = new Date().toISOString();
+          }
+        );
+        return {};
       },
       onExport<RawAlert>(
         context: SavedObjectsExportTransformContext,
