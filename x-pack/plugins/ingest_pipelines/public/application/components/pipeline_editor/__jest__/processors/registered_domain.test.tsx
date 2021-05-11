@@ -12,7 +12,7 @@ import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 const defaultRegisteredDomainParameters = {
   description: undefined,
   if: undefined,
-  ignore_missing: true,
+  ignore_missing: undefined,
   ignore_failure: undefined,
 };
 
@@ -79,6 +79,29 @@ describe('Processor: Registered Domain', () => {
     expect(processors[0][REGISTERED_DOMAIN_TYPE]).toEqual({
       field: 'field_1',
       ...defaultRegisteredDomainParameters,
+    });
+  });
+
+  test('should still send ignore_missing:false when the toggle is disabled', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    // Add "field" value (required)
+    form.setInputValue('fieldNameField.input', 'field_1');
+
+    // Disable ignore missing toggle
+    form.toggleEuiSwitch('ignoreMissingSwitch.input');
+
+    // Save the field with new changes
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, REGISTERED_DOMAIN_TYPE);
+    expect(processors[0][REGISTERED_DOMAIN_TYPE]).toEqual({
+      ...defaultRegisteredDomainParameters,
+      field: 'field_1',
+      ignore_missing: false,
     });
   });
 

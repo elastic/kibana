@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { from } from './shared';
 
 export const RegisteredDomain: FunctionComponent = () => {
   return (
@@ -24,7 +25,7 @@ export const RegisteredDomain: FunctionComponent = () => {
 
       <TargetField />
 
-      <IgnoreMissingField defaultValue={true} />
+      <IgnoreMissingField defaultValue={true} serializer={from.undefinedIfValue(true)} />
     </>
   );
 };
