@@ -78,9 +78,10 @@ describe('vega_map_view/view', () => {
     setUISettings(coreStart.uiSettings);
 
     const getTmsService = jest.fn().mockReturnValue(({
-      getVectorStyleSheet: (): Style => ({
+      getVectorStyleSheet: () => ({
         version: 8,
         sources: {},
+        // @ts-expect-error
         layers: [],
       }),
       getMaxZoom: async () => 20,
