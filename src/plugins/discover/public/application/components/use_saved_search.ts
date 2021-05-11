@@ -36,7 +36,7 @@ export interface UseSavedSearch {
 export type SavedSearchSubject = BehaviorSubject<{
   fetchCounter: number;
   fetchError?: Error;
-  fieldCounts: Record<string, number>;
+  fieldCounts?: Record<string, number>;
   inspectorAdapters?: { requests: RequestAdapter };
   rows?: ElasticSearchHit[];
   state: string;
@@ -77,7 +77,6 @@ export const useSavedSearch = ({
       new BehaviorSubject({
         state: shouldSearchOnPageLoad() ? fetchStatuses.LOADING : fetchStatuses.UNINITIALIZED,
         fetchCounter: 0,
-        fieldCounts: {},
       }),
     [shouldSearchOnPageLoad]
   );
@@ -87,24 +86,6 @@ export const useSavedSearch = ({
   const abortControllerRef = useRef<AbortController | undefined>();
   const { data, filterManager, timefilter } = services;
   const refetch$ = useMemo(() => new Subject(), []);
-  useEffect(() => {
-    const subscription = refetch$.subscribe({
-      next: (val = '') => {
-        if (val === 'reset') {
-          // triggered e.g. when runtime field was added our changed
-          savedSearch$.next({
-            fetchCounter,
-            state: fetchStatuses.LOADING,
-            rows: [],
-            fieldCounts: {},
-          });
-        }
-      },
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [fetchCounter, refetch$, savedSearch$]);
 
   // handler emitted by `timefilter.getAutoRefreshFetch$()`
   // to notify when data completed loading and to start a new autorefresh loop
@@ -199,6 +180,14 @@ export const useSavedSearch = ({
           setFetchCounter(newFetchCounter);
           setFieldCounts(newFieldCounts);
         })
+        .catch((error) => {
+          savedSearch$.next({
+            fetchCounter: newFetchCounter,
+            state: fetchStatuses.ERROR,
+            inspectorAdapters,
+            fetchError: error,
+          });
+        })
         .finally(() => {
           autoRefreshDoneCb.current?.();
           autoRefreshDoneCb.current = undefined;
@@ -219,15 +208,24 @@ export const useSavedSearch = ({
 
   useEffect(() => {
     const subscription = fetch$.subscribe({
-      next: () => {
-        fetchAll();
+      next: (val) => {
+        if (val === 'reset') {
+          // triggered e.g. when runtime field was added, changed, deleted
+          savedSearch$.next({
+            fetchCounter,
+            state: fetchStatuses.LOADING,
+            rows: [],
+            fieldCounts: {},
+          });
+        }
+        fetchAll(val === 'reset');
       },
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchAll, fetch$]);
+  }, [fetchAll, fetch$, savedSearch$, fetchCounter]);
 
   useEffect(() => {
     let triggerFetch = false;
