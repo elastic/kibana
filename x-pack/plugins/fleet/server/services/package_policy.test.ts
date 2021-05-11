@@ -38,6 +38,17 @@ paths:
       },
     ];
   }
+  if (dataset === 'dataset1_level1') {
+    return [
+      {
+        buffer: Buffer.from(`
+type: log
+metricset: ["dataset1.level1"]
+`),
+      },
+    ];
+  }
+
   return [
     {
       buffer: Buffer.from(`
@@ -143,6 +154,56 @@ describe('Package policy service', () => {
               compiled_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
+                type: 'log',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should work with a two level dataset name', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'package.dataset1.level1',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log' }],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1.level1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1.level1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1.level1'],
                 type: 'log',
               },
             },

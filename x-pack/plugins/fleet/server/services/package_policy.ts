@@ -56,8 +56,8 @@ import { appContextService } from '.';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
-function getDataset(st: string) {
-  return st.split('.')[1];
+function getDatasetPath(st: string) {
+  return st.split('.').slice(1).join('_');
 }
 
 class PackagePolicyService {
@@ -562,7 +562,7 @@ async function _compilePackageStream(
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
   }
-  const datasetPath = getDataset(stream.data_stream.dataset);
+  const datasetPath = getDatasetPath(stream.data_stream.dataset);
   const packageDataStreams = pkgInfo.data_streams;
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
