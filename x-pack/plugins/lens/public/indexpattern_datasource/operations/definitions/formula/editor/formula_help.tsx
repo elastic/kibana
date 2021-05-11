@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopoverTitle,
   EuiText,
   EuiSelectable,
   EuiSelectableOption,
@@ -62,37 +63,42 @@ function FormulaHelp({
   );
 
   return (
-    <EuiFlexGroup style={{ height: '100%' }}>
-      <EuiFlexItem grow={false}>
-        <EuiSelectable
-          options={helpItems}
-          singleSelection={true}
-          searchable
-          onChange={(newOptions) => {
-            const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
-            if (!chosenType) {
-              setSelectedFunction(undefined);
-            } else {
-              setSelectedFunction(chosenType.label);
-            }
-          }}
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      </EuiFlexItem>
-      <EuiFlexItem className="eui-yScroll">
-        <EuiText size="s">
-          {selectedFunction ? (
-            helpItems.find(({ label }) => label === selectedFunction)?.description
-          ) : (
-            <Markdown
-              markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-                defaultMessage: `
+    <>
+      <EuiPopoverTitle className="lnsFormula__docsHeader">Formula reference</EuiPopoverTitle>
+
+      <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>
+        <EuiFlexItem className="lnsFormula__docsNav" grow={1}>
+          <EuiSelectable
+            height="full"
+            options={helpItems}
+            singleSelection={true}
+            searchable
+            onChange={(newOptions) => {
+              const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
+              if (!chosenType) {
+                setSelectedFunction(undefined);
+              } else {
+                setSelectedFunction(chosenType.label);
+              }
+            }}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiFlexItem>
+
+        <EuiFlexItem className="lnsFormula__docsText" grow={2}>
+          <EuiText size="s">
+            {selectedFunction ? (
+              helpItems.find(({ label }) => label === selectedFunction)?.description
+            ) : (
+              <Markdown
+                markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                  defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -127,14 +133,15 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-                description:
-                  'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-              })}
-            />
-          )}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+                  description:
+                    'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+                })}
+              />
+            )}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 

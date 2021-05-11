@@ -453,7 +453,7 @@ export function FormulaEditor({
           <div className="lnsFormula__editor">
             <div className="lnsFormula__editorHeader">
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem>{/* TODO: Word wrap button */}</EuiFlexItem>
+                <EuiFlexItem>Word wrap button</EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
@@ -480,8 +480,6 @@ export function FormulaEditor({
             <div className="lnsFormula__editorContent">
               <CodeEditor
                 {...codeEditorOptions}
-                height={200}
-                width={'100%'}
                 options={{
                   ...codeEditorOptions.options,
                   // Shared model and overflow node
@@ -515,9 +513,12 @@ export function FormulaEditor({
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem>
                   {isFullscreen ? (
-                    <p>Accordion button here</p>
+                    <>Docs toggle</>
                   ) : (
                     <EuiPopover
+                      panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
+                      panelPaddingSize="none"
+                      anchorPosition="leftCenter"
                       isOpen={isHelpOpen}
                       closePopover={() => setIsHelpOpen(false)}
                       button={
@@ -533,7 +534,6 @@ export function FormulaEditor({
                           )}
                         />
                       }
-                      anchorPosition="leftDown"
                     >
                       <MemoizedFormulaHelp
                         indexPattern={indexPattern}
@@ -543,13 +543,13 @@ export function FormulaEditor({
                   )}
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>{/* TODO: Errors go here */}</EuiFlexItem>
+                <EuiFlexItem grow={false}>Error count</EuiFlexItem>
               </EuiFlexGroup>
             </div>
           </div>
 
           {isFullscreen ? (
-            <div className="lnsFormula__docs">
+            <div className="lnsFormula__docs lnsFormula__docs--inline">
               <MemoizedFormulaHelp
                 indexPattern={indexPattern}
                 operationDefinitionMap={operationDefinitionMap}

@@ -31,6 +31,7 @@
 .lnsFormula__editorContent {
   flex: 1;
   max-height: 200px;
+  min-height: 0;
 
   .lnsIndexPatternDimensionEditor-isFullscreen & {
     max-height: none;
@@ -39,6 +40,37 @@
 
 .lnsFormula__docs {
   background: $euiColorEmptyShade;
+}
+
+.lnsFormula__docs--inline {
+  display: flex;
+  flex-direction: column;
+}
+
+.lnsFormula__docsContent {
+  max-height: 40vh;
+  max-width: 60vh;
+
+  .lnsFormula__docs--inline & {
+    flex: 1;
+    max-height: none;
+    max-width: none;
+    min-height: 0;
+  }
+
+  & > * + * {
+    border-left: $euiBorderThin;
+  }
+}
+
+.lnsFormula__docsNav {
+  background: $euiColorLightestShade;
+  padding: $euiSizeS;
+}
+
+.lnsFormula__docsText {
+  @include euiYScroll;
+  padding: $euiSize;
 }
 
 .lnsFormulaOverflow {
