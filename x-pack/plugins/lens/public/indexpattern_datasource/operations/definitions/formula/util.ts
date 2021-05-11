@@ -10,12 +10,10 @@ import { i18n } from '@kbn/i18n';
 import type {
   TinymathAST,
   TinymathFunction,
-  TinymathLocation,
   TinymathNamedArgument,
   TinymathVariable,
 } from 'packages/kbn-tinymath';
-import { ReferenceBasedIndexPatternColumn } from '../column_types';
-import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
+import type { OperationDefinition, IndexPatternColumn } from '../index';
 import type { GroupedNodes } from './types';
 
 export function groupArgsByType(args: TinymathAST[]) {
@@ -41,45 +39,6 @@ export function getValueOrName(node: TinymathAST) {
     return node.value;
   }
   return node.name;
-}
-
-export function getSafeFieldName(fieldName: string | undefined) {
-  // clean up the "Records" field for now
-  if (!fieldName || fieldName === 'Records') {
-    return '';
-  }
-  return fieldName;
-}
-
-// Just handle two levels for now
-type OeprationParams = Record<string, string | number | Record<string, string | number>>;
-
-export function extractParamsForFormula(
-  column: IndexPatternColumn | ReferenceBasedIndexPatternColumn,
-  operationDefinitionMap: Record<string, GenericOperationDefinition> | undefined
-) {
-  if (!operationDefinitionMap) {
-    return [];
-  }
-  const def = operationDefinitionMap[column.operationType];
-  if ('operationParams' in def && column.params) {
-    return (def.operationParams || []).flatMap(({ name, required }) => {
-      const value = (column.params as OeprationParams)![name];
-      if (isObject(value)) {
-        return Object.keys(value).map((subName) => ({
-          name: `${name}-${subName}`,
-          value: value[subName] as string | number,
-          required,
-        }));
-      }
-      return {
-        name,
-        value,
-        required,
-      };
-    });
-  }
-  return [];
 }
 
 export function getOperationParams(
@@ -330,32 +289,6 @@ export function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
     return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
   }
   return flattenMathNodes(root);
-}
-
-export function hasMathNode(root: TinymathAST): boolean {
-  return Boolean(findMathNodes(root).length);
-}
-
-function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
-  function flattenFunctionNodes(node: TinymathAST | string): TinymathFunction[] {
-    if (!isObject(node) || node.type !== 'function') {
-      return [];
-    }
-    return [node, ...node.args.flatMap(flattenFunctionNodes)].filter(Boolean);
-  }
-  return flattenFunctionNodes(root);
-}
-
-export function hasInvalidOperations(
-  node: TinymathAST | string,
-  operations: Record<string, GenericOperationDefinition>
-): { names: string[]; locations: TinymathLocation[] } {
-  const nodes = findFunctionNodes(node).filter((v) => !isMathNode(v) && !operations[v.name]);
-  return {
-    // avoid duplicates
-    names: Array.from(new Set(nodes.map(({ name }) => name))),
-    locations: nodes.map(({ location }) => location),
-  };
 }
 
 // traverse a tree and find all string leaves

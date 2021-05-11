@@ -7,7 +7,8 @@
 
 import { createMockedIndexPattern } from '../../../mocks';
 import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from '../index';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
+import { FormulaIndexPatternColumn } from './formula';
+import { regenerateLayerFromAst } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 import { tinymathFunctions } from './util';
 
