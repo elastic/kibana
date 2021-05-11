@@ -18,6 +18,7 @@ import {
   EuiTabs,
   EuiToolTip,
   EuiWindowEvent,
+  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
@@ -61,8 +62,6 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
-import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
-import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
@@ -85,7 +84,6 @@ import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
-import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
 import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
@@ -109,6 +107,8 @@ import * as i18n from './translations';
 import { isTab } from '../../../../../common/components/accessibility/helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
+import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
+import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -125,28 +125,26 @@ enum RuleDetailTabs {
   exceptions = 'exceptions',
 }
 
-const getRuleDetailsTabs = (rule: Rule | null) => {
-  return [
-    {
-      id: RuleDetailTabs.alerts,
-      name: detectionI18n.ALERT,
-      disabled: false,
-      dataTestSubj: 'alertsTab',
-    },
-    {
-      id: RuleDetailTabs.exceptions,
-      name: i18n.EXCEPTIONS_TAB,
-      disabled: false,
-      dataTestSubj: 'exceptionsTab',
-    },
-    {
-      id: RuleDetailTabs.failures,
-      name: i18n.FAILURE_HISTORY_TAB,
-      disabled: false,
-      dataTestSubj: 'failureHistoryTab',
-    },
-  ];
-};
+const ruleDetailTabs = [
+  {
+    id: RuleDetailTabs.alerts,
+    name: detectionI18n.ALERT,
+    disabled: false,
+    dataTestSubj: 'alertsTab',
+  },
+  {
+    id: RuleDetailTabs.exceptions,
+    name: i18n.EXCEPTIONS_TAB,
+    disabled: false,
+    dataTestSubj: 'exceptionsTab',
+  },
+  {
+    id: RuleDetailTabs.failures,
+    name: i18n.FAILURE_HISTORY_TAB,
+    disabled: false,
+    dataTestSubj: 'failureHistoryTab',
+  },
+];
 
 const RuleDetailsPageComponent = () => {
   const dispatch = useDispatch();
@@ -183,7 +181,12 @@ const RuleDetailsPageComponent = () => {
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
-  const { rule: maybeRule, refresh: refreshRule, loading: ruleLoading } = useRuleAsync(ruleId);
+  const {
+    rule: maybeRule,
+    refresh: refreshRule,
+    loading: ruleLoading,
+    isExistingRule,
+  } = useRuleWithFallback(ruleId);
   const [loadingStatus, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
   const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
     ruleStatus?.current_status ?? null
@@ -217,7 +220,6 @@ const RuleDetailsPageComponent = () => {
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
-  const ruleDetailTabs = getRuleDetailsTabs(rule);
   const {
     services: {
       application: {
@@ -239,12 +241,22 @@ const RuleDetailsPageComponent = () => {
     }
   }, [maybeRule]);
 
-  const title = rule?.name ?? <EuiLoadingSpinner size="m" />;
+  const title = useMemo(
+    () => (
+      <>
+        {rule?.name}{' '}
+        {ruleLoading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          !isExistingRule && <EuiBadge>{i18n.DELETED_RULE}</EuiBadge>
+        )}
+      </>
+    ),
+    [rule, ruleLoading, isExistingRule]
+  );
   const subTitle = useMemo(
     () =>
-      rule == null ? (
-        <EuiLoadingSpinner size="m" />
-      ) : (
+      rule ? (
         [
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.ruleDetails.ruleCreationDescription"
@@ -277,8 +289,10 @@ const RuleDetailsPageComponent = () => {
             ''
           ),
         ]
-      ),
-    [rule]
+      ) : ruleLoading ? (
+        <EuiLoadingSpinner size="m" />
+      ) : null,
+    [rule, ruleLoading]
   );
 
   // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
@@ -316,7 +330,7 @@ const RuleDetailsPageComponent = () => {
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
+    [ruleDetailTab, setRuleDetailTab]
   );
 
   const handleRefresh = useCallback(() => {
@@ -342,11 +356,13 @@ const RuleDetailsPageComponent = () => {
             onClick={handleRefresh}
             iconType="refresh"
             aria-label={ruleI18n.REFRESH}
+            isDisabled={!isExistingRule}
           />
         </RuleStatus>
       </>
     );
-  }, [currentStatus, loadingStatus, handleRefresh]);
+  }, [isExistingRule, currentStatus, loadingStatus, handleRefresh]);
+
   const ruleError = useMemo(() => {
     if (loadingStatus) {
       return (
@@ -434,13 +450,13 @@ const RuleDetailsPageComponent = () => {
       <LinkButton
         onClick={goToEditRule}
         iconType="controlsHorizontal"
-        isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
+        isDisabled={!isExistingRule || (userHasNoPermissions(canUserCRUD) ?? true)}
         href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
       >
         {ruleI18n.EDIT_RULE_SETTINGS}
       </LinkButton>
     );
-  }, [canUserCRUD, formatUrl, goToEditRule, hasActionsPrivileges, ruleId]);
+  }, [isExistingRule, canUserCRUD, formatUrl, goToEditRule, hasActionsPrivileges, ruleId]);
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
@@ -528,8 +544,7 @@ const RuleDetailsPageComponent = () => {
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
-      <ReadOnlyAlertsCallOut />
-      <ReadOnlyRulesCallOut />
+      <MissingPrivilegesCallOut />
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
@@ -580,11 +595,12 @@ const RuleDetailsPageComponent = () => {
                         <RuleSwitch
                           id={rule?.id ?? '-1'}
                           isDisabled={
+                            !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
                             userHasNoPermissions(canUserCRUD) ||
                             (!hasMlPermissions && !rule?.enabled)
                           }
-                          enabled={rule?.enabled ?? false}
+                          enabled={isExistingRule && (rule?.enabled ?? false)}
                           onChange={handleOnChangeEnabledRule}
                         />
                         <EuiFlexItem>{i18n.ACTIVATED_RULE}</EuiFlexItem>
@@ -598,7 +614,9 @@ const RuleDetailsPageComponent = () => {
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
-                          userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
+                          userHasNoPermissions={
+                            !isExistingRule || userHasNoPermissions(canUserCRUD)
+                          }
                           canDuplicateRuleWithActions={canEditRuleWithActions(
                             rule,
                             hasActionsPrivileges

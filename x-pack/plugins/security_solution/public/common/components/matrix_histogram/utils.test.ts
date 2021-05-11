@@ -106,7 +106,7 @@ describe('utils', () => {
       expect(result).toEqual([]);
     });
 
-    test('shoule format data correctly', () => {
+    test('should format data correctly', () => {
       const data = [
         { x: 1, y: 2, g: 'g1' },
         { x: 2, y: 4, g: 'g1' },
@@ -120,6 +120,7 @@ describe('utils', () => {
       expect(result).toEqual([
         {
           key: 'g1',
+          color: '#1EA593',
           value: [
             { x: 1, y: 2, g: 'g1' },
             { x: 2, y: 4, g: 'g1' },
@@ -128,6 +129,7 @@ describe('utils', () => {
         },
         {
           key: 'g2',
+          color: '#2B70F7',
           value: [
             { x: 1, y: 1, g: 'g2' },
             { x: 2, y: 3, g: 'g2' },

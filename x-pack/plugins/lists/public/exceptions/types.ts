@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ExceptionListType, NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+
 import {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
-  ExceptionListType,
-  NamespaceType,
   Page,
   PerPage,
   TotalOrUndefined,
