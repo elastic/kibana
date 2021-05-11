@@ -41,19 +41,16 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf1_low_request_rate',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf1_response_code_rates',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf1_url_scanning',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
         ],
         searches: [] as string[],
@@ -81,19 +78,16 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf2_low_request_rate',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf2_response_code_rates',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf2_url_scanning',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
         ],
         searches: [] as string[],
@@ -121,31 +115,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf3_low_request_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf3_source_ip_request_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf3_source_ip_url_count_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf3_status_code_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf3_visitor_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: ['ml_http_access_filebeat_ecs'] as string[],
@@ -181,19 +170,16 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf4_abnormal_span_durations_nodejs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf4_abnormal_trace_durations_nodejs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf4_decreased_throughput_nodejs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -221,7 +207,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf5_high_mean_transaction_duration',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -249,7 +234,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf6_log-entry-rate',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -277,7 +261,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf7_log-entry-categories-count',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '41mb',
           },
         ],
         searches: [] as string[],
@@ -304,31 +287,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf8_visitor_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf8_status_code_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf8_source_ip_url_count_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf8_source_ip_request_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf8_low_request_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: ['ml_http_access_filebeat_ecs'] as string[],
@@ -364,7 +342,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf9_high_sum_total_sales',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -392,7 +369,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf11_suspicious_login_activity_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -420,31 +396,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf12_packetbeat_dns_tunneling',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf12_packetbeat_rare_dns_question',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf12_packetbeat_rare_server_domain',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf12_packetbeat_rare_urls',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf12_packetbeat_rare_user_agent',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -472,7 +443,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf13_high_latency_by_geo',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -500,13 +470,11 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf14_hosts_high_count_process_events_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf14_hosts_rare_process_activity_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: ['ml_auditbeat_hosts_process_events_ecs'] as string[],
@@ -541,37 +509,31 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf15_v2_rare_process_by_host_linux_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf15_v2_linux_rare_metadata_user',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf15_v2_linux_rare_metadata_process',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf15_v2_linux_anomalous_user_name_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf15_v2_linux_anomalous_process_all_hosts_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf15_v2_linux_anomalous_network_port_activity_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -599,49 +561,41 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf16_v2_rare_process_by_host_windows_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf16_v2_windows_anomalous_network_activity_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf16_v2_windows_anomalous_path_activity_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf16_v2_windows_anomalous_process_all_hosts_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf16_v2_windows_anomalous_process_creation',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf16_v2_windows_anomalous_user_name_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf16_v2_windows_rare_metadata_process',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf16_v2_windows_rare_metadata_user',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -669,19 +623,16 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf17_max_disk_utilization_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '25mb',
           },
           {
             jobId: 'pf17_metricbeat_outages_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '15mb',
           },
           {
             jobId: 'pf17_high_mean_cpu_iowait_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '25mb',
           },
         ],
         searches: [] as string[],
@@ -709,19 +660,16 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf18_hosts_memory_usage',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf18_hosts_network_in',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf18_hosts_network_out',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -749,19 +697,16 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf19_k8s_memory_usage',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf19_k8s_network_in',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf19_k8s_network_out',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -789,31 +734,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf20_rare_method_for_a_city',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf20_rare_method_for_a_country',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf20_rare_method_for_a_username',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf20_high_distinct_count_error_message',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf20_rare_error_code',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -841,67 +781,56 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf21_rare_process_by_host_windows_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_anomalous_network_activity_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_anomalous_path_activity_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_anomalous_process_all_hosts_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_anomalous_process_creation',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_anomalous_script',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf21_windows_anomalous_service',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_anomalous_user_name_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_rare_user_runas_event',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_rare_metadata_process',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf21_windows_rare_metadata_user',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
         ],
         searches: [] as string[],
@@ -929,7 +858,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf22_windows_rare_user_type10_remote_login',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
         ],
         searches: [] as string[],
@@ -957,31 +885,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf23_visitor_rate_apache',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf23_status_code_rate_apache',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf23_source_ip_url_count_apache',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf23_source_ip_request_rate_apache',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf23_low_request_rate_apache',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -1009,31 +932,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf24_visitor_rate_nginx',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf24_status_code_rate_nginx',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf24_source_ip_url_count_nginx',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf24_source_ip_request_rate_nginx',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf24_low_request_rate_nginx',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -1220,7 +1138,7 @@ export default ({ getService }: FtrProviderContext) => {
             );
           }
 
-          // verify job and datafeed creation + states
+          // verify job + datafeed creation + states and model memory limit
           for (const job of testData.expected.jobs) {
             const datafeedId = `datafeed-${job.jobId}`;
             await ml.api.waitForAnomalyDetectionJobToExist(job.jobId);
@@ -1230,41 +1148,18 @@ export default ({ getService }: FtrProviderContext) => {
             }
             await ml.api.waitForJobState(job.jobId, job.jobState);
             await ml.api.waitForDatafeedState(datafeedId, job.datafeedState);
+
+            // model memory limit should be <= 99mb
+            const {
+              body: jobsDetails,
+            }: {
+              body: {
+                jobs: Job[];
+              };
+            } = await ml.api.getAnomalyDetectionJob(job.jobId);
+            const actualModelMemoryLimit = jobsDetails.jobs[0].analysis_limits?.model_memory_limit;
+            expect(actualModelMemoryLimit).to.match(/\d{1,2}mb/);
           }
-
-          // compare model memory limits for created jobs
-          const expectedModelMemoryLimits = sortBy(
-            testData.expected.jobs.map((j) => ({
-              id: j.jobId,
-              modelMemoryLimit: j.modelMemoryLimit,
-            })),
-            'id'
-          );
-
-          const {
-            body: { jobs },
-          }: {
-            body: {
-              jobs: Job[];
-            };
-          } = await ml.api.getAnomalyDetectionJob(
-            testData.expected.jobs.map((j) => j.jobId).join()
-          );
-
-          const actualModelMemoryLimits = sortBy(
-            jobs.map((j) => ({
-              id: j.job_id,
-              modelMemoryLimit: j.analysis_limits!.model_memory_limit,
-            })),
-            'id'
-          );
-
-          expect(actualModelMemoryLimits).to.eql(
-            expectedModelMemoryLimits,
-            `Expected job model memory limits '${JSON.stringify(
-              expectedModelMemoryLimits
-            )}' (got '${JSON.stringify(actualModelMemoryLimits)}')`
-          );
 
           // verify saved objects creation
           for (const search of testData.expected.searches) {
