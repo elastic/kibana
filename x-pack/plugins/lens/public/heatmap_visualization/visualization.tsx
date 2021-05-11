@@ -32,7 +32,7 @@ const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmap
 });
 
 interface HeatmapVisualizationDeps {
-  paletteService: PaletteRegistry;
+  paletteService?: PaletteRegistry;
 }
 
 function getAxisName(axis: 'x' | 'y') {
@@ -48,13 +48,13 @@ function getAxisName(axis: 'x' | 'y') {
   return vertical;
 }
 
-const filterOperationsXAxis = (op: OperationMetadata) => isTime(op) || isBucketed(op);
-
 const isTime = (op: OperationMetadata) => op.dataType === 'date';
-const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
+export const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
 const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number';
 
-const isCellValueSupported = (op: OperationMetadata) => {
+export const filterOperationsXAxis = (op: OperationMetadata) => isTime(op) || isBucketed(op);
+
+export const isCellValueSupported = (op: OperationMetadata) => {
   return !isBucketed(op) && (op.scale === 'ordinal' || op.scale === 'ratio') && isNumericMetric(op);
 };
 
@@ -130,8 +130,6 @@ export const getHeatmapVisualization = ({
     const datasourceLayer = frame.datasourceLayers[layerId];
 
     const originalOrder = datasourceLayer.getTableSpec().map(({ columnId }) => columnId);
-    // When we add a column it could be empty, and therefore have no order
-
     if (!originalOrder) {
       return { groups: [] };
     }
@@ -358,7 +356,53 @@ export const getHeatmapVisualization = ({
   },
 
   getErrorMessages(state) {
-    // not possible to break it?
-    return undefined;
+    const errors: ReturnType<Visualization['getErrorMessages']> = [];
+
+    if (!state.xAccessor) {
+      errors.push({
+        shortMessage: i18n.translate(
+          'xpack.lens.heatmapVisualization.missingXAccessorShortMessage',
+          {
+            defaultMessage: 'Missing Horizontal axis.',
+          }
+        ),
+        longMessage: i18n.translate('xpack.lens.heatmapVisualization.missingXAccessorLongMessage', {
+          defaultMessage: 'Configuration for the horizontal axis is missing.',
+        }),
+      });
+    }
+
+    if (!state.yAccessor) {
+      errors.push({
+        shortMessage: i18n.translate(
+          'xpack.lens.heatmapVisualization.missingYAccessorShortMessage',
+          {
+            defaultMessage: 'Missing Vertical axis.',
+          }
+        ),
+        longMessage: i18n.translate('xpack.lens.heatmapVisualization.missingYAccessorLongMessage', {
+          defaultMessage: 'Configuration for the vertical axis is missing.',
+        }),
+      });
+    }
+
+    if (!state.valueAccessor) {
+      errors.push({
+        shortMessage: i18n.translate(
+          'xpack.lens.heatmapVisualization.missingValueAccessorShortMessage',
+          {
+            defaultMessage: 'Missing cell value.',
+          }
+        ),
+        longMessage: i18n.translate(
+          'xpack.lens.heatmapVisualization.missingValueAccessorLongMessage',
+          {
+            defaultMessage: 'Configuration for computing cell value is missing.',
+          }
+        ),
+      });
+    }
+
+    return errors.length ? errors : undefined;
   },
 });
