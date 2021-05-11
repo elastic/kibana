@@ -7,3 +7,16 @@
  */
 
 export * from './add_remove_id_to_item';
+export * from './bad_request_error';
+export * from './create_boostrap_index';
+export * from './delete_all_index';
+export * from './delete_policy';
+export * from './delete_template';
+export * from './elasticsearch_client';
+export * from './get_index_exists';
+export * from './get_policy_exists';
+export * from './get_template_exists';
+export * from './read_privileges';
+export * from './set_policy';
+export * from './set_template';
+export * from './transform_error';
