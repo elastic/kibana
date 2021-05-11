@@ -654,6 +654,14 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.dropdownControl.args.valueColumnLabel', {
         defaultMessage: 'Column from which to extract values to make available in the dropdown',
       }),
+    getDefaultDisplayName: () =>
+        i18n.translate('xpack.canvas.uis.views.dropdownControl.args.defaultValueTitle', {
+          defaultMessage: 'Default value',
+        }),
+    getDefaultHelp: () =>
+        i18n.translate('xpack.canvas.uis.views.dropdownControl.args.defaultValueLabel', {
+          defaultMessage: 'The default value that is choosen in the dropdown',
+        }),
   },
   GetCell: {
     getDisplayName: () =>

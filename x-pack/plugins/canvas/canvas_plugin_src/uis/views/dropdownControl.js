@@ -39,8 +39,8 @@ export const dropdownControl = () => ({
     },
     {
       name: 'defaultValue',
-      displayName: "defaultValue",
-      help: "define a value as default",
+      displayName: strings.getDefaultDisplayName(),
+      help: strings.getDefaultHelp(),
       argType: 'string',
     },
   ],

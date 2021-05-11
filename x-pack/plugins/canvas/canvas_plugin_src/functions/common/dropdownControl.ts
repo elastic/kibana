@@ -58,7 +58,7 @@ export function dropdownControl(): ExpressionFunctionDefinition<
       },
       defaultValue: {
         types: ['string'],
-        help: "default Value",
+        help: argHelp.defaultValue,
       },
     },
     fn: (input, { valueColumn, filterColumn, filterGroup, labelColumn, defaultValue }) => {
@@ -84,7 +84,7 @@ export function dropdownControl(): ExpressionFunctionDefinition<
           column,
           choices,
           filterGroup,
-          defaultValue
+          defaultValue,
         },
       };
     },

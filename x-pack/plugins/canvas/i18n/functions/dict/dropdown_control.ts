@@ -31,5 +31,8 @@ export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
       defaultMessage: 'The group name for the filter.',
     }),
+    defaultValue: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
+      defaultMessage: 'The default value for the element if nothing else is defined.',
+    }),
   },
 };
