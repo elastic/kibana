@@ -113,7 +113,7 @@ export const DashboardListing = ({
     }
   }, [dashboardPanelStorage, redirectTo, core.overlays]);
 
-  const noItemsFragment = useMemo(
+  const emptyPrompt = useMemo(
     () => getNoItemsMessage(hideWriteControls, core.application, createItem),
     [createItem, core.application, hideWriteControls]
   );
@@ -181,7 +181,7 @@ export const DashboardListing = ({
       tableCaption={getTableCaption()}
       entityName={getEntityName()}
       {...{
-        noItemsFragment,
+        emptyPrompt,
         searchFilters,
         listingLimit,
         tableColumns,
@@ -241,80 +241,76 @@ const getNoItemsMessage = (
 ) => {
   if (hideWriteControls) {
     return (
-      <div>
-        <EuiEmptyPrompt
-          iconType="dashboardApp"
-          title={
-            <h1 id="dashboardListingHeading">
-              <FormattedMessage
-                id="dashboard.listing.noItemsMessage"
-                defaultMessage="Looks like you don't have any dashboards."
-              />
-            </h1>
-          }
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div>
       <EuiEmptyPrompt
         iconType="dashboardApp"
         title={
           <h1 id="dashboardListingHeading">
             <FormattedMessage
-              id="dashboard.listing.createNewDashboard.title"
-              defaultMessage="Create your first dashboard"
+              id="dashboard.listing.noItemsMessage"
+              defaultMessage="Looks like you don't have any dashboards."
             />
           </h1>
         }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
-                defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-                defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-                values={{
-                  sampleDataInstallLink: (
-                    <EuiLink
-                      onClick={() =>
-                        application.navigateToApp('home', {
-                          path: '#/tutorial_directory/sampleData',
-                        })
-                      }
-                    >
-                      <FormattedMessage
-                        id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                        defaultMessage="Install some sample data"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            onClick={createItem}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createDashboardPromptButton"
-          >
-            <FormattedMessage
-              id="dashboard.listing.createNewDashboard.createButtonLabel"
-              defaultMessage="Create new dashboard"
-            />
-          </EuiButton>
-        }
       />
-    </div>
+    );
+  }
+
+  return (
+    <EuiEmptyPrompt
+      iconType="dashboardApp"
+      title={
+        <h1 id="dashboardListingHeading">
+          <FormattedMessage
+            id="dashboard.listing.createNewDashboard.title"
+            defaultMessage="Create your first dashboard"
+          />
+        </h1>
+      }
+      body={
+        <Fragment>
+          <p>
+            <FormattedMessage
+              id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+              defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+              defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+              values={{
+                sampleDataInstallLink: (
+                  <EuiLink
+                    onClick={() =>
+                      application.navigateToApp('home', {
+                        path: '#/tutorial_directory/sampleData',
+                      })
+                    }
+                  >
+                    <FormattedMessage
+                      id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                      defaultMessage="Install some sample data"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </Fragment>
+      }
+      actions={
+        <EuiButton
+          onClick={createItem}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="createDashboardPromptButton"
+        >
+          <FormattedMessage
+            id="dashboard.listing.createNewDashboard.createButtonLabel"
+            defaultMessage="Create new dashboard"
+          />
+        </EuiButton>
+      }
+    />
   );
 };
