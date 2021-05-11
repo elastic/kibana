@@ -481,6 +481,7 @@ export const VisualizationWrapper = ({
                 </p>
                 {localState.configurationValidationError[0].fixAction && activeDatasourceId && (
                   <EuiButton
+                    data-test-subj="errorFixAction"
                     onClick={async () => {
                       const newState = await localState.configurationValidationError?.[0].fixAction?.newState(
                         framePublicAPI

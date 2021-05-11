@@ -20,7 +20,7 @@ import {
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
-import { GenericBucket, IAggConfigs } from './agg_configs';
+import { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
 
 type State = string | number | boolean | null | undefined | SerializableState;
@@ -197,26 +197,6 @@ export class AggConfig {
       );
     }
     return parsedTimeShift;
-  }
-
-  getShiftedKey(key: string | number, timeShift: moment.Duration): string | number {
-    return this.type.getShiftedKey(this, key, timeShift);
-  }
-
-  getTimeShiftInterval(): undefined | moment.Duration {
-    return this.type.getTimeShiftInterval(this);
-  }
-
-  splitForTimeShift(aggs: IAggConfigs) {
-    return this.type.splitForTimeShift(this, aggs);
-  }
-
-  orderBuckets(a: GenericBucket, b: GenericBucket): number {
-    if (this.type.orderBuckets) {
-      return this.type.orderBuckets(this, a, b);
-    } else {
-      return 0;
-    }
   }
 
   write(aggs?: IAggConfigs) {

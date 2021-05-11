@@ -45,7 +45,7 @@ export function FrameLayout(props: FrameLayoutProps) {
             </h2>
           </EuiScreenReaderOnly>
           {props.workspacePanel}
-          {/* {props.suggestionsPanel} */}
+          {props.suggestionsPanel}
         </section>
         <section
           className="lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right"

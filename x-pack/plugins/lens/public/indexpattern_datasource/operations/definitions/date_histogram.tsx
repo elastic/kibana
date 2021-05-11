@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -22,8 +22,6 @@ import {
   EuiSwitchEvent,
   EuiTextColor,
 } from '@elastic/eui';
-import moment from 'moment';
-import { parseTimeShift } from '../../../../../../../src/plugins/data/common';
 import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition, ParamEditorProps } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
@@ -188,35 +186,12 @@ export const dateHistogramOperation: OperationDefinition<
     dateRange,
     data,
     indexPattern,
-    activeData,
   }: ParamEditorProps<DateHistogramIndexPatternColumn>) {
-    const [localValue, setLocalValue] = useState(currentColumn?.params.interval);
-    useEffect(() => {
-      setLocalValue(currentColumn?.params.interval);
-    }, [currentColumn?.params.interval]);
-
-    function isIntervalTooSmall(interval: moment.Duration | null) {
-      if (!interval) {
-        return false;
-      }
-      const timeShifts = Object.values(layer.columns)
-        .filter((col) => col.timeShift && col.timeShift !== 'previous')
-        .map((col) => col.timeShift);
-      return timeShifts.some((shift) => {
-        if (!shift) return false;
-        const parsedShift = parseTimeShift(shift);
-        return (
-          typeof parsedShift === 'object' &&
-          parsedShift.asMilliseconds() < interval.asMilliseconds()
-        );
-      });
-    }
-
     const field = currentColumn && indexPattern.getFieldByName(currentColumn.sourceField);
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
-    const interval = parseInterval(localValue);
+    const interval = parseInterval(currentColumn.params.interval);
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
@@ -234,24 +209,13 @@ export const dateHistogramOperation: OperationDefinition<
       updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
     }
 
-    const getIntervalAsDuration = (newInterval: typeof interval) => {
-      const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
-      const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
-      return search.aggs.parseInterval(value);
-    };
-
-    const setInterval = (newInterval: typeof interval, storeLocally: boolean = false) => {
+    const setInterval = (newInterval: typeof interval) => {
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
       const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
-      if (storeLocally) {
-        setLocalValue(value);
-      } else {
-        updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
-      }
+      updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
     };
 
-    const currentIntervalTooSmall = isIntervalTooSmall(getIntervalAsDuration(interval));
     return (
       <>
         {!intervalIsRestricted && (
@@ -273,14 +237,6 @@ export const dateHistogramOperation: OperationDefinition<
             })}
             fullWidth
             display="rowCompressed"
-            isInvalid={currentIntervalTooSmall}
-            error={
-              currentIntervalTooSmall &&
-              i18n.translate('xpack.lens.indexPattern.intervalTooSmallError', {
-                defaultMessage:
-                  'Interval is larger than configured time shift - make sure to keep date histogram interval smaller than time shifts',
-              })
-            }
           >
             {intervalIsRestricted ? (
               <FormattedMessage
@@ -309,8 +265,7 @@ export const dateHistogramOperation: OperationDefinition<
                           ...interval,
                           value: e.target.value,
                         };
-                        const tooSmall = isIntervalTooSmall(getIntervalAsDuration(newInterval));
-                        setInterval(newInterval, tooSmall);
+                        setInterval(newInterval);
                       }}
                     />
                   </EuiFlexItem>
@@ -324,8 +279,7 @@ export const dateHistogramOperation: OperationDefinition<
                           ...interval,
                           unit: e.target.value,
                         };
-                        const tooSmall = isIntervalTooSmall(getIntervalAsDuration(newInterval));
-                        setInterval(newInterval, tooSmall);
+                        setInterval(newInterval);
                       }}
                       isInvalid={!isValid}
                       options={[

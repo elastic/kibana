@@ -61,7 +61,7 @@ function getExpressionForLayer(
       rootDef.input === 'fullReference' &&
       column.timeShift
     ) {
-      // inherit filter to all referenced operations
+      // inherit time shift to all referenced operations
       column.references.forEach((referenceColumnId) => {
         const referencedColumn = columns[referenceColumnId];
         const referenceDef = operationDefinitionMap[column.operationType];

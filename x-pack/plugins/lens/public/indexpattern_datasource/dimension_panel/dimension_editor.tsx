@@ -522,7 +522,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 },
                 showInPopover: Boolean(
                   operationDefinitionMap[selectedColumn.operationType].shiftable &&
-                    selectedColumn.timeShift === undefined
+                    selectedColumn.timeShift === undefined &&
+                    (currentIndexPattern.timeFieldName ||
+                      Object.values(state.layers[layerId].columns).some(
+                        (col) => col.operationType === 'date_histogram'
+                      ))
                 ),
                 inlineElement:
                   operationDefinitionMap[selectedColumn.operationType].shiftable &&

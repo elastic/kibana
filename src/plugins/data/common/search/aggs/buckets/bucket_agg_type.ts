@@ -44,6 +44,22 @@ export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfi
   getKey: (bucket: any, key: any, agg: TBucketAggConfig) => any;
   type = bucketType;
 
+  getShiftedKey(
+    agg: TBucketAggConfig,
+    key: string | number,
+    timeShift: moment.Duration
+  ): string | number {
+    return key;
+  }
+
+  getTimeShiftInterval(agg: TBucketAggConfig): undefined | moment.Duration {
+    return undefined;
+  }
+
+  orderBuckets(agg: TBucketAggConfig, a: GenericBucket, b: GenericBucket): number {
+    return Number(a.key) - Number(b.key);
+  }
+
   constructor(config: BucketAggTypeConfig<TBucketAggConfig>) {
     super(config);
 

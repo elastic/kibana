@@ -141,6 +141,9 @@ export function TimeShift({
   const dateHistogramColumn = layer.columnOrder.find(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   );
+  if (!dateHistogramColumn && !indexPattern.timeFieldName) {
+    return null;
+  }
   if (dateHistogramColumn && activeData && activeData[layerId] && activeData[layerId]) {
     const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
     if (column) {
@@ -169,11 +172,7 @@ export function TimeShift({
   }
 
   const parsedLocalValue = localValue && parseTimeShift(localValue);
-  const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
-  const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
-  const isLocalValueInvalid = Boolean(
-    parsedLocalValue === 'invalid' || localValueTooSmall || localValueNotMultiple
-  );
+  const isLocalValueInvalid = Boolean(parsedLocalValue === 'invalid');
 
   function getSelectedOption() {
     if (!localValue) return [];
@@ -207,19 +206,6 @@ export function TimeShift({
         helpText={i18n.translate('xpack.lens.indexPattern.timeShift.help', {
           defaultMessage: 'Time shift is specified by a number followed by a time unit',
         })}
-        error={
-          localValueTooSmall
-            ? i18n.translate('xpack.lens.indexPattern.timeShift.tooSmallHelp', {
-                defaultMessage:
-                  'Time shift should to be larger than the date histogram interval. Either increase time shift or specify smaller interval in date histogram',
-              })
-            : localValueNotMultiple
-            ? i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
-                defaultMessage:
-                  'Time shift should be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
-              })
-            : undefined
-        }
         isInvalid={isLocalValueInvalid}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
