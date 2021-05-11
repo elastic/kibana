@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getDocHeader()).to.have.string(customLabel);
     });
 
-    it('allows creation of a new field 123', async function () {
+    it('allows creation of a new field', async function () {
       await createRuntimeField('runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('fieldNames to include runtimefield', async () => {
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('fieldNames to include edits', async () => {
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        return fieldNames.includes('runtimefield') && fieldNames.includes('runtimefield edited');
+        return fieldNames.includes('runtimefield edited');
       });
     });
 
