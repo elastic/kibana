@@ -22,7 +22,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
-import { Ecs } from '../../../../../../../common/ecs';
 import { EventFiltersForm } from '../form';
 import { useEventFiltersSelector, useEventFiltersNotification } from '../../hooks';
 import {
@@ -33,97 +32,125 @@ import {
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 
 export interface EventFiltersFlyoutProps {
-  data?: Ecs;
+  type?: 'create' | 'edit';
+  id?: string;
   onCancel(): void;
 }
 
-export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(({ data, onCancel }) => {
-  useEventFiltersNotification();
-  const dispatch = useDispatch<Dispatch<AppAction>>();
-  const formHasError = useEventFiltersSelector(getFormHasError);
-  const creationInProgress = useEventFiltersSelector(isCreationInProgress);
-  const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
+export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
+  ({ onCancel, id, type = 'create' }) => {
+    useEventFiltersNotification();
+    const dispatch = useDispatch<Dispatch<AppAction>>();
+    const formHasError = useEventFiltersSelector(getFormHasError);
+    const creationInProgress = useEventFiltersSelector(isCreationInProgress);
+    const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
 
-  useEffect(() => {
-    if (creationSuccessful) {
+    useEffect(() => {
+      if (creationSuccessful) {
+        onCancel();
+        dispatch({
+          type: 'eventFiltersFormStateChanged',
+          payload: {
+            type: 'UninitialisedResourceState',
+          },
+        });
+      }
+    }, [creationSuccessful, onCancel, dispatch]);
+
+    // Initialize the store with the id passed as prop to allow render the form. It acts as componentDidMount
+    useEffect(() => {
+      if (type === 'edit' && !!id) {
+        dispatch({
+          type: 'eventFiltersInitFromId',
+          payload: { id },
+        });
+      } else {
+        dispatch({
+          type: 'eventFiltersInitForm',
+          payload: { entry: getInitialExceptionFromEvent() },
+        });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleOnCancel = useCallback(() => {
+      if (creationInProgress) return;
       onCancel();
-      dispatch({
-        type: 'eventFiltersFormStateChanged',
-        payload: {
-          type: 'UninitialisedResourceState',
-        },
-      });
-    }
-  }, [creationSuccessful, onCancel, dispatch]);
+    }, [creationInProgress, onCancel]);
 
-  // Initialize the store with the event passed as prop to allow render the form. It acts as componentDidMount
-  useEffect(() => {
-    dispatch({
-      type: 'eventFiltersInitForm',
-      payload: { entry: getInitialExceptionFromEvent(data) },
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleOnCancel = useCallback(() => {
-    if (creationInProgress) return;
-    onCancel();
-  }, [creationInProgress, onCancel]);
-
-  const confirmButtonMemo = useMemo(
-    () => (
-      <EuiButton
-        data-test-subj="add-exception-confirm-button"
-        fill
-        disabled={formHasError || creationInProgress}
-        onClick={() => dispatch({ type: 'eventFiltersCreateStart' })}
-        isLoading={creationInProgress}
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm"
-          defaultMessage="Add Endpoint Event Filter"
-        />
-      </EuiButton>
-    ),
-    [dispatch, formHasError, creationInProgress]
-  );
-
-  return (
-    <EuiFlyout size="l" onClose={handleOnCancel}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>
+    const confirmButtonMemo = useMemo(
+      () => (
+        <EuiButton
+          data-test-subj="add-exception-confirm-button"
+          fill
+          disabled={formHasError || creationInProgress}
+          onClick={() =>
+            id
+              ? dispatch({ type: 'eventFiltersUpdateStart' })
+              : dispatch({ type: 'eventFiltersCreateStart' })
+          }
+          isLoading={creationInProgress}
+        >
+          {id ? (
             <FormattedMessage
-              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title"
-              defaultMessage="Endpoint Security"
+              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update"
+              defaultMessage="Update Endpoint Event Filter"
             />
-          </h2>
-        </EuiTitle>
-        <FormattedMessage
-          id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle"
-          defaultMessage="Add Endpoint Event Filter"
-        />
-      </EuiFlyoutHeader>
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.create"
+              defaultMessage="Add Endpoint Event Filter"
+            />
+          )}
+        </EuiButton>
+      ),
+      [formHasError, creationInProgress, id, dispatch]
+    );
 
-      <EuiFlyoutBody>
-        <EventFiltersForm allowSelectOs />
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
+    return (
+      <EuiFlyout size="l" onClose={handleOnCancel} data-test-subj="eventFiltersCreateEditFlyout">
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
               <FormattedMessage
-                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.cancel"
-                defaultMessage="cancel"
+                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title"
+                defaultMessage="Endpoint Security"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{confirmButtonMemo}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
-  );
-});
+            </h2>
+          </EuiTitle>
+          {id ? (
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.update"
+              defaultMessage="Update Endpoint Event Filter"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create"
+              defaultMessage="Add Endpoint Event Filter"
+            />
+          )}
+        </EuiFlyoutHeader>
+
+        <EuiFlyoutBody>
+          <EventFiltersForm allowSelectOs />
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleOnCancel}>
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.cancel"
+                  defaultMessage="cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{confirmButtonMemo}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    );
+  }
+);
 
 EventFiltersFlyout.displayName = 'EventFiltersFlyout';

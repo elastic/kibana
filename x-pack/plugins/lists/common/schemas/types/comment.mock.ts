@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DATE_NOW, ID, USER } from '../../constants.mock';
+import { Comment, CommentsArray } from '@kbn/securitysolution-io-ts-utils';
 
-import { Comment, CommentsArray } from './comment';
+import { DATE_NOW, ID, USER } from '../../constants.mock';
 
 export const getCommentsMock = (): Comment => ({
   comment: 'some old comment',

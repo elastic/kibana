@@ -6,10 +6,10 @@
  */
 
 import * as t from 'io-ts';
+import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-utils';
 
 import { filter, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { StringToPositiveNumber } from '../types/string_to_positive_number';
 
 export const findEndpointListItemSchema = t.exact(
   t.partial({

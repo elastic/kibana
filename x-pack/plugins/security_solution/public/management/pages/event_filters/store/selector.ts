@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
-import { EventFiltersListPageState } from '../state';
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+
+import { EventFiltersListPageState, EventFiltersServiceGetListOptions } from '../types';
+
+import { ExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
   isLoadingResourceState,
   isLoadedResourceState,
   isFailedResourceState,
+  isUninitialisedResourceState,
+  getLastLoadedResourceState,
 } from '../../../state/async_resource_state';
 import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import {
@@ -21,7 +24,6 @@ import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants';
 import { Immutable } from '../../../../../common/endpoint/types';
-import { EventFiltersServiceGetListOptions } from '../types';
 
 type StoreState = Immutable<EventFiltersListPageState>;
 type EventFiltersSelector<T> = (state: StoreState) => T;
@@ -46,15 +48,7 @@ export const getCurrentListPageDataState: EventFiltersSelector<StoreState['listP
 export const getListApiSuccessResponse: EventFiltersSelector<
   Immutable<FoundExceptionListItemSchema> | undefined
 > = createSelector(getCurrentListPageDataState, (listPageData) => {
-  if (isLoadedResourceState(listPageData)) {
-    return listPageData.data.content;
-  } else if (
-    isLoadingResourceState(listPageData) &&
-    isLoadedResourceState(listPageData.previousState)
-  ) {
-    return listPageData.previousState.data.content;
-  }
-  return undefined;
+  return getLastLoadedResourceState(listPageData)?.data.content;
 });
 
 export const getListItems: EventFiltersSelector<
@@ -71,13 +65,7 @@ export const getListItems: EventFiltersSelector<
 export const getCurrentListItemsQuery: EventFiltersSelector<EventFiltersServiceGetListOptions> = createSelector(
   getCurrentListPageDataState,
   (pageDataState) => {
-    return (
-      (isLoadedResourceState(pageDataState) && pageDataState.data.query) ||
-      (isLoadingResourceState(pageDataState) &&
-        isLoadedResourceState(pageDataState.previousState) &&
-        pageDataState.previousState.data.query) ||
-      {}
-    );
+    return getLastLoadedResourceState(pageDataState)?.data.query ?? {};
   }
 );
 
@@ -121,10 +109,28 @@ export const getListPageDoesDataExist: EventFiltersSelector<boolean> = createSel
   }
 );
 
-export const getFormEntry = (
-  state: EventFiltersListPageState
-): CreateExceptionListItemSchema | ExceptionListItemSchema | undefined => {
+export const getFormEntryState: EventFiltersSelector<StoreState['form']['entry']> = (state) => {
   return state.form.entry;
+};
+// Needed for form component as we modify the existing entry on exceptuionBuilder component
+export const getFormEntryStateMutable = (
+  state: EventFiltersListPageState
+): EventFiltersListPageState['form']['entry'] => {
+  return state.form.entry;
+};
+
+export const getFormEntry = createSelector(getFormEntryState, (entry) => entry);
+
+export const getNewCommentState: EventFiltersSelector<StoreState['form']['newComment']> = (
+  state
+) => {
+  return state.form.newComment;
+};
+
+export const getNewComment = createSelector(getNewCommentState, (newComment) => newComment);
+
+export const getHasNameError = (state: EventFiltersListPageState): boolean => {
+  return state.form.hasNameError;
 };
 
 export const getFormHasError = (state: EventFiltersListPageState): boolean => {
@@ -139,11 +145,26 @@ export const isCreationSuccessful = (state: EventFiltersListPageState): boolean 
   return isLoadedResourceState(state.form.submissionResourceState);
 };
 
-export const getCreationError = (state: EventFiltersListPageState): ServerApiError | undefined => {
+export const isUninitialisedForm = (state: EventFiltersListPageState): boolean => {
+  return isUninitialisedResourceState(state.form.submissionResourceState);
+};
+
+export const getActionError = (state: EventFiltersListPageState): ServerApiError | undefined => {
   const submissionResourceState = state.form.submissionResourceState;
 
   return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
 };
+
+export const getSubmissionResourceState: EventFiltersSelector<
+  StoreState['form']['submissionResourceState']
+> = (state) => {
+  return state.form.submissionResourceState;
+};
+
+export const getSubmissionResource = createSelector(
+  getSubmissionResourceState,
+  (submissionResourceState) => submissionResourceState
+);
 
 export const getCurrentLocation: EventFiltersSelector<StoreState['location']> = (state) =>
   state.location;
