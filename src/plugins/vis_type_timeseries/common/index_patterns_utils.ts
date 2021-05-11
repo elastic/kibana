@@ -7,7 +7,7 @@
  */
 
 import { uniq } from 'lodash';
-import { PanelSchema, IndexPatternValue, FetchedIndexPattern } from '../common/types';
+import type { Panel, IndexPatternValue, FetchedIndexPattern } from '../common/types';
 import { IIndexPattern, IndexPatternsService } from '../../data/common';
 
 export const isStringTypeIndexPattern = (
@@ -17,10 +17,7 @@ export const isStringTypeIndexPattern = (
 export const getIndexPatternKey = (indexPatternValue: IndexPatternValue) =>
   isStringTypeIndexPattern(indexPatternValue) ? indexPatternValue : indexPatternValue?.id ?? '';
 
-export const extractIndexPatternValues = (
-  panel: PanelSchema,
-  defaultIndex: IIndexPattern | null
-) => {
+export const extractIndexPatternValues = (panel: Panel, defaultIndex: IIndexPattern | null) => {
   const patterns: IndexPatternValue[] = [];
 
   if (panel.index_pattern) {
