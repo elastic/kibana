@@ -28,7 +28,6 @@ import {
   RULE_ID,
   RULE_NAME,
 } from '../../../../rule_registry/common/technical_rule_data_field_names';
-import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
