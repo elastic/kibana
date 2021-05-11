@@ -179,7 +179,7 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
       forceRefresh ||
       location.page_index + 1 !== currentQuery.page ||
       location.page_size !== currentQuery.perPage ||
-      location.filter !== currentQuery.filter
+      (!!location.filter && location.filter !== currentQuery.filter)
     );
   }
 );

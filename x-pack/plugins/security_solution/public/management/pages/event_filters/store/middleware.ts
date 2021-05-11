@@ -146,12 +146,10 @@ const eventFiltersUpdate = async (
       delete updatedCommentsEntry[field as keyof UpdateExceptionListItemSchema];
     });
 
-    updatedCommentsEntry.comments = updatedCommentsEntry.comments?.map(
-      (comment: UpdateExceptionListItemSchema['comments']) => ({
-        comment: comment.comment,
-        id: comment.id,
-      })
-    );
+    updatedCommentsEntry.comments = updatedCommentsEntry.comments?.map((comment) => ({
+      comment: comment.comment,
+      id: comment.id,
+    }));
 
     const exception = await eventFiltersService.updateOne(updatedCommentsEntry);
     store.dispatch({
