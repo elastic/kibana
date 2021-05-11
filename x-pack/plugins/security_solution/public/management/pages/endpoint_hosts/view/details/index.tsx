@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useEffect, memo, useMemo } from 'react';
+import moment from 'moment';
+
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -16,6 +18,8 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
   EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,14 +45,64 @@ import {
   policyResponseAppliedRevision,
 } from '../../store/selectors';
 import { EndpointDetails } from './endpoint_details';
+import { EndpointActivityLog } from './endpoint_activity_log';
 import { PolicyResponse } from './policy_response';
-import { HostMetadata } from '../../../../../../common/endpoint/types';
+import * as i18 from '../translations';
+import { EndpointAction, HostMetadata } from '../../../../../../common/endpoint/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
+import {
+  EndpointDetailsFlyoutTabs,
+  EndpointDetailsTabsTypes,
+} from './components/endpoint_details_tabs';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointListPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
+
+export const dummyEndpointActions: EndpointAction[] = [
+  {
+    action_id: '1',
+    '@timestamp': moment().subtract(2, 'hours').fromNow().toString(),
+    expiration: moment().add(1, 'day').fromNow().toString(),
+    type: 'INPUT_ACTION',
+    input_type: 'endpoint',
+    agents: ['x', 'y', 'z'],
+    user_id: 'ash',
+    data: {
+      command: 'isolate',
+      comment: 'Sem et tortor consequat id porta nibh venenatis cras sed.',
+    },
+  },
+  {
+    action_id: '2',
+    '@timestamp': moment().subtract(4, 'hours').fromNow().toString(),
+    expiration: moment().add(1, 'day').fromNow().toString(),
+    type: 'INPUT_ACTION',
+    input_type: 'endpoint',
+    agents: ['x', 'y', 'z'],
+    user_id: 'someone',
+    data: {
+      command: 'unisolate',
+      comment: 'Turpis egestas pretium aenean pharetra.',
+    },
+  },
+  {
+    action_id: '3',
+    '@timestamp': moment().subtract(1, 'day').fromNow().toString(),
+    expiration: moment().add(3, 'day').fromNow().toString(),
+    type: 'INPUT_ACTION',
+    input_type: 'endpoint',
+    agents: ['x', 'y', 'z'],
+    user_id: 'ash',
+    data: {
+      command: 'isolate',
+      comment:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    },
+  },
+];
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -88,6 +142,7 @@ export const EndpointDetailsFlyout = memo(() => {
       style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
       size="m"
+      paddingSize="m"
     >
       <EuiFlyoutHeader hasBorder>
         {loading ? (
@@ -116,11 +171,30 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'details' && (
             <>
               <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
-                <EndpointDetails
-                  details={details}
-                  policyInfo={policyInfo}
-                  hostStatus={hostStatus}
-                />
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EndpointDetailsFlyoutTabs
+                      tabs={[
+                        {
+                          id: EndpointDetailsTabsTypes.overview,
+                          name: i18.OVERVIEW,
+                          content: (
+                            <EndpointDetails
+                              details={details}
+                              policyInfo={policyInfo}
+                              hostStatus={hostStatus}
+                            />
+                          ),
+                        },
+                        {
+                          id: EndpointDetailsTabsTypes.activityLog,
+                          name: i18.ACTIVITY_LOG,
+                          content: <EndpointActivityLog endpointActions={dummyEndpointActions} />,
+                        },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlyoutBody>
             </>
           )}
