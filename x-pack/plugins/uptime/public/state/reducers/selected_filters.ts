@@ -22,6 +22,7 @@ export function selectedFiltersReducer(
     case String(getSelectedFilters):
       return state;
     case String(setSelectedFilters):
+      if (action.payload === null) return null;
       if (state === null) return { ...action.payload };
       return {
         ...(state || {}),
