@@ -66,7 +66,6 @@ import {
   esRawResponse,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
-  INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
 } from '../../common/search';
 import { getEsaggs, getEsdsl } from './expressions';
 import {
@@ -153,16 +152,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.initializerContext.config.legacy.globalConfig$,
         this.logger,
         usage
-      )
-    );
-
-    this.registerSearchStrategy(
-      INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider(
-        this.initializerContext.config.legacy.globalConfig$,
-        this.logger,
-        usage,
-        true
       )
     );
 
