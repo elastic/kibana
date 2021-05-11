@@ -8,8 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const USE_DATA_SERVICE = 'labs:canvas:useDataService';
-export const TIME_TO_PRESENT = 'labs:presentation:timeToPresent';
+export const LABS_PROJECT_PREFIX = 'labs:';
+export const USE_DATA_SERVICE = `${LABS_PROJECT_PREFIX}canvas:useDataService` as const;
+export const TIME_TO_PRESENT = `${LABS_PROJECT_PREFIX}presentation:timeToPresent` as const;
 
 export const projectIDs = [TIME_TO_PRESENT, USE_DATA_SERVICE] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
