@@ -7,15 +7,14 @@
  */
 
 import Joi from 'joi';
-import {
+import type {
   AnySchema,
   JoiRoot,
   Reference,
-  Rules,
+  ExtensionRule,
   SchemaLike,
-  State,
+  CustomHelpers,
   ValidationErrorItem,
-  ValidationOptions,
 } from 'joi';
 import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
@@ -29,53 +28,53 @@ function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;
 }
 
-const anyCustomRule: Rules = {
-  name: 'custom',
-  params: {
-    validator: Joi.func().maxArity(1).required(),
+const anyCustomRule: ExtensionRule = {
+  multi: true,
+  args: [
+    {
+      name: 'validator',
+      assert: Joi.func().maxArity(1).required(),
+    },
+  ],
+  method(validator) {
+    // @ts-expect-error $_ helpers not present on on the typedef
+    return this.$_addRule({ name: 'custom', args: { validator } });
   },
-  validate(params, value, state, options) {
+  validate(value, { error }, args, options) {
     let validationResultMessage;
     try {
-      validationResultMessage = params.validator(value);
+      validationResultMessage = args.validator(value);
     } catch (e) {
       validationResultMessage = e.message || e;
     }
 
     if (typeof validationResultMessage === 'string') {
-      return this.createError(
-        'any.custom',
-        { value, message: validationResultMessage },
-        state,
-        options
-      );
+      return error('any.custom', { validator: args.validator });
     }
 
     return value;
   },
 };
 
-/**
- * @internal
- */
-export const internals = Joi.extend([
+export const internals: JoiRoot = Joi.extend(
   {
-    name: 'any',
-
-    rules: [anyCustomRule],
+    type: 'any',
+    rules: {
+      custom: anyCustomRule,
+    },
   },
   {
-    name: 'boolean',
-
+    type: 'boolean',
     base: Joi.boolean(),
-    coerce(value: any, state: State, options: ValidationOptions) {
+    coerce(value, { error }: CustomHelpers) {
       // If value isn't defined, let Joi handle default value if it's defined.
       if (value === undefined) {
-        return value;
+        return {
+          value,
+        };
       }
 
       // Allow strings 'true' and 'false' to be coerced to booleans (case-insensitive).
-
       // From Joi docs on `Joi.boolean`:
       // > Generates a schema object that matches a boolean data type. Can also
       // >  be called via bool(). If the validation convert option is on
@@ -87,135 +86,156 @@ export const internals = Joi.extend([
       }
 
       if (typeof value !== 'boolean') {
-        return this.createError('boolean.base', { value }, state, options);
+        return {
+          errors: [error('boolean.base')],
+        };
       }
 
-      return value;
+      return {
+        value,
+      };
     },
-    rules: [anyCustomRule],
+    rules: {
+      custom: anyCustomRule,
+    },
   },
   {
-    name: 'binary',
-
+    type: 'binary',
     base: Joi.binary(),
-    coerce(value: any, state: State, options: ValidationOptions) {
+    coerce(value, { error }) {
       // If value isn't defined, let Joi handle default value if it's defined.
       if (value !== undefined && !(typeof value === 'object' && Buffer.isBuffer(value))) {
-        return this.createError('binary.base', { value }, state, options);
+        return {
+          errors: [error('binary.base')],
+        };
       }
 
-      return value;
+      return { value };
     },
-    rules: [anyCustomRule],
+    rules: {
+      custom: anyCustomRule,
+    },
   },
   {
-    name: 'stream',
+    type: 'stream',
 
-    pre(value: any, state: State, options: ValidationOptions) {
+    prepare(value, { error }) {
       // If value isn't defined, let Joi handle default value if it's defined.
       if (value instanceof Stream) {
-        return value as any;
+        return { value };
       }
-
-      return this.createError('stream.base', { value }, state, options);
+      return {
+        errors: [error('stream.base')],
+      };
     },
-    rules: [anyCustomRule],
+    rules: {
+      custom: anyCustomRule,
+    },
   },
   {
-    name: 'string',
-
+    type: 'string',
     base: Joi.string(),
-    rules: [anyCustomRule],
+    rules: {
+      custom: anyCustomRule,
+    },
   },
   {
-    name: 'bytes',
+    type: 'bytes',
 
-    coerce(value: any, state: State, options: ValidationOptions) {
+    coerce(value: any, { error }) {
       try {
         if (typeof value === 'string') {
-          return ByteSizeValue.parse(value);
+          return { value: ByteSizeValue.parse(value) };
         }
 
         if (typeof value === 'number') {
-          return new ByteSizeValue(value);
+          return { value: new ByteSizeValue(value) };
         }
       } catch (e) {
-        return this.createError('bytes.parse', { value, message: e.message }, state, options);
+        return {
+          errors: [error('bytes.parse')],
+        };
       }
-
-      return value;
+      return { value };
     },
-    pre(value: any, state: State, options: ValidationOptions) {
+    prepare(value, { error }) {
       // If value isn't defined, let Joi handle default value if it's defined.
       if (value instanceof ByteSizeValue) {
-        return value as any;
+        return { value };
       }
-
-      return this.createError('bytes.base', { value }, state, options);
+      return {
+        errors: [error('bytes.base')],
+      };
     },
-    rules: [
-      anyCustomRule,
-      {
-        name: 'min',
-        params: {
-          limit: Joi.alternatives([Joi.number(), Joi.string()]).required(),
-        },
-        validate(params, value, state, options) {
-          const limit = ensureByteSizeValue(params.limit);
+    rules: {
+      any: anyCustomRule,
+      min: {
+        args: [
+          {
+            name: 'limit',
+            assert: Joi.alternatives([Joi.number(), Joi.string()]).required(),
+          },
+        ],
+        validate(value, { error }, args, options) {
+          const limit = ensureByteSizeValue(args.limit);
           if (value.isLessThan(limit)) {
-            return this.createError('bytes.min', { value, limit }, state, options);
+            return error('bytes.min', { value, limit });
           }
 
           return value;
         },
       },
-      {
-        name: 'max',
-        params: {
-          limit: Joi.alternatives([Joi.number(), Joi.string()]).required(),
-        },
-        validate(params, value, state, options) {
-          const limit = ensureByteSizeValue(params.limit);
+      max: {
+        args: [
+          {
+            name: 'limit',
+            assert: Joi.alternatives([Joi.number(), Joi.string()]).required(),
+          },
+        ],
+        validate(value, { error }, args, options) {
+          const limit = ensureByteSizeValue(args.limit);
           if (value.isGreaterThan(limit)) {
-            return this.createError('bytes.max', { value, limit }, state, options);
+            return error('bytes.max', { value, limit });
           }
 
           return value;
         },
       },
-    ],
+    },
   },
   {
-    name: 'duration',
-
-    coerce(value: any, state: State, options: ValidationOptions) {
+    type: 'duration',
+    coerce(value, { error }) {
       try {
         if (typeof value === 'string' || typeof value === 'number') {
-          return ensureDuration(value);
+          return { value: ensureDuration(value) };
         }
       } catch (e) {
-        return this.createError('duration.parse', { value, message: e.message }, state, options);
+        return {
+          errors: [error('duration.parse')],
+        };
       }
-
-      return value;
+      return { value };
     },
-    pre(value: any, state: State, options: ValidationOptions) {
+    prepare(value, { error }) {
       if (!isDuration(value)) {
-        return this.createError('duration.base', { value }, state, options);
+        return {
+          errors: [error('duration.base')],
+        };
       }
-
-      return value;
+      return { value };
     },
-    rules: [anyCustomRule],
+    rules: {
+      custom: anyCustomRule,
+    },
   },
   {
-    name: 'number',
-
+    type: 'number',
     base: Joi.number(),
-    coerce(value: any, state: State, options: ValidationOptions) {
+    coerce(value, { error }) {
       // If value isn't defined, let Joi handle default value if it's defined.
       if (value === undefined) {
-        return value;
+        return { value };
       }
 
       // Do we want to allow strings that can be converted, e.g. "2"? (Joi does)
@@ -226,198 +246,206 @@ export const internals = Joi.extend([
       // > strings that can be converted to numbers)
       const coercedValue: any = typeof value === 'string' ? Number(value) : value;
       if (typeof coercedValue !== 'number' || isNaN(coercedValue)) {
-        return this.createError('number.base', { value }, state, options);
+        return {
+          errors: [error('number.base')],
+        };
       }
 
-      return value;
+      return { value };
     },
-    rules: [anyCustomRule],
+    rules: {
+      custom: anyCustomRule,
+    },
   },
   {
-    name: 'object',
-
+    type: 'object',
     base: Joi.object(),
-    coerce(value: any, state: State, options: ValidationOptions) {
+    coerce(value: any, { error, prefs }) {
       if (value === undefined || isPlainObject(value)) {
-        return value;
+        return { value };
       }
 
-      if (options.convert && typeof value === 'string') {
+      if (prefs.convert && typeof value === 'string') {
         try {
           const parsed = JSON.parse(value);
           if (isPlainObject(parsed)) {
-            return parsed;
+            return { value: parsed };
           }
-          return this.createError('object.base', { value: parsed }, state, options);
+          return { errors: [error('object.base')] };
         } catch (e) {
-          return this.createError('object.parse', { value }, state, options);
+          return { errors: [error('object.parse')] };
         }
       }
 
-      return this.createError('object.base', { value }, state, options);
+      return { errors: [error('object.base')] };
     },
-    rules: [anyCustomRule],
+    rules: {
+      custom: anyCustomRule,
+    },
   },
   {
-    name: 'map',
-
-    coerce(value: any, state: State, options: ValidationOptions) {
+    type: 'array',
+    base: Joi.array(),
+    coerce(value: any, { error, prefs }) {
+      if (value === undefined || Array.isArray(value)) {
+        return { value };
+      }
+      if (prefs.convert && typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed)) {
+            return { value: parsed };
+          }
+          return {
+            errors: [error('array.base')],
+          };
+        } catch (e) {
+          return {
+            errors: [error('array.parse')],
+          };
+        }
+      }
+      return {
+        errors: [error('array.base')],
+      };
+    },
+    rules: {
+      custom: anyCustomRule,
+    },
+  },
+  {
+    type: 'map',
+    coerce(value, { error, prefs }) {
       if (value === undefined) {
-        return value;
+        return { value };
       }
       if (isPlainObject(value)) {
-        return new Map(Object.entries(value));
+        return { value: new Map(Object.entries(value)) };
       }
-      if (options.convert && typeof value === 'string') {
+      if (prefs.convert && typeof value === 'string') {
         try {
           const parsed = JSON.parse(value);
           if (isPlainObject(parsed)) {
-            return new Map(Object.entries(parsed));
+            return { value: new Map(Object.entries(parsed)) };
           }
-          return this.createError('map.base', { value: parsed }, state, options);
+          return {
+            errors: [error('map.base')],
+          };
         } catch (e) {
-          return this.createError('map.parse', { value }, state, options);
+          return {
+            errors: [error('map.parse')],
+          };
         }
       }
-
-      return value;
+      return { value };
     },
-    pre(value: any, state: State, options: ValidationOptions) {
+    prepare(value, { error }) {
       if (!isMap(value)) {
-        return this.createError('map.base', { value }, state, options);
+        return {
+          errors: [error('map.base')],
+        };
       }
 
-      return value as any;
+      return { value };
     },
-    rules: [
-      anyCustomRule,
-      {
-        name: 'entries',
-        params: {
-          key: Joi.object().schema(),
-          value: Joi.object().schema(),
-        },
-        validate(params, value, state, options) {
+    rules: {
+      custom: anyCustomRule,
+      entries: {
+        args: [
+          {
+            name: 'key',
+            assert: Joi.object().schema(),
+          },
+          {
+            name: 'value',
+            assert: Joi.object().schema(),
+          },
+        ],
+        validate(value, { error }, args, options) {
           const result = new Map();
           for (const [entryKey, entryValue] of value) {
-            const { value: validatedEntryKey, error: keyError } = Joi.validate(
-              entryKey,
-              params.key,
-              { presence: 'required' }
-            );
-
-            if (keyError) {
-              return this.createError('map.key', { entryKey, reason: keyError }, state, options);
+            let validatedEntryKey: any;
+            try {
+              validatedEntryKey = Joi.attempt(entryKey, args.key, { presence: 'required' });
+            } catch (e) {
+              return error('map.key', { entryKey, reason: e.message });
             }
 
-            const { value: validatedEntryValue, error: valueError } = Joi.validate(
-              entryValue,
-              params.value,
-              { presence: 'required' }
-            );
-
-            if (valueError) {
-              return this.createError(
-                'map.value',
-                { entryKey, reason: valueError },
-                state,
-                options
-              );
+            let validatedEntryValue: any;
+            try {
+              validatedEntryValue = Joi.attempt(entryValue, args.value, { presence: 'required' });
+            } catch (e) {
+              return error('map.value', { entryKey, reason: e.message });
             }
 
             result.set(validatedEntryKey, validatedEntryValue);
           }
-
-          return result as any;
+          return result;
         },
       },
-    ],
+    },
   },
   {
-    name: 'record',
-    pre(value: any, state: State, options: ValidationOptions) {
+    type: 'record',
+    prepare(value, { error, prefs }) {
       if (value === undefined || isPlainObject(value)) {
-        return value;
+        return { value };
       }
 
-      if (options.convert && typeof value === 'string') {
+      if (prefs.convert && typeof value === 'string') {
         try {
           const parsed = JSON.parse(value);
           if (isPlainObject(parsed)) {
-            return parsed;
+            return { value: parsed };
           }
-          return this.createError('record.base', { value: parsed }, state, options);
+          return {
+            errors: [error('record.base')],
+          };
         } catch (e) {
-          return this.createError('record.parse', { value }, state, options);
+          return {
+            errors: [error('record.parse')],
+          };
         }
       }
-
-      return this.createError('record.base', { value }, state, options);
+      return {
+        errors: [error('record.base')],
+      };
     },
-    rules: [
-      anyCustomRule,
-      {
-        name: 'entries',
-        params: { key: Joi.object().schema(), value: Joi.object().schema() },
-        validate(params, value, state, options) {
-          const result = {} as Record<string, any>;
-          for (const [entryKey, entryValue] of Object.entries(value)) {
-            const { value: validatedEntryKey, error: keyError } = Joi.validate(
-              entryKey,
-              params.key,
-              { presence: 'required' }
-            );
-
-            if (keyError) {
-              return this.createError('record.key', { entryKey, reason: keyError }, state, options);
+    rules: {
+      custom: anyCustomRule,
+      entries: {
+        args: [
+          {
+            name: 'key',
+            assert: Joi.object().schema(),
+          },
+          {
+            name: 'value',
+            assert: Joi.object().schema(),
+          },
+        ],
+        validate(value, { error }, args, options) {
+          const result = new Map();
+          for (const [entryKey, entryValue] of value) {
+            let validatedEntryKey: any;
+            try {
+              validatedEntryKey = Joi.attempt(entryKey, args.key, { presence: 'required' });
+            } catch (e) {
+              return error('record.key', { entryKey, reason: e.message });
             }
 
-            const { value: validatedEntryValue, error: valueError } = Joi.validate(
-              entryValue,
-              params.value,
-              { presence: 'required' }
-            );
-
-            if (valueError) {
-              return this.createError(
-                'record.value',
-                { entryKey, reason: valueError },
-                state,
-                options
-              );
+            let validatedEntryValue: any;
+            try {
+              validatedEntryValue = Joi.attempt(entryValue, args.value, { presence: 'required' });
+            } catch (e) {
+              return error('record.value', { entryKey, reason: e.message });
             }
 
-            result[validatedEntryKey] = validatedEntryValue;
+            result.set(validatedEntryKey, validatedEntryValue);
           }
-
-          return result as any;
+          return result;
         },
       },
-    ],
-  },
-  {
-    name: 'array',
-
-    base: Joi.array(),
-    coerce(value: any, state: State, options: ValidationOptions) {
-      if (value === undefined || Array.isArray(value)) {
-        return value;
-      }
-
-      if (options.convert && typeof value === 'string') {
-        try {
-          const parsed = JSON.parse(value);
-          if (Array.isArray(parsed)) {
-            return parsed;
-          }
-          return this.createError('array.base', { value: parsed }, state, options);
-        } catch (e) {
-          return this.createError('array.parse', { value }, state, options);
-        }
-      }
-
-      return this.createError('array.base', { value }, state, options);
     },
-    rules: [anyCustomRule],
-  },
-]) as JoiRoot;
+  }
+);

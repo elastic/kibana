@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { ValidationErrorItem, AnySchema } from 'joi';
 import { SchemaTypeError, ValidationError } from '../errors';
-import { AnySchema, internals, ValidationErrorItem } from '../internals';
+// import { internals } from '../internals';
 import { Reference } from '../references';
 
 export interface TypeOptions<T> {
@@ -36,12 +37,12 @@ export abstract class Type<V> {
 
       // If default value is a function, then we must provide description for it.
       if (typeof options.defaultValue === 'function') {
-        schema = schema.default(options.defaultValue, 'Type default value');
+        schema = schema.default(options.defaultValue);
       } else {
         schema = schema.default(
           Reference.isReference(options.defaultValue)
             ? options.defaultValue.getSchema()
-            : options.defaultValue
+            : (options.defaultValue as any)
         );
       }
     }
@@ -61,7 +62,8 @@ export abstract class Type<V> {
   }
 
   public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
-    const { value: validatedValue, error } = internals.validate(value, this.internalSchema, {
+    // TODO: make sure that we don't need to use `internal.attempt` here.
+    const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',
     });
@@ -94,8 +96,9 @@ export abstract class Type<V> {
     }
 
     const { context = {}, type, path, message } = error;
+    const convertedPath = path.map((entry) => entry.toString());
 
-    const errorHandleResult = this.handleError(type, context, path);
+    const errorHandleResult = this.handleError(type, context, convertedPath);
     if (errorHandleResult instanceof SchemaTypeError) {
       return errorHandleResult;
     }
@@ -103,15 +106,15 @@ export abstract class Type<V> {
     // If error handler just defines error message, then wrap it into proper
     // `SchemaTypeError` instance.
     if (typeof errorHandleResult === 'string') {
-      return new SchemaTypeError(errorHandleResult, path);
+      return new SchemaTypeError(errorHandleResult, convertedPath);
     }
 
     // If error is produced by the custom validator, just extract source message
     // from context and wrap it into `SchemaTypeError` instance.
     if (type === 'any.custom') {
-      return new SchemaTypeError(context.message, path);
+      return new SchemaTypeError(context.message, convertedPath);
     }
 
-    return new SchemaTypeError(message || type, path);
+    return new SchemaTypeError(message || type, convertedPath);
   }
 }
