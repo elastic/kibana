@@ -16,6 +16,7 @@ Having trouble? Here are solutions to common problems you might encounter while 
 * <<reporting-troubleshooting-puppeteer-debug-logs>>
 * <<reporting-troubleshooting-system-requirements>>
 * <<reporting-troubleshooting-arm-systems>>
+* <<reporting-troubleshooting-maps-ems>>
 
 [float]
 [[reporting-diagnostics]]
@@ -163,3 +164,12 @@ In this case, try increasing the memory for the {kib} instance to 2GB.
 === ARM systems
 
 Chromium is not compatible with ARM RHEL/CentOS.
+
+[float]
+[[reporting-troubleshooting-maps-ems]]
+=== Unable to connect to Elastic Maps Service
+
+https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] is a service that hosts
+tile layers and vector shapes of administrative boundaries.
+Reports containing Maps with missing basemap layers or administrative boundaries is due to the kibana server not having access to EMS.
+See <<maps-connect-to-ems>> for more information on how to connect your kibana server to EMS.
