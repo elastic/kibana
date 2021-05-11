@@ -7,6 +7,7 @@
 
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { Visualization } from '../types';
 import { HeatmapVisualizationState } from './types';
 import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
@@ -32,17 +33,24 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   ) {
     return [];
   }
-  const title = 'TODO';
+
+  /**
+   * The score gets increased based on the config completion.
+   */
+  let score = 0;
 
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
-  // heatmap chart requires exact 2 groups and single metric
-  if (groups.length !== 2 || metrics.length !== 1) {
-    return [];
-  }
+  const isSingleBucketDimension = groups.length === 1 && metrics.length === 0;
 
-  const newState = ({
-    title,
+  /**
+   * Hide for:
+   * - reduced tables
+   * - tables with just a single bucket dimension
+   */
+  const hide = table.changeType === 'reduced' || isSingleBucketDimension;
+
+  const newState: HeatmapVisualizationState = {
     shape: CHART_SHAPES.HEATMAP,
     layerId: table.layerId,
     legend: {
@@ -56,34 +64,48 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
     },
-  } as unknown) as HeatmapVisualizationState;
+  };
 
-  if (metrics.length === 1 && metrics[0].operation.dataType === 'number') {
-    newState.valueAccessor = metrics[0].columnId;
+  const numberMetric = metrics.find((m) => m.operation.dataType === 'number');
+
+  if (numberMetric) {
+    score += 0.3;
+    newState.valueAccessor = numberMetric.columnId;
   }
 
-  const [ordinal, dateHistogram] = partition(groups, (g) => g.operation.dataType === 'date');
+  const [dateHistogram, ordinal] = partition(groups, (g) => g.operation.dataType === 'date');
 
-  if (dateHistogram.length > 1) {
-    // support single date histogram only
+  if (ordinal.length === 0 && dateHistogram.length === 0) {
+    // no histogram or grouped data to build at least one axis
     return [];
   }
 
-  if (dateHistogram.length === 1) {
+  if (dateHistogram.length > 0) {
     newState.xAccessor = dateHistogram[0].columnId;
-    newState.yAccessor = ordinal[0].columnId;
-  } else {
-    newState.xAccessor = ordinal[0].columnId;
-    newState.yAccessor = ordinal[1].columnId;
+    score += 0.3;
+  }
+
+  if (ordinal.length > 0) {
+    if (!newState.xAccessor) {
+      newState.xAccessor = ordinal[0].columnId;
+      score += 0.3;
+    }
+
+    if (ordinal[1]) {
+      newState.yAccessor = ordinal[0].columnId;
+      score += 0.3;
+    }
   }
 
   return [
     {
       state: newState,
-      title: 'test',
-      hide: false,
-      previewIcon: '',
-      score: 0.5,
+      title: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
+        defaultMessage: 'Heatmap',
+      }),
+      hide,
+      previewIcon: 'empty',
+      score,
     },
   ];
 };
