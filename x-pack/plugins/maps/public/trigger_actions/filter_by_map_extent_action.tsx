@@ -47,33 +47,3 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
     });
   },
 });
-
-/* export class FilterByMapExtentAction implements Action<FilterByMapExtentActionContext> {
-  public readonly type = FILTER_BY_MAP_EXTENT;
-  public readonly id = FILTER_BY_MAP_EXTENT;
-  public order = 20;
-
-  public getDisplayName({ embeddable }: FilterByMapExtentActionContext) {
-    return embeddable.getInput().filterByMapExtent
-      ? i18n.translate('xpack.map.configureFilterByMapExtentMenuItem.displayName', {
-        defaultMessage: 'Disable filter by map extent',
-      })
-      : i18n.translate('xpack.map.configureFilterByMapExtentMenuItem.displayName', {
-        defaultMessage: 'Filter by map extent',
-      });
-  }
-
-  public getIconType() {
-    return 'filter';
-  }
-
-  public async isCompatible({ embeddable }: FilterByMapExtentActionContext) {
-    return embeddable.type === MAP_SAVED_OBJECT_TYPE;
-  }
-
-  public async execute({ embeddable }: FilterByMapExtentActionContext) {
-    embeddable.updateInput({
-      filterByMapExtent: !embeddable.getInput().filterByMapExtent,
-    });
-  }
-}*/
