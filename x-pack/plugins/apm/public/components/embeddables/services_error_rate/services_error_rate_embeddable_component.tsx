@@ -13,7 +13,11 @@ import {
   Settings,
 } from '@elastic/charts';
 import { EuiLoadingChart } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+} from '../../../../common/elasticsearch_fieldnames';
 import {
   EmbeddableOutput,
   withEmbeddableSubscription,
@@ -29,6 +33,7 @@ import {
   ServicesErrorRateEmbeddable,
   ServicesErrorRateInput,
 } from './services_error_rate_embeddable';
+import { getApiFiltersFromInput } from '../helpers';
 
 interface Props {
   embeddable: ServicesErrorRateEmbeddable;
@@ -47,20 +52,31 @@ const INITIAL_STATE: ServicesErrorRate = {
 };
 
 async function fetchServicesErrorRate({
+  filters = {},
   start,
   end,
 }: {
+  filters?: Record<string, any>;
   start: string;
   end: string;
 }) {
   return callApmApi({
     signal: null,
     endpoint: 'GET /api/apm/services/error_rate',
-    params: { query: { start, end } },
+    params: { query: { start, end, ...filters } },
   });
 }
 
+const API_FILTER_OPTIONS_MAP: Record<string, string> = {
+  [TRANSACTION_TYPE]: 'transactionType',
+  [SERVICE_ENVIRONMENT]: 'environment',
+};
+
 function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
+  const filters = useMemo(
+    () => getApiFiltersFromInput(input.filters, API_FILTER_OPTIONS_MAP),
+    [input]
+  );
   const { from, to } = input.timeRange;
   const [data, setData] = useState<ServicesErrorRate>(INITIAL_STATE);
   const [status, setStatus] = useState<FETCH_STATUS>(
@@ -74,7 +90,7 @@ function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
       if (start && end) {
         setStatus(FETCH_STATUS.LOADING);
         try {
-          const result = await fetchServicesErrorRate({ start, end });
+          const result = await fetchServicesErrorRate({ start, end, filters });
           setData(result);
           setStatus(FETCH_STATUS.SUCCESS);
         } catch (e) {
@@ -83,7 +99,7 @@ function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
       }
     }
     callFetchServicesErrorRate();
-  }, [from, to, setData, setStatus]);
+  }, [from, to, setData, setStatus, filters]);
 
   if (status === FETCH_STATUS.LOADING) {
     return (

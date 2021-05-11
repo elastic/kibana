@@ -6,12 +6,12 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import type {
   Query,
   RefreshInterval,
   TimeRange,
 } from '../../../../../../../src/plugins/data/common/query';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,

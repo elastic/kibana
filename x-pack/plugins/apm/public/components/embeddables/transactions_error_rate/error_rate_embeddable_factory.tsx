@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
-  EmbeddableFactory,
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../../../src/plugins/embeddable/public';
@@ -17,7 +17,6 @@ import {
 } from './error_rate_embeddable';
 import { APP_ID, APP_NAME, APP_ICON } from '../constants';
 
-export type ErrorRateEmbeddableFactory = EmbeddableFactory;
 export class ErrorRateEmbeddableFactoryDefinition
   implements
     EmbeddableFactoryDefinition<ErrorRateInput, {}, ErrorRateEmbeddable> {
@@ -40,6 +39,8 @@ export class ErrorRateEmbeddableFactoryDefinition
   }
 
   public getDisplayName() {
-    return 'Error rate chart';
+    return i18n.translate('xpack.apm.embeddables.errorRate.displayName', {
+      defaultMessage: 'Error rate chart',
+    });
   }
 }

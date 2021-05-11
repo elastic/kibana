@@ -15,14 +15,19 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiLoadingChart } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { EuiLoadingChart, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import {
   EmbeddableOutput,
   withEmbeddableSubscription,
 } from '../../../../../../../src/plugins/embeddable/public';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../common/elasticsearch_fieldnames';
 import { asPercent } from '../../../../common/utils/formatters';
 import { getParsedDate } from '../../../context/url_params_context/helpers';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -31,7 +36,16 @@ import {
   callApmApi,
 } from '../../../services/rest/createCallApmApi';
 import { isTimeseriesEmpty } from '../../shared/charts/helper/helper';
+import { getApiFiltersFromInput } from '../helpers';
 import { ErrorRateEmbeddable, ErrorRateInput } from './error_rate_embeddable';
+
+const CentralizedContainer = styled.div`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 interface Props {
   embeddable: ErrorRateEmbeddable;
@@ -43,12 +57,11 @@ function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-function findServiceNameFilter(filters: Filter[]) {
-  const serviceNameFilter = filters.find((filter) => {
-    return filter.meta.key === SERVICE_NAME;
-  });
-  return serviceNameFilter?.meta.params.query;
-}
+const API_FILTER_OPTIONS_MAP: Record<string, string> = {
+  [SERVICE_NAME]: 'serviceName',
+  [TRANSACTION_TYPE]: 'transactionType',
+  [SERVICE_ENVIRONMENT]: 'environment',
+};
 
 type ErrorRate = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/error_rate'>;
 
@@ -66,27 +79,31 @@ const INITIAL_STATE: ErrorRate = {
 };
 
 async function fetchErrorRate({
-  serviceName,
+  filters,
   start,
   end,
 }: {
-  serviceName: string;
+  filters: Record<string, any>;
   start: string;
   end: string;
 }) {
+  const { serviceName, transactionType = 'request', environment } = filters;
   return callApmApi({
     signal: null,
     endpoint:
       'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
     params: {
       path: { serviceName },
-      query: { transactionType: 'request', start, end },
+      query: { transactionType, start, end, environment },
     },
   });
 }
 
 function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
-  const serviceName = input.serviceName || findServiceNameFilter(input.filters);
+  const filters = useMemo(
+    () => getApiFiltersFromInput(input.filters, API_FILTER_OPTIONS_MAP),
+    [input]
+  );
   const { from, to } = input.timeRange;
 
   const [data, setData] = useState<ErrorRate>(INITIAL_STATE);
@@ -98,10 +115,10 @@ function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
     async function callFetchServicesErrorRate() {
       const start = getParsedDate(from)?.toISOString();
       const end = getParsedDate(to)?.toISOString();
-      if (serviceName && start && end) {
+      if (filters?.serviceName && start && end) {
         setStatus(FETCH_STATUS.LOADING);
         try {
-          const result = await fetchErrorRate({ serviceName, start, end });
+          const result = await fetchErrorRate({ filters, start, end });
           setData(result);
           setStatus(FETCH_STATUS.SUCCESS);
         } catch (e) {
@@ -110,21 +127,26 @@ function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
       }
     }
     callFetchServicesErrorRate();
-  }, [serviceName, from, to, setData, setStatus]);
+  }, [filters, from, to, setData, setStatus]);
+
+  if (!filters?.serviceName) {
+    return (
+      <CentralizedContainer>
+        <EuiText>
+          {i18n.translate(
+            'xpack.apm.embeddables.errorRate.serviceNameFilterRequiredLabel',
+            { defaultMessage: 'Filter by service.name required' }
+          )}
+        </EuiText>
+      </CentralizedContainer>
+    );
+  }
 
   if (status === FETCH_STATUS.LOADING) {
     return (
-      <div
-        style={{
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <CentralizedContainer>
         <EuiLoadingChart data-test-subj="loading" size={'xl'} />
-      </div>
+      </CentralizedContainer>
     );
   }
 
@@ -142,8 +164,8 @@ function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
   const max = Math.max(...xValues);
 
   const xFormatter = niceTimeFormatter([min, max]);
-  const isEmpty = isTimeseriesEmpty(timeseries);
-  const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
+  const isEmptyTimeseries = isTimeseriesEmpty(timeseries);
+  const xDomain = isEmptyTimeseries ? { min: 0, max: 1 } : { min, max };
 
   return (
     <div style={{ height: '100%', width: '100%' }}>
@@ -181,7 +203,7 @@ function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
               yScaleType={ScaleType.Linear}
               xAccessor="x"
               yAccessors={['y']}
-              data={isEmpty ? [] : serie.data}
+              data={isEmptyTimeseries ? [] : serie.data}
               color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
             />
