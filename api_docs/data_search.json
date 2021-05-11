@@ -8271,7 +8271,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 826
+              "lineNumber": 831
             },
             "deprecated": false,
             "children": [
@@ -8287,7 +8287,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 826
+                  "lineNumber": 831
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8311,7 +8311,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 855
+              "lineNumber": 860
             },
             "deprecated": false,
             "children": [],

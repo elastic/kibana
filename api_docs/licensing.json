@@ -608,6 +608,20 @@
               {
                 "plugin": "securitySolution",
                 "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 55
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
                   "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts",
                   "lineNumber": 47
                 }
@@ -2179,6 +2193,20 @@
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts",
                   "lineNumber": 44
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 54
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts",
+                  "lineNumber": 55
                 }
               },
               {

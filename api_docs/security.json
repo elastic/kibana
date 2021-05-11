@@ -1239,13 +1239,6 @@
               {
                 "plugin": "securitySolution",
                 "link": {
-                  "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
-                  "lineNumber": 28
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts",
                   "lineNumber": 48
                 }
@@ -1297,6 +1290,13 @@
                 "link": {
                   "path": "x-pack/plugins/logstash/server/routes/pipeline/save.ts",
                   "lineNumber": 41
+                }
+              },
+              {
+                "plugin": "securitySolution",
+                "link": {
+                  "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts",
+                  "lineNumber": 28
                 }
               }
             ]

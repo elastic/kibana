@@ -243,7 +243,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-          "lineNumber": 50
+          "lineNumber": 52
         },
         "deprecated": false,
         "children": [
@@ -256,7 +256,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 51
+              "lineNumber": 53
             },
             "deprecated": false
           },
@@ -272,7 +272,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 52
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -285,7 +285,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 53
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -298,7 +298,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 54
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -311,7 +311,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 55
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -324,7 +324,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 56
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -347,7 +347,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 57
+              "lineNumber": 59
             },
             "deprecated": false
           },
@@ -370,7 +370,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 58
+              "lineNumber": 60
             },
             "deprecated": false
           }
@@ -2971,7 +2971,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
-          "lineNumber": 648
+          "lineNumber": 650
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -10214,7 +10214,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-          "lineNumber": 50
+          "lineNumber": 52
         },
         "deprecated": false,
         "children": [
@@ -10227,7 +10227,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 51
+              "lineNumber": 53
             },
             "deprecated": false
           },
@@ -10243,7 +10243,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 52
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -10256,7 +10256,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 53
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -10269,7 +10269,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 54
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -10282,7 +10282,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 55
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -10295,7 +10295,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 56
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -10318,7 +10318,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 57
+              "lineNumber": 59
             },
             "deprecated": false
           },
@@ -10341,7 +10341,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 58
+              "lineNumber": 60
             },
             "deprecated": false
           }
@@ -10357,7 +10357,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-          "lineNumber": 37
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -10370,7 +10370,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -10383,7 +10383,23 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 39
+              "lineNumber": 40
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicyInput.keep_enabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "keep_enabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -10407,7 +10423,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -10431,7 +10447,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -10454,7 +10470,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 42
+              "lineNumber": 44
             },
             "deprecated": false
           }
@@ -10489,6 +10505,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicyInputStream.keep_enabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "keep_enabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewPackagePolicyInputStream.data_stream",
             "type": "Object",
             "tags": [],
@@ -10499,7 +10531,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -10523,7 +10555,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 28
+              "lineNumber": 29
             },
             "deprecated": false
           },
@@ -10547,7 +10579,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 29
+              "lineNumber": 30
             },
             "deprecated": false
           }
@@ -10581,7 +10613,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-          "lineNumber": 65
+          "lineNumber": 67
         },
         "deprecated": false,
         "children": [
@@ -10594,7 +10626,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 66
+              "lineNumber": 68
             },
             "deprecated": false
           },
@@ -10617,7 +10649,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 67
+              "lineNumber": 69
             },
             "deprecated": false
           },
@@ -10633,7 +10665,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 68
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -10646,7 +10678,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 69
+              "lineNumber": 71
             },
             "deprecated": false
           },
@@ -10659,7 +10691,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 70
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -10672,7 +10704,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 71
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -10685,7 +10717,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 72
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -10698,7 +10730,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 73
+              "lineNumber": 75
             },
             "deprecated": false
           }
@@ -10792,11 +10824,11 @@
             "section": "def-common.NewPackagePolicyInput",
             "text": "NewPackagePolicyInput"
           },
-          ", \"type\" | \"enabled\" | \"config\" | \"vars\">"
+          ", \"type\" | \"enabled\" | \"config\" | \"keep_enabled\" | \"vars\">"
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-          "lineNumber": 45
+          "lineNumber": 47
         },
         "deprecated": false,
         "children": [
@@ -10819,7 +10851,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 46
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -10835,7 +10867,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 47
+              "lineNumber": 49
             },
             "deprecated": false
           }
@@ -10868,7 +10900,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-          "lineNumber": 32
+          "lineNumber": 33
         },
         "deprecated": false,
         "children": [
@@ -10881,7 +10913,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             },
             "deprecated": false
           },
@@ -10897,7 +10929,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             },
             "deprecated": false
           }
@@ -11170,7 +11202,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"security\" | \"monitoring\" | \"network\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | undefined)[] | undefined"
+              "(\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | undefined)[] | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
@@ -13314,7 +13346,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-          "lineNumber": 61
+          "lineNumber": 63
         },
         "deprecated": false,
         "children": [
@@ -13330,7 +13362,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-              "lineNumber": 62
+              "lineNumber": 64
             },
             "deprecated": false
           }
@@ -15065,7 +15097,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
-          "lineNumber": 76
+          "lineNumber": 78
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -15112,7 +15144,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"custom\" | \"security\" | \"monitoring\" | \"network\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\""
+          "\"custom\" | \"security\" | \"monitoring\" | \"cloud\" | \"kubernetes\" | \"aws\" | \"azure\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"languages\" | \"message_queue\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\""
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",

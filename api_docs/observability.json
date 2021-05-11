@@ -1,41 +1,7 @@
 {
   "id": "observability",
   "client": {
-    "classes": [
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.FormatterRuleRegistry",
-        "type": "Class",
-        "tags": [],
-        "label": "FormatterRuleRegistry",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.FormatterRuleRegistry",
-            "text": "FormatterRuleRegistry"
-          },
-          "<TFieldMap> extends ",
-          {
-            "pluginId": "ruleRegistry",
-            "scope": "public",
-            "docId": "kibRuleRegistryPluginApi",
-            "section": "def-public.RuleRegistry",
-            "text": "RuleRegistry"
-          },
-          "<TFieldMap, FormattableRuleType<TFieldMap>>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/public/rules/formatter_rule_registry.ts",
-          "lineNumber": 27
-        },
-        "deprecated": false,
-        "children": [],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "observability",
@@ -160,6 +126,33 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.createObservabilityRuleTypeRegistryMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createObservabilityRuleTypeRegistryMock",
+        "description": [],
+        "signature": [
+          "() => { register: (type: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.AlertTypeModel",
+            "text": "AlertTypeModel"
+          },
+          "<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; } & { registerFormatter: () => void; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/rules/observability_rule_type_registry_mock.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -848,7 +841,7 @@
         "label": "useUiTracker",
         "description": [],
         "signature": [
-          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"uptime\" | \"fleet\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
+          "({\n  app: defaultApp,\n}: { app?: \"apm\" | \"fleet\" | \"uptime\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined; }) => ({ app, metric, metricType }: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -885,7 +878,7 @@
                 "label": "app",
                 "description": [],
                 "signature": [
-                  "\"apm\" | \"uptime\" | \"fleet\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
+                  "\"apm\" | \"fleet\" | \"uptime\" | \"infra_metrics\" | \"infra_logs\" | \"synthetics\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ],
                 "source": {
                   "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
@@ -1939,29 +1932,19 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsSetup.ruleRegistry",
+            "id": "def-public.ObservabilityPublicPluginsSetup.triggersActionsUi",
             "type": "Object",
             "tags": [],
-            "label": "ruleRegistry",
+            "label": "triggersActionsUi",
             "description": [],
             "signature": [
-              "{ registry: ",
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "public",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-public.RuleRegistry",
-                "text": "RuleRegistry"
-              },
-              "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
                 "docId": "kibTriggersActionsUiPluginApi",
-                "section": "def-public.AlertTypeModel",
-                "text": "AlertTypeModel"
-              },
-              "<Record<string, unknown>>>; }"
+                "section": "def-public.TriggersAndActionsUIPublicPluginSetup",
+                "text": "TriggersAndActionsUIPublicPluginSetup"
+              }
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
@@ -2033,6 +2016,28 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.triggersActionsUi",
+            "type": "Object",
+            "tags": [],
+            "label": "triggersActionsUi",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.TriggersAndActionsUIPublicPluginStart",
+                "text": "TriggersAndActionsUIPublicPluginStart"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 48
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.data",
             "type": "Object",
             "tags": [],
@@ -2049,7 +2054,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -2071,7 +2076,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "deprecated": false
           }
@@ -2851,6 +2856,23 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.ObservabilityRuleTypeRegistry",
+        "type": "Type",
+        "tags": [],
+        "label": "ObservabilityRuleTypeRegistry",
+        "description": [],
+        "signature": [
+          "{ register: (type: AlertTypeModel<any> & { format: Formatter; }) => void; getFormatter: (typeId: string) => Formatter | undefined; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+          "lineNumber": 31
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.SectionLinkProps",
         "type": "Type",
         "tags": [],
@@ -2943,11 +2965,26 @@
       "label": "ObservabilityPublicSetup",
       "description": [],
       "signature": [
-        "{ dashboard: { register: typeof registerDataHandler; }; ruleRegistry: FormatterRuleRegistry<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>; isAlertingExperienceEnabled: () => boolean; }"
+        "{ dashboard: { register: typeof registerDataHandler; }; observabilityRuleTypeRegistry: { register: (type: ",
+        {
+          "pluginId": "triggersActionsUi",
+          "scope": "public",
+          "docId": "kibTriggersActionsUiPluginApi",
+          "section": "def-public.AlertTypeModel",
+          "text": "AlertTypeModel"
+        },
+        "<any> & { format: (options: { fields: { readonly '@timestamp': string; readonly tags?: string[] | undefined; readonly \"kibana.rac.alert.uuid\"?: string | undefined; readonly 'event.kind'?: string | undefined; readonly 'event.action'?: string | undefined; readonly 'rule.uuid'?: string | undefined; readonly 'rule.id'?: string | undefined; readonly 'rule.name'?: string | undefined; readonly 'rule.category'?: string | undefined; readonly \"kibana.rac.alert.producer\"?: string | undefined; readonly \"kibana.rac.alert.id\"?: string | undefined; readonly \"kibana.rac.alert.start\"?: string | undefined; readonly \"kibana.rac.alert.end\"?: string | undefined; readonly \"kibana.rac.alert.duration.us\"?: number | undefined; readonly \"kibana.rac.alert.severity.level\"?: string | undefined; readonly \"kibana.rac.alert.severity.value\"?: number | undefined; readonly \"kibana.rac.alert.status\"?: string | undefined; readonly \"kibana.rac.alert.evaluation.threshold\"?: number | undefined; readonly \"kibana.rac.alert.evaluation.value\"?: number | undefined; } & Record<string, any>; formatters: { asDuration: typeof ",
+        "asDuration",
+        "; asPercent: typeof ",
+        "asPercent",
+        "; }; }) => { reason: string; link: string; }; }) => void; getFormatter: (typeId: string) => ((options: { fields: { readonly '@timestamp': string; readonly tags?: string[] | undefined; readonly \"kibana.rac.alert.uuid\"?: string | undefined; readonly 'event.kind'?: string | undefined; readonly 'event.action'?: string | undefined; readonly 'rule.uuid'?: string | undefined; readonly 'rule.id'?: string | undefined; readonly 'rule.name'?: string | undefined; readonly 'rule.category'?: string | undefined; readonly \"kibana.rac.alert.producer\"?: string | undefined; readonly \"kibana.rac.alert.id\"?: string | undefined; readonly \"kibana.rac.alert.start\"?: string | undefined; readonly \"kibana.rac.alert.end\"?: string | undefined; readonly \"kibana.rac.alert.duration.us\"?: number | undefined; readonly \"kibana.rac.alert.severity.level\"?: string | undefined; readonly \"kibana.rac.alert.severity.value\"?: number | undefined; readonly \"kibana.rac.alert.status\"?: string | undefined; readonly \"kibana.rac.alert.evaluation.threshold\"?: number | undefined; readonly \"kibana.rac.alert.evaluation.value\"?: number | undefined; } & Record<string, any>; formatters: { asDuration: typeof ",
+        "asDuration",
+        "; asPercent: typeof ",
+        "asPercent"
       ],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 37
+        "lineNumber": 38
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -2965,7 +3002,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 52
+        "lineNumber": 53
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -3412,14 +3449,19 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteHandlerResources.ruleRegistry",
+            "id": "def-server.ObservabilityRouteHandlerResources.ruleDataClient",
             "type": "Object",
             "tags": [],
-            "label": "ruleRegistry",
+            "label": "ruleDataClient",
             "description": [],
             "signature": [
-              "RuleRegistry",
-              "<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>"
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleDataClient",
+                "text": "RuleDataClient"
+              }
             ],
             "source": {
               "path": "x-pack/plugins/observability/server/routes/types.ts",
@@ -3538,7 +3580,7 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "TEndpoint extends \"GET /api/observability/rules/alerts/top\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern\" ? ({ \"GET /api/observability/rules/alerts/top\": ServerRoute<\"GET /api/observability/rules/alerts/top\", t.TypeC<{ query: t.IntersectionC<[t.TypeC<{ start: t.Type<number, string, unknown>; end: t.Type<number, string, unknown>; }>, t.PartialC<{ kuery: t.StringC; size: t.Type<number, unknown, unknown>; }>]>; }>, ObservabilityRouteHandlerResources, any, ObservabilityRouteCreateOptions>; } & { \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ServerRoute<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", undefined, ObservabilityRouteHandlerResources, { title: string; timeFieldName: string; fields: ",
+          "TEndpoint extends \"GET /api/observability/rules/alerts/top\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern\" ? ({ \"GET /api/observability/rules/alerts/top\": ServerRoute<\"GET /api/observability/rules/alerts/top\", t.TypeC<{ query: t.IntersectionC<[t.TypeC<{ start: t.Type<number, string, unknown>; end: t.Type<number, string, unknown>; }>, t.PartialC<{ kuery: t.StringC; size: t.Type<number, unknown, unknown>; }>]>; }>, ObservabilityRouteHandlerResources, Partial<Record<never, unknown[]>>[], ObservabilityRouteCreateOptions>; } & { \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ServerRoute<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", undefined, ObservabilityRouteHandlerResources, { title: string; timeFieldName: string; fields: ",
           "IndexPatternFieldDescriptor",
           "[]; }, ObservabilityRouteCreateOptions>; })[TEndpoint] extends ServerRoute<any, any, any, infer TReturnType, Record<string, any>> ? TReturnType : never : never"
         ],
@@ -3562,23 +3604,6 @@
         "source": {
           "path": "x-pack/plugins/observability/server/index.ts",
           "lineNumber": 34
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-server.ObservabilityRuleRegistryClient",
-        "type": "Type",
-        "tags": [],
-        "label": "ObservabilityRuleRegistryClient",
-        "description": [],
-        "signature": [
-          "ScopedRuleRegistryClient<{ readonly 'kibana.rac.producer': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.uuid': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.id': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.start': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.end': { readonly type: \"date\"; }; readonly 'kibana.rac.alert.duration.us': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.severity.level': { readonly type: \"keyword\"; }; readonly 'kibana.rac.alert.severity.value': { readonly type: \"long\"; }; readonly 'kibana.rac.alert.status': { readonly type: \"keyword\"; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; } & { 'kibana.observability.evaluation.value': { type: \"scaled_float\"; scaling_factor: number; }; 'kibana.observability.evaluation.threshold': { type: \"scaled_float\"; scaling_factor: number; }; 'host.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; 'service.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>"
-        ],
-        "source": {
-          "path": "x-pack/plugins/observability/server/types.ts",
-          "lineNumber": 35
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3684,7 +3709,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/observability/server/plugin.ts",
-        "lineNumber": 22
+        "lineNumber": 21
       },
       "deprecated": false,
       "lifecycle": "setup",

@@ -37,7 +37,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-          "lineNumber": 86
+          "lineNumber": 84
         },
         "deprecated": false,
         "children": [
@@ -53,7 +53,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 90
+              "lineNumber": 88
             },
             "deprecated": false,
             "children": [
@@ -75,7 +75,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                  "lineNumber": 90
+                  "lineNumber": 88
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -95,7 +95,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 111
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [],
@@ -113,7 +113,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 115
+              "lineNumber": 113
             },
             "deprecated": false,
             "children": [],
@@ -131,7 +131,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 120
+              "lineNumber": 118
             },
             "deprecated": false,
             "children": [],
@@ -149,7 +149,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 124
+              "lineNumber": 122
             },
             "deprecated": false
           },
@@ -165,7 +165,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 156
+              "lineNumber": 154
             },
             "deprecated": false,
             "children": [],
@@ -183,7 +183,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 166
+              "lineNumber": 164
             },
             "deprecated": false,
             "children": [],
@@ -201,7 +201,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 196
+              "lineNumber": 194
             },
             "deprecated": false,
             "children": [],
@@ -219,7 +219,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 200
+              "lineNumber": 198
             },
             "deprecated": false,
             "children": [],
@@ -237,7 +237,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 204
+              "lineNumber": 202
             },
             "deprecated": false,
             "children": [
@@ -250,7 +250,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                  "lineNumber": 204
+                  "lineNumber": 202
                 },
                 "deprecated": false,
                 "children": [
@@ -263,7 +263,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                      "lineNumber": 204
+                      "lineNumber": 202
                     },
                     "deprecated": false
                   }
@@ -284,7 +284,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 215
+              "lineNumber": 213
             },
             "deprecated": false,
             "children": [],
@@ -302,7 +302,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 223
+              "lineNumber": 221
             },
             "deprecated": false,
             "children": [],
@@ -320,7 +320,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 277
+              "lineNumber": 275
             },
             "deprecated": false,
             "children": [],
@@ -338,7 +338,25 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 319
+              "lineNumber": 317
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListView.renderNoItemsMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "renderNoItemsMessage",
+            "description": [],
+            "signature": [
+              "() => JSX.Element"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 348
             },
             "deprecated": false,
             "children": [],
@@ -356,7 +374,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 350
+              "lineNumber": 370
             },
             "deprecated": false,
             "children": [],
@@ -374,7 +392,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 381
+              "lineNumber": 401
             },
             "deprecated": false,
             "children": [],
@@ -382,53 +400,17 @@
           },
           {
             "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderListingOrEmptyState",
+            "id": "def-public.TableListView.renderCreateButton",
             "type": "Function",
             "tags": [],
-            "label": "renderListingOrEmptyState",
-            "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 461
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderListing",
-            "type": "Function",
-            "tags": [],
-            "label": "renderListing",
-            "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 468
-            },
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListView.renderPageContent",
-            "type": "Function",
-            "tags": [],
-            "label": "renderPageContent",
+            "label": "renderCreateButton",
             "description": [],
             "signature": [
               "() => JSX.Element | undefined"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 513
+              "lineNumber": 481
             },
             "deprecated": false,
             "children": [],
@@ -446,7 +428,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 525
+              "lineNumber": 500
             },
             "deprecated": false,
             "children": [],
@@ -1055,6 +1037,59 @@
           "lineNumber": 76
         },
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.KibanaPageTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaPageTemplate",
+        "description": [],
+        "signature": [
+          "({ template, pageHeader, children, isEmptyState, restrictWidth, bottomBar, bottomBarProps, ...rest }: React.PropsWithChildren<",
+          {
+            "pluginId": "kibanaReact",
+            "scope": "public",
+            "docId": "kibKibanaReactPluginApi",
+            "section": "def-public.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
+          "lineNumber": 22
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.KibanaPageTemplate.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  template,\n  pageHeader,\n  children,\n  isEmptyState,\n  restrictWidth = true,\n  bottomBar,\n  bottomBarProps,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "kibanaReact",
+                "scope": "public",
+                "docId": "kibKibanaReactPluginApi",
+                "section": "def-public.KibanaPageTemplateProps",
+                "text": "KibanaPageTemplateProps"
+              },
+              ">"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2718,7 +2753,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-          "lineNumber": 38
+          "lineNumber": 33
         },
         "deprecated": false,
         "children": [
@@ -2734,7 +2769,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 39
+              "lineNumber": 34
             },
             "deprecated": false,
             "children": [],
@@ -2752,7 +2787,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 40
+              "lineNumber": 35
             },
             "deprecated": false,
             "children": [
@@ -2768,7 +2803,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                  "lineNumber": 40
+                  "lineNumber": 35
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2788,7 +2823,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 41
+              "lineNumber": 36
             },
             "deprecated": false,
             "children": [
@@ -2804,7 +2839,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                  "lineNumber": 41
+                  "lineNumber": 36
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2821,7 +2856,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 42
+              "lineNumber": 37
             },
             "deprecated": false
           },
@@ -2834,7 +2869,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 43
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -2850,7 +2885,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 44
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [
@@ -2866,7 +2901,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-                  "lineNumber": 44
+                  "lineNumber": 39
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2883,7 +2918,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 45
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -2896,7 +2931,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 46
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -2909,23 +2944,25 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 47
+              "lineNumber": 42
             },
             "deprecated": false
           },
           {
             "parentPluginId": "kibanaReact",
-            "id": "def-public.TableListViewProps.noItemsFragment",
+            "id": "def-public.TableListViewProps.emptyPrompt",
             "type": "Object",
             "tags": [],
-            "label": "noItemsFragment",
-            "description": [],
+            "label": "emptyPrompt",
+            "description": [
+              "\nShould be an EuiEmptyPrompt (but TS doesn't support this typing)"
+            ],
             "signature": [
               "JSX.Element | undefined"
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 48
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -2942,7 +2979,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 49
+              "lineNumber": 47
             },
             "deprecated": false
           },
@@ -2955,7 +2992,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 50
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -2979,7 +3016,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 51
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -2997,7 +3034,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 56
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -3012,7 +3049,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 60
+              "lineNumber": 58
             },
             "deprecated": false
           },
@@ -3025,12 +3062,9 @@
             "description": [
               "\nDescribes the content of the table. If not specified, the caption will be \"This table contains {itemCount} rows.\""
             ],
-            "signature": [
-              "string | undefined"
-            ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 64
+              "lineNumber": 62
             },
             "deprecated": false
           },
@@ -3047,7 +3081,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 65
+              "lineNumber": 63
             },
             "deprecated": false
           }
@@ -3063,7 +3097,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-          "lineNumber": 68
+          "lineNumber": 66
         },
         "deprecated": false,
         "children": [
@@ -3079,7 +3113,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 69
+              "lineNumber": 67
             },
             "deprecated": false
           },
@@ -3092,7 +3126,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 70
+              "lineNumber": 68
             },
             "deprecated": false
           },
@@ -3105,7 +3139,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 71
+              "lineNumber": 69
             },
             "deprecated": false
           },
@@ -3118,7 +3152,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 72
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -3131,7 +3165,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 73
+              "lineNumber": 71
             },
             "deprecated": false
           },
@@ -3144,7 +3178,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 74
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -3161,7 +3195,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 75
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -3174,7 +3208,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 76
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -3190,7 +3224,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 77
+              "lineNumber": 75
             },
             "deprecated": false
           },
@@ -3203,7 +3237,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
-              "lineNumber": 78
+              "lineNumber": 76
             },
             "deprecated": false
           }
@@ -3554,6 +3588,32 @@
         "source": {
           "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
           "lineNumber": 64
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.KibanaPageTemplateProps",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaPageTemplateProps",
+        "description": [],
+        "signature": [
+          "Pick<",
+          "EuiPageProps",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"title\" | \"id\" | \"placeholder\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"css\" | \"grow\" | \"data-test-subj\" | \"direction\" | \"restrictWidth\"> & ",
+          "DisambiguateSet",
+          "<{ template?: \"default\" | undefined; bottomBar?: React.ReactNode; bottomBarProps?: (",
+          "CommonProps",
+          " & React.HTMLAttributes<HTMLElement> & ",
+          "DisambiguateSet",
+          "<{ position?: \"fixed\" | undefined; usePortal?: boolean | undefined; affordForDisplacement?: boolean | undefined; }, { position: \"static\" | \"sticky\"; }> & { position: \"static\" | \"sticky\"; } & { paddingSize?: \"m\" | \"s\" | \"none\" | \"l\" | undefined; bodyClassName?: string | undefined; landmarkHeading?: string | undefined; top?: string | number | undefined; right?: string | number | undefined; bottom?: string | number | undefined; left?: string | number | undefined; }) | (",
+          "CommonProps"
+        ],
+        "source": {
+          "path": "src/plugins/kibana_react/public/page_template/page_template.tsx",
+          "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false
