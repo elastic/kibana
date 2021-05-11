@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectsExportTransformContext,
+  SavedObjectsServiceSetup,
+} from 'kibana/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-
+import { transformRulesForExport } from './transform_rule_for_export';
 export { partiallyUpdateAlert } from './partially_update_alert';
 
 export const AlertAttributesExcludedFromAAD = [
@@ -43,6 +47,18 @@ export function setupSavedObjects(
     namespaceType: 'single',
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert,
+    management: {
+      importableAndExportable: true,
+      getTitle(obj) {
+        return `Rule: [${obj.attributes.name}]`;
+      },
+      onExport<RawAlert>(
+        context: SavedObjectsExportTransformContext,
+        objects: Array<SavedObject<RawAlert>>
+      ) {
+        return transformRulesForExport(objects);
+      },
+    },
   });
 
   savedObjects.registerType({

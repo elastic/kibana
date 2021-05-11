@@ -321,7 +321,7 @@ export const EndpointList = () => {
         render: (hostStatus: HostInfo['host_status']) => {
           return (
             <EuiBadge
-              color={HOST_STATUS_TO_BADGE_COLOR[hostStatus] || 'warning'}
+              color={hostStatus != null ? HOST_STATUS_TO_BADGE_COLOR[hostStatus] : 'warning'}
               data-test-subj="rowHostStatus"
               className="eui-textTruncate"
             >

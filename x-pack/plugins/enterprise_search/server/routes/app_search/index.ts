@@ -16,7 +16,9 @@ import { registerEnginesRoutes } from './engines';
 import { registerOnboardingRoutes } from './onboarding';
 import { registerResultSettingsRoutes } from './result_settings';
 import { registerRoleMappingsRoutes } from './role_mappings';
+import { registerSchemaRoutes } from './schema';
 import { registerSearchSettingsRoutes } from './search_settings';
+import { registerSearchUIRoutes } from './search_ui';
 import { registerSettingsRoutes } from './settings';
 import { registerSynonymsRoutes } from './synonyms';
 
@@ -27,10 +29,12 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerAnalyticsRoutes(dependencies);
   registerDocumentsRoutes(dependencies);
   registerDocumentRoutes(dependencies);
+  registerSchemaRoutes(dependencies);
   registerCurationsRoutes(dependencies);
   registerSynonymsRoutes(dependencies);
   registerSearchSettingsRoutes(dependencies);
   registerRoleMappingsRoutes(dependencies);
+  registerSearchUIRoutes(dependencies);
   registerResultSettingsRoutes(dependencies);
   registerApiLogsRoutes(dependencies);
   registerOnboardingRoutes(dependencies);

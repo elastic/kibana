@@ -17,7 +17,7 @@
     "x-pack/typings/**/*",
     "x-pack/tasks/**/*",
     "x-pack/plugins/lists/**/*",
-    "x-pack/plugins/security_solution/**/*",
+    "x-pack/plugins/security_solution/**/*"
   ],
   "exclude": [
     "x-pack/plugins/security_solution/cypress/**/*"
@@ -110,6 +110,7 @@
     { "path": "./x-pack/plugins/licensing/tsconfig.json" },
     { "path": "./x-pack/plugins/logstash/tsconfig.json" },
     { "path": "./x-pack/plugins/maps/tsconfig.json" },
+    { "path": "./x-pack/plugins/metrics_entities/tsconfig.json" },
     { "path": "./x-pack/plugins/ml/tsconfig.json" },
     { "path": "./x-pack/plugins/monitoring/tsconfig.json" },
     { "path": "./x-pack/plugins/observability/tsconfig.json" },

@@ -7,13 +7,12 @@
  */
 
 import { get } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
-import { unset } from '@kbn/std';
 import {
   ConfigDeprecation,
   AddConfigDeprecation,
   ConfigDeprecationFactory,
   DeprecatedConfigDetails,
+  ConfigDeprecationCommand,
 } from './types';
 
 const _rename = (
@@ -23,20 +22,16 @@ const _rename = (
   oldKey: string,
   newKey: string,
   details?: Partial<DeprecatedConfigDetails>
-) => {
+): void | ConfigDeprecationCommand => {
   const fullOldPath = getPath(rootPath, oldKey);
   const oldValue = get(config, fullOldPath);
   if (oldValue === undefined) {
-    return config;
+    return;
   }
-
-  unset(config, fullOldPath);
 
   const fullNewPath = getPath(rootPath, newKey);
   const newValue = get(config, fullNewPath);
   if (newValue === undefined) {
-    set(config, fullNewPath, oldValue);
-
     addDeprecation({
       message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`,
       correctiveActions: {
@@ -46,6 +41,10 @@ const _rename = (
       },
       ...details,
     });
+    return {
+      set: [{ path: fullNewPath, value: oldValue }],
+      unset: [{ path: fullOldPath }],
+    };
   } else {
     addDeprecation({
       message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`,
@@ -59,7 +58,9 @@ const _rename = (
     });
   }
 
-  return config;
+  return {
+    unset: [{ path: fullOldPath }],
+  };
 };
 
 const _unused = (
@@ -68,12 +69,11 @@ const _unused = (
   addDeprecation: AddConfigDeprecation,
   unusedKey: string,
   details?: Partial<DeprecatedConfigDetails>
-) => {
+): void | ConfigDeprecationCommand => {
   const fullPath = getPath(rootPath, unusedKey);
   if (get(config, fullPath) === undefined) {
-    return config;
+    return;
   }
-  unset(config, fullPath);
   addDeprecation({
     message: `${fullPath} is deprecated and is no longer used`,
     correctiveActions: {
@@ -83,7 +83,9 @@ const _unused = (
     },
     ...details,
   });
-  return config;
+  return {
+    unset: [{ path: fullPath }],
+  };
 };
 
 const rename = (

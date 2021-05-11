@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 
 export const APP_ID = 'securitySolution';
@@ -25,6 +26,8 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+export const DEFAULT_LISTS_INDEX = '.lists';
+export const DEFAULT_ITEMS_INDEX = '.items';
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100;
@@ -38,6 +41,7 @@ export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
+export const DEFAULT_TRANSFORMS = 'securitySolution:transforms';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
 export const GLOBAL_HEADER_HEIGHT = 98; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
@@ -48,6 +52,7 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
+export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.indicator.
@@ -105,6 +110,38 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "virustotal.com", "url_template": "https://www.virustotal.com/gui/search/{{ip}}" },
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
+
+/** The default settings for the transforms */
+export const defaultTransformsSetting: TransformConfigSchema = {
+  enabled: false,
+  auto_start: true,
+  auto_create: true,
+  query: {
+    range: {
+      '@timestamp': {
+        gte: 'now-1d/d',
+        format: 'strict_date_optional_time',
+      },
+    },
+  },
+  retention_policy: {
+    time: {
+      field: '@timestamp',
+      max_age: '1w',
+    },
+  },
+  max_page_search_size: 5000,
+  settings: [
+    {
+      prefix: 'all',
+      indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+      data_sources: [
+        ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+      ],
+    },
+  ],
+};
+export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSetting, null, 2);
 
 /**
  * Id for the signals alerting type
@@ -214,3 +251,10 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+/**
+ * Used for transforms for metrics_entities. If the security_solutions pulls in
+ * the metrics_entities plugin, then it should pull this constant from there rather
+ * than use it from here.
+ */
+export const ELASTIC_NAME = 'estc';
