@@ -40,6 +40,8 @@ import {
   hasReadIndexPrivileges,
   getRuleRangeTuples,
   isMachineLearningParams,
+  makeFloatString,
+  errorAggregator,
 } from './utils';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import {
@@ -66,6 +68,9 @@ import {
   RuleParams,
   savedQueryRuleParams,
 } from '../schemas/rule_schemas';
+import { RefreshTypes } from '../types';
+import { get, countBy } from 'lodash';
+import { BaseHit } from 'x-pack/plugins/security_solution/common/detection_engine/types';
 
 export const signalRulesAlertType = ({
   logger,
@@ -219,6 +224,69 @@ export const signalRulesAlertType = ({
           client: exceptionsClient,
           lists: params.exceptionsList ?? [],
         });
+
+        const bulkCreate = async <T>(wrappedDocs: BaseHit<T>[], refresh: RefreshTypes) => {
+          const bulkBody = wrappedDocs.flatMap((wrappedDoc) => [
+            {
+              create: {
+                _index: params.outputIndex,
+                _id: wrappedDoc._id,
+              },
+            },
+            wrappedDoc._source,
+          ]);
+          const start = performance.now();
+          const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk({
+            index: params.outputIndex,
+            refresh,
+            body: bulkBody,
+          });
+          const end = performance.now();
+          logger.debug(
+            buildRuleMessage(
+              `individual bulk process time took: ${makeFloatString(end - start)} milliseconds`
+            )
+          );
+          logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
+          const createdItems = wrappedDocs
+            .map((doc, index) => ({
+              _id: response.items[index].create?._id ?? '',
+              _index: response.items[index].create?._index ?? '',
+              ...doc._source,
+            }))
+            .filter((_, index) => get(response.items[index], 'create.status') === 201);
+          const createdItemsCount = createdItems.length;
+          const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
+          const errorCountByMessage = errorAggregator(response, [409]);
+        
+          logger.debug(buildRuleMessage(`bulk created ${createdItemsCount} signals`));
+          if (duplicateSignalsCount > 0) {
+            logger.debug(buildRuleMessage(`ignored ${duplicateSignalsCount} duplicate signals`));
+          }
+        
+          if (!isEmpty(errorCountByMessage)) {
+            logger.error(
+              buildRuleMessage(
+                `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
+              )
+            );
+            return {
+              errors: Object.keys(errorCountByMessage),
+              success: false,
+              bulkCreateDuration: makeFloatString(end - start),
+              createdItemsCount,
+              createdItems,
+            };
+          } else {
+            return {
+              errors: [],
+              success: true,
+              bulkCreateDuration: makeFloatString(end - start),
+              createdItemsCount,
+              createdItems,
+            };
+          }
+        };
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
           result = await mlExecutor({
@@ -275,6 +343,7 @@ export const signalRulesAlertType = ({
             refresh,
             eventsTelemetry,
             buildRuleMessage,
+            bulkCreate,
           });
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);

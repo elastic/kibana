@@ -76,6 +76,14 @@ export interface SingleBulkCreateResponse {
   errors: string[];
 }
 
+export type GenericBulkCreateResponse<T> = {
+  success: boolean;
+  bulkCreateDuration?: string;
+  createdItemsCount: number;
+  createdItems: Array<T & { _id: string; _index: string }>;
+  errors: string[];
+}
+
 export interface BulkInsertSignalsResponse {
   bulkCreateDuration: string;
   createdItemsCount: number;

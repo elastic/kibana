@@ -8,7 +8,7 @@
 import { identity } from 'lodash';
 import { SortResults } from '@elastic/elasticsearch/api/types';
 import { singleSearchAfter } from './single_search_after';
-import { singleBulkCreate } from './single_bulk_create';
+import { filterDuplicateRules, singleBulkCreate } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
@@ -19,8 +19,10 @@ import {
   mergeReturns,
   mergeSearchResults,
   getSafeSortIds,
+  generateId,
 } from './utils';
-import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
+import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType, WrappedSignalHit } from './types';
+import { buildBulkBody } from './build_bulk_body';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -39,6 +41,7 @@ export const searchAfterAndBulkCreate = async ({
   refresh,
   buildRuleMessage,
   enrichment = identity,
+  bulkCreate,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = ruleSO.attributes.params;
   let toReturn = createSearchAfterReturnType();
@@ -149,23 +152,29 @@ export const searchAfterAndBulkCreate = async ({
             );
           }
           const enrichedEvents = await enrichment(filteredEvents);
+          const ruleParams = ruleSO.attributes.params;
+          filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
+          logger.debug(buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`));
 
+          const wrappedDocs: WrappedSignalHit[] = enrichedEvents.hits.hits.flatMap((doc) => [
+            {
+              _index: signalsIndex,
+              _id: generateId(
+                doc._index,
+                doc._id,
+                doc._version ? doc._version.toString() : '',
+                ruleParams.ruleId ?? '',
+              ),
+              _source: buildBulkBody(ruleSO, doc),
+            },
+          ]);
           const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
             createdItems,
             success: bulkSuccess,
             errors: bulkErrors,
-          } = await singleBulkCreate({
-            buildRuleMessage,
-            filteredEvents: enrichedEvents,
-            ruleSO,
-            services,
-            logger,
-            id,
-            signalsIndex,
-            refresh,
-          });
+          } = await bulkCreate(wrappedDocs, refresh);
           toReturn = mergeReturns([
             toReturn,
             createSearchAfterReturnType({
