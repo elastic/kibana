@@ -17,6 +17,7 @@ import {
   CaseStatuses,
   CaseType,
   CommentRequestAlertType,
+  CaseStatusWithAllStatus,
   CommentType,
   FilterOptions,
   SortFieldCase,
@@ -59,7 +60,7 @@ interface AllCasesGenericProps {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelectorView)
   configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelectorView)
   createCaseNavigation: CasesNavigation;
-  disabledStatuses?: CaseStatuses[];
+  disabledStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
@@ -79,6 +80,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
+    const initialFilterOptions = disabledStatuses ? { status: CaseStatuses.open } : {};
     const {
       data,
       dispatchUpdateCaseProperty,
@@ -90,7 +92,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setFilters,
       setQueryParams,
       setSelectedCases,
-    } = useGetCases();
+    } = useGetCases({}, initialFilterOptions);
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();

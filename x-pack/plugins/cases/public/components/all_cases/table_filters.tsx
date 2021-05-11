@@ -25,7 +25,7 @@ interface CasesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
   setFilterRefetch: (val: () => void) => void;
-  disabledStatuses?: CaseStatuses[];
+  disabledStatuses?: CaseStatusWithAllStatus[];
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
