@@ -52,7 +52,7 @@ Note that we used `--skip-os-packages` which will skip the OS packages build.
 > In case you are testing something and running that same command a couple of times, `--skip-node-download` can be used 
 to speed up the process by a little.
 
-At the end of the process a Kibana distributable was created in a `build` folder created relative to your repository checkout. 
+At the end of the process a Kibana distributable was created in a `target` folder created relative to your repository checkout. 
 The folder will look like the following:
 
 ## Controlling the log levels
@@ -65,3 +65,24 @@ To turn it off you can run the build along `--no-debug` flag. At that point that
 For a longer and verbose logging than `debug` there is other option that can be passed along the build command which is `--verbose`.
 
 ## Create a Kibana distributable and build OS Packages
+
+If you are running a Linux OS there is also the option to create a Kibana distributable including the build of specific OS packages 
+like rpm, deb or docker.
+
+As far as all the above mentioned prerequisites have been followed, you can just run:
+
+```bash
+yarn build
+```
+
+At the end you will get a Kibana distributable including a docker image and both an rpm and a deb package.
+
+To specify a package to build you can add rpm, deb or docker-images as an argument:
+
+```bash
+yarn build --deb
+yarn build --rpm
+yarn build --docker-images
+```
+
+Again the distributable packages can be found in a `target` folder created relative to the repository after the build completes.
