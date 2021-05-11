@@ -100,7 +100,7 @@ describe('migration v2', () => {
     await root.setup();
 
     await expect(root.start()).rejects.toThrow(
-      /Unable to migrate the corrupt saved object document with _id: 'index-pattern:test_index\*'/
+      'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: Corrupt saved object documents: index-pattern:test_index*. To allow migrations to proceed, please delete these documents.'
     );
 
     const logFileContent = await asyncReadFile(logFilePath, 'utf-8');

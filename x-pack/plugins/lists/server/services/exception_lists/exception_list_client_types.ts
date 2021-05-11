@@ -6,39 +6,41 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-
-import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
-import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
 import {
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
+  EmptyStringArrayDecoded,
   EntriesArray,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
-  FilterOrUndefined,
   Id,
   IdOrUndefined,
+  MetaOrUndefined,
+  Name,
+  NameOrUndefined,
+  NamespaceType,
+  NamespaceTypeArray,
+  NonEmptyStringArrayDecoded,
+  OsTypeArray,
+  Tags,
+  TagsOrUndefined,
+  UpdateCommentsArray,
+} from '@kbn/securitysolution-io-ts-utils';
+
+import {
+  FilterOrUndefined,
   Immutable,
   ItemId,
   ItemIdOrUndefined,
   ListId,
   ListIdOrUndefined,
-  MetaOrUndefined,
-  Name,
-  NameOrUndefined,
-  NamespaceType,
-  OsTypeArray,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-  Tags,
-  TagsOrUndefined,
-  UpdateCommentsArray,
   Version,
   VersionOrUndefined,
   _VersionOrUndefined,
