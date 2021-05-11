@@ -562,7 +562,7 @@ async function _compilePackageStream(
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
   }
-  const datasetPath = getDatasetPath(stream.data_stream.dataset);
+
   const packageDataStreams = pkgInfo.data_streams;
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
@@ -571,6 +571,8 @@ async function _compilePackageStream(
   const packageDataStream = packageDataStreams.find(
     (pkgDataStream) => pkgDataStream.dataset === stream.data_stream.dataset
   );
+
+  const datasetPath = packageDataStream.path || getDatasetPath(stream.data_stream.dataset);
   if (!packageDataStream) {
     throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);
   }
