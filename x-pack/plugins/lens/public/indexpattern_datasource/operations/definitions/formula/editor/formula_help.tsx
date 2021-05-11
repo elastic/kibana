@@ -64,7 +64,9 @@ function FormulaHelp({
 
   return (
     <>
-      <EuiPopoverTitle className="lnsFormula__docsHeader">Formula reference</EuiPopoverTitle>
+      <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
+        Formula reference
+      </EuiPopoverTitle>
 
       <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>
         <EuiFlexItem className="lnsFormula__docsNav" grow={1}>

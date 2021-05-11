@@ -5,18 +5,20 @@
   .lnsIndexPatternDimensionEditor-isFullscreen & {
     height: 100%;
   }
-}
 
-.lnsFormula__editor,
-.lnsFormula__docs {
-  flex: 1;
-  min-height: 0;
+  & > * {
+    flex: 1;
+    min-height: 0;
+  }
 }
 
 .lnsFormula__editor {
   border-bottom: $euiBorderThin;
-  display: flex;
-  flex-direction: column;
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    display: flex;
+    flex-direction: column;
+  }
 
   & > * + * {
     border-top: $euiBorderThin;
@@ -28,13 +30,23 @@
   padding: $euiSizeS;
 }
 
-.lnsFormula__editorContent {
-  flex: 1;
-  max-height: 200px;
-  min-height: 0;
+.lnsFormula__editorHeaderGroup,
+.lnsFormula__editorFooterGroup {
+  display: block; // Overrides EUI's styling of `display: flex` on `EuiFlexItem` components
+}
 
-  .lnsIndexPatternDimensionEditor-isFullscreen & {
-    max-height: none;
+.lnsIndexPatternDimensionEditor-isFullscreen .lnsFormula__editorContent {
+  flex: 1;
+  min-height: 0;
+}
+
+.lnsFormula__editorHelp--inline {
+  align-items: center;
+  display: flex;
+  padding: $euiSizeXS;
+
+  & > * + * {
+    margin-left: $euiSizeXS;
   }
 }
 
@@ -48,13 +60,13 @@
 }
 
 .lnsFormula__docsContent {
-  max-height: 40vh;
-  max-width: 60vh;
+  .lnsFormula__docs--overlay & {
+    height: 40vh;
+    width: 65vh;
+  }
 
   .lnsFormula__docs--inline & {
     flex: 1;
-    max-height: none;
-    max-width: none;
     min-height: 0;
   }
 

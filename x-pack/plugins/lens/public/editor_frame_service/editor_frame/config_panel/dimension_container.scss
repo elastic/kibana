@@ -19,6 +19,7 @@
   }
 
   .lnsFrameLayout__sidebar-isFullscreen & {
+    border-left: $euiBorderThin; // Force border regardless of theme in fullscreen
     box-shadow: none;
   }
 }

@@ -7,7 +7,15 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
+} from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
@@ -453,23 +461,33 @@ export function FormulaEditor({
           <div className="lnsFormula__editor">
             <div className="lnsFormula__editorHeader">
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem>Word wrap button</EuiFlexItem>
+                <EuiFlexItem className="lnsFormula__editorHeaderGroup">
+                  {/* TODO: Replace `bolt` with `wordWrap` icon (after latest EUI is deployed) and hook up button to enable/disable word wrapping. */}
+                  <EuiButtonIcon
+                    iconType="bolt"
+                    color="text"
+                    aria-label={i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
+                      defaultMessage: 'Disable word wrap',
+                    })}
+                  />
+                </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem className="lnsFormula__editorHeaderGroup" grow={false}>
+                  {/* TODO: Replace `bolt` with `fullScreenExit` icon (after latest EUI is deployed). */}
                   <EuiButtonEmpty
                     onClick={() => {
                       toggleFullscreen();
                     }}
-                    iconType="fullScreen"
+                    iconType={isFullscreen ? 'bolt' : 'fullScreen'}
                     size="xs"
                     color="text"
                     flush="right"
                   >
                     {isFullscreen
-                      ? i18n.translate('xpack.lens.formula.fullScreenCloseLabel', {
+                      ? i18n.translate('xpack.lens.formula.fullScreenExitLabel', {
                           defaultMessage: 'Collapse',
                         })
-                      : i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
+                      : i18n.translate('xpack.lens.formula.fullScreenEnterLabel', {
                           defaultMessage: 'Expand',
                         })}
                   </EuiButtonEmpty>
@@ -511,9 +529,19 @@ export function FormulaEditor({
 
             <div className="lnsFormula__editorFooter">
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem>
+                <EuiFlexItem className="lnsFormula__editorFooterGroup">
                   {isFullscreen ? (
-                    <>Docs toggle</>
+                    // TODO: Hook up the below `EuiLink` button so that it toggles the presence of the `.lnsFormula__docs--inline` element in fullscreen mode. Note that when docs are hidden, the `arrowDown` button should change to `arrowUp`.
+                    <EuiLink
+                      aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineShowLabel', {
+                        defaultMessage: 'Show function reference',
+                      })}
+                      className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
+                      color="text"
+                    >
+                      <EuiIcon type="help" />
+                      <EuiIcon type="arrowDown" />
+                    </EuiLink>
                   ) : (
                     <EuiPopover
                       panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
@@ -523,15 +551,13 @@ export function FormulaEditor({
                       closePopover={() => setIsHelpOpen(false)}
                       button={
                         <EuiButtonIcon
+                          className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                           onClick={() => setIsHelpOpen(!isHelpOpen)}
                           iconType="help"
                           color="text"
-                          aria-label={i18n.translate(
-                            'xpack.lens.formula.functionReferenceEditorLabel',
-                            {
-                              defaultMessage: 'Function reference',
-                            }
-                          )}
+                          aria-label={i18n.translate('xpack.lens.formula.editorHelpOverlayLabel', {
+                            defaultMessage: 'Function reference',
+                          })}
                         />
                       }
                     >
@@ -543,7 +569,9 @@ export function FormulaEditor({
                   )}
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>Error count</EuiFlexItem>
+                <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
+                  Error count
+                </EuiFlexItem>
               </EuiFlexGroup>
             </div>
           </div>
