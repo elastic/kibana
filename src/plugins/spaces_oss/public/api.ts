@@ -15,7 +15,15 @@ import type { Space } from '../common';
  * @public
  */
 export interface SpacesApi {
-  readonly activeSpace$: Observable<Space>;
+  /**
+   * Observable representing the currently active space.
+   * The details of the space can change without a full page reload (such as display name, color, etc.)
+   */
+  getActiveSpace$(): Observable<Space>;
+
+  /**
+   * Retrieve the currently active space.
+   */
   getActiveSpace(): Promise<Space>;
   /**
    * UI API to use to add spaces capabilities to an application
