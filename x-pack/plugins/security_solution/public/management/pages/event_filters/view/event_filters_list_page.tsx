@@ -198,7 +198,7 @@ export const EventFiltersListPage = memo(() => {
           type={location.show}
         />
       )}
-      {/* TODO: Pending to add unit test when #99463 is merged */}
+
       {doesDataExist && (
         <>
           <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
