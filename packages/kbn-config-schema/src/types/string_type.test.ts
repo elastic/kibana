@@ -30,6 +30,20 @@ test('includes namespace in failure', () => {
   );
 });
 
+test('returns error when not string', () => {
+  expect(() => schema.string().validate(123)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [number]"`
+  );
+
+  expect(() => schema.string().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [Array]"`
+  );
+
+  expect(() => schema.string().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [RegExp]"`
+  );
+});
+
 describe('#minLength', () => {
   test('returns value when longer string', () => {
     expect(schema.string({ minLength: 2 }).validate('foo')).toBe('foo');
@@ -71,17 +85,19 @@ describe('#hostname', () => {
     expect(hostNameSchema.validate('www.example.com')).toBe('www.example.com');
     expect(hostNameSchema.validate('3domain.local')).toBe('3domain.local');
     expect(hostNameSchema.validate('hostname')).toBe('hostname');
-    expect(hostNameSchema.validate('2387628')).toBe('2387628');
+    // DOMAIN_INVALID_TLDS_CHARS (last segment must start with alphanum) - https://github.com/sideway/address/blob/master/lib/domain.js#L88
+    // expect(hostNameSchema.validate('2387628')).toBe('2387628');
     expect(hostNameSchema.validate('::1')).toBe('::1');
     expect(hostNameSchema.validate('0:0:0:0:0:0:0:1')).toBe('0:0:0:0:0:0:0:1');
     expect(hostNameSchema.validate('xn----ascii-7gg5ei7b1i.xn--90a3a')).toBe(
       'xn----ascii-7gg5ei7b1i.xn--90a3a'
     );
 
-    const hostNameWithMaxAllowedLength = 'a'.repeat(255);
-    expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
-      hostNameWithMaxAllowedLength
-    );
+    // DOMAIN_LONG_SEGMENT (63 chars max per segment) - https://github.com/sideway/address/blob/master/lib/domain.js#L79
+    //const hostNameWithMaxAllowedLength = 'a'.repeat(100);
+    //expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
+    //  hostNameWithMaxAllowedLength
+    //);
   });
 
   test('returns error when value is not a valid hostname', () => {
@@ -108,7 +124,7 @@ describe('#hostname', () => {
 
   test('returns error when empty string', () => {
     expect(() => schema.string({ hostname: true }).validate('')).toThrowErrorMatchingInlineSnapshot(
-      `"any.empty"`
+      `"\\"value\\" is not allowed to be empty"`
     );
   });
 
@@ -175,18 +191,4 @@ describe('#validate', () => {
       `"validator failure"`
     );
   });
-});
-
-test('returns error when not string', () => {
-  expect(() => schema.string().validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
-  );
-
-  expect(() => schema.string().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [Array]"`
-  );
-
-  expect(() => schema.string().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [RegExp]"`
-  );
 });

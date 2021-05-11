@@ -16,7 +16,7 @@ export interface TypeOptions<T> {
   validate?: (value: T) => string | void;
 }
 
-const convertValidationFunction = <T>(
+export const convertValidationFunction = <T = unknown>(
   validate: (value: T) => string | void
 ): CustomValidator<T> => {
   return (value, { error }) => {
@@ -28,7 +28,7 @@ const convertValidationFunction = <T>(
     }
 
     if (typeof validationResultMessage === 'string') {
-      return error('any.custom');
+      return error('any.custom', { message: validationResultMessage });
     }
 
     return value;
@@ -80,7 +80,6 @@ export abstract class Type<V> {
   }
 
   public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
-    // TODO: make sure that we don't need to use `internal.attempt` here.
     const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',
@@ -137,7 +136,7 @@ export abstract class Type<V> {
 
     // If error is produced by the custom validator, just extract source message
     // from context and wrap it into `SchemaTypeError` instance.
-    if (code === 'any.custom') {
+    if (code === 'any.custom' && context.message) {
       return new SchemaTypeError(context.message, convertedPath);
     }
 

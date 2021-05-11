@@ -39,10 +39,6 @@ declare module 'joi' {
     stream: () => AnySchema;
   };
 
-  interface AnySchema {
-    custom(validator: (value: any) => string | void): this;
-  }
-
   // Joi types don't include `schema` function even though it's supported.
   interface ObjectSchema {
     schema(): this;
