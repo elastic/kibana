@@ -117,20 +117,19 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [goToHostEvents, formatUrl]
   );
 
-  const [filterQuery, kqlError] = useMemo(
-    () =>
-      combinedQueries == null
-        ? convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-            indexPattern,
-            queries: [query],
-            filters,
-          })
-        : combinedQueries,
-    [combinedQueries, kibana, indexPattern, query, filters]
-  );
+  const [filterQuery, kqlError] = useMemo(() => {
+    if (combinedQueries == null) {
+      return convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+        indexPattern,
+        queries: [query],
+        filters,
+      });
+    }
+    return [combinedQueries];
+  }, [combinedQueries, kibana, indexPattern, query, filters]);
 
-  // useInvalidFilterQuery({ filterQuery, kqlError });
+  useInvalidFilterQuery({ filterQuery, kqlError });
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({

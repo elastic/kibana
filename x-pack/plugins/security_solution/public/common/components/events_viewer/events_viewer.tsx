@@ -247,7 +247,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     sort: sortField,
     startDate: start,
     endDate: end,
-    skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined,
+    skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined, // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
   });
 
   const totalCountMinusDeleted = useMemo(

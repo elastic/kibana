@@ -210,7 +210,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlMode,
   });
 
-  useInvalidFilterQuery({ filterQuery: combinedQueries?.filterQuery });
+  useInvalidFilterQuery({
+    filterQuery: combinedQueries?.filterQuery,
+    kqlError: combinedQueries?.kqlError,
+  });
 
   const isBlankTimeline: boolean =
     isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query);

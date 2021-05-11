@@ -161,7 +161,7 @@ export const combineQueries = ({
   kqlQuery: Query;
   kqlMode: string;
   isEventViewer?: boolean;
-}): { filterQuery?: string } | null => {
+}): { filterQuery?: string; kqlError?: Error } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
@@ -178,6 +178,7 @@ export const combineQueries = ({
     });
     return {
       filterQuery,
+      kqlError,
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
     kuery.query = `(${kqlQuery.query})`;
@@ -189,6 +190,7 @@ export const combineQueries = ({
     });
     return {
       filterQuery,
+      kqlError,
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
@@ -200,6 +202,7 @@ export const combineQueries = ({
     });
     return {
       filterQuery,
+      kqlError,
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
@@ -215,6 +218,7 @@ export const combineQueries = ({
   });
   return {
     filterQuery,
+    kqlError,
   };
 };
 
