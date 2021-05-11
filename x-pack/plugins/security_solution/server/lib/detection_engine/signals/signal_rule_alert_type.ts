@@ -6,12 +6,14 @@
  */
 /* eslint-disable complexity */
 
-import { Logger, SavedObject } from 'src/core/server';
+import { ElasticsearchClient, Logger, SavedObject } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
+import { get, countBy } from 'lodash';
+import { performance } from 'perf_hooks';
 import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '@kbn/securitysolution-list-api';
 
@@ -29,7 +31,13 @@ import {
 } from '../../../../common/detection_engine/utils';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
+import {
+  AlertAttributes,
+  SearchAfterAndBulkCreateParams,
+  SignalRuleAlertTypeDefinition,
+  WrapHits,
+  WrappedSignalHit,
+} from './types';
 import {
   getListsClient,
   getExceptions,
@@ -39,6 +47,9 @@ import {
   hasReadIndexPrivileges,
   getRuleRangeTuples,
   isMachineLearningParams,
+  makeFloatString,
+  errorAggregator,
+  generateId,
 } from './utils';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import {
@@ -46,7 +57,7 @@ import {
   NotificationRuleTypeParams,
 } from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
-import { buildRuleMessageFactory } from './rule_messages';
+import { BuildRuleMessage, buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { TelemetryEventsSender } from '../../telemetry/sender';
@@ -65,6 +76,10 @@ import {
   RuleParams,
   savedQueryRuleParams,
 } from '../schemas/rule_schemas';
+import { RefreshTypes } from '../types';
+import { BaseHit } from '../../../../common/detection_engine/types';
+import { filterDuplicateSignals, GenericBulkCreateResponse } from './single_bulk_create';
+import { buildBulkBody } from './build_bulk_body';
 
 export const signalRulesAlertType = ({
   logger,
@@ -218,6 +233,19 @@ export const signalRulesAlertType = ({
           client: exceptionsClient,
           lists: params.exceptionsList ?? [],
         });
+
+        const bulkCreate = bulkCreateFactory(
+          logger,
+          services.scopedClusterClient.asCurrentUser,
+          buildRuleMessage,
+          refresh
+        );
+
+        const wrapHits = buildWrappedSignalsFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+        });
+
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
           result = await mlExecutor({
@@ -228,8 +256,9 @@ export const signalRulesAlertType = ({
             ruleStatusService,
             services,
             logger,
-            refresh,
             buildRuleMessage,
+            bulkCreate,
+            wrapHits,
           });
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
@@ -241,9 +270,10 @@ export const signalRulesAlertType = ({
             services,
             version,
             logger,
-            refresh,
             buildRuleMessage,
             startedAt,
+            bulkCreate,
+            wrapHits,
           });
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
@@ -256,9 +286,10 @@ export const signalRulesAlertType = ({
             version,
             searchAfterSize,
             logger,
-            refresh,
             eventsTelemetry,
             buildRuleMessage,
+            bulkCreate,
+            wrapHits,
           });
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
@@ -271,9 +302,10 @@ export const signalRulesAlertType = ({
             version,
             searchAfterSize,
             logger,
-            refresh,
             eventsTelemetry,
             buildRuleMessage,
+            bulkCreate,
+            wrapHits,
           });
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
@@ -284,8 +316,8 @@ export const signalRulesAlertType = ({
             services,
             version,
             searchAfterSize,
+            bulkCreate,
             logger,
-            refresh,
           });
         } else {
           throw new Error(`unknown rule type ${type}`);
@@ -415,4 +447,105 @@ export const asTypeSpecificSO = <T extends t.Mixed>(
       params: validated,
     },
   };
+};
+
+const bulkCreateFactory = (
+  logger: Logger,
+  esClient: ElasticsearchClient,
+  buildRuleMessage: BuildRuleMessage,
+  refreshForBulkCreate: RefreshTypes
+) => async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
+  if (wrappedDocs.length === 0) {
+    return {
+      errors: [],
+      success: true,
+      bulkCreateDuration: '0',
+      createdItemsCount: 0,
+      createdItems: [],
+    };
+  }
+
+  const bulkBody = wrappedDocs.flatMap((wrappedDoc) => [
+    {
+      create: {
+        _index: wrappedDoc._index,
+        _id: wrappedDoc._id,
+      },
+    },
+    wrappedDoc._source,
+  ]);
+  const start = performance.now();
+
+  const { body: response } = await esClient.bulk({
+    refresh: refreshForBulkCreate,
+    body: bulkBody,
+  });
+
+  const end = performance.now();
+  logger.debug(
+    buildRuleMessage(
+      `individual bulk process time took: ${makeFloatString(end - start)} milliseconds`
+    )
+  );
+  logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
+  const createdItems = wrappedDocs
+    .map((doc, index) => ({
+      _id: response.items[index].create?._id ?? '',
+      _index: response.items[index].create?._index ?? '',
+      ...doc._source,
+    }))
+    .filter((_, index) => get(response.items[index], 'create.status') === 201);
+  const createdItemsCount = createdItems.length;
+  const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
+  const errorCountByMessage = errorAggregator(response, [409]);
+
+  logger.debug(buildRuleMessage(`bulk created ${createdItemsCount} signals`));
+  if (duplicateSignalsCount > 0) {
+    logger.debug(buildRuleMessage(`ignored ${duplicateSignalsCount} duplicate signals`));
+  }
+  if (!isEmpty(errorCountByMessage)) {
+    logger.error(
+      buildRuleMessage(
+        `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
+      )
+    );
+    return {
+      errors: Object.keys(errorCountByMessage),
+      success: false,
+      bulkCreateDuration: makeFloatString(end - start),
+      createdItemsCount,
+      createdItems,
+    };
+  } else {
+    return {
+      errors: [],
+      success: true,
+      bulkCreateDuration: makeFloatString(end - start),
+      createdItemsCount,
+      createdItems,
+    };
+  }
+};
+
+const buildWrappedSignalsFactory = ({
+  ruleSO,
+  signalsIndex,
+}: {
+  ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+  signalsIndex: string;
+}): WrapHits => (events) => {
+  const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
+    {
+      _index: signalsIndex,
+      _id: generateId(
+        doc._index,
+        doc._id,
+        doc._version ? doc._version.toString() : '',
+        ruleSO.attributes.params.ruleId ?? ''
+      ),
+      _source: buildBulkBody(ruleSO, doc),
+    },
+  ]);
+
+  return filterDuplicateSignals(ruleSO.id, wrappedDocs);
 };
