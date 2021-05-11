@@ -102,7 +102,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     []
   );
 
-  const filterQuery = useMemo(
+  const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -113,13 +113,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     [filters, indexPattern, uiSettings, query]
   );
 
-  useInvalidFilterQuery({
-    filterQuery,
-    config: esQuery.getEsQueryConfig(uiSettings),
-    indexPattern,
-    queries: [query],
-    filters,
-  });
+  useInvalidFilterQuery({ filterQuery, kqlError });
 
   useEffect(() => {
     return () => {

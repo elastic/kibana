@@ -71,7 +71,7 @@ const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); //
 export const escapeKuery = flow(escapeSpecialCharacters, escapeWhitespace);
 
 /**
- * Deprecated in leiu of `convertToBuildEsQueryOrError`
+ * Deprecated in lieu of `convertToBuildEsQueryOrError`
  */
 export const convertToBuildEsQuery = ({
   config,
@@ -83,48 +83,51 @@ export const convertToBuildEsQuery = ({
   indexPattern: IIndexPattern;
   queries: Query[];
   filters: Filter[];
-}): string | undefined => {
+}): [string | undefined, Error | undefined] => {
   try {
-    return JSON.stringify(
-      esQuery.buildEsQuery(
-        indexPattern,
-        queries,
-        filters.filter((f) => f.meta.disabled === false),
-        {
-          ...config,
-          dateFormatTZ: undefined,
-        }
-      )
-    );
-  } catch (exp) {
-    return undefined;
+    return [
+      JSON.stringify(
+        esQuery.buildEsQuery(
+          indexPattern,
+          queries,
+          filters.filter((f) => f.meta.disabled === false),
+          {
+            ...config,
+            dateFormatTZ: undefined,
+          }
+        )
+      ),
+      undefined,
+    ];
+  } catch (error) {
+    return [undefined, error];
   }
 };
 
-export const convertToBuildEsQueryOrError = ({
-  config,
-  indexPattern,
-  queries,
-  filters,
-}: {
-  config: EsQueryConfig;
-  indexPattern: IIndexPattern;
-  queries: Query[];
-  filters: Filter[];
-}): string | Error => {
-  try {
-    return JSON.stringify(
-      esQuery.buildEsQuery(
-        indexPattern,
-        queries,
-        filters.filter((f) => f.meta.disabled === false),
-        {
-          ...config,
-          dateFormatTZ: undefined,
-        }
-      )
-    );
-  } catch (error) {
-    return error;
-  }
-};
+// export const convertToBuildEsQueryOrError = ({
+//   config,
+//   indexPattern,
+//   queries,
+//   filters,
+// }: {
+//   config: EsQueryConfig;
+//   indexPattern: IIndexPattern;
+//   queries: Query[];
+//   filters: Filter[];
+// }): string | Error => {
+//   try {
+//     return JSON.stringify(
+//       esQuery.buildEsQuery(
+//         indexPattern,
+//         queries,
+//         filters.filter((f) => f.meta.disabled === false),
+//         {
+//           ...config,
+//           dateFormatTZ: undefined,
+//         }
+//       )
+//     );
+//   } catch (error) {
+//     return error;
+//   }
+// };

@@ -6,35 +6,25 @@
  */
 
 import { useEffect } from 'react';
-import { EsQueryConfig, Filter, IIndexPattern, Query } from 'src/plugins/data/public';
-import { convertToBuildEsQueryOrError } from '../lib/keury';
 import { useAppToasts } from './use_app_toasts';
 
+/**
+ * Adds a toast error message whenever invalid KQL is submitted through the search bar
+ */
 export const useInvalidFilterQuery = ({
   filterQuery,
-  config,
-  indexPattern,
-  queries,
-  filters,
+  kqlError,
 }: {
   filterQuery?: string;
-  config: EsQueryConfig;
-  indexPattern: IIndexPattern;
-  queries: Query[];
-  filters: Filter[];
+  kqlError?: Error;
 }) => {
   const { addError } = useAppToasts();
 
   useEffect(() => {
-    if (filterQuery === undefined) {
-      const error = convertToBuildEsQueryOrError({
-        config,
-        indexPattern,
-        queries,
-        filters,
-      }) as Error;
-      addError(error, { title: error.name });
+    if (filterQuery === undefined && kqlError != null) {
+      addError(kqlError, { title: kqlError.name });
     }
+    // This disable is required to only trigger the toast once per render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterQuery, addError]);
 };

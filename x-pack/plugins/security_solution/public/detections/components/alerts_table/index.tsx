@@ -136,10 +136,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   useInvalidFilterQuery({
     filterQuery: getGlobalQuery([])?.filterQuery,
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern: indexPatterns,
-    queries: [globalQuery],
-    filters: [...(defaultFilters ?? []), ...globalFilters, ...buildTimeRangeFilter(from, to)],
   });
 
   const setEventsLoadingCallback = useCallback(

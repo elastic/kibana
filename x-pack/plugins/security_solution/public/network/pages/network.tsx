@@ -134,26 +134,20 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
     );
 
-    const filterQuery = convertToBuildEsQuery({
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters,
     });
-    const tabsFilterQuery = convertToBuildEsQuery({
+    const [tabsFilterQuery] = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters: tabsFilters,
     });
 
-    useInvalidFilterQuery({
-      filterQuery,
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern,
-      queries: [query],
-      filters,
-    });
+    useInvalidFilterQuery({ filterQuery, kqlError });
 
     return (
       <>

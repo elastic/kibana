@@ -104,20 +104,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
-  const filterQuery = convertToBuildEsQuery({
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
     queries: [query],
     filters: getFilters(),
   });
 
-  useInvalidFilterQuery({
-    filterQuery,
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: getFilters(),
-  });
+  useInvalidFilterQuery({ filterQuery, kqlError });
 
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());

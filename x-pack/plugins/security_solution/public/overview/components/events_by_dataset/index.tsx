@@ -117,7 +117,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [goToHostEvents, formatUrl]
   );
 
-  const filterQuery = useMemo(
+  const [filterQuery, kqlError] = useMemo(
     () =>
       combinedQueries == null
         ? convertToBuildEsQuery({
@@ -130,13 +130,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [combinedQueries, kibana, indexPattern, query, filters]
   );
 
-  useInvalidFilterQuery({
-    filterQuery,
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters,
-  });
+  // useInvalidFilterQuery({ filterQuery, kqlError });
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({

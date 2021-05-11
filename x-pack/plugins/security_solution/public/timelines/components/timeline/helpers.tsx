@@ -170,33 +170,36 @@ export const combineQueries = ({
     isEmpty(kqlQuery.query) &&
     (isEventViewer || !isEmpty(filters))
   ) {
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({
-        config,
-        queries: [kuery],
-        indexPattern,
-        filters,
-      }),
+      filterQuery,
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
     kuery.query = `(${kqlQuery.query})`;
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({
-        config,
-        queries: [kuery],
-        indexPattern,
-        filters,
-      }),
+      filterQuery,
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
     return {
-      filterQuery: convertToBuildEsQuery({
-        config,
-        queries: [kuery],
-        indexPattern,
-        filters,
-      }),
+      filterQuery,
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
@@ -204,8 +207,14 @@ export const combineQueries = ({
   kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery.query as string
   )})`;
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
+    config,
+    queries: [kuery],
+    indexPattern,
+    filters,
+  });
   return {
-    filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+    filterQuery,
   };
 };
 

@@ -46,7 +46,7 @@ const EventCountsComponent: React.FC<Props> = ({
 }) => {
   const { uiSettings } = useKibana().services;
 
-  const hostFilterQuery = useMemo(
+  const [hostFilterQuery, hostKqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -57,7 +57,7 @@ const EventCountsComponent: React.FC<Props> = ({
     [filters, indexPattern, query, uiSettings]
   );
 
-  const networkFilterQuery = useMemo(
+  const [networkFilterQuery, networkKqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -68,21 +68,9 @@ const EventCountsComponent: React.FC<Props> = ({
     [filters, indexPattern, uiSettings, query]
   );
 
-  useInvalidFilterQuery({
-    filterQuery: hostFilterQuery,
-    config: esQuery.getEsQueryConfig(uiSettings),
-    indexPattern,
-    queries: [query],
-    filters,
-  });
+  useInvalidFilterQuery({ filterQuery: hostFilterQuery, kqlError: hostKqlError });
 
-  useInvalidFilterQuery({
-    filterQuery: networkFilterQuery,
-    config: esQuery.getEsQueryConfig(uiSettings),
-    indexPattern,
-    queries: [query],
-    filters,
-  });
+  useInvalidFilterQuery({ filterQuery: networkFilterQuery, kqlError: networkKqlError });
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">

@@ -111,7 +111,7 @@ const HostsComponent = () => {
     [dispatch]
   );
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const filterQuery = useMemo(
+  const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -121,7 +121,7 @@ const HostsComponent = () => {
       }),
     [filters, indexPattern, uiSettings, query]
   );
-  const tabsFilterQuery = useMemo(
+  const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -132,13 +132,7 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
-  useInvalidFilterQuery({
-    filterQuery,
-    config: esQuery.getEsQueryConfig(uiSettings),
-    indexPattern,
-    queries: [query],
-    filters,
-  });
+  useInvalidFilterQuery({ filterQuery, kqlError });
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
