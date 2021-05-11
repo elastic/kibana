@@ -180,7 +180,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         await deleteCases({
-          supertest,
+          supertest: supertestWithoutAuth,
           caseIDs: [postedCase.id],
           expectedHttpCode: 204,
           auth: { user: secOnly, space: 'space1' },

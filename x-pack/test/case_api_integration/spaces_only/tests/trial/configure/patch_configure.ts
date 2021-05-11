@@ -23,6 +23,7 @@ import {
   getServiceNowConnector,
   createConnector,
   getAuthWithSuperUser,
+  getActionsSpace,
 } from '../../../../common/lib/utils';
 import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 import { nullUser } from '../../../../common/lib/mock';
@@ -33,6 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const authSpace1 = getAuthWithSuperUser();
+  const space = getActionsSpace(authSpace1.space);
 
   describe('patch_configure', () => {
     const actionsRemover = new ActionsRemover(supertest);
@@ -59,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(authSpace1.space, connector.id, 'action', 'actions');
+      actionsRemover.add(space, connector.id, 'action', 'actions');
 
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(
@@ -129,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(authSpace1.space, connector.id, 'action', 'actions');
+      actionsRemover.add(space, connector.id, 'action', 'actions');
 
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(

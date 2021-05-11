@@ -546,8 +546,17 @@ export const superUserSpace1Auth = getAuthWithSuperUser();
  * Returns an auth object with the specified space and user set as super user. The result can be passed to other utility
  * functions.
  */
-export function getAuthWithSuperUser(space: string = 'space1'): { user: User; space: string } {
+export function getAuthWithSuperUser(
+  space: string | null = 'space1'
+): { user: User; space: string | null } {
   return { user: superUser, space };
+}
+
+/**
+ * Converts the space into the appropriate string for use by the actions remover utility object.
+ */
+export function getActionsSpace(space: string | null) {
+  return space ?? 'default';
 }
 
 export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {

@@ -17,6 +17,7 @@ import {
   getServiceNowSIRConnector,
   getAuthWithSuperUser,
   getCaseConnectors,
+  getActionsSpace,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -24,6 +25,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const actionsRemover = new ActionsRemover(supertest);
   const authSpace1 = getAuthWithSuperUser();
+  const space = getActionsSpace(authSpace1.space);
 
   describe('get_connectors', () => {
     afterEach(async () => {
@@ -68,11 +70,11 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(authSpace1.space, sir.id, 'action', 'actions');
-      actionsRemover.add(authSpace1.space, snConnector.id, 'action', 'actions');
-      actionsRemover.add(authSpace1.space, emailConnector.id, 'action', 'actions');
-      actionsRemover.add(authSpace1.space, jiraConnector.id, 'action', 'actions');
-      actionsRemover.add(authSpace1.space, resilientConnector.id, 'action', 'actions');
+      actionsRemover.add(space, sir.id, 'action', 'actions');
+      actionsRemover.add(space, snConnector.id, 'action', 'actions');
+      actionsRemover.add(space, emailConnector.id, 'action', 'actions');
+      actionsRemover.add(space, jiraConnector.id, 'action', 'actions');
+      actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({ supertest, auth: authSpace1 });
 
@@ -162,11 +164,11 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      actionsRemover.add(authSpace1.space, sir.id, 'action', 'actions');
-      actionsRemover.add(authSpace1.space, snConnector.id, 'action', 'actions');
-      actionsRemover.add(authSpace1.space, emailConnector.id, 'action', 'actions');
-      actionsRemover.add(authSpace1.space, jiraConnector.id, 'action', 'actions');
-      actionsRemover.add(authSpace1.space, resilientConnector.id, 'action', 'actions');
+      actionsRemover.add(space, sir.id, 'action', 'actions');
+      actionsRemover.add(space, snConnector.id, 'action', 'actions');
+      actionsRemover.add(space, emailConnector.id, 'action', 'actions');
+      actionsRemover.add(space, jiraConnector.id, 'action', 'actions');
+      actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({
         supertest,
