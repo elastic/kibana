@@ -122,12 +122,13 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.fleet.fleetServerUpgradeModal.modalTitle"
-            defaultMessage="This version of Fleet requires a Fleet Server"
+            defaultMessage="Enroll your agents into Fleet Server"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiImage
+          size="fullWidth"
           src={getAssetsPath('./announcement.jpg')}
           alt={i18n.translate('xpack.fleet.fleetServerUpgradeModal.announcementImageAlt', {
             defaultMessage: 'Fleet Server upgrade announcement',
@@ -138,7 +139,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
           {isCloud ? (
             <FormattedMessage
               id="xpack.fleet.fleetServerUpgradeModal.cloudDescriptionMessage"
-              defaultMessage="Fleet Server is now available and it provides improved scalability and security. If you already had APM on Elastic Cloud, we've upgraded it to APM & Fleet. {existingAgentsMessage} To continue using Fleet, you must install the new version of Elastic Agent on each host. Learn more in our {link}."
+              defaultMessage="Fleet Server is now available and it provides improved scalability and security. If you already had an APM instance on Elastic Cloud, we've upgraded it to APM & Fleet. If not, you can add one to your deployment for free. {existingAgentsMessage} To continue using Fleet, you must use Fleet Server and install the new version of Elastic Agent on each host."
               values={{
                 existingAgentsMessage: (
                   <strong>
@@ -147,17 +148,6 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
                       defaultMessage="Your existing Elastic Agents have been automatically unenrolled and have stopped sending data."
                     />
                   </strong>
-                ),
-                link: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/fleet/current/upgrade-elastic-agent.html"
-                    external={true}
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.fleetServerUpgradeModal.fleetServerMigrationGuide"
-                      defaultMessage="Fleet Server migration guide"
-                    />
-                  </EuiLink>
                 ),
               }}
             />
