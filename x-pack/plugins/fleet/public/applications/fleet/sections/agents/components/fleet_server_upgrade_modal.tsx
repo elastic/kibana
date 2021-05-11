@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -24,7 +24,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { sendPutSettings, useLink, useStartServices } from '../../../hooks';
+import {
+  sendGetAgents,
+  sendGetOneAgentPolicy,
+  sendPutSettings,
+  useLink,
+  useStartServices,
+} from '../../../hooks';
+import type { PackagePolicy } from '../../../types';
+import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
 interface Props {
   onClose: () => void;
@@ -37,6 +45,58 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
   const isCloud = !!cloud?.cloudId;
 
   const [checked, setChecked] = useState(false);
+  const [isAgentsAndPoliciesLoaded, setAgentsAndPoliciesLoaded] = useState(false);
+
+  // Check if an other agent than the fleet server is already enrolled
+  useEffect(() => {
+    async function check() {
+      try {
+        const agentPoliciesAlreadyChecked: { [k: string]: boolean } = {};
+
+        const res = await sendGetAgents({
+          page: 1,
+          perPage: 10,
+          showInactive: false,
+        });
+
+        if (res.error) {
+          throw res.error;
+        }
+
+        for (const agent of res.data?.list ?? []) {
+          if (agent.policy_id) {
+            if (!agentPoliciesAlreadyChecked[agent.policy_id]) {
+              agentPoliciesAlreadyChecked[agent.policy_id] = true;
+              const policyRes = await sendGetOneAgentPolicy(agent.policy_id);
+              const hasFleetServer =
+                (policyRes.data?.item.package_policies as PackagePolicy[]).some(
+                  (p: PackagePolicy) => {
+                    return p.package?.name === FLEET_SERVER_PACKAGE;
+                  }
+                ) ?? false;
+              if (!hasFleetServer) {
+                await sendPutSettings({
+                  has_seen_fleet_migration_notice: true,
+                });
+                onClose();
+                return;
+              }
+            }
+          }
+        }
+        setAgentsAndPoliciesLoaded(true);
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.fleetServerUpgradeModal.errorLoadingAgents', {
+            defaultMessage: `Error loading agents`,
+          }),
+        });
+      }
+    }
+
+    check();
+  }, [setAgentsAndPoliciesLoaded, notifications.toasts, onClose]);
+
   const onChange = useCallback(async () => {
     try {
       setChecked(!checked);
@@ -51,6 +111,10 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
       });
     }
   }, [checked, setChecked, notifications]);
+
+  if (!isAgentsAndPoliciesLoaded) {
+    return null;
+  }
 
   return (
     <EuiModal onClose={onClose}>
@@ -74,7 +138,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
           {isCloud ? (
             <FormattedMessage
               id="xpack.fleet.fleetServerUpgradeModal.cloudDescriptionMessage"
-              defaultMessage="Fleet Server is now available and it provides improved scalability and security. If you already had APM on Elastic Cloud, we've upgraded it to APM & Fleet. {existingAgentsMessage} To continue using Fleet, you must install a Fleet Server and the new version of Elastic Agent on each host. Learn more in our {link}."
+              defaultMessage="Fleet Server is now available and it provides improved scalability and security. If you already had APM on Elastic Cloud, we've upgraded it to APM & Fleet. {existingAgentsMessage} To continue using Fleet, you must install the new version of Elastic Agent on each host. Learn more in our {link}."
               values={{
                 existingAgentsMessage: (
                   <strong>
