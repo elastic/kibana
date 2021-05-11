@@ -84,9 +84,6 @@ export function runBuildApiDocsCli() {
         }
       );
 
-      log.info('referencedDeprecations');
-      log.info(JSON.stringify(referencedDeprecations, null, 2));
-
       const reporter = CiStatsReporter.fromEnv(log);
       plugins.forEach((plugin) => {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
@@ -128,6 +125,12 @@ export function runBuildApiDocsCli() {
             value: referencedDeprecations[id] ? referencedDeprecations[id].length : 0,
           },
         ]);
+
+        log.info(
+          `[deprecated] [${id}] ${
+            referencedDeprecations[id] ? referencedDeprecations[id].length : 0
+          }`
+        );
 
         const getLink = (d: ApiDeclaration) =>
           `https://github.com/elastic/kibana/tree/master/${d.source.path}#L${d.source.lineNumber}`;
