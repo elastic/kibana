@@ -21,6 +21,7 @@ import {
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CustomPaletteParams } from './expression';
+import { CUSTOM_PALETTE } from './components/coloring/constants';
 
 export interface ColumnState {
   columnId: string;
@@ -340,7 +341,15 @@ export const getDatatableVisualization = ({
             title: [title || ''],
             description: [description || ''],
             columns: columns.map((column) => {
-              const paletteConfig = column.palette?.params;
+              const paletteParams = {
+                ...column.palette?.params,
+                // rewrite colors and stops as two distinct arguments
+                colors: (column.palette?.params?.stops || []).map(({ color }) => color),
+                stops:
+                  column.palette?.params?.name === 'custom'
+                    ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                    : [],
+              };
 
               return {
                 type: 'expression',
@@ -359,31 +368,7 @@ export const getDatatableVisualization = ({
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                       colorMode: [column.colorMode ?? 'none'],
-                      palette: [
-                        {
-                          type: 'expression',
-                          chain: [
-                            {
-                              type: 'function',
-                              function: 'palette',
-                              arguments: {
-                                rangeMin:
-                                  paletteConfig?.rangeMin != null ? [paletteConfig?.rangeMin] : [],
-                                rangeMax:
-                                  paletteConfig?.rangeMax != null ? [paletteConfig?.rangeMax] : [],
-                                reverse: [], // controlled at UI level
-                                continuity: [paletteConfig?.continuity || 'above'],
-                                range: [paletteConfig?.rangeType || 'percent'],
-                                color: (paletteConfig?.stops || []).map(({ color }) => color),
-                                stop:
-                                  paletteConfig?.name === 'custom'
-                                    ? (paletteConfig?.stops || []).map(({ stop }) => stop)
-                                    : [],
-                              },
-                            },
-                          ],
-                        },
-                      ],
+                      palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
                     },
                   },
                 ],

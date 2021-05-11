@@ -213,7 +213,25 @@ function buildCustomPalette(): PaletteDefinition {
       return gradient ? chroma.scale(colors).colors(size) : colors;
     },
     canDynamicColoring: false,
-    toExpression: ({ colors, gradient }: { colors: string[]; gradient: boolean }) => ({
+    toExpression: ({
+      colors,
+      gradient,
+      stops = [],
+      rangeMax,
+      rangeMin,
+      rangeType = 'percent',
+      continuity = 'above',
+      reverse = false,
+    }: {
+      colors: string[];
+      gradient: boolean;
+      stops: number[];
+      rangeMax?: number;
+      rangeMin?: number;
+      rangeType: 'percent' | 'number';
+      continuity?: 'all' | 'none' | 'above' | 'below';
+      reverse?: boolean;
+    }) => ({
       type: 'expression',
       chain: [
         {
@@ -222,6 +240,12 @@ function buildCustomPalette(): PaletteDefinition {
           arguments: {
             color: colors,
             gradient: [gradient],
+            reverse: [reverse],
+            continuity: [continuity],
+            stop: stops,
+            range: [rangeType],
+            rangeMax: rangeMax == null ? [] : [rangeMax],
+            rangeMin: rangeMin == null ? [] : [rangeMin],
           },
         },
       ],

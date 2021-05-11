@@ -52,7 +52,7 @@ const gridStyle: EuiDataGridStyle = {
 
 export interface ColumnConfig {
   columns: Array<
-    Exclude<ColumnState, 'palette'> & {
+    Omit<ColumnState, 'palette'> & {
       type: 'lens_datatable_column';
       palette?: PaletteOutput<CustomPaletteState>;
     }

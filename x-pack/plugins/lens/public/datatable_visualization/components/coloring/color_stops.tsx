@@ -141,17 +141,23 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                             color: colorValue,
                             stop: newStopString,
                           };
+                          setLocalColorStops(newColorStops);
+                        }}
+                        onBlur={() => {
                           if (onBlurOption === 'input') {
-                            if (
-                              prevStopValue > Number(newStopString) ||
-                              Number(newStopString) > nextStopValue
-                            ) {
-                              newColorStops.sort(
-                                ({ stop: stopA }, { stop: stopB }) => Number(stopA) - Number(stopB)
+                            // sort the stops when the focus leaves the row container
+                            const shouldSort =
+                              Number(stopValue) > nextStopValue ||
+                              prevStopValue > Number(stopValue);
+                            if (shouldSort) {
+                              setLocalColorStops(
+                                [...localColorStops].sort(
+                                  ({ stop: stopA }, { stop: stopB }) =>
+                                    Number(stopA) - Number(stopB)
+                                )
                               );
                             }
                           }
-                          setLocalColorStops(newColorStops);
                         }}
                         append={rangeType === 'percent' ? '%' : undefined}
                         aria-label={i18n.translate(
@@ -244,9 +250,10 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                   newColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })),
                   max
                 );
+                const newStop = step + Number(localColorStops[length - 1].stop);
                 newColorStops.push({
                   color: DEFAULT_COLOR,
-                  stop: String(localColorStops[length - 1].stop + step),
+                  stop: String(newStop),
                 });
                 setLocalColorStops(newColorStops);
               }}

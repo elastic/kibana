@@ -556,5 +556,28 @@ describe('palettes', () => {
       expect(helperFn(26)).not.toEqual('#aa0000');
       expect(helperFn(24)).not.toEqual('#aa0000');
     });
+
+    // just make sure to not have broken anything
+    it('should work with only legacy arguments, filling with default values the new ones', () => {
+      expect(palette.toExpression({ colors: [], gradient: false })).toEqual({
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'palette',
+            arguments: {
+              color: [],
+              gradient: [false],
+              reverse: [false],
+              continuity: ['above'],
+              stops: [],
+              range: ['percent'],
+              rangeMax: [],
+              rangeMin: [],
+            },
+          },
+        ],
+      });
+    });
   });
 });

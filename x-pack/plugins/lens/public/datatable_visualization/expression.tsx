@@ -30,15 +30,15 @@ import type { DatatableRender } from './components/types';
 import { transposeTable } from './transpose_helpers';
 import { ColorStop } from './components/coloring/constants';
 
+export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
+  type: 'lens_datatable_column';
+  palette?: PaletteOutput<CustomPaletteState>;
+};
+
 export interface Args {
   title: string;
   description?: string;
-  columns: Array<
-    Exclude<ColumnState, 'palette'> & {
-      type: 'lens_datatable_column';
-      palette?: PaletteOutput<CustomPaletteState>;
-    }
-  >;
+  columns: ColumnConfigArg[];
   sortingColumnId: string | undefined;
   sortingDirection: 'asc' | 'desc' | 'none';
 }
