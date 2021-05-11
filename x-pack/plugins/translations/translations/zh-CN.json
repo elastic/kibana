@@ -8225,6 +8225,7 @@
     "xpack.enterpriseSearch.appSearch.engine.sampleEngineBadge": "样本引擎",
     "xpack.enterpriseSearch.appSearch.engine.schema.conflicts": "架构冲突",
     "xpack.enterpriseSearch.appSearch.engine.schema.title": "架构",
+    "xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFieldLabel": "最近添加",
     "xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFields": "新的未确认字段",
     "xpack.enterpriseSearch.appSearch.engine.searchUI.title": "搜索 UI",
     "xpack.enterpriseSearch.appSearch.engine.synonyms.title": "同义词",

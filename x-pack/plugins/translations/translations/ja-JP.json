@@ -8156,6 +8156,7 @@
     "xpack.enterpriseSearch.appSearch.engine.sampleEngineBadge": "サンプルエンジン",
     "xpack.enterpriseSearch.appSearch.engine.schema.conflicts": "スキーマ競合",
     "xpack.enterpriseSearch.appSearch.engine.schema.title": "スキーマ",
+    "xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFieldLabel": "最近追加された項目",
     "xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFields": "新しい未確認のフィールド",
     "xpack.enterpriseSearch.appSearch.engine.searchUI.title": "Search UI",
     "xpack.enterpriseSearch.appSearch.engine.synonyms.title": "同義語",

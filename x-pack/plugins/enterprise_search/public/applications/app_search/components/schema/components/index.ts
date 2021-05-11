@@ -6,4 +6,5 @@
  */
 
 export { SchemaCallouts } from './schema_callouts';
+export { SchemaTable } from './schema_table';
 export { EmptyState } from './empty_state';

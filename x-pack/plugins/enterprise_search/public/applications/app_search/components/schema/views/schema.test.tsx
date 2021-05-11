@@ -17,7 +17,7 @@ import { EuiPageHeader, EuiButton } from '@elastic/eui';
 import { Loading } from '../../../../shared/loading';
 import { SchemaAddFieldModal } from '../../../../shared/schema';
 
-import { SchemaCallouts, EmptyState } from '../components';
+import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
 
 import { Schema } from './';
 
@@ -45,7 +45,7 @@ describe('Schema', () => {
     const wrapper = shallow(<Schema />);
 
     expect(wrapper.find(SchemaCallouts)).toHaveLength(1);
-    // TODO: Check for schema components
+    expect(wrapper.find(SchemaTable)).toHaveLength(1);
   });
 
   it('calls loadSchema on mount', () => {
