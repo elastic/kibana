@@ -46,7 +46,6 @@ server log [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed f
 server log [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
 ```
 
-
 Go to the scripts folder `cd kibana/x-pack/plugins/security_solution/server/lib/detection_engine/scripts` and run:
 
 ```sh
