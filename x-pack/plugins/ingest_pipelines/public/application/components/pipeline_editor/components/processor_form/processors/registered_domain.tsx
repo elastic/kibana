@@ -8,10 +8,11 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { from } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { from } from './shared';
+import { SerializerFunc } from '../../../../../../shared_imports';
 
 export const RegisteredDomain: FunctionComponent = () => {
   return (
@@ -25,7 +26,7 @@ export const RegisteredDomain: FunctionComponent = () => {
 
       <TargetField />
 
-      <IgnoreMissingField defaultValue={true} serializer={from.undefinedIfValue(true)} />
+      <IgnoreMissingField defaultValue={true} serializer={from.undefinedIfValue(true) as SerializerFunc<boolean>} />
     </>
   );
 };

@@ -43,7 +43,7 @@ export const fieldsConfig: FieldsConfig = {
   },
 };
 
-type Props = Partial<FieldConfig<any>>;
+type Props = Partial<FieldConfig>;
 
 export const IgnoreMissingField: FunctionComponent<Props> = (props) => (
   <UseField
