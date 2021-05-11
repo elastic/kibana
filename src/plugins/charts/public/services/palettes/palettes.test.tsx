@@ -570,7 +570,7 @@ describe('palettes', () => {
               gradient: [false],
               reverse: [false],
               continuity: ['above'],
-              stops: [],
+              stop: [],
               range: ['percent'],
               rangeMax: [],
               rangeMin: [],
