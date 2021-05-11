@@ -649,6 +649,398 @@ export default ({ getService }: FtrProviderContext) => {
         dashboards: [] as string[],
       },
     },
+    {
+      testTitleSuffix:
+        'for metricbeat_system_ecs with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_metricbeat',
+      indexPattern: { name: 'ft_module_metricbeat', timeField: '@timestamp' },
+      module: 'metricbeat_system_ecs',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf17_',
+        indexPatternName: 'ft_module_metricbeat',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf17_max_disk_utilization_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '25mb',
+          },
+          {
+            jobId: 'pf17_metricbeat_outages_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '15mb',
+          },
+          {
+            jobId: 'pf17_high_mean_cpu_iowait_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '25mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for metrics_ui_hosts with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_metrics_ui',
+      indexPattern: { name: 'ft_module_metrics_ui', timeField: '@timestamp' },
+      module: 'metrics_ui_hosts',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf18_',
+        indexPatternName: 'ft_module_metrics_ui',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf18_hosts_memory_usage',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf18_hosts_network_in',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf18_hosts_network_out',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for metrics_ui_k8s with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_metrics_ui',
+      indexPattern: { name: 'ft_module_metrics_ui', timeField: '@timestamp' },
+      module: 'metrics_ui_k8s',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf19_',
+        indexPatternName: 'ft_module_metrics_ui',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf19_k8s_memory_usage',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf19_k8s_network_in',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf19_k8s_network_out',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for siem_cloudtrail with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_siem_cloudtrail',
+      indexPattern: { name: 'ft_module_siem_cloudtrail', timeField: '@timestamp' },
+      module: 'siem_cloudtrail',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf20_',
+        indexPatternName: 'ft_module_siem_cloudtrail',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf20_rare_method_for_a_city',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf20_rare_method_for_a_country',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf20_rare_method_for_a_username',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf20_high_distinct_count_error_message',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '16mb',
+          },
+          {
+            jobId: 'pf20_rare_error_code',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for siem_winlogbeat with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_siem_winlogbeat',
+      indexPattern: { name: 'ft_module_siem_winlogbeat', timeField: '@timestamp' },
+      module: 'siem_winlogbeat',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf21_',
+        indexPatternName: 'ft_module_siem_winlogbeat',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf21_rare_process_by_host_windows_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_anomalous_network_activity_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_anomalous_path_activity_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_anomalous_process_all_hosts_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_anomalous_process_creation',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_anomalous_script',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '16mb',
+          },
+          {
+            jobId: 'pf21_windows_anomalous_service',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_anomalous_user_name_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_rare_user_runas_event',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_rare_metadata_process',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf21_windows_rare_metadata_user',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for siem_winlogbeat_auth with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_siem_winlogbeat',
+      indexPattern: { name: 'ft_module_siem_winlogbeat', timeField: '@timestamp' },
+      module: 'siem_winlogbeat_auth',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf22_',
+        indexPatternName: 'ft_module_siem_winlogbeat',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf22_windows_rare_user_type10_remote_login',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for apache_data_stream with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_apache_data_stream',
+      indexPattern: { name: 'ft_module_apache_data_stream', timeField: '@timestamp' },
+      module: 'apache_data_stream',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf23_',
+        indexPatternName: 'ft_module_apache_data_stream',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf23_visitor_rate_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf23_status_code_rate_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf23_source_ip_url_count_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '16mb',
+          },
+          {
+            jobId: 'pf23_source_ip_request_rate_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf23_low_request_rate_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for nginx_data_stream with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_nginx_data_stream',
+      indexPattern: { name: 'ft_module_nginx_data_stream', timeField: '@timestamp' },
+      module: 'nginx_data_stream',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf24_',
+        indexPatternName: 'ft_module_nginx_data_stream',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf24_visitor_rate_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf24_status_code_rate_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf24_source_ip_url_count_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '16mb',
+          },
+          {
+            jobId: 'pf24_source_ip_request_rate_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf24_low_request_rate_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
   ];
 
   const testDataListNegative = [
