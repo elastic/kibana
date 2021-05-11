@@ -19,11 +19,9 @@ import {
 } from '../../../common/search_strategy/security_solution';
 import { securitySolutionFactory } from './factory';
 import { SecuritySolutionFactory } from './factory/types';
-import { EndpointAppContext } from '../../endpoint/types';
 
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
-  data: PluginStart,
-  endpointContext: EndpointAppContext
+  data: PluginStart
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -44,13 +42,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
             },
           };
         }),
-        mergeMap((esSearchRes) =>
-          queryFactory.parse(request, esSearchRes, {
-            esClient: deps.esClient,
-            savedObjectsClient: deps.savedObjectsClient,
-            endpointContext,
-          })
-        )
+        mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
       );
     },
     cancel: async (id, options, deps) => {
