@@ -161,7 +161,7 @@ export async function fetchGeoJson(
 export const addFeatureToIndex = async (indexName: string, geometry: unknown, path: string) => {
   const data = convertDotNotationStringToObj(path, geometry);
   return await getHttp().fetch({
-    path: `/${INDEX_FEATURE_PATH}`,
+    path: `${INDEX_FEATURE_PATH}`,
     method: 'POST',
     body: convertObjectToBlob({
       index: indexName,

@@ -16,14 +16,16 @@ import * as jsts from 'jsts';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../';
 import { DRAW_TYPE } from '../../../../../common';
+import { DrawState } from '../../../../../common/descriptor_types';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 
 export interface Props {
-  addNewFeature: (indexName: string, geometry: unknown, mappings: unknown) => void;
+  addNewFeatureToIndex: (indexName: string, geometry: unknown, path: string) => void;
   disableDrawState: () => void;
   removeFeatures: (featureIds: string[]) => void;
   drawType: DRAW_TYPE;
+  drawState: DrawState;
   mbMap: MbMap;
 }
 
@@ -46,9 +48,29 @@ export class DrawFeatureControl extends Component<Props, {}> {
         const { geometry } = geoJSONReader.read(feature);
         if (!geometry.isSimple() || !geometry.isValid()) {
           mbDrawControl.delete(feature.id);
-          throw new Error('Invalid geometry detected');
+          throw new Error(
+            i18n.translate('xpack.maps.drawFeatureControl.invalidGeometry', {
+              defaultMessage: `Invalid geometry detected`,
+            })
+          );
         }
-        this.props.addNewFeature('someIndex', geometry, 'somePath');
+        const geoField = this.props.drawState.geoFieldName;
+        const indexPattern = this.props.drawState.indexPatternTitle;
+        if (!geoField) {
+          throw new Error(
+            i18n.translate('xpack.maps.drawFeatureControl.missingGeofield', {
+              defaultMessage: `No geo field designated for feature update`,
+            })
+          );
+        }
+        if (!indexPattern) {
+          throw new Error(
+            i18n.translate('xpack.maps.drawFeatureControl.missingIndexPattern', {
+              defaultMessage: `No index pattern designated for feature update`,
+            })
+          );
+        }
+        this.props.addNewFeatureToIndex(indexPattern, feature.geometry, geoField);
       });
     } catch (error) {
       getToasts().addWarning(

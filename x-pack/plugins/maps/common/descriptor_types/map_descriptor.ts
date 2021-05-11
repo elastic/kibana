@@ -62,5 +62,6 @@ export type DrawState = {
   geoFieldType?: ES_GEO_FIELD_TYPE;
   geometryLabel?: string;
   indexPatternId?: string;
+  indexPatternTitle?: string;
   relation?: ES_SPATIAL_RELATIONS;
 };

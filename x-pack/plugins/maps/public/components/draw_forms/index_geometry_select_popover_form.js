@@ -30,6 +30,7 @@ export class IndexGeometrySelectPopoverForm extends Component {
       indexPatternId: this.state.selectedField.indexPatternId,
       geoFieldName: this.state.selectedField.geoFieldName,
       geoFieldType: this.state.selectedField.geoFieldType,
+      indexPatternTitle: this.state.selectedField.indexPatternTitle,
     });
   };
 

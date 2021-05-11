@@ -146,6 +146,7 @@ export class ToolsControl extends Component<Props, State> {
     actionId: string;
     filterLabel: string;
     indexPatternId: string;
+    indexPatternTitle: string;
     geoFieldName: string;
     geoFieldType?: ES_GEO_FIELD_TYPE;
   }) => {
