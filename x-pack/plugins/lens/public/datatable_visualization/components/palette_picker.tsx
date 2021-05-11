@@ -8,14 +8,14 @@
 import React from 'react';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { CustomPaletteParams } from '../expression';
 import {
   CUSTOM_PALETTE,
-  defaultParams,
   DEFAULT_COLOR_STEPS,
   FIXED_PROGRESSION,
-} from './coloring/constants';
-import { remapStopsByNewInterval } from './coloring/utils';
+  defaultParams,
+} from '../../shared_components/coloring/constants';
+import { CustomPaletteParams } from '../../shared_components/coloring/types';
+import { remapStopsByNewInterval } from '../../shared_components/coloring/utils';
 
 function getCustomPaletteConfig(
   palettes: PaletteRegistry,

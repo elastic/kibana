@@ -10,9 +10,10 @@ import { EuiColorPalettePickerPaletteProps, EuiSwitchEvent } from '@elastic/eui'
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { applyPaletteParams, CustomizablePalette } from './palette_configuration';
-import { CustomPaletteParams } from '../expression';
 import { ReactWrapper } from 'enzyme';
+import { CustomPaletteParams } from '../../shared_components/coloring/types';
+import { applyPaletteParams } from '../../shared_components/coloring/utils';
+import { CustomizablePalette } from './palette_configuration';
 
 describe('palette utilities', () => {
   const paletteRegistry = chartPluginMock.createPaletteRegistry();

@@ -80,4 +80,39 @@ describe('Color Stops component', () => {
     expect(invalidRow.prop('isInvalid')).toBe(true);
     expect(invalidRow.prop('error')).toBe('Color must provide a valid hex value');
   });
+
+  it('should sort stops value on whole component blur', () => {
+    let component = mount(<CustomStops {...props} />);
+    let firstStopValueInput = component
+      .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_value_0"]')
+      .first();
+    act(() => {
+      firstStopValueInput.prop('onChange')!(({
+        target: { value: ' 90' },
+      } as unknown) as React.ChangeEvent);
+    });
+
+    component = component.update();
+
+    act(() => {
+      component
+        .find('[data-test-subj="lnsDatatable_dynamicColoring_custom_stops"]')
+        .first()
+        .prop('onBlur')!({} as React.FocusEvent);
+    });
+    component = component.update();
+
+    // retrieve again the input
+    firstStopValueInput = component
+      .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_value_0"]')
+      .first();
+    expect(firstStopValueInput.prop('value')).toBe('40');
+    // the previous one move at the bottom
+    expect(
+      component
+        .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_value_2"]')
+        .first()
+        .prop('value')
+    ).toBe('90');
+  });
 });

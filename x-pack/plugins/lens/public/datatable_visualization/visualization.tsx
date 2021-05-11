@@ -20,8 +20,8 @@ import {
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
-import { CustomPaletteParams } from './expression';
-import { CUSTOM_PALETTE } from './components/coloring/constants';
+import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
+import { CustomPaletteParams } from '../shared_components/coloring/types';
 
 export interface ColumnState {
   columnId: string;

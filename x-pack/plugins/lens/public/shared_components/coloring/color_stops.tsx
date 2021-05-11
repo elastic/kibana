@@ -52,10 +52,11 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
   );
 
   return (
-    <EuiFlexItem data-test-subj={`lnsDatatable_dynamicColoring_custom_stops`}>
+    <EuiFlexItem>
       <EuiFormRow display="row">
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem
+            data-test-subj={`lnsDatatable_dynamicColoring_custom_stops`}
             onBlur={(e: FocusEvent<HTMLDivElement>) => {
               // sort the stops when the focus leaves the block container
               const shouldSort = localColorStops.some(({ stop }, index) => {
