@@ -19,7 +19,10 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type {
+  EmbeddableStart,
+  EmbeddableSetup,
+} from '../../../../src/plugins/embeddable/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
@@ -44,6 +47,7 @@ import type { APMRuleFieldMap } from '../common/rules/apm_rule_field_map';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
+import { registerEmbeddables } from './components/embeddables';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmRuleRegistry = ApmPluginSetup['ruleRegistry'];
@@ -59,6 +63,7 @@ export interface ApmPluginSetupDeps {
   licensing: LicensingPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -138,6 +143,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return await dataHelper.fetchUxOverviewDate(params);
       },
     });
+
+    registerEmbeddables(plugins.embeddable, core);
 
     core.application.register({
       id: 'apm',

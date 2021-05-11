@@ -10,7 +10,7 @@ import { compact, pickBy } from 'lodash';
 import moment from 'moment';
 import { IUrlParams } from './types';
 
-function getParsedDate(rawDate?: string, options = {}) {
+export function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
     const parsed = datemath.parse(rawDate, options);
     if (parsed && parsed.isValid()) {
