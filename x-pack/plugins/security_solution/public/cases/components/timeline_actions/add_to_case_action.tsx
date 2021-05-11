@@ -248,6 +248,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           onRowClick: onCaseClicked,
           updateCase: onCaseSuccess,
           userCanCrud: userPermissions?.crud ?? false,
+          owner: [APP_ID],
         })}
     </>
   );

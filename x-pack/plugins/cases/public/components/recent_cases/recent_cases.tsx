@@ -31,6 +31,7 @@ export interface RecentCasesProps {
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
+  owner: string[];
 }
 const usePrevious = (value: Partial<FilterOptions>) => {
   const ref = useRef();
@@ -44,9 +45,13 @@ export const RecentCasesComp = ({
   createCaseNavigation,
   filterOptions,
   maxCasesToShow,
+  owner,
 }: RecentCasesProps) => {
   const previousFilterOptions = usePrevious(filterOptions);
-  const { data, loading, setFilters } = useGetCases({ perPage: maxCasesToShow });
+  const { data, loading, setFilters } = useGetCases({
+    initialQueryParams: { perPage: maxCasesToShow },
+    initialFilterOptions: { owner },
+  });
 
   useEffect(() => {
     if (previousFilterOptions !== undefined && !isEqual(previousFilterOptions, filterOptions)) {

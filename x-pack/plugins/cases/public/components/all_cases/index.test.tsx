@@ -53,6 +53,7 @@ describe('AllCasesGeneric', () => {
       onClick: jest.fn(),
     },
     userCanCrud: true,
+    owner: ['securitySolution'],
   };
 
   const dispatchResetIsDeleted = jest.fn();

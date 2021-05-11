@@ -64,6 +64,7 @@ interface AllCasesGenericProps {
   onRowClick?: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
+  owner: string[];
 }
 
 export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
@@ -77,6 +78,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     onRowClick,
     updateCase,
     userCanCrud,
+    owner,
   }) => {
     const { actionLicense } = useGetActionLicense();
     const {
@@ -90,7 +92,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       setFilters,
       setQueryParams,
       setSelectedCases,
-    } = useGetCases();
+    } = useGetCases({ initialFilterOptions: { owner } });
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
@@ -286,6 +288,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
               reporters: filterOptions.reporters,
               tags: filterOptions.tags,
               status: filterOptions.status,
+              owner: filterOptions.owner,
             }}
             setFilterRefetch={setFilterRefetch}
             disabledStatuses={disabledStatuses}

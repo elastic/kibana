@@ -101,6 +101,7 @@ export interface FilterOptions {
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
+  owner: string[];
   onlyCollectionType?: boolean;
 }
 

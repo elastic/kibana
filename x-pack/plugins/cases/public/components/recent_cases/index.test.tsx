@@ -28,6 +28,7 @@ const defaultProps = {
     onClick: jest.fn(),
   },
   maxCasesToShow: 10,
+  owner: ['securitySolution'],
 };
 const setFilters = jest.fn();
 const mockData = {

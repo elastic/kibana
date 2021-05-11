@@ -20,6 +20,7 @@ const defaultProps = {
   createCaseNavigation,
   onRowClick,
   userCanCrud: true,
+  owner: ['securitySolution'],
 };
 const updateCase = jest.fn();
 

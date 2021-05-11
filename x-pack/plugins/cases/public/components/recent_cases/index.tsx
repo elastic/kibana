@@ -20,6 +20,7 @@ export interface RecentCasesProps {
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
+  owner: string[];
 }
 
 const RecentCases = ({
@@ -27,6 +28,7 @@ const RecentCases = ({
   caseDetailsNavigation,
   createCaseNavigation,
   maxCasesToShow,
+  owner,
 }: RecentCasesProps) => {
   const currentUser = useCurrentUser();
   const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
@@ -74,6 +76,7 @@ const RecentCases = ({
           createCaseNavigation={createCaseNavigation}
           filterOptions={recentCasesFilterOptions}
           maxCasesToShow={maxCasesToShow}
+          owner={owner}
         />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">

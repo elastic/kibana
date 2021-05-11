@@ -13,6 +13,7 @@ export interface AllCasesProps {
   configureCasesNavigation: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelector)
   createCaseNavigation: CasesNavigation;
   userCanCrud: boolean;
+  owner: string[];
 }
 
 export const AllCases: React.FC<AllCasesProps> = (props) => {

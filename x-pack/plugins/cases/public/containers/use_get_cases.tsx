@@ -105,6 +105,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   status: StatusAll,
   tags: [],
   onlyCollectionType: false,
+  owner: [],
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
@@ -139,12 +140,18 @@ export interface UseGetCases extends UseGetCasesState {
 
 const empty = {};
 export const useGetCases = (
-  initialQueryParams: Partial<QueryParams> = empty,
-  initialFilterOptions: Partial<FilterOptions> = empty
+  params: Partial<{
+    initialQueryParams?: Partial<QueryParams>;
+    initialFilterOptions?: Partial<FilterOptions>;
+  }> = {}
 ): UseGetCases => {
+  const { initialQueryParams = empty, initialFilterOptions = empty } = params;
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
-    filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...initialFilterOptions },
+    filterOptions: {
+      ...DEFAULT_FILTER_OPTIONS,
+      ...initialFilterOptions,
+    },
     isError: false,
     loading: [],
     queryParams: { ...DEFAULT_QUERY_PARAMS, ...initialQueryParams },

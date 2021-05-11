@@ -171,6 +171,7 @@ export const getCases = async ({
     reporters: [],
     status: StatusAll,
     tags: [],
+    owner: [],
   },
   queryParams = {
     page: 1,
@@ -186,6 +187,7 @@ export const getCases = async ({
     status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.onlyCollectionType ? { type: CaseType.collection } : {}),
+    ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...queryParams,
   };
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {

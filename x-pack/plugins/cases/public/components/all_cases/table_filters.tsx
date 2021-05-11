@@ -47,6 +47,7 @@ const defaultInitial = {
   reporters: [],
   status: StatusAll,
   tags: [],
+  owner: [],
 };
 
 const CasesTableFiltersComponent = ({

@@ -177,6 +177,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
           },
           onRowClick,
           userCanCrud: userPermissions?.crud ?? false,
+          owner: [APP_ID],
         })}
     </>
   );

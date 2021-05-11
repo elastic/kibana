@@ -89,9 +89,17 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
     actionParams.subAction,
   ]);
 
+  /**
+   * TODO: When the case connector is enabled we need to figure out
+   * how we can pass the owner to this component
+   */
   return (
     <Container>
-      <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
+      <ExistingCase
+        onCaseChanged={onCaseChanged}
+        selectedCase={selectedCase}
+        owner="securitySolution"
+      />
       <EuiSpacer size="m" />
       <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_TITLE} iconType="iInCircle">
         <p>{i18n.CASE_CONNECTOR_CALL_OUT_MSG}</p>
