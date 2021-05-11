@@ -52,6 +52,7 @@ export async function syncVectorSource({
   requestMeta,
   syncContext,
   source,
+  forceRefresh,
 }: {
   layerId: string;
   layerName: string;
@@ -59,6 +60,7 @@ export async function syncVectorSource({
   requestMeta: VectorSourceRequestMeta;
   syncContext: DataRequestContext;
   source: IVectorSource;
+  forceRefresh: boolean;
 }): Promise<{ refreshed: boolean; featureCollection: FeatureCollection }> {
   const {
     startLoading,
@@ -69,12 +71,14 @@ export async function syncVectorSource({
   } = syncContext;
   const dataRequestId = SOURCE_DATA_REQUEST_ID;
   const requestToken = Symbol(`${layerId}-${dataRequestId}`);
-  const canSkipFetch = await canSkipSourceUpdate({
-    source,
-    prevDataRequest,
-    nextMeta: requestMeta,
-    extentAware: source.isFilterByMapBounds(),
-  });
+  const canSkipFetch = !forceRefresh
+    ? await canSkipSourceUpdate({
+        source,
+        prevDataRequest,
+        nextMeta: requestMeta,
+        extentAware: source.isFilterByMapBounds(),
+      })
+    : !forceRefresh;
   if (canSkipFetch) {
     return {
       refreshed: false,

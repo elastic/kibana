@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import * as jsts from 'jsts';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../';
-import { DRAW_TYPE } from '../../../../../common';
+import { DRAW_MODE, DRAW_TYPE } from '../../../../../common';
 import { DrawState } from '../../../../../common/descriptor_types';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
@@ -26,6 +26,7 @@ export interface Props {
   removeFeatures: (featureIds: string[]) => void;
   drawType: DRAW_TYPE;
   drawState: DrawState;
+  drawMode: DRAW_MODE;
   mbMap: MbMap;
 }
 
@@ -70,7 +71,11 @@ export class DrawFeatureControl extends Component<Props, {}> {
             })
           );
         }
-        this.props.addNewFeatureToIndex(indexPattern, feature.geometry, geoField);
+        const featureGeom =
+          this.props.drawMode === DRAW_MODE.DRAW_POINTS
+            ? feature.geometry.coordinates
+            : feature.geometry;
+        this.props.addNewFeatureToIndex(indexPattern, featureGeom, geoField);
       });
     } catch (error) {
       getToasts().addWarning(

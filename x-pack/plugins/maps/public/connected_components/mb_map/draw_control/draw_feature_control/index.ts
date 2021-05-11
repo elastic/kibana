@@ -16,11 +16,13 @@ import {
 } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 import { getDrawState, getShapeToDraw } from '../../../../selectors/map_selectors';
+import { getDrawMode } from '../../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     drawType: getShapeToDraw(state),
     drawState: getDrawState(state),
+    drawMode: getDrawMode(state),
   };
 }
 

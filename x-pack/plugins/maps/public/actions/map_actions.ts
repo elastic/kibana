@@ -354,6 +354,6 @@ export function setVectorLayerIndexName(indexName: string) {
 export function addNewFeatureToIndex(indexName: string, geometry: unknown, path: string) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     await addFeatureToIndex(indexName, geometry, path);
-    await dispatch(syncDataForAllLayers());
+    await dispatch(syncDataForAllLayers({ forceRefresh: true }));
   };
 }

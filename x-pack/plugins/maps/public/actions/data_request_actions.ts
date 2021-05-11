@@ -138,13 +138,15 @@ function getDataRequestContext(
   };
 }
 
-export function syncDataForAllLayers() {
+export function syncDataForAllLayers(
+  { forceRefresh }: { forceRefresh: boolean } = { forceRefresh: false }
+) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const syncPromises = getLayerList(getState()).map((layer) => {
-      return dispatch(syncDataForLayer(layer));
+      return dispatch(syncDataForLayer(layer, forceRefresh));
     });
     await Promise.all(syncPromises);
   };
@@ -166,13 +168,13 @@ function syncDataForAllJoinLayers() {
   };
 }
 
-export function syncDataForLayer(layer: ILayer) {
+export function syncDataForLayer(layer: ILayer, forceRefresh: boolean) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const dataRequestContext = getDataRequestContext(dispatch, getState, layer.getId());
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
     }
-    await layer.syncData(dataRequestContext);
+    await layer.syncData(dataRequestContext, forceRefresh);
   };
 }
 
