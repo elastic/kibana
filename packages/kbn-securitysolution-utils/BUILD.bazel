@@ -28,7 +28,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 SRC_DEPS = [
-  "@npm//@hapi/hapi",
   "@npm//tslib",
   "@npm//uuid",
 ]
