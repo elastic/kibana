@@ -28,9 +28,12 @@ import {
   setUISettings,
 } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
-import { Map, NavigationControl, Style } from 'mapbox-gl';
 
-jest.mock('mapbox-gl', () => ({
+// @ts-expect-error
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+
+jest.mock('mapbox-gl/dist/mapbox-gl-csp', () => ({
+  setRTLTextPlugin: jest.fn(),
   Map: jest.fn().mockImplementation(() => ({
     getLayer: () => '',
     removeLayer: jest.fn(),
@@ -144,7 +147,7 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
-      expect(Map).toHaveBeenCalledWith({
+      expect(mapboxgl.Map).toHaveBeenCalledWith({
         style: {
           version: 8,
           sources: {},
@@ -170,7 +173,7 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
-      expect(Map).toHaveBeenCalledWith({
+      expect(mapboxgl.Map).toHaveBeenCalledWith({
         style: {
           version: 8,
           sources: {},
@@ -195,7 +198,7 @@ describe('vega_map_view/view', () => {
 
       await vegaMapView.init();
 
-      expect(NavigationControl).toHaveBeenCalled();
+      expect(mapboxgl.NavigationControl).toHaveBeenCalled();
     });
   });
 });
