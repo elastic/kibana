@@ -25,7 +25,7 @@ interface SearchUIActions {
   onFacetFieldsChange(facetFields: string[]): { facetFields: string[] };
   onSortFieldsChange(sortFields: string[]): { sortFields: string[] };
   onTitleFieldChange(titleField: string): { titleField: string };
-  onURLFieldChange(urlField: string): { urlField: string };
+  onUrlFieldChange(urlField: string): { urlField: string };
 }
 
 interface SearchUIValues {
@@ -49,7 +49,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     onFacetFieldsChange: (facetFields) => ({ facetFields }),
     onSortFieldsChange: (sortFields) => ({ sortFields }),
     onTitleFieldChange: (titleField) => ({ titleField }),
-    onURLFieldChange: (urlField) => ({ urlField }),
+    onUrlFieldChange: (urlField) => ({ urlField }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -62,7 +62,7 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     validSortFields: [[], { onFieldDataLoaded: (_, { validSortFields }) => validSortFields }],
     validFacetFields: [[], { onFieldDataLoaded: (_, { validFacetFields }) => validFacetFields }],
     titleField: ['', { onTitleFieldChange: (_, { titleField }) => titleField }],
-    urlField: ['', { onURLFieldChange: (_, { urlField }) => urlField }],
+    urlField: ['', { onUrlFieldChange: (_, { urlField }) => urlField }],
     facetFields: [[], { onFacetFieldsChange: (_, { facetFields }) => facetFields }],
     sortFields: [[], { onSortFieldsChange: (_, { sortFields }) => sortFields }],
     activeField: [ActiveField.None, { onActiveFieldChange: (_, { activeField }) => activeField }],
