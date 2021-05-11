@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 import { NonEmptyString } from '../../non_empty_string';
 
 import { type } from '../type';
-import { operator } from '../operator';
+import { listOperator as operator } from '../list_operator';
 
 export const entriesList = t.exact(
   t.type({

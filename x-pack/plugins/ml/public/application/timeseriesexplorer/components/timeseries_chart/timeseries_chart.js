@@ -1108,8 +1108,6 @@ class TimeseriesChartIntl extends Component {
     ctxAnnotationRects
       .enter()
       .append('rect')
-      .attr('rx', ctxAnnotationMargin)
-      .attr('ry', ctxAnnotationMargin)
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
