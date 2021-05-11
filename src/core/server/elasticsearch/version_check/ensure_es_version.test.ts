@@ -122,7 +122,7 @@ describe('pollEsNodesVersion', () => {
     internalClient.nodes.info.mockImplementationOnce(() => createEsError(error));
   };
 
-  it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {
+  it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
     expect.assertions(3);
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
@@ -142,6 +142,33 @@ describe('pollEsNodesVersion', () => {
       .subscribe({
         next: (result) => {
           expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('returns the error from a failed nodes.info call when a poll request throws', (done) => {
+    expect.assertions(2);
+    const expectedCompatibilityResults = [false];
+    jest.clearAllMocks();
+
+    nodeInfosErrorOnce(new Error('mock request error'));
+
+    pollEsNodesVersion({
+      internalClient,
+      esVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+          expect(result.message).toBe(
+            'Unable to retrieve version information from Elasticsearch nodes: mock request error'
+          );
         },
         complete: done,
         error: done,
