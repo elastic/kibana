@@ -215,6 +215,8 @@ export class TaskRunner<
     event: Event
   ): Promise<AlertTaskState> {
     const {
+      consumer,
+      schedule,
       throttle,
       notifyWhen,
       muteAll,
@@ -223,6 +225,8 @@ export class TaskRunner<
       tags,
       createdBy,
       updatedBy,
+      createdAt,
+      updatedAt,
     } = alert;
     const {
       params: { alertId },
@@ -265,6 +269,12 @@ export class TaskRunner<
         tags,
         createdBy,
         updatedBy,
+        consumer,
+        schedule,
+        createdAt,
+        updatedAt,
+        throttle,
+        notifyWhen,
       });
     } catch (err) {
       event.message = `alert execution failure: ${alertLabel}`;

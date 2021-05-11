@@ -100,11 +100,13 @@ describe('Task Runner', () => {
     kibanaBaseUrl: 'https://localhost:5601',
   };
 
+  const mockDate = new Date('2019-02-12T21:01:22.479Z');
+
   const mockedAlertTypeSavedObject: Alert<AlertTypeParams> = {
     id: '1',
     consumer: 'bar',
-    createdAt: new Date('2019-02-12T21:01:22.479Z'),
-    updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+    createdAt: mockDate,
+    updatedAt: mockDate,
     throttle: null,
     muteAll: false,
     notifyWhen: 'onActiveAlert',
@@ -205,6 +207,16 @@ describe('Task Runner', () => {
     expect(call.tags).toEqual(['alert-', '-tags']);
     expect(call.createdBy).toBe('alert-creator');
     expect(call.updatedBy).toBe('alert-updater');
+    expect(call.consumer).toBe('bar');
+    expect(call.schedule).toMatchInlineSnapshot(`
+    Object {
+      "interval": "10s",
+    }
+    `);
+    expect(call.createdAt).toBe(mockDate);
+    expect(call.updatedAt).toBe(mockDate);
+    expect(call.notifyWhen).toBe('onActiveAlert');
+    expect(call.throttle).toBe(null);
     expect(call.services.alertInstanceFactory).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();

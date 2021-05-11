@@ -32,6 +32,7 @@ import {
   AlertNotifyWhenType,
   WithoutReservedActionGroups,
   ActionVariable,
+  IntervalSchedule,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -91,10 +92,16 @@ export interface AlertExecutorOptions<
   state: State;
   spaceId: string;
   namespace?: string;
+  consumer: string;
   name: string;
   tags: string[];
   createdBy: string | null;
   updatedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
+  schedule: IntervalSchedule;
 }
 
 export type ExecutorType<
