@@ -32,12 +32,11 @@ import { DefaultIndexPatternContext } from '../contexts/default_index_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
-import { PANEL_TYPES } from '../../../common/panel_types';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
+import { AUTO_INTERVAL } from '../../../common/constants';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 import { getUISettings } from '../../services';
-import { AUTO_INTERVAL } from '../../../common/constants';
 import { UI_SETTINGS } from '../../../../data/common';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
@@ -113,7 +112,7 @@ export const IndexPattern = ({
   const defaults = {
     [indexPatternName]: '',
     [intervalName]: AUTO_INTERVAL,
-    [dropBucketName]: 1,
+    [dropBucketName]: 0,
     [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };

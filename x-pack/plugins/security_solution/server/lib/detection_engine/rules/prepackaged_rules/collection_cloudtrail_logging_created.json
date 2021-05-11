@@ -15,8 +15,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS CloudTrail Log Created",
-  "note": "The AWS Filebeat module must be enabled to use this rule.",
-  "query": "event.action:CreateTrail and event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.outcome:success",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:CreateTrail and event.outcome:success",
   "references": [
     "https://docs.aws.amazon.com/awscloudtrail/latest/APIReference/API_CreateTrail.html",
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/cloudtrail/create-trail.html"
@@ -51,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 5
 }

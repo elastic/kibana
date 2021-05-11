@@ -10,7 +10,10 @@ export const parseQueryFilterToKQL = (filter: string): string => {
   const kuery = [`name`, `description`, `entries.value`, `entries.entries.value`]
     .map(
       (field) =>
-        `exception-list-agnostic.attributes.${field}:*${filter.trim().replace(/\s/gm, '* *')}*`
+        `exception-list-agnostic.attributes.${field}:(*${filter
+          .trim()
+          .replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&') // Escape problematic chars
+          .replace(/\s/gm, '*')}*)`
     )
     .join(' OR ');
 

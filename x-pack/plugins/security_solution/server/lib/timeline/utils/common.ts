@@ -14,14 +14,14 @@ import { schema } from '@kbn/config-schema';
 import { isObject } from 'lodash/fp';
 
 import { KibanaRequest } from 'src/core/server';
-import { SetupPlugins } from '../../../plugin';
+import { SetupPlugins, StartPlugins } from '../../../plugin';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { FrameworkRequest } from '../../framework';
 
 export const buildFrameworkRequest = async (
   context: SecuritySolutionRequestHandlerContext,
-  security: SetupPlugins['security'],
+  security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
   const savedObjectsClient = context.core.savedObjects.client;
@@ -40,6 +40,9 @@ export const buildFrameworkRequest = async (
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts
+ */
 export const formatErrors = (errors: rt.Errors): string[] => {
   const err = errors.map((error) => {
     if (error.message != null) {
