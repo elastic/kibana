@@ -32,6 +32,8 @@ import type {
   SetTempWriteBlock,
   WaitForYellowSourceState,
   TransformRawDocs,
+  TransformedDocumentsBulkIndex,
+  ReindexSourceToTempIndexBulk,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
   OutdatedDocumentsSearchClosePit,
@@ -82,11 +84,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     REINDEX_SOURCE_TO_TEMP_CLOSE_PIT: (state: ReindexSourceToTempClosePit) =>
       Actions.closePit(client, state.sourceIndexPitId),
     REINDEX_SOURCE_TO_TEMP_INDEX: (state: ReindexSourceToTempIndex) =>
-      Actions.transformDocs(
+      Actions.transformDocs(transformRawDocs, state.outdatedDocuments),
+    REINDEX_SOURCE_TO_TEMP_INDEX_BULK: (state: ReindexSourceToTempIndexBulk) =>
+      Actions.bulkOverwriteTransformedDocuments(
         client,
-        transformRawDocs,
-        state.outdatedDocuments,
         state.tempIndex,
+        state.transformedDocs,
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
@@ -121,11 +124,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     OUTDATED_DOCUMENTS_REFRESH: (state: OutdatedDocumentsRefresh) =>
       Actions.refreshIndex(client, state.targetIndex),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
-      Actions.transformDocs(
+      Actions.transformDocs(transformRawDocs, state.outdatedDocuments),
+    TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: TransformedDocumentsBulkIndex) =>
+      Actions.bulkOverwriteTransformedDocuments(
         client,
-        transformRawDocs,
-        state.outdatedDocuments,
         state.targetIndex,
+        state.transformedDocs,
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
