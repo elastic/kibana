@@ -13,8 +13,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices, IIndexPattern } from '../../../kibana_services';
-import { IndexPatternField } from '../../../../../data/common/index_patterns';
-import { SkipBottomButton } from '../../components/skip_bottom_button';
+import { IndexPatternField } from '../../../../../data/common';
+import { SkipBottomButton } from '../../apps/main/components/skip_bottom_button';
 
 export interface DocTableLegacyProps {
   columns: string[];

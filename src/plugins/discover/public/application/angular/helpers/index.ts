@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { buildPointSeriesData } from './point_series';
 export { formatRow, formatTopLevelObject } from './row_formatter';
 export { handleSourceColumnState } from './state_helpers';

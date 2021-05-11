@@ -8,7 +8,7 @@
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { popularizeField } from '../../../helpers/popularize_field';
 import { IndexPattern, IndexPatternsContract } from '../../../../kibana_services';
-import { AppState } from '../../discover_state';
+import { AppState } from '../../../apps/main/services/discover_state';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
 /**

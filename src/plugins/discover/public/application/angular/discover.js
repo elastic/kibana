@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getState } from './discover_state';
+import { getState } from '../apps/main/services/discover_state';
 import indexTemplateLegacy from './discover_legacy.html';
 import {
   getAngularModule,
@@ -16,7 +16,7 @@ import {
   redirectWhenMissing,
 } from '../../kibana_services';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
+import { loadIndexPattern, resolveIndexPattern } from '../apps/main/utils/resolve_index_pattern';
 
 const services = getServices();
 
@@ -129,16 +129,15 @@ function discoverController($route, $scope) {
     history,
     services,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
+    navigateTo: (path) => {
+      $scope.$evalAsync(() => {
+        history.push(path);
+      });
+    },
   };
 
   $scope.$on('$destroy', () => {
     savedSearch.destroy();
     data.search.session.clear();
   });
-
-  $scope.opts.navigateTo = (path) => {
-    $scope.$evalAsync(() => {
-      history.push(path);
-    });
-  };
 }
