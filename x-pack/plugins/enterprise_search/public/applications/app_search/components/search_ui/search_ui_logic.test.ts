@@ -78,10 +78,10 @@ describe('SearchUILogic', () => {
       });
     });
 
-    describe('onURLFieldChange', () => {
+    describe('onUrlFieldChange', () => {
       it('sets the urlField value', () => {
         mount({ urlField: '' });
-        SearchUILogic.actions.onURLFieldChange('foo');
+        SearchUILogic.actions.onUrlFieldChange('foo');
         expect(SearchUILogic.values).toEqual({
           ...DEFAULT_VALUES,
           urlField: 'foo',
