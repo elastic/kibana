@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await makeChecksWithStatus(
-        getService('legacyEs'),
+        getService('es'),
         MONITOR_ID,
         5,
         2,

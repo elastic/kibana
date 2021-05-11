@@ -15,7 +15,7 @@ import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const legacyEsService = getService('legacyEs');
+  const esService = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('certs api', () => {
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       const monitorId = 'monitor1';
       before(async () => {
         makeChecksWithStatus(
-          legacyEsService,
+          esService,
           monitorId,
           3,
           1,
