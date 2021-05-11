@@ -14099,7 +14099,6 @@
     "xpack.maps.tooltip.loadingMsg": "読み込み中",
     "xpack.maps.tooltip.pageNumerText": "{total} 個中 {pageNumber} 個の機能",
     "xpack.maps.tooltip.showAddFilterActionsViewLabel": "フィルターアクション",
-    "xpack.maps.tooltip.showGeometryFilterViewLinkLabel": "ジオメトリでフィルタリング",
     "xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel": "キャンセル",
     "xpack.maps.tooltip.unableToLoadContentTitle": "ツールヒントのコンテンツを読み込めません",
     "xpack.maps.tooltip.viewActionsTitle": "フィルターアクションを表示",
