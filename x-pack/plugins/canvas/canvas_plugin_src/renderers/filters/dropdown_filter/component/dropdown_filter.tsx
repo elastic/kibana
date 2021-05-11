@@ -60,6 +60,11 @@ export const DropdownFilter: FunctionComponent<Props> = ({
     );
   });
 
+  /* Commit the value after mount to get the default value */
+  React.useEffect(() => {
+    commit(value);
+  }, []);
+
   /* eslint-disable jsx-a11y/no-onchange */
   return (
     <div className="canvasDropdownFilter">

@@ -14,6 +14,7 @@ interface Arguments {
   labelColumn: string;
   valueColumn: string;
   filterGroup: string;
+  defaultValue: string;
 }
 
 interface Return {
@@ -55,8 +56,12 @@ export function dropdownControl(): ExpressionFunctionDefinition<
         types: ['string'],
         help: argHelp.filterGroup,
       },
+      defaultValue: {
+        types: ['string'],
+        help: "default Value",
+      },
     },
-    fn: (input, { valueColumn, filterColumn, filterGroup, labelColumn }) => {
+    fn: (input, { valueColumn, filterColumn, filterGroup, labelColumn, defaultValue }) => {
       let choices: Array<[string, string]> = [];
       const labelCol = labelColumn || valueColumn;
 
@@ -79,6 +84,7 @@ export function dropdownControl(): ExpressionFunctionDefinition<
           column,
           choices,
           filterGroup,
+          defaultValue
         },
       };
     },

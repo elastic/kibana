@@ -25,13 +25,17 @@ export interface Config {
    */
   choices: string[];
   filterGroup: string;
+  defaultValue: string;
 }
 
 const MATCH_ALL = '%%CANVAS_MATCH_ALL%%';
 
-const getFilterValue = (filterExpression: string) => {
-  if (filterExpression === '') {
+const getFilterValue = (filterExpression: string, config: Config) => {
+  if (filterExpression === '' && config.defaultValue === '') {
     return MATCH_ALL;
+  }
+  if (filterExpression === '' && config.defaultValue !== '') {
+    return config.defaultValue;
   }
 
   const filterAST = fromExpression(filterExpression);
@@ -85,7 +89,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
       <DropdownFilter
         commit={commit}
         choices={config.choices || []}
-        value={getFilterValue(filterExpression)}
+        value={getFilterValue(filterExpression, config)}
       />,
       domNode,
       () => handlers.done()

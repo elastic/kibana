@@ -37,5 +37,11 @@ export const dropdownControl = () => ({
       help: strings.getFilterGroupHelp(),
       argType: 'filterGroup',
     },
+    {
+      name: 'defaultValue',
+      displayName: "defaultValue",
+      help: "define a value as default",
+      argType: 'string',
+    },
   ],
 });
