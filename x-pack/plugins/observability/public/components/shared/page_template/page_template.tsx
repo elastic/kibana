@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiPageTemplateProps, ExclusiveUnion } from '@elastic/eui';
+import { ExclusiveUnion } from '@elastic/eui';
 import React from 'react';
+import {
+  KibanaPageTemplate,
+  KibanaPageTemplateProps,
+} from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilitySideNav, ObservabilitySideNavProps } from './side_nav';
 import './side_nav.scss';
 
 export type WrappedPageTemplateProps = Pick<
-  EuiPageTemplateProps,
+  KibanaPageTemplateProps,
   | 'children'
   | 'data-test-subj'
   | 'paddingSize'
@@ -23,8 +27,8 @@ export type WrappedPageTemplateProps = Pick<
 > &
   // recreate the exclusivity of bottomBar-related props
   ExclusiveUnion<
-    { template?: 'default' } & Pick<EuiPageTemplateProps, 'bottomBar' | 'bottomBarProps'>,
-    { template: EuiPageTemplateProps['template'] }
+    { template?: 'default' } & Pick<KibanaPageTemplateProps, 'bottomBar' | 'bottomBarProps'>,
+    { template: KibanaPageTemplateProps['template'] }
   >;
 
 export type ObservabilityPageTemplateProps = ObservabilitySideNavProps & WrappedPageTemplateProps;
@@ -38,7 +42,7 @@ export function ObservabilityPageTemplate({
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       restrictWidth={false}
       {...pageTemplateProps}
       pageSideBar={
@@ -55,7 +59,7 @@ export function ObservabilityPageTemplate({
       }}
     >
       {children}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 }
 
