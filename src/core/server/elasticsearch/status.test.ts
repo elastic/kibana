@@ -54,7 +54,7 @@ describe('calculateStatus', () => {
     });
   });
 
-  it('changes to available with a differemnt message when isCompatible and warningNodes present', async () => {
+  it('changes to available with a different message when isCompatible and warningNodes present', async () => {
     expect(
       await calculateStatus$(
         of({

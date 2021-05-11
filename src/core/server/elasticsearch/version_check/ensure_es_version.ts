@@ -19,6 +19,7 @@ import {
 } from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
 import type { ElasticsearchClient } from '../client';
+import { isUnauthorizedError, UnauthorizedError } from '../client/errors';
 
 export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
@@ -49,7 +50,7 @@ export interface NodesVersionCompatibility {
   incompatibleNodes: NodeInfo[];
   warningNodes: NodeInfo[];
   kibanaVersion: string;
-  nodesInfoError?: Error;
+  nodesInfoError?: UnauthorizedError | Error;
 }
 
 function getHumanizedNodeName(node: NodeInfo) {
@@ -61,9 +62,10 @@ export function mapNodesVersionCompatibility(
   nodesInfo: NodesInfo,
   kibanaVersion: string,
   ignoreVersionMismatch: boolean,
-  nodesInfoError?: Error // we probably need to check the type of ES error thrown: ResponseError, UnauthorizedError
+  nodesInfoError?: UnauthorizedError | Error // we probably need to check the type of ES error thrown: ResponseError, UnauthorizedError
 ): NodesVersionCompatibility {
   if (Object.keys(nodesInfo.nodes ?? {}).length === 0 && nodesInfoError) {
+    // TINA: We return directly from here
     return {
       isCompatible: false,
       message: `Unable to retrieve version information from Elasticsearch nodes: ${nodesInfoError.message}`,
@@ -114,7 +116,24 @@ export function mapNodesVersionCompatibility(
     kibanaVersion,
   };
 }
-
+// TINA: Is this needed?
+function compareNodesInfoErrorMessages(
+  prev: NodesVersionCompatibility,
+  curr: NodesVersionCompatibility
+): boolean {
+  const messageIsErrorCase = (str: string = '') =>
+    str.startsWith('Unable to retrieve version information from Elasticsearch nodes: ');
+  if (messageIsErrorCase(prev.message) && messageIsErrorCase(curr.message)) {
+    // both emissions are of an error case and we check if it's the same error
+    return prev.message === curr.message;
+  } else if (!messageIsErrorCase(prev.message) && !messageIsErrorCase(curr.message)) {
+    // neither is an error case and we let the other conditional checks take over
+    return true;
+  }
+  // if one of them is an error, and the other is not, then we
+  // know we need to emit because something changed
+  return false;
+}
 // Returns true if two NodesVersionCompatibility entries match
 function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
   const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
@@ -123,7 +142,9 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
     curr.incompatibleNodes.length === prev.incompatibleNodes.length &&
     curr.warningNodes.length === prev.warningNodes.length &&
     curr.incompatibleNodes.every((node, i) => nodesEqual(node, prev.incompatibleNodes[i])) &&
-    curr.warningNodes.every((node, i) => nodesEqual(node, prev.warningNodes[i]))
+    curr.warningNodes.every((node, i) => nodesEqual(node, prev.warningNodes[i])) &&
+    // TINA: This should be simplified
+    compareNodesInfoErrorMessages(curr, prev)
   );
 }
 
@@ -145,7 +166,13 @@ export const pollEsNodesVersion = ({
       ).pipe(
         map(({ body }) => body),
         catchError((_err) => {
-          nodesInfoError = _err;
+          // TODO: check if this is needed or if it can be improved -> we probably need to check the type of error that's returned here
+          if (isUnauthorizedError(_err)) {
+            nodesInfoError = _err as UnauthorizedError;
+          } else {
+            nodesInfoError = _err as Error;
+          }
+
           return of({ nodes: {} });
         })
       );
@@ -153,6 +180,6 @@ export const pollEsNodesVersion = ({
     map((nodesInfo: NodesInfo) =>
       mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch, nodesInfoError)
     ),
-    distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions
+    distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions or if we return an error and that error changes
   );
 };
