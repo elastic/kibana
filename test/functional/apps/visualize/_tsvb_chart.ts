@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const security = getService('security');
-  const kibanaServer = getService('kibanaServer');
 
   const PageObjects = getPageObjects([
     'visualize',
@@ -148,6 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await security.testUser.restoreDefaults();
         await esArchiver.load('empty_kibana');
+        await PageObjects.visualize.initTests();
       });
 
       const switchIndexTest = async (useKibanaIndexes: boolean) => {
@@ -177,11 +177,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('browser history changes', () => {
-      before(async () => {
-        await kibanaServer.savedObjects.clean({ types: ['visualization'] });
-        await kibanaServer.importExport.load('visualize');
-      });
-
       it('should activate previous/next chart tab and panel config', async () => {
         await PageObjects.visualBuilder.resetPage();
 
