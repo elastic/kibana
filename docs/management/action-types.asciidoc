@@ -72,6 +72,11 @@ image::images/connector-listing.png[Example connector listing in the Rules and C
 Access to connectors is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
 
 [float]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations.
+
+[float]
 [[connectors-list]]
 === Connector list
 
@@ -110,7 +115,7 @@ image::images/connector-select-type.png[Connector select type]
 [[importing-and-exporting-connectors]]
 === Importing and exporting connectors
 
-To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
+To import and export connectors, use the <<managing-saved-objects, Saved Objects Management UI>>.
 
 [float]
 [[create-connectors]]
