@@ -77,18 +77,14 @@ export const ruleStatusSavedObjectsClientFactory = (
       perPage: 0,
     });
     const buckets = get(results, 'aggregations.alertIds.buckets');
-    const test: FindBulkResponse = buckets.reduce(
-      (acc: Record<string, unknown>, bucket: unknown) => {
-        const key = get(bucket, 'key');
-        const hits = get(bucket, 'most_recent_statuses.hits.hits');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const statuses = hits.map((hit: any) => hit._source['siem-detection-engine-rule-status']);
-        acc[key] = statuses;
-        return acc;
-      },
-      {}
-    );
-    return test;
+    return buckets.reduce((acc: Record<string, unknown>, bucket: unknown) => {
+      const key = get(bucket, 'key');
+      const hits = get(bucket, 'most_recent_statuses.hits.hits');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const statuses = hits.map((hit: any) => hit._source['siem-detection-engine-rule-status']);
+      acc[key] = statuses;
+      return acc;
+    }, {});
   },
   create: (attributes) => savedObjectsClient.create(ruleStatusSavedObjectType, attributes),
   update: (id, attributes) => savedObjectsClient.update(ruleStatusSavedObjectType, id, attributes),

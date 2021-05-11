@@ -279,21 +279,6 @@ describe('utils', () => {
         data: [expected],
       });
     });
-
-    test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = ([{ name: 'something else' }] as unknown) as SanitizedAlert[];
-      const output = transformFindAlerts(
-        {
-          data: unsafeCast,
-          page: 1,
-          perPage: 1,
-          total: 1,
-        },
-        {},
-        {}
-      );
-      expect(output).toBeNull();
-    });
   });
 
   describe('transform', () => {
