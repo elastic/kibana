@@ -729,6 +729,41 @@
         "children": [
           {
             "parentPluginId": "presentationUtil",
+            "id": "def-public.PresentationLabsService.isProjectEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isProjectEnabled",
+            "description": [],
+            "signature": [
+              "(id: \"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\") => boolean"
+            ],
+            "source": {
+              "path": "src/plugins/presentation_util/public/services/labs.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.id",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "\"labs:presentation:timeToPresent\" | \"labs:canvas:useDataService\""
+                ],
+                "source": {
+                  "path": "src/plugins/presentation_util/public/services/labs.ts",
+                  "lineNumber": 23
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
             "id": "def-public.PresentationLabsService.getProjectIDs",
             "type": "Function",
             "tags": [],
@@ -739,7 +774,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 23
+              "lineNumber": 24
             },
             "deprecated": false,
             "returnComment": [],
@@ -764,7 +799,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "deprecated": false,
             "returnComment": [],
@@ -781,7 +816,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/public/services/labs.ts",
-                  "lineNumber": 24
+                  "lineNumber": 25
                 },
                 "deprecated": false
               }
@@ -807,7 +842,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "deprecated": false,
             "returnComment": [],
@@ -824,7 +859,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/public/services/labs.ts",
-                  "lineNumber": 25
+                  "lineNumber": 26
                 },
                 "deprecated": false
               }
@@ -842,7 +877,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "deprecated": false,
             "returnComment": [],
@@ -859,7 +894,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/public/services/labs.ts",
-                  "lineNumber": 26
+                  "lineNumber": 27
                 },
                 "deprecated": false
               },
@@ -875,7 +910,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/public/services/labs.ts",
-                  "lineNumber": 26
+                  "lineNumber": 27
                 },
                 "deprecated": false
               },
@@ -888,7 +923,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/public/services/labs.ts",
-                  "lineNumber": 26
+                  "lineNumber": 27
                 },
                 "deprecated": false
               }
@@ -906,7 +941,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/public/services/labs.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false,
             "returnComment": [],
@@ -1170,7 +1205,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 78
+          "lineNumber": 79
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1187,7 +1222,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 54
+          "lineNumber": 55
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1206,7 +1241,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 14
+          "lineNumber": 15
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1360,7 +1395,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 80
+          "lineNumber": 81
         },
         "deprecated": false,
         "children": [],
@@ -1387,7 +1422,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 82
+          "lineNumber": 83
         },
         "deprecated": false,
         "children": [
@@ -1403,7 +1438,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 82
+              "lineNumber": 83
             },
             "deprecated": false,
             "isRequired": true
@@ -1426,7 +1461,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 82
+              "lineNumber": 83
             },
             "deprecated": false,
             "isRequired": true
@@ -1446,7 +1481,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 68
+          "lineNumber": 69
         },
         "deprecated": false,
         "children": [
@@ -1462,7 +1497,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 69
+              "lineNumber": 70
             },
             "deprecated": false
           },
@@ -1475,7 +1510,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 70
+              "lineNumber": 71
             },
             "deprecated": false
           },
@@ -1488,7 +1523,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 71
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -1501,7 +1536,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 72
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -1517,7 +1552,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 73
+              "lineNumber": 74
             },
             "deprecated": false
           },
@@ -1530,7 +1565,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 74
+              "lineNumber": 75
             },
             "deprecated": false
           },
@@ -1546,7 +1581,7 @@
             ],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 75
+              "lineNumber": 76
             },
             "deprecated": false
           }
@@ -1568,7 +1603,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 55
+          "lineNumber": 56
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1585,7 +1620,24 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 58
+          "lineNumber": 59
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-common.LABS_PROJECT_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "LABS_PROJECT_PREFIX",
+        "description": [],
+        "signature": [
+          "\"labs:\""
+        ],
+        "source": {
+          "path": "src/plugins/presentation_util/common/labs.ts",
+          "lineNumber": 11
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1651,7 +1703,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 78
+          "lineNumber": 79
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1668,7 +1720,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 54
+          "lineNumber": 55
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1692,7 +1744,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 62
+          "lineNumber": 63
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1709,7 +1761,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 56
+          "lineNumber": 57
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1726,7 +1778,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 12
+          "lineNumber": 13
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1743,7 +1795,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 11
+          "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1762,7 +1814,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 15
+          "lineNumber": 16
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1779,7 +1831,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 14
+          "lineNumber": 15
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1795,7 +1847,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 22
+          "lineNumber": 23
         },
         "deprecated": false,
         "children": [
@@ -1808,7 +1860,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 23
+              "lineNumber": 24
             },
             "deprecated": false,
             "children": [
@@ -1824,7 +1876,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 24
+                  "lineNumber": 25
                 },
                 "deprecated": false
               },
@@ -1840,7 +1892,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 25
+                  "lineNumber": 26
                 },
                 "deprecated": false
               },
@@ -1856,7 +1908,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 26
+                  "lineNumber": 27
                 },
                 "deprecated": false
               },
@@ -1872,7 +1924,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 27
+                  "lineNumber": 28
                 },
                 "deprecated": false
               },
@@ -1885,7 +1937,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 28
+                  "lineNumber": 29
                 },
                 "deprecated": false
               },
@@ -1898,7 +1950,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 31
+                  "lineNumber": 32
                 },
                 "deprecated": false
               },
@@ -1914,7 +1966,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 34
+                  "lineNumber": 35
                 },
                 "deprecated": false
               }
@@ -1929,7 +1981,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/common/labs.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             },
             "deprecated": false,
             "children": [
@@ -1945,7 +1997,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 37
+                  "lineNumber": 38
                 },
                 "deprecated": false
               },
@@ -1961,7 +2013,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 38
+                  "lineNumber": 39
                 },
                 "deprecated": false
               },
@@ -1977,7 +2029,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 39
+                  "lineNumber": 40
                 },
                 "deprecated": false
               },
@@ -1993,7 +2045,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 40
+                  "lineNumber": 41
                 },
                 "deprecated": false
               },
@@ -2006,7 +2058,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 41
+                  "lineNumber": 42
                 },
                 "deprecated": false
               },
@@ -2019,7 +2071,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 44
+                  "lineNumber": 45
                 },
                 "deprecated": false
               },
@@ -2035,7 +2087,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/presentation_util/common/labs.ts",
-                  "lineNumber": 50
+                  "lineNumber": 51
                 },
                 "deprecated": false
               }
@@ -2056,7 +2108,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/common/labs.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "deprecated": false,
         "initialIsOpen": false

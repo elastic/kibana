@@ -1770,7 +1770,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 407
+          "lineNumber": 408
         },
         "deprecated": false,
         "children": [
@@ -1783,7 +1783,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 408
+              "lineNumber": 409
             },
             "deprecated": false
           },
@@ -1796,7 +1796,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 409
+              "lineNumber": 410
             },
             "deprecated": false
           },
@@ -1808,11 +1808,11 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
+              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
             ],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 410
+              "lineNumber": 411
             },
             "deprecated": false
           }
@@ -8400,9 +8400,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-          "lineNumber": 104
+          "lineNumber": 107
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "children": [
           {
@@ -8417,7 +8418,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-              "lineNumber": 121
+              "lineNumber": 124
             },
             "deprecated": false,
             "children": [
@@ -8439,7 +8440,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 122
+                  "lineNumber": 125
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8456,7 +8457,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 123
+                  "lineNumber": 126
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8473,7 +8474,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 124
+                  "lineNumber": 127
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8496,7 +8497,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 125
+                  "lineNumber": 128
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8528,7 +8529,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-              "lineNumber": 140
+              "lineNumber": 143
             },
             "deprecated": true,
             "references": [
@@ -8770,7 +8771,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 141
+                  "lineNumber": 144
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8787,7 +8788,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 142
+                  "lineNumber": 145
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -8811,7 +8812,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 143
+                  "lineNumber": 146
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -8833,7 +8834,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-              "lineNumber": 158
+              "lineNumber": 161
             },
             "deprecated": false,
             "children": [],
@@ -8885,7 +8886,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-              "lineNumber": 181
+              "lineNumber": 184
             },
             "deprecated": false,
             "children": [
@@ -8926,7 +8927,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-                  "lineNumber": 181
+                  "lineNumber": 184
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -8948,7 +8949,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/errors.ts",
-          "lineNumber": 69
+          "lineNumber": 70
         },
         "deprecated": false,
         "children": [
@@ -8971,7 +8972,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/errors.ts",
-              "lineNumber": 70
+              "lineNumber": 71
             },
             "deprecated": false,
             "children": [
@@ -8987,7 +8988,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/errors.ts",
-                  "lineNumber": 70
+                  "lineNumber": 71
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9014,7 +9015,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/errors.ts",
-              "lineNumber": 74
+              "lineNumber": 75
             },
             "deprecated": false,
             "children": [
@@ -9030,7 +9031,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/errors.ts",
-                  "lineNumber": 74
+                  "lineNumber": 75
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9047,7 +9048,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/errors.ts",
-                  "lineNumber": 74
+                  "lineNumber": 75
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -9089,9 +9090,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-          "lineNumber": 34
+          "lineNumber": 36
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [
           {
             "plugin": "indexManagement",
@@ -9135,7 +9137,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-              "lineNumber": 35
+              "lineNumber": 37
             },
             "deprecated": false,
             "children": [
@@ -9157,7 +9159,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 36
+                  "lineNumber": 38
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9180,7 +9182,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 37
+                  "lineNumber": 39
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9204,7 +9206,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 38
+                  "lineNumber": 40
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -9236,9 +9238,10 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-              "lineNumber": 54
+              "lineNumber": 57
             },
             "deprecated": true,
+            "removeBy": "7.16",
             "references": [
               {
                 "plugin": "licensing",
@@ -9277,7 +9280,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 55
+                  "lineNumber": 58
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9296,7 +9299,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 56
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -9322,7 +9325,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 57
+                  "lineNumber": 60
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -9354,9 +9357,10 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-              "lineNumber": 72
+              "lineNumber": 76
             },
             "deprecated": true,
+            "removeBy": "7.16",
             "references": [
               {
                 "plugin": "licensing",
@@ -9419,27 +9423,6 @@
                 "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.ts",
                   "lineNumber": 39
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/handlers.ts",
-                  "lineNumber": 114
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/handlers.ts",
-                  "lineNumber": 181
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/service.ts",
-                  "lineNumber": 55
                 }
               },
               {
@@ -9914,314 +9897,6 @@
               {
                 "plugin": "securitySolution",
                 "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 122
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 134
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 160
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 172
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 217
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 229
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 261
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 274
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 276
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 318
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 331
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 334
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 352
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 396
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 414
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 434
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 446
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 473
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 485
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 506
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 518
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 534
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-                  "lineNumber": 549
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 113
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 125
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 154
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 167
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 169
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 208
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 221
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 224
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 243
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 284
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 302
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 322
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 334
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 360
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 372
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 393
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 405
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 421
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-                  "lineNumber": 436
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/handlers.test.ts",
-                  "lineNumber": 55
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
-                  "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/handlers.test.ts",
-                  "lineNumber": 74
-                }
-              },
-              {
-                "plugin": "securitySolution",
-                "link": {
                   "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/privileges/read_privileges_route.test.ts",
                   "lineNumber": 20
                 }
@@ -10340,7 +10015,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 73
+                  "lineNumber": 77
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10359,7 +10034,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 74
+                  "lineNumber": 78
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10385,7 +10060,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-                  "lineNumber": 75
+                  "lineNumber": 79
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -10512,9 +10187,10 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 337
+          "lineNumber": 343
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "children": [
           {
@@ -10537,7 +10213,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 338
+              "lineNumber": 344
             },
             "deprecated": false
           }
@@ -10566,9 +10242,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 317
+          "lineNumber": 320
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "children": [
           {
@@ -10583,7 +10260,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 318
+              "lineNumber": 321
             },
             "deprecated": false
           },
@@ -10599,7 +10276,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 319
+              "lineNumber": 322
             },
             "deprecated": false
           }
@@ -11150,7 +10827,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 67
+          "lineNumber": 87
         },
         "deprecated": false,
         "children": [
@@ -11171,7 +10848,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 80
+              "lineNumber": 100
             },
             "deprecated": false,
             "children": [
@@ -11187,7 +10864,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 80
+                  "lineNumber": 100
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11204,7 +10881,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 80
+                  "lineNumber": 100
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11223,7 +10900,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 80
+                  "lineNumber": 100
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -11248,7 +10925,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 96
+              "lineNumber": 116
             },
             "deprecated": false,
             "children": [
@@ -11264,7 +10941,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 96
+                  "lineNumber": 116
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11281,7 +10958,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 96
+                  "lineNumber": 116
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11300,7 +10977,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 96
+                  "lineNumber": 116
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -11325,7 +11002,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 109
+              "lineNumber": 129
             },
             "deprecated": false,
             "children": [
@@ -11341,7 +11018,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 109
+                  "lineNumber": 129
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11360,7 +11037,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 109
+                  "lineNumber": 129
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -11385,7 +11062,7 @@
             ],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 125
+              "lineNumber": 145
             },
             "deprecated": false,
             "children": [
@@ -11401,7 +11078,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 125
+                  "lineNumber": 145
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -11420,7 +11097,7 @@
                 ],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 125
+                  "lineNumber": 145
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -12236,9 +11913,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 349
+          "lineNumber": 356
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "children": [
           {
@@ -12253,7 +11931,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 350
+              "lineNumber": 357
             },
             "deprecated": false
           },
@@ -12269,7 +11947,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 351
+              "lineNumber": 358
             },
             "deprecated": false
           }
@@ -12287,9 +11965,10 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 377
+          "lineNumber": 387
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "children": [
           {
@@ -12311,7 +11990,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 378
+              "lineNumber": 388
             },
             "deprecated": false
           },
@@ -12334,7 +12013,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 379
+              "lineNumber": 389
             },
             "deprecated": false
           },
@@ -12357,7 +12036,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 380
+              "lineNumber": 390
             },
             "deprecated": false
           },
@@ -12379,7 +12058,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 381
+              "lineNumber": 391
             },
             "deprecated": false
           }
@@ -12397,9 +12076,10 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 358
+          "lineNumber": 366
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "children": [
           {
@@ -12414,7 +12094,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 359
+              "lineNumber": 367
             },
             "deprecated": false
           },
@@ -12427,7 +12107,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 360
+              "lineNumber": 368
             },
             "deprecated": false
           },
@@ -12440,7 +12120,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 361
+              "lineNumber": 369
             },
             "deprecated": false
           },
@@ -12456,7 +12136,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 362
+              "lineNumber": 370
             },
             "deprecated": false
           }
@@ -12871,7 +12551,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 87
+          "lineNumber": 89
         },
         "deprecated": false,
         "children": [
@@ -12895,7 +12575,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 96
+              "lineNumber": 98
             },
             "deprecated": false
           },
@@ -12928,7 +12608,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 114
+              "lineNumber": 116
             },
             "deprecated": false,
             "returnComment": [],
@@ -12944,7 +12624,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/types.ts",
-                  "lineNumber": 115
+                  "lineNumber": 117
                 },
                 "deprecated": false
               },
@@ -12970,7 +12650,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/elasticsearch/types.ts",
-                  "lineNumber": 116
+                  "lineNumber": 118
                 },
                 "deprecated": false
               }
@@ -13024,7 +12704,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 124
+              "lineNumber": 126
             },
             "deprecated": true,
             "references": [
@@ -13133,7 +12813,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 171
+          "lineNumber": 179
         },
         "deprecated": false,
         "children": [
@@ -13149,7 +12829,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 172
+              "lineNumber": 180
             },
             "deprecated": false
           },
@@ -13165,7 +12845,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 173
+              "lineNumber": 181
             },
             "deprecated": false
           }
@@ -13244,7 +12924,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 180
+          "lineNumber": 188
         },
         "deprecated": false,
         "children": [
@@ -13262,7 +12942,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/types.ts",
-              "lineNumber": 182
+              "lineNumber": 190
             },
             "deprecated": false
           }
@@ -15779,9 +15459,10 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 369
+          "lineNumber": 378
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "children": [
           {
@@ -15796,7 +15477,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 370
+              "lineNumber": 379
             },
             "deprecated": false
           }
@@ -16264,31 +15945,11 @@
         "description": [],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 162
+          "lineNumber": 164
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/common/get_call_cluster.mock.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/common/get_call_cluster.mock.ts",
-              "lineNumber": 26
-            }
-          },
-          {
-            "plugin": "lists",
-            "link": {
-              "path": "x-pack/plugins/lists/common/get_call_cluster.mock.ts",
-              "lineNumber": 30
-            }
-          },
           {
             "plugin": "securitySolution",
             "link": {
@@ -16308,6 +15969,27 @@
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
               "lineNumber": 466
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 27
+            }
+          },
+          {
+            "plugin": "lists",
+            "link": {
+              "path": "x-pack/plugins/lists/server/schemas/common/get_call_cluster.mock.ts",
+              "lineNumber": 31
             }
           },
           {
@@ -16870,38 +16552,6 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 164
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.LegacyAPICaller.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 165
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.LegacyAPICaller.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
               "lineNumber": 166
             },
             "deprecated": false
@@ -17046,7 +16696,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 176
+              "lineNumber": 175
             },
             "deprecated": false
           },
@@ -17062,7 +16712,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 177
+              "lineNumber": 176
             },
             "deprecated": false
           },
@@ -17110,6 +16760,22 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 180
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LegacyAPICaller.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
               "lineNumber": 181
             },
             "deprecated": false
@@ -17126,7 +16792,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 182
+              "lineNumber": 183
             },
             "deprecated": false
           },
@@ -17143,22 +16809,6 @@
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
               "lineNumber": 184
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.LegacyAPICaller.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 185
             },
             "deprecated": false
           },
@@ -17302,7 +16952,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 195
+              "lineNumber": 194
             },
             "deprecated": false
           },
@@ -17318,7 +16968,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 196
+              "lineNumber": 195
             },
             "deprecated": false
           },
@@ -17430,7 +17080,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 205
+              "lineNumber": 203
             },
             "deprecated": false
           },
@@ -17446,7 +17096,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 206
+              "lineNumber": 204
             },
             "deprecated": false
           },
@@ -17734,7 +17384,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 226
+              "lineNumber": 224
             },
             "deprecated": false
           },
@@ -17750,7 +17400,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 227
+              "lineNumber": 225
             },
             "deprecated": false
           },
@@ -17862,7 +17512,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 236
+              "lineNumber": 234
             },
             "deprecated": false
           },
@@ -17878,7 +17528,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 237
+              "lineNumber": 235
             },
             "deprecated": false
           },
@@ -18438,7 +18088,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 274
+              "lineNumber": 272
             },
             "deprecated": false
           },
@@ -18454,7 +18104,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 275
+              "lineNumber": 273
             },
             "deprecated": false
           },
@@ -18502,7 +18152,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 280
+              "lineNumber": 278
             },
             "deprecated": false
           },
@@ -18518,7 +18168,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 281
+              "lineNumber": 279
             },
             "deprecated": false
           },
@@ -18550,7 +18200,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 285
+              "lineNumber": 283
             },
             "deprecated": false
           },
@@ -18566,7 +18216,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 286
+              "lineNumber": 284
             },
             "deprecated": false
           },
@@ -18694,7 +18344,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 296
+              "lineNumber": 294
             },
             "deprecated": false
           },
@@ -18710,7 +18360,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 297
+              "lineNumber": 295
             },
             "deprecated": false
           },
@@ -18742,7 +18392,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 301
+              "lineNumber": 299
             },
             "deprecated": false
           },
@@ -18758,7 +18408,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 304
+              "lineNumber": 300
             },
             "deprecated": false
           },
@@ -18774,7 +18424,39 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 309
+              "lineNumber": 303
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LegacyAPICaller.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 306
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LegacyAPICaller.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/core/server/elasticsearch/legacy/api_types.ts",
+              "lineNumber": 311
             },
             "deprecated": false
           }
@@ -18794,9 +18476,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 144
+          "lineNumber": 145
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [
           {
             "plugin": "securitySolution",
@@ -18828,7 +18511,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 151
+              "lineNumber": 152
             },
             "deprecated": false
           },
@@ -18846,7 +18529,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-              "lineNumber": 155
+              "lineNumber": 156
             },
             "deprecated": false
           }
@@ -18876,9 +18559,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/errors.ts",
-          "lineNumber": 22
+          "lineNumber": 23
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "children": [
           {
@@ -18893,7 +18577,7 @@
             ],
             "source": {
               "path": "src/core/server/elasticsearch/legacy/errors.ts",
-              "lineNumber": 23
+              "lineNumber": 24
             },
             "deprecated": false
           }
@@ -22616,7 +22300,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 6
+          "lineNumber": 7
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -22721,27 +22405,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.ConfigDeprecation",
-        "type": "Type",
-        "tags": [],
-        "label": "ConfigDeprecation",
-        "description": [
-          "\nConfiguration deprecation returned from {@link ConfigDeprecationProvider} that handles a single deprecation from the configuration.\n"
-        ],
-        "signature": [
-          "(config: Record<string, any>, fromPath: string, addDeprecation: ",
-          "AddConfigDeprecation",
-          ") => Record<string, any>"
-        ],
-        "source": {
-          "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 33
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.ConfigDeprecationProvider",
         "type": "Type",
         "tags": [],
@@ -22758,7 +22421,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 50
+          "lineNumber": 70
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23562,9 +23225,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-          "lineNumber": 83
+          "lineNumber": 84
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [
           {
             "plugin": "licensing",
@@ -23613,48 +23277,6 @@
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
               "lineNumber": 180
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-              "lineNumber": 57
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-              "lineNumber": 80
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-              "lineNumber": 52
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-              "lineNumber": 74
             }
           },
           {
@@ -23877,9 +23499,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/cluster_client.ts",
-          "lineNumber": 94
+          "lineNumber": 96
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [
           {
             "plugin": "indexManagement",
@@ -23994,20 +23617,6 @@
             }
           },
           {
-            "plugin": "rollup",
-            "link": {
-              "path": "x-pack/plugins/rollup/server/plugin.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "plugin": "rollup",
-            "link": {
-              "path": "x-pack/plugins/rollup/server/plugin.ts",
-              "lineNumber": 36
-            }
-          },
-          {
             "plugin": "monitoring",
             "link": {
               "path": "x-pack/plugins/monitoring/target/types/server/types.d.ts",
@@ -24119,9 +23728,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/scoped_cluster_client.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [
           {
             "plugin": "licensing",
@@ -24163,76 +23773,6 @@
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
               "lineNumber": 115
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/service.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/service.ts",
-              "lineNumber": 52
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/mocks.ts",
-              "lineNumber": 8
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/mocks.ts",
-              "lineNumber": 135
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts",
-              "lineNumber": 58
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata_v1.test.ts",
-              "lineNumber": 53
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/handlers.test.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "securitySolution",
-            "link": {
-              "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/handlers.test.ts",
-              "lineNumber": 36
             }
           },
           {
@@ -24572,9 +24112,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 326
+          "lineNumber": 330
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "initialIsOpen": false
       },
@@ -24592,9 +24133,10 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/legacy/api_types.ts",
-          "lineNumber": 331
+          "lineNumber": 336
         },
         "deprecated": true,
+        "removeBy": "7.16",
         "references": [],
         "initialIsOpen": false
       },
@@ -24806,7 +24348,7 @@
         ],
         "source": {
           "path": "src/core/server/elasticsearch/types.ts",
-          "lineNumber": 192
+          "lineNumber": 200
         },
         "deprecated": false,
         "initialIsOpen": false

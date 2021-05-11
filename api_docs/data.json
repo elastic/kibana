@@ -7797,7 +7797,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 826
+              "lineNumber": 831
             },
             "deprecated": false,
             "children": [
@@ -7813,7 +7813,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                  "lineNumber": 826
+                  "lineNumber": 831
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -7837,7 +7837,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/search_source.ts",
-              "lineNumber": 855
+              "lineNumber": 860
             },
             "deprecated": false,
             "children": [],
@@ -36699,15 +36699,7 @@
             "section": "def-common.RangeFilterParams",
             "text": "RangeFilterParams"
           },
-          ") => { script: { source: string; params: Partial<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.RangeFilterParams",
-            "text": "RangeFilterParams"
-          },
-          ">; lang: string | undefined; }; }"
+          ") => { script: { source: string; params: { from?: string | number | undefined; to?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; gte?: string | number | undefined; lte?: string | number | undefined; format?: string | number | undefined; }; lang: string | undefined; }; }"
         ],
         "source": {
           "path": "src/plugins/data/common/es_query/filters/range_filter.ts",
