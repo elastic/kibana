@@ -56,10 +56,6 @@ import { appContextService } from '.';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
-function getDatasetPath(st: string) {
-  return st.split('.').slice(1).join('_');
-}
-
 class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
@@ -572,9 +568,10 @@ async function _compilePackageStream(
     (pkgDataStream) => pkgDataStream.dataset === stream.data_stream.dataset
   );
 
-  const datasetPath = packageDataStream.path || getDatasetPath(stream.data_stream.dataset);
   if (!packageDataStream) {
-    throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);
+    throw new Error(
+      `Stream template not found, unable to find dataset ${stream.data_stream.dataset}`
+    );
   }
 
   const streamFromPkg = (packageDataStream.streams || []).find(
@@ -585,8 +582,10 @@ async function _compilePackageStream(
   }
 
   if (!streamFromPkg.template_path) {
-    throw new Error(`Stream template path not found for dataset ${datasetPath}`);
+    throw new Error(`Stream template path not found for dataset ${stream.data_stream.dataset}`);
   }
+
+  const datasetPath = packageDataStream.path;
 
   const [pkgStreamTemplate] = await getAssetsData(
     registryPkgInfo,
@@ -596,7 +595,7 @@ async function _compilePackageStream(
 
   if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
     throw new Error(
-      `Unable to load stream template ${streamFromPkg.template_path} for dataset ${datasetPath}`
+      `Unable to load stream template ${streamFromPkg.template_path} for dataset ${stream.data_stream.dataset}`
     );
   }
 
