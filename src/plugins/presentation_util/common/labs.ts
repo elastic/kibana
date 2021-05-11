@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TIME_TO_PRESENT = 'labs:presentation:timeToPresent';
+export const LABS_PROJECT_PREFIX = 'labs:';
+export const TIME_TO_PRESENT = `${LABS_PROJECT_PREFIX}presentation:timeToPresent` as const;
 
 export const projectIDs = [TIME_TO_PRESENT] as const;
 export const environmentNames = ['kibana', 'browser', 'session'] as const;
