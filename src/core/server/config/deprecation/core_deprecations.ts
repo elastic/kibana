@@ -44,7 +44,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
     });
 
     return {
-      set: [{ key: 'server.cors', value: { enabled: corsSettings } }],
+      set: [{ path: 'server.cors', value: { enabled: corsSettings } }],
     };
   }
 };
@@ -67,7 +67,7 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecati
     return {
       set: [
         {
-          key: 'csp.rules',
+          path: 'csp.rules',
           value: [...parsed].map(([policy, sourceList]) => {
             if (sourceList.find((source) => source.includes(NONCE_STRING))) {
               addDeprecation({

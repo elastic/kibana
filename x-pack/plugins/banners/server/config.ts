@@ -47,7 +47,7 @@ export const config: PluginConfigDescriptor<BannersConfigType> = {
           message: 'The `header` value for xpack.banners.placement has been replaced by `top`',
         });
         return {
-          set: [{ key: `${fromPath}.placement`, value: 'top' }],
+          set: [{ path: `${fromPath}.placement`, value: 'top' }],
         };
       }
     },

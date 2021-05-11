@@ -42,8 +42,8 @@ const _rename = (
       ...details,
     });
     return {
-      set: [{ key: fullNewPath, value: oldValue }],
-      unset: [{ key: fullOldPath }],
+      set: [{ path: fullNewPath, value: oldValue }],
+      unset: [{ path: fullOldPath }],
     };
   } else {
     addDeprecation({
@@ -59,7 +59,7 @@ const _rename = (
   }
 
   return {
-    unset: [{ key: fullOldPath }],
+    unset: [{ path: fullOldPath }],
   };
 };
 
@@ -84,7 +84,7 @@ const _unused = (
     ...details,
   });
   return {
-    unset: [{ key: fullPath }],
+    unset: [{ path: fullPath }],
   };
 };
 

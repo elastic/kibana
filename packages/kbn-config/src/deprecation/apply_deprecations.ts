@@ -28,13 +28,13 @@ export const applyDeprecations = (
     const commands = deprecation(result, path, createAddDeprecation(path));
     if (commands) {
       if (commands.set) {
-        commands.set.forEach(function ({ key, value }) {
-          set(result, key, value);
+        commands.set.forEach(function ({ path: commandPath, value }) {
+          set(result, commandPath, value);
         });
       }
       if (commands.unset) {
-        commands.unset.forEach(function ({ key }) {
-          unset(result, key);
+        commands.unset.forEach(function ({ path: commandPath }) {
+          unset(result, commandPath);
         });
       }
     }

@@ -61,8 +61,8 @@ export type ConfigDeprecation = (
  * @public
  */
 export interface ConfigDeprecationCommand {
-  set?: Array<{ key: string; value: any }>;
-  unset?: Array<{ key: string }>;
+  set?: Array<{ path: string; value: any }>;
+  unset?: Array<{ path: string }>;
 }
 
 /**
