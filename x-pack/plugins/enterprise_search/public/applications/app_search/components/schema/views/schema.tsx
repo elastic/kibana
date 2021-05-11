@@ -16,12 +16,12 @@ import { FlashMessages } from '../../../../shared/flash_messages';
 import { Loading } from '../../../../shared/loading';
 import { SchemaAddFieldModal } from '../../../../shared/schema';
 
-import { SchemaCallouts } from '../components';
+import { SchemaCallouts, EmptyState } from '../components';
 import { SchemaLogic } from '../schema_logic';
 
 export const Schema: React.FC = () => {
   const { loadSchema, addSchemaField, openModal, closeModal } = useActions(SchemaLogic);
-  const { dataLoading, isUpdating, isModalOpen } = useValues(SchemaLogic);
+  const { dataLoading, isUpdating, hasSchema, isModalOpen } = useValues(SchemaLogic);
 
   useEffect(() => {
     loadSchema();
@@ -62,7 +62,7 @@ export const Schema: React.FC = () => {
       <FlashMessages />
       <EuiPageContentBody>
         <SchemaCallouts />
-        TODO: SchemaTable, EmptyState
+        {hasSchema ? 'TODO: SchemaTable' : <EmptyState />}
         {isModalOpen && (
           <SchemaAddFieldModal addNewField={addSchemaField} closeAddFieldModal={closeModal} />
         )}

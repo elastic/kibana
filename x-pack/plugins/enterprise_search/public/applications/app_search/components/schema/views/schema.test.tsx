@@ -17,13 +17,14 @@ import { EuiPageHeader, EuiButton } from '@elastic/eui';
 import { Loading } from '../../../../shared/loading';
 import { SchemaAddFieldModal } from '../../../../shared/schema';
 
-import { SchemaCallouts } from '../components';
+import { SchemaCallouts, EmptyState } from '../components';
 
 import { Schema } from './';
 
 describe('Schema', () => {
   const values = {
     dataLoading: false,
+    hasSchema: true,
     isUpdating: false,
     isModalOpen: false,
   };
@@ -58,6 +59,13 @@ describe('Schema', () => {
     const wrapper = shallow(<Schema />);
 
     expect(wrapper.find(Loading)).toHaveLength(1);
+  });
+
+  it('renders an empty state', () => {
+    setMockValues({ ...values, hasSchema: false });
+    const wrapper = shallow(<Schema />);
+
+    expect(wrapper.find(EmptyState)).toHaveLength(1);
   });
 
   it('renders page action buttons', () => {
