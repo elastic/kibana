@@ -11,7 +11,7 @@ import { Dispatch } from 'redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { AppAction } from '../../../../common/store/actions';
@@ -203,6 +203,19 @@ export const EventFiltersListPage = memo(() => {
       )}
 
       {showDelete && <EventFilterDeleteModal />}
+
+      {doesDataExist && (
+        <>
+          <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.list.totalCount"
+              defaultMessage="{total, plural, one {# event filter} other {# event filters}}"
+              values={{ total: listItems.length }}
+            />
+          </EuiText>
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
 
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
         items={listItems}
