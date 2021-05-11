@@ -114,7 +114,7 @@ export const getQueryValidationError = (
 
 function getMessageFromId<K extends ErrorTypes>({
   messageId,
-  values,
+  values: { ...values },
   locations,
 }: {
   messageId: K;
@@ -127,85 +127,85 @@ function getMessageFromId<K extends ErrorTypes>({
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
         defaultMessage:
           'The first argument for {operation} should be a {type} name. Found {argument}',
-        values,
+        values: { operation: values.operation, type: values.type, argument: values.argument },
       });
       break;
     case 'shouldNotHaveField':
       message = i18n.translate('xpack.lens.indexPattern.formulaFieldNotRequired', {
         defaultMessage: 'The operation {operation} does not accept any field as argument',
-        values,
+        values: { operation: values.operation },
       });
       break;
     case 'cannotAcceptParameter':
       message = i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
         defaultMessage: 'The operation {operation} does not accept any parameter',
-        values,
+        values: { operation: values.operation },
       });
       break;
     case 'missingParameter':
       message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
         defaultMessage:
           'The operation {operation} in the Formula is missing the following parameters: {params}',
-        values,
+        values: { operation: values.operation, params: values.params },
       });
       break;
     case 'wrongTypeParameter':
-      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongType', {
         defaultMessage:
           'The parameters for the operation {operation} in the Formula are of the wrong type: {params}',
-        values,
+        values: { operation: values.operation, params: values.params },
       });
       break;
     case 'duplicateArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaOperationDuplicateParams', {
         defaultMessage:
           'The parameters for the operation {operation} have been declared multiple times: {params}',
-        values,
+        values: { operation: values.operation, params: values.params },
       });
       break;
     case 'missingField':
-      message = i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
         defaultMessage:
           '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
-        values,
+        values: { variablesLength: values.variablesLength, variablesList: values.variablesList },
       });
       break;
     case 'missingOperation':
       message = i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
         defaultMessage:
           '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
-        values,
+        values: { operationLength: values.operationLength, operationsList: values.operationsList },
       });
       break;
     case 'fieldWithNoOperation':
       message = i18n.translate('xpack.lens.indexPattern.fieldNoOperation', {
         defaultMessage: 'The field {field} cannot be used without operation',
-        values,
+        values: { field: values.field },
       });
       break;
     case 'failedParsing':
-      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionParseError', {
         defaultMessage: 'The Formula {expression} cannot be parsed',
-        values,
+        values: { expression: values.expression },
       });
       break;
     case 'tooManyArguments':
       message = i18n.translate('xpack.lens.indexPattern.formulaWithTooManyArguments', {
         defaultMessage: 'The operation {operation} has too many arguments',
-        values,
+        values: { operation: values.operation },
       });
       break;
     case 'missingMathArgument':
       message = i18n.translate('xpack.lens.indexPattern.formulaMathMissingArgument', {
         defaultMessage:
           'The operation {operation} in the Formula is missing {count} arguments: {params}',
-        values,
+        values: { operation: values.operation, count: params.count, params: values.params },
       });
       break;
     // case 'mathRequiresFunction':
     //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
     //     defaultMessage; 'The function {name} requires an Elasticsearch function',
-    //     values,
+    //     values: { ...values },
     //   });
     //   break;
     default:
