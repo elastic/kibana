@@ -620,7 +620,7 @@ describe('indicator match', () => {
         });
       });
 
-      it('Displays threat indicator data on the threat indicator tab', () => {
+      it('Displays threat indicator data on the threat intel tab', () => {
         const expectedThreatIndicatorData = [
           { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
           { field: 'file.size', value: '80280' },
