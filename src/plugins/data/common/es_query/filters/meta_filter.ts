@@ -6,17 +6,25 @@
  * Side Public License, v 1.
  */
 
+/**
+ * Dictates whether the filter should be applied globally, GLOBAL_STATE, aka "pin across all apps", or only with the current
+ * application, APP_STATE.
+ */
 export enum FilterStateStore {
   APP_STATE = 'appState',
   GLOBAL_STATE = 'globalState',
 }
 
-// eslint-disable-next-line
-export type FilterState = {
+/**
+ * Contains whether the filter should be applied globally ("pin across all apps"), or only with the current
+ * application.
+ */
+export interface FilterState {
   store: FilterStateStore;
-};
+}
 
-type FilterFormatterFunction = (value: any) => string;
+type FilterFormatterFunction = (value: unknown) => string;
+
 export interface FilterValueFormatter {
   convert: FilterFormatterFunction;
   getConverterFor: (type: string) => FilterFormatterFunction;
@@ -33,16 +41,15 @@ export type FilterMeta = {
   index?: string;
   type?: string;
   key?: string;
-  params?: any;
+  params?: unknown;
   value?: string;
 };
 
-// eslint-disable-next-line
-export type Filter = {
+export interface Filter {
   $state?: FilterState;
   meta: FilterMeta;
-  query?: any;
-};
+  query?: unknown;
+}
 
 export interface LatLon {
   lat: number;
