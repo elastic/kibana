@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useStateToaster } from '../../../../common/components/toasters';
 
 import { TimelineDownloader } from './export_timeline';
 import { mockSelectedTimeline } from './mocks';
@@ -16,12 +15,9 @@ import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 
-jest.mock('../translations', () => {
-  return {
-    EXPORT_SELECTED: 'EXPORT_SELECTED',
-    EXPORT_FILENAME: 'TIMELINE',
-  };
-});
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 jest.mock('.', () => {
   return {
@@ -38,34 +34,26 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../../../common/components/toasters', () => {
-  const actual = jest.requireActual('../../../../common/components/toasters');
-  return {
-    ...actual,
-    useStateToaster: jest.fn(),
-  };
-});
-
 describe('TimelineDownloader', () => {
+  const mockAddSuccess = jest.fn();
+  (useAppToasts as jest.Mock).mockReturnValue({ addSuccess: mockAddSuccess });
+
   let wrapper: ReactWrapper;
+  const exportedIds = ['baa20980-6301-11ea-9223-95b6d4dd806c'];
   const defaultTestProps = {
-    exportedIds: ['baa20980-6301-11ea-9223-95b6d4dd806c'],
+    exportedIds,
     getExportedData: jest.fn(),
     isEnableDownloader: true,
     onComplete: jest.fn(),
   };
-  const mockDispatchToaster = jest.fn();
 
   beforeEach(() => {
-    (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
     (useParams as jest.Mock).mockReturnValue({ tabName: 'default' });
   });
 
   afterEach(() => {
-    (useStateToaster as jest.Mock).mockClear();
     (useParams as jest.Mock).mockReset();
-
-    (mockDispatchToaster as jest.Mock).mockClear();
+    mockAddSuccess.mockClear();
   });
 
   describe('should not render a downloader', () => {
@@ -104,11 +92,12 @@ describe('TimelineDownloader', () => {
       };
 
       wrapper = mount(<TimelineDownloader {...testProps} />);
+
       await waitFor(() => {
         wrapper.update();
 
-        expect(mockDispatchToaster.mock.calls[0][0].title).toEqual(
-          i18n.SUCCESSFULLY_EXPORTED_TIMELINES
+        expect(mockAddSuccess.mock.calls[0][0].title).toEqual(
+          i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportedIds.length)
         );
       });
     });
@@ -124,8 +113,8 @@ describe('TimelineDownloader', () => {
       await waitFor(() => {
         wrapper.update();
 
-        expect(mockDispatchToaster.mock.calls[0][0].title).toEqual(
-          i18n.SUCCESSFULLY_EXPORTED_TIMELINES
+        expect(mockAddSuccess.mock.calls[0][0].title).toEqual(
+          i18n.SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES(exportedIds.length)
         );
       });
     });
