@@ -49,6 +49,8 @@ export function LayerPanel(
     ) => void;
     onRemoveLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
+    toggleFullscreen: () => void;
+    isFullscreen: boolean;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -65,6 +67,8 @@ export function LayerPanel(
     activeVisualization,
     updateVisualization,
     updateDatasource,
+    toggleFullscreen,
+    isFullscreen,
   } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
@@ -406,8 +410,14 @@ export function LayerPanel(
 
       <DimensionContainer
         isOpen={!!activeId}
+        isFullscreen={isFullscreen}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
+          if (layerDatasource.canCloseDimensionEditor) {
+            if (!layerDatasource.canCloseDimensionEditor(layerDatasourceState)) {
+              return false;
+            }
+          }
           if (layerDatasource.updateStateOnCloseDimension) {
             const newState = layerDatasource.updateStateOnCloseDimension({
               state: layerDatasourceState,
@@ -419,9 +429,13 @@ export function LayerPanel(
             }
           }
           setActiveDimension(initialActiveDimensionState);
+          if (isFullscreen) {
+            toggleFullscreen();
+          }
+          return true;
         }}
         panel={
-          <>
+          <div>
             {activeGroup && activeId && (
               <NativeRenderer
                 render={layerDatasource.renderDimensionEditor}
@@ -433,6 +447,8 @@ export function LayerPanel(
                   hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
                   dimensionGroups: groups,
+                  toggleFullscreen,
+                  isFullscreen,
                   setState: (
                     newState: unknown,
                     {
@@ -473,6 +489,7 @@ export function LayerPanel(
             )}
             {activeGroup &&
               activeId &&
+              !isFullscreen &&
               !activeDimension.isNew &&
               activeVisualization.renderDimensionEditor &&
               activeGroup?.enableDimensionEditor && (
@@ -488,7 +505,7 @@ export function LayerPanel(
                   />
                 </div>
               )}
-          </>
+          </div>
         }
       />
     </>

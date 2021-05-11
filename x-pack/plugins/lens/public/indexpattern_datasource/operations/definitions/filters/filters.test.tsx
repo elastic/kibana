@@ -28,6 +28,9 @@ const defaultProps = {
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
 };
 
 // mocking random id generator function

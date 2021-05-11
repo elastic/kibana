@@ -10,6 +10,7 @@ import { OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
+import { FormulaEditor } from './editor';
 import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
 
@@ -152,4 +153,6 @@ export const formulaOperation: OperationDefinition<
     );
     return newLayer;
   },
+
+  paramEditor: FormulaEditor,
 };

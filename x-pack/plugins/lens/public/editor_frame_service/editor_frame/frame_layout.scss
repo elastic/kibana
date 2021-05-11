@@ -70,6 +70,10 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   &:first-child {
     padding-left: $euiSize;
   }
+
+  &.lnsFrameLayout__pageBody--fullscreen {
+    padding: 0;
+  }
 }
 
 .lnsFrameLayout__sidebar {
@@ -105,4 +109,9 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
       margin-left: 0;
     }
   }
+}
+
+.lnsFrameLayout__sidebar--fullscreen {
+  flex-basis: 50%;
+  max-width: calc(50%);
 }

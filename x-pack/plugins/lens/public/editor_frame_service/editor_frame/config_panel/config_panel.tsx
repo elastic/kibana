@@ -63,7 +63,8 @@ export function LayerPanels(
     () => (datasourceId: string, newState: unknown) => {
       dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
-        updater: () => newState,
+        updater: (prevState: unknown) =>
+          typeof newState === 'function' ? newState(prevState) : newState,
         datasourceId,
         clearStagedPreview: false,
       });
@@ -92,6 +93,14 @@ export function LayerPanels(
             stagedPreview: undefined,
           };
         },
+      });
+    },
+    [dispatch]
+  );
+  const toggleFullscreen = useMemo(
+    () => () => {
+      dispatch({
+        type: 'TOGGLE_FULLSCREEN',
       });
     },
     [dispatch]
@@ -130,6 +139,7 @@ export function LayerPanels(
               });
               removeLayerRef(layerId);
             }}
+            toggleFullscreen={toggleFullscreen}
           />
         ) : null
       )}

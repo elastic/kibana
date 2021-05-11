@@ -66,6 +66,8 @@ function getDefaultProps() {
       data: dataPluginMock.createStartContract(),
     },
     getSuggestionForField: () => undefined,
+    isFullscreen: false,
+    toggleFullscreen: jest.fn(),
   };
 }
 

@@ -114,7 +114,7 @@ export const getQueryValidationError = (
 
 function getMessageFromId<K extends ErrorTypes>({
   messageId,
-  values: { ...values },
+  values,
   locations,
 }: {
   messageId: K;

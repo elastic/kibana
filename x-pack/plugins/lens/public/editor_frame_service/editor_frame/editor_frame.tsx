@@ -310,6 +310,7 @@ export function EditorFrame(props: EditorFrameProps) {
   return (
     <RootDragDropProvider>
       <FrameLayout
+        isFullscreen={Boolean(state.isFullscreenDatasource)}
         dataPanel={
           <DataPanelWrapper
             datasourceMap={props.datasourceMap}
@@ -346,6 +347,7 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationState={state.visualization.state}
               framePublicAPI={framePublicAPI}
               core={props.core}
+              isFullscreen={Boolean(state.isFullscreenDatasource)}
             />
           )
         }
@@ -361,6 +363,7 @@ export function EditorFrame(props: EditorFrameProps) {
               visualizationState={state.visualization.state}
               visualizationMap={props.visualizationMap}
               dispatch={dispatch}
+              isFullscreen={Boolean(state.isFullscreenDatasource)}
               ExpressionRenderer={props.ExpressionRenderer}
               core={props.core}
               plugins={props.plugins}

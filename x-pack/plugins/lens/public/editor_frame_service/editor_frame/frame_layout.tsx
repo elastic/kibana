@@ -10,12 +10,14 @@ import './frame_layout.scss';
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
   configPanel?: React.ReactNode;
   suggestionsPanel?: React.ReactNode;
   workspacePanel?: React.ReactNode;
+  isFullscreen?: boolean;
 }
 
 export function FrameLayout(props: FrameLayoutProps) {
@@ -26,17 +28,25 @@ export function FrameLayout(props: FrameLayoutProps) {
         className="lnsFrameLayout__pageContent"
         aria-labelledby="lns_ChartTitle"
       >
-        <section className="lnsFrameLayout__sidebar" aria-labelledby="dataPanelId">
-          <EuiScreenReaderOnly>
-            <h2 id="dataPanelId">
-              {i18n.translate('xpack.lens.section.dataPanelLabel', {
-                defaultMessage: 'Data panel',
-              })}
-            </h2>
-          </EuiScreenReaderOnly>
-          {props.dataPanel}
-        </section>
-        <section className="lnsFrameLayout__pageBody" aria-labelledby="workspaceId">
+        {!props.isFullscreen ? (
+          <section className="lnsFrameLayout__sidebar" aria-labelledby="dataPanelId">
+            <EuiScreenReaderOnly>
+              <h2 id="dataPanelId">
+                {i18n.translate('xpack.lens.section.dataPanelLabel', {
+                  defaultMessage: 'Data panel',
+                })}
+              </h2>
+            </EuiScreenReaderOnly>
+            {props.dataPanel}
+          </section>
+        ) : null}
+        <section
+          className={classNames('lnsFrameLayout__pageBody', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            'lnsFrameLayout__pageBody--fullscreen': props.isFullscreen,
+          })}
+          aria-labelledby="workspaceId"
+        >
           <EuiScreenReaderOnly>
             <h2 id="workspaceId">
               {i18n.translate('xpack.lens.section.workspaceLabel', {
@@ -45,10 +55,13 @@ export function FrameLayout(props: FrameLayoutProps) {
             </h2>
           </EuiScreenReaderOnly>
           {props.workspacePanel}
-          {props.suggestionsPanel}
+          {!props.isFullscreen ? props.suggestionsPanel : null}
         </section>
         <section
-          className="lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right"
+          className={classNames('lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            'lnsFrameLayout__sidebar--fullscreen': props.isFullscreen,
+          })}
           aria-labelledby="configPanel"
         >
           <EuiScreenReaderOnly>

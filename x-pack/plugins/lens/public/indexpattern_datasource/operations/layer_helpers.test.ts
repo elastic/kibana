@@ -24,7 +24,7 @@ import type { IndexPattern, IndexPatternLayer } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
-import { createMockedFullReference } from './mocks';
+import { createMockedFullReference, createMockedManagedReference } from './mocks';
 
 jest.mock('../operations');
 jest.mock('../../id_generator');
@@ -91,10 +91,13 @@ describe('state_helpers', () => {
 
     // @ts-expect-error we are inserting an invalid type
     operationDefinitionMap.testReference = createMockedFullReference();
+    // @ts-expect-error we are inserting an invalid type
+    operationDefinitionMap.managedReference = createMockedManagedReference();
   });
 
   afterEach(() => {
     delete operationDefinitionMap.testReference;
+    delete operationDefinitionMap.managedReference;
   });
 
   describe('copyColumn', () => {
@@ -108,7 +111,7 @@ describe('state_helpers', () => {
           formula: 'moving_average(sum(bytes), window=5)',
           isFormulaBroken: false,
         },
-        references: ['formulaX3'],
+        references: ['formulaX1'],
       };
       const math = {
         customLabel: true,
@@ -135,7 +138,7 @@ describe('state_helpers', () => {
         label: 'formulaX2',
         operationType: 'moving_average' as const,
         params: { window: 5 },
-        references: ['formulaX1'],
+        references: ['formulaX0'],
       };
       expect(
         copyColumn({

@@ -86,6 +86,8 @@ describe('LayerPanel', () => {
       core: coreMock.createStart(),
       layerIndex: 0,
       registerNewLayerRef: jest.fn(),
+      isFullscreen: false,
+      toggleFullscreen: jest.fn(),
     };
   }
 

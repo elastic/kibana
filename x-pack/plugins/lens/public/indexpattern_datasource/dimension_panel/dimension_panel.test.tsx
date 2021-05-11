@@ -203,6 +203,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       core: {} as CoreSetup,
       dimensionGroups: [],
       groupId: 'a',
+      isFullscreen: false,
+      toggleFullscreen: jest.fn(),
     };
 
     jest.clearAllMocks();
