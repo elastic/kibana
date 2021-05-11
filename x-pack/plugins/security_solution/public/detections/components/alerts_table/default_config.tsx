@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 
-import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
 
@@ -72,7 +73,25 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
         //   // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
         //   exists: { field: 'signal.rule.building_block_type' },
         // },
-];
+      ];
+
+export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): Filter[] =>
+  showOnlyThreatIndicatorAlerts
+    ? [
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+            key: 'signal.rule.threat_mapping',
+            type: 'exists',
+            value: 'exists',
+          },
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'signal.rule.threat_mapping' },
+        },
+      ]
+    : [];
 
 export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
