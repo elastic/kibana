@@ -60,6 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       url = await browser.getCurrentUrl();
       expect(url).to.contain('searchSessionId');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      // Note this currently fails, for some reason the fakeSearchSessionId is not restored
       await searchSessions.expectState('restored');
       expect(await getSearchSessionId()).to.be(fakeSearchSessionId);
     });

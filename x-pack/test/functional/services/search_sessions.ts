@@ -55,6 +55,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
         const currentState = await (
           await testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
         ).getAttribute('data-state');
+        log.info(`searchSessions state current: ${currentState} expected: ${state}`);
         return currentState === state;
       });
     }

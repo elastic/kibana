@@ -88,6 +88,7 @@ export function Discover({
     fetchCounter: number;
     inspectorAdapters?: { requests: RequestAdapter };
     fieldCounts: Record<string, number>;
+    fetchError?: Error;
   }>({
     state: savedSearch$.getValue().state,
     fetchCounter: 0,
@@ -240,7 +241,9 @@ export function Discover({
     if (!state.columns) {
       return [];
     }
-    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
+    return useNewFieldsApi
+      ? state.columns.filter((col: string) => col !== '_source')
+      : state.columns;
   }, [state, useNewFieldsApi]);
 
   const contentCentered = resultState === 'uninitialized';
@@ -325,6 +328,7 @@ export function Discover({
                     timeFieldName={timeField}
                     queryLanguage={state.query?.language || ''}
                     data={data}
+                    error={fetchState.fetchError}
                   />
                 )}
                 {resultState === 'uninitialized' && (
