@@ -7,7 +7,9 @@
 
 import { mockHistory } from './react_router_history.mock';
 
+import { notificationServiceMock } from '../../../../../../src/core/public/mocks';
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
+import { securityMock } from '../../../../security/public/mocks';
 
 export const mockKibanaValues = {
   config: { host: 'http://localhost:3002' },
@@ -18,6 +20,8 @@ export const mockKibanaValues = {
   },
   history: mockHistory,
   navigateToUrl: jest.fn(),
+  notifications: notificationServiceMock.createStartContract(),
+  security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
