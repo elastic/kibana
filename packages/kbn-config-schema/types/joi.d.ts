@@ -28,6 +28,7 @@ declare module 'joi' {
     // missing from the typedef
     // see https://github.com/sideway/joi/blob/master/lib/errors.js
     local?: Record<string, any>;
+    toString(): string;
   }
 
   export type JoiRoot = Joi.Root & {

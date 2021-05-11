@@ -113,9 +113,10 @@ export abstract class Type<V> {
       return error;
     }
 
+    const { local, code, path, value } = error;
     // `message` is only initialized once `toString` has been called (...)
     // see https://github.com/sideway/joi/blob/master/lib/errors.js
-    const { local, code, path, message, value } = error;
+    const message = error.toString();
     const convertedPath = path.map((entry) => entry.toString());
 
     const context: Record<string, any> = {
