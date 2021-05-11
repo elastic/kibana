@@ -26,7 +26,10 @@ export const RegisteredDomain: FunctionComponent = () => {
 
       <TargetField />
 
-      <IgnoreMissingField defaultValue={true} serializer={from.undefinedIfValue(true) as SerializerFunc<boolean>} />
+      <IgnoreMissingField
+        defaultValue={true}
+        serializer={from.undefinedIfValue(true) as SerializerFunc<boolean>}
+      />
     </>
   );
 };
