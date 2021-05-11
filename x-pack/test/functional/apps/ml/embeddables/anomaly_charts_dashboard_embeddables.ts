@@ -107,6 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Feb 11, 2016 @ 00:00:00.000'
           );
           await PageObjects.timePicker.pauseAutoRefresh();
+          await new Promise((resolve) => setTimeout(resolve, 300));
           await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
         });
