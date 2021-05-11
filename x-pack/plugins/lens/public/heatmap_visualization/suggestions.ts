@@ -20,7 +20,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   subVisualizationId,
 }) => {
   if (state?.shape === CHART_SHAPES.HEATMAP) {
-    // don't provide suggestion when heatmap is the current chart
+    // don't provide suggestions when heatmap is the current chart
     return [];
   }
 
@@ -75,11 +75,6 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
 
   const [dateHistogram, ordinal] = partition(groups, (g) => g.operation.dataType === 'date');
 
-  if (ordinal.length === 0 && dateHistogram.length === 0) {
-    // no histogram or grouped data to build at least one axis
-    return [];
-  }
-
   if (dateHistogram.length > 0) {
     newState.xAccessor = dateHistogram[0].columnId;
     score += 0.3;
@@ -89,10 +84,13 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     if (!newState.xAccessor) {
       newState.xAccessor = ordinal[0].columnId;
       score += 0.3;
+    } else {
+      newState.yAccessor = ordinal[0].columnId;
+      score += 0.3;
     }
 
-    if (ordinal[1]) {
-      newState.yAccessor = ordinal[0].columnId;
+    if (!newState.yAccessor && ordinal[1]) {
+      newState.yAccessor = ordinal[1].columnId;
       score += 0.3;
     }
   }
@@ -105,7 +103,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
       }),
       hide,
       previewIcon: 'empty',
-      score,
+      score: Number(score.toFixed(1)),
     },
   ];
 };
