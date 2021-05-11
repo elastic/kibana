@@ -129,18 +129,6 @@ describe('actions', () => {
     });
   });
 
-  describe('transformDocs', () => {
-    it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.transformDocs(client, () => Promise.resolve([]), [], 'my_index', false);
-      try {
-        await task();
-      } catch (e) {
-        /** ignore */
-      }
-      expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
-    });
-  });
-
   describe('reindex', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
       const task = Actions.reindex(
