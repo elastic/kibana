@@ -124,7 +124,7 @@ describe('DiscoverGrid', () => {
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 
-    test('showing selected documents, underlying data changes, all selected documents are displayed', async () => {
+    test('showing selected documents, underlying data changes, all documents are displayed, selection is gone', async () => {
       await toggleDocSelection(component, esHits[0]);
       await toggleDocSelection(component, esHits[1]);
       expect(getSelectedDocNr(component)).toBe(2);
