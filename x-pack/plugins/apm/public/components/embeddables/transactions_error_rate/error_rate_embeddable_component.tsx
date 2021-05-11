@@ -16,7 +16,7 @@ import {
   Settings,
 } from '@elastic/charts';
 import { EuiLoadingChart } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import {
   EmbeddableOutput,
@@ -25,8 +25,11 @@ import {
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { asPercent } from '../../../../common/utils/formatters';
 import { getParsedDate } from '../../../context/url_params_context/helpers';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../services/rest/createCallApmApi';
 import { isTimeseriesEmpty } from '../../shared/charts/helper/helper';
 import { ErrorRateEmbeddable, ErrorRateInput } from './error_rate_embeddable';
 
@@ -62,27 +65,52 @@ const INITIAL_STATE: ErrorRate = {
   },
 };
 
+async function fetchErrorRate({
+  serviceName,
+  start,
+  end,
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+}) {
+  return callApmApi({
+    signal: null,
+    endpoint:
+      'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
+    params: {
+      path: { serviceName },
+      query: { transactionType: 'request', start, end },
+    },
+  });
+}
+
 function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
   const serviceName = input.serviceName || findServiceNameFilter(input.filters);
   const { from, to } = input.timeRange;
 
-  const { data = INITIAL_STATE, status } = useFetcher(
-    (callApmApi) => {
+  const [data, setData] = useState<ErrorRate>(INITIAL_STATE);
+  const [status, setStatus] = useState<FETCH_STATUS>(
+    FETCH_STATUS.NOT_INITIATED
+  );
+
+  useEffect(() => {
+    async function callFetchServicesErrorRate() {
       const start = getParsedDate(from)?.toISOString();
       const end = getParsedDate(to)?.toISOString();
       if (serviceName && start && end) {
-        return callApmApi({
-          endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
-          params: {
-            path: { serviceName },
-            query: { transactionType: 'request', start, end },
-          },
-        });
+        setStatus(FETCH_STATUS.LOADING);
+        try {
+          const result = await fetchErrorRate({ serviceName, start, end });
+          setData(result);
+          setStatus(FETCH_STATUS.SUCCESS);
+        } catch (e) {
+          setStatus(FETCH_STATUS.FAILURE);
+        }
       }
-    },
-    [serviceName, from, to]
-  );
+    }
+    callFetchServicesErrorRate();
+  }, [serviceName, from, to, setData, setStatus]);
 
   if (status === FETCH_STATUS.LOADING) {
     return (

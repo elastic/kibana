@@ -13,15 +13,18 @@ import {
   Settings,
 } from '@elastic/charts';
 import { EuiLoadingChart } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EmbeddableOutput,
   withEmbeddableSubscription,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { asPercent } from '../../../../common/utils/formatters';
 import { getParsedDate } from '../../../context/url_params_context/helpers';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../services/rest/createCallApmApi';
 import {
   ServicesErrorRateEmbeddable,
   ServicesErrorRateInput,
@@ -43,27 +46,44 @@ const INITIAL_STATE: ServicesErrorRate = {
   servicesErrorRate: [],
 };
 
+async function fetchServicesErrorRate({
+  start,
+  end,
+}: {
+  start: string;
+  end: string;
+}) {
+  return callApmApi({
+    signal: null,
+    endpoint: 'GET /api/apm/services/error_rate',
+    params: { query: { start, end } },
+  });
+}
+
 function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
   const { from, to } = input.timeRange;
+  const [data, setData] = useState<ServicesErrorRate>(INITIAL_STATE);
+  const [status, setStatus] = useState<FETCH_STATUS>(
+    FETCH_STATUS.NOT_INITIATED
+  );
 
-  const { data: data = INITIAL_STATE, status } = useFetcher(
-    (callApmApi) => {
+  useEffect(() => {
+    async function callFetchServicesErrorRate() {
       const start = getParsedDate(from)?.toISOString();
       const end = getParsedDate(to)?.toISOString();
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/services/error_rate',
-          params: {
-            query: {
-              start,
-              end,
-            },
-          },
-        });
+        setStatus(FETCH_STATUS.LOADING);
+        try {
+          const result = await fetchServicesErrorRate({ start, end });
+          setData(result);
+          setStatus(FETCH_STATUS.SUCCESS);
+        } catch (e) {
+          setStatus(FETCH_STATUS.FAILURE);
+        }
       }
-    },
-    [from, to]
-  );
+    }
+    callFetchServicesErrorRate();
+  }, [from, to, setData, setStatus]);
 
   if (status === FETCH_STATUS.LOADING) {
     return (
