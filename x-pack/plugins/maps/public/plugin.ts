@@ -42,8 +42,10 @@ import {
   createTileMapUrlGenerator,
 } from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
+import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
@@ -173,6 +175,7 @@ export class MapsPlugin
     if (core.application.capabilities.maps.show) {
       plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     }
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
 
     if (!core.application.capabilities.maps.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);

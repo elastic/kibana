@@ -349,18 +349,49 @@ export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBo
   return esBbox;
 }
 
-export function createExtentFilter(mapExtent: MapExtent, geoFieldName: string): GeoFilter {
-  return {
-    geo_bounding_box: {
-      [geoFieldName]: makeESBbox(mapExtent),
-    },
-    meta: {
-      alias: null,
-      disabled: false,
-      negate: false,
-      key: geoFieldName,
-    },
-  };
+export function createExtentFilter(mapExtent: MapExtent, geoFieldNames: string[]): GeoFilter {
+  const esBbox = makeESBbox(mapExtent);
+  return geoFieldNames.length === 1
+    ? {
+        geo_bounding_box: {
+          [geoFieldNames[0]]: esBbox,
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+          key: geoFieldNames[0],
+        },
+      }
+    : {
+        query: {
+          bool: {
+            should: geoFieldNames.map((geoFieldName) => {
+              return {
+                bool: {
+                  must: [
+                    {
+                      exists: {
+                        field: geoFieldName,
+                      },
+                    },
+                    {
+                      geo_bounding_box: {
+                        [geoFieldName]: esBbox,
+                      },
+                    },
+                  ],
+                },
+              };
+            }),
+          },
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+      };
 }
 
 export function createSpatialFilterWithGeometry({
