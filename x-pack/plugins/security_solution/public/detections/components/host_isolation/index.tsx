@@ -76,23 +76,25 @@ export const HostIsolationPanel = React.memo(
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
 
-    const casesList = useMemo(() => {
-      for (const [index, id] of caseIds.entries()) {
-        return (
-          <li>
-            <CaseDetailsLink detailName={id}>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
-                defaultMessage="Case {caseIndex}"
-                values={{ caseIndex: index + 1 }}
-              />
-            </CaseDetailsLink>
-          </li>
-        );
-      }
-    }, [caseIds]);
+    const casesList = useMemo(
+      () =>
+        caseIds.map((id, index) => {
+          return (
+            <li>
+              <CaseDetailsLink detailName={id}>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
+                  defaultMessage="Case {caseIndex}"
+                  values={{ caseIndex: index + 1 }}
+                />
+              </CaseDetailsLink>
+            </li>
+          );
+        }),
+      [caseIds]
+    );
 
-    const caseCount: number = caseIds.length;
+    const caseCount: number = useMemo(() => caseIds.length, [caseIds]);
 
     const hostIsolated = useMemo(() => {
       return (
