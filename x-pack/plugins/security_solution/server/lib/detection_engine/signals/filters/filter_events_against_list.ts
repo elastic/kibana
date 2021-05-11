@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { estypes } from '@elastic/elasticsearch';
-import { ExceptionListItemSchema, entriesList } from '../../../../../../lists/common/schemas';
+import { entriesList } from '@kbn/securitysolution-io-ts-utils';
+
+import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { hasLargeValueList } from '../../../../../common/detection_engine/utils';
 import { FilterEventsAgainstListOptions } from './types';
 import { filterEvents } from './filter_events';
