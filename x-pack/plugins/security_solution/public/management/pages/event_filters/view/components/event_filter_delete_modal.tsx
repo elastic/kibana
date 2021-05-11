@@ -56,7 +56,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
 
   return (
     <EuiModal onClose={onCancel}>
-      <EuiModalHeader>
+      <EuiModalHeader data-test-subj="eventFilterDeleteModalHeader">
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.deletionDialog.title"
