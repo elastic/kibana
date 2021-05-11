@@ -5,6 +5,7 @@
     "outDir": "./target",
     "declaration": true,
     "declarationMap": true,
+    "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-telemetry-tools/src",
     "isolatedModules": true
