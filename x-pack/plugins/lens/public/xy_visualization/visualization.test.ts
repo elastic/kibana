@@ -52,7 +52,7 @@ describe('xy_visualization', () => {
       };
     }
 
-    it('should show mixed xy chart when multilple series types', () => {
+    it('should show mixed xy chart when multiple series types', () => {
       const desc = xyVisualization.getDescription(mixedState('bar', 'line'));
 
       expect(desc.label).toEqual('Mixed XY');
@@ -332,7 +332,7 @@ describe('xy_visualization', () => {
       expect(options.map((o) => o.groupId)).toEqual(['x', 'y', 'breakdown']);
     });
 
-    it('should return the correct labels for the 3 dimensios', () => {
+    it('should return the correct labels for the 3 dimensions', () => {
       const options = xyVisualization.getConfiguration({
         state: exampleState(),
         frame,
@@ -345,7 +345,7 @@ describe('xy_visualization', () => {
       ]);
     });
 
-    it('should return the correct labels for the 3 dimensios for a horizontal chart', () => {
+    it('should return the correct labels for the 3 dimensions for a horizontal chart', () => {
       const initialState = exampleState();
       const state = {
         ...initialState,
