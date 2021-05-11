@@ -65,8 +65,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./ping_redirects'));
     });
 
-    /* eslint-disable ban/ban */
-    describe.only('with real-world data', () => {
+    describe('with real-world data', () => {
       before(async () => {
         await esArchiver.unload(ARCHIVE);
         await esArchiver.load(ARCHIVE);
@@ -80,6 +79,5 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./ml_anomaly'));
       loadTestFile(require.resolve('./feature_controls'));
     });
-    /* eslint-enable ban/ban */
   });
 };
