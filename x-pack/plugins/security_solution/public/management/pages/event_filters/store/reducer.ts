@@ -25,7 +25,6 @@ import {
   EventFiltersFormStateChanged,
   EventFiltersCreateSuccess,
   EventFiltersUpdateSuccess,
-  EventFiltersListPageStateChanged,
   EventFiltersListPageDataChanged,
   EventFiltersListPageDataExistsChanged,
   EventFilterForDeletion,
@@ -33,9 +32,9 @@ import {
   EventFilterDeleteStatusChanged,
 } from './action';
 
-import { EventFiltersListPageState } from '../state';
 import { initialEventFiltersPageState } from './builders';
 import { getListPageIsActive } from './selector';
+import { EventFiltersListPageState } from '../types';
 
 type StateReducer = ImmutableReducer<EventFiltersListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -50,17 +49,6 @@ const isEventFiltersPageLocation = (location: Immutable<AppLocation>) => {
       exact: true,
     }) !== null
   );
-};
-
-// FIXME:PT might not need this. maybe delete
-const handleEventFiltersListPageChanges: CaseReducer<EventFiltersListPageStateChanged> = (
-  state,
-  action
-) => {
-  return {
-    ...state,
-    listPage: action.payload,
-  };
 };
 
 const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDataChanged> = (
@@ -253,8 +241,6 @@ export const eventFiltersPageReducer: StateReducer = (
   // actions only handled if we're on the List Page
   if (getListPageIsActive(state)) {
     switch (action.type) {
-      case 'eventFiltersListPageStateChanged':
-        return handleEventFiltersListPageChanges(state, action);
       case 'eventFiltersListPageDataChanged':
         return handleEventFiltersListPageDataChanges(state, action);
       case 'eventFiltersListPageDataExistsChanged':
