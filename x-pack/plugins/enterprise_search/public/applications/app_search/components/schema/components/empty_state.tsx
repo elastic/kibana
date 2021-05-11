@@ -39,7 +39,7 @@ export const EmptyState: React.FC = () => {
             iconType="popout"
             href={`${DOCS_PREFIX}/indexing-documents-guide.html#indexing-documents-guide-schema`}
           >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.synonyms.empty.buttonLabel', {
+            {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.empty.buttonLabel', {
               defaultMessage: 'Read the indexing schema guide',
             })}
           </EuiButton>

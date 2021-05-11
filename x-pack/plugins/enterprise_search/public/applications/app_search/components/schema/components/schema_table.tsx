@@ -60,7 +60,7 @@ export const SchemaTable: React.FC = () => {
                   <EuiHealth color="success">
                     <EuiText color="subdued" size="s">
                       {i18n.translate(
-                        'xpack.enterprisesearch.appSearch.engine.schema.unconfirmedFieldLabel',
+                        'xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFieldLabel',
                         { defaultMessage: 'Recently added' }
                       )}
                     </EuiText>
