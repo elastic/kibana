@@ -390,6 +390,7 @@ describe('Package policy service', () => {
         {
           config: {},
           enabled: true,
+          keep_enabled: true,
           type: 'endpoint',
           vars: {
             dog: {
@@ -428,7 +429,7 @@ describe('Package policy service', () => {
       const inputsUpdate = [
         {
           config: {},
-          enabled: true,
+          enabled: false,
           type: 'endpoint',
           vars: {
             dog: {
@@ -501,6 +502,7 @@ describe('Package policy service', () => {
       );
 
       const [modifiedInput] = result.inputs;
+      expect(modifiedInput.enabled).toEqual(true);
       expect(modifiedInput.vars!.dog.value).toEqual('labrador');
       expect(modifiedInput.vars!.cat.value).toEqual('siamese');
       const [modifiedStream] = modifiedInput.streams;
