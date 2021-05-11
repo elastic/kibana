@@ -6,8 +6,10 @@
  */
 import {
   Axis,
-  BarSeries,
   Chart,
+  CurveType,
+  LineSeries,
+  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
@@ -15,13 +17,13 @@ import {
 import { EuiLoadingChart } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  SERVICE_ENVIRONMENT,
-  TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import {
   EmbeddableOutput,
   withEmbeddableSubscription,
 } from '../../../../../../../src/plugins/embeddable/public';
+import {
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+} from '../../../../common/elasticsearch_fieldnames';
 import { asPercent } from '../../../../common/utils/formatters';
 import { getParsedDate } from '../../../context/url_params_context/helpers';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -29,11 +31,11 @@ import {
   APIReturnType,
   callApmApi,
 } from '../../../services/rest/createCallApmApi';
+import { getApiFiltersFromInput } from '../helpers';
 import {
   ServicesErrorRateEmbeddable,
   ServicesErrorRateInput,
 } from './services_error_rate_embeddable';
-import { getApiFiltersFromInput } from '../helpers';
 
 interface Props {
   embeddable: ServicesErrorRateEmbeddable;
@@ -78,6 +80,7 @@ function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
     [input]
   );
   const { from, to } = input.timeRange;
+  console.log('### caue ~ from, to', { from, to });
   const [data, setData] = useState<ServicesErrorRate>(INITIAL_STATE);
   const [status, setStatus] = useState<FETCH_STATUS>(
     FETCH_STATUS.NOT_INITIATED
@@ -86,7 +89,7 @@ function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
   useEffect(() => {
     async function callFetchServicesErrorRate() {
       const start = getParsedDate(from)?.toISOString();
-      const end = getParsedDate(to)?.toISOString();
+      const end = getParsedDate(to, { roundUp: true })?.toISOString();
       if (start && end) {
         setStatus(FETCH_STATUS.LOADING);
         try {
@@ -117,6 +120,18 @@ function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
     );
   }
 
+  const xValues = data.servicesErrorRate.flatMap((service) =>
+    service.timeseries.map(({ x }) => x)
+  );
+
+  const min = Math.min(...xValues);
+  const max = Math.max(...xValues);
+
+  const xFormatter = niceTimeFormatter([min, max]);
+  const xDomain = data.servicesErrorRate.length
+    ? { min, max }
+    : { min: 0, max: 1 };
+
   return (
     <div style={{ height: '100%', width: '100%' }}>
       <Chart>
@@ -124,13 +139,13 @@ function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
-          xDomain={{ min: 0, max: 1 }}
+          xDomain={xDomain}
         />
         <Axis
           id="x-axis"
           position={Position.Bottom}
           showOverlappingTicks
-          // tickFormat={xFormatter}
+          tickFormat={xFormatter}
           gridLine={{ visible: false }}
         />
         <Axis
@@ -142,14 +157,20 @@ function ServicesErrorRateEmbeddableComponentInner({ input }: Props) {
           labelFormat={yLabelFormat}
         />
 
-        <BarSeries
-          id="Error Rate"
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="serviceName"
-          yAccessors={['errorRate']}
-          data={data.servicesErrorRate}
-        />
+        {data.servicesErrorRate.map(({ serviceName, timeseries }) => {
+          return (
+            <LineSeries
+              key={serviceName}
+              id={serviceName}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={timeseries}
+              curve={CurveType.LINEAR}
+            />
+          );
+        })}
       </Chart>
     </div>
   );

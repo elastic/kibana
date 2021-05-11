@@ -12,12 +12,16 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery, rangeQuery } from '../../utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
 } from '../helpers/transaction_error_rate';
+import { getBucketSize } from '../helpers/get_bucket_size';
 
 export async function getServicesErrorRate({
   searchAggregatedTransactions,
@@ -53,6 +57,9 @@ export async function getServicesErrorRate({
               ...rangeQuery(start, end),
               ...transactionTypefilter,
               ...environmentQuery(environment),
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
             ],
           },
         },
@@ -63,7 +70,17 @@ export async function getServicesErrorRate({
               size: 10,
             },
             aggs: {
-              outcomes: getOutcomeAggregation(),
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: getBucketSize({ start, end }).intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: { min: start, max: end },
+                },
+                aggs: {
+                  outcomes: getOutcomeAggregation(),
+                },
+              },
             },
           },
         },
@@ -77,12 +94,18 @@ export async function getServicesErrorRate({
     }
 
     return (
-      response.aggregations?.serviceNames.buckets
-        .map(({ key: serviceName, outcomes }) => {
-          const errorRate = calculateTransactionErrorPercentage(outcomes);
-          return { serviceName, errorRate };
-        })
-        .filter(({ errorRate }) => isFiniteNumber(errorRate)) || []
+      response.aggregations?.serviceNames.buckets.map(
+        ({ key: serviceName, timeseries }) => {
+          const coordinates = timeseries.buckets.map(({ key: x, outcomes }) => {
+            return {
+              x,
+              y: calculateTransactionErrorPercentage(outcomes),
+            };
+          });
+
+          return { serviceName: String(serviceName), timeseries: coordinates };
+        }
+      ) || []
     );
   });
 }

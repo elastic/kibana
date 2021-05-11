@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  AreaSeries,
   Axis,
   Chart,
   CurveType,
@@ -35,7 +34,6 @@ import {
   APIReturnType,
   callApmApi,
 } from '../../../services/rest/createCallApmApi';
-import { isTimeseriesEmpty } from '../../shared/charts/helper/helper';
 import { getApiFiltersFromInput } from '../helpers';
 import { ErrorRateEmbeddable, ErrorRateInput } from './error_rate_embeddable';
 
@@ -114,7 +112,7 @@ function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
   useEffect(() => {
     async function callFetchServicesErrorRate() {
       const start = getParsedDate(from)?.toISOString();
-      const end = getParsedDate(to)?.toISOString();
+      const end = getParsedDate(to, { roundUp: true })?.toISOString();
       if (filters?.serviceName && start && end) {
         setStatus(FETCH_STATUS.LOADING);
         try {
@@ -150,22 +148,13 @@ function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
     );
   }
 
-  const timeseries = [
-    {
-      data: data.currentPeriod.transactionErrorRate,
-      type: 'linemark',
-      color: 'red',
-      title: 'Error rate (avg.)',
-    },
-  ];
-  const xValues = timeseries.flatMap((item) => item.data.map(({ x }) => x));
-
+  const xValues = data.currentPeriod.transactionErrorRate.flatMap(({ x }) => x);
   const min = Math.min(...xValues);
   const max = Math.max(...xValues);
-
   const xFormatter = niceTimeFormatter([min, max]);
-  const isEmptyTimeseries = isTimeseriesEmpty(timeseries);
-  const xDomain = isEmptyTimeseries ? { min: 0, max: 1 } : { min, max };
+  const xDomain = data.currentPeriod.transactionErrorRate.length
+    ? { min, max }
+    : { min: 0, max: 1 };
 
   return (
     <div style={{ height: '100%', width: '100%' }}>
@@ -191,24 +180,17 @@ function ErrorRateEmbeddableComponentInner({ input, ...rest }: Props) {
           tickFormat={yLabelFormat}
           labelFormat={yLabelFormat}
         />
-
-        {timeseries.map((serie) => {
-          const Series = serie.type === 'area' ? AreaSeries : LineSeries;
-
-          return (
-            <Series
-              key={serie.title}
-              id={serie.title}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={isEmptyTimeseries ? [] : serie.data}
-              color={serie.color}
-              curve={CurveType.CURVE_MONOTONE_X}
-            />
-          );
-        })}
+        <LineSeries
+          id={i18n.translate('xpack.apm.embeddables.errorRate.chartLegend', {
+            defaultMessage: 'Error rate (avg.)',
+          })}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="x"
+          yAccessors={['y']}
+          data={data.currentPeriod.transactionErrorRate}
+          curve={CurveType.CURVE_MONOTONE_X}
+        />
       </Chart>
     </div>
   );
