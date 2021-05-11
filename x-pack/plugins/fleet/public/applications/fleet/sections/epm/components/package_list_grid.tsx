@@ -24,11 +24,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
-import { useLocalSearch } from '../hooks';
+import { useLocalSearch, searchIdField } from '../hooks';
 
 import { PackageCard } from './package_card';
 
-interface PackageListProps {
+interface ListProps {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;
@@ -41,10 +41,10 @@ export function PackageListGrid({
   isLoading,
   controls,
   title,
-  list = [],
+  list,
   setSelectedCategory = () => {},
   showMissingIntegrationMessage = false,
-}: PackageListProps) {
+}: ListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
   const [query, setQuery] = useState<Query | null>(initialQuery);
@@ -79,11 +79,15 @@ export function PackageListGrid({
     gridContent = <Loading />;
   } else {
     const filteredList = searchTerm
-      ? list.filter((item) => localSearchRef.current!.search(searchTerm) as PackageList)
+      ? list.filter((item) =>
+          (localSearchRef.current!.search(searchTerm) as PackageList)
+            .map((match) => match[searchIdField])
+            .includes(item[searchIdField])
+        )
       : list;
     gridContent = (
       <GridColumn
-        packages={filteredList}
+        list={filteredList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
       />
     );
@@ -140,18 +144,18 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
 }
 
 interface GridColumnProps {
-  packages: PackageList;
+  list: PackageList;
   showMissingIntegrationMessage?: boolean;
 }
 
-function GridColumn({ packages, showMissingIntegrationMessage = false }: GridColumnProps) {
+function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
-      {packages.length ? (
-        packages.map((pkg) => {
+      {list.length ? (
+        list.map((item) => {
           return (
-            <EuiFlexItem key={pkg.id}>
-              <PackageCard {...pkg} />
+            <EuiFlexItem key={item.id}>
+              <PackageCard {...item} />
             </EuiFlexItem>
           );
         })

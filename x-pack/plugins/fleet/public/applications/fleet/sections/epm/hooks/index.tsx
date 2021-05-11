@@ -6,7 +6,7 @@
  */
 
 export { useLinks } from './use_links';
-export { useLocalSearch } from './use_local_search';
+export { useLocalSearch, searchIdField } from './use_local_search';
 export {
   PackageInstallProvider,
   useUninstallPackage,

@@ -27,7 +27,6 @@ const LeftColumn = styled(EuiFlexItem)`
 `;
 
 export const OverviewPage: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
-  // Collect all package-level and integration-level screenshots
   const screenshots = useMemo(() => integrationInfo?.screenshots || packageInfo.screenshots || [], [
     integrationInfo,
     packageInfo.screenshots,
