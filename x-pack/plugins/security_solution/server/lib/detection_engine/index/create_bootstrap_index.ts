@@ -12,7 +12,7 @@ import { ElasticsearchClient } from 'kibana/server';
 // Ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/applying-policy-to-template.html
 
 /**
- * @deprecated Use the one from kbn-securitysolution-utils
+ * @deprecated Use the one from kbn-securitysolution-es-utils
  */
 export const createBootstrapIndex = async (
   esClient: ElasticsearchClient,

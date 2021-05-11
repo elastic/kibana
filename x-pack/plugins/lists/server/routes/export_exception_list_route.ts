@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListsPluginRouter } from '../types';
 import { EXCEPTION_LIST_URL } from '../../common/constants';

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './add_remove_id_to_item';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-securitysolution-es-utils'],
+};

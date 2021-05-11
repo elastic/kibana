@@ -16,7 +16,7 @@ import {
   getTemplateExists,
   setPolicy,
   setTemplate,
-} from '@kbn/securitysolution-utils';
+} from '@kbn/securitysolution-es-utils';
 
 import {
   FoundListItemSchema,

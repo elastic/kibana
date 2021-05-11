@@ -7,7 +7,7 @@
 
 import { Stream } from 'stream';
 
-import { transformError } from '@kbn/securitysolution-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListsPluginRouter } from '../types';
 import { LIST_ITEM_URL } from '../../common/constants';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readPrivileges, transformError } from '@kbn/securitysolution-utils';
+import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
 import { merge } from 'lodash/fp';
 
 import type { ListsPluginRouter } from '../types';

@@ -26,7 +26,7 @@ export interface OutputError {
 }
 
 /**
- * @deprecated Use kbn-securitysolution-utils version
+ * @deprecated Use kbn-securitysolution-es-utils version
  */
 export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
   if (Boom.isBoom(err)) {
