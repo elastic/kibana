@@ -21,10 +21,11 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
-import { CustomizablePalette, applyPaletteParams } from './palette_configuration';
+import { CustomizablePalette } from './palette_configuration';
 import { PalettePanelContainer } from './palette_panel_container';
 import { findMinMaxByColumnId } from './shared_utils';
-import { defaultParams, FIXED_PROGRESSION } from './coloring/constants';
+import { applyPaletteParams } from '../../shared_components/coloring/utils';
+import { defaultParams, FIXED_PROGRESSION } from '../../shared_components/coloring/constants';
 
 const idPrefix = htmlIdGenerator()();
 

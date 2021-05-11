@@ -18,25 +18,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
-import { CustomPaletteParams } from '../expression';
 
 import './palette_configuration.scss';
+
+import { CustomStops } from '../../shared_components/coloring/color_stops';
 import {
-  getDataMinMax,
+  defaultParams,
+  CUSTOM_PALETTE,
+  DEFAULT_COLOR_STEPS,
+} from '../../shared_components/coloring/constants';
+import {
+  CustomPaletteParams,
+  RequiredPaletteParamTypes,
+} from '../../shared_components/coloring/types';
+import {
+  getColorStops,
   getPaletteStops,
   mergePaletteParams,
-  remapStopsByNewInterval,
-  reversePalette,
+  getDataMinMax,
   roundStopValues,
-} from './coloring/utils';
-import {
-  CUSTOM_PALETTE,
-  defaultParams,
-  DEFAULT_COLOR_STEPS,
-  RequiredPaletteParamTypes,
-} from './coloring/constants';
-import { CustomStops } from './coloring/color_stops';
-
+  remapStopsByNewInterval,
+  getSwitchToCustomParams,
+  reversePalette,
+} from '../../shared_components/coloring/utils';
 const idPrefix = htmlIdGenerator()();
 
 /**
@@ -55,92 +59,6 @@ const idPrefix = htmlIdGenerator()();
  * These naming conventions would be useful to track the code flow in this feature as multiple transformations are happening
  * for a single change.
  */
-
-function getSwitchToCustomParams(
-  palettes: PaletteRegistry,
-  activePalette: PaletteOutput<CustomPaletteParams>,
-  newParams: CustomPaletteParams,
-  dataBounds: { min: number; max: number }
-) {
-  // if it's already a custom palette just return the params
-  if (activePalette?.params?.name === CUSTOM_PALETTE) {
-    const stops = getPaletteStops(
-      palettes,
-      {
-        steps: DEFAULT_COLOR_STEPS,
-        ...activePalette.params,
-        ...newParams,
-      },
-      {
-        dataBounds,
-      }
-    );
-    return mergePaletteParams(activePalette, {
-      ...newParams,
-      stops,
-    });
-  }
-  // prepare everything to switch to custom palette
-  const newPaletteParams = {
-    steps: DEFAULT_COLOR_STEPS,
-    ...activePalette.params,
-    ...newParams,
-    name: CUSTOM_PALETTE,
-  };
-
-  const stops = getPaletteStops(palettes, newPaletteParams, {
-    prevPalette: newPaletteParams.colorStops ? undefined : activePalette.name,
-    dataBounds,
-  });
-  return mergePaletteParams(
-    { name: CUSTOM_PALETTE, type: 'palette' },
-    {
-      ...newPaletteParams,
-      stops,
-    }
-  );
-}
-
-export function applyPaletteParams(
-  palettes: PaletteRegistry,
-  activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number }
-) {
-  // make a copy of it as they have to be manipulated later on
-  let displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
-    dataBounds,
-  });
-
-  if (activePalette?.params?.reverse && displayStops) {
-    displayStops = reversePalette(displayStops);
-  }
-  return displayStops;
-}
-
-function getColorStops(
-  palettes: PaletteRegistry,
-  colorStops: Required<CustomPaletteParams>['stops'],
-  activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number }
-) {
-  // just forward the current stops if custom
-  if (activePalette?.name === CUSTOM_PALETTE) {
-    return colorStops;
-  }
-  // for predefined palettes create some stops, then drop the last one.
-  // we're using these as starting point for the user
-  let freshColorStops = getPaletteStops(
-    palettes,
-    { ...activePalette?.params },
-    // mapFromMinValue is a special flag to offset the stops values
-    // used here to avoid a new remap/left shift
-    { dataBounds, mapFromMinValue: true }
-  );
-  if (activePalette?.params?.reverse) {
-    freshColorStops = reversePalette(freshColorStops);
-  }
-  return freshColorStops;
-}
 
 export function CustomizablePalette({
   palettes,

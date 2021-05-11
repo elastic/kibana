@@ -5,13 +5,52 @@
  * 2.0.
  */
 
-import { isValidHex } from '@elastic/eui';
+import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { CustomPaletteParams } from '../../expression';
-import { ColorStop, defaultParams, DEFAULT_MAX_STOP, DEFAULT_MIN_STOP } from './constants';
+import {
+  CUSTOM_PALETTE,
+  defaultParams,
+  DEFAULT_COLOR_STEPS,
+  DEFAULT_MAX_STOP,
+  DEFAULT_MIN_STOP,
+} from './constants';
+import { CustomPaletteParams, ColorStop } from './types';
+
+/**
+ * Some name conventions here:
+ * * `displayStops` => It's an additional transformation of `stops` into a [0, N] domain for the EUIPaletteDisplay component.
+ * * `stops` => final steps used to table coloring. It is a rightShift of the colorStops
+ * * `colorStops` => user's color stop inputs.  Used to compute range min.
+ *
+ * When the user inputs the colorStops, they are designed to be the initial part of the color segment,
+ * so the next stops indicate where the previous stop ends.
+ * Both table coloring logic and EuiPaletteDisplay format implementation works differently than our current `colorStops`,
+ * by having the stop values at the end of each color segment rather than at the beginning: `stops` values are computed by a rightShift of `colorStops`.
+ * EuiPaletteDisplay has an additional requirement as it is always mapped against a domain [0, N]: from `stops` the `displayStops` are computed with
+ * some continuity enrichment and a remap against a [0, 100] domain to make the palette component work ok.
+ *
+ * These naming conventions would be useful to track the code flow in this feature as multiple transformations are happening
+ * for a single change.
+ */
+
+export function applyPaletteParams(
+  palettes: PaletteRegistry,
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  dataBounds: { min: number; max: number }
+) {
+  // make a copy of it as they have to be manipulated later on
+  let displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
+    dataBounds,
+  });
+
+  if (activePalette?.params?.reverse && displayStops) {
+    displayStops = reversePalette(displayStops);
+  }
+  return displayStops;
+}
 
 // Need to shift the Custom palette in order to correctly visualize it when in display mode
-export function shiftPalette(stops: ColorStop[], max: number) {
+function shiftPalette(stops: ColorStop[], max: number) {
   // shift everything right and add an additional stop at the end
   const result = stops.map((entry, i, array) => ({
     ...entry,
@@ -106,7 +145,7 @@ export function getPaletteStops(
   return stops;
 }
 
-export function reversePalette(paletteColorRepresentation: CustomPaletteParams['stops'] = []) {
+export function reversePalette(paletteColorRepresentation: ColorStop[] = []) {
   const stops = paletteColorRepresentation.map(({ stop }) => stop);
   return paletteColorRepresentation
     .map(({ color }, i) => ({
@@ -129,58 +168,112 @@ export function mergePaletteParams(
   };
 }
 
-// ControlStops are ColorStops with continuity values
-export function getControlStops(
-  colorStops: ColorStop[],
-  params: CustomPaletteParams,
-  { dataBounds }: { dataBounds: { min: number; max: number } }
-) {
-  const newStops: ColorStop[] = [];
-  const { min: minRef, max: maxRef } = getDataMinMax(params.rangeType, dataBounds);
-  const minStop = colorStops[0].stop;
-  if (minStop > minRef) {
-    if (params.continuity === 'below' || params.continuity === 'all') {
-      newStops.push({
-        color: colorStops[0].color,
-        stop: colorStops[0]?.stop || minRef,
-      });
-    }
-  }
-  newStops.push(...colorStops);
-  if (minStop < maxRef) {
-    if (params.continuity == null || params.continuity === 'above' || params.continuity === 'all') {
-      newStops.push({
-        color: colorStops[colorStops.length - 1].color,
-        stop: maxRef,
-      });
-    }
+function isValidPonyfill(colorString: string) {
+  // we're using an old version of chroma without the valid function
+  try {
+    chroma(colorString);
+    return true;
+  } catch (e) {
+    return false;
   }
 }
 
 export function isValidColor(colorString: string) {
-  return colorString !== '' && isValidHex(colorString);
-}
-
-function shouldRoundDigits(value: number) {
-  return !Number.isInteger(value);
+  // chroma can handle also hex values with alpha channel/transparency
+  // chroma accepts also hex without #, so test for it
+  return colorString !== '' && /^#/.test(colorString) && isValidPonyfill(colorString);
 }
 
 export function roundStopValues(colorStops: ColorStop[]) {
   return colorStops.map(({ color, stop }) => {
-    const roundedStop = shouldRoundDigits(stop) ? Number(stop.toFixed(2)) : stop;
+    const roundedStop = Number(stop.toFixed(2));
     return { color, stop: roundedStop };
   });
 }
 
+// very simple heuristic: pick last two stops and compute a new stop based on the same distance
+// if the new stop is above max, then reduce the step to reach max, or if zero then just 1.
+//
+// it accepts two series of stops as the function is used also when computing stops from colorStops
 export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[], max: number) {
   const length = newColorStops.length;
   // workout the steps from the last 2 items
   const dataStep = newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1;
-  let step = shouldRoundDigits(dataStep) ? Number(dataStep.toFixed(2)) : dataStep;
+  let step = Number(dataStep.toFixed(2));
   if (max < colorStops[length - 1].stop + step) {
     const diffToMax = max - colorStops[length - 1].stop;
     // if the computed step goes way out of bound, fallback to 1, otherwise reach max
     step = diffToMax > 0 ? diffToMax : 1;
   }
   return step;
+}
+
+export function getSwitchToCustomParams(
+  palettes: PaletteRegistry,
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  newParams: CustomPaletteParams,
+  dataBounds: { min: number; max: number }
+) {
+  // if it's already a custom palette just return the params
+  if (activePalette?.params?.name === CUSTOM_PALETTE) {
+    const stops = getPaletteStops(
+      palettes,
+      {
+        steps: DEFAULT_COLOR_STEPS,
+        ...activePalette.params,
+        ...newParams,
+      },
+      {
+        dataBounds,
+      }
+    );
+    return mergePaletteParams(activePalette, {
+      ...newParams,
+      stops,
+    });
+  }
+  // prepare everything to switch to custom palette
+  const newPaletteParams = {
+    steps: DEFAULT_COLOR_STEPS,
+    ...activePalette.params,
+    ...newParams,
+    name: CUSTOM_PALETTE,
+  };
+
+  const stops = getPaletteStops(palettes, newPaletteParams, {
+    prevPalette: newPaletteParams.colorStops ? undefined : activePalette.name,
+    dataBounds,
+  });
+  return mergePaletteParams(
+    { name: CUSTOM_PALETTE, type: 'palette' },
+    {
+      ...newPaletteParams,
+      stops,
+    }
+  );
+}
+
+export function getColorStops(
+  palettes: PaletteRegistry,
+  colorStops: Required<CustomPaletteParams>['stops'],
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  dataBounds: { min: number; max: number }
+) {
+  // just forward the current stops if custom
+  if (activePalette?.name === CUSTOM_PALETTE) {
+    return colorStops;
+  }
+  // for predefined palettes create some stops, then drop the last one.
+  // we're using these as starting point for the user
+  let freshColorStops = getPaletteStops(
+    palettes,
+    { ...activePalette?.params },
+    // mapFromMinValue is a special flag to offset the stops values
+    // used here to avoid a new remap/left shift
+    { dataBounds, mapFromMinValue: true }
+  );
+  if (activePalette?.params?.reverse) {
+    freshColorStops = reversePalette(freshColorStops);
+  }
+  return freshColorStops;
 }

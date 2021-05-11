@@ -28,7 +28,6 @@ import { ColumnState } from './visualization';
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
 import type { DatatableRender } from './components/types';
 import { transposeTable } from './transpose_helpers';
-import { ColorStop } from './components/coloring/constants';
 
 export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
   type: 'lens_datatable_column';
@@ -182,19 +181,6 @@ export const datatableColumn: ExpressionFunctionDefinition<
     };
   },
 };
-
-export interface CustomPaletteParams {
-  name?: string;
-  reverse?: boolean;
-  rangeType?: 'number' | 'percent';
-  continuity?: 'above' | 'below' | 'all' | 'none';
-  progression?: 'fixed';
-  rangeMin?: number;
-  rangeMax?: number;
-  stops?: ColorStop[];
-  colorStops?: ColorStop[];
-  steps?: number;
-}
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;

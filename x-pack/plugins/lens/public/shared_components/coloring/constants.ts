@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { CustomPaletteParams } from '../../expression';
-export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
-export interface ColorStop {
-  color: string;
-  stop: number;
-}
+import { RequiredPaletteParamTypes } from './types';
 
 export const DEFAULT_PALETTE_NAME = 'positive';
 export const FIXED_PROGRESSION = 'fixed' as const;

@@ -17,10 +17,11 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
 } from '@elastic/eui';
-import { ColorStop, DEFAULT_COLOR } from './constants';
+import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
-import { TooltipWrapper } from '../../../shared_components';
-import { useDebounceWithOptions } from '../../../indexpattern_datasource/operations/definitions/helpers';
+import { TooltipWrapper } from '../index';
+import { useDebounceWithOptions } from '../../indexpattern_datasource/operations/definitions/helpers';
+import { ColorStop } from './types';
 
 interface CustomPropsForm {
   colorStops: ColorStop[];
