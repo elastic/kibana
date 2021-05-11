@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
-import { AnySchema, internals } from '../internals';
+import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 import { ValidationError } from '../errors';
 

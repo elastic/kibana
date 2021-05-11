@@ -7,62 +7,18 @@
  */
 
 import Joi from 'joi';
-import type {
-  AnySchema,
-  JoiRoot,
-  Reference,
-  ExtensionRule,
-  SchemaLike,
-  CustomHelpers,
-  ValidationErrorItem,
-} from 'joi';
+import type { JoiRoot, CustomHelpers } from 'joi';
 import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
 import { Stream } from 'stream';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { ensureDuration } from '../duration';
 
-export { AnySchema, Reference, SchemaLike, ValidationErrorItem };
-
 function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;
 }
 
-const anyCustomRule: ExtensionRule = {
-  multi: true,
-  args: [
-    {
-      name: 'validator',
-      assert: Joi.func().maxArity(1).required(),
-    },
-  ],
-  method(validator) {
-    // @ts-expect-error $_ helpers not present on on the typedef
-    return this.$_addRule({ name: 'custom', args: { validator } });
-  },
-  validate(value, { error }, args, options) {
-    let validationResultMessage;
-    try {
-      validationResultMessage = args.validator(value);
-    } catch (e) {
-      validationResultMessage = e.message || e;
-    }
-
-    if (typeof validationResultMessage === 'string') {
-      return error('any.custom', { validator: args.validator });
-    }
-
-    return value;
-  },
-};
-
 export const internals: JoiRoot = Joi.extend(
-  {
-    type: 'any',
-    rules: {
-      custom: anyCustomRule,
-    },
-  },
   {
     type: 'boolean',
     base: Joi.boolean(),
@@ -95,9 +51,6 @@ export const internals: JoiRoot = Joi.extend(
         value,
       };
     },
-    rules: {
-      custom: anyCustomRule,
-    },
   },
   {
     type: 'binary',
@@ -112,13 +65,9 @@ export const internals: JoiRoot = Joi.extend(
 
       return { value };
     },
-    rules: {
-      custom: anyCustomRule,
-    },
   },
   {
     type: 'stream',
-
     prepare(value, { error }) {
       // If value isn't defined, let Joi handle default value if it's defined.
       if (value instanceof Stream) {
@@ -128,20 +77,9 @@ export const internals: JoiRoot = Joi.extend(
         errors: [error('stream.base')],
       };
     },
-    rules: {
-      custom: anyCustomRule,
-    },
-  },
-  {
-    type: 'string',
-    base: Joi.string(),
-    rules: {
-      custom: anyCustomRule,
-    },
   },
   {
     type: 'bytes',
-
     coerce(value: any, { error }) {
       try {
         if (typeof value === 'string') {
@@ -168,7 +106,6 @@ export const internals: JoiRoot = Joi.extend(
       };
     },
     rules: {
-      any: anyCustomRule,
       min: {
         args: [
           {
@@ -225,9 +162,6 @@ export const internals: JoiRoot = Joi.extend(
       }
       return { value };
     },
-    rules: {
-      custom: anyCustomRule,
-    },
   },
   {
     type: 'number',
@@ -253,9 +187,6 @@ export const internals: JoiRoot = Joi.extend(
 
       return { value };
     },
-    rules: {
-      custom: anyCustomRule,
-    },
   },
   {
     type: 'object',
@@ -278,9 +209,6 @@ export const internals: JoiRoot = Joi.extend(
       }
 
       return { errors: [error('object.base')] };
-    },
-    rules: {
-      custom: anyCustomRule,
     },
   },
   {
@@ -308,9 +236,6 @@ export const internals: JoiRoot = Joi.extend(
       return {
         errors: [error('array.base')],
       };
-    },
-    rules: {
-      custom: anyCustomRule,
     },
   },
   {
@@ -349,7 +274,6 @@ export const internals: JoiRoot = Joi.extend(
       return { value };
     },
     rules: {
-      custom: anyCustomRule,
       entries: {
         args: [
           {
@@ -412,7 +336,6 @@ export const internals: JoiRoot = Joi.extend(
       };
     },
     rules: {
-      custom: anyCustomRule,
       entries: {
         args: [
           {

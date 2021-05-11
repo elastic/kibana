@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ValidationErrorItem, AnySchema } from 'joi';
+import type { ValidationErrorItem, AnySchema, CustomValidator } from 'joi';
 import { SchemaTypeError, ValidationError } from '../errors';
 // import { internals } from '../internals';
 import { Reference } from '../references';
@@ -15,6 +15,25 @@ export interface TypeOptions<T> {
   defaultValue?: T | Reference<T> | (() => T);
   validate?: (value: T) => string | void;
 }
+
+const convertValidationFunction = <T>(
+  validate: (value: T) => string | void
+): CustomValidator<T> => {
+  return (value, { error }) => {
+    let validationResultMessage;
+    try {
+      validationResultMessage = validate(value);
+    } catch (e) {
+      validationResultMessage = e.message || e;
+    }
+
+    if (typeof validationResultMessage === 'string') {
+      return error('any.custom');
+    }
+
+    return value;
+  };
+};
 
 export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
@@ -48,7 +67,7 @@ export abstract class Type<V> {
     }
 
     if (options.validate) {
-      schema = schema.custom(options.validate);
+      schema = schema.custom(convertValidationFunction(options.validate));
     }
 
     // Attach generic error handler only if it hasn't been attached yet since
