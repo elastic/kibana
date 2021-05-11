@@ -22,6 +22,7 @@ import {
   TABLE_ROWS,
   THREAT_CONTENT,
   THREAT_DETAILS_VIEW,
+  THREAT_INTEL_TAB,
   THREAT_SUMMARY_VIEW,
   TITLE,
 } from '../../screens/alerts_details';
@@ -668,6 +669,7 @@ describe('indicator match', () => {
         expandFirstAlert();
         openThreatIndicatorDetails();
 
+        cy.get(THREAT_INTEL_TAB).should('have.text', 'Threat Intel (1)');
         cy.get(THREAT_DETAILS_VIEW).within(() => {
           cy.get(TABLE_ROWS).should('have.length', expectedThreatIndicatorData.length);
           expectedThreatIndicatorData.forEach((row, index) => {
