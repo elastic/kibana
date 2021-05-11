@@ -256,7 +256,10 @@ export interface QueryFilter {
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
-export type BulkCreate = <T>(docs: BaseHit<T>[], refresh: RefreshTypes) => Promise<GenericBulkCreateResponse<T>>;
+export type BulkCreate = <T>(
+  docs: Array<BaseHit<T>>,
+  refresh: RefreshTypes
+) => Promise<GenericBulkCreateResponse<T>>;
 
 export interface SearchAfterAndBulkCreateParams {
   tuples: Array<{
