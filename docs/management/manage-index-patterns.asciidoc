@@ -7,27 +7,21 @@ To customize the data fields in your index pattern, you can add runtime fields t
 [[runtime-fields]]
 === Explore your data with runtime fields 
 
-Runtime fields are fields that you add to documents after you've ingested, and are evaluated at query time. With runtime fields, you allow for a smaller index and 
-faster ingest time so that you can use less resources and reduce your operating costs. 
+Runtime fields are fields that you add to documents after you've ingested, and are evaluated at query time. With runtime fields, you allow for a smaller index and faster ingest time so that you can use less resources and reduce your operating costs. You can use runtime fields anywhere index patterns are used.
 
 When you use runtime fields, you can:
 
-* Add fields to existing documents without reindexing your data. 
-
-* Start working on your data without first understanding the structure. 
+* Define fields for a specific use without modifying the underlying schema. 
 
 * Override the returned values from index fields.
 
-* Define fields for a specific use without modifying the underlying schema. 
+* Start working on your data without first understanding the structure. 
 
-You can view runtime field data in *Discover*, create visualizations with runtime fields using the visualization editors, and create alerts for runtime fields. 
+* Add fields to existing documents without reindexing your data. 
 
-The following visualization editors support runtime fields:
+* Explore runtime field data in *Discover*.
 
-* *Lens*
-* *Maps*
-* *TSVB*
-* *Aggregation-based*
+* Create visualizations with runtime field data using *Lens*. 
 
 WARNING: Runtime fields can impact {kib} performance. When you run a query, {es} uses the fields you index first to shorten the response time. 
 Index the fields that you commonly search for and filter on, such as `timestamp`, then use runtime fields to limit the number of fields {es} uses to calculate values. 
