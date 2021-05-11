@@ -569,15 +569,11 @@
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "spacesOss",
-            "id": "def-public.SpacesApi.activeSpace$",
-            "type": "Object",
-            "tags": [],
-            "label": "activeSpace$",
-            "description": [
-              "\nObservable representing the currently active space.\nThe details of the space can change without a full page reload (such as display name, color, etc.)"
-            ],
+            "id": "def-public.SpacesApi.getActiveSpace$",
+            "type": "Function",
+            "label": "getActiveSpace$",
             "signature": [
+              "() => ",
               "Observable",
               "<",
               {
@@ -589,11 +585,16 @@
               },
               ">"
             ],
+            "description": [
+              "\nObservable representing the currently active space.\nThe details of the space can change without a full page reload (such as display name, color, etc.)"
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
               "lineNumber": 22
-            },
-            "deprecated": false
+            }
           },
           {
             "parentPluginId": "spacesOss",
