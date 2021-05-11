@@ -364,6 +364,9 @@ export const getFailingRules = async (
         };
       }, {});
   } catch (exc) {
+    if (Boom.isBoom(exc)) {
+      throw exc;
+    }
     throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
   }
 };
