@@ -228,6 +228,7 @@ const getSavedObjectTypes = (
             version: { type: 'keyword' },
           },
         },
+        vars: { type: 'flattened' },
         inputs: {
           type: 'nested',
           enabled: false,
