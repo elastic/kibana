@@ -108,7 +108,7 @@ describe('state_helpers', () => {
           formula: 'moving_average(sum(bytes), window=5)',
           isFormulaBroken: false,
         },
-        references: ['formulaX1'],
+        references: ['formulaX3'],
       };
       const math = {
         customLabel: true,
@@ -135,7 +135,7 @@ describe('state_helpers', () => {
         label: 'formulaX2',
         operationType: 'moving_average' as const,
         params: { window: 5 },
-        references: ['formulaX0'],
+        references: ['formulaX1'],
       };
       expect(
         copyColumn({
@@ -1537,6 +1537,83 @@ describe('state_helpers', () => {
         });
         expect(layer.columns.output).toEqual(
           expect.objectContaining({ references: ['ref1', 'invalid'] })
+        );
+      });
+
+      it('should transition from managedReference to fullReference by deleting the managedReference', () => {
+        const math = {
+          customLabel: true,
+          dataType: 'number' as const,
+          isBucketed: false,
+          label: 'math',
+          operationType: 'math' as const,
+        };
+        const layer: IndexPatternLayer = {
+          indexPatternId: '',
+          columnOrder: [],
+          columns: {
+            source: {
+              dataType: 'number' as const,
+              isBucketed: false,
+              label: 'Formula',
+              operationType: 'formula' as const,
+              params: {
+                formula: 'moving_average(sum(bytes), window=5)',
+                isFormulaBroken: false,
+              },
+              references: ['formulaX3'],
+            },
+            formulaX0: {
+              customLabel: true,
+              dataType: 'number' as const,
+              isBucketed: false,
+              label: 'formulaX0',
+              operationType: 'sum' as const,
+              scale: 'ratio' as const,
+              sourceField: 'bytes',
+            },
+            formulaX1: {
+              ...math,
+              label: 'formulaX1',
+              references: ['formulaX0'],
+              params: { tinymathAst: 'formulaX0' },
+            },
+            formulaX2: {
+              customLabel: true,
+              dataType: 'number' as const,
+              isBucketed: false,
+              label: 'formulaX2',
+              operationType: 'moving_average' as const,
+              params: { window: 5 },
+              references: ['formulaX1'],
+            },
+            formulaX3: {
+              ...math,
+              label: 'formulaX3',
+              references: ['formulaX2'],
+              params: { tinymathAst: 'formulaX2' },
+            },
+          },
+        };
+
+        expect(
+          replaceColumn({
+            layer,
+            indexPattern,
+            columnId: 'source',
+            // @ts-expect-error not statically available
+            op: 'secondTest',
+          })
+        ).toEqual(
+          expect.objectContaining({
+            columnOrder: ['source'],
+            columns: {
+              source: expect.objectContaining({
+                operationType: 'secondTest',
+                references: ['id1'],
+              }),
+            },
+          })
         );
       });
 

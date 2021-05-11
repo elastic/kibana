@@ -351,6 +351,19 @@ export function replaceColumn({
 
     tempLayer = resetIncomplete(tempLayer, columnId);
 
+    if (previousDefinition.input === 'managedReference') {
+      // Every transition away from a managedReference resets it, we don't have a way to keep the state
+      tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
+      return insertNewColumn({
+        layer: tempLayer,
+        columnId,
+        indexPattern,
+        op,
+        field,
+        visualizationGroups,
+      });
+    }
+
     if (operationDefinition.input === 'fullReference') {
       return applyReferenceTransition({
         layer: tempLayer,

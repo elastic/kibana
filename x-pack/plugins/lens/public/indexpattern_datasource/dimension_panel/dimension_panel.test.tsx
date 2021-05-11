@@ -388,6 +388,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
     );
   });
 
+  it('should not display hidden operation types', () => {
+    wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
+
+    const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
+
+    expect(items.find(({ id }) => id === 'math')).toBeUndefined();
+    expect(items.find(({ id }) => id === 'formula')).toBeUndefined();
+  });
+
   it('should indicate that reference-based operations are not compatible when they are incomplete', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent
