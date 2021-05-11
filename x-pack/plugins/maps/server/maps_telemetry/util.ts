@@ -64,6 +64,13 @@ export enum TELEMETRY_SCALING_OPTIONS {
   CLUSTERS = 'clusters',
 }
 
+export enum TELEMETRY_GRID_RESOLUTION {
+  COARSE = 'coarse',
+  FINE = 'fine',
+  FINEST = 'finest',
+  SUPER_FINE = 'super_fine',
+}
+
 export type TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER = {
   [key in TELEMETRY_SCALING_OPTIONS]?: ClusterCountStats;
 };
