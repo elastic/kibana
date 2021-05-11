@@ -62,10 +62,9 @@ export function mapNodesVersionCompatibility(
   nodesInfo: NodesInfo,
   kibanaVersion: string,
   ignoreVersionMismatch: boolean,
-  nodesInfoError?: UnauthorizedError | Error // we probably need to check the type of ES error thrown: ResponseError, UnauthorizedError
+  nodesInfoError?: UnauthorizedError | Error
 ): NodesVersionCompatibility {
   if (Object.keys(nodesInfo.nodes ?? {}).length === 0 && nodesInfoError) {
-    // TINA: We return directly from here
     return {
       isCompatible: false,
       message: `Unable to retrieve version information from Elasticsearch nodes: ${nodesInfoError.message}`,
@@ -116,7 +115,8 @@ export function mapNodesVersionCompatibility(
     kibanaVersion,
   };
 }
-// TINA: Is this needed?
+// Returns true if NodesVersionCompatibility entries' messages contain an es error and the error is the same
+// Returns true if neither message contains an error, handing off the compatibility check to the other conditions
 function compareNodesInfoErrorMessages(
   prev: NodesVersionCompatibility,
   curr: NodesVersionCompatibility
@@ -124,14 +124,10 @@ function compareNodesInfoErrorMessages(
   const messageIsErrorCase = (str: string = '') =>
     str.startsWith('Unable to retrieve version information from Elasticsearch nodes: ');
   if (messageIsErrorCase(prev.message) && messageIsErrorCase(curr.message)) {
-    // both emissions are of an error case and we check if it's the same error
     return prev.message === curr.message;
   } else if (!messageIsErrorCase(prev.message) && !messageIsErrorCase(curr.message)) {
-    // neither is an error case and we let the other conditional checks take over
     return true;
   }
-  // if one of them is an error, and the other is not, then we
-  // know we need to emit because something changed
   return false;
 }
 // Returns true if two NodesVersionCompatibility entries match
@@ -143,7 +139,6 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
     curr.warningNodes.length === prev.warningNodes.length &&
     curr.incompatibleNodes.every((node, i) => nodesEqual(node, prev.incompatibleNodes[i])) &&
     curr.warningNodes.every((node, i) => nodesEqual(node, prev.warningNodes[i])) &&
-    // TINA: This should be simplified
     compareNodesInfoErrorMessages(curr, prev)
   );
 }
@@ -166,7 +161,6 @@ export const pollEsNodesVersion = ({
       ).pipe(
         map(({ body }) => body),
         catchError((_err) => {
-          // TODO: check if this is needed or if it can be improved -> we probably need to check the type of error that's returned here
           if (isUnauthorizedError(_err)) {
             nodesInfoError = _err as UnauthorizedError;
           } else {
