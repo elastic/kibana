@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const SEARCH_UI_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.searchUI.title',
-  { defaultMessage: 'Search UI' }
-);
+export { LicenseService } from './license';

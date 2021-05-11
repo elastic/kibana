@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { LicenseService } from '../../../common/license/license';
-
-export const licenseService = new LicenseService();
+export { ChoroplethMap } from './choropleth_map';

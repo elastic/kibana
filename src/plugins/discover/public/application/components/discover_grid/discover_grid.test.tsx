@@ -124,6 +124,33 @@ describe('DiscoverGrid', () => {
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 
+    test('showing selected documents, underlying data changes, all documents are displayed, selection is gone', async () => {
+      await toggleDocSelection(component, esHits[0]);
+      await toggleDocSelection(component, esHits[1]);
+      expect(getSelectedDocNr(component)).toBe(2);
+      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
+      expect(getDisplayedDocNr(component)).toBe(2);
+      component.setProps({
+        rows: [
+          {
+            _index: 'i',
+            _id: '6',
+            _score: 1,
+            _type: '_doc',
+            _source: {
+              date: '2020-20-02T12:12:12.128',
+              name: 'test6',
+              extension: 'doc',
+              bytes: 50,
+            },
+          },
+        ],
+      });
+      expect(getDisplayedDocNr(component)).toBe(1);
+      expect(getSelectedDocNr(component)).toBe(0);
+    });
+
     test('showing only selected documents and remove filter deselecting each doc manually', async () => {
       await toggleDocSelection(component, esHits[0]);
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
