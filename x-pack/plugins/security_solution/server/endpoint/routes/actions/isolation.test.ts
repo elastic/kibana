@@ -6,12 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
-  ILegacyClusterClient,
-  KibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from 'kibana/server';
+import { KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
