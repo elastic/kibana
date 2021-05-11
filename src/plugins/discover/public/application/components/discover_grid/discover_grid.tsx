@@ -168,9 +168,8 @@ export const DiscoverGrid = ({
     if (!selectedDocs.length || !rows?.length) {
       return [];
     }
-    const idMap = rows.reduce((prev, row) => {
-      return prev.set(getDocId(row), true);
-    }, new Map());
+    const idMap = rows.reduce((map, row) => map.set(getDocId(row), true), new Map());
+    // filter out selected docs that are no longer part of the current data
     const result = selectedDocs.filter((docId) => idMap.get(docId));
     if (result.length === 0 && isFilterActive) {
       setIsFilterActive(false);
@@ -189,9 +188,8 @@ export const DiscoverGrid = ({
     if (!rowsFiltered.length) {
       // in case the selected docs are no longer part of the sample of 500, show all docs
       return rows;
-    } else {
-      return rowsFiltered;
     }
+    return rowsFiltered;
   }, [rows, usedSelectedDocs, isFilterActive]);
 
   /**
