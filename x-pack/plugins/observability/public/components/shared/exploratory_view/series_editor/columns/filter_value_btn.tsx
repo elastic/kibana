@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_url_storage';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
@@ -37,7 +37,7 @@ export function FilterValueButton({
   nestedField,
   allSelectedValues,
 }: Props) {
-  const { series } = useUrlStorage(seriesId);
+  const { series } = useSeriesStorage(seriesId);
 
   const { indexPattern } = useAppIndexPatternContext();
 

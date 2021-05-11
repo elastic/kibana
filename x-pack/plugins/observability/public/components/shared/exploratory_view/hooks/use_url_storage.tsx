@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import type {
   AppDataType,
@@ -18,7 +18,16 @@ import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
 
-export const UrlStorageContext = createContext<IKbnUrlStateStorage | null>(null);
+interface ContextValue {
+  firstSeries: SeriesUrl;
+  firstSeriesId: string;
+  allSeriesIds: string[];
+  allSeries: AllSeries;
+  setSeries: (seriesIdN: string, newValue: SeriesUrl) => void;
+  getSeries: (seriesId: string) => SeriesUrl;
+  removeSeries: (seriesId: string) => void;
+}
+export const UrlStorageContext = createContext<ContextValue>({} as ContextValue);
 
 interface ProviderProps {
   storage: IKbnUrlStateStorage;
@@ -28,7 +37,62 @@ export function UrlStorageContextProvider({
   children,
   storage,
 }: ProviderProps & { children: JSX.Element }) {
-  return <UrlStorageContext.Provider value={storage}>{children}</UrlStorageContext.Provider>;
+  // const allSeriesKey = 'sr';
+  // const [series, updateSeries] = useState({} as SeriesUrl);
+
+  // const allShortSeries = storage.get<AllShortSeries>(allSeriesKey) ?? {};
+
+  const [allShortSeries, setAllShortSeries] = useState<AllShortSeries>({});
+  const [allSeries, setAllSeries] = useState<AllSeries>({});
+  const [firstSeriesId, setFirstSeriesId] = useState('');
+
+  useEffect(() => {
+    const allSeriesIds = Object.keys(allShortSeries);
+    const allseriesN: AllSeries = {};
+    allSeriesIds.forEach((seriesKey) => {
+      allseriesN[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
+    });
+
+    setAllSeries(allseriesN);
+    setFirstSeriesId(allSeriesIds?.[0]);
+  }, [allShortSeries]);
+
+  const setSeries = (seriesIdN: string, newValue: SeriesUrl) => {
+    setAllShortSeries((prevState) => {
+      prevState[seriesIdN] = convertToShortUrl(newValue);
+      return { ...prevState };
+    });
+  };
+
+  const removeSeries = (seriesIdN: string) => {
+    delete allShortSeries[seriesIdN];
+    delete allSeries[seriesIdN];
+  };
+
+  const allSeriesIds = Object.keys(allShortSeries);
+
+  const getSeries = useCallback(
+    (seriesId?: string) => {
+      return seriesId ? allSeries?.[seriesId] ?? {} : ({} as SeriesUrl);
+    },
+    [allSeries]
+  );
+
+  const value = {
+    storage,
+    getSeries,
+    setSeries,
+    removeSeries,
+    firstSeriesId,
+    allSeries,
+    allSeriesIds,
+    firstSeries: allSeries?.[firstSeriesId],
+  };
+  return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;
+}
+
+export function useSeriesStorage() {
+  return useContext(UrlStorageContext);
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
@@ -64,47 +128,3 @@ export type AllShortSeries = Record<string, ShortUrlSeries>;
 export type AllSeries = Record<string, SeriesUrl>;
 
 export const NEW_SERIES_KEY = 'new-series-key';
-
-export function useUrlStorage(seriesId?: string) {
-  const allSeriesKey = 'sr';
-  const storage = useContext((UrlStorageContext as unknown) as Context<IKbnUrlStateStorage>);
-  let series: SeriesUrl = {} as SeriesUrl;
-  const allShortSeries = storage.get<AllShortSeries>(allSeriesKey) ?? {};
-
-  const allSeriesIds = Object.keys(allShortSeries);
-
-  const allSeries: AllSeries = {};
-
-  allSeriesIds.forEach((seriesKey) => {
-    allSeries[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
-  });
-
-  if (seriesId) {
-    series = allSeries?.[seriesId] ?? ({} as SeriesUrl);
-  }
-
-  const setSeries = async (seriesIdN: string, newValue: SeriesUrl) => {
-    allShortSeries[seriesIdN] = convertToShortUrl(newValue);
-    allSeries[seriesIdN] = newValue;
-    return storage.set(allSeriesKey, allShortSeries);
-  };
-
-  const removeSeries = (seriesIdN: string) => {
-    delete allShortSeries[seriesIdN];
-    delete allSeries[seriesIdN];
-    storage.set(allSeriesKey, allShortSeries);
-  };
-
-  const firstSeriesId = allSeriesIds?.[0];
-
-  return {
-    storage,
-    setSeries,
-    removeSeries,
-    series,
-    firstSeriesId,
-    allSeries,
-    allSeriesIds,
-    firstSeries: allSeries?.[firstSeriesId],
-  };
-}

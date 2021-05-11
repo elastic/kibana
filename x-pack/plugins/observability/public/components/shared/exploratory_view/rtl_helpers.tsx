@@ -282,7 +282,7 @@ export const mockUrlStorage = ({
   const removeSeries = jest.fn();
   const setSeries = jest.fn();
 
-  const spy = jest.spyOn(useUrlHook, 'useUrlStorage').mockReturnValue({
+  const spy = jest.spyOn(useUrlHook, 'useSeriesStorage').mockReturnValue({
     firstSeriesId,
     allSeriesIds,
     removeSeries,

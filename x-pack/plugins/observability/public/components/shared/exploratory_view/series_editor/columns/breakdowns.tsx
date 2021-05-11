@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldLabels } from '../../configurations/constants';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { useSeriesStorage } from '../../hooks/use_url_storage';
 
 interface Props {
   seriesId: string;
@@ -17,7 +17,9 @@ interface Props {
 }
 
 export function Breakdowns({ seriesId, breakdowns = [] }: Props) {
-  const { setSeries, series } = useUrlStorage(seriesId);
+  const { setSeries, getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const selectedBreakdown = series.breakdown;
   const NO_BREAKDOWN = 'no_breakdown';

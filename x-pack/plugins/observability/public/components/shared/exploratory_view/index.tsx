@@ -17,11 +17,17 @@ import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
+  createSessionStorageStateStorage,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { UrlStorageContextProvider } from './hooks/use_url_storage';
 import { useTrackPageview } from '../../..';
 
-export function ExploratoryViewPage() {
+export function ExploratoryViewPage({
+  saveAttributes,
+  useSessionStorage = true,
+}: {
+  useSessionStorage?: boolean;
+}) {
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view', delay: 15000 });
 
@@ -39,17 +45,19 @@ export function ExploratoryViewPage() {
 
   const history = useHistory();
 
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: uiSettings!.get('state:storeInSessionStorage'),
-    ...withNotifyOnErrors(notifications!.toasts),
-  });
+  const kbnUrlStateStorage = useSessionStorage
+    ? createSessionStorageStateStorage()
+    : createKbnUrlStateStorage({
+        history,
+        useHash: uiSettings!.get('state:storeInSessionStorage'),
+        ...withNotifyOnErrors(notifications!.toasts),
+      });
 
   return (
     <Wrapper>
       <IndexPatternContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-          <ExploratoryView />
+          <ExploratoryView saveAttributes={saveAttributes} />
         </UrlStorageContextProvider>
       </IndexPatternContextProvider>
     </Wrapper>
