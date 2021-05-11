@@ -7,6 +7,7 @@
 
 {kib} supports the following authentication mechanisms:
 
+- <<multiple-authentication-providers>>
 - <<basic-authentication>>
 - <<token-authentication>>
 - <<pki-authentication>>
@@ -16,7 +17,12 @@
 - <<anonymous-authentication>>
 - <<http-authentication>>
 
-Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
+For an introduction to {kib}'s security features, including the login process, refer to <<tutorial-secure-access-to-kibana>>.
+
+[[multiple-authentication-providers]]
+==== Multiple authentication providers
+
+Enable multiple authentication mechanisms at the same time by specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
 
 When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the `order` setting. The appearance of the specific provider entry can be customized with the `description`, `hint`, and `icon` settings.
 
