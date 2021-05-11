@@ -7,7 +7,6 @@
  */
 
 import uuid from 'uuid';
-import { of } from 'rxjs';
 import { ISearchStrategy } from '../../../src/plugins/data/server';
 import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
@@ -15,56 +14,39 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
   FibonacciRequest,
   FibonacciResponse
 > => {
-  const responseMap = new Map<string, [number, number, number]>();
-  return {
-    search: (request) => {
-      return of({
-        id: uuid(),
-        loaded: 1,
-        total: 1,
-        isRunning: true,
-        isPartial: false,
-        rawResponse: { took: 100, values: fibonacci(request.params?.n) },
-      });
-      // const search = async () => {
-      //   const id = request.id ?? uuid();
-      //   const [prevLoaded, total, started] = responseMap.get(id) ?? [
-      //     0,
-      //     request.params?.n!,
-      //     Date.now(),
-      //   ];
-      //   const loaded = prevLoaded + 1;
-      //   const sequence = fibonacci(loaded);
-      //   if (loaded < total) {
-      //     responseMap.set(id, [loaded, total, started]);
-      //   } else {
-      //     responseMap.delete(id);
-      //   }
-      //
-      //   const isRunning = loaded < total;
-      //   const isPartial = isRunning;
-      //   const took = Date.now() - started;
-      //   const values = sequence.slice(0, loaded);
-      //
-      //   return { id, loaded, total, isRunning, isPartial, rawResponse: { took, values } };
-      // };
-      // return from(search());
+  const responseMap = new Map<string, [number[], number, number]>();
+  return ({
+    search: (request: FibonacciRequest) => {
+      const id = request.id ?? uuid();
+      const [sequence, total, started] = responseMap.get(id) ?? [
+        [],
+        request.params?.n ?? 0,
+        Date.now(),
+      ];
+      if (sequence.length < 2) {
+        if (total > 0) sequence.push(sequence.length);
+      } else {
+        const [a, b] = sequence.slice(-2);
+        sequence.push(a + b);
+      }
+      const loaded = sequence.length;
+      responseMap.set(id, [sequence, total, started]);
+      if (loaded >= total) {
+        responseMap.delete(id);
+      }
+
+      const isRunning = loaded < total;
+      const isPartial = isRunning;
+      const took = Date.now() - started;
+      const values = sequence.slice(0, loaded);
+
+      // Usually we'd do something like "of()" but for some reason it breaks in tests with the error
+      // "You provided an invalid object where a stream was expected." which is why we have to cast
+      // down below as well
+      return [{ id, loaded, total, isRunning, isPartial, rawResponse: { took, values } }];
     },
-    cancel: async (id, options, deps) => {
+    cancel: async (id: string) => {
       responseMap.delete(id);
     },
-  };
+  } as unknown) as ISearchStrategy<FibonacciRequest, FibonacciResponse>;
 };
-
-function fibonacci(n = 0) {
-  return Array(n)
-    .fill(null)
-    .reduce((arr, _, i) => {
-      if (i < 2) {
-        arr.push(i);
-      } else {
-        arr.push(arr[i - 1] + arr[i - 2]);
-      }
-      return arr;
-    }, []);
-}
