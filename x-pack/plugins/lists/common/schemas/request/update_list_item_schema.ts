@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { id, meta } from '@kbn/securitysolution-io-ts-utils';
 
-import { _version, id, meta, value } from '../common/schemas';
+import { _version, value } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const updateListItemSchema = t.intersection([

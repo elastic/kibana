@@ -6,15 +6,18 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  UpdateExceptionListItemSchema,
+} from '../../../../shared_imports';
 import { Immutable } from '../../../../../common/endpoint/types';
-import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
 
-export interface EventFiltersService {
-  addEventFilters(
-    exception: Immutable<ExceptionListItemSchema | CreateExceptionListItemSchema>
-  ): Promise<ExceptionListItemSchema>;
-}
+import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
+import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
+import { EventFiltersService } from '../types';
+
 export class EventFiltersHttpService implements EventFiltersService {
   private listHasBeenCreated: boolean;
 
@@ -27,6 +30,7 @@ export class EventFiltersHttpService implements EventFiltersService {
       await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
         body: JSON.stringify(EVENT_FILTER_LIST),
       });
+      this.listHasBeenCreated = true;
     } catch (err) {
       // Ignore 409 errors. List already created
       if (err.response.status === 409) this.listHasBeenCreated = true;
@@ -39,8 +43,49 @@ export class EventFiltersHttpService implements EventFiltersService {
     return this.http;
   }
 
+  async getList({
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+  }: Partial<{
+    page: number;
+    perPage: number;
+    sortField: string;
+    sortOrder: string;
+  }> = {}): Promise<FoundExceptionListItemSchema> {
+    const http = await this.httpWrapper();
+    return http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+      query: {
+        page,
+        per_page: perPage,
+        sort_field: sortField,
+        sort_order: sortOrder,
+        list_id: [ENDPOINT_EVENT_FILTERS_LIST_ID],
+        namespace_type: ['agnostic'],
+      },
+    });
+  }
+
   async addEventFilters(exception: ExceptionListItemSchema | CreateExceptionListItemSchema) {
     return (await this.httpWrapper()).post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      body: JSON.stringify(exception),
+    });
+  }
+
+  async getOne(id: string) {
+    return (await this.httpWrapper()).get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      query: {
+        id,
+        namespace_type: 'agnostic',
+      },
+    });
+  }
+
+  async updateOne(
+    exception: Immutable<UpdateExceptionListItemSchema>
+  ): Promise<ExceptionListItemSchema> {
+    return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });
   }
