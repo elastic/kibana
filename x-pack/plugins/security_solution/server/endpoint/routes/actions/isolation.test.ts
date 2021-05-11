@@ -78,8 +78,8 @@ describe('Host Isolation', () => {
 
   beforeEach(() => {
     // instantiate... everything
-    const mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<ILegacyClusterClient>;
+    const mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     const routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
