@@ -83,14 +83,14 @@ export class HeadlessChromiumDriverFactory {
         } as puppeteer.LaunchOptions);
 
         page = await browser.newPage();
-        await page.emulateTimezone(browserTimezone ?? null);
+        await page.emulateTimezone(browserTimezone);
 
         // Log version info for debugging / maintenance
         const client = await page.target().createCDPSession();
         const versionInfo = await client.send('Browser.getVersion');
         logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
 
-        await page.emulateTimezone(browserTimezone ?? null);
+        await page.emulateTimezone(browserTimezone);
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
@@ -174,7 +174,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<puppeteer.Request>(page, 'requestfailed').pipe(
+    const pageRequestFailed$ = Rx.fromEvent<puppeteer.HTTPRequest>(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
