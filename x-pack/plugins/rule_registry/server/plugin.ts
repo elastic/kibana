@@ -11,6 +11,7 @@ import { SpacesPluginStart } from '../../spaces/server';
 import { RuleRegistryPluginConfig } from './config';
 import { RuleDataPluginService } from './rule_data_plugin_service';
 import { EventLogService, IEventLogService } from './event_log';
+import { testEventLogImplementation } from './event_log/test_implementation';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface RuleRegistryPluginSetupDependencies {}
@@ -90,6 +91,8 @@ export class RuleRegistryPlugin
         logger: this.logger.get('eventLog'),
       },
     });
+
+    testEventLogImplementation(this.eventLogService, this.logger);
 
     return {
       eventLogService: this.eventLogService,
