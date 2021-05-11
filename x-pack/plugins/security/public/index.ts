@@ -14,6 +14,9 @@ export { SecurityPluginSetup, SecurityPluginStart };
 export { AuthenticatedUser } from '../common/model';
 export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
 export { UserMenuLink } from '../public/nav_control';
+export { UserAPIClient } from './management';
+export { PersonalInfo } from './account_management/personal_info';
+export { ChangePassword } from './account_management/change_password';
 
 export const plugin: PluginInitializer<
   SecurityPluginSetup,
