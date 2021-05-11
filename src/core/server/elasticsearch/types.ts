@@ -36,6 +36,7 @@ export interface ElasticsearchServiceSetup {
     readonly config$: Observable<ElasticsearchConfig>;
     /**
      * @deprecated
+     * @removeBy 7.16
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.createClient} instead.
      *
      * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
@@ -60,6 +61,7 @@ export interface ElasticsearchServiceSetup {
     ) => ILegacyCustomClusterClient;
 
     /**
+     * @removeBy 7.16
      * @deprecated
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.client} instead.
      *
@@ -131,6 +133,9 @@ export interface ElasticsearchServiceStart {
     /**
      * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
      *
+     * @deprecated
+     * @removeBy 7.16
+     *
      * @param type Unique identifier of the client
      * @param clientConfig A config consists of Elasticsearch JS client options and
      * valid sub-set of Elasticsearch service config.
@@ -152,6 +157,9 @@ export interface ElasticsearchServiceStart {
 
     /**
      * A pre-configured {@link ILegacyClusterClient | legacy Elasticsearch client}.
+     *
+     * @deprecated
+     * @removeBy 7.16
      *
      * @example
      * ```js
