@@ -150,3 +150,117 @@ export const roles = [
   observabilityOnlyAll,
   observabilityOnlyRead,
 ];
+
+/**
+ * These roles have access to all spaces.
+ */
+
+export const securitySolutionOnlyAllSpacesAll: Role = {
+  name: 'sec_only_all',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadSpacesAll: Role = {
+  name: 'sec_only_read',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['read'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const observabilityOnlyAllSpacesAll: Role = {
+  name: 'obs_only_all',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          observabilityFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const observabilityOnlyReadSpacesAll: Role = {
+  name: 'obs_only_read',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          observabilityFixture: ['read'],
+          actions: ['read'],
+          actionsSimulators: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+/**
+ * These roles are specifically for the security_only tests where the spaces plugin is disabled. Most of the roles (except
+ * for noKibanaPrivileges) have spaces: ['*'] effectively giving it access to the default space since no other spaces
+ * will exist when the spaces plugin is disabled.
+ */
+export const rolesDefaultSpace = [
+  noKibanaPrivileges,
+  globalRead,
+  securitySolutionOnlyAllSpacesAll,
+  securitySolutionOnlyReadSpacesAll,
+  observabilityOnlyAllSpacesAll,
+  observabilityOnlyReadSpacesAll,
+];
