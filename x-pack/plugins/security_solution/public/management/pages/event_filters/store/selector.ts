@@ -212,3 +212,12 @@ export const wasDeletionSuccessful: EventFiltersSelector<boolean> = createSelect
     return isLoadedResourceState(status);
   }
 );
+
+export const getDeleteError: EventFiltersSelector<ServerApiError | undefined> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    if (isFailedResourceState(status)) {
+      return status.error;
+    }
+  }
+);
