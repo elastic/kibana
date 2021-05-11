@@ -20,8 +20,12 @@ import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
 import { SchemaLogic } from '../schema_logic';
 
 export const Schema: React.FC = () => {
-  const { loadSchema, addSchemaField, openModal, closeModal } = useActions(SchemaLogic);
-  const { dataLoading, isUpdating, hasSchema, isModalOpen } = useValues(SchemaLogic);
+  const { loadSchema, updateSchema, addSchemaField, openModal, closeModal } = useActions(
+    SchemaLogic
+  );
+  const { dataLoading, isUpdating, hasSchema, hasSchemaChanged, isModalOpen } = useValues(
+    SchemaLogic
+  );
 
   useEffect(() => {
     loadSchema();
@@ -40,7 +44,13 @@ export const Schema: React.FC = () => {
           { defaultMessage: 'Add new fields or change the types of existing ones.' }
         )}
         rightSideItems={[
-          <EuiButton fill>
+          <EuiButton
+            fill
+            disabled={!hasSchemaChanged}
+            isLoading={isUpdating}
+            onClick={() => updateSchema()}
+            data-test-subj="updateSchemaButton"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.schema.updateSchemaButtonLabel',
               { defaultMessage: 'Update types' }
