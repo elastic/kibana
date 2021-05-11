@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { from } from 'rxjs';
+import { of } from 'rxjs';
 import { ISearchStrategy } from '../../../src/plugins/data/server';
 import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
@@ -18,29 +18,37 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
   const responseMap = new Map<string, [number, number, number]>();
   return {
     search: (request) => {
-      const search = async () => {
-        const id = request.id ?? uuid();
-        const [prevLoaded, total, started] = responseMap.get(id) ?? [
-          0,
-          request.params?.n!,
-          Date.now(),
-        ];
-        const loaded = prevLoaded + 1;
-        const sequence = fibonacci(loaded);
-        if (loaded < total) {
-          responseMap.set(id, [loaded, total, started]);
-        } else {
-          responseMap.delete(id);
-        }
-
-        const isRunning = loaded < total;
-        const isPartial = isRunning;
-        const took = Date.now() - started;
-        const values = sequence.slice(0, loaded);
-
-        return { id, loaded, total, isRunning, isPartial, rawResponse: { took, values } };
-      };
-      return from(search());
+      return of({
+        id: uuid(),
+        loaded: 1,
+        total: 1,
+        isRunning: true,
+        isPartial: false,
+        rawResponse: { took: 100, values: fibonacci(request.params?.n) },
+      });
+      // const search = async () => {
+      //   const id = request.id ?? uuid();
+      //   const [prevLoaded, total, started] = responseMap.get(id) ?? [
+      //     0,
+      //     request.params?.n!,
+      //     Date.now(),
+      //   ];
+      //   const loaded = prevLoaded + 1;
+      //   const sequence = fibonacci(loaded);
+      //   if (loaded < total) {
+      //     responseMap.set(id, [loaded, total, started]);
+      //   } else {
+      //     responseMap.delete(id);
+      //   }
+      //
+      //   const isRunning = loaded < total;
+      //   const isPartial = isRunning;
+      //   const took = Date.now() - started;
+      //   const values = sequence.slice(0, loaded);
+      //
+      //   return { id, loaded, total, isRunning, isPartial, rawResponse: { took, values } };
+      // };
+      // return from(search());
     },
     cancel: async (id, options, deps) => {
       responseMap.delete(id);
