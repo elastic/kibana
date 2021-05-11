@@ -29,7 +29,7 @@ import type {
   HeatmapRender,
   LegendConfigResult,
 } from './types';
-import { LegendConfig } from './types';
+import { HeatmapLegendConfig } from './types';
 import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { HeatmapChartReportable } from './chart_component';
 
@@ -125,7 +125,7 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
 export const heatmapLegendConfig: ExpressionFunctionDefinition<
   typeof LEGEND_FUNCTION,
   null,
-  LegendConfig,
+  HeatmapLegendConfig,
   LegendConfigResult
 > = {
   name: LEGEND_FUNCTION,

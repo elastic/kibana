@@ -56,7 +56,7 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   formatFactory: FormatFactory;
 };
 
-export interface LegendConfig {
+export interface HeatmapLegendConfig {
   /**
    * Flag whether the legend should be shown. If there is just a single series, it will be hidden
    */
@@ -67,7 +67,7 @@ export interface LegendConfig {
   position: Position;
 }
 
-export type LegendConfigResult = LegendConfig & { type: typeof LEGEND_FUNCTION };
+export type LegendConfigResult = HeatmapLegendConfig & { type: typeof LEGEND_FUNCTION };
 
 export interface HeatmapGridConfig {
   // grid
