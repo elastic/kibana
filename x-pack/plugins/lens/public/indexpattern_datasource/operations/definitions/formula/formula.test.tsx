@@ -680,16 +680,6 @@ invalid: "
           operationDefinitionMap
         )
       ).toEqual(undefined);
-
-      // Not sure it will be supported
-      //   expect(
-      //     formulaOperation.getErrorMessage!(
-      //       getNewLayerWithFormula('moving_average(average("bytes"), "window"=7)'),
-      //       'col1',
-      //       indexPattern,
-      //       operationDefinitionMap
-      //     )
-      //   ).toEqual(undefined);
     });
 
     it('returns an error if field is used with no Lens wrapping operation', () => {
