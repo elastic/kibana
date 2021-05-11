@@ -30,7 +30,6 @@ export interface CustomStopsProps {
 }
 export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: CustomStopsProps) => {
   const shouldEnableDelete = colorStops.length > 2;
-  const remappedControlStops = colorStops;
 
   const [localColorStops, setLocalColorStops] = useState<Array<{ color: string; stop: string }>>(
     colorStops.map(({ color, stop }) => ({ color, stop: String(stop) }))
@@ -82,13 +81,10 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
               }
             }}
           >
-            {remappedControlStops.map(({ color, stop }, index) => {
-              const stopValue = localColorStops[index]?.stop ?? stop;
-              const colorValue = localColorStops[index]?.color ?? color;
-
+            {localColorStops.map(({ color, stop }, index) => {
               const errorMessages = [];
               // do not show color error messages if number field is already in error
-              if (!isValidColor(colorValue) && errorMessages.length === 0) {
+              if (!isValidColor(color) && errorMessages.length === 0) {
                 errorMessages.push(
                   i18n.translate('xpack.lens.table.dynamicColoring.customPalette.hexWarningLabel', {
                     defaultMessage: 'Color must provide a valid hex value',
@@ -101,19 +97,20 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                   display="rowCompressed"
                   isInvalid={Boolean(errorMessages.length)}
                   error={errorMessages[0]}
+                  data-test-subj={`lnsDatatable_dynamicColoring_stop_row_${index}`}
                 >
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
                       <EuiFieldNumber
                         compressed
                         data-test-subj={`lnsDatatable_dynamicColoring_stop_value_${index}`}
-                        value={stopValue}
+                        value={stop}
                         min={-Infinity}
                         onChange={({ target }) => {
                           const newStopString = target.value.trim();
                           const newColorStops = [...localColorStops];
                           newColorStops[index] = {
-                            color: colorValue,
+                            color,
                             stop: newStopString,
                           };
                           setLocalColorStops(newColorStops);
@@ -130,12 +127,14 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                         )}
                       />
                     </EuiFlexItem>
-                    <EuiFlexItem>
+                    <EuiFlexItem
+                      data-test-subj={`lnsDatatable_dynamicColoring_stop_color_${index}`}
+                    >
                       <EuiColorPicker
                         key={stop}
                         onChange={(newColor) => {
                           const newColorStops = [...localColorStops];
-                          newColorStops[index] = { color: newColor, stop: stopValue };
+                          newColorStops[index] = { color: newColor, stop };
                           setLocalColorStops(newColorStops);
                         }}
                         secondaryInputDisplay="top"
@@ -143,7 +142,6 @@ export const CustomStops = ({ colorStops, onChange, rangeType, dataBounds }: Cus
                         isInvalid={!isValidColor(color)}
                         showAlpha
                         compressed
-                        data-test-subj={`lnsDatatable_dynamicColoring_stop_color_${index}`}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
