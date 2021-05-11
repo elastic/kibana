@@ -24,6 +24,7 @@ export default ({ getService, getPageObjects }) => {
     const kibanaServer = getService('kibanaServer');
     const queryBar = getService('queryBar');
     const filterBar = getService('filterBar');
+    const supertest = getService('supertest');
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
@@ -97,6 +98,8 @@ export default ({ getService, getPageObjects }) => {
         );
         await PageObjects.security.logout();
       }
+      // visit app/security so to create .siem-signals-* as side effect
+      await PageObjects.common.navigateToApp('security', { insertTimestamp: false });
       const url = await browser.getCurrentUrl();
       log.debug(url);
       if (!url.includes('kibana')) {
@@ -133,6 +136,35 @@ export default ({ getService, getPageObjects }) => {
       await PageObjects.settings.createIndexPattern('*:makelogs工程-*', '@timestamp', true, false);
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('*:makelogs工程-*');
+    });
+
+    it('create local siem signals index pattern', async () => {
+      log.debug('Add index pattern: .siem-signals-*');
+      await supertest
+        .post('/api/index_patterns/index_pattern')
+        .set('kbn-xsrf', 'true')
+        .send({
+          index_pattern: {
+            title: '.siem-signals-*',
+          },
+          override: true,
+        })
+        .expect(200);
+    });
+
+    it('create remote monitoring ES index pattern', async () => {
+      log.debug('Add index pattern: data:.monitoring-es-*');
+      await supertest
+        .post('/api/index_patterns/index_pattern')
+        .set('kbn-xsrf', 'true')
+        .send({
+          index_pattern: {
+            title: 'data:.monitoring-es-*',
+            timeFieldName: 'timestamp',
+          },
+          override: true,
+        })
+        .expect(200);
     });
 
     it('local:makelogs(star) should discover data from the local cluster', async () => {
@@ -201,6 +233,37 @@ export default ({ getService, getPageObjects }) => {
         log.debug('### hit count = ' + hitCount);
         expect(hitCount).to.be.greaterThan(15000);
         expect(hitCount).to.be.lessThan(originalHitCount);
+      });
+    });
+
+    it('should generate alerts based on remote events', async () => {
+      log.debug('Add detection rule type:shards on data:.monitoring-es-*');
+      await supertest
+        .post('/api/detection_engine/rules')
+        .set('kbn-xsrf', 'true')
+        .send({
+          description: 'This is the description of the rule',
+          risk_score: 17,
+          severity: 'low',
+          interval: '10s',
+          name: 'CCS_Detection_test',
+          type: 'query',
+          from: 'now-1d',
+          index: ['data:.monitoring-es-*'],
+          timestamp_override: 'timestamp',
+          query: 'type:shards',
+          language: 'kuery',
+          enabled: true,
+        })
+        .expect(200);
+
+      log.debug('Check if any alert got to .siem-signals-*');
+      await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
+      await PageObjects.discover.selectIndexPattern('.siem-signals-*');
+      await retry.tryForTime(40000, async () => {
+        const hitCount = await PageObjects.discover.getHitCount();
+        log.debug('### hit count = ' + hitCount);
+        expect(hitCount).to.be.greaterThan('0');
       });
     });
   });
