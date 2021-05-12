@@ -5,14 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useValues, useActions } from 'kea';
 
 import { EuiPageHeader, EuiButton, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
+import { Loading } from '../../../../shared/loading';
+
+import { SchemaLogic } from '../schema_logic';
 
 export const Schema: React.FC = () => {
+  const { loadSchema } = useActions(SchemaLogic);
+  const { dataLoading } = useValues(SchemaLogic);
+
+  useEffect(() => {
+    loadSchema();
+  }, []);
+
+  if (dataLoading) return <Loading />;
+
   return (
     <>
       <EuiPageHeader
