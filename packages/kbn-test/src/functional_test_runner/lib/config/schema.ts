@@ -9,6 +9,7 @@
 import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
+import type { CustomHelpers } from 'joi';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
@@ -61,8 +62,10 @@ const dockerServerSchema = () =>
     .default();
 
 const defaultRelativeToConfigPath = (path: string) => {
-  const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
-  makeDefault.description = `<config.js directory>/${path}`;
+  const makeDefault = (parent: any, helpers: CustomHelpers) => {
+    helpers.schema.description(`<config.js directory>/${path}`);
+    return resolve(dirname(helpers.prefs.context!.path), path);
+  };
   return makeDefault;
 };
 
