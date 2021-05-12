@@ -34,6 +34,7 @@ const mockDeps = {
       metricsEntitiesEnabled: false,
       eventFilteringEnabled: false,
       hostIsolationEnabled: false,
+      ruleRegistryEnabled: false,
     },
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
