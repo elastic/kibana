@@ -147,30 +147,32 @@ export class EditorFrameService {
           searchSessionId,
         }) => {
           return (
-            <EditorFrame
-              data-test-subj="lnsEditorFrame"
-              onError={onError}
-              datasourceMap={resolvedDatasources}
-              visualizationMap={resolvedVisualizations}
-              initialDatasourceId={getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null}
-              initialVisualizationId={
-                (doc && doc.visualizationType) || firstVisualizationId || null
-              }
-              key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
-              core={core}
-              plugins={plugins}
-              ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
-              palettes={palettes}
-              doc={doc}
-              dateRange={dateRange}
-              query={query}
-              filters={filters}
-              savedQuery={savedQuery}
-              onChange={onChange}
-              showNoDataPopover={showNoDataPopover}
-              initialContext={initialContext}
-              searchSessionId={searchSessionId}
-            />
+            <div className="lnsApp__frame">
+              <EditorFrame
+                data-test-subj="lnsEditorFrame"
+                onError={onError}
+                datasourceMap={resolvedDatasources}
+                visualizationMap={resolvedVisualizations}
+                initialDatasourceId={getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null}
+                initialVisualizationId={
+                  (doc && doc.visualizationType) || firstVisualizationId || null
+                }
+                key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
+                core={core}
+                plugins={plugins}
+                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
+                palettes={palettes}
+                doc={doc}
+                dateRange={dateRange}
+                query={query}
+                filters={filters}
+                savedQuery={savedQuery}
+                onChange={onChange}
+                showNoDataPopover={showNoDataPopover}
+                initialContext={initialContext}
+                searchSessionId={searchSessionId}
+              />
+            </div>
           );
         },
       };

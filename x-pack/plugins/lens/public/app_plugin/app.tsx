@@ -26,7 +26,6 @@ import {
   checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
 import { injectFilterReferences } from '../persistence';
-import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   DataPublicPluginStart,
@@ -792,48 +791,46 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
-    <div className="lnsApp__frame">
-      <EditorFrameContainer
-        {...{
-          searchSessionId,
-          dateRange: resolvedDateRange,
-          query,
-          filters,
-          savedQuery,
-          doc: persistedDoc,
-          onError,
-          showNoDataPopover,
-          initialContext,
-          onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
-            if (isSaveable !== oldIsSaveable) {
-              setState((s) => ({ ...s, isSaveable }));
-            }
-            if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
-              setState((s) => ({ ...s, lastKnownDoc: doc }));
-            }
-            if (!_.isEqual(activeDataRef.current, activeData)) {
-              setState((s) => ({ ...s, activeData }));
-            }
+    <EditorFrameContainer
+      {...{
+        searchSessionId,
+        dateRange: resolvedDateRange,
+        query,
+        filters,
+        savedQuery,
+        doc: persistedDoc,
+        onError,
+        showNoDataPopover,
+        initialContext,
+        onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
+          if (isSaveable !== oldIsSaveable) {
+            setState((s) => ({ ...s, isSaveable }));
+          }
+          if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
+            setState((s) => ({ ...s, lastKnownDoc: doc }));
+          }
+          if (!_.isEqual(activeDataRef.current, activeData)) {
+            setState((s) => ({ ...s, activeData }));
+          }
 
-            // Update the cached index patterns if the user made a change to any of them
-            if (
-              indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-              filterableIndexPatterns.some(
-                (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-              )
-            ) {
-              getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
-                ({ indexPatterns }) => {
-                  if (indexPatterns) {
-                    setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
-                  }
+          // Update the cached index patterns if the user made a change to any of them
+          if (
+            indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+            filterableIndexPatterns.some(
+              (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+            )
+          ) {
+            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
+              ({ indexPatterns }) => {
+                if (indexPatterns) {
+                  setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
                 }
-              );
-            }
-          },
-        }}
-      />
-    </div>
+              }
+            );
+          }
+        },
+      }}
+    />
   );
 });
 
