@@ -457,6 +457,7 @@ export class AggConfigs {
     }
     const aggCursor = transformedRawResponse.aggregations!;
 
+    const requestAggs = this.getRequestAggs();
     const bucketAggs = this.aggs.filter(
       (agg) => agg.type.type === AggGroupNames.Buckets
     ) as IBucketAggConfig[];
@@ -480,7 +481,9 @@ export class AggConfigs {
           return;
         } else {
           // a sub-agg
-          const agg = this.byId(key);
+          const agg = requestAggs.find(
+            (requestAgg) => key.substr(0, String(requestAgg.id).length) === requestAgg.id
+          );
           if (agg && agg.type.type === AggGroupNames.Metrics) {
             const timeShift = agg.getTimeShift();
             if (

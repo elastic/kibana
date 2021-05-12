@@ -35,7 +35,7 @@ export const getCountMetricAgg = () =>
       if (!timeShift) {
         return bucket.doc_count;
       } else {
-        return bucket[`doc_count_${timeShift.asMilliseconds()}`];
+        return bucket[`doc_count_${timeShift.asMilliseconds()}`] ?? bucket.doc_count;
       }
     },
     isScalable() {

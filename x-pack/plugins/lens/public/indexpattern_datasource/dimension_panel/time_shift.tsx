@@ -201,7 +201,7 @@ export function TimeShift({
         display="columnCompressed"
         fullWidth
         label={i18n.translate('xpack.lens.indexPattern.timeShift.label', {
-          defaultMessage: 'Time shift',
+          defaultMessage: 'Shift in time',
         })}
         helpText={i18n.translate('xpack.lens.indexPattern.timeShift.help', {
           defaultMessage: 'Time shift is specified by a number followed by a time unit',

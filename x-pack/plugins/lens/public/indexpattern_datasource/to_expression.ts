@@ -116,6 +116,7 @@ function getExpressionForLayer(
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
+              timeShift: col.timeShift,
             }
           ).toAst();
         }
