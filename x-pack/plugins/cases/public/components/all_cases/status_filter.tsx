@@ -24,22 +24,20 @@ const StatusFilterComponent: React.FC<Props> = ({
   disabledStatuses = [],
 }) => {
   const caseStatuses = Object.keys(statuses) as CaseStatusWithAllStatus[];
-  const options: Array<EuiSuperSelectOption<CaseStatusWithAllStatus>> = [
-    StatusAll,
-    ...caseStatuses,
-  ].map((status) => ({
-    value: status,
-    inputDisplay: (
-      <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
-        <EuiFlexItem grow={false}>
-          <Status type={status} />
-        </EuiFlexItem>
-        {status !== StatusAll && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
-      </EuiFlexGroup>
-    ),
-    disabled: disabledStatuses.includes(status),
-    'data-test-subj': `case-status-filter-${status}`,
-  }));
+  const options: Array<EuiSuperSelectOption<CaseStatusWithAllStatus>> = [StatusAll, ...caseStatuses]
+    .filter((status) => !disabledStatuses.includes(status))
+    .map((status) => ({
+      value: status,
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
+          <EuiFlexItem grow={false}>
+            <Status type={status} />
+          </EuiFlexItem>
+          {status !== StatusAll && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': `case-status-filter-${status}`,
+    }));
 
   return (
     <EuiSuperSelect
