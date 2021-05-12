@@ -26,7 +26,7 @@ image::maps/images/inspector.png[]
 * Verify your geospatial data is correctly mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
   ** Run `GET myIndexPatternTitle/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexPatternTitle` and `myGeoFieldName` with your index pattern title and geospatial field name.
   ** Ensure response specifies `type` as `geo_point` or `geo_shape`.
-* Verify your geospatial data is correctly mapped in your <<managing-fields, Kibana index pattern>>.
+* Verify your geospatial data is correctly mapped in your <<managing-fields,index pattern>>.
   ** Open your index pattern in <<management, Stack Management>>.
   ** Ensure your geospatial field type is `geo_point` or `geo_shape`.
   ** Ensure your geospatial field is searchable and aggregatable.
