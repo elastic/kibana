@@ -7,8 +7,7 @@
 
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-
-import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getPathListSchemaMock } from './patch_list_schema.mock';
 import { PatchListSchema, patchListSchema } from './patch_list_schema';

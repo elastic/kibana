@@ -254,6 +254,12 @@ interface HostInfo {
         version: number;
       };
     };
+    configuration: {
+      isolation: boolean;
+    };
+    state: {
+      isolation: boolean;
+    };
   };
 }
 
@@ -457,6 +463,12 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         status: EndpointStatus.enrolled,
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
+        },
+        configuration: {
+          isolation: false,
+        },
+        state: {
+          isolation: false,
         },
       },
     };

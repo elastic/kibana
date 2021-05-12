@@ -43,6 +43,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   public render() {
     return (
       <ReportingPanelContent
+        requiresSavedState
         apiClient={this.props.apiClient}
         toasts={this.props.toasts}
         reportType={this.props.reportType}

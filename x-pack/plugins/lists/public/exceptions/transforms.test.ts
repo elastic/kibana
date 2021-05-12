@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Entry, EntryMatch, EntryNested } from '@kbn/securitysolution-io-ts-utils';
+
 import { ExceptionListItemSchema } from '../../common/schemas/response/exception_list_item_schema';
 import { UpdateExceptionListItemSchema } from '../../common/schemas/request/update_exception_list_item_schema';
 import { CreateExceptionListItemSchema } from '../../common/schemas/request/create_exception_list_item_schema';
@@ -12,7 +14,6 @@ import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/reque
 import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
 import { ENTRIES_WITH_IDS } from '../../common/constants.mock';
-import { Entry, EntryMatch, EntryNested } from '../../common/schemas';
 
 import {
   addIdToExceptionItemEntries,
