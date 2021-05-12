@@ -8,15 +8,9 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-// Default parameter values automatically added to the URI parts processor when saved
-const defaultUriPartsParameters = {
-  keep_original: undefined,
-  remove_if_successful: undefined,
-};
+const APPEND_TYPE = 'append';
 
-const URI_PARTS_TYPE = 'uri_parts';
-
-describe('Processor: URI parts', () => {
+describe('Processor: Append', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
 
@@ -41,7 +35,6 @@ describe('Processor: URI parts', () => {
       });
     });
     testBed.component.update();
-
     const {
       actions: { addProcessor, addProcessorType },
     } = testBed;
@@ -49,7 +42,7 @@ describe('Processor: URI parts', () => {
     addProcessor();
 
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(URI_PARTS_TYPE);
+    await addProcessorType(APPEND_TYPE);
   });
 
   test('prevents form submission if required fields are not provided', async () => {
@@ -61,25 +54,36 @@ describe('Processor: URI parts', () => {
     // Click submit button with only the type defined
     await saveNewProcessor();
 
-    // Expect form error as "field" is required parameter
-    expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
+    // Expect form error as "field" and "value" are required parameters
+    expect(form.getErrorsMessages()).toEqual([
+      'A field value is required.',
+      'A value is required.',
+    ]);
   });
 
   test('saves with required parameter values', async () => {
     const {
       actions: { saveNewProcessor },
       form,
+      find,
+      component,
     } = testBed;
 
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
+
+    await act(async () => {
+      find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
+    });
+    component.update();
+
     // Save the field
     await saveNewProcessor();
 
-    const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
-    expect(processors[0].uri_parts).toEqual({
+    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    expect(processors[0].append).toEqual({
       field: 'field_1',
-      ...defaultUriPartsParameters,
+      value: ['Some_Value'],
     });
   });
 
@@ -87,25 +91,28 @@ describe('Processor: URI parts', () => {
     const {
       actions: { saveNewProcessor },
       form,
+      find,
+      component,
     } = testBed;
 
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set optional parameteres
-    form.setInputValue('targetField.input', 'target_field');
-    form.toggleEuiSwitch('keepOriginalField.input');
-    form.toggleEuiSwitch('removeIfSuccessfulField.input');
+    await act(async () => {
+      find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
+      component.update();
+    });
 
+    form.toggleEuiSwitch('ignoreFailureSwitch.input');
     // Save the field with new changes
     await saveNewProcessor();
 
-    const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
-    expect(processors[0].uri_parts).toEqual({
+    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    expect(processors[0].append).toEqual({
       field: 'field_1',
-      keep_original: false,
-      remove_if_successful: true,
-      target_field: 'target_field',
+      ignore_failure: true,
+      value: ['Some_Value'],
     });
   });
 });

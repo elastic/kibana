@@ -217,11 +217,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     spec.type = type;
 
-    this.setState({
+    const nextState = {
       fieldTypeFormats: getFieldTypeFormatsList(spec, DefaultFieldFormat, data.fieldFormats),
       fieldFormatId: DefaultFieldFormat.id,
       fieldFormatParams: format.params(),
-    });
+    };
+
+    this.setState(nextState);
+    this.onFormatChange(nextState.fieldFormatId, nextState.fieldFormatParams);
   };
 
   onLangChange = (lang: string) => {

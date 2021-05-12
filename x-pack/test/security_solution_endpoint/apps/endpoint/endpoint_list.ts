@@ -66,7 +66,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ];
 
   describe('endpoint list', function () {
-    this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
     describe('when initially navigating to page', () => {

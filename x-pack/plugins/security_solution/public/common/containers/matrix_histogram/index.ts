@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { getOr, isEmpty, noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -51,10 +51,12 @@ export const useMatrixHistogram = ({
   histogramType,
   indexNames,
   isPtrIncluded,
+  onError,
   stackByField,
   startDate,
   threshold,
   skip = false,
+  includeMissingData = true,
 }: MatrixHistogramQueryProps): [
   boolean,
   UseMatrixHistogramArgs,
@@ -82,6 +84,7 @@ export const useMatrixHistogram = ({
     threshold,
     ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
     ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
+    ...(includeMissingData != null ? { includeMissingData } : {}),
   });
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -183,6 +186,7 @@ export const useMatrixHistogram = ({
   ]);
 
   useEffect(() => {
+    // We want to search if it is not skipped, stackByField ends with ip and include missing data
     if (!skip) {
       hostsSearch(matrixHistogramRequest);
     }
@@ -207,4 +211,73 @@ export const useMatrixHistogram = ({
   );
 
   return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
+};
+
+/* function needed to split ip histogram data requests due to elasticsearch bug https://github.com/elastic/kibana/issues/89205
+ * using includeMissingData parameter to do the "missing data" query separately
+ **/
+export const useMatrixHistogramCombined = (
+  matrixHistogramQueryProps: MatrixHistogramQueryProps
+): [boolean, UseMatrixHistogramArgs] => {
+  const [mainLoading, mainResponse] = useMatrixHistogram({
+    ...matrixHistogramQueryProps,
+    includeMissingData: true,
+  });
+
+  const skipMissingData = useMemo(() => !matrixHistogramQueryProps.stackByField.endsWith('.ip'), [
+    matrixHistogramQueryProps.stackByField,
+  ]);
+  const [missingDataLoading, missingDataResponse] = useMatrixHistogram({
+    ...matrixHistogramQueryProps,
+    includeMissingData: false,
+    skip: skipMissingData,
+  });
+
+  const combinedLoading = useMemo<boolean>(() => mainLoading || missingDataLoading, [
+    mainLoading,
+    missingDataLoading,
+  ]);
+
+  const combinedResponse = useMemo<UseMatrixHistogramArgs>(() => {
+    if (skipMissingData) return mainResponse;
+
+    const { data, inspect, totalCount, refetch, buckets } = mainResponse;
+    const {
+      data: extraData,
+      inspect: extraInspect,
+      totalCount: extraTotalCount,
+      refetch: extraRefetch,
+    } = missingDataResponse;
+
+    const combinedRefetch = () => {
+      refetch();
+      extraRefetch();
+    };
+
+    if (combinedLoading) {
+      return {
+        data: [],
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        refetch: combinedRefetch,
+        totalCount: -1,
+        buckets: [],
+      };
+    }
+
+    return {
+      data: [...data, ...extraData],
+      inspect: {
+        dsl: [...inspect.dsl, ...extraInspect.dsl],
+        response: [...inspect.response, ...extraInspect.response],
+      },
+      totalCount: totalCount + extraTotalCount,
+      refetch: combinedRefetch,
+      buckets,
+    };
+  }, [combinedLoading, mainResponse, missingDataResponse, skipMissingData]);
+
+  return [combinedLoading, combinedResponse];
 };
