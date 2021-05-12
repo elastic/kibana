@@ -25,6 +25,7 @@ import {
   RawMonitoringStats,
 } from '../monitoring';
 import { TaskManagerConfig } from '../config';
+import { MonitoringMetrics } from '../monitoring/monitoring_metrics';
 
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;
@@ -55,7 +56,7 @@ export function healthRoute(
   config: TaskManagerConfig
 ): {
   serviceStatus$: Observable<TaskManagerServiceStatus>;
-  getLatestTaskManagerHealth: () => MonitoredHealth | undefined;
+  getLatestTaskManagerHealth: () => MonitoringMetrics | undefined;
 } {
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
   // consider the system unhealthy
@@ -123,8 +124,24 @@ export function healthRoute(
   );
   return {
     serviceStatus$,
-    getLatestTaskManagerHealth: () =>
-      lastMonitoredStats ? calculateStatus(lastMonitoredStats) : undefined,
+    getLatestTaskManagerHealth: () => {
+      const health = lastMonitoredStats ? calculateStatus(lastMonitoredStats) : undefined;
+      const metrics: MonitoringMetrics = {
+        task_manager: {
+          drift: {
+            by_type: Object.keys(health?.stats.runtime?.value.drift_by_type ?? {}).map(
+              (alertType) => {
+                return {
+                  alertType,
+                  stat: health?.stats.runtime?.value.drift_by_type[alertType],
+                };
+              }
+            ),
+          },
+        },
+      };
+      return metrics;
+    },
   };
 }
 

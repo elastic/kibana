@@ -25,8 +25,9 @@ import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictiona
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
-import { healthRoute, MonitoredHealth } from './routes';
+import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
+import { MonitoringMetrics } from './monitoring/monitoring_metrics';
 
 export type TaskManagerSetupContract = {
   /**
@@ -43,7 +44,7 @@ export type TaskManagerStartContract = Pick<
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
   } & {
-    getTaskManagerHealth: () => MonitoredHealth | undefined;
+    getTaskManagerHealthMonitoringMetrics: () => MonitoringMetrics | undefined;
   };
 
 export class TaskManagerPlugin
@@ -56,7 +57,7 @@ export class TaskManagerPlugin
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
-  private getLatestTaskManagerHealth?: () => MonitoredHealth | undefined;
+  private getLatestTaskManagerHealth?: () => MonitoringMetrics | undefined;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -170,7 +171,7 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
-      getTaskManagerHealth: () =>
+      getTaskManagerHealthMonitoringMetrics: () =>
         this.getLatestTaskManagerHealth ? this.getLatestTaskManagerHealth() : undefined,
     };
   }

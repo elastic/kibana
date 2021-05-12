@@ -71,7 +71,7 @@ export class BulkUploader implements IBulkUploader {
   private _timer: NodeJS.Timer | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
-  private getTaskManagerHealth?: () => MonitoredHealth | undefined;
+  private getTaskManagerHealthMonitoringMetrics?: () => MonitoredHealth | undefined;
 
   constructor({
     log,
@@ -143,8 +143,10 @@ export class BulkUploader implements IBulkUploader {
     this.stop('Connection issue detected');
   }
 
-  public setGetTaskHealth(getTaskManagerHealth: () => MonitoredHealth | undefined) {
-    this.getTaskManagerHealth = getTaskManagerHealth;
+  public setGetTaskHealth(
+    getTaskManagerHealthMonitoringMetrics: () => MonitoredHealth | undefined
+  ) {
+    this.getTaskManagerHealthMonitoringMetrics = getTaskManagerHealthMonitoringMetrics;
   }
 
   /**
@@ -162,7 +164,7 @@ export class BulkUploader implements IBulkUploader {
       health,
     ] = await Promise.all([
       this.opsMetrics$.pipe(take(1)).toPromise(),
-      this.getTaskManagerHealthMetrics(),
+      this.getTaskManagerHealthMonitoringMetricsMetrics(),
     ]);
     return {
       ...lastMetrics,
@@ -177,22 +179,10 @@ export class BulkUploader implements IBulkUploader {
     };
   }
 
-  private async getTaskManagerHealthMetrics() {
-    if (this.getTaskManagerHealth) {
-      const health = this.getTaskManagerHealth();
-      if (health) {
-        return {
-          task_manager: {
-            runtime: {
-              duration: {
-                p99: health.stats.runtime?.value.polling.duration?.p99,
-              },
-            },
-          },
-        };
-      }
-    }
-    return undefined;
+  private async getTaskManagerHealthMonitoringMetricsMetrics() {
+    return this.getTaskManagerHealthMonitoringMetrics
+      ? this.getTaskManagerHealthMonitoringMetrics()
+      : undefined;
   }
 
   private async _fetchAndUpload(esClient: ElasticsearchClient) {

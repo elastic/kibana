@@ -30,7 +30,7 @@ import { LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
-import { MonitoredHealth, TaskManagerStartContract } from '../../task_manager/server';
+import { MonitoringMetrics, TaskManagerStartContract } from '../../task_manager/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -98,7 +98,9 @@ export interface IBulkUploader {
   stop: () => void;
   start: (esClient: ElasticsearchClient) => void;
   handleNotEnabled: () => void;
-  setGetTaskHealth: (getTaskManagerHealth: () => MonitoredHealth | undefined) => void;
+  setGetTaskHealth: (
+    getTaskManagerHealthMonitoringMetrics: () => MonitoringMetrics | undefined
+  ) => void;
 }
 
 export interface MonitoringPluginSetup {

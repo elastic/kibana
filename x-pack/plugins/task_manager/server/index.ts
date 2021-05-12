@@ -31,6 +31,8 @@ export {
 
 export { MonitoredHealth } from './routes';
 
+export { MonitoringMetrics } from './monitoring/monitoring_metrics';
+
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
   deprecations: () => [

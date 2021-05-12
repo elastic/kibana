@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaEventsRateClusterMetric, KibanaMetric } from './classes';
+import { KibanaEventsRateClusterMetric, KibanaMetric, KibanaTaskManagerMetric } from './classes';
 import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 
@@ -253,19 +253,22 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  kibana_task_manager_duration_p99: new KibanaMetric({
-    field: 'kibana_stats.task_manager.runtime.duration.p99',
+  kibana_task_manager_drift_p50: new KibanaTaskManagerMetric({
+    field: 'kibana_stats.task_manager.drift.by_type.stat.p50',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Label', {
-      defaultMessage: 'P99 Duration',
+      defaultMessage: 'P50 drift for [alertType]',
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Description',
       {
-        defaultMessage: 'TODO: FILL IN',
+        defaultMessage: 'P50 drift for [alertType]',
       }
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    limit: {
+      max: 5,
+    },
   }),
 };

@@ -23,6 +23,7 @@ import './elasticsearch/ml_jobs';
 import './kibana/overview';
 import './kibana/instances';
 import './kibana/instance';
+import './kibana/task_manager';
 import './logstash/overview';
 import './logstash/nodes';
 import './logstash/node';

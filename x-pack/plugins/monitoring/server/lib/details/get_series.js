@@ -103,6 +103,20 @@ async function fetchSeries(
   // if we're using a derivative metric, offset the min (also @see comment on offsetMinForDerivativeMetric function)
   const adjustedMin = metric.derivative ? offsetMinForDerivativeMetric(min, bucketSize) : min;
 
+  const query = createQuery({
+    start: adjustedMin,
+    end: max,
+    metric,
+    clusterUuid: req.params.clusterUuid,
+    // TODO: Pass in the UUID as an explicit function parameter
+    uuid: getUuid(req, metric),
+    filters,
+  });
+
+  if (metric.before) {
+    await metric.before(req, indexPattern, query);
+  }
+
   let dateHistogramSubAggs = null;
   if (metric.getDateHistogramSubAggs) {
     dateHistogramSubAggs = metric.getDateHistogramSubAggs(metricOptions);
@@ -152,15 +166,7 @@ async function fetchSeries(
     size: 0,
     ignoreUnavailable: true,
     body: {
-      query: createQuery({
-        start: adjustedMin,
-        end: max,
-        metric,
-        clusterUuid: req.params.clusterUuid,
-        // TODO: Pass in the UUID as an explicit function parameter
-        uuid: getUuid(req, metric),
-        filters,
-      }),
+      query,
       aggs,
     },
   };
@@ -256,7 +262,7 @@ function countBuckets(data, count = 0) {
 }
 
 function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, response) {
-  const { derivative, calculation: customCalculation } = metric;
+  const { derivative, calculation: customCalculation, resultHandler } = metric;
 
   function getAggregatedData(buckets) {
     const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
@@ -281,26 +287,43 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
       });
     }
 
+    let usableBuckets = [];
+
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts
       const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
       const calculation = customCalculation !== undefined ? customCalculation : defaultCalculation;
 
-      data = buckets
-        .slice(firstUsableBucketIndex, lastUsableBucketIndex + 1) // take only the buckets we know are usable
-        .map((bucket) => [
-          formatUTCTimestampForTimezone(bucket.key, timezone),
-          calculation(bucket, key, metric, bucketSizeInSeconds),
-        ]); // map buckets to X/Y coords for Flot charting
+      usableBuckets = buckets.slice(firstUsableBucketIndex, lastUsableBucketIndex + 1); // take only the buckets we know are usable
+
+      data = usableBuckets.map((bucket) => [
+        formatUTCTimestampForTimezone(bucket.key, timezone),
+        calculation(bucket, key, metric, bucketSizeInSeconds),
+      ]); // map buckets to X/Y coords for Flot charting
     }
 
-    return {
+    const result = {
       bucket_size: formatBucketSize(bucketSizeInSeconds),
       timeRange: {
         min: formatUTCTimestampForTimezone(min, timezone),
         max: formatUTCTimestampForTimezone(max, timezone),
       },
       metric: metric.serialize(),
+    };
+
+    if (resultHandler && firstUsableBucketIndex <= lastUsableBucketIndex) {
+      return resultHandler(
+        result,
+        usableBuckets,
+        metric,
+        customCalculation !== undefined ? customCalculation : defaultCalculation,
+        bucketSizeInSeconds,
+        timezone
+      );
+    }
+
+    return {
+      ...result,
       data,
     };
   }

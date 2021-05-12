@@ -80,4 +80,8 @@ export class Metric {
 
     return timeInMillis / totalEvents;
   }
+
+  async before() {
+    // Nothing at this level
+  }
 }

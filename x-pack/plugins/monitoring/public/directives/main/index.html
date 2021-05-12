@@ -112,7 +112,6 @@
       >
       </a>
     </div>
-
     <div ng-if="monitoringMain.inKibana" class="euiTabs" role="navigation">
       <a
         ng-if="!monitoringMain.instance && !monitoringMain.isDisabledTab('kibana')"
@@ -139,6 +138,22 @@
         ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('kibanas')}"
         i18n-id="xpack.monitoring.kibanaNavigation.instancesLinkText"
         i18n-default-message="Instances"
+      ></a>
+      <a
+        ng-if="monitoringMain.instance"
+        kbn-href="#/kibana/instances/{{ monitoringMain.resolver }}"
+        class="euiTab"
+        ng-class="{'euiTab-isSelected': monitoringMain.page === 'overview'}"
+        i18n-id="xpack.monitoring.kibanaNavigation.instance.overviewLink"
+        i18n-default-message="Overview"
+      ></a>
+      <a
+        ng-if="monitoringMain.instance"
+        kbn-href="#/kibana/instances/{{ monitoringMain.resolver }}/task_manager"
+        class="euiTab"
+        ng-class="{'euiTab-isSelected': monitoringMain.page === 'task_manager'}"
+        i18n-id="xpack.monitoring.kibanaNavigation.instance.taskManagerLink"
+        i18n-default-message="Task Manager"
       ></a>
     </div>
 

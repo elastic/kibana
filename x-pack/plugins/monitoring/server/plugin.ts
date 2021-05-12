@@ -197,7 +197,7 @@ export class MonitoringPlugin
     });
 
     if (this.bulkUploader && taskManager) {
-      this.bulkUploader.setGetTaskHealth(taskManager.getTaskManagerHealth);
+      this.bulkUploader.setGetTaskHealth(taskManager.getTaskManagerHealthMonitoringMetrics);
     }
 
     // If collection is enabled, start it

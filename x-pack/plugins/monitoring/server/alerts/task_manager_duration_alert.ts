@@ -124,10 +124,10 @@ export class TaskManagerDurationAlert extends BaseAlert {
     const stat = item.meta as AlertTaskManagerDurationStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.taskManagerDuration.ui.firingMessage', {
-        defaultMessage: `Node #start_link{nodeName}#end_link is reporting cpu usage of {cpuUsage}% at #absolute`,
+        defaultMessage: `Node #start_link{nodeName}#end_link is reporting cpu usage of {p99}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
-          cpuUsage: numeral(stat.cpuUsage).format(ROUNDED_FLOAT),
+          p99: numeral(stat.p99).format(ROUNDED_FLOAT),
         },
       }),
       nextSteps: [
