@@ -20,6 +20,12 @@ export interface EMSTermJoinConfig {
   field: string;
 }
 
+export enum MATCH_TYPE {
+  FIELD_ALIAS = 'FIELD_ALIAS',
+  FIELD_VALUE_PATTERN = 'FIELD_VALUE_PATTERN',
+  FIELD_VALUE_EMS_MATCH = 'FIELD_VALUE_EMS_MATCH',
+}
+
 const wellKnownColumnNames = [
   {
     regex: /(geo\.){0,}country_iso_code$/i, // ECS postfix for country
@@ -29,7 +35,7 @@ const wellKnownColumnNames = [
     },
   },
   {
-    regex: /(geo\.){0,}region_iso_code$/i, // ECS postfixn for region
+    regex: /(geo\.){0,}region_iso_code$/i, // ECS postfix for region
     emsConfig: {
       layerId: emsRegionLayerId,
       field: 'region_iso_code',
@@ -42,14 +48,28 @@ const wellKnownColumnNames = [
       field: 'name',
     },
   },
+  {
+    regex: /(country|countries)/i, // anything with country|countries in it (matches sample data)
+    emsConfig: {
+      layerId: emsWorldLayerId,
+      field: 'iso2',
+    },
+  },
 ];
 
 const wellKnownColumnFormats = [
   {
-    regex: /(^\d{5}$)/i, // 5-digit zipcode
+    regex: /(^\d{5}$)/, // 5-digit zipcode
     emsConfig: {
       layerId: emsUsaZipLayerId,
       field: 'zip',
+    },
+  },
+  {
+    regex: /(^[a-zA-Z]{2}$)/, // iso2 2-char code
+    emsConfig: {
+      layerId: emsWorldLayerId,
+      field: 'iso2',
     },
   },
 ];
@@ -77,7 +97,7 @@ export async function suggestEMSTermJoinConfig(
         ))
       );
     } else {
-      matches.push(...suggestByValues(sampleValuesConfig.sampleValues));
+      matches.push(...suggestByFieldPattern(sampleValuesConfig.sampleValues));
     }
   }
 
@@ -115,10 +135,11 @@ function suggestByName(columnName: string): EMSTermJoinConfig[] {
   });
 }
 
-function suggestByValues(values: Array<string | number>): EMSTermJoinConfig[] {
+function suggestByFieldPattern(values: Array<string | number>): EMSTermJoinConfig[] {
   const matches = wellKnownColumnFormats.filter((wellknown) => {
     for (let i = 0; i < values.length; i++) {
       const value = values[i].toString();
+      // must satisfy all checks, otherwise reject
       if (!value.match(wellknown.regex)) {
         return false;
       }
@@ -144,6 +165,7 @@ function existsInEMS(emsJson: any, emsFieldId: string, sampleValue: string): boo
 function matchesEmsField(emsJson: any, emsFieldId: string, sampleValues: Array<string | number>) {
   for (let j = 0; j < sampleValues.length; j++) {
     const sampleValue = sampleValues[j].toString();
+    // If at least one value breaks, _reject_ the suggestion
     if (!existsInEMS(emsJson, emsFieldId, sampleValue)) {
       return false;
     }
