@@ -8,23 +8,23 @@
 import { CoreSetup } from 'kibana/public';
 import { EmbeddableSetup } from '../../../../../../src/plugins/embeddable/public';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
-import { ThroughputEmbeddableFactoryDefinition } from './throughput/throughput_embeddable_factory';
-import { ErrorRateEmbeddableFactoryDefinition } from './transactions_error_rate';
+import { ThroughputEmbeddableFactory } from './throughput/throughput_embeddable_factory';
+import { ErrorRateEmbeddableFactory } from './transactions_error_rate';
 
 export function registerEmbeddables(
   embeddable: EmbeddableSetup,
   core: CoreSetup
 ) {
   createCallApmApi(core);
-  const ErrorRateEmbeddableFactory = new ErrorRateEmbeddableFactoryDefinition();
+  const ErrorRateEmbeddable = new ErrorRateEmbeddableFactory();
   embeddable.registerEmbeddableFactory(
-    ErrorRateEmbeddableFactory.type,
-    ErrorRateEmbeddableFactory
+    ErrorRateEmbeddable.type,
+    ErrorRateEmbeddable
   );
 
-  const ThroughputEmbeddableFactory = new ThroughputEmbeddableFactoryDefinition();
+  const ThroughputEmbeddable = new ThroughputEmbeddableFactory();
   embeddable.registerEmbeddableFactory(
-    ThroughputEmbeddableFactory.type,
-    ThroughputEmbeddableFactory
+    ThroughputEmbeddable.type,
+    ThroughputEmbeddable
   );
 }

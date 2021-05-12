@@ -6,41 +6,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../../../src/plugins/embeddable/public';
+import { IContainer } from '../../../../../../../src/plugins/embeddable/public';
 import {
   ErrorRateEmbeddable,
   ErrorRateInput,
   ERROR_RATE_EMBEDDABLE,
 } from './error_rate_embeddable';
-import { APP_ID, APP_NAME, APP_ICON } from '../constants';
+import { APMEmbeddableFactory } from '../apm_embeddable_factory';
 
-export class ErrorRateEmbeddableFactoryDefinition
-  implements
-    EmbeddableFactoryDefinition<ErrorRateInput, {}, ErrorRateEmbeddable> {
-  public readonly type = ERROR_RATE_EMBEDDABLE;
-
-  public readonly grouping = [
-    {
-      id: APP_ID,
-      getDisplayName: () => APP_NAME,
-      getIconType: () => APP_ICON,
-    },
-  ];
-
-  public async isEditable() {
-    return true;
+export class ErrorRateEmbeddableFactory extends APMEmbeddableFactory<
+  ErrorRateInput,
+  {},
+  ErrorRateEmbeddable
+> {
+  constructor() {
+    super(
+      ERROR_RATE_EMBEDDABLE,
+      i18n.translate('xpack.apm.embeddables.errorRate.displayName', {
+        defaultMessage: 'Error rate chart',
+      })
+    );
   }
 
   public async create(initialInput: ErrorRateInput, parent?: IContainer) {
     return new ErrorRateEmbeddable(initialInput, parent);
-  }
-
-  public getDisplayName() {
-    return i18n.translate('xpack.apm.embeddables.errorRate.displayName', {
-      defaultMessage: 'Error rate chart',
-    });
   }
 }
