@@ -19,8 +19,7 @@ import {
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
-import { RefreshTypes } from '../../types';
-import { singleBulkCreate, SingleBulkCreateResponse } from '../single_bulk_create';
+import { SingleBulkCreateResponse } from '../single_bulk_create';
 import {
   calculateThresholdSignalUuid,
   getThresholdAggregationParts,
@@ -33,8 +32,10 @@ import type {
   SignalSearchResponse,
   ThresholdSignalHistory,
   AlertAttributes,
+  BulkCreate,
 } from '../types';
 import { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { filterAndWrapDocuments } from '../search_after_bulk_create';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
@@ -45,11 +46,11 @@ interface BulkCreateThresholdSignalsParams {
   id: string;
   filter: unknown;
   signalsIndex: string;
-  refresh: RefreshTypes;
   startedAt: Date;
   from: Date;
   thresholdSignalHistory: ThresholdSignalHistory;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
 }
 
 const getTransformedHits = (
@@ -255,5 +256,14 @@ export const bulkCreateThresholdSignals = async (
   );
   const buildRuleMessage = params.buildRuleMessage;
 
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
+  return params.bulkCreate(
+    filterAndWrapDocuments({
+      buildRuleMessage,
+      enrichedEvents: ecsResults,
+      id: params.id,
+      logger: params.logger,
+      ruleSO: params.ruleSO,
+      signalsIndex: params.signalsIndex,
+    })
+  );
 };

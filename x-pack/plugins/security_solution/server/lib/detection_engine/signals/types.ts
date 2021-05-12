@@ -25,7 +25,6 @@ import {
   RuleAlertAction,
   SearchTypes,
 } from '../../../../common/detection_engine/types';
-import { RefreshTypes } from '../types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';

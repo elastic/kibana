@@ -17,13 +17,12 @@ import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { SetupPlugins } from '../../../../plugin';
 import { MachineLearningRuleParams } from '../../schemas/rule_schemas';
-import { RefreshTypes } from '../../types';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
 import { RuleStatusService } from '../rule_status_service';
-import { AlertAttributes } from '../types';
+import { AlertAttributes, BulkCreate } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
 
 export const mlExecutor = async ({
@@ -34,8 +33,8 @@ export const mlExecutor = async ({
   ruleStatusService,
   services,
   logger,
-  refresh,
   buildRuleMessage,
+  bulkCreate,
 }: {
   rule: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
   ml: SetupPlugins['ml'];
@@ -44,8 +43,8 @@ export const mlExecutor = async ({
   ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
-  refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
 }) => {
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
@@ -120,8 +119,8 @@ export const mlExecutor = async ({
     logger,
     id: rule.id,
     signalsIndex: ruleParams.outputIndex,
-    refresh,
     buildRuleMessage,
+    bulkCreate,
   });
   // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
   const shardFailures =

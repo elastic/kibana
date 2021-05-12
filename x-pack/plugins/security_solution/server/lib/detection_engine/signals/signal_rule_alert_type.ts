@@ -243,8 +243,8 @@ export const signalRulesAlertType = ({
             ruleStatusService,
             services,
             logger,
-            refresh,
             buildRuleMessage,
+            bulkCreate,
           });
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
@@ -256,9 +256,9 @@ export const signalRulesAlertType = ({
             services,
             version,
             logger,
-            refresh,
             buildRuleMessage,
             startedAt,
+            bulkCreate,
           });
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
@@ -299,8 +299,7 @@ export const signalRulesAlertType = ({
             services,
             version,
             searchAfterSize,
-            logger,
-            refresh,
+            bulkCreate,
           });
         } else {
           throw new Error(`unknown rule type ${type}`);
@@ -450,7 +449,6 @@ const bulkCreateFactory = (
   const start = performance.now();
 
   const { body: response } = await esClient.bulk({
-    index: wrappedDocs[0]._index,
     refresh: refreshForBulkCreate,
     body: bulkBody,
   });

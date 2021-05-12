@@ -7,6 +7,7 @@
 
 import { identity } from 'lodash';
 import { SortResults } from '@elastic/elasticsearch/api/types';
+import { Logger } from '@kbn/logging';
 import { singleSearchAfter } from './single_search_after';
 import { filterDuplicateRules } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
@@ -24,9 +25,11 @@ import {
 import {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
+  SignalSearchResponse,
   WrappedSignalHit,
 } from './types';
 import { buildBulkBody } from './build_bulk_body';
+import { BuildRuleMessage } from './rule_messages';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -155,23 +158,15 @@ export const searchAfterAndBulkCreate = async ({
             );
           }
           const enrichedEvents = await enrichment(filteredEvents);
-          filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
-          logger.debug(
-            buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`)
-          );
+          const wrappedDocs = filterAndWrapDocuments({
+            enrichedEvents,
+            buildRuleMessage,
+            id,
+            logger,
+            signalsIndex,
+            ruleSO,
+          });
 
-          const wrappedDocs: WrappedSignalHit[] = enrichedEvents.hits.hits.flatMap((doc) => [
-            {
-              _index: signalsIndex,
-              _id: generateId(
-                doc._index,
-                doc._id,
-                doc._version ? doc._version.toString() : '',
-                ruleParams.ruleId ?? ''
-              ),
-              _source: buildBulkBody(ruleSO, doc),
-            },
-          ]);
           const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
@@ -193,10 +188,10 @@ export const searchAfterAndBulkCreate = async ({
           logger.debug(buildRuleMessage(`created ${createdCount} signals`));
           logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
           logger.debug(
-            buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
+            buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.hits.hits.length}`)
           );
 
-          sendAlertTelemetryEvents(logger, eventsTelemetry, filteredEvents, buildRuleMessage);
+          sendAlertTelemetryEvents(logger, eventsTelemetry, enrichedEvents, buildRuleMessage);
         }
 
         if (!hasSortId) {
@@ -218,4 +213,37 @@ export const searchAfterAndBulkCreate = async ({
   logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
   toReturn.totalToFromTuples = tuplesToBeLogged;
   return toReturn;
+};
+
+export const filterAndWrapDocuments = ({
+  buildRuleMessage,
+  enrichedEvents,
+  id,
+  logger,
+  ruleSO,
+  signalsIndex,
+}: {
+  buildRuleMessage: BuildRuleMessage;
+  enrichedEvents: SignalSearchResponse;
+  id: string;
+  logger: Logger;
+  ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+  signalsIndex: string;
+}) => {
+  enrichedEvents.hits.hits = filterDuplicateRules(id, enrichedEvents);
+  logger.debug(buildRuleMessage(`about to bulk create ${enrichedEvents.hits.hits.length} events`));
+
+  const wrappedDocs: WrappedSignalHit[] = enrichedEvents.hits.hits.flatMap((doc) => [
+    {
+      _index: signalsIndex,
+      _id: generateId(
+        doc._index,
+        doc._id,
+        doc._version ? doc._version.toString() : '',
+        ruleSO.attributes.params.ruleId ?? ''
+      ),
+      _source: buildBulkBody(ruleSO, doc),
+    },
+  ]);
+  return wrappedDocs;
 };
