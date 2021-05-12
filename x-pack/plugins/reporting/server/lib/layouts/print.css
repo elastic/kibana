@@ -96,12 +96,12 @@ discover-app .discover-table-footer {
 *  Dashboard tweaks
 */
 
-.dshAppContainer .embPanel__header {
+.dashboardViewport .embPanel__header {
   /* hide the panel heading with the controls and title */
-  display: none !important
+  display: none !important;
 }
 
-.dshAppContainer .euiPanel {
+.dashboardViewport .euiPanel {
   /* Remove the border from the eui panel */
   border: none !important;
 }
@@ -114,7 +114,7 @@ discover-app .discover-table-footer {
  * 2. React grid item's transform affects the visualizations, even when they are using fixed positioning. Chrome seems
  * to handle this fine, but firefox moves the visualizations around.
  */
-.dshAppContainer .react-grid-item {
+.dashboardViewport .react-grid-item {
   height: 0 !important; /* 1. */
   width: 0 !important; /* 1. */
   transform: none !important; /* 2. */
