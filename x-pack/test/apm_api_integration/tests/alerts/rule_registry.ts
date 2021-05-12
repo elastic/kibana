@@ -266,7 +266,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               '@timestamp': 'desc',
             },
           },
-          allow_no_indices: true,
         });
 
         expect(beforeDataResponse.body.hits.hits.length).to.be(0);
