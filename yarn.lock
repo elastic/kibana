@@ -2726,7 +2726,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
+"@kbn/telemetry-tools@link:bazel-bin/packages/kbn-telemetry-tools/npm_module":
   version "0.0.0"
   uid ""
 
