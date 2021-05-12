@@ -39,7 +39,7 @@ export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
-): ISearchStrategy<IEsSearchRequest> => {
+): ISearchStrategy => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     try {
       await esClient.asCurrentUser.asyncSearch.delete({ id });

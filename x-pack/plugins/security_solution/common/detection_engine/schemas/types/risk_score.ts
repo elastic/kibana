@@ -12,6 +12,7 @@ import { Either } from 'fp-ts/lib/Either';
  * Types the risk score as:
  *   - Natural Number (positive integer and not a float),
  *   - Between the values [0 and 100] inclusive.
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const RiskScore = new t.Type<number, number, unknown>(
   'RiskScore',

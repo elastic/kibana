@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../../constants.mock';
+import { EntryList } from '@kbn/securitysolution-io-ts-utils';
 
-import { EntryList } from './entry_list';
+import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../../constants.mock';
 
 export const getEntryListMock = (): EntryList => ({
   field: FIELD,

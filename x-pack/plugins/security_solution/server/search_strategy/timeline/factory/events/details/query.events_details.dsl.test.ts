@@ -40,7 +40,10 @@ describe('buildTimelineDetailsQuery', () => {
             },
           ],
           "fields": Array [
-            "*",
+            Object {
+              "field": "*",
+              "include_unmapped": true,
+            },
           ],
           "query": Object {
             "terms": Object {

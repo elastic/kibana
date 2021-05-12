@@ -22,8 +22,8 @@ jest.mock('../../../../app_logic', () => ({
 const spyScrollTo = jest.fn();
 Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
 
-import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
+import { SchemaType } from '../../../../../shared/schema/types';
 import { AppLogic } from '../../../../app_logic';
 
 import {
@@ -54,7 +54,7 @@ describe('SchemaLogic', () => {
     addFieldFormErrors: null,
     mostRecentIndexJob: {},
     fieldCoercionErrors: {},
-    newFieldType: TEXT,
+    newFieldType: SchemaType.Text,
     rawFieldName: '',
     formUnchanged: true,
     dataLoading: true,
@@ -113,7 +113,7 @@ describe('SchemaLogic', () => {
       expect(SchemaLogic.values.activeSchema).toEqual(schema);
       expect(SchemaLogic.values.serverSchema).toEqual(schema);
       expect(SchemaLogic.values.mostRecentIndexJob).toEqual(mostRecentIndexJob);
-      expect(SchemaLogic.values.newFieldType).toEqual(TEXT);
+      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Text);
       expect(SchemaLogic.values.addFieldFormErrors).toEqual(null);
       expect(SchemaLogic.values.formUnchanged).toEqual(true);
       expect(SchemaLogic.values.showAddFieldModal).toEqual(false);
@@ -128,10 +128,9 @@ describe('SchemaLogic', () => {
     });
 
     it('updateNewFieldType', () => {
-      const NUMBER = 'number';
-      SchemaLogic.actions.updateNewFieldType(NUMBER);
+      SchemaLogic.actions.updateNewFieldType(SchemaType.Number);
 
-      expect(SchemaLogic.values.newFieldType).toEqual(NUMBER);
+      expect(SchemaLogic.values.newFieldType).toEqual(SchemaType.Number);
     });
 
     it('onFieldUpdate', () => {
@@ -313,16 +312,16 @@ describe('SchemaLogic', () => {
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         const newSchema = {
           ...schema,
-          bar: 'number',
+          bar: SchemaType.Number,
         };
-        SchemaLogic.actions.addNewField('bar', 'number');
+        SchemaLogic.actions.addNewField('bar', SchemaType.Number);
 
         expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
       });
 
       it('handles duplicate', () => {
         SchemaLogic.actions.onInitializeSchema(serverResponse);
-        SchemaLogic.actions.addNewField('foo', 'number');
+        SchemaLogic.actions.addNewField('foo', SchemaType.Number);
 
         expect(setErrorMessage).toHaveBeenCalledWith('New field already exists: foo.');
       });
@@ -332,9 +331,9 @@ describe('SchemaLogic', () => {
       const onFieldUpdateSpy = jest.spyOn(SchemaLogic.actions, 'onFieldUpdate');
       SchemaLogic.actions.onInitializeSchema(serverResponse);
       const newSchema = {
-        foo: 'number',
+        foo: SchemaType.Number,
       };
-      SchemaLogic.actions.updateExistingFieldType('foo', 'number');
+      SchemaLogic.actions.updateExistingFieldType('foo', SchemaType.Number);
 
       expect(onFieldUpdateSpy).toHaveBeenCalledWith({ schema: newSchema, formUnchanged: false });
     });
@@ -455,7 +454,7 @@ describe('SchemaLogic', () => {
       it('handles filtered response', () => {
         const newSchema = {
           ...schema,
-          bar: 'number',
+          bar: SchemaType.Number,
         };
         SchemaLogic.actions.onInitializeSchema(serverResponse);
         SchemaLogic.actions.onFieldUpdate({ schema: newSchema, formUnchanged: false });

@@ -9,10 +9,17 @@ import { initialEventFiltersPageState } from './builders';
 import { eventFiltersPageReducer } from './reducer';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
+import { UserChangedUrl } from '../../../../common/store/routing/action';
+import { getListPageIsActive } from './selector';
+import { EventFiltersListPageState } from '../types';
 
-const initialState = initialEventFiltersPageState();
+describe('event filters reducer', () => {
+  let initialState: EventFiltersListPageState;
 
-describe('reducer', () => {
+  beforeEach(() => {
+    initialState = initialEventFiltersPageState();
+  });
+
   describe('EventFiltersForm', () => {
     it('sets the initial form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
@@ -37,9 +44,10 @@ describe('reducer', () => {
     it('change form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       const nameChanged = 'name changed';
+      const newComment = 'new comment';
       const result = eventFiltersPageReducer(initialState, {
         type: 'eventFiltersChangeForm',
-        payload: { entry: { ...entry, name: nameChanged } },
+        payload: { entry: { ...entry, name: nameChanged }, newComment },
       });
 
       expect(result).toStrictEqual({
@@ -50,6 +58,7 @@ describe('reducer', () => {
             ...entry,
             name: nameChanged,
           },
+          newComment,
           hasNameError: false,
           submissionResourceState: {
             type: 'UninitialisedResourceState',
@@ -79,50 +88,64 @@ describe('reducer', () => {
       });
     });
 
-    it('create is success when there is no entry on entries list', () => {
-      const result = eventFiltersPageReducer(initialState, {
+    it('create is success and force list refresh', () => {
+      const initialStateWithListPageActive = {
+        ...initialState,
+        listPage: { ...initialState.listPage, active: true },
+      };
+      const result = eventFiltersPageReducer(initialStateWithListPageActive, {
         type: 'eventFiltersCreateSuccess',
-        payload: {
-          exception: createdEventFilterEntryMock(),
-        },
       });
 
       expect(result).toStrictEqual({
-        ...initialState,
-        entries: [createdEventFilterEntryMock()],
-      });
-    });
-
-    it('create is success when there there are entries on entries list', () => {
-      const customizedInitialState = {
-        ...initialState,
-        entries: [createdEventFilterEntryMock(), createdEventFilterEntryMock()],
-      };
-      const result = eventFiltersPageReducer(customizedInitialState, {
-        type: 'eventFiltersCreateSuccess',
-        payload: {
-          exception: { ...createdEventFilterEntryMock(), meta: {} },
+        ...initialStateWithListPageActive,
+        listPage: {
+          ...initialStateWithListPageActive.listPage,
+          forceRefresh: true,
         },
       });
-
-      expect(result.entries).toHaveLength(3);
-      expect(result.entries[0]!.meta).not.toBeUndefined();
     });
   });
   describe('UserChangedUrl', () => {
-    it('receives a url change with show=create', () => {
-      const result = eventFiltersPageReducer(initialState, {
-        type: 'userChangedUrl',
-        payload: { search: '?show=create', pathname: '/event_filters', hash: '' },
+    const userChangedUrlAction = (
+      search: string = '',
+      pathname = '/event_filters'
+    ): UserChangedUrl => ({
+      type: 'userChangedUrl',
+      payload: { search, pathname, hash: '' },
+    });
+
+    describe('When url is the Event List page', () => {
+      it('should mark page active when on the list url', () => {
+        const result = eventFiltersPageReducer(initialState, userChangedUrlAction());
+        expect(getListPageIsActive(result)).toBe(true);
       });
 
-      expect(result).toStrictEqual({
-        ...initialState,
-        location: {
-          ...initialState.location,
-          id: undefined,
-          show: 'create',
-        },
+      it('should mark page not active when not on the list url', () => {
+        const result = eventFiltersPageReducer(
+          initialState,
+          userChangedUrlAction('', '/some-other-page')
+        );
+        expect(getListPageIsActive(result)).toBe(false);
+      });
+    });
+
+    describe('When `show=create`', () => {
+      it('receives a url change with show=create', () => {
+        const result = eventFiltersPageReducer(initialState, userChangedUrlAction('?show=create'));
+
+        expect(result).toStrictEqual({
+          ...initialState,
+          location: {
+            ...initialState.location,
+            id: undefined,
+            show: 'create',
+          },
+          listPage: {
+            ...initialState.listPage,
+            active: true,
+          },
+        });
       });
     });
   });
