@@ -4,6 +4,11 @@ This directory contains generated docs using `typedoc` for the cases client API 
 plugins. This README will describe how to generate a new version of these markdown docs in the event that new methods
 or parameters are added.
 
+## TypeDoc Info
+
+See more info at: <https://typedoc.org/>
+and: <https://www.npmjs.com/package/typedoc-plugin-markdown> for the markdown plugin
+
 ## Install dependencies
 
 ```bash

@@ -51,14 +51,13 @@ export interface PluginsStart {
 
 /**
  * Cases server exposed contract for interacting with cases entities.
- *
- * @public
  */
 export interface PluginsStartContract {
   /**
    * Returns a client which can be used to interact with the cases backend entities.
    *
    * @param request a KibanaRequest
+   * @returns a {@link CasesClient}
    */
   getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
 }
