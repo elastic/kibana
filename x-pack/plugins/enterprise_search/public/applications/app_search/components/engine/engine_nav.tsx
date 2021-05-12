@@ -70,6 +70,7 @@ export const EngineNav: React.FC = () => {
     dataLoading,
     isSampleEngine,
     isMetaEngine,
+    hasSchemaErrors,
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
     engine,
@@ -131,6 +132,16 @@ export const EngineNav: React.FC = () => {
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
             <EuiFlexItem>{SCHEMA_TITLE}</EuiFlexItem>
             <EuiFlexItem className="appSearchNavIcons">
+              {hasSchemaErrors && (
+                <EuiIcon
+                  type="alert"
+                  color="danger"
+                  title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
+                    defaultMessage: 'Schema change errors',
+                  })}
+                  data-test-subj="EngineNavSchemaErrors"
+                />
+              )}
               {hasUnconfirmedSchemaFields && (
                 <EuiIcon
                   type="iInCircle"
