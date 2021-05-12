@@ -70,8 +70,8 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             timeout: {
-              value: 1600,
-              type: 'integer',
+              value: '16s',
+              type: 'text',
             },
             max_redirects: {
               value: 0,
@@ -173,7 +173,7 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             timeout: {
-              type: 'integer',
+              type: 'text',
             },
             max_redirects: {
               type: 'integer',
@@ -246,7 +246,7 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             timeout: {
-              type: 'integer',
+              type: 'text',
             },
             max_redirects: {
               type: 'integer',
@@ -311,7 +311,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     });
   });
 
-  it('handles updating each field', async () => {
+  it('handles updating fields', async () => {
     const { getByLabelText } = render(<WrappedComponent />);
     const url = getByLabelText('URL') as HTMLInputElement;
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
@@ -336,6 +336,54 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     expect(apmServiceName.value).toEqual('APM Service');
     expect(maxRedirects.value).toEqual('2');
     expect(timeout.value).toEqual('3');
+
+    await waitFor(() => {
+      expect(onChange).toBeCalledWith({
+        isValid: true,
+        updatedPolicy: {
+          ...defaultNewPolicy,
+          inputs: [
+            {
+              ...defaultNewPolicy.inputs[0],
+              streams: [
+                {
+                  ...defaultNewPolicy.inputs[0].streams[0],
+                  vars: {
+                    ...defaultNewPolicy.inputs[0].streams[0].vars,
+                    urls: {
+                      value: 'http://elastic.co',
+                      type: 'text',
+                    },
+                    proxy_url: {
+                      value: 'http://proxy.co',
+                      type: 'text',
+                    },
+                    schedule: {
+                      value: '"@every 1m"',
+                      type: 'text',
+                    },
+                    'service.name': {
+                      value: 'APM Service',
+                      type: 'text',
+                    },
+                    max_redirects: {
+                      value: '2',
+                      type: 'integer',
+                    },
+                    timeout: {
+                      value: '3s',
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            defaultNewPolicy.inputs[1],
+            defaultNewPolicy.inputs[2],
+          ],
+        },
+      });
+    });
   });
 
   it('handles calling onChange', async () => {

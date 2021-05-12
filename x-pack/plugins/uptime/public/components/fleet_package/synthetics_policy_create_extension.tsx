@@ -9,7 +9,7 @@ import React, { memo, useContext, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
-import { Config, ConfigKeys } from './types';
+import { Config, ConfigKeys, DataStream } from './types';
 import {
   SimpleFieldsContext,
   HTTPAdvancedFieldsContext,
@@ -63,6 +63,11 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
           ...httpAdvancedFields,
           ...tcpAdvancedFields,
           ...tlsFields,
+          // ensure proxyUrl is not overwritten
+          [ConfigKeys.PROXY_URL]:
+            simpleFields[ConfigKeys.MONITOR_TYPE] === DataStream.HTTP
+              ? httpAdvancedFields[ConfigKeys.PROXY_URL]
+              : tcpAdvancedFields[ConfigKeys.PROXY_URL],
         }));
       },
       250,
