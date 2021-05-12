@@ -123,6 +123,12 @@ const NetworkDetailsComponent: React.FC = () => {
     ip,
   ]);
 
+  // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
+  const shouldSkip = useMemo(() => isInitializing || filterQuery === undefined, [
+    isInitializing,
+    filterQuery,
+  ]);
+
   return (
     <div data-test-subj="network-details-page">
       {indicesExist ? (
@@ -177,7 +183,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing || filterQuery === undefined}
+                  skip={shouldSkip}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -192,7 +198,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   filterQuery={filterQuery}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing || filterQuery === undefined}
+                  skip={shouldSkip}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -211,7 +217,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing || filterQuery === undefined}
+                  skip={shouldSkip}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -226,7 +232,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   filterQuery={filterQuery}
                   indexNames={selectedPatterns}
                   ip={ip}
-                  skip={isInitializing || filterQuery === undefined}
+                  skip={shouldSkip}
                   startDate={from}
                   type={type}
                   setQuery={setQuery}
@@ -243,7 +249,7 @@ const NetworkDetailsComponent: React.FC = () => {
               flowTarget={flowTarget}
               indexNames={selectedPatterns}
               ip={ip}
-              skip={isInitializing || filterQuery === undefined}
+              skip={shouldSkip}
               startDate={from}
               type={type}
               setQuery={setQuery}
@@ -256,7 +262,7 @@ const NetworkDetailsComponent: React.FC = () => {
               filterQuery={filterQuery}
               indexNames={selectedPatterns}
               ip={ip}
-              skip={isInitializing || filterQuery === undefined}
+              skip={shouldSkip}
               startDate={from}
               type={type}
               setQuery={setQuery}
@@ -271,7 +277,7 @@ const NetworkDetailsComponent: React.FC = () => {
               indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
-              skip={isInitializing || filterQuery === undefined}
+              skip={shouldSkip}
               startDate={from}
               type={type}
             />
@@ -283,7 +289,7 @@ const NetworkDetailsComponent: React.FC = () => {
               setQuery={setQuery}
               startDate={from}
               endDate={to}
-              skip={isInitializing || filterQuery === undefined}
+              skip={shouldSkip}
               indexNames={selectedPatterns}
               ip={ip}
               type={type}
