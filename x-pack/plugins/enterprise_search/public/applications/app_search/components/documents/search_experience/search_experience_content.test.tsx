@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 // @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaType } from '../../../../shared/schema/types';
 
 import { Pagination } from './pagination';
 import { SearchExperienceContent } from './search_experience_content';
@@ -33,7 +33,7 @@ describe('SearchExperienceContent', () => {
     myRole: { canManageEngineDocuments: true },
     engine: {
       schema: {
-        title: 'string' as SchemaTypes,
+        title: SchemaType.Text,
       },
     },
   };

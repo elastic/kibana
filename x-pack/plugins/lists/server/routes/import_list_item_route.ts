@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import type { ListsPluginRouter } from '../types';
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
 import { importListItemQuerySchema, listSchema } from '../../common/schemas';
 import { ConfigType } from '../config';
 

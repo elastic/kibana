@@ -16,7 +16,7 @@ export interface ExpectedSectionTable {
   expectedEntries: ExpectedSectionTableEntries;
 }
 
-export type AnalyticsTableRowDetails = Record<'jobDetails' | 'jobStats', ExpectedSectionTable[]>;
+export type AnalyticsTableRowDetails = Record<'jobDetails', ExpectedSectionTable[]>;
 export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
@@ -395,14 +395,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       }
     }
 
-    public async assertJobStatsTabContent(jobId: string, sections: ExpectedSectionTable[]) {
+    public async assertJobStatsTabContent(jobId: string) {
       const tabSubject = 'job-stats';
       await this.ensureDetailsTabOpen(jobId, tabSubject);
       await this.assertDetailsSectionExists(jobId, 'stats');
-
-      for (const { section, expectedEntries } of sections) {
-        await this.assertRowDetailsSectionContent(jobId, section, expectedEntries);
-      }
+      await this.assertDetailsSectionExists(jobId, 'analysisStats');
     }
 
     public async assertJsonTabContent(jobId: string) {
@@ -431,7 +428,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
           'job-messages',
         ]);
         await this.assertJobDetailsTabContent(jobId, expectedRowDetails.jobDetails);
-        await this.assertJobStatsTabContent(jobId, expectedRowDetails.jobStats);
+        await this.assertJobStatsTabContent(jobId);
         await this.assertJsonTabContent(jobId);
         await this.assertJobMessagesTabContent(jobId);
       });

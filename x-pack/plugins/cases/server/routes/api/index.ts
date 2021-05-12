@@ -38,6 +38,7 @@ import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
 import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
 import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { initGetCaseIdsByAlertIdApi } from './cases/alerts/get_cases';
 
 /**
  * Default page number when interacting with the saved objects API.
@@ -86,4 +87,6 @@ export function initCaseApi(deps: RouteDeps) {
   initGetCasesStatusApi(deps);
   // Tags
   initGetTagsApi(deps);
+  // Alerts
+  initGetCaseIdsByAlertIdApi(deps);
 }

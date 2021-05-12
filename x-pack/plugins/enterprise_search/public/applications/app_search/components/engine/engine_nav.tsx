@@ -124,8 +124,8 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineSchema && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_SCHEMA_PATH))}
+          to={generateEnginePath(ENGINE_SCHEMA_PATH)}
+          shouldShowActiveForSubroutes
           data-test-subj="EngineSchemaLink"
         >
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">

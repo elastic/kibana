@@ -21,7 +21,6 @@
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
           "infrastructure-ui-source": "ddc0ecb18383f6b26101a2fadb2dab0c",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
-          "map": "23d7aa4a720d4938ccde3983f87bd58d",
           "maps-telemetry": "a4229f8b16a6820c6d724b7e0c1f729d",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "ml-telemetry": "257fd1d4b4fdbb9cb4b8a3b27da201e9",
@@ -419,7 +418,8 @@
         "map": {
           "properties": {
             "bounds": {
-              "type": "geo_shape"
+              "dynamic": false,
+              "properties": {}
             },
             "description": {
               "type": "text"

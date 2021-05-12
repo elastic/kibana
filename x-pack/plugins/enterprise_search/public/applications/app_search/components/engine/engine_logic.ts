@@ -8,8 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpLogic } from '../../../shared/http';
-
-import { IIndexingStatus } from '../../../shared/types';
+import { IIndexingStatus } from '../../../shared/schema/types';
 
 import { EngineDetails, EngineTypes } from './types';
 

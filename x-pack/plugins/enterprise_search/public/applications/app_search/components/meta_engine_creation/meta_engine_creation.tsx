@@ -65,7 +65,7 @@ export const MetaEngineCreation: React.FC = () => {
     submitEngine,
   } = useActions(MetaEngineCreationLogic);
 
-  const { rawName, name, indexedEngineNames, selectedIndexedEngineNames } = useValues(
+  const { rawName, name, indexedEngineNames, selectedIndexedEngineNames, isLoading } = useValues(
     MetaEngineCreationLogic
   );
 
@@ -157,10 +157,11 @@ export const MetaEngineCreation: React.FC = () => {
               selectedIndexedEngineNames.length === 0 ||
               selectedIndexedEngineNames.length > maxEnginesPerMetaEngine
             }
+            isLoading={isLoading}
             type="submit"
             data-test-subj="NewMetaEngineSubmitButton"
-            fill
             color="secondary"
+            fill
           >
             {META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
           </EuiButton>

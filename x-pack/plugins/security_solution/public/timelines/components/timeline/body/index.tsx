@@ -13,6 +13,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
+import { ControlColumnProps } from './control_columns';
 import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import {
   FIRST_ARIA_INDEX,
@@ -48,6 +49,8 @@ interface OwnProps {
   refetch: inputsModel.Refetch;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  leadingControlColumns: ControlColumnProps[];
+  trailingControlColumns: ControlColumnProps[];
   tabType: TimelineTabs;
   totalPages: number;
   onRuleChange?: () => void;
@@ -92,6 +95,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     sort,
     tabType,
     totalPages,
+    leadingControlColumns = [],
+    trailingControlColumns = [],
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const { getManageTimelineById } = useManageTimeline();
@@ -165,12 +170,40 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       () =>
         columnHeaders.reduce(
           (totalWidth, header) => totalWidth + (header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH),
-          actionsColumnWidth
+          0
         ),
-      [actionsColumnWidth, columnHeaders]
+      [columnHeaders]
     );
 
+    const leadingActionColumnsWidth = useMemo(() => {
+      return leadingControlColumns
+        ? leadingControlColumns.reduce(
+            (totalWidth, header) =>
+              header.width ? totalWidth + header.width : totalWidth + actionsColumnWidth,
+            0
+          )
+        : 0;
+    }, [actionsColumnWidth, leadingControlColumns]);
+
+    const trailingActionColumnsWidth = useMemo(() => {
+      return trailingControlColumns
+        ? trailingControlColumns.reduce(
+            (totalWidth, header) =>
+              header.width ? totalWidth + header.width : totalWidth + actionsColumnWidth,
+            0
+          )
+        : 0;
+    }, [actionsColumnWidth, trailingControlColumns]);
+
+    const totalWidth = useMemo(() => {
+      return columnWidths + leadingActionColumnsWidth + trailingActionColumnsWidth;
+    }, [columnWidths, leadingActionColumnsWidth, trailingActionColumnsWidth]);
+
     const [lastFocusedAriaColindex] = useState(FIRST_ARIA_INDEX);
+
+    const columnCount = useMemo(() => {
+      return columnHeaders.length + trailingControlColumns.length + leadingControlColumns.length;
+    }, [columnHeaders, trailingControlColumns, leadingControlColumns]);
 
     const onKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
@@ -192,9 +225,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
           <EventsTable
             $activePage={activePage}
-            $columnCount={columnHeaders.length + 1}
+            $columnCount={columnCount}
             data-test-subj={`${tabType}-events-table`}
-            columnWidths={columnWidths}
+            columnWidths={totalWidth}
             onKeyDown={onKeyDown}
             $rowCount={data.length}
             $totalPages={totalPages}
@@ -211,6 +244,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               sort={sort}
               tabType={tabType}
               timelineId={id}
+              leadingControlColumns={leadingControlColumns}
+              trailingControlColumns={trailingControlColumns}
             />
 
             <Events
@@ -232,6 +267,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
+              leadingControlColumns={leadingControlColumns}
+              trailingControlColumns={trailingControlColumns}
               tabType={tabType}
             />
           </EventsTable>

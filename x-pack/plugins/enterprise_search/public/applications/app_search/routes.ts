@@ -35,8 +35,8 @@ export const ENGINE_ANALYTICS_QUERY_DETAIL_PATH = `${ENGINE_ANALYTICS_QUERY_DETA
 export const ENGINE_DOCUMENTS_PATH = `${ENGINE_PATH}/documents`;
 export const ENGINE_DOCUMENT_DETAIL_PATH = `${ENGINE_DOCUMENTS_PATH}/:documentId`;
 
-export const ENGINE_SCHEMA_PATH = `${ENGINE_PATH}/schema/edit`;
-export const ENGINE_REINDEX_JOB_PATH = `${ENGINE_PATH}/reindex-job/:activeReindexJobId`;
+export const ENGINE_SCHEMA_PATH = `${ENGINE_PATH}/schema`;
+export const ENGINE_REINDEX_JOB_PATH = `${ENGINE_SCHEMA_PATH}/reindex_job/:reindexJobId`;
 
 export const ENGINE_CRAWLER_PATH = `${ENGINE_PATH}/crawler`;
 // TODO: Crawler sub-pages

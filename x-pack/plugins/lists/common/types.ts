@@ -18,7 +18,7 @@ export type SavedObjectType = 'exception-list' | 'exception-list-agnostic';
  *
  * will yield a type of:
  * type A = { a: undefined; b: number; }
- *
+ * @deprecated This has no replacement. We should stop using/relying on this and just remove it.
  */
 export type RequiredKeepUndefined<T> = { [K in keyof T]-?: [T[K]] } extends infer U
   ? U extends Record<keyof U, [unknown]>

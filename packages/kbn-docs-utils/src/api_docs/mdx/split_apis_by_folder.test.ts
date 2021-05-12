@@ -34,7 +34,7 @@ beforeAll(() => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: KibanaPlatformPlugin[] = [pluginA];
 
-  doc = getPluginApi(project, plugins[0], plugins, log);
+  doc = getPluginApi(project, plugins[0], plugins, log, false);
 });
 
 test('foo service has all exports', () => {

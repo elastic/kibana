@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from 'src/core/server';
 import { AgentService } from '../../../../fleet/server';
-import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
-import { AGENT_EVENT_SAVED_OBJECT_TYPE } from './../../../../fleet/common/constants/agent';
 import { defaultPackages as FleetDefaultPackages } from '../../../../fleet/common';
 
 export const FLEET_ENDPOINT_PACKAGE_CONSTANT = FleetDefaultPackages.Endpoint;
+
+export const AGENT_EVENT_SAVED_OBJECT_TYPE = 'donotexistsanymore-since-7.13';
 
 export const getEndpointIntegratedFleetMetadata = async (
   agentService: AgentService | undefined,
@@ -36,15 +40,6 @@ export const getEndpointIntegratedFleetMetadata = async (
 export const getLatestFleetEndpointEvent = async (
   savedObjectsClient: SavedObjectsClientContract,
   agentId: string
-) =>
-  savedObjectsClient.find<AgentEventSOAttributes>({
-    // Get the most recent endpoint event.
-    type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    fields: ['agent_id', 'subtype', 'payload'],
-    filter: `${AGENT_EVENT_SAVED_OBJECT_TYPE}.attributes.message: "${FLEET_ENDPOINT_PACKAGE_CONSTANT}"`,
-    perPage: 1,
-    sortField: 'timestamp',
-    sortOrder: 'desc',
-    search: agentId,
-    searchFields: ['agent_id'],
-  });
+): Promise<SavedObjectsFindResponse> =>
+  // Agent events saved object do not exists in Fleet anymore
+  ({ total: 0, saved_objects: [], page: 0, per_page: 0 });

@@ -6,8 +6,8 @@ These tooltips give users an in-depth insight into what's going on in the map.
 
 If more than one feature exists at a location, the tooltip displays the
 attributes for the top feature, and notes the number of features at that location.
-The following image shows a tooltip with three features at the current location.
-The tooltip displays attributes for the top feature, the green circle.
+The following image has a tooltip with three features at the current location: a green circle from the *Total Sales Revenue* layer, a blue New York State polygon from *United States* layer, and a red United States Country polygon from the *World Countries* layer.
+The tooltip displays attributes for the top feature, the green circle, from the *Total Sales Revenue* layer.
 
 [role="screenshot"]
 image::maps/images/multifeature_tooltip.png[]

@@ -115,7 +115,7 @@ export const getRenderCellValueFn = (
   if (typeof rowFlattened[columnId] === 'object' && isDetails) {
     return (
       <JsonCodeEditor
-        json={rowFlattened[columnId] as Record<string, any>}
+        json={rowFlattened[columnId] as Record<string, unknown>}
         width={defaultMonacoEditorWidth}
       />
     );
@@ -123,7 +123,8 @@ export const getRenderCellValueFn = (
 
   if (field && field.type === '_source') {
     if (isDetails) {
-      return <JsonCodeEditor json={row} width={defaultMonacoEditorWidth} />;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return <JsonCodeEditor json={row as any} width={defaultMonacoEditorWidth} />;
     }
     const formatted = indexPattern.formatHit(row);
 

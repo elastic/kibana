@@ -55,6 +55,7 @@ dates, geopoints,
 and numbers.
 
 [float]
+[[kibana-concepts-searching-your-data]]
 === Searching your data
 
 {kib} provides you several ways to build search queries,

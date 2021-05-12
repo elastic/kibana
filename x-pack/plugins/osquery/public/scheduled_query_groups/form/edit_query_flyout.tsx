@@ -91,7 +91,7 @@ export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
 
   return (
     <EuiPortal>
-      <EuiFlyout size="s" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
+      <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">

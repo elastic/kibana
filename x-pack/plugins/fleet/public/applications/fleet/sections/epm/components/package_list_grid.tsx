@@ -6,12 +6,13 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiTitle,
   // @ts-ignore
@@ -33,9 +34,18 @@ interface ListProps {
   controls?: ReactNode;
   title: string;
   list: PackageList;
+  setSelectedCategory?: (category: string) => void;
+  showMissingIntegrationMessage?: boolean;
 }
 
-export function PackageListGrid({ isLoading, controls, title, list }: ListProps) {
+export function PackageListGrid({
+  isLoading,
+  controls,
+  title,
+  list,
+  setSelectedCategory = () => {},
+  showMissingIntegrationMessage = false,
+}: ListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
   const [query, setQuery] = useState<Query | null>(initialQuery);
@@ -58,6 +68,11 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
     }
   };
 
+  const resetQuery = () => {
+    setQuery(initialQuery);
+    setSearchTerm('');
+  };
+
   const controlsContent = <ControlsColumn title={title} controls={controls} />;
   let gridContent: JSX.Element;
 
@@ -71,7 +86,12 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
             .includes(item[searchIdField])
         )
       : list;
-    gridContent = <GridColumn list={filteredList} />;
+    gridContent = (
+      <GridColumn
+        list={filteredList}
+        showMissingIntegrationMessage={showMissingIntegrationMessage}
+      />
+    );
   }
 
   return (
@@ -90,6 +110,15 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
         />
         <EuiSpacer />
         {gridContent}
+        {showMissingIntegrationMessage && (
+          <>
+            <EuiSpacer size="xxl" />
+            <MissingIntegrationContent
+              resetQuery={resetQuery}
+              setSelectedCategory={setSelectedCategory}
+            />
+          </>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -117,9 +146,10 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
 
 interface GridColumnProps {
   list: PackageList;
+  showMissingIntegrationMessage?: boolean;
 }
 
-function GridColumn({ list }: GridColumnProps) {
+function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
@@ -129,17 +159,68 @@ function GridColumn({ list }: GridColumnProps) {
           </EuiFlexItem>
         ))
       ) : (
-        <EuiFlexItem>
+        <EuiFlexItem grow={3}>
           <EuiText>
             <p>
-              <FormattedMessage
-                id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                defaultMessage="No packages found"
-              />
+              {showMissingIntegrationMessage ? (
+                <FormattedMessage
+                  id="xpack.fleet.epmList.missingIntegrationPlaceholder"
+                  defaultMessage="We didn't find any integrations matching your search term. Please try another keyword or browse using the categories on the left."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
+                  defaultMessage="No packages found"
+                />
+              )}
             </p>
           </EuiText>
         </EuiFlexItem>
       )}
     </EuiFlexGrid>
+  );
+}
+
+interface MissingIntegrationContentProps {
+  resetQuery: () => void;
+  setSelectedCategory: (category: string) => void;
+}
+
+function MissingIntegrationContent({
+  resetQuery,
+  setSelectedCategory,
+}: MissingIntegrationContentProps) {
+  const handleCustomInputsLinkClick = useCallback(() => {
+    resetQuery();
+    setSelectedCategory('custom');
+  }, [resetQuery, setSelectedCategory]);
+
+  return (
+    <EuiText>
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.integrations.missing"
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations using our {discussForumLink}."
+          values={{
+            customInputsLink: (
+              <EuiLink onClick={handleCustomInputsLinkClick}>
+                <FormattedMessage
+                  id="xpack.fleet.integrations.customInputsLink"
+                  defaultMessage="custom inputs"
+                />
+              </EuiLink>
+            ),
+            discussForumLink: (
+              <EuiLink href="https://discuss.elastic.co/tag/fleet" external target="_blank">
+                <FormattedMessage
+                  id="xpack.fleet.integrations.discussForumLink"
+                  defaultMessage="discuss forum"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiText>
   );
 }
