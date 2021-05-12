@@ -104,7 +104,12 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_winlogbeat'],
+        moduleIds: [
+          'security_network',
+          'security_windows',
+          'siem_winlogbeat',
+          'siem_winlogbeat_auth',
+        ],
       },
     },
     {
@@ -144,6 +149,56 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         moduleIds: ['security_linux', 'security_network', 'security_windows'],
+      },
+    },
+    {
+      testTitleSuffix: 'for metricbeat dataset',
+      sourceDataArchive: 'ml/module_metricbeat',
+      indexPattern: 'ft_module_metricbeat',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['metricbeat_system_ecs', 'security_linux'],
+      },
+    },
+    {
+      testTitleSuffix: 'for siem clodutrail dataset',
+      sourceDataArchive: 'ml/module_siem_cloudtrail',
+      indexPattern: 'ft_module_siem_cloudtrail',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['siem_cloudtrail'],
+      },
+    },
+    {
+      testTitleSuffix: 'for metrics ui dataset',
+      sourceDataArchive: 'ml/module_metrics_ui',
+      indexPattern: 'ft_module_metrics_ui',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_linux'], // the metrics ui modules don't define a query and can't be recognized
+      },
+    },
+    {
+      testTitleSuffix: 'for apache data stream dataset',
+      sourceDataArchive: 'ml/module_apache_data_stream',
+      indexPattern: 'ft_module_apache_data_stream',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['apache_data_stream'],
+      },
+    },
+    {
+      testTitleSuffix: 'for nginx data stream dataset',
+      sourceDataArchive: 'ml/module_nginx_data_stream',
+      indexPattern: 'ft_module_nginx_data_stream',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['nginx_data_stream'],
       },
     },
   ];
