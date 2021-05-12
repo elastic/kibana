@@ -30,7 +30,7 @@ import { PartialFilter } from '../../types';
 export const patchRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null
 ) => {
   router.patch(
     {

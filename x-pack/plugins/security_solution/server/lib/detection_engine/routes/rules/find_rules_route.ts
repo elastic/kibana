@@ -22,7 +22,7 @@ import { transformFindAlerts } from './utils';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null
 ) => {
   router.get(
     {

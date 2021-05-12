@@ -24,7 +24,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 export const updateRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null
 ) => {
   router.put(
     {

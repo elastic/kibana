@@ -53,6 +53,26 @@ const TestProvidersComponent: React.FC<Props> = ({
     <MockKibanaContextProvider>
       <ReduxStoreProvider store={store}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+        </ThemeProvider>
+      </ReduxStoreProvider>
+    </MockKibanaContextProvider>
+  </I18nProvider>
+);
+
+/**
+ * A utility for wrapping children in the providers required to run most tests
+ * WITH user privileges provider.
+ */
+const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
+  children,
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  onDragEnd = jest.fn(),
+}) => (
+  <I18nProvider>
+    <MockKibanaContextProvider>
+      <ReduxStoreProvider store={store}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <UserPrivilegesProvider>
             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
           </UserPrivilegesProvider>
@@ -63,6 +83,7 @@ const TestProvidersComponent: React.FC<Props> = ({
 );
 
 export const TestProviders = React.memo(TestProvidersComponent);
+export const TestProvidersWithPrivileges = React.memo(TestProvidersWithPrivilegesComponent);
 
 export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => {
   return {

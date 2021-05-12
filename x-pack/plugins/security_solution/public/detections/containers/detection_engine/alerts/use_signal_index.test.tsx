@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { renderHook, act } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../../common/mock';
+import { TestProvidersWithPrivileges } from '../../../../common/mock';
 import { useSignalIndex, ReturnSignalIndex } from './use_signal_index';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
@@ -29,7 +29,7 @@ describe('useSignalIndex', () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
         {
-          wrapper: TestProviders,
+          wrapper: TestProvidersWithPrivileges,
         }
       );
       await waitForNextUpdate();
@@ -48,7 +48,7 @@ describe('useSignalIndex', () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
         {
-          wrapper: TestProviders,
+          wrapper: TestProvidersWithPrivileges,
         }
       );
       await waitForNextUpdate();
@@ -69,7 +69,7 @@ describe('useSignalIndex', () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
         {
-          wrapper: TestProviders,
+          wrapper: TestProvidersWithPrivileges,
         }
       );
       await waitForNextUpdate();
@@ -95,7 +95,7 @@ describe('useSignalIndex', () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
         {
-          wrapper: TestProviders,
+          wrapper: TestProvidersWithPrivileges,
         }
       );
       await waitForNextUpdate();
@@ -118,7 +118,7 @@ describe('useSignalIndex', () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
         {
-          wrapper: TestProviders,
+          wrapper: TestProvidersWithPrivileges,
         }
       );
       await waitForNextUpdate();
@@ -146,7 +146,7 @@ describe('useSignalIndex', () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
         {
-          wrapper: TestProviders,
+          wrapper: TestProvidersWithPrivileges,
         }
       );
       await waitForNextUpdate();

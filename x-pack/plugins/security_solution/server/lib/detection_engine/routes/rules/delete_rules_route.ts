@@ -23,7 +23,7 @@ import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_s
 
 export const deleteRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null
 ) => {
   router.delete(
     {
