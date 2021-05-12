@@ -10,7 +10,6 @@ import { MetricExpressionParams, Aggregators } from '../types';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { roundTimestamp } from '../../../../utils/round_timestamp';
 import { createPercentileAggregation } from './create_percentile_aggregation';
-import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
 
 const MINIMUM_BUCKETS = 5;
 const COMPOSITE_RESULTS_PER_PAGE = 100;
@@ -37,18 +36,17 @@ export const getElasticsearchMetricQuery = (
   }
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
+  const intervalAsMS = intervalAsSeconds * 1000;
 
   const to = roundTimestamp(timeframe ? timeframe.end : Date.now(), timeUnit);
   // We need enough data for 5 buckets worth of data. We also need
   // to convert the intervalAsSeconds to milliseconds.
-  const minimumFrom = to - intervalAsSeconds * 1000 * MINIMUM_BUCKETS;
+  const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
 
   const from = roundTimestamp(
     timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
     timeUnit
   );
-
-  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -67,14 +65,12 @@ export const getElasticsearchMetricQuery = (
 
   const baseAggs = {
     aggregatedIntervals: {
-      date_histogram: {
+      date_range: {
         field: timefield,
-        fixed_interval: interval,
-        offset,
-        extended_bounds: {
-          min: from,
-          max: to,
-        },
+        ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
+          from: from + intervalAsMS * i,
+          to: from + intervalAsMS * (i + 1),
+        })),
       },
       aggregations,
     },
