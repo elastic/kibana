@@ -117,7 +117,7 @@ describe('heatmap', () => {
             accessors: [{ columnId: 'y-accessor' }],
             filterOperations: isBucketed,
             supportsMoreColumns: false,
-            required: true,
+            required: false,
             dataTestSubj: 'lnsHeatmap_yDimensionPanel',
           },
           {
@@ -162,7 +162,7 @@ describe('heatmap', () => {
             accessors: [],
             filterOperations: isBucketed,
             supportsMoreColumns: true,
-            required: true,
+            required: false,
             dataTestSubj: 'lnsHeatmap_yDimensionPanel',
           },
           {

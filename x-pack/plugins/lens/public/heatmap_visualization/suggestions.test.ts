@@ -148,7 +148,7 @@ describe('heatmap suggestions', () => {
                 },
               },
             ],
-            changeType: 'reorder',
+            changeType: 'initial',
           },
           state: {
             layerId: 'first',
@@ -217,7 +217,7 @@ describe('heatmap suggestions', () => {
                 },
               },
             ],
-            changeType: 'reorder',
+            changeType: 'initial',
           },
           state: {
             layerId: 'first',
