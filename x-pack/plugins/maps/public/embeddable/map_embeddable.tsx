@@ -107,7 +107,7 @@ export class MapEmbeddable
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
-  private _prevFilters?: Filter[];
+  private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;

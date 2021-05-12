@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
-import { Action } from '../../../../src/plugins/ui_actions/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 
