@@ -30,7 +30,7 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
       sampleValues: Array.isArray(stats?.topValues)
         ? stats?.topValues.map((value) => value.key)
         : [],
-      sampleValuesColumnName: fieldName || '',
+      fieldName: fieldName || '',
     });
     setEMSSuggestion(suggestion);
   };

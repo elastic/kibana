@@ -9,10 +9,10 @@ import type { FileLayer } from '@elastic/ems-client';
 import { getEmsFileLayers } from '../util';
 import { emsWorldLayerId, emsRegionLayerId, emsUsaZipLayerId } from '../../common';
 
-export interface SampleValuesConfig {
+export interface AutoSuggestConfig {
   emsLayerIds?: string[];
   sampleValues?: Array<string | number>;
-  sampleValuesColumnName?: string;
+  fieldName?: string;
 }
 
 export interface EMSTermJoinConfig {
@@ -27,6 +27,13 @@ export enum MATCH_TYPE {
 }
 
 const wellKnownColumnNames = [
+  {
+    regex: /(country|countries)/i, // anything with country|countries in it (matches sample data)
+    emsConfig: {
+      layerId: emsWorldLayerId,
+      field: 'iso2',
+    },
+  },
   {
     regex: /(geo\.){0,}country_iso_code$/i, // ECS postfix for country
     emsConfig: {
@@ -46,13 +53,6 @@ const wellKnownColumnNames = [
     emsConfig: {
       layerId: emsWorldLayerId,
       field: 'name',
-    },
-  },
-  {
-    regex: /(country|countries)/i, // anything with country|countries in it (matches sample data)
-    emsConfig: {
-      layerId: emsWorldLayerId,
-      field: 'iso2',
     },
   },
 ];
@@ -80,12 +80,12 @@ interface UniqueMatch {
 }
 
 export async function suggestEMSTermJoinConfig(
-  sampleValuesConfig: SampleValuesConfig
+  sampleValuesConfig: AutoSuggestConfig
 ): Promise<EMSTermJoinConfig | null> {
   const matches: EMSTermJoinConfig[] = [];
 
-  if (sampleValuesConfig.sampleValuesColumnName) {
-    matches.push(...suggestByName(sampleValuesConfig.sampleValuesColumnName));
+  if (sampleValuesConfig.fieldName) {
+    matches.push(...suggestByName(sampleValuesConfig.fieldName));
   }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {

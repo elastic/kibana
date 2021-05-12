@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
+import { EMSTermJoinConfig, AutoSuggestConfig } from '../ems_autosuggest';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 export async function suggestEMSTermJoinConfig(
-  sampleValuesConfig: SampleValuesConfig
+  sampleValuesConfig: AutoSuggestConfig
 ): Promise<EMSTermJoinConfig | null> {
   const mapModules = await lazyLoadMapModules();
   return await mapModules.suggestEMSTermJoinConfig(sampleValuesConfig);

@@ -179,7 +179,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
         const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
           emsLayerIds: COMMON_EMS_LAYER_IDS,
           sampleValues: Array.from(entityValues),
-          sampleValuesColumnName: entityName || '',
+          fieldName: entityName || '',
         });
         if (suggestion) {
           return { jobId, ...suggestion };
