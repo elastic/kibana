@@ -151,6 +151,11 @@ const ScheduledQueryGroupFormComponent: React.FC<ScheduledQueryGroupFormProps> =
         // @ts-expect-error update types
         draft.inputs[0].streams.forEach((stream) => {
           delete stream.compiled_stream;
+
+          // we don't want to send id as null when creating the policy
+          if (stream.id == null) {
+            delete stream.id;
+          }
         });
         return draft;
       });

@@ -70,14 +70,12 @@ const testRule: Rule = {
 };
 
 describe('useRuleStatus', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
+
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
+
   afterEach(async () => {
     cleanup();
   });

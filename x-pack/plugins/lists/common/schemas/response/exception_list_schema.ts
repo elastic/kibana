@@ -6,24 +6,26 @@
  */
 
 import * as t from 'io-ts';
-
 import {
-  _versionOrUndefined,
   created_at,
   created_by,
   description,
   exceptionListType,
   id,
-  immutable,
-  list_id,
   metaOrUndefined,
   name,
-  namespace_type,
   osTypeArray,
   tags,
-  tie_breaker_id,
   updated_at,
   updated_by,
+} from '@kbn/securitysolution-io-ts-utils';
+
+import {
+  _versionOrUndefined,
+  immutable,
+  list_id,
+  namespace_type,
+  tie_breaker_id,
   version,
 } from '../common/schemas';
 
