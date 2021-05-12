@@ -22,7 +22,7 @@ import { SeriesBuilder } from './series_builder/series_builder';
 export function ExploratoryView({
   saveAttributes,
 }: {
-  saveAttributes: () => TypedLensByValueInput['attributes'] | null;
+  saveAttributes: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   const {
     services: { lens, notifications },
@@ -68,7 +68,10 @@ export function ExploratoryView({
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
-    saveAttributes(lensAttributesT);
+    if (saveAttributes) {
+      saveAttributes(lensAttributesT);
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
