@@ -22,7 +22,9 @@ describe('useGetTags', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() =>
+        useGetTags(['securitySolution'])
+      );
       await waitForNextUpdate();
       expect(result.current).toEqual({
         tags: [],
@@ -36,7 +38,9 @@ describe('useGetTags', () => {
   it('calls getTags api', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { waitForNextUpdate } = renderHook<string, UseGetTags>(() =>
+        useGetTags(['securitySolution'])
+      );
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal);
@@ -45,7 +49,9 @@ describe('useGetTags', () => {
 
   it('fetch tags', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() =>
+        useGetTags(['securitySolution'])
+      );
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -60,7 +66,9 @@ describe('useGetTags', () => {
   it('refetch tags', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() =>
+        useGetTags(['securitySolution'])
+      );
       await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.fetchTags();
@@ -75,7 +83,9 @@ describe('useGetTags', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() => useGetTags());
+      const { result, waitForNextUpdate } = renderHook<string, UseGetTags>(() =>
+        useGetTags(['securitySolution'])
+      );
       await waitForNextUpdate();
       await waitForNextUpdate();
 

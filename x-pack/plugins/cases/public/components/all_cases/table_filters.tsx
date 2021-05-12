@@ -64,8 +64,8 @@ const CasesTableFiltersComponent = ({
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const { tags, fetchTags } = useGetTags();
-  const { reporters, respReporters, fetchReporters } = useGetReporters();
+  const { tags, fetchTags } = useGetTags(initial.owner);
+  const { reporters, respReporters, fetchReporters } = useGetReporters(initial.owner);
 
   const refetch = useCallback(() => {
     fetchTags();

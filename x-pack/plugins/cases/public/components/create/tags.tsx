@@ -14,10 +14,11 @@ const CommonUseField = getUseField({ component: Field });
 
 interface Props {
   isLoading: boolean;
+  owner: string[];
 }
 
-const TagsComponent: React.FC<Props> = ({ isLoading }) => {
-  const { tags: tagOptions, isLoading: isLoadingTags } = useGetTags();
+const TagsComponent: React.FC<Props> = ({ isLoading, owner }) => {
+  const { tags: tagOptions, isLoading: isLoadingTags } = useGetTags(owner);
   const options = useMemo(
     () =>
       tagOptions.map((label) => ({

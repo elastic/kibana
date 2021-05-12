@@ -37,6 +37,7 @@ const defaultProps = {
   isLoading: false,
   onSubmit,
   tags: [],
+  owner: ['securitySolution'],
 };
 
 describe('TagList ', () => {

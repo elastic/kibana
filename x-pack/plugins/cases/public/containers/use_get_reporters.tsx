@@ -31,7 +31,7 @@ export interface UseGetReporters extends ReportersState {
   fetchReporters: () => void;
 }
 
-export const useGetReporters = (): UseGetReporters => {
+export const useGetReporters = (owner: string[]): UseGetReporters => {
   const [reportersState, setReporterState] = useState<ReportersState>(initialData);
 
   const toasts = useToasts();
@@ -48,7 +48,7 @@ export const useGetReporters = (): UseGetReporters => {
         isLoading: true,
       });
 
-      const response = await getReporters(abortCtrlRef.current.signal);
+      const response = await getReporters(abortCtrlRef.current.signal, owner);
       const myReporters = response
         .map((r) => (r.full_name == null || isEmpty(r.full_name) ? r.username ?? '' : r.full_name))
         .filter((u) => !isEmpty(u));
@@ -78,7 +78,7 @@ export const useGetReporters = (): UseGetReporters => {
         });
       }
     }
-  }, [reportersState, toasts]);
+  }, [owner, reportersState, toasts]);
 
   useEffect(() => {
     fetchReporters();

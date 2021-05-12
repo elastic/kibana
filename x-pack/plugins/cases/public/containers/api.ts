@@ -119,18 +119,20 @@ export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> 
   return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
 };
 
-export const getTags = async (signal: AbortSignal): Promise<string[]> => {
+export const getTags = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {
   const response = await KibanaServices.get().http.fetch<string[]>(CASE_TAGS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
 };
 
-export const getReporters = async (signal: AbortSignal): Promise<User[]> => {
+export const getReporters = async (signal: AbortSignal, owner: string[]): Promise<User[]> => {
   const response = await KibanaServices.get().http.fetch<User[]>(CASE_REPORTERS_URL, {
     method: 'GET',
     signal,
+    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
 };

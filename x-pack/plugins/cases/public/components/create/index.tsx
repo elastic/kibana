@@ -61,6 +61,7 @@ export const CreateCase = ({
       <CreateCaseForm
         hideConnectorServiceNowSir={hideConnectorServiceNowSir}
         withSteps={withSteps}
+        owner={owner}
       />
       <Container>
         <EuiFlexGroup

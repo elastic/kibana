@@ -250,7 +250,7 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await getReporters(abortCtrl.signal);
+      await getReporters(abortCtrl.signal, ['securitySolution']);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -258,7 +258,7 @@ describe('Case Configuration API', () => {
     });
 
     test('happy path', async () => {
-      const resp = await getReporters(abortCtrl.signal);
+      const resp = await getReporters(abortCtrl.signal, ['securitySolution']);
       expect(resp).toEqual(respReporters);
     });
   });
@@ -270,7 +270,7 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await getTags(abortCtrl.signal);
+      await getTags(abortCtrl.signal, ['securitySolution']);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -278,7 +278,7 @@ describe('Case Configuration API', () => {
     });
 
     test('happy path', async () => {
-      const resp = await getTags(abortCtrl.signal);
+      const resp = await getTags(abortCtrl.signal, ['securitySolution']);
       expect(resp).toEqual(tags);
     });
   });

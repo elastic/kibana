@@ -41,6 +41,7 @@ interface Props {
   hideConnectorServiceNowSir?: boolean;
   isLoadingConnectors?: boolean;
   withSteps?: boolean;
+  owner: string;
 }
 const empty: ActionConnector[] = [];
 export const CreateCaseForm: React.FC<Props> = React.memo(
@@ -49,6 +50,7 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
     isLoadingConnectors = false,
     hideConnectorServiceNowSir = false,
     withSteps = true,
+    owner,
   }) => {
     const { isSubmitting } = useFormContext();
 
@@ -59,7 +61,7 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
           <>
             <Title isLoading={isSubmitting} />
             <Container>
-              <Tags isLoading={isSubmitting} />
+              <Tags isLoading={isSubmitting} owner={[owner]} />
             </Container>
             <Container big>
               <Description isLoading={isSubmitting} />
@@ -67,7 +69,7 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
           </>
         ),
       }),
-      [isSubmitting]
+      [isSubmitting, owner]
     );
 
     const secondStep = useMemo(

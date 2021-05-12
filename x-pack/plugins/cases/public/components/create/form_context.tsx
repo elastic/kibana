@@ -88,7 +88,6 @@ export const FormContext: React.FC<Props> = ({
           type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
-          owner,
         });
 
         if (afterCaseCreated && updatedCase) {
@@ -111,7 +110,6 @@ export const FormContext: React.FC<Props> = ({
       connectors,
       postCase,
       caseType,
-      owner,
       afterCaseCreated,
       onSuccess,
       postComment,

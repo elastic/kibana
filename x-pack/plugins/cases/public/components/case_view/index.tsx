@@ -450,6 +450,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   tags={caseData.tags}
                   onSubmit={onSubmitTags}
                   isLoading={isLoading && updateKey === 'tags'}
+                  owner={[caseData.owner]}
                 />
                 <EditConnector
                   caseFields={caseData.connector.fields}

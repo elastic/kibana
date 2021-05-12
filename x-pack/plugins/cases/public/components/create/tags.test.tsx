@@ -42,7 +42,7 @@ describe('Tags', () => {
   it('it renders', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Tags isLoading={false} />
+        <Tags isLoading={false} owner={['securitySolution']} />
       </MockHookWrapperComponent>
     );
 
@@ -54,7 +54,7 @@ describe('Tags', () => {
   it('it disables the input when loading', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Tags isLoading={true} />
+        <Tags isLoading={true} owner={['securitySolution']} />
       </MockHookWrapperComponent>
     );
 
@@ -64,7 +64,7 @@ describe('Tags', () => {
   it('it changes the tags', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Tags isLoading={false} />
+        <Tags isLoading={false} owner={['securitySolution']} />
       </MockHookWrapperComponent>
     );
 

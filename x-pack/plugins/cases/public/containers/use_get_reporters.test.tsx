@@ -23,7 +23,7 @@ describe('useGetReporters', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters()
+        useGetReporters(['securitySolution'])
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -39,7 +39,9 @@ describe('useGetReporters', () => {
   it('calls getReporters api', async () => {
     const spyOnGetReporters = jest.spyOn(api, 'getReporters');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetReporters>(() => useGetReporters());
+      const { waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
+        useGetReporters(['securitySolution'])
+      );
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(spyOnGetReporters).toBeCalledWith(abortCtrl.signal);
@@ -49,7 +51,7 @@ describe('useGetReporters', () => {
   it('fetch reporters', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters()
+        useGetReporters(['securitySolution'])
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -67,7 +69,7 @@ describe('useGetReporters', () => {
     const spyOnGetReporters = jest.spyOn(api, 'getReporters');
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters()
+        useGetReporters(['securitySolution'])
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -84,7 +86,7 @@ describe('useGetReporters', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetReporters>(() =>
-        useGetReporters()
+        useGetReporters(['securitySolution'])
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
