@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { set } from '@elastic/safer-lodash-set';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
 
@@ -38,7 +39,7 @@ export const getDeprecationsFor = ({
   settings?: Record<string, any>;
   path: string;
 }) => {
-  return collectDeprecations(provider, { [path]: settings }, path);
+  return collectDeprecations(provider, set({}, path, settings), path);
 };
 
 export const getDeprecationsForGlobalSettings = ({

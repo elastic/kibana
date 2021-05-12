@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use [IScopedClusterClient](./kibana-plugin-core-server.iscopedclusterclient.md)<!-- -->.
+> Use [IScopedClusterClient](./kibana-plugin-core-server.iscopedclusterclient.md)<!-- -->.  7.16
 > 
 
 Serves the same purpose as "normal" `ClusterClient` but exposes additional `callAsCurrentUser` method that doesn't use credentials of the Kibana internal user (as `callAsInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.
