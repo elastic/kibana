@@ -49,7 +49,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = Required<estypes.SearchRequest>['body']['fields'];
+type Fields = Exclude<Required<estypes.SearchRequest>['body']['fields'], undefined>;
 type DocValueFields = MaybeArray<string | estypes.DocValueField>;
 
 export type SearchHit<
