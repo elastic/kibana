@@ -11,7 +11,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getFilter } from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
@@ -53,14 +53,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
   buildColumn({ field, previousColumn }, columnParams) {
-    let filter = previousColumn?.filter;
-    if (columnParams) {
-      if ('kql' in columnParams) {
-        filter = { query: columnParams.kql ?? '', language: 'kuery' };
-      } else if ('lucene' in columnParams) {
-        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
-      }
-    }
     return {
       label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
       dataType: 'number',
@@ -69,7 +61,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
-      filter,
+      filter: getFilter(previousColumn, columnParams),
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&

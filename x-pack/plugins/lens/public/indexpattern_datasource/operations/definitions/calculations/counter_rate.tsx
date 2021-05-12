@@ -17,7 +17,7 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -79,14 +79,6 @@ export const counterRateOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
-    let filter = previousColumn?.filter;
-    if (columnParams) {
-      if ('kql' in columnParams) {
-        filter = { query: columnParams.kql ?? '', language: 'kuery' };
-      } else if ('lucene' in columnParams) {
-        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
-      }
-    }
     return {
       label: ofName(
         metric && 'sourceField' in metric
@@ -100,7 +92,7 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      filter,
+      filter: getFilter(previousColumn, columnParams),
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

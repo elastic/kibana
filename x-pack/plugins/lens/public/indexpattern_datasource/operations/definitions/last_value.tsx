@@ -15,7 +15,12 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
-import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
+import {
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+  getFilter,
+} from './helpers';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
@@ -154,14 +159,6 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       );
     }
 
-    let filter = previousColumn?.filter;
-    if (columnParams) {
-      if ('kql' in columnParams) {
-        filter = { query: columnParams.kql ?? '', language: 'kuery' };
-      } else if ('lucene' in columnParams) {
-        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
-      }
-    }
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -169,7 +166,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
-      filter,
+      filter: getFilter(previousColumn, columnParams),
       params: {
         sortField,
         ...getFormatFromPreviousColumn(previousColumn),

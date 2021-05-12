@@ -24,44 +24,43 @@ import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinitio
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import type { TinymathNodeTypes } from './types';
 
-const validationErrors = {
-  missingField: { message: 'missing field', type: { variablesLength: 1, variablesList: 'string' } },
+interface ValidationErrors {
+  missingField: { message: string; type: { variablesLength: number; variablesList: string } };
   missingOperation: {
-    message: 'missing operation',
-    type: { operationLength: 1, operationsList: 'string' },
-  },
+    message: string;
+    type: { operationLength: number; operationsList: string };
+  };
   missingParameter: {
-    message: 'missing parameter',
-    type: { operation: 'string', params: 'string' },
-  },
+    message: string;
+    type: { operation: string; params: string };
+  };
   wrongTypeParameter: {
-    message: 'wrong type parameter',
-    type: { operation: 'string', params: 'string' },
-  },
+    message: string;
+    type: { operation: string; params: string };
+  };
   wrongFirstArgument: {
-    message: 'wrong first argument',
-    type: { operation: 'string', type: 'string', argument: 'any' as string | number },
-  },
-  cannotAcceptParameter: { message: 'cannot accept parameter', type: { operation: 'string' } },
-  shouldNotHaveField: { message: 'operation should not have field', type: { operation: 'string' } },
-  tooManyArguments: { message: 'too many arguments', type: { operation: 'string' } },
+    message: string;
+    type: { operation: string; type: string; argument: string | number };
+  };
+  cannotAcceptParameter: { message: string; type: { operation: string } };
+  shouldNotHaveField: { message: string; type: { operation: string } };
+  tooManyArguments: { message: string; type: { operation: string } };
   fieldWithNoOperation: {
-    message: 'unexpected field with no operation',
-    type: { field: 'string' },
-  },
-  failedParsing: { message: 'Failed to parse expression', type: { expression: 'string' } },
+    message: string;
+    type: { field: string };
+  };
+  failedParsing: { message: string; type: { expression: string } };
   duplicateArgument: {
-    message: 'duplicate argument',
-    type: { operation: 'string', params: 'string' },
-  },
+    message: string;
+    type: { operation: string; params: string };
+  };
   missingMathArgument: {
-    message: 'missing math argument',
-    type: { operation: 'string', count: 1, params: 'string' },
-  },
-};
-export const errorsLookup = new Set(Object.values(validationErrors).map(({ message }) => message));
-type ErrorTypes = keyof typeof validationErrors;
-type ErrorValues<K extends ErrorTypes> = typeof validationErrors[K]['type'];
+    message: string;
+    type: { operation: string; count: number; params: string };
+  };
+}
+type ErrorTypes = keyof ValidationErrors;
+type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export interface ErrorWrapper {
   message: string;
@@ -70,7 +69,7 @@ export interface ErrorWrapper {
 }
 
 export function isParsingError(message: string) {
-  return message.includes(validationErrors.failedParsing.message);
+  return message.includes('Failed to parse expression');
 }
 
 function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
