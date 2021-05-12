@@ -59,8 +59,6 @@ interface CasePush {
 
 /**
  * API for interacting with the cases entities.
- *
- * @public
  */
 export interface CasesSubClient {
   /**

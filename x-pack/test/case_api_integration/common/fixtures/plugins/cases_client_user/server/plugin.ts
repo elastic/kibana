@@ -13,7 +13,6 @@ import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
 import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
 import { PluginsStartContract as CasesPluginStart } from '../../../../../../../plugins/cases/server';
 import { CasesPatchRequest } from '../../../../../../../plugins/cases/common';
-import { wrapError } from '../../../../../../../plugins/cases//server/routes/api/utils';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -57,7 +56,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           });
         } catch (error) {
           this.log.error(`CasesClientUser failure: ${error}`);
-          return response.customError(wrapError(error));
+          throw error;
         }
       }
     );

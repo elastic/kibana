@@ -1,0 +1,16 @@
+{
+  "entryPoints": [
+    "../server/client/client.ts",
+    "../server/client/attachments",
+    "../server/client/cases",
+    "../server/client/configure",
+    "../server/client/stats",
+    "../server/client/sub_cases",
+    "../server/client/user_actions"
+  ],
+  "out": "server",
+  "theme": "markdown",
+  "plugin": "typedoc-plugin-markdown",
+  "entryDocument": "server_client_api.md",
+  "readme": "none"
+}

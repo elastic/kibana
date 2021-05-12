@@ -21,6 +21,9 @@ Case management in Kibana
 ## Cases API
 [**Explore the API docs »**](https://www.elastic.co/guide/en/security/current/cases-api-overview.html)
 
+## Cases Client API
+[**Cases Client API docs**][cases-client-api-docs]
+
 ## Cases UI
 
 #### Embed Cases UI components in any Kibana plugin
@@ -263,4 +266,4 @@ For IBM Resilient connectors:
 [all-cases-modal-img]: images/all_cases_selector_modal.png
 [recent-cases-img]: images/recent_cases.png
 [case-view-img]: images/case_view.png
-
+[cases-client-api-docs]: docs/server/server_client_api.md

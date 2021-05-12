@@ -85,6 +85,14 @@ export class CasesClient {
   }
 }
 
+/**
+ * Creates a {@link CasesClient} for interacting with the cases entities
+ *
+ * @param args arguments for initializing the cases client
+ * @returns a {@link CasesClient}
+ *
+ * @ignore
+ */
 export const createCasesClient = (args: CasesClientArgs): CasesClient => {
   return new CasesClient(args);
 };
