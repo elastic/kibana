@@ -44,6 +44,14 @@ describe('rules_notification_alert_type', () => {
       previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
       createdBy: 'elastic',
       updatedBy: 'elastic',
+      createdAt: new Date('2019-12-14T16:40:33.400Z'),
+      updatedAt: new Date('2019-12-14T16:40:33.400Z'),
+      consumer: 'foo',
+      throttle: null,
+      notifyWhen: null,
+      schedule: {
+        interval: '1h',
+      },
     };
 
     alert = rulesNotificationAlertType({

@@ -66,6 +66,14 @@ const getPayload = (
   previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
   createdBy: 'elastic',
   updatedBy: 'elastic',
+  createdAt: new Date('2019-12-13T16:50:33.400Z'),
+  updatedAt: new Date('2019-12-13T16:50:33.400Z'),
+  consumer: 'foo',
+  throttle: null,
+  notifyWhen: null,
+  schedule: {
+    interval: '1h',
+  },
 });
 
 describe('signal_rule_alert_type', () => {
