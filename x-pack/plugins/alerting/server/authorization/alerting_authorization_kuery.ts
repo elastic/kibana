@@ -10,7 +10,7 @@ import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 import { nodeBuilder, EsQueryConfig } from '../../../../../src/plugins/data/common';
 import { toElasticsearchQuery } from '../../../../../src/plugins/data/common/es_query';
 import { KueryNode } from '../../../../../src/plugins/data/server';
-import { RegistryAlertTypeWithAuth } from './alerts_authorization';
+import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
   KQL = 'kql',

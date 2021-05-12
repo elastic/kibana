@@ -23,13 +23,13 @@ import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mock
 import { LegacyAuditLogger } from '../../security/server';
 import { ALERTS_FEATURE_ID } from '../common';
 import { eventLogMock } from '../../event_log/server/mocks';
-import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
+import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
-import { AlertsAuthorization } from './authorization';
+import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 
 jest.mock('./alerts_client');
-jest.mock('./authorization/alerts_authorization');
+jest.mock('./authorization/alerting_authorization');
 jest.mock('./authorization/audit_logger');
 
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -38,7 +38,7 @@ const savedObjectsService = savedObjectsServiceMock.createInternalStartContract(
 const securityPluginSetup = securityMock.createSetup();
 const securityPluginStart = securityMock.createStart();
 
-const alertsAuthorization = alertsAuthorizationMock.create();
+const alertsAuthorization = alertingAuthorizationMock.create();
 const alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMock.createFactory();
 
 const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
@@ -90,7 +90,7 @@ test('creates an alerts client with proper constructor arguments when security i
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   alertingAuthorizationClientFactory.create.mockReturnValue(
-    (alertsAuthorization as unknown) as AlertsAuthorization
+    (alertsAuthorization as unknown) as AlertingAuthorization
   );
 
   const logger = {
@@ -138,7 +138,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   alertingAuthorizationClientFactory.create.mockReturnValue(
-    (alertsAuthorization as unknown) as AlertsAuthorization
+    (alertsAuthorization as unknown) as AlertingAuthorization
   );
 
   factory.create(request, savedObjectsService);

@@ -6,13 +6,13 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertsAuthorization } from './alerts_authorization';
+import { AlertingAuthorization } from './alerting_authorization';
 
-type Schema = PublicMethodsOf<AlertsAuthorization>;
-export type AlertsAuthorizationMock = jest.Mocked<Schema>;
+type Schema = PublicMethodsOf<AlertingAuthorization>;
+export type AlertingAuthorizationMock = jest.Mocked<Schema>;
 
-const createAlertsAuthorizationMock = () => {
-  const mocked: AlertsAuthorizationMock = {
+const createAlertingAuthorizationMock = () => {
+  const mocked: AlertingAuthorizationMock = {
     ensureAuthorized: jest.fn(),
     filterByRuleTypeAuthorization: jest.fn(),
     getFindAuthorizationFilter: jest.fn(),
@@ -20,8 +20,8 @@ const createAlertsAuthorizationMock = () => {
   return mocked;
 };
 
-export const alertsAuthorizationMock: {
-  create: () => AlertsAuthorizationMock;
+export const alertingAuthorizationMock: {
+  create: () => AlertingAuthorizationMock;
 } = {
-  create: createAlertsAuthorizationMock,
+  create: createAlertingAuthorizationMock,
 };

@@ -10,7 +10,7 @@ import {
   AlertingAuthorizationFilterType,
   asFiltersByRuleTypeAndConsumer,
   ensureFieldIsSafeForQuery,
-} from './alerts_authorization_kuery';
+} from './alerting_authorization_kuery';
 import { esKuery } from '../../../../../src/plugins/data/server';
 
 describe('asKqlFiltersByRuleTypeAndConsumer', () => {

@@ -68,7 +68,7 @@ import {
 import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import { AlertsAuthorization } from './authorization';
+import { AlertingAuthorization } from './authorization';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -105,7 +105,9 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
   getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
-  getAlertingAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsAuthorization>;
+  getAlertingAuthorizationWithRequest(
+    request: KibanaRequest
+  ): PublicMethodsOf<AlertingAuthorization>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 

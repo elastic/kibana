@@ -12,12 +12,12 @@ import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
+import { AlertingAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { Space } from '../../../spaces/server';
 import {
   asFiltersByRuleTypeAndConsumer,
   AlertingAuthorizationFilterOpts,
-} from './alerts_authorization_kuery';
+} from './alerting_authorization_kuery';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 
@@ -68,16 +68,16 @@ export interface ConstructorOptions {
   request: KibanaRequest;
   features: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
-  auditLogger: AlertsAuthorizationAuditLogger;
+  auditLogger: AlertingAuthorizationAuditLogger;
   exemptConsumerIds: string[];
   authorization?: SecurityPluginSetup['authz'];
 }
 
-export class AlertsAuthorization {
+export class AlertingAuthorization {
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
-  private readonly auditLogger: AlertsAuthorizationAuditLogger;
+  private readonly auditLogger: AlertingAuthorizationAuditLogger;
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly exemptConsumerIds: string[];
@@ -183,7 +183,7 @@ export class AlertsAuthorization {
          * This check will ensure we don't accidentally let these through
          */
         throw Boom.forbidden(
-          this.auditLogger.alertsAuthorizationFailure(
+          this.auditLogger.logAuthorizationFailure(
             username,
             ruleTypeId,
             ScopeType.Consumer,
@@ -195,7 +195,7 @@ export class AlertsAuthorization {
       }
 
       if (hasAllRequested) {
-        this.auditLogger.alertsAuthorizationSuccess(
+        this.auditLogger.logAuthorizationSuccess(
           username,
           ruleTypeId,
           ScopeType.Consumer,
@@ -219,7 +219,7 @@ export class AlertsAuthorization {
             : [ScopeType.Producer, ruleType.producer];
 
         throw Boom.forbidden(
-          this.auditLogger.alertsAuthorizationFailure(
+          this.auditLogger.logAuthorizationFailure(
             username,
             ruleTypeId,
             unauthorizedScopeType,
@@ -231,7 +231,7 @@ export class AlertsAuthorization {
       }
     } else if (!isAvailableConsumer) {
       throw Boom.forbidden(
-        this.auditLogger.alertsAuthorizationFailure(
+        this.auditLogger.logAuthorizationFailure(
           '',
           ruleTypeId,
           ScopeType.Consumer,
@@ -260,11 +260,7 @@ export class AlertsAuthorization {
 
       if (!authorizedRuleTypes.size) {
         throw Boom.forbidden(
-          this.auditLogger.alertsUnscopedAuthorizationFailure(
-            username!,
-            'find',
-            authorizationEntity
-          )
+          this.auditLogger.logUnscopedAuthorizationFailure(username!, 'find', authorizationEntity)
         );
       }
 
@@ -283,7 +279,7 @@ export class AlertsAuthorization {
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
             throw Boom.forbidden(
-              this.auditLogger.alertsAuthorizationFailure(
+              this.auditLogger.logAuthorizationFailure(
                 username!,
                 ruleTypeId,
                 ScopeType.Consumer,
@@ -302,7 +298,7 @@ export class AlertsAuthorization {
         },
         logSuccessfulAuthorization: () => {
           if (authorizedEntries.size) {
-            this.auditLogger.alertsBulkAuthorizationSuccess(
+            this.auditLogger.logBulkAuthorizationSuccess(
               username!,
               [...authorizedEntries.entries()].reduce<Array<[string, string]>>(
                 (authorizedPairs, [alertTypeId, consumers]) => {

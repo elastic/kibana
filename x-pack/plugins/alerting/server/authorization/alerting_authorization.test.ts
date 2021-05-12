@@ -14,25 +14,25 @@ import {
 } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import {
-  AlertsAuthorization,
+  AlertingAuthorization,
   WriteOperations,
   ReadOperations,
   AlertingAuthorizationEntity,
-} from './alerts_authorization';
-import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
-import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
+} from './alerting_authorization';
+import { alertingAuthorizationAuditLoggerMock } from './audit_logger.mock';
+import { AlertingAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryAlertType } from '../alert_type_registry';
 import { esKuery } from '../../../../../src/plugins/data/server';
-import { AlertingAuthorizationFilterType } from './alerts_authorization_kuery';
+import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
 const request = {} as KibanaRequest;
 
-const auditLogger = alertsAuthorizationAuditLoggerMock.create();
-const realAuditLogger = new AlertsAuthorizationAuditLogger();
+const auditLogger = alertingAuthorizationAuditLoggerMock.create();
+const realAuditLogger = new AlertingAuthorizationAuditLogger();
 
 const getSpace = jest.fn();
 
@@ -174,13 +174,13 @@ const myFeatureWithoutAlerting = mockFeature('myOtherApp');
 
 beforeEach(() => {
   jest.resetAllMocks();
-  auditLogger.alertsAuthorizationFailure.mockImplementation((username, ...args) =>
+  auditLogger.logAuthorizationFailure.mockImplementation((username, ...args) =>
     realAuditLogger.getAuthorizationMessage(AuthorizationResult.Unauthorized, ...args)
   );
-  auditLogger.alertsAuthorizationSuccess.mockImplementation((username, ...args) =>
+  auditLogger.logAuthorizationSuccess.mockImplementation((username, ...args) =>
     realAuditLogger.getAuthorizationMessage(AuthorizationResult.Authorized, ...args)
   );
-  auditLogger.alertsUnscopedAuthorizationFailure.mockImplementation(
+  auditLogger.logUnscopedAuthorizationFailure.mockImplementation(
     (username, operation) => `Unauthorized ${username}/${operation}`
   );
   alertTypeRegistry.get.mockImplementation((id) => ({
@@ -202,7 +202,7 @@ beforeEach(() => {
   getSpace.mockResolvedValue(undefined);
 });
 
-describe('AlertsAuthorization', () => {
+describe('AlertingAuthorization', () => {
   describe('constructor', () => {
     test(`fetches the user's current space`, async () => {
       const space = {
@@ -212,7 +212,7 @@ describe('AlertsAuthorization', () => {
       };
       getSpace.mockResolvedValue(space);
 
-      new AlertsAuthorization({
+      new AlertingAuthorization({
         request,
         alertTypeRegistry,
         features,
@@ -227,7 +227,7 @@ describe('AlertsAuthorization', () => {
 
   describe('ensureAuthorized', () => {
     test('is a no-op when there is no authorization api', async () => {
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         alertTypeRegistry,
         features,
@@ -249,7 +249,7 @@ describe('AlertsAuthorization', () => {
     test('is a no-op when the security license is disabled', async () => {
       const { authorization } = mockSecurity();
       authorization.mode.useRbacForRequest.mockReturnValue(false);
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         alertTypeRegistry,
         authorization,
@@ -275,7 +275,7 @@ describe('AlertsAuthorization', () => {
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
       > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -311,9 +311,9 @@ describe('AlertsAuthorization', () => {
         kibana: [mockAuthorizationAction('myType', 'myApp', 'rule', 'create')],
       });
 
-      expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "some-user",
             "myType",
@@ -331,7 +331,7 @@ describe('AlertsAuthorization', () => {
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
       > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -373,9 +373,9 @@ describe('AlertsAuthorization', () => {
         kibana: [mockAuthorizationAction('myType', 'myApp', 'rule', 'create')],
       });
 
-      expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "some-user",
             "myType",
@@ -399,7 +399,7 @@ describe('AlertsAuthorization', () => {
         privileges: { kibana: [] },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -438,9 +438,9 @@ describe('AlertsAuthorization', () => {
         ],
       });
 
-      expect(auditLogger.alertsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "some-user",
             "myType",
@@ -458,7 +458,7 @@ describe('AlertsAuthorization', () => {
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
       > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -496,9 +496,9 @@ describe('AlertsAuthorization', () => {
         `"Unauthorized to create a \\"myType\\" rule for \\"myOtherApp\\""`
       );
 
-      expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.alertsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "some-user",
             "myType",
@@ -516,7 +516,7 @@ describe('AlertsAuthorization', () => {
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
       > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -554,9 +554,9 @@ describe('AlertsAuthorization', () => {
         `"Unauthorized to create a \\"myType\\" alert by \\"myApp\\""`
       );
 
-      expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.alertsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "some-user",
             "myType",
@@ -574,7 +574,7 @@ describe('AlertsAuthorization', () => {
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
       > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -612,9 +612,9 @@ describe('AlertsAuthorization', () => {
         `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
       );
 
-      expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.alertsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "some-user",
             "myType",
@@ -664,7 +664,7 @@ describe('AlertsAuthorization', () => {
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
 
     test('omits filter when there is no authorization api', async () => {
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         alertTypeRegistry,
         features,
@@ -690,7 +690,7 @@ describe('AlertsAuthorization', () => {
     });
 
     test('ensureAlertTypeIsAuthorized is no-op when there is no authorization api', async () => {
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         alertTypeRegistry,
         features,
@@ -712,8 +712,8 @@ describe('AlertsAuthorization', () => {
 
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
 
-      expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
     });
 
     test('creates a filter based on the privileged types', async () => {
@@ -728,7 +728,7 @@ describe('AlertsAuthorization', () => {
         privileges: { kibana: [] },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -755,7 +755,7 @@ describe('AlertsAuthorization', () => {
         )
       );
 
-      expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
     test('creates an `ensureAlertTypeIsAuthorized` function which throws if type is unauthorized', async () => {
@@ -794,7 +794,7 @@ describe('AlertsAuthorization', () => {
         },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -821,9 +821,9 @@ describe('AlertsAuthorization', () => {
         `"Unauthorized to find a \\"myAppAlertType\\" alert for \\"myOtherApp\\""`
       );
 
-      expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.alertsAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "some-user",
             "myAppAlertType",
@@ -871,7 +871,7 @@ describe('AlertsAuthorization', () => {
         },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -896,8 +896,8 @@ describe('AlertsAuthorization', () => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
       }).not.toThrow();
 
-      expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
     });
 
     test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
@@ -949,7 +949,7 @@ describe('AlertsAuthorization', () => {
         },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -976,13 +976,13 @@ describe('AlertsAuthorization', () => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
       }).not.toThrow();
 
-      expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.alertsAuthorizationFailure).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
 
       logSuccessfulAuthorization();
 
-      expect(auditLogger.alertsBulkAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.alertsBulkAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(auditLogger.logBulkAuthorizationSuccess).toHaveBeenCalledTimes(1);
+      expect(auditLogger.logBulkAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "some-user",
             Array [
@@ -1029,7 +1029,7 @@ describe('AlertsAuthorization', () => {
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
 
     test('augments a list of types with all features when there is no authorization api', async () => {
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         alertTypeRegistry,
         features,
@@ -1108,7 +1108,7 @@ describe('AlertsAuthorization', () => {
     });
 
     test('augments a list of types with all features and exempt consumer ids when there is no authorization api', async () => {
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         alertTypeRegistry,
         features,
@@ -1238,7 +1238,7 @@ describe('AlertsAuthorization', () => {
         },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -1341,7 +1341,7 @@ describe('AlertsAuthorization', () => {
         },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -1435,7 +1435,7 @@ describe('AlertsAuthorization', () => {
         },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -1539,7 +1539,7 @@ describe('AlertsAuthorization', () => {
         },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
@@ -1646,7 +1646,7 @@ describe('AlertsAuthorization', () => {
         },
       });
 
-      const alertAuthorization = new AlertsAuthorization({
+      const alertAuthorization = new AlertingAuthorization({
         request,
         authorization,
         alertTypeRegistry,
