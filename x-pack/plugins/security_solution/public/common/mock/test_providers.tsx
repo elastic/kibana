@@ -24,6 +24,7 @@ import {
 import { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
+import { UserPrivilegesProvider } from '../../detections/components/user_privileges';
 
 const state: State = mockGlobalState;
 
@@ -52,7 +53,9 @@ const TestProvidersComponent: React.FC<Props> = ({
     <MockKibanaContextProvider>
       <ReduxStoreProvider store={store}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+          <UserPrivilegesProvider>
+            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+          </UserPrivilegesProvider>
         </ThemeProvider>
       </ReduxStoreProvider>
     </MockKibanaContextProvider>
