@@ -493,6 +493,8 @@ export const APPLY_FILTER_TRIGGER = "FILTER_TRIGGER";
 // @public (undocumented)
 export interface ApplyGlobalFilterActionContext {
     // (undocumented)
+    controlledBy?: string;
+    // (undocumented)
     embeddable?: unknown;
     // (undocumented)
     filters: Filter[];
@@ -763,6 +765,7 @@ export const esFilters: {
             disabled: boolean;
             controlledBy?: string | undefined;
             index?: string | undefined;
+            isMultiIndex?: boolean | undefined;
             type?: string | undefined;
             key?: string | undefined;
             params?: any;
@@ -2689,8 +2692,8 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/common/es_query/filters/exists_filter.ts:19:3 - (ae-forgotten-export) The symbol "ExistsFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/exists_filter.ts:20:3 - (ae-forgotten-export) The symbol "FilterExistsProperty" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/match_all_filter.ts:17:3 - (ae-forgotten-export) The symbol "MatchAllFilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/es_query/filters/meta_filter.ts:42:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/es_query/filters/meta_filter.ts:43:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/es_query/filters/meta_filter.ts:43:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/es_query/filters/meta_filter.ts:44:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:22:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:20:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:65:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts

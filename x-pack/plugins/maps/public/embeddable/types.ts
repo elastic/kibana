@@ -35,9 +35,9 @@ interface MapEmbeddableState {
 }
 export type MapByValueInput = {
   attributes: MapSavedObjectAttributes;
-} & EmbeddableInput & { filterByMapExtent: boolean } & MapEmbeddableState;
+} & EmbeddableInput & { filterByMapExtent?: boolean } & MapEmbeddableState;
 export type MapByReferenceInput = SavedObjectEmbeddableInput & {
-  filterByMapExtent: boolean;
+  filterByMapExtent?: boolean;
 } & MapEmbeddableState;
 export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
 

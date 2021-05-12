@@ -26,10 +26,10 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
   order: 20,
   getDisplayName: ({ embeddable }: FilterByMapExtentActionContext) => {
     return embeddable.getInput().filterByMapExtent
-      ? i18n.translate('xpack.map.configureFilterByMapExtentMenuItem.displayName', {
+      ? i18n.translate('xpack.maps.filterByMapExtentMenuItem.disableDisplayName', {
           defaultMessage: 'Disable filter by map extent',
         })
-      : i18n.translate('xpack.map.configureFilterByMapExtentMenuItem.displayName', {
+      : i18n.translate('xpack.maps.filterByMapExtentMenuItem.enableDisplayName', {
           defaultMessage: 'Filter by map extent',
         });
   },
