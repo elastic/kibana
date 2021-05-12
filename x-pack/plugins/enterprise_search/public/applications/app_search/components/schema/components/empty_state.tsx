@@ -16,7 +16,7 @@ export const EmptyState: React.FC = () => {
   return (
     <EuiPanel color="subdued">
       <EuiEmptyPrompt
-        iconType="gear"
+        iconType="database"
         title={
           <h2>
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.empty.title', {
