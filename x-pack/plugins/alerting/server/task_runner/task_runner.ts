@@ -547,7 +547,6 @@ export class TaskRunner<
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
             this.logger.debug(message);
           } else {
-            this.logger.error(require('util').inspect(err, { depth: null }));
             this.logger.error(message);
           }
           return originalState;
