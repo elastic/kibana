@@ -32,11 +32,21 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: {
+<<<<<<< HEAD
         rule: {
           all: [IndexThreshold, GeoContainment, ElasticsearchQuery],
         },
         alert: {
           read: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+=======
+        all: {
+          rule: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+          alert: [],
+        },
+        read: {
+          rule: [],
+          alert: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+>>>>>>> Initial commit with changes needed for subfeature privilege
         },
       },
       savedObject: {
@@ -53,11 +63,21 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: {
+<<<<<<< HEAD
         rule: {
           read: [IndexThreshold, GeoContainment, ElasticsearchQuery],
         },
         alert: {
           read: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+=======
+        all: {
+          rule: [],
+          alert: [],
+        },
+        read: {
+          rule: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+          alert: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+>>>>>>> Initial commit with changes needed for subfeature privilege
         },
       },
       savedObject: {
@@ -80,8 +100,18 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
               name: 'Manage Alerts',
               includeIn: 'all',
               alerting: {
+<<<<<<< HEAD
                 alert: {
                   all: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+=======
+                all: {
+                  rule: [],
+                  alert: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+                },
+                read: {
+                  rule: [],
+                  alert: [],
+>>>>>>> Initial commit with changes needed for subfeature privilege
                 },
               },
               savedObject: {
