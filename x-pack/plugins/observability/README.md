@@ -24,6 +24,10 @@ xpack.ruleRegistry.unsafe.write.enabled: true
 
 When both of the these are set to `true`, your alerts should show on the alerts page.
 
+## Shared navigation
+
+The Observability plugin maintains a navigation registry for Observability solutions, and exposes a shared page template component. Please refer to the docs in [the component directory](./components/shared/page_template/README.md) for more information on registering your solution's navigation structure, and rendering the navigation via the shared component. 
+
 ## Unit testing
 
 Note: Run the following commands from `kibana/x-pack/plugins/observability`.
