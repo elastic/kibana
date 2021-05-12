@@ -403,15 +403,43 @@ instanceStateValue: true
           );
 
           expect(alertSearchResult.hits.total.value).to.be.greaterThan(0);
-          expect(alertSearchResult.hits.hits[0]._source.alertInfo).to.eql({
+          const alertSearchResultInfoWithoutDates = omit(
+            alertSearchResult.hits.hits[0]._source.alertInfo,
+            ['createdAt', 'updatedAt']
+          );
+          expect(alertSearchResultInfoWithoutDates).to.eql({
             alertId,
+            consumer: 'alertsFixture',
             spaceId: space.id,
             namespace: space.id,
             name: 'def',
+            enabled: true,
+            notifyWhen: 'onActiveAlert',
+            schedule: {
+              interval: '59s',
+            },
             tags: ['fee', 'fi', 'fo'],
+            throttle: '1m',
             createdBy: user.fullName,
             updatedBy: Superuser.fullName,
+            actions: response2.body.actions.map((action: any) => {
+              /* eslint-disable @typescript-eslint/naming-convention */
+              const { connector_type_id, group, id, params } = action;
+              return {
+                actionTypeId: connector_type_id,
+                group,
+                id,
+                params,
+              };
+            }),
           });
+
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+            /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+          );
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+            /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+          );
         });
 
         it('should handle custom retry logic when appropriate', async () => {
