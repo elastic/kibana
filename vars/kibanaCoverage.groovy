@@ -194,12 +194,12 @@ def runTests() {
     'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
     'kibana-oss-agent'   : workers.functional(
       'kibana-oss-tests',
-      { kibanaPipeline.buildOss() },
+      { kibanaPipeline.buildKibana() },
       ossProks()
     ),
     'kibana-xpack-agent' : workers.functional(
       'kibana-xpack-tests',
-      { kibanaPipeline.buildXpack() },
+      { kibanaPipeline.buildKibana() },
       xpackProks()
     ),
   ])
