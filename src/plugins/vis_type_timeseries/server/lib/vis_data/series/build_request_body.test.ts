@@ -157,6 +157,7 @@ describe('buildRequestBody(req)', () => {
             intervalString: '10s',
             seriesId: 'c9b5f9c0-e403-11e6-be91-6f7688e9fac7',
             timeField: '@timestamp',
+            panelId: 'c9b5d2b0-e403-11e6-be91-6f7688e9fac7',
           },
         },
       },
