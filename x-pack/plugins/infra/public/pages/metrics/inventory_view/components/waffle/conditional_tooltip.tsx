@@ -77,29 +77,29 @@ export const ConditionalToolTip = withTheme(({ theme, node, nodeType, currentTim
           marginBottom: theme?.eui.paddingSizes.xs,
         }}
       >
-        <div>{node.name}</div>
-        {metrics.map((metric) => {
-          const metricName = SnapshotMetricTypeRT.is(metric.name) ? metric.name : 'custom';
-          const name = SNAPSHOT_METRIC_TRANSLATIONS[metricName] || metricName;
-          // if custom metric, find field and label from waffleOptionsContext result
-          // because useSnapshot does not return it
-          const customMetric =
-            name === 'custom' ? customMetrics.find((item) => item.id === metric.name) : null;
-          const formatter = customMetric
-            ? createFormatterForMetric(customMetric)
-            : createInventoryMetricFormatter({ type: metricName });
-          return (
-            <EuiFlexGroup gutterSize="s" key={metric.name}>
-              <EuiFlexItem grow={1} className="eui-textTruncate eui-displayBlock">
-                {customMetric ? getCustomMetricLabel(customMetric) : name}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {(metric.value && formatter(metric.value)) || '-'}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        })}
+        {node.name}
       </div>
+      {metrics.map((metric) => {
+        const metricName = SnapshotMetricTypeRT.is(metric.name) ? metric.name : 'custom';
+        const name = SNAPSHOT_METRIC_TRANSLATIONS[metricName] || metricName;
+        // if custom metric, find field and label from waffleOptionsContext result
+        // because useSnapshot does not return it
+        const customMetric =
+          name === 'custom' ? customMetrics.find((item) => item.id === metric.name) : null;
+        const formatter = customMetric
+          ? createFormatterForMetric(customMetric)
+          : createInventoryMetricFormatter({ type: metricName });
+        return (
+          <EuiFlexGroup gutterSize="s" key={metric.name}>
+            <EuiFlexItem grow={1} className="eui-textTruncate eui-displayBlock">
+              {customMetric ? getCustomMetricLabel(customMetric) : name}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {(metric.value && formatter(metric.value)) || '-'}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      })}
     </div>
   );
 });
