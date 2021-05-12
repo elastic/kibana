@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { Datatable } from 'src/plugins/expressions/public';
 
-module.exports = {
-  presets: ['@kbn/babel-preset/node_preset'],
-  ignore: ['**/*.test.ts', '**/__fixture__/**'],
-};
+export interface TSVBTables {
+  [key: string]: Datatable;
+}
