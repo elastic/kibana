@@ -73,7 +73,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRu
           rule.uuid
         );
 
-        console.error('RULE REGISTRY CONSUMER', so.attributes.consumer);
+        logger.debug(`RULE REGISTRY CONSUMER ${so.attributes.consumer}`);
 
         const decodedState = wrappedStateRt.decode(previousState);
 
@@ -157,6 +157,8 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRu
             },
           });
 
+          console.error('EVENTS????', JSON.stringify(events, null, 2));
+
           events.forEach((event) => {
             const alertId = event['kibana.rac.alert.id']!;
             alertsDataMap[alertId] = event;
@@ -218,7 +220,10 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<BaseRu
           }
         );
 
+        logger.debug(`EVENTSTOINDEX: ${JSON.stringify(eventsToIndex, null, 2)}`);
+
         if (eventsToIndex.length && scopedRuleRegistryClient) {
+          logger.debug('ABOUT TO INDEX ALERTS');
           await scopedRuleRegistryClient.bulkIndex(eventsToIndex);
         }
 

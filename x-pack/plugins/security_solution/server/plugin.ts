@@ -141,6 +141,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly config: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
+  private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
@@ -165,6 +166,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
+    this.setupPlugins = plugins;
 
     const config = this.config;
     const globalConfig = this.context.config.legacy.get();
@@ -355,7 +357,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Create rule-registry scoped to security-solution (APP_ID uses caps, not supported)
     this.setupPlugins.ruleRegistry = plugins.ruleRegistry.create({
-      namespace: 'security-solution',
+      name: 'security-solution',
       fieldMap: {
         ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
       },

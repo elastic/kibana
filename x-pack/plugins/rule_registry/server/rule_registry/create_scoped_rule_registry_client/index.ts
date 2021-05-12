@@ -150,6 +150,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends BaseRuleFieldMa
       });
     },
     bulkIndex: (docs) => {
+      logger.debug(`indexAliasName: ${indexAliasName}`);
       const validations = docs.map((doc) => {
         return fieldmapType.decode({
           ...doc,

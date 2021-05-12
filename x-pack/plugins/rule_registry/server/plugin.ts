@@ -82,7 +82,7 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
       kibanaVersion: this.initContext.env.packageInfo.version,
       logger: logger.get('root'),
       alertingPluginSetupContract: plugins.alerting,
-      writeEnabled: this.config.writeEnabled,
+      writeEnabled: true, // this.config.writeEnabled,
     });
 
     // ALERTS ROUTES
