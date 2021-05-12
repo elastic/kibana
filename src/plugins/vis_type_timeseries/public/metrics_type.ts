@@ -75,7 +75,7 @@ export const metricsVisDefinition = {
   },
   toExpressionAst,
   getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.brush];
+    return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
   },
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {
