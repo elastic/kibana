@@ -250,6 +250,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }`,
         [`aria-pressed`]: isActive,
         onClick() {
+          if (temporaryQuickFunction) {
+            setQuickFunction(false);
+          }
+
           if (
             operationDefinitionMap[operationType].input === 'none' ||
             operationDefinitionMap[operationType].input === 'managedReference' ||
@@ -619,7 +623,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         quickFunctions
       )}
 
-      {!isFullscreen && !currentFieldIsInvalid && (
+      {!isFullscreen && !currentFieldIsInvalid && !temporaryQuickFunction && (
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded">
           {!incompleteInfo && selectedColumn && (
             <LabelInput
