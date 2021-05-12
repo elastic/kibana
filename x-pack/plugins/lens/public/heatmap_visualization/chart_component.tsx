@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   Chart,
   ElementClickListener,
@@ -53,9 +54,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const yAxisColumn = table.columns[yAxisColumnIndex];
   const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
 
-  if (!xAxisColumn || !valueColumn || !yAxisColumn) {
+  if (!xAxisColumn || !valueColumn) {
     // Chart is not ready
     return null;
+  }
+
+  if (!yAxisColumn) {
+    chartData.forEach((row) => {
+      row.unifiedY = i18n.translate('xpack.lens.heatmap.emptyYLabel', {
+        defaultMessage: '(empty)',
+      });
+    });
   }
 
   const xAxisMeta = xAxisColumn.meta;
@@ -63,7 +72,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const xScaleType = isTimeBasedSwimLane ? ScaleType.Time : ScaleType.Ordinal;
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
-  const yValuesFormatter = formatFactory(yAxisColumn.meta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
 
   const xDomain = (() => {
@@ -141,8 +149,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       // eui color subdued
       fill: `#6a717d`,
       padding: 8,
-      name: yAxisColumn.name,
-      formatter: (v: number | string) => yValuesFormatter.convert(v),
+      name: yAxisColumn?.name,
+      ...(yAxisColumn
+        ? {
+            formatter: (v: number | string) => formatFactory(yAxisColumn.meta.params).convert(v),
+          }
+        : {}),
     },
     xAxisLabel: {
       visible: args.gridConfig.isXAxisLabelVisible,
@@ -175,7 +187,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         colorScale={ScaleType.Linear}
         data={chartData}
         xAccessor={args.xAccessor}
-        yAccessor={args.yAccessor}
+        yAccessor={args.yAccessor || 'unifiedY'}
         valueAccessor={args.valueAccessor}
         valueFormatter={(v: number) => valueFormatter.convert(v)}
         xScaleType={xScaleType}

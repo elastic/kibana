@@ -153,7 +153,7 @@ export const getHeatmapVisualization = ({
           accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
           filterOperations: isBucketed,
           supportsMoreColumns: !state.yAccessor,
-          required: true,
+          required: false,
           dataTestSubj: 'lnsHeatmap_yDimensionPanel',
         },
         {
@@ -368,20 +368,6 @@ export const getHeatmapVisualization = ({
         ),
         longMessage: i18n.translate('xpack.lens.heatmapVisualization.missingXAccessorLongMessage', {
           defaultMessage: 'Configuration for the horizontal axis is missing.',
-        }),
-      });
-    }
-
-    if (!state.yAccessor) {
-      errors.push({
-        shortMessage: i18n.translate(
-          'xpack.lens.heatmapVisualization.missingYAccessorShortMessage',
-          {
-            defaultMessage: 'Missing Vertical axis.',
-          }
-        ),
-        longMessage: i18n.translate('xpack.lens.heatmapVisualization.missingYAccessorLongMessage', {
-          defaultMessage: 'Configuration for the vertical axis is missing.',
         }),
       });
     }
