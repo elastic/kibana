@@ -19,6 +19,7 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 
 // @ts-expect-error
 import mapboxgl from '@kbn/mapbox-gl';
+
 import { DrawFilterControl } from './draw_control';
 import { ScaleControl } from './scale_control';
 // @ts-expect-error
