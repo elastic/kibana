@@ -14,7 +14,7 @@ import { securityConfigDeprecationProvider } from './config_deprecations';
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
-  const migrated = applyDeprecations(
+  const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,
