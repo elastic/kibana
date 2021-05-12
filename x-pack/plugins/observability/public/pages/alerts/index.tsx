@@ -18,15 +18,15 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { format, parse } from 'url';
 import {
-  ParsedTechnicalFields,
-  parseTechnicalFields,
-} from '../../../../rule_registry/common/parse_technical_fields';
-import {
   ALERT_START,
   EVENT_ACTION,
   RULE_ID,
   RULE_NAME,
-} from '../../../../rule_registry/common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  ParsedTechnicalFields,
+  parseTechnicalFields,
+} from '../../../../rule_registry/common/parse_technical_fields';
 import { asDuration, asPercent } from '../../../common/utils/formatters';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useFetcher } from '../../hooks/use_fetcher';

@@ -14,7 +14,7 @@ import {
   RULE_ID,
   ALERT_START,
   ALERT_UUID,
-} from '../../../../../../rule_registry/common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 

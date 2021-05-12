@@ -29,7 +29,7 @@ import {
   ALERT_SEVERITY_LEVEL,
   RULE_CATEGORY,
   RULE_NAME,
-} from '../../../../../rule_registry/common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import { TopAlert } from '../';
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';

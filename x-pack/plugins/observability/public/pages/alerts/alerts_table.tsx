@@ -19,7 +19,7 @@ import React, { useState } from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY_LEVEL,
-} from '../../../../rule_registry/common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils/target/technical_field_names';
 import { asDuration } from '../../../common/utils/formatters';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { usePluginContext } from '../../hooks/use_plugin_context';

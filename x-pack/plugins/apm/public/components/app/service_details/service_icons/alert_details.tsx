@@ -8,13 +8,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { parse, format } from 'url';
 import { uniqBy } from 'lodash';
-import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import {
   ALERT_ID,
   ALERT_START,
   RULE_ID,
   RULE_NAME,
-} from '../../../../../../rule_registry/common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
