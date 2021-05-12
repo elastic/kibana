@@ -29,6 +29,7 @@ const ecommerceSampleDataset = ecommerceSpecProvider();
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
+
   private readonly sampleDatasets: SampleDatasetSchema[] = [
     flightsSampleDataset,
     logsSampleDataset,
@@ -55,9 +56,10 @@ export class SampleDataRegistry {
 
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
-        const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
-
-        if (error) {
+        let value: any;
+        try {
+          value = Joi.attempt(specProvider(), sampleDataSchema);
+        } catch (error) {
           throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
         }
         const defaultIndexSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
@@ -164,6 +166,7 @@ export class SampleDataRegistry {
     return {};
   }
 }
+
 /** @public */
 export type SampleDataRegistrySetup = ReturnType<SampleDataRegistry['setup']>;
 

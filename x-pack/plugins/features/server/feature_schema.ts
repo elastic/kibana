@@ -156,10 +156,8 @@ const elasticsearchFeatureSchema = Joi.object({
 });
 
 export function validateKibanaFeature(feature: KibanaFeatureConfig) {
-  const validateResult = Joi.validate(feature, kibanaFeatureSchema);
-  if (validateResult.error) {
-    throw validateResult.error;
-  }
+  Joi.attempt(feature, kibanaFeatureSchema);
+
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { app = [], management = {}, catalogue = [], alerting = [] } = feature;
 
@@ -343,10 +341,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 }
 
 export function validateElasticsearchFeature(feature: ElasticsearchFeatureConfig) {
-  const validateResult = Joi.validate(feature, elasticsearchFeatureSchema);
-  if (validateResult.error) {
-    throw validateResult.error;
-  }
+  Joi.attempt(feature, elasticsearchFeatureSchema);
+
   // the following validation can't be enforced by the Joi schema without a very convoluted and verbose definition
   const { privileges } = feature;
   privileges.forEach((privilege, index) => {

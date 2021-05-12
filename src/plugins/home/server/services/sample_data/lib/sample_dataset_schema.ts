@@ -41,7 +41,7 @@ const appLinkSchema = Joi.object({
   icon: Joi.string().required(),
 });
 
-export const sampleDataSchema = {
+export const sampleDataSchema = Joi.object({
   id: Joi.string()
     .regex(/^[a-zA-Z0-9-]+$/)
     .required(),
@@ -61,4 +61,4 @@ export const sampleDataSchema = {
   // Should provide a nice demo of Kibana's functionality with the sample data set
   savedObjects: Joi.array().items(Joi.object()).required(),
   dataIndices: Joi.array().items(dataIndexSchema).required(),
-};
+});

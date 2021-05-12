@@ -85,7 +85,9 @@ const paramSchema = Joi.object({
     .regex(/^[a-zA-Z_]+$/)
     .required(),
   label: Joi.string().required(),
-  type: Joi.string().valid(Object.values(PARAM_TYPES)).required(),
+  type: Joi.string()
+    .valid(...Object.values(PARAM_TYPES))
+    .required(),
 });
 
 const instructionsSchema = Joi.object({
@@ -93,11 +95,13 @@ const instructionsSchema = Joi.object({
   params: Joi.array().items(paramSchema),
 });
 
-export const tutorialSchema = {
+export const tutorialSchema = Joi.object({
   id: Joi.string()
     .regex(/^[a-zA-Z0-9-]+$/)
     .required(),
-  category: Joi.string().valid(Object.values(TUTORIAL_CATEGORY)).required(),
+  category: Joi.string()
+    .valid(...Object.values(TUTORIAL_CATEGORY))
+    .required(),
   name: Joi.string().required(),
   moduleName: Joi.string(),
   isBeta: Joi.boolean().default(false),
@@ -122,4 +126,4 @@ export const tutorialSchema = {
   // saved objects used by data module.
   savedObjects: Joi.array().items(),
   savedObjectsInstallMsg: Joi.string(),
-};
+});

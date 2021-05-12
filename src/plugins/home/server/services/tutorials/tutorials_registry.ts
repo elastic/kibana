@@ -43,9 +43,9 @@ export class TutorialsRegistry {
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
         const emptyContext = {};
-        const { error } = Joi.validate(specProvider(emptyContext), tutorialSchema);
-
-        if (error) {
+        try {
+          Joi.attempt(specProvider(emptyContext), tutorialSchema);
+        } catch (error) {
           throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);
         }
 
