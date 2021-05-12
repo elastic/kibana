@@ -142,9 +142,10 @@ export class TaskRunnerFactory {
           // We would idealy secure every operation but in order to support clean up of legacy alerts
           // we allow this operation in an unsecured manner
           // Once support for legacy alert RBAC is dropped, this can be secured
-          await getUnsecuredSavedObjectsClient(
-            fakeRequest
-          ).delete(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, actionTaskParamsId, { refresh: false });
+          await getUnsecuredSavedObjectsClient(fakeRequest).delete(
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+            actionTaskParamsId
+          );
         } catch (e) {
           // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
           logger.error(
