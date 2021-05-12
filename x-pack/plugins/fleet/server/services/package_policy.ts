@@ -56,10 +56,6 @@ import { appContextService } from '.';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
-function getDataset(st: string) {
-  return st.split('.')[1];
-}
-
 class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
@@ -562,7 +558,7 @@ async function _compilePackageStream(
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
   }
-  const datasetPath = getDataset(stream.data_stream.dataset);
+
   const packageDataStreams = pkgInfo.data_streams;
   if (!packageDataStreams) {
     throw new Error('Stream template not found, no data streams');
@@ -571,8 +567,11 @@ async function _compilePackageStream(
   const packageDataStream = packageDataStreams.find(
     (pkgDataStream) => pkgDataStream.dataset === stream.data_stream.dataset
   );
+
   if (!packageDataStream) {
-    throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);
+    throw new Error(
+      `Stream template not found, unable to find dataset ${stream.data_stream.dataset}`
+    );
   }
 
   const streamFromPkg = (packageDataStream.streams || []).find(
@@ -583,8 +582,10 @@ async function _compilePackageStream(
   }
 
   if (!streamFromPkg.template_path) {
-    throw new Error(`Stream template path not found for dataset ${datasetPath}`);
+    throw new Error(`Stream template path not found for dataset ${stream.data_stream.dataset}`);
   }
+
+  const datasetPath = packageDataStream.path;
 
   const [pkgStreamTemplate] = await getAssetsData(
     registryPkgInfo,
@@ -594,7 +595,7 @@ async function _compilePackageStream(
 
   if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
     throw new Error(
-      `Unable to load stream template ${streamFromPkg.template_path} for dataset ${datasetPath}`
+      `Unable to load stream template ${streamFromPkg.template_path} for dataset ${stream.data_stream.dataset}`
     );
   }
 
@@ -614,12 +615,14 @@ function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: Package
 
   for (const input of resultInputs) {
     const oldInput = oldInputs.find((i) => i.type === input.type);
+    if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
       input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
     }
     if (input.streams && oldInput?.streams) {
       for (const stream of input.streams) {
         const oldStream = oldInput.streams.find((s) => s.id === stream.id);
+        if (oldStream?.keep_enabled) stream.enabled = oldStream.enabled;
         if (stream.vars && oldStream?.vars) {
           stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
         }
