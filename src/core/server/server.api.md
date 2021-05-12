@@ -400,6 +400,11 @@ export interface ContextSetup {
 // @internal
 export interface CoreConfigUsageData {
     // (undocumented)
+    deprecatedKeys: {
+        set: string[];
+        unset: string[];
+    };
+    // (undocumented)
     elasticsearch: {
         sniffOnStart: boolean;
         sniffIntervalMs?: number;
