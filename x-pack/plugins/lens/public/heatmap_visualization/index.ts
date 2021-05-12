@@ -9,6 +9,7 @@ import { CoreSetup } from 'kibana/public';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { getTimeZone } from '../utils';
 
 export interface HeatmapVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -25,7 +26,7 @@ export class HeatmapVisualization {
     { expressions, formatFactory, editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const timeZone = await core.uiSettings.get('dateFormat:tz');
+      const timeZone = getTimeZone(core.uiSettings);
 
       const {
         getHeatmapVisualization,

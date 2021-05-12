@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'kibana/public';
+import moment from 'moment-timezone';
 import { LensFilterEvent } from './types';
 
 /** replaces the value `(empty) to empty string for proper filtering` */
@@ -42,3 +44,12 @@ export const desanitizeFilterContext = (
   }
   return result;
 };
+
+export function getTimeZone(uiSettings: IUiSettingsClient) {
+  const configuredTimeZone = uiSettings.get('dateFormat:tz');
+  if (configuredTimeZone === 'Browser') {
+    return moment.tz.guess();
+  }
+
+  return configuredTimeZone;
+}
