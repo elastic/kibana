@@ -94,10 +94,10 @@ describe('#hostname', () => {
     );
 
     // DOMAIN_LONG_SEGMENT (63 chars max per segment) - https://github.com/sideway/address/blob/master/lib/domain.js#L79
-    //const hostNameWithMaxAllowedLength = 'a'.repeat(100);
-    //expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
+    // const hostNameWithMaxAllowedLength = 'a'.repeat(100);
+    // expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
     //  hostNameWithMaxAllowedLength
-    //);
+    // );
   });
 
   test('returns error when value is not a valid hostname', () => {
