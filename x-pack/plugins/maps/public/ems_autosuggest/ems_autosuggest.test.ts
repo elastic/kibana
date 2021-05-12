@@ -118,6 +118,17 @@ describe('suggestEMSTermJoinConfig', () => {
       });
     });
 
+    test('5-digit zip code with column name', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['90201', '40204'],
+        fieldName: 'zip',
+      });
+      expect(termJoinConfig).toEqual({
+        layerId: 'usa_zip_codes',
+        field: 'zip',
+      });
+    });
+
     test('2 character iso code with country in column-name', async () => {
       const termJoinConfig = await suggestEMSTermJoinConfig({
         sampleValues: ['US', 'AR', 'KR', 'ZA', 'IT', 'CN', 'DE', 'CA', 'EC'],
@@ -254,6 +265,30 @@ describe('suggestEMSTermJoinConfig', () => {
         emsLayerIds: ['world_countries'],
       });
       expect(termJoinConfig).toEqual({ field: 'iso2', layerId: 'world_countries' });
+    });
+
+    test('5-digit zip code with column name and ems validation (all data in ems)', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['40205', '40204'],
+        emsLayerIds: ['world_countries', 'usa_zip_codes'],
+        fieldName: 'zip',
+      });
+      expect(termJoinConfig).toEqual({
+        layerId: 'usa_zip_codes',
+        field: 'zip',
+      });
+    });
+
+    test('5-digit zip code with column name and ems validation (not all data in ems)', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['90201', '40204'],
+        emsLayerIds: ['world_countries', 'usa_zip_codes'],
+        fieldName: 'zip',
+      });
+      expect(termJoinConfig).toEqual({
+        layerId: 'usa_zip_codes',
+        field: 'zip',
+      });
     });
   });
 });

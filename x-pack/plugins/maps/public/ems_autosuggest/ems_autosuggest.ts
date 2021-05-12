@@ -20,10 +20,15 @@ export interface EMSTermJoinConfig {
   field: string;
 }
 
-export enum MATCH_TYPE {
+enum MATCH_TYPE {
   FIELD_ALIAS = 'FIELD_ALIAS',
   FIELD_VALUE_PATTERN = 'FIELD_VALUE_PATTERN',
   FIELD_VALUE_EMS_MATCH = 'FIELD_VALUE_EMS_MATCH',
+}
+
+interface ConfigMatch {
+  config: EMSTermJoinConfig;
+  matchType: MATCH_TYPE;
 }
 
 const wellKnownColumnNames = [
@@ -76,53 +81,70 @@ const wellKnownColumnFormats = [
 
 interface UniqueMatch {
   config: { layerId: string; field: string };
-  count: number;
+  matchTypes: MATCH_TYPE[];
+}
+
+function isTermJoinEqual(config1: EMSTermJoinConfig, config2: EMSTermJoinConfig): boolean {
+  return config1.field === config2.field && config1.layerId === config2.layerId;
+}
+
+function findMatchIndex(matches: UniqueMatch[], config: EMSTermJoinConfig): number {
+  return matches.findIndex((match: UniqueMatch) => {
+    return isTermJoinEqual(match.config, config);
+  });
+}
+
+function collectMatches(matches: ConfigMatch[]): UniqueMatch[] {
+  const collectedMatches: UniqueMatch[] = [];
+
+  for (let i = 0; i < matches.length; i++) {
+    const match = matches[i];
+    const index = findMatchIndex(collectedMatches, match.config);
+    if (index >= 0) {
+      collectedMatches[index].matchTypes.push(match.matchType);
+    } else {
+      collectedMatches.push({
+        config: match.config,
+        matchTypes: [match.matchType],
+      });
+    }
+  }
+
+  return collectedMatches;
+}
+
+function sortMatch(match1: UniqueMatch, match2: UniqueMatch): number {
+  return match2.matchTypes.length - match2.matchTypes.length;
 }
 
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: AutoSuggestConfig
 ): Promise<EMSTermJoinConfig | null> {
-  const matches: EMSTermJoinConfig[] = [];
+  const matches: ConfigMatch[] = [];
 
+  // Get the fuzzy ones based on field-name
   if (sampleValuesConfig.fieldName) {
-    matches.push(...suggestByName(sampleValuesConfig.fieldName));
+    const fieldNameMatches: EMSTermJoinConfig[] = suggestByName(sampleValuesConfig.fieldName);
+    matches.push(...addMatchType(fieldNameMatches, MATCH_TYPE.FIELD_ALIAS));
   }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
-      matches.push(
-        ...(await suggestByEMSLayerIds(
-          sampleValuesConfig.emsLayerIds,
-          sampleValuesConfig.sampleValues
-        ))
+      const emsMatches = await suggestByEMSLayerIds(
+        sampleValuesConfig.emsLayerIds,
+        sampleValuesConfig.sampleValues
       );
-    } else {
-      matches.push(...suggestByFieldPattern(sampleValuesConfig.sampleValues));
+      matches.push(...addMatchType(emsMatches, MATCH_TYPE.FIELD_VALUE_EMS_MATCH));
     }
+
+    const patternMatches = suggestByFieldPattern(sampleValuesConfig.sampleValues);
+    matches.push(...addMatchType(patternMatches, MATCH_TYPE.FIELD_VALUE_PATTERN));
   }
 
-  const uniqMatches: UniqueMatch[] = matches.reduce((accum: UniqueMatch[], match) => {
-    const found = accum.find((m) => {
-      return m.config.layerId === match.layerId && m.config.field === match.layerId;
-    });
+  const uniqueMatches: UniqueMatch[] = collectMatches(matches);
+  uniqueMatches.sort(sortMatch);
 
-    if (found) {
-      found.count += 1;
-    } else {
-      accum.push({
-        config: match,
-        count: 1,
-      });
-    }
-
-    return accum;
-  }, []);
-
-  uniqMatches.sort((a, b) => {
-    return b.count - a.count;
-  });
-
-  return uniqMatches.length ? uniqMatches[0].config : null;
+  return uniqueMatches.length ? uniqueMatches[0].config : null;
 }
 
 function suggestByName(columnName: string): EMSTermJoinConfig[] {
@@ -215,4 +237,13 @@ async function suggestByEMSLayerIds(
     matches.push(...layerIdMathes);
   }
   return matches;
+}
+
+function addMatchType(configs: EMSTermJoinConfig[], matchType: MATCH_TYPE): ConfigMatch[] {
+  return configs.map((config) => {
+    return {
+      matchType,
+      config,
+    };
+  });
 }
