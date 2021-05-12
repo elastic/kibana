@@ -127,7 +127,7 @@ describe('unmuteAll()', () => {
       await alertsClient.unmuteAll({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'unmuteAll',
         ruleTypeId: 'myType',
@@ -146,7 +146,7 @@ describe('unmuteAll()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'unmuteAll',
         ruleTypeId: 'myType',

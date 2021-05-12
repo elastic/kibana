@@ -100,7 +100,7 @@ describe('disable()', () => {
       await alertsClient.disable({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'disable',
         ruleTypeId: 'myType',
@@ -117,7 +117,7 @@ describe('disable()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'disable',
         ruleTypeId: 'myType',

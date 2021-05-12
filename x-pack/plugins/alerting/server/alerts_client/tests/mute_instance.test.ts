@@ -160,7 +160,7 @@ describe('muteInstance()', () => {
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'muteInstance',
         ruleTypeId: 'myType',
@@ -180,7 +180,7 @@ describe('muteInstance()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'muteInstance',
         ruleTypeId: 'myType',

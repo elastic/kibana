@@ -1416,7 +1416,7 @@ describe('update()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'update',
         ruleTypeId: 'myType',
@@ -1448,7 +1448,7 @@ describe('update()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'update',
         ruleTypeId: 'myType',

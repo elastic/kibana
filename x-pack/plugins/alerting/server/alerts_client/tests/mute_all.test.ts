@@ -127,7 +127,7 @@ describe('muteAll()', () => {
       await alertsClient.muteAll({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'muteAll',
         ruleTypeId: 'myType',
@@ -146,7 +146,7 @@ describe('muteAll()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'muteAll',
         ruleTypeId: 'myType',

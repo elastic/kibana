@@ -183,7 +183,7 @@ describe('get()', () => {
       await alertsClient.get({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'get',
         ruleTypeId: 'myType',
@@ -201,7 +201,7 @@ describe('get()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'get',
         ruleTypeId: 'myType',

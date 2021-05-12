@@ -232,7 +232,7 @@ describe('delete()', () => {
       await alertsClient.delete({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'delete',
         ruleTypeId: 'myType',
@@ -249,7 +249,7 @@ describe('delete()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'delete',
         ruleTypeId: 'myType',

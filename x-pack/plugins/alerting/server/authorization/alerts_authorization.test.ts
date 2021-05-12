@@ -17,7 +17,7 @@ import {
   AlertsAuthorization,
   WriteOperations,
   ReadOperations,
-  AlertingAuthorizationTypes,
+  AlertingAuthorizationEntity,
 } from './alerts_authorization';
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
@@ -240,7 +240,7 @@ describe('AlertsAuthorization', () => {
         ruleTypeId: 'myType',
         consumer: 'myApp',
         operation: WriteOperations.Create,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       expect(alertTypeRegistry.get).toHaveBeenCalledTimes(0);
@@ -263,7 +263,7 @@ describe('AlertsAuthorization', () => {
         ruleTypeId: 'myType',
         consumer: 'myApp',
         operation: WriteOperations.Create,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       expect(alertTypeRegistry.get).toHaveBeenCalledTimes(0);
@@ -295,7 +295,7 @@ describe('AlertsAuthorization', () => {
         ruleTypeId: 'myType',
         consumer: 'myApp',
         operation: WriteOperations.Create,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
@@ -351,7 +351,7 @@ describe('AlertsAuthorization', () => {
         ruleTypeId: 'myType',
         consumer: 'exemptConsumer',
         operation: WriteOperations.Create,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
@@ -413,7 +413,7 @@ describe('AlertsAuthorization', () => {
         ruleTypeId: 'myType',
         consumer: 'myOtherApp',
         operation: WriteOperations.Create,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
@@ -490,7 +490,7 @@ describe('AlertsAuthorization', () => {
           ruleTypeId: 'myType',
           consumer: 'myOtherApp',
           operation: WriteOperations.Create,
-          authorizationType: AlertingAuthorizationTypes.Rule,
+          entity: AlertingAuthorizationEntity.Rule,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to create a \\"myType\\" rule for \\"myOtherApp\\""`
@@ -548,7 +548,7 @@ describe('AlertsAuthorization', () => {
           ruleTypeId: 'myType',
           consumer: 'myOtherApp',
           operation: WriteOperations.Create,
-          authorizationType: AlertingAuthorizationTypes.Alert,
+          entity: AlertingAuthorizationEntity.Alert,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to create a \\"myType\\" alert by \\"myApp\\""`
@@ -606,7 +606,7 @@ describe('AlertsAuthorization', () => {
           ruleTypeId: 'myType',
           consumer: 'myOtherApp',
           operation: WriteOperations.Create,
-          authorizationType: AlertingAuthorizationTypes.Alert,
+          entity: AlertingAuthorizationEntity.Alert,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
@@ -676,7 +676,7 @@ describe('AlertsAuthorization', () => {
       const {
         filter,
         ensureRuleTypeIsAuthorized,
-      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
+      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
         type: AlertingAuthorizationFilterType.KQL,
         fieldNames: {
           ruleTypeId: 'ruleId',
@@ -700,7 +700,7 @@ describe('AlertsAuthorization', () => {
       });
 
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
-        AlertingAuthorizationTypes.Rule,
+        AlertingAuthorizationEntity.Rule,
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
@@ -741,7 +741,7 @@ describe('AlertsAuthorization', () => {
 
       expect(
         (
-          await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
+          await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
             type: AlertingAuthorizationFilterType.KQL,
             fieldNames: {
               ruleTypeId: 'path.to.rule.id',
@@ -806,7 +806,7 @@ describe('AlertsAuthorization', () => {
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
-        AlertingAuthorizationTypes.Alert,
+        AlertingAuthorizationEntity.Alert,
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
@@ -883,7 +883,7 @@ describe('AlertsAuthorization', () => {
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
       const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
-        AlertingAuthorizationTypes.Rule,
+        AlertingAuthorizationEntity.Rule,
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
@@ -963,7 +963,7 @@ describe('AlertsAuthorization', () => {
       const {
         ensureRuleTypeIsAuthorized,
         logSuccessfulAuthorization,
-      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationTypes.Rule, {
+      } = await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
         type: AlertingAuthorizationFilterType.KQL,
         fieldNames: {
           ruleTypeId: 'ruleId',
@@ -1043,7 +1043,7 @@ describe('AlertsAuthorization', () => {
         alertAuthorization.filterByRuleTypeAuthorization(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create],
-          AlertingAuthorizationTypes.Rule
+          AlertingAuthorizationEntity.Rule
         )
       ).resolves.toMatchInlineSnapshot(`
               Set {
@@ -1122,7 +1122,7 @@ describe('AlertsAuthorization', () => {
         alertAuthorization.filterByRuleTypeAuthorization(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create],
-          AlertingAuthorizationTypes.Rule
+          AlertingAuthorizationEntity.Rule
         )
       ).resolves.toMatchInlineSnapshot(`
               Set {
@@ -1253,7 +1253,7 @@ describe('AlertsAuthorization', () => {
         alertAuthorization.filterByRuleTypeAuthorization(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create],
-          AlertingAuthorizationTypes.Rule
+          AlertingAuthorizationEntity.Rule
         )
       ).resolves.toMatchInlineSnapshot(`
                 Set {
@@ -1356,7 +1356,7 @@ describe('AlertsAuthorization', () => {
         alertAuthorization.filterByRuleTypeAuthorization(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create],
-          AlertingAuthorizationTypes.Rule
+          AlertingAuthorizationEntity.Rule
         )
       ).resolves.toMatchInlineSnapshot(`
                 Set {
@@ -1450,7 +1450,7 @@ describe('AlertsAuthorization', () => {
         alertAuthorization.filterByRuleTypeAuthorization(
           new Set([myAppAlertType]),
           [WriteOperations.Create],
-          AlertingAuthorizationTypes.Alert
+          AlertingAuthorizationEntity.Alert
         )
       ).resolves.toMatchInlineSnapshot(`
                 Set {
@@ -1554,7 +1554,7 @@ describe('AlertsAuthorization', () => {
         alertAuthorization.filterByRuleTypeAuthorization(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create, ReadOperations.Get],
-          AlertingAuthorizationTypes.Alert
+          AlertingAuthorizationEntity.Alert
         )
       ).resolves.toMatchInlineSnapshot(`
                 Set {
@@ -1661,7 +1661,7 @@ describe('AlertsAuthorization', () => {
         alertAuthorization.filterByRuleTypeAuthorization(
           new Set([myAppAlertType, myOtherAppAlertType]),
           [WriteOperations.Create],
-          AlertingAuthorizationTypes.Alert
+          AlertingAuthorizationEntity.Alert
         )
       ).resolves.toMatchInlineSnapshot(`
                 Set {

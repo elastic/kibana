@@ -21,7 +21,7 @@ import {
 import { KueryNode } from '../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 
-export enum AlertingAuthorizationTypes {
+export enum AlertingAuthorizationEntity {
   Rule = 'rule',
   Alert = 'alert',
 }
@@ -50,7 +50,7 @@ export interface EnsureAuthorizedOpts {
   ruleTypeId: string;
   consumer: string;
   operation: ReadOperations | WriteOperations;
-  authorizationType: AlertingAuthorizationTypes;
+  entity: AlertingAuthorizationEntity;
 }
 
 interface HasPrivileges {
@@ -138,28 +138,18 @@ export class AlertsAuthorization {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async ensureAuthorized({
-    ruleTypeId,
-    consumer,
-    operation,
-    authorizationType,
-  }: EnsureAuthorizedOpts) {
+  public async ensureAuthorized({ ruleTypeId, consumer, operation, entity }: EnsureAuthorizedOpts) {
     const { authorization } = this;
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const ruleType = this.alertTypeRegistry.get(ruleTypeId);
       const requiredPrivilegesByScope = {
-        consumer: authorization.actions.alerting.get(
-          ruleTypeId,
-          consumer,
-          authorizationType,
-          operation
-        ),
+        consumer: authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
         producer: authorization.actions.alerting.get(
           ruleTypeId,
           ruleType.producer,
-          authorizationType,
+          entity,
           operation
         ),
       };
@@ -199,7 +189,7 @@ export class AlertsAuthorization {
             ScopeType.Consumer,
             consumer,
             operation,
-            authorizationType
+            entity
           )
         );
       }
@@ -211,7 +201,7 @@ export class AlertsAuthorization {
           ScopeType.Consumer,
           consumer,
           operation,
-          authorizationType
+          entity
         );
       } else {
         const authorizedPrivileges = map(
@@ -235,7 +225,7 @@ export class AlertsAuthorization {
             unauthorizedScopeType,
             unauthorizedScope,
             operation,
-            authorizationType
+            entity
           )
         );
       }
@@ -247,14 +237,14 @@ export class AlertsAuthorization {
           ScopeType.Consumer,
           consumer,
           operation,
-          authorizationType
+          entity
         )
       );
     }
   }
 
   public async getFindAuthorizationFilter(
-    authorizationType: AlertingAuthorizationTypes,
+    authorizationEntity: AlertingAuthorizationEntity,
     filterOpts: AlertingAuthorizationFilterOpts
   ): Promise<{
     filter?: KueryNode | JsonObject;
@@ -265,19 +255,23 @@ export class AlertsAuthorization {
       const { username, authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
         this.alertTypeRegistry.list(),
         [ReadOperations.Find],
-        authorizationType
+        authorizationEntity
       );
 
       if (!authorizedRuleTypes.size) {
         throw Boom.forbidden(
-          this.auditLogger.alertsUnscopedAuthorizationFailure(username!, 'find', authorizationType)
+          this.auditLogger.alertsUnscopedAuthorizationFailure(
+            username!,
+            'find',
+            authorizationEntity
+          )
         );
       }
 
       const authorizedRuleTypeIdsToConsumers = new Set<string>(
         [...authorizedRuleTypes].reduce<string[]>((ruleTypeIdConsumerPairs, ruleType) => {
           for (const consumer of Object.keys(ruleType.authorizedConsumers)) {
-            ruleTypeIdConsumerPairs.push(`${ruleType.id}/${consumer}/${authorizationType}`);
+            ruleTypeIdConsumerPairs.push(`${ruleType.id}/${consumer}/${authorizationEntity}`);
           }
           return ruleTypeIdConsumerPairs;
         }, [])
@@ -295,7 +289,7 @@ export class AlertsAuthorization {
                 ScopeType.Consumer,
                 consumer,
                 'find',
-                authorizationType
+                authorizationEntity
               )
             );
           } else {
@@ -321,7 +315,7 @@ export class AlertsAuthorization {
               ),
               ScopeType.Consumer,
               'find',
-              authorizationType
+              authorizationEntity
             );
           }
         },
@@ -336,12 +330,12 @@ export class AlertsAuthorization {
   public async filterByRuleTypeAuthorization(
     ruleTypes: Set<RegistryAlertType>,
     operations: Array<ReadOperations | WriteOperations>,
-    authorizationType: AlertingAuthorizationTypes
+    authorizationEntity: AlertingAuthorizationEntity
   ): Promise<Set<RegistryAlertTypeWithAuth>> {
     const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
       ruleTypes,
       operations,
-      authorizationType
+      authorizationEntity
     );
     return authorizedRuleTypes;
   }
@@ -349,7 +343,7 @@ export class AlertsAuthorization {
   private async augmentRuleTypesWithAuthorization(
     ruleTypes: Set<RegistryAlertType>,
     operations: Array<ReadOperations | WriteOperations>,
-    authorizationType: AlertingAuthorizationTypes
+    authorizationEntity: AlertingAuthorizationEntity
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
@@ -379,7 +373,7 @@ export class AlertsAuthorization {
               this.authorization!.actions.alerting.get(
                 ruleType.id,
                 feature,
-                authorizationType,
+                authorizationEntity,
                 operation
               ),
               [ruleType, feature, hasPrivilegeByOperation(operation), ruleType.producer === feature]

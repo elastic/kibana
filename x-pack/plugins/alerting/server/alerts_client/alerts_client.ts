@@ -50,7 +50,7 @@ import {
   AlertsAuthorization,
   WriteOperations,
   ReadOperations,
-  AlertingAuthorizationTypes,
+  AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
@@ -248,7 +248,7 @@ export class AlertsClient {
         ruleTypeId: data.alertTypeId,
         consumer: data.consumer,
         operation: WriteOperations.Create,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (error) {
       this.auditLogger?.log(
@@ -374,7 +374,7 @@ export class AlertsClient {
         ruleTypeId: result.attributes.alertTypeId,
         consumer: result.attributes.consumer,
         operation: ReadOperations.Get,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (error) {
       this.auditLogger?.log(
@@ -401,7 +401,7 @@ export class AlertsClient {
       ruleTypeId: alert.alertTypeId,
       consumer: alert.consumer,
       operation: ReadOperations.GetAlertState,
-      authorizationType: AlertingAuthorizationTypes.Rule,
+      entity: AlertingAuthorizationEntity.Rule,
     });
     if (alert.scheduledTaskId) {
       const { state } = taskInstanceToAlertTaskInstance(
@@ -422,7 +422,7 @@ export class AlertsClient {
       ruleTypeId: alert.alertTypeId,
       consumer: alert.consumer,
       operation: ReadOperations.GetAlertInstanceSummary,
-      authorizationType: AlertingAuthorizationTypes.Rule,
+      entity: AlertingAuthorizationEntity.Rule,
     });
 
     // default duration of instance summary is 60 * alert interval
@@ -465,7 +465,7 @@ export class AlertsClient {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
-        AlertingAuthorizationTypes.Rule,
+        AlertingAuthorizationEntity.Rule,
         alertingAuthorizationFilterOpts
       );
     } catch (error) {
@@ -507,7 +507,7 @@ export class AlertsClient {
         ensureRuleTypeIsAuthorized(
           attributes.alertTypeId,
           attributes.consumer,
-          AlertingAuthorizationTypes.Rule
+          AlertingAuthorizationEntity.Rule
         );
       } catch (error) {
         this.auditLogger?.log(
@@ -555,7 +555,7 @@ export class AlertsClient {
           filter: authorizationFilter,
           logSuccessfulAuthorization,
         } = await this.authorization.getFindAuthorizationFilter(
-          AlertingAuthorizationTypes.Rule,
+          AlertingAuthorizationEntity.Rule,
           alertingAuthorizationFilterOpts
         );
         const filter = options.filter
@@ -619,7 +619,7 @@ export class AlertsClient {
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
         operation: WriteOperations.Delete,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (error) {
       this.auditLogger?.log(
@@ -693,7 +693,7 @@ export class AlertsClient {
         ruleTypeId: alertSavedObject.attributes.alertTypeId,
         consumer: alertSavedObject.attributes.consumer,
         operation: WriteOperations.Update,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (error) {
       this.auditLogger?.log(
@@ -866,7 +866,7 @@ export class AlertsClient {
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
         operation: WriteOperations.UpdateApiKey,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
       if (attributes.actions.length) {
         await this.actionsAuthorization.ensureAuthorized('execute');
@@ -971,7 +971,7 @@ export class AlertsClient {
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
         operation: WriteOperations.Enable,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       if (attributes.actions.length) {
@@ -1084,7 +1084,7 @@ export class AlertsClient {
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
         operation: WriteOperations.Disable,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (error) {
       this.auditLogger?.log(
@@ -1157,7 +1157,7 @@ export class AlertsClient {
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
         operation: WriteOperations.MuteAll,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       if (attributes.actions.length) {
@@ -1219,7 +1219,7 @@ export class AlertsClient {
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
         operation: WriteOperations.UnmuteAll,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       if (attributes.actions.length) {
@@ -1281,7 +1281,7 @@ export class AlertsClient {
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
         operation: WriteOperations.MuteInstance,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
 
       if (attributes.actions.length) {
@@ -1349,7 +1349,7 @@ export class AlertsClient {
         ruleTypeId: attributes.alertTypeId,
         consumer: attributes.consumer,
         operation: WriteOperations.UnmuteInstance,
-        authorizationType: AlertingAuthorizationTypes.Rule,
+        entity: AlertingAuthorizationEntity.Rule,
       });
       if (attributes.actions.length) {
         await this.actionsAuthorization.ensureAuthorized('execute');
@@ -1394,7 +1394,7 @@ export class AlertsClient {
     return await this.authorization.filterByRuleTypeAuthorization(
       this.alertTypeRegistry.list(),
       [ReadOperations.Get, WriteOperations.Create],
-      AlertingAuthorizationTypes.Rule
+      AlertingAuthorizationEntity.Rule
     );
   }
 

@@ -269,7 +269,7 @@ describe('updateApiKey()', () => {
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'updateApiKey',
         ruleTypeId: 'myType',
@@ -286,7 +286,7 @@ describe('updateApiKey()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'updateApiKey',
         ruleTypeId: 'myType',

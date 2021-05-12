@@ -211,7 +211,7 @@ describe('getAlertState()', () => {
       await alertsClient.getAlertState({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'getAlertState',
         ruleTypeId: 'myType',
@@ -232,7 +232,7 @@ describe('getAlertState()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'getAlertState',
         ruleTypeId: 'myType',

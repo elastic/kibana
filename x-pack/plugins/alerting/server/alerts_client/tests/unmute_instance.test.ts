@@ -158,7 +158,7 @@ describe('unmuteInstance()', () => {
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'unmuteInstance',
         ruleTypeId: 'myType',
@@ -178,7 +178,7 @@ describe('unmuteInstance()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'unmuteInstance',
         ruleTypeId: 'myType',

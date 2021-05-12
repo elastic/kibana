@@ -195,7 +195,7 @@ describe('create()', () => {
       await tryToExecuteOperation({ data });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'create',
         ruleTypeId: 'myType',
@@ -217,7 +217,7 @@ describe('create()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        authorizationType: 'rule',
+        entity: 'rule',
         consumer: 'myApp',
         operation: 'create',
         ruleTypeId: 'myType',
@@ -349,7 +349,7 @@ describe('create()', () => {
     });
     const result = await alertsClient.create({ data });
     expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-      authorizationType: 'rule',
+      entity: 'rule',
       consumer: 'bar',
       operation: 'create',
       ruleTypeId: '123',
