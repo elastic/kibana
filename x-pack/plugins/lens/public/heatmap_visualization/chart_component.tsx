@@ -20,7 +20,7 @@ import {
 import { VisualizationContainer } from '../visualization_container';
 import { HeatmapRenderProps } from './types';
 import './index.scss';
-import { LensFilterEvent } from '../types';
+import { LensBrushEvent, LensFilterEvent } from '../types';
 import { desanitizeFilterContext } from '../utils';
 import { search } from '../../../../../src/plugins/data/public';
 
@@ -122,8 +122,52 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     onClickValue(desanitizeFilterContext(context));
   };
 
+  const onBrushEnd = (e: HeatmapBrushEvent) => {
+    const { x, y } = e;
+
+    const xAxisFieldName = xAxisColumn.meta.field;
+    const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
+
+    if (isTimeBasedSwimLane) {
+      const context: LensBrushEvent['data'] = {
+        range: x as number[],
+        table,
+        column: xAxisColumnIndex,
+        timeFieldName,
+      };
+      onSelectRange(context);
+    } else {
+      const points = (y as string[]).map((v) => {
+        return {
+          row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
+          column: yAxisColumnIndex,
+          value: v,
+        };
+      });
+
+      (x as string[]).forEach((v) => {
+        points.push({
+          row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+          column: xAxisColumnIndex,
+          value: v,
+        });
+      });
+
+      const context: LensFilterEvent['data'] = {
+        data: points.map((point) => ({
+          row: point.row,
+          column: point.column,
+          value: point.value,
+          table,
+        })),
+        timeFieldName,
+      };
+      onClickValue(desanitizeFilterContext(context));
+    }
+  };
+
   const config: HeatmapSpec['config'] = {
-    onBrushEnd: (e: HeatmapBrushEvent) => {},
+    onBrushEnd,
     grid: {
       stroke: {
         width: args.gridConfig.strokeWidth ?? 1,
