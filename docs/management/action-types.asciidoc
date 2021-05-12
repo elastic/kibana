@@ -111,6 +111,13 @@ image::images/connector-select-type.png[Connector select type]
 === Importing and exporting connectors
 
 To import and export rules, use the <<managing-saved-objects, Saved Objects Management UI>>.
+After the succesful import the proper banner will be displayed:
+[role="screenshot"]
+image::images/coonectors-import-banner.png[Connectors import banner]
+
+Connectors with the missing user sensitive information due to the import will be shown with the 'Fix' button in the list:
+[role="screenshot"]
+image::images/connectors-with-missing-secrets.png[Connectors with missing secrets]
 
 [float]
 [[create-connectors]]
