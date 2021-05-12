@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useState, useContext, useMemo, useEffect } from 'react';
+import classNames from 'classnames';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -16,7 +17,8 @@ import {
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import classNames from 'classnames';
+import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 
@@ -29,18 +31,28 @@ export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
   return [doc._index, doc._id, routing].join('::');
 };
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
-  const ctx = useContext(DiscoverGridContext);
-  const doc = useMemo(() => ctx.rows[rowIndex], [ctx.rows, rowIndex]);
+  const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } = useContext(
+    DiscoverGridContext
+  );
+  const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
   const id = useMemo(() => getDocId(doc), [doc]);
-  const checked = useMemo(() => ctx.selectedDocs.includes(id), [ctx.selectedDocs, id]);
+  const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);
 
   useEffect(() => {
     if (doc.isAnchor) {
       setCellProps({
         className: 'dscDiscoverGrid__cell--highlight',
       });
+    } else if (expanded && doc && expanded._id === doc._id) {
+      setCellProps({
+        style: {
+          backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
+        },
+      });
+    } else {
+      setCellProps({ style: undefined });
     }
-  }, [doc, setCellProps]);
+  }, [expanded, doc, setCellProps, isDarkMode]);
 
   return (
     <EuiCheckbox
@@ -50,10 +62,10 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
       data-test-subj={`dscGridSelectDoc-${id}`}
       onChange={() => {
         if (checked) {
-          const newSelection = ctx.selectedDocs.filter((docId) => docId !== id);
-          ctx.setSelectedDocs(newSelection);
+          const newSelection = selectedDocs.filter((docId) => docId !== id);
+          setSelectedDocs(newSelection);
         } else {
-          ctx.setSelectedDocs([...ctx.selectedDocs, id]);
+          setSelectedDocs([...selectedDocs, id]);
         }
       }}
     />

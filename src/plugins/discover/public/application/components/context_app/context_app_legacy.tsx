@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import './context_app_legacy.scss';
-import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
+import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { DOC_TABLE_LEGACY } from '../../../../common';
 import { ContextErrorMessage } from '../context_error_message';
 import {
@@ -83,6 +83,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
     predecessorStatus === LoadingStatus.LOADED &&
     successorStatus === LoadingStatus.LOADED;
   const isLegacy = config.get(DOC_TABLE_LEGACY);
+  const anchorId = rows?.find(({ isAnchor }) => isAnchor)?._id;
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,
@@ -183,10 +184,21 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       {isFailed ? (
         <ContextErrorMessage status={anchorStatus} reason={renderProps.anchorReason} />
       ) : (
-        <React.Fragment>
+        <Fragment>
           <TopNavMenu {...getNavBarProps()} />
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageContent paddingSize="s" className="dscDocsContent">
+              <EuiSpacer size="s" />
+              <EuiText>
+                <strong>
+                  <FormattedMessage
+                    id="discover.context.contextOfTitle"
+                    defaultMessage="Context of #{anchorId}"
+                    values={{ anchorId }}
+                  />
+                </strong>
+              </EuiText>
+              <EuiSpacer size="s" />
               <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
               {loadingFeedback()}
               <EuiHorizontalRule margin="xs" />
@@ -205,7 +217,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
               <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
             </EuiPageContent>
           </EuiPage>
-        </React.Fragment>
+        </Fragment>
       )}
     </I18nProvider>
   );

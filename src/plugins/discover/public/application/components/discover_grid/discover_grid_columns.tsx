@@ -54,7 +54,7 @@ export function buildEuiGridColumn(
   columnWidth: number | undefined = 0,
   indexPattern: IndexPattern,
   defaultColumns: boolean,
-  isSortEnabled?: boolean
+  isSortEnabled: boolean
 ) {
   const timeString = i18n.translate('discover.timeLabel', {
     defaultMessage: 'Time',
@@ -102,7 +102,7 @@ export function getEuiGridColumns(
   indexPattern: IndexPattern,
   showTimeCol: boolean,
   defaultColumns: boolean,
-  isSortEnabled?: boolean
+  isSortEnabled: boolean
 ) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;

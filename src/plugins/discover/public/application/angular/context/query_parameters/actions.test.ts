@@ -141,7 +141,7 @@ describe('context query_parameter actions', function () {
         indexPatternId: 'INDEX_PATTERN',
         predecessorCount: 100,
         successorCount: 100,
-        sort: ['field', SortDirection.asc],
+        sort: [['field', SortDirection.asc]],
         tieBreakerField: '',
       });
     });
