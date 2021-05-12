@@ -186,7 +186,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
         return `expected a plain object value, but found [${typeDetect(value)}] instead.`;
       case 'object.parse':
         return `could not parse object value from json input`;
-      case 'object.allowUnknown':
+      case 'object.unknown':
         return `definition for this key is missing`;
       case 'object.child':
         return reason[0];

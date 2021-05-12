@@ -191,10 +191,7 @@ export const internals: JoiRoot = Joi.extend(
       if (prefs.convert && typeof value === 'string') {
         try {
           const parsed = JSON.parse(value);
-          if (isPlainObject(parsed)) {
-            return { value: parsed };
-          }
-          return { errors: [error('object.base')] };
+          return { value: parsed };
         } catch (e) {
           return { errors: [error('object.parse')] };
         }
