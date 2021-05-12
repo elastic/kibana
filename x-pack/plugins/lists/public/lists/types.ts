@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { Type } from '@kbn/securitysolution-io-ts-utils';
+
 import { HttpStart } from '../../../../../src/core/public';
-import { Type } from '../../common/schemas';
 
 export interface ApiParams {
   http: HttpStart;

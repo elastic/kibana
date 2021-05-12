@@ -84,7 +84,8 @@ export async function mountApp({
   } = pluginsStart;
 
   const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
-  const activeSpaceId = spacesApi && (await spacesApi.activeSpace$.pipe(first()).toPromise())?.id;
+  const activeSpaceId =
+    spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
 
   const dashboardServices: DashboardAppServices = {
