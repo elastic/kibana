@@ -21847,8 +21847,6 @@
     "xpack.securitySolution.trustedapps.list.backButton": "戻る",
     "xpack.securitySolution.trustedapps.list.columns.actions": "アクション",
     "xpack.securitySolution.trustedapps.list.pageTitle": "信頼できるアプリケーション",
-    "xpack.securitySolution.trustedapps.list.search.button": "更新",
-    "xpack.securitySolution.trustedapps.list.search.placeholder": "検索",
     "xpack.securitySolution.trustedapps.listEmptyState.message": "現在、エンドポイントには信頼できるアプリケーションがありません。",
     "xpack.securitySolution.trustedapps.listEmptyState.title": "最初の信頼できるアプリケーションを追加",
     "xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.hash": "md5、sha1、sha256",

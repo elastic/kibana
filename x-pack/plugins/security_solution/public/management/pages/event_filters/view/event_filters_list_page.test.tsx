@@ -153,4 +153,27 @@ describe('When on the Event Filters List Page', () => {
       ).not.toBeNull();
     });
   });
+
+  describe('And search is dispatched', () => {
+    beforeEach(async () => {
+      act(() => {
+        history.push('/event_filters?filter=test');
+      });
+      renderResult = render();
+      await act(async () => {
+        await waitForAction('eventFiltersListPageDataChanged');
+      });
+    });
+
+    it('search bar is filled with query params', () => {
+      expect(renderResult.getByDisplayValue('test')).not.toBeNull();
+    });
+
+    it('search action is dispatched', async () => {
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('searchButton'));
+        expect(await waitForAction('userChangedUrl')).not.toBeNull();
+      });
+    });
+  });
 });

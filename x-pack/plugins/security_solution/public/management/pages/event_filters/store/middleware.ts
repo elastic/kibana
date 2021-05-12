@@ -35,6 +35,9 @@ import {
   getItemToDelete,
   getDeletionState,
 } from './selector';
+
+import { parseQueryFilterToKQL } from '../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../constants';
 import {
   EventFiltersListPageData,
   EventFiltersListPageState,
@@ -236,12 +239,13 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       },
     });
 
-    const { page_size: pageSize, page_index: pageIndex } = getCurrentLocation(state);
+    const { page_size: pageSize, page_index: pageIndex, filter } = getCurrentLocation(state);
     const query: EventFiltersServiceGetListOptions = {
       page: pageIndex + 1,
       perPage: pageSize,
       sortField: 'created_at',
       sortOrder: 'desc',
+      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
     };
 
     try {

@@ -37,6 +37,7 @@ export type EventFiltersServiceGetListOptions = Partial<{
   perPage: number;
   sortField: keyof ExceptionListItemSchema;
   sortOrder: 'asc' | 'desc';
+  filter: string;
 }>;
 
 export interface EventFiltersService {
