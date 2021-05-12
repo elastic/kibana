@@ -14,7 +14,6 @@ import {
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
@@ -32,7 +31,6 @@ export const queryExecutor = async ({
   version,
   searchAfterSize,
   logger,
-  refresh,
   eventsTelemetry,
   buildRuleMessage,
   bulkCreate,
@@ -45,7 +43,6 @@ export const queryExecutor = async ({
   version: string;
   searchAfterSize: number;
   logger: Logger;
-  refresh: RefreshTypes;
   eventsTelemetry: TelemetryEventsSender | undefined;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
@@ -76,7 +73,6 @@ export const queryExecutor = async ({
     signalsIndex: ruleParams.outputIndex,
     filter: esFilter,
     pageSize: searchAfterSize,
-    refresh,
     buildRuleMessage,
     bulkCreate,
   });

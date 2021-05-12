@@ -32,7 +32,7 @@ import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { RuleParams } from '../schemas/rule_schemas';
-import { GenericBulkCreateResponse, SingleBulkCreateResponse } from './single_bulk_create';
+import { GenericBulkCreateResponse } from './single_bulk_create';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -256,10 +256,7 @@ export interface QueryFilter {
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
-export type BulkCreate = <T>(
-  docs: Array<BaseHit<T>>,
-  refresh: RefreshTypes
-) => Promise<GenericBulkCreateResponse<T>>;
+export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
 
 export interface SearchAfterAndBulkCreateParams {
   tuples: Array<{
@@ -278,7 +275,6 @@ export interface SearchAfterAndBulkCreateParams {
   signalsIndex: string;
   pageSize: number;
   filter: unknown;
-  refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
   enrichment?: SignalsEnrichment;
   bulkCreate: BulkCreate;

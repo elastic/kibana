@@ -76,7 +76,7 @@ export interface SingleBulkCreateResponse {
   errors: string[];
 }
 
-export type GenericBulkCreateResponse<T> = {
+export interface GenericBulkCreateResponse<T> {
   success: boolean;
   bulkCreateDuration?: string;
   createdItemsCount: number;

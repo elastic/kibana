@@ -31,6 +31,7 @@ import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import {
   AlertAttributes,
+  BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalsEnrichment,
@@ -57,7 +58,6 @@ export interface CreateThreatSignalsOptions {
   outputIndex: string;
   ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  refresh: false | 'wait_for';
   threatFilters: unknown[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
@@ -66,6 +66,7 @@ export interface CreateThreatSignalsOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   concurrentSearches: ConcurrentSearches;
   itemsPerSearch: ItemsPerSearch;
+  bulkCreate: BulkCreate;
 }
 
 export interface CreateThreatSignalOptions {
@@ -87,10 +88,10 @@ export interface CreateThreatSignalOptions {
   outputIndex: string;
   ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  refresh: false | 'wait_for';
   buildRuleMessage: BuildRuleMessage;
   currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
+  bulkCreate: BulkCreate;
 }
 
 export interface BuildThreatMappingFilterOptions {

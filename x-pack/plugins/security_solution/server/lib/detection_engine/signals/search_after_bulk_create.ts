@@ -8,7 +8,7 @@
 import { identity } from 'lodash';
 import { SortResults } from '@elastic/elasticsearch/api/types';
 import { singleSearchAfter } from './single_search_after';
-import { filterDuplicateRules, singleBulkCreate } from './single_bulk_create';
+import { filterDuplicateRules } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
@@ -21,7 +21,11 @@ import {
   getSafeSortIds,
   generateId,
 } from './utils';
-import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType, WrappedSignalHit } from './types';
+import {
+  SearchAfterAndBulkCreateParams,
+  SearchAfterAndBulkCreateReturnType,
+  WrappedSignalHit,
+} from './types';
 import { buildBulkBody } from './build_bulk_body';
 
 // search_after through documents and re-index using bulk endpoint.
@@ -38,7 +42,6 @@ export const searchAfterAndBulkCreate = async ({
   signalsIndex,
   filter,
   pageSize,
-  refresh,
   buildRuleMessage,
   enrichment = identity,
   bulkCreate,
@@ -152,9 +155,10 @@ export const searchAfterAndBulkCreate = async ({
             );
           }
           const enrichedEvents = await enrichment(filteredEvents);
-          const ruleParams = ruleSO.attributes.params;
           filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
-          logger.debug(buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`));
+          logger.debug(
+            buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`)
+          );
 
           const wrappedDocs: WrappedSignalHit[] = enrichedEvents.hits.hits.flatMap((doc) => [
             {
@@ -163,7 +167,7 @@ export const searchAfterAndBulkCreate = async ({
                 doc._index,
                 doc._id,
                 doc._version ? doc._version.toString() : '',
-                ruleParams.ruleId ?? '',
+                ruleParams.ruleId ?? ''
               ),
               _source: buildBulkBody(ruleSO, doc),
             },
@@ -174,7 +178,7 @@ export const searchAfterAndBulkCreate = async ({
             createdItems,
             success: bulkSuccess,
             errors: bulkErrors,
-          } = await bulkCreate(wrappedDocs, refresh);
+          } = await bulkCreate(wrappedDocs);
           toReturn = mergeReturns([
             toReturn,
             createSearchAfterReturnType({
