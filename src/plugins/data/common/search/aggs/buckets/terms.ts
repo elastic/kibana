@@ -180,7 +180,11 @@ export const getTermsBucketAgg = () =>
             return;
           }
 
-          if (aggs?.hasTimeShifts() && aggs.timeRange) {
+          if (
+            aggs?.hasTimeShifts() &&
+            Object.keys(aggs?.getTimeShifts()).length > 1 &&
+            aggs.timeRange
+          ) {
             const shift = orderAgg.getTimeShift();
             orderAgg = aggs.createAggConfig(
               {
