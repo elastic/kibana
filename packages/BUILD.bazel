@@ -27,6 +27,7 @@ filegroup(
       "//packages/kbn-securitysolution-io-ts-utils:build",
       "//packages/kbn-securitysolution-utils:build",
       "//packages/kbn-std:build",
+      "//packages/kbn-telemetry-tools:build",
       "//packages/kbn-tinymath:build",
       "//packages/kbn-utility-types:build",
       "//packages/kbn-utils:build",

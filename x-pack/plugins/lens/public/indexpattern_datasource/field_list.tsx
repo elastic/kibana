@@ -14,6 +14,7 @@ import { NoFieldsCallout } from './no_fields_callout';
 import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
 import { DatasourceDataPanelProps } from '../types';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 const PAGINATION_SIZE = 50;
 
 export type FieldGroups = Record<
@@ -55,6 +56,7 @@ export const FieldList = React.memo(function FieldList({
   hasSuggestionForField,
   editField,
   removeField,
+  uiActions,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
@@ -72,6 +74,7 @@ export const FieldList = React.memo(function FieldList({
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   editField?: (name: string) => void;
   removeField?: (name: string) => void;
+  uiActions: UiActionsStart;
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -155,6 +158,7 @@ export const FieldList = React.memo(function FieldList({
                   groupIndex={0}
                   dropOntoWorkspace={dropOntoWorkspace}
                   hasSuggestionForField={hasSuggestionForField}
+                  uiActions={uiActions}
                 />
               ))
             )}
@@ -206,6 +210,7 @@ export const FieldList = React.memo(function FieldList({
                     defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
                   />
                 }
+                uiActions={uiActions}
               />
               <EuiSpacer size="m" />
             </Fragment>
