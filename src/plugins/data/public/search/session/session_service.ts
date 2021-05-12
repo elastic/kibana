@@ -215,7 +215,7 @@ export class SessionService {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
 
     // cancel previous session if needed
-    this.clear();
+    this.cancelIfNotPersisted();
 
     this.state.transitions.start({ appName: this.currentApp });
     return this.getSessionId()!;
@@ -245,28 +245,31 @@ export class SessionService {
       );
       return;
     }
-    const { sessionId, isRestore, isStored } = this.state.get();
-    if (sessionId && !isRestore && !isStored) {
-      this.sessionsClient
-        .cancel(this.state.get().sessionId!)
-        .catch(() => {});
-    }
+    this.cancelIfNotPersisted();
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
+  }
+
+  private async cancelIfNotPersisted() {
+    const { sessionId, isRestore, isStored } = this.state.get();
+    if (sessionId && !isRestore && !isStored) {
+      return this.cancel();
+    }
   }
 
   /**
    * Request a cancellation of on-going search requests within current session
    */
   public async cancel(): Promise<void> {
-    const isStoredSession = this.state.get().isStored;
     this.state.get().pendingSearches.forEach((s) => {
       s.abort();
     });
     this.state.transitions.cancel();
-    if (isStoredSession) {
-      await this.sessionsClient.delete(this.state.get().sessionId!);
+
+    const { sessionId, isRestore, isStored } = this.state.get();
+    if (sessionId && !isRestore && !isStored) {
+      await this.sessionsClient.cancel(sessionId).catch(() => {});
     }
   }
 
