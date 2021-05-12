@@ -58,9 +58,16 @@ export class IndexPatternsFetcher {
     rollupIndex?: string;
   }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
+    const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
+    let patternListActive: string[] = patternList;
+    // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
+    if (patternList.length > 1) {
+      patternListActive = await this.validatePatternListActive(patternList);
+    }
     const fieldCapsResponse = await getFieldCapabilities(
       this.elasticsearchClient,
-      pattern,
+      // if none of the patterns are active, pass the original list to get an error
+      patternListActive.length > 0 ? patternListActive : patternList,
       metaFields,
       {
         allow_no_indices: fieldCapsOptions
@@ -68,6 +75,7 @@ export class IndexPatternsFetcher {
           : this.allowNoIndices,
       }
     );
+
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
@@ -117,5 +125,35 @@ export class IndexPatternsFetcher {
       throw createNoMatchingIndicesError(pattern);
     }
     return await getFieldCapabilities(this.elasticsearchClient, indices, metaFields);
+  }
+
+  /**
+   *  Returns an index pattern list of only those index pattern strings in the given list that return indices
+   *
+   *  @param patternList string[]
+   *  @return {Promise<string[]>}
+   */
+  async validatePatternListActive(patternList: string[]) {
+    const result = await Promise.all(
+      patternList
+        .map((pattern) =>
+          this.elasticsearchClient.count({
+            index: pattern,
+          })
+        )
+        .map((p) =>
+          p.catch((e) => {
+            if (e.body.error.type === 'index_not_found_exception') {
+              return { body: { count: 0 } };
+            }
+            throw e;
+          })
+        )
+    );
+    return result.reduce(
+      (acc: string[], { body: { count } }, patternListIndex) =>
+        count > 0 ? [...acc, patternList[patternListIndex]] : acc,
+      []
+    );
   }
 }

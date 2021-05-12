@@ -7,40 +7,31 @@
 
 import React from 'react';
 
+import { EuiPageHeader, EuiPageContentBody, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContentBody,
-  EuiTitle,
-  EuiButton,
-} from '@elastic/eui';
 
+import { FlashMessages } from '../../../shared/flash_messages';
 import { DOCS_PREFIX } from '../../routes';
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 
 export const EmptyEngineOverview: React.FC = () => {
   return (
     <>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.empty.heading', {
-                defaultMessage: 'Engine setup',
-              })}
-            </h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
-          <EuiButton href={`${DOCS_PREFIX}/index.html`} target="_blank">
+      <EuiPageHeader
+        pageTitle={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.overview.empty.heading',
+          { defaultMessage: 'Engine setup' }
+        )}
+        rightSideItems={[
+          <EuiButton href={`${DOCS_PREFIX}/index.html`} target="_blank" iconType="popout">
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.overview.empty.headingAction',
               { defaultMessage: 'View documentation' }
             )}
-          </EuiButton>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+          </EuiButton>,
+        ]}
+      />
+      <FlashMessages />
       <EuiPageContentBody>
         <DocumentCreationButtons />
         <DocumentCreationFlyout />

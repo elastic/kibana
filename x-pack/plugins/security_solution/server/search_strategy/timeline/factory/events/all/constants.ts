@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
+
 export const TIMELINE_EVENTS_FIELDS = [
   '@timestamp',
   'signal.status',
@@ -24,6 +26,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'signal.rule.version',
   'signal.rule.severity',
   'signal.rule.risk_score',
+  'signal.threshold_result',
   'event.code',
   'event.module',
   'event.action',
@@ -70,6 +73,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'auditd.summary.how',
   'auditd.summary.message_type',
   'auditd.summary.sequence',
+  'file.Ext.original.path',
   'file.name',
   'file.target_path',
   'file.extension',
@@ -95,6 +99,8 @@ export const TIMELINE_EVENTS_FIELDS = [
   'host.os.family',
   'host.id',
   'host.ip',
+  'registry.key',
+  'registry.path',
   'rule.reference',
   'source.bytes',
   'source.packets',
@@ -162,9 +168,12 @@ export const TIMELINE_EVENTS_FIELDS = [
   'tls.server_certificate.fingerprint.sha1',
   'user.domain',
   'winlog.event_id',
+  'process.exit_code',
   'process.hash.md5',
   'process.hash.sha1',
   'process.hash.sha256',
+  'process.parent.name',
+  'process.parent.pid',
   'process.pid',
   'process.name',
   'process.ppid',
@@ -223,4 +232,5 @@ export const TIMELINE_EVENTS_FIELDS = [
   'zeek.ssl.established',
   'zeek.ssl.resumed',
   'zeek.ssl.version',
+  ...CTI_ROW_RENDERER_FIELDS,
 ];

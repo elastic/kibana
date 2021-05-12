@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
@@ -20,7 +21,9 @@ import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
-import { EventDetailsFlyout } from './event_details_flyout';
+import { DetailsPanel } from '../../../timelines/components/side_panel';
+import { RowRenderer } from '../../../timelines/components/timeline/body/renderers/row_renderer';
+import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -34,17 +37,24 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 export interface OwnProps {
   defaultModel: SubsetTimelineModel;
   end: string;
-  id: string;
+  id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
 type Props = OwnProps & PropsFromRedux;
 
+/**
+ * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where
+ * timeline is used BESIDES the flyout. The flyout makes use of the `EventsViewer` component which is a subcomponent here
+ * NOTE: As of writting, it is not used in the Case_View component
+ */
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
@@ -52,7 +62,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   deleteEventQuery,
   end,
-  expandedEvent,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
@@ -62,8 +71,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   pageFilters,
-  query,
   onRuleChange,
+  query,
+  renderCellValue,
+  rowRenderers,
   start,
   scopeId,
   showCheckboxes,
@@ -113,7 +124,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             dataProviders={dataProviders!}
             deletedEventIds={deletedEventIds}
             end={end}
-            expandedEvent={expandedEvent}
             isLoadingIndexPattern={isLoadingIndexPattern}
             filters={globalFilters}
             headerFilterGroup={headerFilterGroup}
@@ -125,6 +135,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             kqlMode={kqlMode}
             query={query}
             onRuleChange={onRuleChange}
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
             start={start}
             sort={sort}
             utilityBar={utilityBar}
@@ -132,9 +144,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           />
         </InspectButtonContainer>
       </FullScreenContainer>
-      <EventDetailsFlyout
+      <DetailsPanel
         browserFields={browserFields}
         docValueFields={docValueFields}
+        isFlyoutView
         timelineId={id}
       />
     </>
@@ -154,7 +167,6 @@ const makeMapStateToProps = () => {
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
-      expandedEvent,
       graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
@@ -167,7 +179,6 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       deletedEventIds,
-      expandedEvent: expandedEvent?.query ?? {},
       excludedRowRendererIds,
       filters: getGlobalFiltersQuerySelector(state),
       id,
@@ -198,6 +209,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
+    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       prevProps.scopeId === nextProps.scopeId &&
@@ -212,6 +224,8 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       prevProps.kqlMode === nextProps.kqlMode &&
       deepEqual(prevProps.query, nextProps.query) &&
+      prevProps.renderCellValue === nextProps.renderCellValue &&
+      prevProps.rowRenderers === nextProps.rowRenderers &&
       deepEqual(prevProps.sort, nextProps.sort) &&
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&

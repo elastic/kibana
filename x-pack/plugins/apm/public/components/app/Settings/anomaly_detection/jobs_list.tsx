@@ -69,7 +69,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
     <EuiPanel>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle>
+          <EuiTitle size="s">
             <h2>
               {i18n.translate(
                 'xpack.apm.settings.anomalyDetection.jobList.environments',
@@ -91,8 +91,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiText>
+      <EuiText size="s" color="subdued">
         <FormattedMessage
           id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
           defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."

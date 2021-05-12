@@ -160,8 +160,20 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "exists": Object {
+                    "field": "span.self_time.sum.us",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "transaction.breakdown.count",
+                  },
+                },
+              ],
             },
           },
         ],
@@ -294,8 +306,20 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "exists": Object {
+                    "field": "span.self_time.sum.us",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "transaction.breakdown.count",
+                  },
+                },
+              ],
             },
           },
           Object {
@@ -351,11 +375,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
         ],

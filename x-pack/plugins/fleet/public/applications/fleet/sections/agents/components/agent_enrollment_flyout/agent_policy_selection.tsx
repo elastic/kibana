@@ -9,14 +9,16 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
+
 import { SO_SEARCH_LIMIT } from '../../../../constants';
-import { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
+import type { AgentPolicy, GetEnrollmentAPIKeysResponse } from '../../../../types';
 import { sendGetEnrollmentAPIKeys, useStartServices } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 type Props = {
   agentPolicies?: AgentPolicy[];
   onAgentPolicyChange?: (key: string) => void;
+  excludeFleetServer?: boolean;
 } & (
   | {
       withKeySelection: true;
@@ -29,7 +31,7 @@ type Props = {
 
 export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   const { notifications } = useStartServices();
-  const { withKeySelection, agentPolicies, onAgentPolicyChange } = props;
+  const { withKeySelection, agentPolicies, onAgentPolicyChange, excludeFleetServer } = props;
   const onKeyChange = props.withKeySelection && props.onKeyChange;
 
   const [isAuthenticationSettingsOpen, setIsAuthenticationSettingsOpen] = useState(false);
@@ -181,7 +183,10 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
       />
       <EuiSpacer size="m" />
       {selectedState.agentPolicyId && (
-        <AgentPolicyPackageBadges agentPolicyId={selectedState.agentPolicyId} />
+        <AgentPolicyPackageBadges
+          agentPolicyId={selectedState.agentPolicyId}
+          excludeFleetServer={excludeFleetServer}
+        />
       )}
       {withKeySelection && onKeyChange && (
         <>

@@ -15,6 +15,15 @@ jest.mock('../../legacy_shims', () => ({
       docLinks: {
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         DOC_LINK_VERSION: 'current',
+        links: {
+          filebeat: {
+            elasticsearchModule: 'jest-metadata-mock-url',
+            installation: 'jest-metadata-mock-url',
+          },
+          monitoring: {
+            troubleshootKibana: 'jest-metadata-mock-url',
+          },
+        },
       },
     },
   },

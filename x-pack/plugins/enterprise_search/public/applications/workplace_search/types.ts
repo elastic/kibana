@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RoleMapping } from '../shared/types';
+
 export * from '../../../common/types/workplace_search';
 
 export type SpacerSizeTypes = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
@@ -19,6 +21,8 @@ export interface MetaPage {
 export interface Meta {
   page: MetaPage;
 }
+
+export type Role = 'admin' | 'user';
 
 export interface Group {
   id: string;
@@ -102,7 +106,7 @@ export interface ContentSourceDetails extends ContentSource {
   isFederatedSource: boolean;
   searchable: boolean;
   supportedByLicense: boolean;
-  errorReason: number;
+  errorReason: string | null;
   allowsReauth: boolean;
   boost: number;
 }
@@ -202,4 +206,14 @@ export interface SearchResultConfig {
   urlField: string | null;
   color: string;
   detailFields: DetailField[];
+}
+
+export interface RoleGroup {
+  id: string;
+  name: string;
+}
+
+export interface WSRoleMapping extends RoleMapping {
+  allGroups: boolean;
+  groups: RoleGroup[];
 }

@@ -160,12 +160,12 @@ export function md5HashForProcess(event: SafeResolverEvent): string | undefined 
 /**
  * First non-null value for the `event.process.args` field.
  */
-export function argsForProcess(event: SafeResolverEvent): string | undefined {
+export function argsForProcess(event: SafeResolverEvent): string[] | undefined {
   if (isLegacyEventSafeVersion(event)) {
     // There is not currently a key for this on Legacy event types
     return undefined;
   }
-  return firstNonNullValue(event.process?.args);
+  return values(event.process?.args);
 }
 
 /**

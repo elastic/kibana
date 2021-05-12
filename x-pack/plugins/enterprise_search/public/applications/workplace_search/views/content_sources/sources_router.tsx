@@ -6,37 +6,31 @@
  */
 
 import React, { useEffect } from 'react';
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
+import { FlashMessages } from '../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { LicensingLogic } from '../../../shared/licensing';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
-import { LicensingLogic } from '../../../../applications/shared/licensing';
-
+import { AppLogic } from '../../app_logic';
 import { NAV } from '../../constants';
 import {
   ADD_SOURCE_PATH,
-  SOURCE_ADDED_PATH,
   SOURCE_DETAILS_PATH,
   PERSONAL_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
 } from '../../routes';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-
-import { AppLogic } from '../../app_logic';
-import { staticSourceData } from './source_data';
-import { SourcesLogic } from './sources_logic';
-
 import { AddSource, AddSourceList } from './components/add_source';
-import { SourceAdded } from './components/source_added';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
+import { staticSourceData } from './source_data';
 import { SourceRouter } from './source_router';
+import { SourcesLogic } from './sources_logic';
 
 import './sources.scss';
 
@@ -88,7 +82,7 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         ))}
         {staticSourceData.map(({ addPath, name }, i) => (
-          <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/re-authenticate`}>
+          <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/reauthenticate`}>
             <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE, name]} />
             <AddSource reAuthenticate sourceIndex={i} />
           </Route>
@@ -118,10 +112,6 @@ export const SourcesRouter: React.FC = () => {
         <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
           <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE]} />
           <AddSourceList />
-        </Route>
-        <Route path={getSourcesPath(SOURCE_ADDED_PATH, isOrganization)} exact>
-          <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE]} />
-          <SourceAdded />
         </Route>
         <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)}>
           <SourceRouter />

@@ -33,21 +33,31 @@ import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_ru
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
-import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
-import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
-import { createTimelinesRoute } from '../lib/timeline/routes/create_timelines_route';
-import { updateTimelinesRoute } from '../lib/timeline/routes/update_timelines_route';
-import { getDraftTimelinesRoute } from '../lib/timeline/routes/get_draft_timelines_route';
-import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/clean_draft_timelines_route';
+import {
+  createTimelinesRoute,
+  deleteTimelinesRoute,
+  exportTimelinesRoute,
+  getTimelineRoute,
+  getTimelinesRoute,
+  importTimelinesRoute,
+  patchTimelinesRoute,
+  persistFavoriteRoute,
+} from '../lib/timeline/routes/timelines';
+import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
+import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
+
+import { persistNoteRoute } from '../lib/timeline/routes/notes';
+
+import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
+
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
-import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepacked_timelines_route';
-import { getTimelineRoute } from '../lib/timeline/routes/get_timeline_route';
+import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  usingEphemeralEncryptionKey: boolean,
+  hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml']
 ) => {
@@ -68,7 +78,7 @@ export const initRoutes = (
   deleteRulesBulkRoute(router);
 
   createTimelinesRoute(router, config, security);
-  updateTimelinesRoute(router, config, security);
+  patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml);
   exportRulesRoute(router, config);
 
@@ -76,9 +86,15 @@ export const initRoutes = (
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
   getTimelineRoute(router, config, security);
+  getTimelinesRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
+  deleteTimelinesRoute(router, config, security);
+  persistFavoriteRoute(router, config, security);
 
   installPrepackedTimelinesRoute(router, config, security);
+
+  persistNoteRoute(router, config, security);
+  persistPinnedEventRoute(router, config, security);
 
   findRulesStatusesRoute(router);
 
@@ -102,5 +118,5 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, hasEncryptionKey);
 };

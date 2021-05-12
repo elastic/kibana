@@ -12,7 +12,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { ExceptionListClient } from '../../../lists/server';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginStart } from '../../../security/server';
 import {
   AgentService,
   FleetStartContract,
@@ -20,11 +20,11 @@ import {
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
-import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
+import { PluginStartContract as AlertsPluginStartContract } from '../../../alerting/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
-} from './ingest_integration';
+} from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
@@ -36,7 +36,11 @@ import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
-import { LicenseService } from '../../common/license/license';
+import { LicenseService } from '../../common/license';
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../../common/experimental_features';
 
 export interface MetadataService {
   queryStrategy(
@@ -87,8 +91,8 @@ export type EndpointAppContextServiceStartContract = Partial<
   logger: Logger;
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
-  security: SecurityPluginSetup;
-  alerts: AlertsPluginStartContract;
+  security: SecurityPluginStart;
+  alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
@@ -107,6 +111,11 @@ export class EndpointAppContextService {
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
+  private config: ConfigType | undefined;
+  private license: LicenseService | undefined;
+  public security: SecurityPluginStart | undefined;
+
+  private experimentalFeatures: ExperimentalFeatures | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
@@ -115,6 +124,11 @@ export class EndpointAppContextService {
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = createMetadataService(dependencies.packageService!);
+    this.config = dependencies.config;
+    this.license = dependencies.licenseService;
+    this.security = dependencies.security;
+
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
@@ -125,7 +139,7 @@ export class EndpointAppContextService {
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
           dependencies.security,
-          dependencies.alerts,
+          dependencies.alerting,
           dependencies.licenseService,
           dependencies.exceptionListsClient
         )
@@ -139,6 +153,10 @@ export class EndpointAppContextService {
   }
 
   public stop() {}
+
+  public getExperimentalFeatures(): Readonly<ExperimentalFeatures> | undefined {
+    return this.experimentalFeatures;
+  }
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
@@ -165,5 +183,12 @@ export class EndpointAppContextService {
       throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
     return this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
+  }
+
+  public getLicenseService(): LicenseService {
+    if (!this.license) {
+      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
+    }
+    return this.license;
   }
 }

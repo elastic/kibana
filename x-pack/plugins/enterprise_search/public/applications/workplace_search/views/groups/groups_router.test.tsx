@@ -9,14 +9,13 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions } from '../../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { Route, Switch } from 'react-router-dom';
 
-import { GroupsRouter } from './groups_router';
+import { shallow } from 'enzyme';
 
 import { GroupRouter } from './group_router';
 import { Groups } from './groups';
+import { GroupsRouter } from './groups_router';
 
 describe('GroupsRouter', () => {
   const initializeGroups = jest.fn();

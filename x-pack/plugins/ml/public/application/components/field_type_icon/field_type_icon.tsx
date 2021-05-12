@@ -52,6 +52,7 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
       color = 'euiColorVis7';
       break;
     case ML_JOB_FIELD_TYPES.GEO_POINT:
+    case ML_JOB_FIELD_TYPES.GEO_SHAPE:
       iconType = 'tokenGeo';
       color = 'euiColorVis8';
       break;

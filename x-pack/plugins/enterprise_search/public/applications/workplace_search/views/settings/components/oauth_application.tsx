@@ -18,7 +18,6 @@ import {
   EuiSwitch,
   EuiCode,
   EuiSpacer,
-  EuiOverlayMask,
   EuiLink,
   EuiModal,
   EuiModalBody,
@@ -26,7 +25,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
+import { LicensingLogic } from '../../../../shared/licensing';
+import { ContentSection } from '../../../components/shared/content_section';
+import { CredentialItem } from '../../../components/shared/credential_item';
+import { LicenseBadge } from '../../../components/shared/license_badge';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
   CLIENT_ID_LABEL,
   CLIENT_SECRET_LABEL,
@@ -48,12 +51,7 @@ import {
   LICENSE_MODAL_DESCRIPTION,
   LICENSE_MODAL_LINK,
 } from '../../../constants';
-
-import { LicensingLogic } from '../../../../shared/licensing';
-import { ContentSection } from '../../../components/shared/content_section';
-import { LicenseBadge } from '../../../components/shared/license_badge';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { CredentialItem } from '../../../components/shared/credential_item';
+import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
 
 export const OauthApplication: React.FC = () => {
@@ -94,25 +92,23 @@ export const OauthApplication: React.FC = () => {
   };
 
   const licenseModal = (
-    <EuiOverlayMask className="oauth-platinum-modal">
-      <EuiModal maxWidth={500} onClose={closeLicenseModal} data-test-subj="LicenseModal">
-        <EuiModalBody>
-          <EuiSpacer size="xl" />
-          <LicenseBadge />
-          <EuiSpacer />
-          <EuiTitle size="l">
-            <h1>{LICENSE_MODAL_TITLE}</h1>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued">{LICENSE_MODAL_DESCRIPTION}</EuiText>
-          <EuiSpacer />
-          <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-            {LICENSE_MODAL_LINK}
-          </EuiLink>
-          <EuiSpacer />
-        </EuiModalBody>
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal maxWidth={500} onClose={closeLicenseModal} data-test-subj="LicenseModal">
+      <EuiModalBody>
+        <EuiSpacer size="xl" />
+        <LicenseBadge />
+        <EuiSpacer />
+        <EuiTitle size="l">
+          <h1>{LICENSE_MODAL_TITLE}</h1>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued">{LICENSE_MODAL_DESCRIPTION}</EuiText>
+        <EuiSpacer />
+        <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+          {LICENSE_MODAL_LINK}
+        </EuiLink>
+        <EuiSpacer />
+      </EuiModalBody>
+    </EuiModal>
   );
 
   return (

@@ -11,7 +11,8 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
-import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
+import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -25,12 +26,17 @@ import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import {
+  ApmPluginSetupDeps,
+  ApmPluginStartDeps,
+  ApmRuleRegistry,
+} from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
+import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 
-const CsmMainContainer = styled.div`
+const CsmMainContainer = euiStyled.div`
   padding: ${px(units.plus)};
   height: 100%;
 `;
@@ -71,12 +77,14 @@ export function CsmAppRoot({
   deps,
   config,
   corePlugins: { embeddable, maps },
+  apmRuleRegistry,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   config: ConfigSchema;
   corePlugins: ApmPluginStartDeps;
+  apmRuleRegistry: ApmRuleRegistry;
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -86,7 +94,9 @@ export function CsmAppRoot({
     config,
     core,
     plugins,
+    apmRuleRegistry,
   };
+
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
@@ -95,6 +105,7 @@ export function CsmAppRoot({
             <Router history={history}>
               <UrlParamsProvider>
                 <CsmApp />
+                <UXActionMenu appMountParameters={appMountParameters} />
               </UrlParamsProvider>
             </Router>
           </i18nCore.Context>
@@ -108,16 +119,24 @@ export function CsmAppRoot({
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export const renderApp = (
-  core: CoreStart,
-  deps: ApmPluginSetupDeps,
-  appMountParameters: AppMountParameters,
-  config: ConfigSchema,
-  corePlugins: ApmPluginStartDeps
-) => {
+export const renderApp = ({
+  core,
+  deps,
+  appMountParameters,
+  config,
+  corePlugins,
+  apmRuleRegistry,
+}: {
+  core: CoreStart;
+  deps: ApmPluginSetupDeps;
+  appMountParameters: AppMountParameters;
+  config: ConfigSchema;
+  corePlugins: ApmPluginStartDeps;
+  apmRuleRegistry: ApmRuleRegistry;
+}) => {
   const { element } = appMountParameters;
 
-  createCallApmApi(core.http);
+  createCallApmApi(core);
 
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {
@@ -132,6 +151,7 @@ export const renderApp = (
       deps={deps}
       config={config}
       corePlugins={corePlugins}
+      apmRuleRegistry={apmRuleRegistry}
     />,
     element
   );

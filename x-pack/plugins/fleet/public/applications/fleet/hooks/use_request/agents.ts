@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { useRequest, UseRequestConfig, sendRequest } from './use_request';
 import { agentRouteService } from '../../services';
-import {
+
+import type {
   GetOneAgentResponse,
-  GetOneAgentEventsResponse,
-  GetOneAgentEventsRequest,
   PostAgentUnenrollRequest,
   PostBulkAgentUnenrollRequest,
   PostBulkAgentUnenrollResponse,
@@ -31,25 +29,15 @@ import {
   PostNewAgentActionResponse,
 } from '../../types';
 
+import { useRequest, sendRequest } from './use_request';
+import type { UseRequestConfig } from './use_request';
+
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 
 export function useGetOneAgent(agentId: string, options?: RequestOptions) {
   return useRequest<GetOneAgentResponse>({
     path: agentRouteService.getInfoPath(agentId),
     method: 'get',
-    ...options,
-  });
-}
-
-export function useGetOneAgentEvents(
-  agentId: string,
-  query: GetOneAgentEventsRequest['query'],
-  options?: RequestOptions
-) {
-  return useRequest<GetOneAgentEventsResponse>({
-    path: agentRouteService.getEventsPath(agentId),
-    method: 'get',
-    query,
     ...options,
   });
 }

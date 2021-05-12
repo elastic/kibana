@@ -5,31 +5,15 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
+
 import { PolicyFromES } from '../../../common/types';
+
+import { defaultRolloverAction } from '../../../public/application/constants';
 
 export const POLICY_NAME = 'my_policy';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
-
-export const DEFAULT_POLICY: PolicyFromES = {
-  version: 1,
-  modified_date: Date.now().toString(),
-  policy: {
-    name: 'my_policy',
-    phases: {
-      hot: {
-        min_age: '0ms',
-        actions: {
-          rollover: {
-            max_age: '30d',
-            max_size: '50gb',
-          },
-        },
-      },
-    },
-  },
-  name: 'my_policy',
-};
 
 export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
   version: 1,
@@ -40,13 +24,11 @@ export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
       hot: {
         min_age: '0ms',
         actions: {
-          rollover: {
-            max_age: '30d',
-            max_size: '50gb',
-          },
+          rollover: defaultRolloverAction,
         },
       },
       warm: {
+        min_age: '1d',
         actions: {
           migrate: { enabled: false },
         },
@@ -72,6 +54,7 @@ export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
         },
       },
       warm: {
+        min_age: '10d',
         actions: {
           allocate: {
             include: {
@@ -133,7 +116,7 @@ export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
         actions: {
           rollover: {
             max_age: '30d',
-            max_size: '50gb',
+            max_primary_shard_size: '50gb',
           },
         },
       },
@@ -189,6 +172,7 @@ export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
         },
       },
       warm: {
+        min_age: '0ms',
         actions: {},
       },
     },
@@ -213,6 +197,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
         },
       },
       warm: {
+        min_age: '10d',
         actions: {
           my_unfollow_action: {},
           set_priority: {
@@ -222,6 +207,7 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
         },
       },
       delete: {
+        min_age: '15d',
         wait_for_snapshot: {
           policy: SNAPSHOT_POLICY_NAME,
         },
@@ -234,3 +220,32 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
   },
   name: POLICY_NAME,
 } as any) as PolicyFromES;
+
+export const getGeneratedPolicies = (): PolicyFromES[] => {
+  const policy = {
+    phases: {
+      hot: {
+        min_age: '0s',
+        actions: {
+          rollover: {
+            max_size: '1gb',
+          },
+        },
+      },
+    },
+  };
+  const policies: PolicyFromES[] = [];
+  for (let i = 0; i < 105; i++) {
+    policies.push({
+      version: i,
+      modified_date: moment().subtract(i, 'days').toISOString(),
+      linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
+      name: `testy${i}`,
+      policy: {
+        ...policy,
+        name: `testy${i}`,
+      },
+    });
+  }
+  return policies;
+};

@@ -7,16 +7,15 @@
 
 import { Readable } from 'stream';
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { MetaOrUndefined, Type } from '@kbn/securitysolution-io-ts-utils';
 
 import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 import {
   DeserializerOrUndefined,
   ListIdOrUndefined,
   ListSchema,
-  MetaOrUndefined,
   SerializerOrUndefined,
-  Type,
   Version,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
@@ -31,7 +30,7 @@ export interface ImportListItemsToStreamOptions {
   deserializer: DeserializerOrUndefined;
   serializer: SerializerOrUndefined;
   stream: Readable;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   type: Type;
   user: string;
@@ -45,7 +44,7 @@ export const importListItemsToStream = ({
   serializer,
   listId,
   stream,
-  callCluster,
+  esClient,
   listItemIndex,
   listIndex,
   type,
@@ -62,9 +61,9 @@ export const importListItemsToStream = ({
       fileName = fileNameEmitted;
       if (listId == null) {
         list = await createListIfItDoesNotExist({
-          callCluster,
           description: `File uploaded from file system of ${fileNameEmitted}`,
           deserializer,
+          esClient,
           id: fileNameEmitted,
           immutable: false,
           listIndex,
@@ -83,8 +82,8 @@ export const importListItemsToStream = ({
       if (listId != null) {
         await writeBufferToItems({
           buffer: lines,
-          callCluster,
           deserializer,
+          esClient,
           listId,
           listItemIndex,
           meta,
@@ -95,8 +94,8 @@ export const importListItemsToStream = ({
       } else if (fileName != null) {
         await writeBufferToItems({
           buffer: lines,
-          callCluster,
           deserializer,
+          esClient,
           listId: fileName,
           listItemIndex,
           meta,
@@ -117,7 +116,7 @@ export interface WriteBufferToItemsOptions {
   listId: string;
   deserializer: DeserializerOrUndefined;
   serializer: SerializerOrUndefined;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   buffer: string[];
   type: Type;
@@ -131,7 +130,7 @@ export interface LinesResult {
 
 export const writeBufferToItems = async ({
   listId,
-  callCluster,
+  esClient,
   deserializer,
   serializer,
   listItemIndex,
@@ -141,8 +140,8 @@ export const writeBufferToItems = async ({
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   await createListItemsBulk({
-    callCluster,
     deserializer,
+    esClient,
     listId,
     listItemIndex,
     meta,

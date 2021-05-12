@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { SearchResponse } from '@elastic/elasticsearch/api/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ElasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../src/core/server/mocks';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
-import { createUptimeESClient } from '../lib';
+import { createUptimeESClient, UptimeESClient } from '../lib';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;
@@ -49,7 +50,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
       },
     };
     esMock.search.mockResolvedValueOnce({
-      body: mockResponse,
+      body: (mockResponse as unknown) as SearchResponse,
       statusCode: 200,
       headers: {},
       warnings: [],
@@ -60,7 +61,14 @@ export const setupMockEsCompositeQuery = <K, C, I>(
   return esMock;
 };
 
-export const getUptimeESMockClient = (esClientMock?: ElasticsearchClientMock) => {
+interface UptimeEsMockClient {
+  esClient: ElasticsearchClientMock;
+  uptimeEsClient: UptimeESClient;
+}
+
+export const getUptimeESMockClient = (
+  esClientMock?: ElasticsearchClientMock
+): UptimeEsMockClient => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   const savedObjectsClient = savedObjectsClientMock.create();

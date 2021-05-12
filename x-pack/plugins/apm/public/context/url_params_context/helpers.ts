@@ -6,8 +6,8 @@
  */
 
 import datemath from '@elastic/datemath';
-import { scaleUtc } from 'd3-scale';
 import { compact, pickBy } from 'lodash';
+import moment from 'moment';
 import { IUrlParams } from './types';
 
 function getParsedDate(rawDate?: string, options = {}) {
@@ -42,13 +42,12 @@ export function getDateRange({
     return { start: state.start, end: state.end };
   }
 
-  // Calculate ticks for the time ranges to produce nicely rounded values.
-  const ticks = scaleUtc().domain([start, end]).nice().ticks();
+  // rounds down start to minute
+  const roundedStart = moment(start).startOf('minute');
 
-  // Return the first and last tick values.
   return {
-    start: ticks[0].toISOString(),
-    end: ticks[ticks.length - 1].toISOString(),
+    start: roundedStart.toISOString(),
+    end: end.toISOString(),
   };
 }
 

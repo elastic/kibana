@@ -10,7 +10,8 @@ import copy from 'cpy';
 import globby from 'globby';
 import { basename, join, relative, resolve } from 'path';
 
-import { buildProject, getProductionProjects } from './build_non_bazel_production_projects';
+import { getProductionProjects } from './build_non_bazel_production_projects';
+import { runBazel } from '../utils/bazel';
 import { chmod, isFile, isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import {
@@ -35,8 +36,10 @@ export async function buildBazelProductionProjects({
   const projectNames = [...projects.values()].map((project) => project.name);
   log.info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
 
+  await runBazel(['build', '//packages:build']);
+  log.info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete`);
+
   for (const project of projects.values()) {
-    await buildProject(project);
     await copyToBuild(project, kibanaRoot, buildRoot);
     await applyCorrectPermissions(project, kibanaRoot, buildRoot);
   }
@@ -58,9 +61,8 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
 
-  const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
-  await copy(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
-    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath)),
+  await copy(['**/*'], buildProjectPath, {
+    cwd: join(kibanaRoot, 'bazel-bin', 'packages', basename(buildProjectPath), 'npm_module'),
     dot: true,
     onlyFiles: true,
     parents: true,
@@ -86,12 +88,12 @@ async function applyCorrectPermissions(project: Project, kibanaRoot: string, bui
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
   const allPluginPaths = await globby([`**/*`], {
     onlyFiles: false,
-    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath)),
+    cwd: buildProjectPath,
     dot: true,
   });
 
   for (const pluginPath of allPluginPaths) {
-    const resolvedPluginPath = resolve(buildRoot, pluginPath);
+    const resolvedPluginPath = resolve(buildProjectPath, pluginPath);
     if (await isFile(resolvedPluginPath)) {
       await chmod(resolvedPluginPath, 0o644);
     }

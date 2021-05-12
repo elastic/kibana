@@ -31,13 +31,13 @@ Then(`breakdown series should appear in chart`, () => {
   cy.get('.euiLoadingChart').should('not.exist');
 
   cy.get('[data-cy=pageLoadDist]').within(() => {
-    cy.get('div.echLegendItem__label[title=Chrome] ', DEFAULT_TIMEOUT)
+    cy.get('button.echLegendItem__label[title=Chrome] ', DEFAULT_TIMEOUT)
       .invoke('text')
       .should('eq', 'Chrome');
 
-    cy.get('div.echLegendItem__label', DEFAULT_TIMEOUT).should(
+    cy.get('button.echLegendItem__label', DEFAULT_TIMEOUT).should(
       'have.text',
-      'OverallChromeChrome Mobile WebViewSafariFirefoxMobile SafariChrome MobileChrome Mobile iOS'
+      'ChromeChrome Mobile WebViewSafariFirefoxMobile SafariChrome MobileChrome Mobile iOSOverall'
     );
   });
 });

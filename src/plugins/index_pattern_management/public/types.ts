@@ -11,7 +11,6 @@ import {
   ApplicationStart,
   IUiSettingsClient,
   OverlayStart,
-  SavedObjectsStart,
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
@@ -20,20 +19,22 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
 import { KibanaReactContextValue } from '../../kibana_react/public';
+import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
   application: ApplicationStart;
-  savedObjects: SavedObjectsStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   overlays: OverlayStart;
   http: HttpSetup;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getMlCardState: () => MlCardState;
+  fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
 }
 
 export type IndexPatternManagmentContextValue = KibanaReactContextValue<IndexPatternManagmentContext>;

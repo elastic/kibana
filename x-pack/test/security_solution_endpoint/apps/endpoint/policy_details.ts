@@ -22,8 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
 
   describe('When on the Endpoint Policy Details Page', function () {
-    this.tags(['ciGroup7']);
-
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
@@ -178,6 +176,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
             artifact_manifest: {
               artifacts: {
+                'endpoint-exceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
                 'endpoint-exceptionlist-macos-v1': {
                   compression_algorithm: 'zlib',
                   decoded_sha256:
@@ -188,7 +198,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-exceptionlist-windows-v1': {
                   compression_algorithm: 'zlib',
@@ -200,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-linux-v1': {
                   compression_algorithm: 'zlib',
@@ -212,7 +222,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-macos-v1': {
                   compression_algorithm: 'zlib',
@@ -224,7 +234,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-windows-v1': {
                   compression_algorithm: 'zlib',
@@ -236,7 +246,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
               },
               // The manifest version could have changed when the Policy was updated because the
@@ -256,13 +266,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -332,6 +337,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
             artifact_manifest: {
               artifacts: {
+                'endpoint-exceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
                 'endpoint-exceptionlist-macos-v1': {
                   compression_algorithm: 'zlib',
                   decoded_sha256:
@@ -342,7 +359,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-exceptionlist-windows-v1': {
                   compression_algorithm: 'zlib',
@@ -354,7 +371,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-linux-v1': {
                   compression_algorithm: 'zlib',
@@ -366,7 +383,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-macos-v1': {
                   compression_algorithm: 'zlib',
@@ -378,7 +395,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-windows-v1': {
                   compression_algorithm: 'zlib',
@@ -390,7 +407,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
               },
               // The manifest version could have changed when the Policy was updated because the
@@ -410,13 +427,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -458,6 +470,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Clear the value
         await advancedPolicyField.click();
         await advancedPolicyField.clearValueWithKeyboard();
+
+        // Make sure the toast button closes so the save button on the sticky footer is visible
+        await (await testSubjects.find('toastCloseButton')).click();
+        await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
@@ -480,6 +496,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
             artifact_manifest: {
               artifacts: {
+                'endpoint-exceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
                 'endpoint-exceptionlist-macos-v1': {
                   compression_algorithm: 'zlib',
                   decoded_sha256:
@@ -490,7 +518,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-exceptionlist-windows-v1': {
                   compression_algorithm: 'zlib',
@@ -502,7 +530,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-linux-v1': {
                   compression_algorithm: 'zlib',
@@ -514,7 +542,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-macos-v1': {
                   compression_algorithm: 'zlib',
@@ -526,7 +554,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
                 'endpoint-trustlist-windows-v1': {
                   compression_algorithm: 'zlib',
@@ -538,7 +566,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   encoded_size: 22,
                   encryption_algorithm: 'none',
                   relative_url:
-                    '/api/endpoint/artifacts/download/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    '/api/fleet/artifacts/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                 },
               },
               // The manifest version could have changed when the Policy was updated because the
@@ -557,13 +585,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },

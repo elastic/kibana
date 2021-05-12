@@ -11,7 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
-import { MetricsItemsSchema } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
 type AggSelectOption = EuiComboBoxOptionOption;
@@ -225,7 +225,7 @@ const FILTER_RATIO_AGGS = [
   'value_count',
 ];
 
-const HISTOGRAM_AGGS = ['avg', 'count', 'sum', 'value_count'];
+const HISTOGRAM_AGGS = ['avg', 'count', 'sum', 'min', 'max', 'value_count'];
 
 const allAggOptions = [...metricAggs, ...pipelineAggs, ...siblingAggs, ...specialAggs];
 
@@ -239,7 +239,7 @@ function filterByPanelType(panelType: string) {
 interface AggSelectUiProps {
   id: string;
   panelType: string;
-  siblings: MetricsItemsSchema[];
+  siblings: Metric[];
   value: string;
   uiRestrictions?: TimeseriesUIRestrictions;
   onChange: (currentlySelectedOptions: AggSelectOption[]) => void;

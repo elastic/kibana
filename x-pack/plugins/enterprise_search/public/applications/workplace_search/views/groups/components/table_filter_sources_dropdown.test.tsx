@@ -9,11 +9,11 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { contentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { TableFilterSourcesDropdown } from './table_filter_sources_dropdown';
-
 import { SourcesList } from './sources_list';
+import { TableFilterSourcesDropdown } from './table_filter_sources_dropdown';
 
 const addFilteredSource = jest.fn();
 const removeFilteredSource = jest.fn();

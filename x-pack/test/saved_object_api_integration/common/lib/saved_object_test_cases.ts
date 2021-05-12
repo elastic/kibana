@@ -53,6 +53,16 @@ export const SAVED_OBJECT_TEST_CASES: Record<string, CommonTestCase> = Object.fr
     id: 'only_space_2',
     expectedNamespaces: [SPACE_2_ID],
   }),
+  MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE: Object.freeze({
+    type: 'sharecapabletype',
+    id: 'only_default_space',
+    expectedNamespaces: [DEFAULT_SPACE_ID],
+  }),
+  MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1: Object.freeze({
+    type: 'sharecapabletype',
+    id: 'only_space_1',
+    expectedNamespaces: [SPACE_1_ID],
+  }),
   NAMESPACE_AGNOSTIC: Object.freeze({
     type: 'globaltype',
     id: 'globaltype-id',

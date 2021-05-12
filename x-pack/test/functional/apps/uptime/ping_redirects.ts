@@ -19,8 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const monitor = () => uptime.monitor;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/84992
-  describe.skip('Ping redirects', () => {
+  describe('Ping redirects', () => {
     const start = '~ 15 minutes ago';
     const end = 'now';
 

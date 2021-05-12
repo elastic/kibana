@@ -17,7 +17,8 @@ export function actionsMenuContent(
   showEditJobFlyout,
   showDeleteJobModal,
   showStartDatafeedModal,
-  refreshJobs
+  refreshJobs,
+  showCreateAlertFlyout
 ) {
   const canCreateJob = checkPermission('canCreateJob') && mlNodesAvailable();
   const canUpdateJob = checkPermission('canUpdateJob');
@@ -25,6 +26,7 @@ export function actionsMenuContent(
   const canUpdateDatafeed = checkPermission('canUpdateDatafeed');
   const canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
   const canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
+  const canCreateMlAlerts = checkPermission('canCreateMlAlerts');
 
   return [
     {
@@ -58,6 +60,22 @@ export function actionsMenuContent(
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonStopDatafeed',
+    },
+    {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
+        defaultMessage: 'Create alert rule',
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
+        defaultMessage: 'Create alert rule',
+      }),
+      icon: 'bell',
+      enabled: (item) => item.deleting !== true,
+      available: () => canCreateMlAlerts,
+      onClick: (item) => {
+        showCreateAlertFlyout([item.id]);
+        closeMenu(true);
+      },
+      'data-test-subj': 'mlActionButtonCreateAlert',
     },
     {
       name: i18n.translate('xpack.ml.jobsList.managementActions.closeJobLabel', {

@@ -8,7 +8,9 @@
 import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFlyout } from '@elastic/eui';
 
 import {
@@ -18,9 +20,8 @@ import {
   UploadJsonFile,
 } from './creation_mode_components';
 import { Summary } from './creation_response_components';
-import { DocumentCreationStep } from './types';
-
 import { DocumentCreationFlyout, FlyoutContent } from './document_creation_flyout';
+import { DocumentCreationStep } from './types';
 
 describe('DocumentCreationFlyout', () => {
   const values = {

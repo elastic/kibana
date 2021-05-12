@@ -26,6 +26,8 @@ export const CASE = (id: string) => {
 
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
+export const COLUMN_HEADERS = '[data-test-subj="column-headers"] [data-test-subj^=header-text]';
+
 export const COMBO_BOX = '.euiComboBoxOption__content';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
@@ -73,6 +75,8 @@ export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
+export const CLOSE_OPEN_TIMELINE_MODAL_BTN = `${OPEN_TIMELINE_MODAL} > button`;
+
 export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
@@ -91,6 +95,8 @@ export const SAVE_FILTER_BTN = '[data-test-subj="saveFilter"]';
 
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
+
+export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
 
 export const QUERY_TAB_EVENTS_TABLE = '[data-test-subj="query-events-table"]';
 
@@ -112,9 +118,21 @@ export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiPro
 
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
+export const IS_DRAGGING_DATA_PROVIDERS = '.is-dragging';
+
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
+
+export const TIMELINE_ADD_FIELD_BUTTON = '[data-test-subj="addField"]';
+
+export const TIMELINE_DATA_PROVIDER_FIELD = '[data-test-subj="field"]';
+
+export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
+
+export const TIMELINE_DATA_PROVIDER_VALUE = `[data-test-subj="value"]`;
+
+export const SAVE_DATA_PROVIDER_BTN = `[data-test-subj="save"]`;
 
 export const TIMELINE_DATA_PROVIDERS_EMPTY =
   '[data-test-subj="dataProviders"] [data-test-subj="empty"]';
@@ -147,6 +165,8 @@ export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"
 export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
+
+export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 

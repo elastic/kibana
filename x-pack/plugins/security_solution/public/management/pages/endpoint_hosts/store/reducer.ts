@@ -43,6 +43,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   endpointsTotalError: undefined,
   queryStrategyVersion: undefined,
   policyVersionInfo: undefined,
+  hostStatus: undefined,
 };
 
 /* eslint-disable-next-line complexity */
@@ -109,6 +110,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       ...state,
       details: action.payload.metadata,
       policyVersionInfo: action.payload.policy_info,
+      hostStatus: action.payload.host_status,
       detailsLoading: false,
       detailsError: undefined,
     };

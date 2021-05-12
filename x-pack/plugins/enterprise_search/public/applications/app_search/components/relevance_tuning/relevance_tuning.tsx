@@ -5,40 +5,47 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
-  EuiPageContent,
-} from '@elastic/eui';
+import React, { useEffect } from 'react';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { FlashMessages } from '../../../shared/flash_messages';
+import { useActions, useValues } from 'kea';
 
-import { RELEVANCE_TUNING_TITLE } from './constants';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-interface Props {
-  engineBreadcrumb: string[];
-}
+import { Loading } from '../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 
-export const RelevanceTuning: React.FC<Props> = ({ engineBreadcrumb }) => {
+import { EmptyState } from './components';
+import { RelevanceTuningForm } from './relevance_tuning_form';
+import { RelevanceTuningLayout } from './relevance_tuning_layout';
+import { RelevanceTuningPreview } from './relevance_tuning_preview';
+
+import { RelevanceTuningLogic } from '.';
+
+export const RelevanceTuning: React.FC = () => {
+  const { dataLoading, engineHasSchemaFields, unsavedChanges } = useValues(RelevanceTuningLogic);
+  const { initializeRelevanceTuning } = useActions(RelevanceTuningLogic);
+
+  useEffect(() => {
+    initializeRelevanceTuning();
+  }, []);
+
+  if (dataLoading) return <Loading />;
+
   return (
-    <>
-      <SetPageChrome trail={[...engineBreadcrumb, RELEVANCE_TUNING_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{RELEVANCE_TUNING_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          <FlashMessages />
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </>
+    <RelevanceTuningLayout>
+      <UnsavedChangesPrompt hasUnsavedChanges={unsavedChanges} />
+      {engineHasSchemaFields ? (
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem grow={3}>
+            <RelevanceTuningForm />
+          </EuiFlexItem>
+          <EuiFlexItem grow={4}>
+            <RelevanceTuningPreview />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EmptyState />
+      )}
+    </RelevanceTuningLayout>
   );
 };

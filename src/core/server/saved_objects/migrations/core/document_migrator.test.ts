@@ -11,6 +11,7 @@ import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
+import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -143,7 +144,7 @@ describe('DocumentMigrator', () => {
       ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
     });
 
-    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple'`, () => {
+    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple' or 'multiple-isolated'`, () => {
       const invalidDefinition = {
         kibanaVersion: '3.2.3',
         typeRegistry: createRegistry({
@@ -154,7 +155,7 @@ describe('DocumentMigrator', () => {
         log: mockLogger,
       };
       expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple', but got 'single'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple' or 'multiple-isolated', but got 'single'.`
       );
     });
 
@@ -722,8 +723,14 @@ describe('DocumentMigrator', () => {
       });
     });
 
-    it('logs the document and transform that failed', () => {
+    it('logs the original error and throws a transform error if a document transform fails', () => {
       const log = mockLogger;
+      const failedDoc = {
+        id: 'smelly',
+        type: 'dog',
+        attributes: {},
+        migrationVersion: {},
+      };
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
@@ -737,20 +744,18 @@ describe('DocumentMigrator', () => {
         log,
       });
       migrator.prepareMigrations();
-      const failedDoc = {
-        id: 'smelly',
-        type: 'dog',
-        attributes: {},
-        migrationVersion: {},
-      };
       try {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
       } catch (error) {
-        expect(error.message).toMatch(/Dang diggity!/);
-        const warning = loggingSystemMock.collect(mockLoggerFactory).warn[0][0];
-        expect(warning).toContain(JSON.stringify(failedDoc));
-        expect(warning).toContain('dog:1.2.3');
+        expect(error.message).toMatchInlineSnapshot(`
+          "Failed to transform document smelly. Transform: dog:1.2.3
+          Doc: {\\"id\\":\\"smelly\\",\\"type\\":\\"dog\\",\\"attributes\\":{},\\"migrationVersion\\":{}}"
+        `);
+        expect(error).toBeInstanceOf(TransformSavedObjectDocumentError);
+        expect(loggingSystemMock.collect(mockLoggerFactory).error[0][0]).toMatchInlineSnapshot(
+          `[Error: Dang diggity!]`
+        );
       }
     });
 
@@ -779,7 +784,7 @@ describe('DocumentMigrator', () => {
       };
       migrator.migrate(doc);
       expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
-      expect(loggingSystemMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
+      expect(loggingSystemMock.collect(mockLoggerFactory).warn[0][0]).toEqual(logTestMsg);
     });
 
     test('extracts the latest migration version info', () => {

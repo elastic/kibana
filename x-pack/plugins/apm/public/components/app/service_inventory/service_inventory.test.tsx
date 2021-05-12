@@ -20,11 +20,12 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
+import { clearCache } from '../../../services/rest/callApi';
 import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
 import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import * as hook from './use_anomaly_detection_jobs_fetcher';
+import * as hook from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { TimeRangeComparisonType } from '../../shared/time_comparison/get_time_range_comparison';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -56,10 +57,10 @@ function wrapper({ children }: { children?: ReactNode }) {
               params={{
                 rangeFrom: 'now-15m',
                 rangeTo: 'now',
-                start: 'mystart',
-                end: 'myend',
+                start: '2021-02-12T13:20:43.344Z',
+                end: '2021-02-12T13:20:58.344Z',
                 comparisonEnabled: true,
-                comparisonType: 'yesterday',
+                comparisonType: TimeRangeComparisonType.DayBefore,
               }}
             >
               {children}
@@ -75,17 +76,12 @@ describe('ServiceInventory', () => {
   beforeEach(() => {
     // @ts-expect-error
     global.sessionStorage = new SessionStorageMock();
+    clearCache();
 
-    jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
-      filters: [],
-      setFilterValue: () => null,
-      clearValues: () => null,
-      status: FETCH_STATUS.SUCCESS,
-    });
-
-    jest.spyOn(hook, 'useAnomalyDetectionJobsFetcher').mockReturnValue({
-      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+    jest.spyOn(hook, 'useAnomalyDetectionJobsContext').mockReturnValue({
       anomalyDetectionJobsData: { jobs: [], hasLegacyJobs: false },
+      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+      anomalyDetectionJobsRefetch: () => {},
     });
 
     jest

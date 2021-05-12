@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

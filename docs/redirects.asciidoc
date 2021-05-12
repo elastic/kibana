@@ -163,11 +163,6 @@ This content has moved. See <<discover, **Discover**>>.
 
 This content has moved. See <<discover, **Discover**>>.
 
-[role="exclude",id="lens"]
-== Lens
-
-This content has moved. See <<create-panels-with-lens>>.
-
 [role="exclude",id="known-plugins"]
 == Known plugins
 
@@ -241,7 +236,7 @@ This page has been moved. Refer to <<vega-tutorial-create-a-stacked-area-chart>>
 [[heatmap-chart]]
 === Heatmap Chart
 
-This page has been moved. Refer to <<types-of-visualization-panels>>.
+This page has been moved. Refer to <<types-of-visualizations>>.
 
 [float]
 [[interface-overview]]
@@ -280,3 +275,30 @@ This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
 [role="exclude",id="explore-dashboard-data"]
 This content has moved. Refer to <<dashboard, **Dashboard**>>.
+
+[role="exclude",id="ingest-node-pipelines"]
+== Ingest Node Pipelines
+
+This content has moved. See {ref}/ingest.html[Ingest pipelines].
+
+
+[role="exclude",id="create-panels-with-timelion"]
+== Timelion
+
+This content has moved. refer to <<timelion>>.
+
+
+[role="exclude",id="space-rbac-tutorial"]
+== Tutorial: Use role-based access control to customize Kibana spaces
+
+This content has moved. refer to <<tutorial-secure-access-to-kibana>>.
+
+[role="exclude",id="search"]
+== Search your data
+
+This content has moved. refer to <<kuery-query>>.
+
+[role="exclude",id="discover-document-context"]
+== View surrounding documents
+
+This content has moved. refer to <<discover-view-surrounding-documents>>.

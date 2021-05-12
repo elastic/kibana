@@ -8,7 +8,7 @@
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   getDeleteRequest,
   getFindResultWithSingleHit,
   getDeleteRequestById,
@@ -16,6 +16,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesRoute } from './delete_rules_route';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 describe('delete_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -39,7 +40,7 @@ describe('delete_rules', () => {
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
-      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const response = await server.inject(getDeleteRequestById(), context);
 
       expect(response.status).toEqual(200);

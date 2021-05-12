@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { Id } from '@kbn/securitysolution-io-ts-utils';
 
-import { Id, ListItemSchema } from '../../../common/schemas';
+import { ListItemSchema } from '../../../common/schemas';
 
 import { getListItem } from '.';
 
 export interface DeleteListItemOptions {
   id: Id;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
 }
 
 export const deleteListItem = async ({
   id,
-  callCluster,
+  esClient,
   listItemIndex,
 }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
-  const listItem = await getListItem({ callCluster, id, listItemIndex });
+  const listItem = await getListItem({ esClient, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
-    await callCluster('delete', {
+    await esClient.delete({
       id,
       index: listItemIndex,
       refresh: 'wait_for',

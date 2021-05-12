@@ -10,6 +10,8 @@ import { Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 import { DataEnhancedPluginRouter } from '../type';
 
+const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
+
 export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: Logger): void {
   router.post(
     {
@@ -24,6 +26,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -65,6 +70,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           id: schema.string(),
         }),
       },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+      },
     },
     async (context, request, res) => {
       const { id } = request.params;
@@ -90,11 +98,14 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           page: schema.maybe(schema.number()),
           perPage: schema.maybe(schema.number()),
           sortField: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
           filter: schema.maybe(schema.string()),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
           search: schema.maybe(schema.string()),
         }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -128,6 +139,35 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           id: schema.string(),
         }),
       },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      try {
+        await context.search!.deleteSession(id);
+
+        return res.ok();
+      } catch (e) {
+        const err = e.output?.payload || e;
+        logger.error(err);
+        return reportServerError(res, err);
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/session/{id}/cancel',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+      },
     },
     async (context, request, res) => {
       const { id } = request.params;
@@ -154,6 +194,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           name: schema.maybe(schema.string()),
           expires: schema.maybe(schema.string()),
         }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -182,6 +225,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
         body: schema.object({
           expires: schema.string(),
         }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
       },
     },
     async (context, request, res) => {

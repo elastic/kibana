@@ -14,6 +14,8 @@ const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
   labels: 'visText',
   values: 'number',
+  list: 'list',
+  visualOptions: 'brush',
 };
 
 export interface ToolbarPopoverProps {

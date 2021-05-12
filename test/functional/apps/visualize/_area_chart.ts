@@ -96,7 +96,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show correct chart', async function () {
       const xAxisLabels = await PageObjects.visChart.getExpectedValue(
         ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00'],
-        ['2015-09-19 12:00', '2015-09-20 12:00', '2015-09-21 12:00', '2015-09-22 12:00']
+        [
+          '2015-09-19 12:00',
+          '2015-09-20 12:00',
+          '2015-09-21 12:00',
+          '2015-09-22 12:00',
+          '2015-09-23 12:00',
+        ]
       );
       const yAxisLabels = await PageObjects.visChart.getExpectedValue(
         ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'],
@@ -443,7 +449,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const errorMessage = await fieldErrorMessage.getVisibleText();
         expect(errorMessage).to.be(
-          'The index pattern test_index* does not contain any of the following compatible field types: date'
+          'The index pattern test_index* does not contain any of the following compatible field types: date or date_range'
         );
       });
     });
@@ -499,7 +505,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show error when calendar interval invalid', async () => {
-          await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
+          await PageObjects.visEditor.setInterval('2w', { type: 'custom' });
           const intervalErrorMessage = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );

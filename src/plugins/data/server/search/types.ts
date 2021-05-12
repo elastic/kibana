@@ -21,14 +21,14 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchClient,
+  IEsSearchResponse,
+  IEsSearchRequest,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
-  defaultStrategy: string;
   sessionService: ISearchSessionService;
 }
 
@@ -92,6 +92,7 @@ export interface IScopedSearchClient extends ISearchClient {
   findSessions: IScopedSearchSessionsClient['find'];
   updateSession: IScopedSearchSessionsClient['update'];
   cancelSession: IScopedSearchSessionsClient['cancel'];
+  deleteSession: IScopedSearchSessionsClient['delete'];
   extendSession: IScopedSearchSessionsClient['extend'];
 }
 

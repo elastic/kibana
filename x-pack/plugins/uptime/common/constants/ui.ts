@@ -15,6 +15,8 @@ export const CERTIFICATES_ROUTE = '/certificates';
 
 export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
 
+export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',
@@ -63,3 +65,5 @@ export enum CERT_STATUS {
   EXPIRED = 'EXPIRED',
   TOO_OLD = 'TOO_OLD',
 }
+
+export const KQL_SYNTAX_LOCAL_STORAGE = 'xpack.uptime.kql.syntax';

@@ -18,8 +18,8 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
     },
     wrapRouteWithLicenseCheck(checkLicense, async (context, request, response) => {
       try {
-        const client = context.logstash!.esClient;
-        const info = await client.callAsCurrentUser('info');
+        const { client } = context.core.elasticsearch;
+        const { body: info } = await client.asCurrentUser.info();
         return response.ok({
           body: {
             cluster: Cluster.fromUpstreamJSON(info).downstreamJSON,
@@ -29,7 +29,7 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
         if (err.status === 403) {
           return response.ok();
         }
-        return response.internalError();
+        throw err;
       }
     })
   );

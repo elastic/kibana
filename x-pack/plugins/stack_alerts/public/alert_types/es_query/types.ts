@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerts/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 
 export interface Comparator {
   text: string;
@@ -17,6 +17,7 @@ export interface EsQueryAlertParams extends AlertTypeParams {
   index: string[];
   timeField?: string;
   esQuery: string;
+  size: number;
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;

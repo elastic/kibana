@@ -7,8 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { AnnotationTooltipFormatter, RectAnnotation } from '@elastic/charts';
-import { RectAnnotationDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import { AnnotationTooltipFormatter, RectAnnotation, RectAnnotationDatum } from '@elastic/charts';
 import { AnnotationTooltip } from './annotation_tooltip';
 import {
   ANOMALY_SEVERITY,

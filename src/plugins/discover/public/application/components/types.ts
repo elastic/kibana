@@ -7,9 +7,10 @@
  */
 
 import { IUiSettingsClient, MountPoint, SavedObject } from 'kibana/public';
+import { Subject } from 'rxjs';
 import { Chart } from '../angular/helpers/point_series';
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
-import { DocViewFilterFn, ElasticSearchHit } from '../doc_views/doc_views_types';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { AggConfigs } from '../../../../data/common/search/aggs';
 
 import {
@@ -17,12 +18,12 @@ import {
   FilterManager,
   IndexPatternAttributes,
   ISearchSource,
-  Query,
-  TimeRange,
 } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
-import { AppState } from '../angular/discover_state';
-import { TopNavMenuData } from '../../../../navigation/public';
+import { AppState, GetStateReturn } from '../angular/discover_state';
+import { RequestAdapter } from '../../../../inspector/common';
+import { DiscoverServices } from '../../build_services';
+import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 
 export interface DiscoverProps {
   /**
@@ -42,6 +43,10 @@ export interface DiscoverProps {
    */
   fieldCounts: Record<string, number>;
   /**
+   * Current state of data fetching
+   */
+  fetchStatus: string;
+  /**
    * Histogram aggregation data
    */
   histogramData?: Chart;
@@ -60,37 +65,9 @@ export interface DiscoverProps {
    */
   minimumVisibleRows: number;
   /**
-   * Function to add a column to state
-   */
-  onAddColumn: (column: string) => void;
-  /**
-   * Function to add a filter to state
-   */
-  onAddFilter: DocViewFilterFn;
-  /**
-   * Function to change the used time interval of the date histogram
-   */
-  onChangeInterval: (interval: string) => void;
-  /**
-   * Function to move a given column to a given index, used in legacy table
-   */
-  onMoveColumn: (columns: string, newIdx: number) => void;
-  /**
-   * Function to remove a given column from state
-   */
-  onRemoveColumn: (column: string) => void;
-  /**
-   * Function to replace columns in state
-   */
-  onSetColumns: (columns: string[]) => void;
-  /**
    * Function to scroll down the legacy table to the bottom
    */
   onSkipBottomButtonClick: () => void;
-  /**
-   * Function to change sorting of the table, triggers a fetch
-   */
-  onSort: (sort: string[][]) => void;
   opts: {
     /**
      * Date histogram aggregation config
@@ -100,6 +77,18 @@ export interface DiscoverProps {
      * Client of uiSettings
      */
     config: IUiSettingsClient;
+    /**
+     * returns field statistics based on the loaded data sample
+     */
+    getFieldCounts: () => Promise<Record<string, number>>;
+    /**
+     * Use angular router for navigation
+     */
+    navigateTo: () => void;
+    /**
+     * Inspect, for analyzing requests and responses
+     */
+    inspectorAdapters: { requests: RequestAdapter };
     /**
      * Data plugin
      */
@@ -112,6 +101,18 @@ export interface DiscoverProps {
      * List of available index patterns
      */
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+    /**
+     * Refetch observable
+     */
+    refetch$: Subject<undefined>;
+    /**
+     * Kibana core services used by discover
+     */
+    services: DiscoverServices;
+    /**
+     * Helps with state management of search session
+     */
+    searchSessionManager: DiscoverSearchSessionManager;
     /**
      * The number of documents that can be displayed in the table/grid
      */
@@ -132,6 +133,10 @@ export interface DiscoverProps {
      * Function to set the current state
      */
     setAppState: (state: Partial<AppState>) => void;
+    /**
+     * State container providing globalState, appState and functions
+     */
+    stateContainer: GetStateReturn;
   };
   /**
    * Function to reset the current query
@@ -150,51 +155,18 @@ export interface DiscoverProps {
    */
   searchSource: ISearchSource;
   /**
-   * Function to change the current index pattern
-   */
-  setIndexPattern: (id: string) => void;
-  /**
    * Current app state of URL
    */
   state: AppState;
   /**
-   * Function to update the time filter
-   */
-  timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
-  /**
-   * Currently selected time range
-   */
-  timeRange?: { from: string; to: string };
-  /**
-   * Menu data of top navigation (New, save ...)
-   */
-  topNavMenu: TopNavMenuData[];
-  /**
-   * Function to update the actual query
-   */
-  updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-  /**
-   * Function to update the actual savedQuery id
-   */
-  updateSavedQueryId: (savedQueryId?: string) => void;
-  /**
-   * An object containing properties for proper handling of unmapped fields in the UI
+   * An object containing properties for unmapped fields behavior
    */
   unmappedFieldsConfig?: {
     /**
      * determines whether to display unmapped fields
-     * configurable through the switch in the UI
      */
     showUnmappedFields: boolean;
-    /**
-     * determines if we should display an option to toggle showUnmappedFields value in the first place
-     * this value is not configurable through the UI
-     */
-    showUnmappedFieldsDefaultValue: boolean;
-    /**
-     * callback function to change the value of `showUnmappedFields` flag
-     * @param value new value to set
-     */
-    onChangeUnmappedFields: (value: boolean) => void;
   };
+
+  refreshAppState?: () => void;
 }

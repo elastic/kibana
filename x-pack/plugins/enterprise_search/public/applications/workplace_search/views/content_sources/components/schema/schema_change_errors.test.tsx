@@ -10,10 +10,11 @@ import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { useParams } from 'react-router-dom';
 
-import { SchemaErrorsAccordion } from '../../../../../shared/schema/schema_errors_accordion';
+import { shallow } from 'enzyme';
+
+import { SchemaErrorsAccordion } from '../../../../../shared/schema';
 
 import { SchemaChangeErrors } from './schema_change_errors';
 

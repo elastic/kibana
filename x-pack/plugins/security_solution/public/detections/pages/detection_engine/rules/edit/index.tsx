@@ -251,6 +251,7 @@ const EditRulePageComponent: FC = () => {
           rule
         ),
         ...(ruleId ? { id: ruleId } : {}),
+        ...(rule != null ? { max_signals: rule.max_signals } : {}),
       });
     }
   }, [
@@ -342,6 +343,7 @@ const EditRulePageComponent: FC = () => {
                 href: getRuleDetailsUrl(ruleId ?? ''),
                 text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
                 pageId: SecurityPageName.detections,
+                dataTestSubj: 'ruleEditBackToRuleDetails',
               }}
               isLoading={isLoading}
               title={i18n.PAGE_TITLE}

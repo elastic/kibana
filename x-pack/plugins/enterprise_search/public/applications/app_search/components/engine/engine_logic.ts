@@ -8,9 +8,9 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpLogic } from '../../../shared/http';
+import { IIndexingStatus } from '../../../shared/schema/types';
 
-import { IIndexingStatus } from '../../../shared/types';
-import { EngineDetails } from './types';
+import { EngineDetails, EngineTypes } from './types';
 
 interface EngineValues {
   dataLoading: boolean;
@@ -77,7 +77,7 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     ],
   },
   selectors: ({ selectors }) => ({
-    isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === 'meta'],
+    isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === EngineTypes.meta],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
     hasSchemaConflicts: [
       () => [selectors.engine],

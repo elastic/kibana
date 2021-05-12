@@ -9,11 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
 
-import {
-  LegacyAPICaller,
-  ServiceStatus,
-  ServiceStatusLevels,
-} from '../../../../../src/core/server';
+import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import {
   contextServiceMock,
   elasticsearchServiceMock,
@@ -31,24 +27,18 @@ export function mockGetClusterInfo(clusterInfo: any) {
   esClient.info.mockResolvedValue({ body: { ...clusterInfo } });
   return esClient;
 }
+
 describe('/api/settings', () => {
   let server: HttpService;
   let httpSetup: HttpSetup;
   let overallStatus$: BehaviorSubject<ServiceStatus>;
-  let mockApiCaller: jest.Mocked<LegacyAPICaller>;
 
   beforeEach(async () => {
-    mockApiCaller = jest.fn();
     server = createHttpServer();
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract({
         core: {
           elasticsearch: {
-            legacy: {
-              client: {
-                callAsCurrentUser: mockApiCaller,
-              },
-            },
             client: {
               asCurrentUser: mockGetClusterInfo({ cluster_uuid: 'yyy-yyyyy' }),
             },

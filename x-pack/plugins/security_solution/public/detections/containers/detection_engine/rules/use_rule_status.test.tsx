@@ -14,8 +14,11 @@ import {
 } from './use_rule_status';
 import * as api from './api';
 import { Rule } from './types';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('./api');
+jest.mock('../../../../common/hooks/use_app_toasts');
 
 const testRule: Rule = {
   actions: [
@@ -67,11 +70,12 @@ const testRule: Rule = {
 };
 
 describe('useRuleStatus', () => {
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
+
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
+
   afterEach(async () => {
     cleanup();
   });

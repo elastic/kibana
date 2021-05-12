@@ -13,7 +13,6 @@ import { ClientConfigType } from '../types';
 import { httpService } from './services/http';
 import { UiMetricService } from './services';
 import { breadcrumbService, docTitleService } from './services/navigation';
-import { documentationLinksService } from './services/documentation';
 import { AppDependencies } from './app_context';
 import { renderApp } from '.';
 
@@ -28,13 +27,11 @@ export async function mountManagementSection(
   const { element, setBreadcrumbs, history } = params;
   const [core] = await coreSetup.getStartServices();
   const {
-    docLinks,
     chrome: { docTitle },
   } = core;
 
   docTitleService.setup(docTitle.change);
   breadcrumbService.setup(setBreadcrumbs);
-  documentationLinksService.setup(docLinks);
 
   const appDependencies: AppDependencies = {
     core,

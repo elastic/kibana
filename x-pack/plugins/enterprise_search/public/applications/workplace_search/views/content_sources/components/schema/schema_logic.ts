@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
 import { kea, MakeLogicType } from 'kea';
+import { cloneDeep, isEqual } from 'lodash';
 
-import { HttpLogic } from '../../../../../shared/http';
+import { i18n } from '@kbn/i18n';
 
-import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
-import { IndexJob, TOperation, Schema, SchemaTypes } from '../../../../../shared/types';
-import { OptionValue } from '../../../../types';
-
 import {
   flashAPIErrors,
   setSuccessMessage,
+  setErrorMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../../../shared/http';
+import {
+  IndexJob,
+  FieldCoercionErrors,
+  Schema,
+  SchemaType,
+} from '../../../../../shared/schema/types';
+import { TOperation } from '../../../../../shared/types';
 import { AppLogic } from '../../../../app_logic';
+import { OptionValue } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
 import {
@@ -37,7 +42,7 @@ interface SchemaActions {
   ): SchemaChangeErrorsProps;
   onSchemaSetSuccess(schemaProps: SchemaResponseProps): SchemaResponseProps;
   onSchemaSetFormErrors(errors: string[]): string[];
-  updateNewFieldType(newFieldType: SchemaTypes): SchemaTypes;
+  updateNewFieldType(newFieldType: SchemaType): SchemaType;
   onFieldUpdate({
     schema,
     formUnchanged,
@@ -51,8 +56,8 @@ interface SchemaActions {
   setFilterValue(filterValue: string): string;
   addNewField(
     fieldName: string,
-    newFieldType: SchemaTypes
-  ): { fieldName: string; newFieldType: SchemaTypes };
+    newFieldType: SchemaType
+  ): { fieldName: string; newFieldType: SchemaType };
   updateFields(): void;
   openAddFieldModal(): void;
   closeAddFieldModal(): void;
@@ -64,8 +69,8 @@ interface SchemaActions {
   ): { activeReindexJobId: string; sourceId: string };
   updateExistingFieldType(
     fieldName: string,
-    newFieldType: SchemaTypes
-  ): { fieldName: string; newFieldType: SchemaTypes };
+    newFieldType: SchemaType
+  ): { fieldName: string; newFieldType: SchemaType };
   setServerField(
     updatedSchema: Schema,
     operation: TOperation
@@ -96,15 +101,6 @@ interface SchemaResponseProps {
 
 export interface SchemaInitialData extends SchemaResponseProps {
   sourceId: string;
-}
-
-interface FieldCoercionError {
-  external_id: string;
-  error: string;
-}
-
-export interface FieldCoercionErrors {
-  [key: string]: FieldCoercionError[];
 }
 
 interface SchemaChangeErrorsProps {
@@ -142,7 +138,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       activeReindexJobId,
       sourceId,
     }),
-    addNewField: (fieldName: string, newFieldType: SchemaTypes) => ({ fieldName, newFieldType }),
+    addNewField: (fieldName: string, newFieldType: SchemaType) => ({ fieldName, newFieldType }),
     updateExistingFieldType: (fieldName: string, newFieldType: string) => ({
       fieldName,
       newFieldType,
@@ -196,10 +192,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       },
     ],
     newFieldType: [
-      TEXT,
+      SchemaType.Text,
       {
         updateNewFieldType: (_, newFieldType) => newFieldType,
-        onSchemaSetSuccess: () => TEXT,
+        onSchemaSetSuccess: () => SchemaType.Text,
       },
     ],
     addFieldFormErrors: [
@@ -298,13 +294,26 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
           fieldCoercionErrors: response.fieldCoercionErrors,
         });
       } catch (e) {
-        flashAPIErrors({ ...e, message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE });
+        setErrorMessage(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       }
     },
     addNewField: ({ fieldName, newFieldType }) => {
-      const schema = cloneDeep(values.activeSchema);
-      schema[fieldName] = newFieldType;
-      actions.setServerField(schema, ADD);
+      if (fieldName in values.activeSchema) {
+        window.scrollTo(0, 0);
+        setErrorMessage(
+          i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.newFieldExists.message',
+            {
+              defaultMessage: 'New field already exists: {fieldName}.',
+              values: { fieldName },
+            }
+          )
+        );
+      } else {
+        const schema = cloneDeep(values.activeSchema);
+        schema[fieldName] = newFieldType;
+        actions.setServerField(schema, ADD);
+      }
     },
     updateExistingFieldType: ({ fieldName, newFieldType }) => {
       const schema = cloneDeep(values.activeSchema);

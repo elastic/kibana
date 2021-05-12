@@ -13,7 +13,6 @@ export {
   AgentMetadata,
   AgentPolicy,
   NewAgentPolicy,
-  AgentEvent,
   SimplifiedAgentStatus,
   EnrollmentAPIKey,
   PackagePolicy,
@@ -49,6 +48,7 @@ export {
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
+  GetPackagePoliciesResponse,
   // API schemas - Data streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -63,8 +63,6 @@ export {
   PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
   PostBulkAgentUpgradeResponse,
-  GetOneAgentEventsRequest,
-  GetOneAgentEventsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
   PutAgentReassignRequest,
@@ -87,6 +85,7 @@ export {
   PutSettingsResponse,
   // API schemas - app
   CheckPermissionsResponse,
+  GenerateServiceTokenResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
@@ -122,6 +121,7 @@ export {
   InstallationStatus,
   Installable,
   RegistryRelease,
+  PackageSpecCategory,
 } from '../../../../common';
 
 export * from './intra_app_route_state';

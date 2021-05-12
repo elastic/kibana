@@ -40,7 +40,7 @@ const getAggs = (type: string, ip: string) => {
                 _source: [`${type}.as`],
                 sort: [
                   {
-                    '@timestamp': 'desc',
+                    '@timestamp': 'desc' as const,
                   },
                 ],
               },
@@ -60,7 +60,7 @@ const getAggs = (type: string, ip: string) => {
                 _source: [`${type}.geo`],
                 sort: [
                   {
-                    '@timestamp': 'desc',
+                    '@timestamp': 'desc' as const,
                   },
                 ],
               },
@@ -87,7 +87,7 @@ const getHostAggs = (ip: string) => {
             _source: ['host'],
             sort: [
               {
-                '@timestamp': 'desc',
+                '@timestamp': 'desc' as const,
               },
             ],
           },
@@ -106,6 +106,7 @@ export const buildNetworkDetailsQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
@@ -119,7 +120,6 @@ export const buildNetworkDetailsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

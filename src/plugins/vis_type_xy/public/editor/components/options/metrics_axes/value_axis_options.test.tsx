@@ -16,7 +16,7 @@ import { TextInputOption } from '../../../../../../vis_default_editor/public';
 import { ValueAxis, ScaleType } from '../../../../types';
 import { LabelOptions } from './label_options';
 import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
-import { valueAxis, vis } from './mocks';
+import { valueAxis } from './mocks';
 
 const POSITION = 'position';
 
@@ -37,7 +37,6 @@ describe('ValueAxisOptions component', () => {
       axis,
       index: 0,
       valueAxis,
-      vis,
       setParamByIndex,
       onValueAxisPositionChanged,
       setMultipleValidity,

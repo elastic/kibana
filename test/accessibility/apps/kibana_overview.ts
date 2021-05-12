@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('kibanaOverview');
     });
 
@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         useActualUrl: true,
       });
       await PageObjects.home.removeSampleDataSet('flights');
-      await esArchiver.unload('empty_kibana');
     });
 
     it('Getting started view', async () => {

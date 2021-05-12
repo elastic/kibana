@@ -22,7 +22,7 @@ import {
   timeIntervalTriggeringPolicyConfigSchema,
 } from './time_interval';
 
-export { TriggeringPolicy } from './policy';
+export type { TriggeringPolicy } from './policy';
 
 /**
  * Any of the existing policy's configuration
@@ -34,7 +34,7 @@ export type TriggeringPolicyConfig =
   | TimeIntervalTriggeringPolicyConfig;
 
 const defaultPolicy: TimeIntervalTriggeringPolicyConfig = {
-  kind: 'time-interval',
+  type: 'time-interval',
   interval: moment.duration(24, 'hour'),
   modulate: true,
 };
@@ -48,7 +48,7 @@ export const createTriggeringPolicy = (
   config: TriggeringPolicyConfig,
   context: RollingFileContext
 ): TriggeringPolicy => {
-  switch (config.kind) {
+  switch (config.type) {
     case 'size-limit':
       return new SizeLimitTriggeringPolicy(config, context);
     case 'time-interval':

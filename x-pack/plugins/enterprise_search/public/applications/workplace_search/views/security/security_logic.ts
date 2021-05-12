@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { kea, MakeLogicType } from 'kea';
 import { cloneDeep } from 'lodash';
 import { isEqual } from 'lodash';
-
-import { kea, MakeLogicType } from 'kea';
 
 import {
   clearFlashMessages,
@@ -17,7 +16,6 @@ import {
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
-
 import { SOURCE_RESTRICTIONS_SUCCESS_MESSAGE } from '../../constants';
 
 export interface PrivateSource {

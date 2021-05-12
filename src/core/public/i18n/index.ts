@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { I18nService, I18nStart } from './i18n_service';
+export { I18nService } from './i18n_service';
+export type { I18nStart } from './i18n_service';

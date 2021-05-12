@@ -13,8 +13,9 @@ import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { SelectOption, SwitchOption } from '../../../vis_default_editor/public';
 import { ValidatedDualRange } from '../../../kibana_react/public';
 import { TagCloudVisParams } from '../types';
+import { collections } from './collections';
 
-function TagCloudOptions({ stateParams, setValue, vis }: VisEditorOptionsProps<TagCloudVisParams>) {
+function TagCloudOptions({ stateParams, setValue }: VisEditorOptionsProps<TagCloudVisParams>) {
   const handleFontSizeChange = ([minFontSize, maxFontSize]: [string | number, string | number]) => {
     setValue('minFontSize', Number(minFontSize));
     setValue('maxFontSize', Number(maxFontSize));
@@ -29,7 +30,7 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisEditorOptionsProps<T
         label={i18n.translate('visTypeTagCloud.visParams.textScaleLabel', {
           defaultMessage: 'Text scale',
         })}
-        options={vis.type.editorConfig.collections.scales}
+        options={collections.scales}
         paramName="scale"
         value={stateParams.scale}
         setValue={setValue}
@@ -39,7 +40,7 @@ function TagCloudOptions({ stateParams, setValue, vis }: VisEditorOptionsProps<T
         label={i18n.translate('visTypeTagCloud.visParams.orientationsLabel', {
           defaultMessage: 'Orientations',
         })}
-        options={vis.type.editorConfig.collections.orientations}
+        options={collections.orientations}
         paramName="orientation"
         value={stateParams.orientation}
         setValue={setValue}

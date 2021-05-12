@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);
-        expect(await dimensions[1].getVisibleText()).to.be('Average of bytes');
+        expect(await dimensions[1].getVisibleText()).to.be('Median of bytes');
       });
     });
 

@@ -995,7 +995,7 @@ Array [
     },
     "serviceName": "kibana-frontend",
     "transactionName": "/app/dev_tools",
-    "transactionType": "page-load",
+    "transactionType": "route-change",
     "transactionsPerMinute": 0.0666666666666667,
   },
   Object {

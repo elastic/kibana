@@ -17,9 +17,8 @@ import { createTickFormatter } from '../../lib/tick_formatter';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
-import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
+import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 
@@ -34,9 +33,14 @@ class TimeseriesVisualization extends Component {
   scaledDataFormat = this.props.getConfig('dateFormat:scaled');
   dateFormat = this.props.getConfig('dateFormat');
 
-  xAxisFormatter = (interval) => (val) => {
-    const formatter = createXaxisFormatter(interval, this.scaledDataFormat, this.dateFormat);
-    return formatter(val);
+  xAxisFormatter = (interval) => {
+    const formatter = createIntervalBasedFormatter(
+      interval,
+      this.scaledDataFormat,
+      this.dateFormat,
+      this.props.model.ignore_daylight_time
+    );
+    return (val) => formatter(val);
   };
 
   yAxisStackedByPercentFormatter = (val) => {
@@ -132,7 +136,7 @@ class TimeseriesVisualization extends Component {
   };
 
   render() {
-    const { model, visData, onBrush } = this.props;
+    const { model, visData, onBrush, syncColors, palettesService } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -163,6 +167,13 @@ class TimeseriesVisualization extends Component {
         seriesGroup,
         this.props.getConfig
       );
+      const palette = {
+        ...seriesGroup.palette,
+        name:
+          seriesGroup.split_color_mode === 'kibana'
+            ? 'kibana_palette'
+            : seriesGroup.split_color_mode || seriesGroup.palette?.name,
+      };
       const yScaleType = hasSeparateAxis
         ? TimeseriesVisualization.getAxisScaleType(seriesGroup)
         : mainAxisScaleType;
@@ -182,6 +193,9 @@ class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
+          seriesDataRow.palette = palette;
+          seriesDataRow.baseColor = seriesGroup.color;
+          seriesDataRow.isSplitByTerms = seriesGroup.split_mode === 'terms';
         });
 
       if (isCustomDomain) {
@@ -211,19 +225,27 @@ class TimeseriesVisualization extends Component {
 
     return (
       <div className="tvbVis">
-        <TimeSeries
-          series={series}
-          yAxis={yAxis}
-          onBrush={onBrush}
-          backgroundColor={model.background_color}
-          showGrid={Boolean(model.show_grid)}
-          legend={Boolean(model.show_legend)}
-          legendPosition={model.legend_position}
-          tooltipMode={model.tooltip_mode}
-          xAxisLabel={getAxisLabelString(interval)}
-          xAxisFormatter={this.xAxisFormatter(interval)}
-          annotations={this.prepareAnnotations()}
-        />
+        <div className="tvbVisTimeSeries">
+          <TimeSeries
+            series={series}
+            yAxis={yAxis}
+            onBrush={onBrush}
+            backgroundColor={model.background_color}
+            showGrid={Boolean(model.show_grid)}
+            legend={Boolean(model.show_legend)}
+            legendPosition={model.legend_position}
+            tooltipMode={model.tooltip_mode}
+            xAxisFormatter={this.xAxisFormatter(interval)}
+            annotations={this.prepareAnnotations()}
+            syncColors={syncColors}
+            palettesService={palettesService}
+            interval={interval}
+            isLastBucketDropped={Boolean(
+              model.drop_last_bucket ||
+                model.series.some((series) => series.series_drop_last_bucket)
+            )}
+          />
+        </div>
       </div>
     );
   }

@@ -17,8 +17,8 @@ import Url from 'url';
 import readline from 'readline';
 import Fs from 'fs';
 
-import { RunWithCommands, createFlagError, KbnClient, CA_CERT_PATH } from '@kbn/dev-utils';
-import { readConfigFile } from '@kbn/test';
+import { RunWithCommands, createFlagError, CA_CERT_PATH } from '@kbn/dev-utils';
+import { readConfigFile, KbnClient } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
 
 import { EsArchiver } from './es_archiver';

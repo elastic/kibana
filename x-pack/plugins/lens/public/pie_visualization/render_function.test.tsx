@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { Partition, SeriesIdentifier, Settings } from '@elastic/charts';
 import {
+  Partition,
+  SeriesIdentifier,
+  Settings,
   NodeColorAccessor,
   ShapeTreeNode,
-} from '@elastic/charts/dist/chart_types/partition_chart/layout/types/viewmodel_types';
-import { HierarchyOfArrays } from '@elastic/charts/dist/chart_types/partition_chart/layout/utils/group_by_rollup';
+  HierarchyOfArrays,
+  Chart,
+} from '@elastic/charts';
 import { shallow } from 'enzyme';
 import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
@@ -40,12 +43,12 @@ describe('PieVisualization component', () => {
           type: 'datatable',
           columns: [
             { id: 'a', name: 'a', meta: { type: 'number' } },
-            { id: 'b', name: 'b', meta: { type: 'number' } },
-            { id: 'c', name: 'c', meta: { type: 'string' } },
+            { id: 'b', name: 'b', meta: { type: 'string' } },
+            { id: 'c', name: 'c', meta: { type: 'number' } },
           ],
           rows: [
-            { a: 6, b: 2, c: 'I', d: 'Row 1' },
-            { a: 1, b: 5, c: 'J', d: 'Row 2' },
+            { a: 6, b: 'I', c: 2, d: 'Row 1' },
+            { a: 1, b: 'J', c: 5, d: 'Row 2' },
           ],
         },
       },
@@ -214,7 +217,19 @@ describe('PieVisualization component', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(<PieComponent args={{ ...args }} {...defaultArgs} />);
       component.find(Settings).first().prop('onElementClick')!([
-        [[{ groupByRollup: 6, value: 6 }], {} as SeriesIdentifier],
+        [
+          [
+            {
+              groupByRollup: 6,
+              value: 6,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+          ],
+          {} as SeriesIdentifier,
+        ],
       ]);
 
       expect(defaultArgs.onClickValue.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -235,14 +250,14 @@ describe('PieVisualization component', () => {
                   Object {
                     "id": "b",
                     "meta": Object {
-                      "type": "number",
+                      "type": "string",
                     },
                     "name": "b",
                   },
                   Object {
                     "id": "c",
                     "meta": Object {
-                      "type": "string",
+                      "type": "number",
                     },
                     "name": "c",
                   },
@@ -250,14 +265,14 @@ describe('PieVisualization component', () => {
                 "rows": Array [
                   Object {
                     "a": 6,
-                    "b": 2,
-                    "c": "I",
+                    "b": "I",
+                    "c": 2,
                     "d": "Row 1",
                   },
                   Object {
                     "a": 1,
-                    "b": 5,
-                    "c": "J",
+                    "b": "J",
+                    "c": 5,
                     "d": "Row 2",
                   },
                 ],
@@ -278,6 +293,48 @@ describe('PieVisualization component', () => {
       expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
     });
 
+    test('it renders the empty placeholder when metric contains only falsy data', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            rows: [
+              { a: 0, b: 'I', c: 0, d: 'Row 1' },
+              { a: 0, b: 'J', c: null, d: 'Row 2' },
+            ],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+      expect(component.find(EmptyPlaceholder)).toHaveLength(1);
+    });
+
+    test('it renders the chart when metric contains truthy data and buckets contain only falsy data', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            // a and b are buckets, c is a metric
+            rows: [{ a: 0, b: undefined, c: 12 }],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+
+      expect(component.find(EmptyPlaceholder)).toHaveLength(0);
+      expect(component.find(Chart)).toHaveLength(1);
+    });
+
     test('it shows emptyPlaceholder for undefined grouped data', () => {
       const defaultData = getDefaultArgs().data;
       const emptyData: LensMultiTable = {
@@ -286,8 +343,8 @@ describe('PieVisualization component', () => {
           first: {
             ...defaultData.tables.first,
             rows: [
-              { a: undefined, b: undefined, c: 'I', d: 'Row 1' },
-              { a: undefined, b: undefined, c: 'J', d: 'Row 2' },
+              { a: undefined, b: 'I', c: undefined, d: 'Row 1' },
+              { a: undefined, b: 'J', c: undefined, d: 'Row 2' },
             ],
           },
         },

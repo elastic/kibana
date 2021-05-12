@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+
 import {
   EuiPageContent,
   EuiSpacer,
@@ -18,6 +17,8 @@ import {
   EuiAccordion,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   productName: string;

@@ -26,6 +26,7 @@ const columnSortOrder = {
   ip: 3,
   boolean: 4,
   number: 5,
+  histogram: 6,
 };
 
 /**
@@ -520,6 +521,7 @@ function buildSuggestion({
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction || 'None',
+    curveType: currentState?.curveType,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,

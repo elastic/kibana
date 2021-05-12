@@ -1,5 +1,5 @@
 {
-  "id": "elasticsearch_client_plugin",
+  "id": "elasticsearchClientPlugin",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "server": true,

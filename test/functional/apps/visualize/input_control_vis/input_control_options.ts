@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.visEditor.clickVisEditorTab('controls');
       await PageObjects.visEditor.addInputControl();
-      await comboBox.set('indexPatternSelect-0', 'logstash- ');
+      await comboBox.set('indexPatternSelect-0', 'logstash-');
       await comboBox.set('fieldSelect-0', FIELD_NAME);
       await PageObjects.visEditor.clickGo();
     });

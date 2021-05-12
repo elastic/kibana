@@ -22,8 +22,8 @@ export const buildTimelineDetailsQuery = (
         _id: [id],
       },
     },
-    fields: ['*'],
-    _source: ['signal.*'],
+    fields: [{ field: '*', include_unmapped: true }],
+    _source: true,
   },
   size: 1,
 });

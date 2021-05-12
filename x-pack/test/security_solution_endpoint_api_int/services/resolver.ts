@@ -49,14 +49,6 @@ interface BulkCreateHeader {
   };
 }
 
-interface BulkResponse {
-  items: Array<{
-    create: {
-      _id: string;
-    };
-  }>;
-}
-
 export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   const client = getService('es');
 
@@ -69,12 +61,13 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
         array.push({ create: { _index: eventsIndex } }, doc);
         return array;
       }, []);
-      const bulkResp = await client.bulk<BulkResponse>({ body, refresh: true });
+      const bulkResp = await client.bulk({ body, refresh: true });
 
       const eventsInfo = events.map((event: Event, i: number) => {
-        return { event, _id: bulkResp.body.items[i].create._id };
+        return { event, _id: bulkResp.body.items[i].create?._id };
       });
 
+      // @ts-expect-error @elastic/elasticsearch expected BulkResponseItemBase._id: string
       return { eventsInfo, indices: [eventsIndex] };
     },
     async createTrees(

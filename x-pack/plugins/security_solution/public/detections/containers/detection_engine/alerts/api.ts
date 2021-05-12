@@ -6,12 +6,14 @@
  */
 
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
+import { HostIsolationResponse } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
+import { ISOLATE_HOST_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -100,4 +102,27 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
   KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_INDEX_URL, {
     method: 'POST',
     signal,
+  });
+
+/**
+ * Get Host Isolation index
+ *
+ * @param agent id
+ * @param optional comment for the isolation action
+ *
+ * @throws An error if response is not OK
+ */
+export const createHostIsolation = async ({
+  agentId,
+  comment = '',
+}: {
+  agentId: string;
+  comment?: string;
+}): Promise<HostIsolationResponse> =>
+  KibanaServices.get().http.fetch<HostIsolationResponse>(ISOLATE_HOST_ROUTE, {
+    method: 'POST',
+    body: JSON.stringify({
+      agent_ids: [agentId],
+      comment,
+    }),
   });

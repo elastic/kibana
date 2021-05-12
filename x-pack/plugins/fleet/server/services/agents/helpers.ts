@@ -5,18 +5,38 @@
  * 2.0.
  */
 
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
-import { Agent, AgentSOAttributes } from '../../types';
+import type { estypes } from '@elastic/elasticsearch';
 
-export function searchHitToAgent(hit: ESSearchHit<AgentSOAttributes>): Agent {
+import type { SearchHit } from '../../../../../../typings/elasticsearch';
+import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
+
+type FleetServerAgentESResponse =
+  | estypes.MultiGetHit<FleetServerAgent>
+  | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
+  | SearchHit<FleetServerAgent>;
+
+export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
+  // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
   return {
     id: hit._id,
     ...hit._source,
-    current_error_events: hit._source.current_error_events
-      ? JSON.parse(hit._source.current_error_events)
-      : [],
+    policy_revision: hit._source?.policy_revision_idx,
     access_api_key: undefined,
     status: undefined,
-    packages: hit._source.packages ?? [],
+    packages: hit._source?.packages ?? [],
   };
+}
+
+export function agentSOAttributesToFleetServerAgentDoc(
+  data: Partial<AgentSOAttributes>
+): Partial<Omit<FleetServerAgent, 'id'>> {
+  const { policy_revision: policyRevison, ...rest } = data;
+
+  const doc: Partial<Omit<FleetServerAgent, 'id'>> = { ...rest };
+
+  if (policyRevison !== undefined) {
+    doc.policy_revision_idx = policyRevison;
+  }
+
+  return doc;
 }

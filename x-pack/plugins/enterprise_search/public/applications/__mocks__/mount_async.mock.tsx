@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
+import { mountWithIntl } from './mount_with_i18n.mock';
 
-import { mountWithIntl } from './';
+import React from 'react';
+
+import { mount, ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 /**
  * This helper is intended for components that have async effects

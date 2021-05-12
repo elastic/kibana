@@ -16,6 +16,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -23,13 +24,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const renderable = getService('renderable');
   const listingTable = getService('listingTable');
   const elasticChart = getService('elasticChart');
-  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'discover']);
 
   interface SaveDashboardOptions {
     /**
      * @default true
      */
     waitDialogIsClosed?: boolean;
+    exitFromEditMode?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
@@ -157,6 +159,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
     }
 
+    public async expectOnDashboard(dashboardTitle: string) {
+      await retry.waitFor(
+        'last breadcrumb to have dashboard title',
+        async () => (await globalNav.getLastBreadcrumb()) === dashboardTitle
+      );
+    }
+
     public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
@@ -211,14 +220,21 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     /**
      * Asserts that the toolbar pagination (count and arrows) is either displayed or not displayed.
-     * @param { displayed: boolean }
+
      */
-    public async expectToolbarPaginationDisplayed({ displayed = true }) {
-      const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
-      if (displayed) {
+    public async expectToolbarPaginationDisplayed() {
+      const isLegacyDefault = PageObjects.discover.useLegacyTable();
+      if (isLegacyDefault) {
+        const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
         await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
       } else {
-        await Promise.all(subjects.map(async (subj) => await testSubjects.missingOrFail(subj)));
+        const subjects = ['pagination-button-previous', 'pagination-button-next'];
+
+        await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
+        const paginationListExists = await find.existsByCssSelector('.euiPagination__list');
+        if (!paginationListExists) {
+          throw new Error(`expected discover data grid pagination list to exist`);
+        }
       }
     }
 
@@ -238,14 +254,31 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return await testSubjects.exists('dashboardEditMode');
     }
 
-    public async clickCancelOutOfEditMode() {
+    public async clickCancelOutOfEditMode(accept = true) {
       log.debug('clickCancelOutOfEditMode');
       await testSubjects.click('dashboardViewOnlyMode');
+      if (accept) {
+        const confirmation = await testSubjects.exists('dashboardDiscardConfirmKeep');
+        if (confirmation) {
+          await testSubjects.click('dashboardDiscardConfirmKeep');
+        }
+      }
     }
 
-    public async clickDiscardChanges() {
+    public async clickDiscardChanges(accept = true) {
       log.debug('clickDiscardChanges');
-      await testSubjects.click('dashboardDiscardChanges');
+      await testSubjects.click('dashboardViewOnlyMode');
+      if (accept) {
+        const confirmation = await testSubjects.exists('dashboardDiscardConfirmDiscard');
+        if (confirmation) {
+          await testSubjects.click('dashboardDiscardConfirmDiscard');
+        }
+      }
+    }
+
+    public async clickQuickSave() {
+      log.debug('clickQuickSave');
+      await testSubjects.click('dashboardQuickSaveMenuItem');
     }
 
     public async clickNewDashboard(continueEditing = false) {
@@ -351,7 +384,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async saveDashboard(
       dashboardName: string,
-      saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
+      saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
     ) {
       await retry.try(async () => {
         await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
@@ -367,6 +400,12 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const message = await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.waitForSaveModalToClose();
+
+      const isInViewMode = await testSubjects.exists('dashboardEditMode');
+      if (saveOptions.exitFromEditMode && !isInViewMode) {
+        await this.clickCancelOutOfEditMode();
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       return message;
     }
@@ -400,8 +439,9 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
       }
 
-      if (saveOptions.saveAsNew !== undefined) {
-        await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        await this.setSaveAsNewCheckBox(Boolean(saveOptions.saveAsNew));
       }
 
       if (saveOptions.tags) {
@@ -581,6 +621,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async expectMissingSaveOption() {
       await testSubjects.missingOrFail('dashboardSaveMenuItem');
+    }
+
+    public async expectMissingQuickSaveOption() {
+      await testSubjects.missingOrFail('dashboardQuickSaveMenuItem');
+    }
+    public async expectExistsQuickSaveOption() {
+      await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
     }
 
     public async getNotLoadedVisualizations(vizList: string[]) {

@@ -9,12 +9,12 @@
 import { extname } from 'path';
 import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
+import { chain } from 'lodash';
 import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsImportError } from '../import';
-import { createSavedObjectsStreamFromNdJson } from './utils';
-
+import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: CoreUsageDataSetup;
@@ -69,7 +69,7 @@ export const registerResolveImportErrorsRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, req, res) => {
       const { createNewCopies } = req.query;
 
       const usageStatsClient = coreUsageData.getClient();
@@ -92,7 +92,18 @@ export const registerResolveImportErrorsRoute = (
         });
       }
 
-      const { importer } = context.core.savedObjects;
+      const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
+
+      const includedHiddenTypes = chain(req.body.retries)
+        .map('type')
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value();
+
+      const client = getClient({ includedHiddenTypes });
+      const importer = getImporter(client);
 
       try {
         const result = await importer.resolveImportErrors({

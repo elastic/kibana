@@ -33,6 +33,7 @@ async function fetchPolicies(client: ElasticsearchClient): Promise<ApiResponse<P
     ignore: [404],
   };
 
+  // @ts-expect-error Policy doesn't contain name property
   return client.ilm.getLifecycle({}, options);
 }
 

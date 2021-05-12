@@ -24,6 +24,10 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickTable();
 
         await visualBuilder.checkTableTabIsPresent();
+        await visualBuilder.clickPanelOptions('table');
+        await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.setDropLastBucket(true);
+        await visualBuilder.clickDataTab('table');
         await visualBuilder.selectGroupByField('machine.os.raw');
         await visualBuilder.setColumnLabelValue('OS');
         await visChart.waitForVisualizationRenderingStabilized();

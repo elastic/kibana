@@ -7,27 +7,29 @@
 
 import { PassThrough, Readable } from 'stream';
 
-import { LegacyAPICaller } from 'kibana/server';
-
+import { ElasticsearchClient } from 'kibana/server';
 import {
   Description,
   DescriptionOrUndefined,
-  DeserializerOrUndefined,
-  Filter,
   Id,
   IdOrUndefined,
-  Immutable,
-  ListId,
-  ListIdOrUndefined,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-utils';
+
+import {
+  DeserializerOrUndefined,
+  Filter,
+  Immutable,
+  ListId,
+  ListIdOrUndefined,
   Page,
   PerPage,
   SerializerOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-  Type,
   Version,
   VersionOrUndefined,
   _VersionOrUndefined,
@@ -35,7 +37,7 @@ import {
 import { ConfigType } from '../../config';
 
 export interface ConstructorOptions {
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   config: ConfigType;
   spaceId: string;
   user: string;

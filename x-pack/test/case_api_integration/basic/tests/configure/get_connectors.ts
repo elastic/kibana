@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../plugins/case/common/constants';
+import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../plugins/cases/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import {
   getServiceNowConnector,
@@ -92,6 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
             projectKey: 'pkey',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
         {
@@ -103,6 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
             orgId: 'pkey',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
         {
@@ -113,6 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
             apiUrl: 'http://some.non.existent.com',
           },
           isPreconfigured: false,
+          isMissingSecrets: false,
           referencedByCount: 0,
         },
       ]);

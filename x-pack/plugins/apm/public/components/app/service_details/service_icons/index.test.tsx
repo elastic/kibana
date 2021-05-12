@@ -19,6 +19,7 @@ import {
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { ServiceIcons } from './';
+import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -60,7 +61,9 @@ describe('ServiceIcons', () => {
       });
       const { getByTestId, queryAllByTestId } = render(
         <Wrapper>
-          <ServiceIcons serviceName="foo" />
+          <EuiThemeProvider>
+            <ServiceIcons serviceName="foo" />
+          </EuiThemeProvider>
         </Wrapper>
       );
       expect(getByTestId('loading')).toBeInTheDocument();
@@ -77,7 +80,9 @@ describe('ServiceIcons', () => {
 
       const { queryAllByTestId } = render(
         <Wrapper>
-          <ServiceIcons serviceName="foo" />
+          <EuiThemeProvider>
+            <ServiceIcons serviceName="foo" />
+          </EuiThemeProvider>
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
@@ -96,7 +101,9 @@ describe('ServiceIcons', () => {
 
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
-          <ServiceIcons serviceName="foo" />
+          <EuiThemeProvider>
+            <ServiceIcons serviceName="foo" />
+          </EuiThemeProvider>
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
@@ -116,7 +123,9 @@ describe('ServiceIcons', () => {
 
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
-          <ServiceIcons serviceName="foo" />
+          <EuiThemeProvider>
+            <ServiceIcons serviceName="foo" />
+          </EuiThemeProvider>
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
@@ -137,7 +146,9 @@ describe('ServiceIcons', () => {
 
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
-          <ServiceIcons serviceName="foo" />
+          <EuiThemeProvider>
+            <ServiceIcons serviceName="foo" />
+          </EuiThemeProvider>
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
@@ -180,7 +191,9 @@ describe('ServiceIcons', () => {
 
       const { queryAllByTestId, getByTestId } = render(
         <Wrapper>
-          <ServiceIcons serviceName="foo" />
+          <EuiThemeProvider>
+            <ServiceIcons serviceName="foo" />
+          </EuiThemeProvider>
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);
@@ -216,7 +229,9 @@ describe('ServiceIcons', () => {
 
       const { queryAllByTestId, getByTestId, getByText } = render(
         <Wrapper>
-          <ServiceIcons serviceName="foo" />
+          <EuiThemeProvider>
+            <ServiceIcons serviceName="foo" />
+          </EuiThemeProvider>
         </Wrapper>
       );
       expect(queryAllByTestId('loading')).toHaveLength(0);

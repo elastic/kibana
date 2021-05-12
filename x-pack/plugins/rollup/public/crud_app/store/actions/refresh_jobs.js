@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { loadJobs as sendLoadJobsRequest, deserializeJobs, showApiWarning } from '../../services';
 import { REFRESH_JOBS_SUCCESS } from '../action_types';
 
-export const refreshJobs = () => async (dispatch) => {
+export const refreshJobs = (options) => async (dispatch) => {
   let jobs;
   try {
-    jobs = await sendLoadJobsRequest();
+    jobs = await sendLoadJobsRequest(options);
   } catch (error) {
     return showApiWarning(
       error,

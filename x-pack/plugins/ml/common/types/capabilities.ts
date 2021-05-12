@@ -8,6 +8,7 @@
 import { KibanaRequest } from 'kibana/server';
 import { PLUGIN_ID } from '../constants/app';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
@@ -29,6 +30,8 @@ export const userMlCapabilities = {
   canGetAnnotations: false,
   canCreateAnnotation: false,
   canDeleteAnnotation: false,
+  // Alerts
+  canUseMlAlerts: false,
 };
 
 export const adminMlCapabilities = {
@@ -56,6 +59,9 @@ export const adminMlCapabilities = {
   canCreateDataFrameAnalytics: false,
   canDeleteDataFrameAnalytics: false,
   canStartStopDataFrameAnalytics: false,
+  // Alerts
+  canCreateMlAlerts: false,
+  canUseMlAlerts: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
@@ -99,23 +105,35 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      api: [
+        'fileUpload:import',
+        'fileUpload:analyzeFile',
+        ...allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
         all: savedObjects,
         read: savedObjects,
       },
+      alerting: {
+        all: Object.values(ML_ALERT_TYPES),
+        read: [],
+      },
     },
     user: {
       ...privilege,
-      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      api: ['fileUpload:analyzeFile', ...userMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID],
       management: { insightsAndAlerting: [] },
       ui: userMlCapabilitiesKeys,
       savedObject: {
         all: [],
         read: savedObjects,
+      },
+      alerting: {
+        all: [],
+        read: Object.values(ML_ALERT_TYPES),
       },
     },
     apmUser: {

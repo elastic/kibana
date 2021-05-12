@@ -6,13 +6,14 @@
  */
 
 import { uniq } from 'lodash';
-import { SecurityLicense } from '../../../common/licensing';
-import {
-  KibanaFeature,
+
+import type {
   PluginSetupContract as FeaturesPluginSetup,
+  KibanaFeature,
 } from '../../../../features/server';
-import { RawKibanaPrivileges } from '../../../common/model';
-import { Actions } from '../actions';
+import type { SecurityLicense } from '../../../common/licensing';
+import type { RawKibanaPrivileges } from '../../../common/model';
+import type { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import {
   featurePrivilegeIterator,
@@ -104,6 +105,7 @@ export function privilegesFactory(
           all: [
             actions.login,
             actions.version,
+            actions.api.get('decryptedTelemetry'),
             actions.api.get('features'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
@@ -112,7 +114,12 @@ export function privilegesFactory(
             actions.ui.get('enterpriseSearch', 'all'),
             ...allActions,
           ],
-          read: [actions.login, actions.version, ...readActions],
+          read: [
+            actions.login,
+            actions.version,
+            actions.api.get('decryptedTelemetry'),
+            ...readActions,
+          ],
         },
         space: {
           all: [actions.login, actions.version, ...allActions],

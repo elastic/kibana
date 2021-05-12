@@ -13,12 +13,13 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { CancellationToken } from '../common';
-import { BaseParams } from '../common/types';
+import { BaseParams, TaskRunResult } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
-import { ReportTaskParams, TaskRunResult } from './lib/tasks';
+import { ReportTaskParams } from './lib/tasks';
 
 /*
  * Plugin Contract
@@ -29,15 +30,20 @@ export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
 
 export interface ReportingStartDeps {
   data: DataPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
-export type ReportingStart = object;
-export type ReportingSetup = object;
+export interface ReportingSetup {
+  usesUiCapabilities: () => boolean;
+}
+
+export type ReportingStart = ReportingSetup;
 
 /*
  * Internal Types
@@ -80,13 +86,16 @@ export type RunTaskFnFactory<RunTaskFnType> = (
   logger: LevelLogger
 ) => RunTaskFnType;
 
-export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnType = RunTaskFn> {
+export interface ExportTypeDefinition<
+  CreateJobFnType = CreateJobFn | null,
+  RunTaskFnType = RunTaskFn
+> {
   id: string;
   name: string;
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
@@ -94,8 +103,9 @@ export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnTy
 /**
  * @internal
  */
-export interface ReportingRequestHandlerContext extends RequestHandlerContext {
+export interface ReportingRequestHandlerContext {
   reporting: ReportingStart | null;
+  core: RequestHandlerContext['core'];
 }
 
 /**

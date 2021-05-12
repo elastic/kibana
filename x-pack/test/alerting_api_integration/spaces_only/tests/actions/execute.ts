@@ -44,11 +44,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should handle execute request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          actionTypeId: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -59,9 +59,11 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
-      const reference = `actions-execute-1:${Spaces.space1.id}`;
+      const reference = `actions-execute-1:${Spaces.space1.id}:${createdAction.id}`;
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdAction.id}/_execute`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -102,18 +104,20 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should handle failed executions', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'failing action',
-          actionTypeId: 'test.failing',
+          connector_type_id: 'test.failing',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
       const reference = `actions-failure-1:${Spaces.space1.id}`;
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdAction.id}/_execute`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -124,10 +128,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
-        actionId: createdAction.id,
+        connector_id: createdAction.id,
         status: 'error',
         message: 'an error occurred while running the action executor',
-        serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
+        service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: false,
       });
 
@@ -142,11 +146,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`shouldn't execute an action from another space`, async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          actionTypeId: 'test.index-record',
+          connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -178,17 +182,19 @@ export default function ({ getService }: FtrProviderContext) {
     it('should handle execute request appropriately and have proper callCluster and savedObjectsClient authorization', async () => {
       const reference = `actions-execute-3:${Spaces.space1.id}`;
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
-          actionTypeId: 'test.authorization',
+          connector_type_id: 'test.authorization',
         })
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdAction.id}/_execute`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -220,11 +226,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should notify feature usage when executing a gold action type', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'Noop action type',
-          actionTypeId: 'test.noop',
+          connector_type_id: 'test.noop',
           secrets: {},
           config: {},
         })
@@ -233,7 +239,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       const executionStart = new Date();
       await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdAction.id}/_execute`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {},
@@ -250,6 +258,72 @@ export default function ({ getService }: FtrProviderContext) {
       expect(noopFeature).to.be.ok();
       expect(noopFeature.last_used).to.be.a('string');
       expect(new Date(noopFeature.last_used).getTime()).to.be.greaterThan(executionStart.getTime());
+    });
+
+    describe('legacy', () => {
+      it('should handle execute request appropriately', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'My action',
+            actionTypeId: 'test.index-record',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
+            secrets: {
+              encrypted: 'This value should be encrypted',
+            },
+          })
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+        const reference = `actions-execute-1:${Spaces.space1.id}:${createdAction.id}`;
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              reference,
+              index: ES_TEST_INDEX_NAME,
+              message: 'Testing 123',
+            },
+          });
+
+        expect(response.status).to.eql(200);
+      });
+
+      it('should handle failed executions', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'failing action',
+            actionTypeId: 'test.failing',
+          })
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+        const reference = `actions-failure-1:${Spaces.space1.id}:${createdAction.id}`;
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              reference,
+              index: ES_TEST_INDEX_NAME,
+            },
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body).to.eql({
+          actionId: createdAction.id,
+          status: 'error',
+          message: 'an error occurred while running the action executor',
+          serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
+          retry: false,
+        });
+      });
     });
   });
 

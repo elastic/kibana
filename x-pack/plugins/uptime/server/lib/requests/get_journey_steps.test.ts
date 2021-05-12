@@ -14,9 +14,9 @@ describe('getJourneySteps request module', () => {
       expect(formatSyntheticEvents()).toMatchInlineSnapshot(`
         Array [
           "step/end",
-          "stderr",
           "cmd/status",
           "step/screenshot",
+          "journey/browserconsole",
         ]
       `);
     });
@@ -121,9 +121,9 @@ describe('getJourneySteps request module', () => {
           "terms": Object {
             "synthetics.type": Array [
               "step/end",
-              "stderr",
               "cmd/status",
               "step/screenshot",
+              "journey/browserconsole",
             ],
           },
         }

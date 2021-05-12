@@ -79,6 +79,25 @@ storiesOf('CodeEditor', module)
     }
   )
   .add(
+    'transparent background',
+    () => (
+      <div>
+        <CodeEditor
+          languageId="plaintext"
+          height={250}
+          value="Hello!"
+          onChange={action('onChange')}
+          transparentBackground
+        />
+      </div>
+    ),
+    {
+      info: {
+        text: 'Plaintext Monaco Editor',
+      },
+    }
+  )
+  .add(
     'custom log language',
     () => (
       <div>
@@ -165,7 +184,6 @@ storiesOf('CodeEditor', module)
               provideCompletionItems: provideSuggestions,
             }}
             options={{
-              wordBasedSuggestions: false,
               quickSuggestions: true,
             }}
           />

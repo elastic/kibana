@@ -13,25 +13,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { SelectOption, SwitchOption } from '../../../../../../vis_default_editor/public';
 
 import { LabelOptions, SetAxisLabel } from './label_options';
 import { CategoryAxis } from '../../../../types';
+import { getPositions } from '../../../collections';
+
+const positions = getPositions();
 
 export interface CategoryAxisPanelProps {
   axis: CategoryAxis;
   onPositionChanged: (position: Position) => void;
   setCategoryAxis: (value: CategoryAxis) => void;
-  vis: VisEditorOptionsProps['vis'];
 }
 
-function CategoryAxisPanel({
-  axis,
-  onPositionChanged,
-  vis,
-  setCategoryAxis,
-}: CategoryAxisPanelProps) {
+function CategoryAxisPanel({ axis, onPositionChanged, setCategoryAxis }: CategoryAxisPanelProps) {
   const setAxis = useCallback(
     <T extends keyof CategoryAxis>(paramName: T, value: CategoryAxis[T]) => {
       const updatedAxis = {
@@ -78,7 +74,7 @@ function CategoryAxisPanel({
         label={i18n.translate('visTypeXy.controls.pointSeries.categoryAxis.positionLabel', {
           defaultMessage: 'Position',
         })}
-        options={vis.type.editorConfig.collections.positions}
+        options={positions}
         paramName="position"
         value={axis.position}
         setValue={setPosition}

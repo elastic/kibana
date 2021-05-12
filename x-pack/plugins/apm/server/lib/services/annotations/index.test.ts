@@ -8,7 +8,7 @@
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../typings/elasticsearch';
+} from '../../../../../../../typings/elasticsearch';
 import {
   inspectSearchParams,
   SearchParamsMock,
@@ -111,13 +111,13 @@ describe('getServiceAnnotations', () => {
         {
           id: '8.0.0',
           text: '8.0.0',
-          '@timestamp': 1.5281138e12,
+          '@timestamp': new Date('2018-06-04T12:00:00.000Z').getTime(),
           type: 'version',
         },
         {
           id: '7.5.0',
           text: '7.5.0',
-          '@timestamp': 1.5281138e12,
+          '@timestamp': new Date('2018-06-04T12:00:00.000Z').getTime(),
           type: 'version',
         },
       ]);

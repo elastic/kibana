@@ -16,7 +16,10 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     params: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
+    }),
+    query: schema.object({
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }) => {
@@ -28,7 +31,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex,
     });
 
-    if (result === null) {
+    if (result === null || !result.blob) {
       return response.notFound();
     }
     return response.ok({

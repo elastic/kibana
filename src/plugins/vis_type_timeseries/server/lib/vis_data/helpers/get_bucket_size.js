@@ -30,6 +30,10 @@ const calculateBucketData = (timeInterval, capabilities) => {
     bucketSize = 1;
   }
 
+  if (bucketSize > capabilities.maxBucketsLimit) {
+    bucketSize = capabilities.maxBucketsLimit;
+  }
+
   // Check decimal
   if (parsedInterval && parsedInterval.value % 1 !== 0) {
     if (parsedInterval.unit !== 'ms') {
@@ -61,16 +65,16 @@ const calculateBucketSizeForAutoInterval = (req, maxBars) => {
   return search.aggs.calcAutoIntervalLessThan(maxBars, timerange).asSeconds();
 };
 
-export const getBucketSize = (req, interval, capabilities, maxBars) => {
-  const bucketSize = calculateBucketSizeForAutoInterval(req, maxBars);
-  let intervalString = `${bucketSize}s`;
+export const getBucketSize = (req, interval, capabilities, bars) => {
+  const defaultBucketSize = calculateBucketSizeForAutoInterval(req, bars);
+  let intervalString = `${defaultBucketSize}s`;
 
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);
 
   if (gteAutoMatch) {
     const bucketData = calculateBucketData(gteAutoMatch[1], capabilities);
 
-    if (bucketData.bucketSize >= bucketSize) {
+    if (bucketData.bucketSize >= defaultBucketSize) {
       return bucketData;
     }
   }

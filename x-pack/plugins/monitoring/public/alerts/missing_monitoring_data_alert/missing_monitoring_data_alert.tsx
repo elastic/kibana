@@ -9,7 +9,11 @@ import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { validate } from './validation';
-import { ALERT_MISSING_MONITORING_DATA, ALERT_DETAILS } from '../../../common/constants';
+import {
+  ALERT_MISSING_MONITORING_DATA,
+  ALERT_DETAILS,
+  ALERT_REQUIRES_APP_CONTEXT,
+} from '../../../common/constants';
 import { Expression } from './expression';
 
 export function createMissingMonitoringDataAlertType(): AlertTypeModel {
@@ -28,6 +32,6 @@ export function createMissingMonitoringDataAlertType(): AlertTypeModel {
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: true,
+    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
   };
 }

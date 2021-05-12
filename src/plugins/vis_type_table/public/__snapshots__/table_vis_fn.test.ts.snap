@@ -6,27 +6,30 @@ Object {
   "type": "render",
   "value": Object {
     "visConfig": Object {
-      "dimensions": Object {
-        "buckets": Array [],
-        "metrics": Array [
-          Object {
-            "accessor": 0,
-            "aggType": "count",
-            "format": Object {
-              "id": "number",
-            },
+      "buckets": Array [],
+      "metrics": Array [
+        Object {
+          "accessor": 0,
+          "format": Object {
+            "id": "number",
             "params": Object {},
           },
-        ],
-      },
+          "params": Object {},
+        },
+      ],
       "perPage": 10,
+      "percentageCol": "",
+      "row": false,
       "showMetricsAtAllLevels": false,
       "showPartialRows": false,
+      "showToolbar": false,
       "showTotal": false,
       "sort": Object {
         "columnIndex": null,
         "direction": null,
       },
+      "splitColumn": undefined,
+      "splitRow": undefined,
       "title": "My Chart title",
       "totalFunc": "sum",
     },

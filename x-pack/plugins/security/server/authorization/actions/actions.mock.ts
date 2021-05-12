@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Actions } from './actions';
+import { AlertingActions } from './alerting';
 import { ApiActions } from './api';
 import { AppActions } from './app';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UIActions } from './ui';
-import { AlertingActions } from './alerting';
-import { Actions } from './actions';
 
 jest.mock('./api');
 jest.mock('./app');

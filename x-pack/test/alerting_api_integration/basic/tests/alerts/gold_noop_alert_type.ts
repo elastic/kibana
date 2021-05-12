@@ -15,14 +15,14 @@ export default function emailTest({ getService }: FtrProviderContext) {
   describe('create gold noop alert', () => {
     it('should return 403 when creating an gold alert', async () => {
       await supertest
-        .post(`/api/alerts/alert`)
+        .post(`/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ alertTypeId: 'test.gold.noop' }))
+        .send(getTestAlertData({ rule_type_id: 'test.gold.noop' }))
         .expect(403, {
           statusCode: 403,
           error: 'Forbidden',
           message:
-            'Alert test.gold.noop is disabled because it requires a Gold license. Contact your administrator to upgrade your license.',
+            'Alert test.gold.noop is disabled because it requires a Gold license. Go to License Management to view upgrade options.',
         });
     });
   });

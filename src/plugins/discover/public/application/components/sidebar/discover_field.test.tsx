@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+// @ts-expect-error
+import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -49,7 +49,7 @@ function getComponent({
 }) {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
-    (cfg: any) => cfg,
+    (cfg: unknown) => cfg,
     'time',
     stubbedLogstashFields(),
     coreMock.createSetup()
@@ -113,5 +113,21 @@ describe('discover sidebar field', function () {
     });
     findTestSubject(comp, 'field-_source-showDetails').simulate('click');
     expect(props.getDetails).not.toHaveBeenCalled();
+  });
+  it('displays warning for conflicting fields', function () {
+    const field = new IndexPatternField({
+      name: 'troubled_field',
+      type: 'conflict',
+      esTypes: ['integer', 'text'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: false,
+    });
+    const { comp } = getComponent({
+      selected: true,
+      field,
+    });
+    const dscField = findTestSubject(comp, 'field-troubled_field-showDetails');
+    expect(dscField.find('.kbnFieldButton__infoIcon').length).toEqual(1);
   });
 });

@@ -46,8 +46,8 @@ export const DocumentationPage = (
           <h2>Plugin Structure</h2>
           <p>
             This example solution has both `server` and a `public` plugins. The `server` handles
-            registration of example the AlertTypes, while the `public` handles creation of, and
-            navigation for, these alert types.
+            registration of example the RuleTypes, while the `public` handles creation of, and
+            navigation for, these rule types.
           </p>
         </EuiText>
         <EuiSpacer />

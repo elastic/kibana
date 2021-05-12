@@ -8,7 +8,7 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { configSchema, ConfigSchema } from '../config';
-import { Plugin } from './plugin';
+import { TimelionPlugin } from './plugin';
 
 export { PluginSetupContract } from './plugin';
 
@@ -21,8 +21,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     renameFromRoot('timelion_vis.enabled', 'vis_type_timelion.enabled'),
     renameFromRoot('timelion.enabled', 'vis_type_timelion.enabled'),
     renameFromRoot('timelion.graphiteUrls', 'vis_type_timelion.graphiteUrls'),
-    renameFromRoot('timelion.ui.enabled', 'vis_type_timelion.ui.enabled', true),
+    renameFromRoot('timelion.ui.enabled', 'vis_type_timelion.ui.enabled', { silent: true }),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+  new TimelionPlugin(initializerContext);

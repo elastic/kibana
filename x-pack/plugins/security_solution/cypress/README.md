@@ -29,7 +29,7 @@ This configuration runs cypress tests against an arbitrary host.
 
 ### Test Execution: Examples
 
-#### FTR + Headless
+#### FTR + Headless (Chrome)
 
 Since this is how tests are run on CI, this will likely be the configuration you want to reproduce failures locally, etc.
 
@@ -43,6 +43,22 @@ node scripts/build_kibana_platform_plugins
 # launch the cypress test runner
 cd x-pack/plugins/security_solution
 yarn cypress:run-as-ci
+```
+
+#### FTR + Headless (Firefox)
+
+Since this is how tests are run on CI, this will likely be the configuration you want to reproduce failures locally, etc.
+
+```shell
+# bootstrap kibana from the project root
+yarn kbn bootstrap
+
+# build the plugins/assets that cypress will execute against
+node scripts/build_kibana_platform_plugins
+
+# launch the cypress test runner
+cd x-pack/plugins/security_solution
+yarn cypress:run-as-ci:firefox
 ```
 
 #### FTR + Interactive
@@ -61,7 +77,9 @@ cd x-pack/plugins/security_solution
 yarn cypress:open-as-ci
 ```
 
-#### Custom Target + Headless
+Note that you can select the browser you want to use on the top right side of the interactive runner.
+
+#### Custom Target + Headless (Chrome)
 
 This mode may be useful for testing a release, e.g. spin up a build candidate
 and point cypress at it to catch regressions.
@@ -77,6 +95,24 @@ node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solut
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
 CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run
+```
+
+#### Custom Target + Headless (Firefox)
+
+This mode may be useful for testing a release, e.g. spin up a build candidate
+and point cypress at it to catch regressions.
+
+```shell
+# bootstrap kibana from the project root
+yarn kbn bootstrap
+
+# load auditbeat data needed for test execution (which FTR normally does for us)
+cd x-pack/plugins/security_solution
+node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
+
+# launch the cypress test runner with overridden environment variables
+cd x-pack/plugins/security_solution
+CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run:firefox
 ```
 
 ## Folder Structure

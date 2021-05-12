@@ -6,11 +6,12 @@
  */
 
 export {
-  absoluteTimingToRelativeTiming,
   calculateRelativeFromAbsoluteMilliseconds,
-  normalizeTimingsToHumanReadable,
   formDataToAbsoluteTimings,
+  getPhaseMinAgeInMilliseconds,
   AbsoluteTimings,
   PhaseAgeInMilliseconds,
   RelativePhaseTimingInMs,
 } from './absolute_timing_to_relative_timing';
+
+export { getDefaultRepository } from './get_default_repository';

@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { Description, Id, MetaOrUndefined, Name, Type } from '@kbn/securitysolution-io-ts-utils';
 
 import {
-  Description,
   DeserializerOrUndefined,
-  Id,
   Immutable,
   ListSchema,
-  MetaOrUndefined,
-  Name,
   SerializerOrUndefined,
-  Type,
   Version,
 } from '../../../common/schemas';
 
@@ -31,7 +27,7 @@ export interface CreateListIfItDoesNotExistOptions {
   serializer: SerializerOrUndefined;
   description: Description;
   immutable: Immutable;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -46,7 +42,7 @@ export const createListIfItDoesNotExist = async ({
   type,
   description,
   deserializer,
-  callCluster,
+  esClient,
   listIndex,
   user,
   meta,
@@ -56,13 +52,13 @@ export const createListIfItDoesNotExist = async ({
   version,
   immutable,
 }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
-  const list = await getList({ callCluster, id, listIndex });
+  const list = await getList({ esClient, id, listIndex });
   if (list == null) {
     return createList({
-      callCluster,
       dateNow,
       description,
       deserializer,
+      esClient,
       id,
       immutable,
       listIndex,

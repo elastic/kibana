@@ -19,6 +19,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 import {
+  getFormattedSeverityScore,
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../../common/util/anomaly_utils';
@@ -571,7 +572,6 @@ class TimeseriesChartIntl extends Component {
       showAnnotations,
       showForecast,
       showModelBounds,
-
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
     } = this.props;
@@ -640,7 +640,7 @@ class TimeseriesChartIntl extends Component {
       let yMax = 0;
 
       let combinedData = data;
-      if (focusForecastData !== undefined && focusForecastData.length > 0) {
+      if (showForecast && focusForecastData !== undefined && focusForecastData.length > 0) {
         combinedData = data.concat(focusForecastData);
       }
 
@@ -968,7 +968,6 @@ class TimeseriesChartIntl extends Component {
       contextForecastData,
       modelPlotEnabled,
       annotationData,
-      showAnnotations,
     } = this.props;
     const data = contextChartData;
 
@@ -984,8 +983,10 @@ class TimeseriesChartIntl extends Component {
       contextForecastData === undefined ? data : data.concat(contextForecastData);
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
     each(combinedData, (item) => {
-      valuesRange.min = Math.min(item.value, valuesRange.min);
-      valuesRange.max = Math.max(item.value, valuesRange.max);
+      const lowerBound = item.lower ?? Number.MAX_VALUE;
+      const upperBound = item.upper ?? Number.MIN_VALUE;
+      valuesRange.min = Math.min(item.value, lowerBound, valuesRange.min);
+      valuesRange.max = Math.max(item.value, upperBound, valuesRange.max);
     });
     let dataMin = valuesRange.min;
     let dataMax = valuesRange.max;
@@ -1021,9 +1022,7 @@ class TimeseriesChartIntl extends Component {
       .domain([chartLimits.min, chartLimits.max]);
 
     const borders = cxtGroup.append('g').attr('class', 'axis');
-    const brushChartHeight = showAnnotations
-      ? cxtChartHeight + swlHeight + annotationHeight
-      : cxtChartHeight + swlHeight;
+    const brushChartHeight = cxtChartHeight + swlHeight + annotationHeight;
 
     // Add borders left and right.
     borders.append('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', brushChartHeight);
@@ -1075,11 +1074,7 @@ class TimeseriesChartIntl extends Component {
       .defined((d) => d.lower !== null && d.upper !== null);
 
     if (modelPlotEnabled === true) {
-      cxtGroup
-        .append('path')
-        .datum(data)
-        .attr('class', 'area context')
-        .attr('d', contextBoundsArea);
+      cxtGroup.append('path').datum(data).attr('class', 'area bounds').attr('d', contextBoundsArea);
     }
 
     const contextValuesLine = d3.svg
@@ -1102,7 +1097,7 @@ class TimeseriesChartIntl extends Component {
     const ctxAnnotations = cxtGroup
       .select('.mlContextAnnotations')
       .selectAll('g.mlContextAnnotation')
-      .data(showAnnotations && annotationData ? annotationData : [], (d) => d._id || '');
+      .data(annotationData, (d) => d._id || '');
 
     ctxAnnotations.enter().append('g').classed('mlContextAnnotation', true);
 
@@ -1113,8 +1108,6 @@ class TimeseriesChartIntl extends Component {
     ctxAnnotationRects
       .enter()
       .append('rect')
-      .attr('rx', ctxAnnotationMargin)
-      .attr('ry', ctxAnnotationMargin)
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
@@ -1138,7 +1131,7 @@ class TimeseriesChartIntl extends Component {
       .attr('y', cxtChartHeight + swlHeight + 2)
       .attr('height', ANNOTATION_SYMBOL_HEIGHT)
       .attr('width', (d) => {
-        const start = this.contextXScale(moment(d.timestamp)) + 1;
+        const start = Math.max(this.contextXScale(moment(d.timestamp)) + 1, contextXRangeStart);
         const end =
           typeof d.end_timestamp !== 'undefined'
             ? this.contextXScale(moment(d.end_timestamp)) - 1
@@ -1147,7 +1140,6 @@ class TimeseriesChartIntl extends Component {
         return width;
       });
 
-    ctxAnnotations.classed('mlAnnotationHidden', !showAnnotations);
     ctxAnnotationRects.exit().remove();
 
     // Create the path elements for the forecast value line and bounds area.
@@ -1442,12 +1434,11 @@ class TimeseriesChartIntl extends Component {
 
     if (marker.anomalyScore !== undefined) {
       const score = parseInt(marker.anomalyScore);
-      const displayScore = score > 0 ? score : '< 1';
       tooltipData.push({
         label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel', {
           defaultMessage: 'anomaly score',
         }),
-        value: displayScore,
+        value: getFormattedSeverityScore(score),
         color: anomalyColorScale(score),
         seriesIdentifier: {
           key: seriesKey,

@@ -7,11 +7,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import type { IAggType } from 'src/plugins/data/public';
-import type {
+import {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
@@ -19,23 +20,23 @@ import type {
 import { getSortingCriteria } from './sorting';
 
 import { DatatableComponent } from './components/table_basic';
+import { ColumnState } from './visualization';
 
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
-import type {
-  DatatableRender,
-  DatatableColumns,
-  DatatableColumnWidth,
-  DatatableColumnWidthResult,
-} from './components/types';
+import type { DatatableRender } from './components/types';
+import { transposeTable } from './transpose_helpers';
 
-interface Args {
+export interface Args {
   title: string;
   description?: string;
-  columns: DatatableColumns & { type: 'lens_datatable_columns' };
+  columns: Array<ColumnState & { type: 'lens_datatable_column' }>;
+  sortingColumnId: string | undefined;
+  sortingDirection: 'asc' | 'desc' | 'none';
 }
 
 export interface DatatableProps {
   data: LensMultiTable;
+  untransposedData?: LensMultiTable;
   args: Args;
 }
 
@@ -66,11 +67,21 @@ export const getDatatable = ({
       help: '',
     },
     columns: {
-      types: ['lens_datatable_columns'],
+      types: ['lens_datatable_column'],
+      help: '',
+      multi: true,
+    },
+    sortingColumnId: {
+      types: ['string'],
+      help: '',
+    },
+    sortingDirection: {
+      types: ['string'],
       help: '',
     },
   },
   fn(data, args, context) {
+    let untransposedData: LensMultiTable | undefined;
     // do the sorting at this level to propagate it also at CSV download
     const [firstTable] = Object.values(data.tables);
     const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
@@ -79,7 +90,16 @@ export const getDatatable = ({
     firstTable.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);
     });
-    const { sortBy, sortDirection } = args.columns;
+
+    const hasTransposedColumns = args.columns.some((c) => c.isTransposed);
+    if (hasTransposedColumns) {
+      // store original shape of data separately
+      untransposedData = cloneDeep(data);
+      // transposes table and args inplace
+      transposeTable(args, firstTable, formatters);
+    }
+
+    const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
     const columnsReverseLookup = firstTable.columns.reduce<
       Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -88,7 +108,7 @@ export const getDatatable = ({
       return memo;
     }, {});
 
-    if (sortBy && sortDirection !== 'none') {
+    if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
       // Sort on raw values for these types, while use the formatted value for the rest
       const sortingCriteria = getSortingCriteria(
         isRange(columnsReverseLookup[sortBy]?.meta)
@@ -104,77 +124,46 @@ export const getDatatable = ({
         .sort(sortingCriteria);
       // replace also the local copy
       firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
+    } else {
+      args.sortingColumnId = undefined;
+      args.sortingDirection = 'none';
     }
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
         data,
+        untransposedData,
         args,
       },
     };
   },
 });
 
-type DatatableColumnsResult = DatatableColumns & { type: 'lens_datatable_columns' };
+type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };
 
-export const datatableColumns: ExpressionFunctionDefinition<
-  'lens_datatable_columns',
+export const datatableColumn: ExpressionFunctionDefinition<
+  'lens_datatable_column',
   null,
-  DatatableColumns,
-  DatatableColumnsResult
+  ColumnState,
+  DatatableColumnResult
 > = {
-  name: 'lens_datatable_columns',
+  name: 'lens_datatable_column',
   aliases: [],
-  type: 'lens_datatable_columns',
+  type: 'lens_datatable_column',
   help: '',
   inputTypes: ['null'],
   args: {
-    sortBy: { types: ['string'], help: '' },
-    sortDirection: { types: ['string'], help: '' },
-    columnIds: {
-      types: ['string'],
-      multi: true,
-      help: '',
-    },
-    columnWidth: {
-      types: ['lens_datatable_column_width'],
-      multi: true,
-      help: '',
-    },
+    columnId: { types: ['string'], help: '' },
+    alignment: { types: ['string'], help: '' },
+    hidden: { types: ['boolean'], help: '' },
+    width: { types: ['number'], help: '' },
+    isTransposed: { types: ['boolean'], help: '' },
+    transposable: { types: ['boolean'], help: '' },
   },
-  fn: function fn(input: unknown, args: DatatableColumns) {
+  fn: function fn(input: unknown, args: ColumnState) {
     return {
-      type: 'lens_datatable_columns',
-      ...args,
-    };
-  },
-};
-
-export const datatableColumnWidth: ExpressionFunctionDefinition<
-  'lens_datatable_column_width',
-  null,
-  DatatableColumnWidth,
-  DatatableColumnWidthResult
-> = {
-  name: 'lens_datatable_column_width',
-  aliases: [],
-  type: 'lens_datatable_column_width',
-  help: '',
-  inputTypes: ['null'],
-  args: {
-    columnId: {
-      types: ['string'],
-      help: '',
-    },
-    width: {
-      types: ['number'],
-      help: '',
-    },
-  },
-  fn: function fn(input: unknown, args: DatatableColumnWidth) {
-    return {
-      type: 'lens_datatable_column_width',
+      type: 'lens_datatable_column',
       ...args,
     };
   },
@@ -213,7 +202,7 @@ export const getDatatableRenderer = (dependencies: {
                 data: {
                   rowIndex,
                   table,
-                  columns: config.args.columns.columnIds,
+                  columns: config.args.columns.map((column) => column.columnId),
                 },
               });
 

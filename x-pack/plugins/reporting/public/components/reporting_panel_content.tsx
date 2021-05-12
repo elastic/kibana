@@ -11,11 +11,7 @@ import React, { Component, ReactElement } from 'react';
 import { ToastsSetup } from 'src/core/public';
 import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import {
-  CSV_REPORT_TYPE_DEPRECATED,
-  PDF_REPORT_TYPE,
-  PNG_REPORT_TYPE,
-} from '../../common/constants';
+import { CSV_REPORT_TYPE, PDF_REPORT_TYPE, PNG_REPORT_TYPE } from '../../common/constants';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
@@ -23,6 +19,11 @@ export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
+
+  /**
+   * Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
+   */
+  requiresSavedState: boolean;
   layoutId: string | undefined;
   objectId?: string;
   getJobParams: () => BaseParams;
@@ -89,7 +90,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
   }
 
   public render() {
-    if (this.isNotSaved() || this.props.isDirty || this.state.isStale) {
+    if (
+      this.props.requiresSavedState &&
+      (this.isNotSaved() || this.props.isDirty || this.state.isStale)
+    ) {
       return (
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFormRow
@@ -177,8 +181,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
     switch (this.props.reportType) {
       case PDF_REPORT_TYPE:
         return 'PDF';
-      case 'csv':
-        return CSV_REPORT_TYPE_DEPRECATED;
+      case 'csv_searchsource':
+        return CSV_REPORT_TYPE;
       case 'png':
         return PNG_REPORT_TYPE;
       default:
@@ -223,7 +227,17 @@ class ReportingPanelContentUi extends Component<Props, State> {
           text: toMountPoint(
             <FormattedMessage
               id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in Management"
+              defaultMessage="Track its progress in {path}"
+              values={{
+                path: (
+                  <a href={this.props.apiClient.getManagementLink()}>
+                    <FormattedMessage
+                      id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      defaultMessage="Stack Management &gt; Alerts and Insights &gt; Reporting"
+                    />
+                  </a>
+                ),
+              }}
             />
           ),
           'data-test-subj': 'queueReportSuccess',

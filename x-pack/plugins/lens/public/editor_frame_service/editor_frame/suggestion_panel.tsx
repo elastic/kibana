@@ -34,7 +34,7 @@ import {
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { validateDatasourceAndVisualization } from './state_helpers';
+import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -130,6 +130,8 @@ const SuggestionPreview = ({
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
         <EuiPanel
+          hasBorder
+          hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
@@ -182,46 +184,52 @@ export function SuggestionPanel({
     ? stagedPreview.visualization.activeId
     : activeVisualizationId;
 
+  const missingIndexPatterns = getMissingIndexPattern(
+    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+  );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(
     () => {
-      const newSuggestions = getSuggestions({
-        datasourceMap,
-        datasourceStates: currentDatasourceStates,
-        visualizationMap,
-        activeVisualizationId: currentVisualizationId,
-        visualizationState: currentVisualizationState,
-        activeData: frame.activeData,
-      })
-        .filter((suggestion) => !suggestion.hide)
-        .filter(
-          ({
-            visualizationId,
-            visualizationState: suggestionVisualizationState,
-            datasourceState: suggestionDatasourceState,
-            datasourceId: suggetionDatasourceId,
-          }) => {
-            return (
-              validateDatasourceAndVisualization(
-                suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
-                suggestionDatasourceState,
-                visualizationMap[visualizationId],
-                suggestionVisualizationState,
-                frame
-              ) == null
-            );
-          }
-        )
-        .slice(0, MAX_SUGGESTIONS_DISPLAYED)
-        .map((suggestion) => ({
-          ...suggestion,
-          previewExpression: preparePreviewExpression(
-            suggestion,
-            visualizationMap[suggestion.visualizationId],
+      const newSuggestions = missingIndexPatterns.length
+        ? []
+        : getSuggestions({
             datasourceMap,
-            currentDatasourceStates,
-            frame
-          ),
-        }));
+            datasourceStates: currentDatasourceStates,
+            visualizationMap,
+            activeVisualizationId: currentVisualizationId,
+            visualizationState: currentVisualizationState,
+            activeData: frame.activeData,
+          })
+            .filter((suggestion) => !suggestion.hide)
+            .filter(
+              ({
+                visualizationId,
+                visualizationState: suggestionVisualizationState,
+                datasourceState: suggestionDatasourceState,
+                datasourceId: suggetionDatasourceId,
+              }) => {
+                return (
+                  validateDatasourceAndVisualization(
+                    suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                    suggestionDatasourceState,
+                    visualizationMap[visualizationId],
+                    suggestionVisualizationState,
+                    frame
+                  ) == null
+                );
+              }
+            )
+            .slice(0, MAX_SUGGESTIONS_DISPLAYED)
+            .map((suggestion) => ({
+              ...suggestion,
+              previewExpression: preparePreviewExpression(
+                suggestion,
+                visualizationMap[suggestion.visualizationId],
+                datasourceMap,
+                currentDatasourceStates,
+                frame
+              ),
+            }));
 
       const validationErrors = validateDatasourceAndVisualization(
         activeDatasourceId ? datasourceMap[activeDatasourceId] : null,

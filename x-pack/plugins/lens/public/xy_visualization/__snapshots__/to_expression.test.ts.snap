@@ -27,6 +27,9 @@ Object {
             "type": "expression",
           },
         ],
+        "curveType": Array [
+          "LINEAR",
+        ],
         "description": Array [
           "",
         ],
@@ -54,6 +57,9 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "hideEndzones": Array [
+          true,
         ],
         "layers": Array [
           Object {

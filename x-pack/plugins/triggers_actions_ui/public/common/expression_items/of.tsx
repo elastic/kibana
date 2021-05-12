@@ -22,7 +22,7 @@ import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 import './of.scss';
 
-interface OfExpressionProps {
+export interface OfExpressionProps {
   aggType: string;
   aggField?: string;
   errors: IErrorObject;
@@ -91,6 +91,7 @@ export const OfExpression = ({
               defaultMessage: 'of',
             }
           )}
+          data-test-subj="ofExpressionPopover"
           display={display === 'inline' ? 'inline' : 'columns'}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
@@ -119,6 +120,7 @@ export const OfExpression = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
             <EuiFormRow
+              id="ofField"
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
               error={errors.aggField}
@@ -150,3 +152,6 @@ export const OfExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { OfExpression as default };

@@ -14,7 +14,7 @@ import {
   expectTextsInDocument,
   renderWithTheme,
 } from '../../../../../utils/testHelpers';
-import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
+import { ErrorMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { ErrorMarker } from './ErrorMarker';
 
 function Wrapper({ children }: { children?: ReactNode }) {

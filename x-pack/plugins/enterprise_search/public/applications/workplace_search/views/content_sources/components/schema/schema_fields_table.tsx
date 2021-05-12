@@ -9,8 +9,6 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,13 +19,15 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { SchemaExistingField } from '../../../../../shared/schema/schema_existing_field';
-import { SchemaLogic } from './schema_logic';
+import { SchemaFieldTypeSelect } from '../../../../../shared/schema';
+
 import {
   SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER,
   SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER,
 } from './constants';
+import { SchemaLogic } from './schema_logic';
 
 export const SchemaFieldsTable: React.FC = () => {
   const { updateExistingFieldType } = useActions(SchemaLogic);
@@ -53,11 +53,9 @@ export const SchemaFieldsTable: React.FC = () => {
               </EuiFlexGroup>
             </EuiTableRowCell>
             <EuiTableRowCell align="right">
-              <SchemaExistingField
+              <SchemaFieldTypeSelect
                 disabled={fieldName === 'id'}
-                key={fieldName}
                 fieldName={fieldName}
-                hideName={true}
                 fieldType={filteredSchemaFields[fieldName]}
                 updateExistingFieldType={updateExistingFieldType}
               />

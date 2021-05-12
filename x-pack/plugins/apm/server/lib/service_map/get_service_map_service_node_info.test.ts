@@ -20,10 +20,11 @@ describe('getServiceMapServiceNodeInfo', () => {
             }),
         },
         indices: {},
-        uiFilters: { environment: 'test environment' },
+        uiFilters: {},
       } as unknown) as Setup & SetupTimeRange;
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
+        environment: 'test environment',
         setup,
         serviceName,
         searchAggregatedTransactions: false,

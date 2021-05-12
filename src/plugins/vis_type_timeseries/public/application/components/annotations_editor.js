@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
@@ -24,7 +25,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFormLabel,
   EuiSpacer,
   EuiFieldText,
   EuiTitle,
@@ -32,15 +32,15 @@ import {
   EuiCode,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IndexPatternSelect } from './lib/index_pattern_select';
 
 function newAnnotation() {
   return {
     id: uuid.v1(),
     color: '#F00',
     index_pattern: '',
-    time_field: '@timestamp',
+    time_field: '',
     icon: 'fa-tag',
     ignore_global_filters: 1,
     ignore_panel_filters: 1,
@@ -91,7 +91,6 @@ export class AnnotationsEditor extends Component {
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const defaultIndexPattern = this.props.model.default_index_pattern;
 
     return (
       <div className="tvbAnnotationsEditor" key={model.id}>
@@ -108,51 +107,27 @@ export class AnnotationsEditor extends Component {
           <EuiFlexItem className="tvbAggRow__children">
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('indexPattern')}
-                  label={
-                    <FormattedMessage
-                      id="visTypeTimeseries.annotationsEditor.indexPatternLabel"
-                      defaultMessage="Index pattern"
-                    />
-                  }
-                  helpText={
-                    defaultIndexPattern &&
-                    !model.index_pattern &&
-                    i18n.translate('visTypeTimeseries.annotationsEditor.searchByDefaultIndex', {
-                      defaultMessage: 'Default index pattern is used. To query all indexes use *',
-                    })
-                  }
-                  fullWidth
-                >
-                  <EuiFieldText
-                    onChange={this.handleChange(model, 'index_pattern')}
-                    value={model.index_pattern}
-                    placeholder={defaultIndexPattern}
-                    fullWidth
-                  />
-                </EuiFormRow>
+                <IndexPatternSelect
+                  value={model.index_pattern}
+                  indexPatternName={'index_pattern'}
+                  onChange={handleChange}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('timeField')}
+                <FieldSelect
                   label={
                     <FormattedMessage
                       id="visTypeTimeseries.annotationsEditor.timeFieldLabel"
                       defaultMessage="Time field (required)"
                     />
                   }
+                  restrict={RESTRICT_FIELDS}
+                  value={model.time_field}
+                  onChange={this.handleChange(model, 'time_field')}
+                  indexPattern={model.index_pattern}
+                  fields={this.props.fields}
                   fullWidth
-                >
-                  <FieldSelect
-                    restrict={RESTRICT_FIELDS}
-                    value={model.time_field}
-                    onChange={this.handleChange(model, 'time_field')}
-                    indexPattern={model.index_pattern}
-                    fields={this.props.fields}
-                    fullWidth
-                  />
-                </EuiFormRow>
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -181,32 +156,36 @@ export class AnnotationsEditor extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.annotationsEditor.ignoreGlobalFiltersLabel"
-                    defaultMessage="Ignore global filters?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.annotationsEditor.ignoreGlobalFiltersLabel',
+                    {
+                      defaultMessage: 'Ignore global filters?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filters}
+                    name="ignore_global_filters"
+                    onChange={handleChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filters}
-                  name="ignore_global_filters"
-                  onChange={handleChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="visTypeTimeseries.annotationsEditor.ignorePanelFiltersLabel"
-                    defaultMessage="Ignore panel filters?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.annotationsEditor.ignorePanelFiltersLabel',
+                    {
+                      defaultMessage: 'Ignore panel filters?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_panel_filters}
+                    name="ignore_panel_filters"
+                    onChange={handleChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="xs" />
-                <YesNo
-                  value={model.ignore_panel_filters}
-                  name="ignore_panel_filters"
-                  onChange={handleChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
 

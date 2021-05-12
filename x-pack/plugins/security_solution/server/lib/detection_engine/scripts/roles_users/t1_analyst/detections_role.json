@@ -21,10 +21,9 @@
     {
       "feature": {
         "ml": ["read"],
-        "siem": ["all"],
+        "siem": ["read"],
         "actions": ["read"],
-        "builtInAlerts": ["read"],
-        "savedObjectsManagement": ["read"]
+        "builtInAlerts": ["read"]
       },
       "spaces": ["*"]
     }

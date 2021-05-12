@@ -45,7 +45,6 @@ describe('settings routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/org/settings/customize',
-        payload: 'body',
       });
 
       registerOrgSettingsCustomizeRoute({
@@ -76,7 +75,6 @@ describe('settings routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/org/settings/oauth_application',
-        payload: 'body',
       });
 
       registerOrgSettingsOauthApplicationRoute({

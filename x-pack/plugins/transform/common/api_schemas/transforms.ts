@@ -14,7 +14,12 @@ import type { PivotAggDict } from '../types/pivot_aggs';
 import type { PivotGroupByDict } from '../types/pivot_group_by';
 import type { TransformId, TransformPivotConfig } from '../types/transform';
 
-import { transformStateSchema } from './common';
+import { transformStateSchema, runtimeMappingsSchema } from './common';
+
+// GET transform nodes
+export interface GetTransformNodesResponseSchema {
+  count: number;
+}
 
 // GET transforms
 export const getTransformsRequestSchema = schema.arrayOf(
@@ -40,6 +45,7 @@ export const destSchema = schema.object({
 export const pivotSchema = schema.object({
   group_by: schema.any(),
   aggregations: schema.any(),
+  max_page_search_size: schema.maybe(schema.number()),
 });
 
 export const latestFunctionSchema = schema.object({
@@ -51,6 +57,13 @@ export type PivotConfig = TypeOf<typeof pivotSchema>;
 
 export type LatestFunctionConfig = TypeOf<typeof latestFunctionSchema>;
 
+export const retentionPolicySchema = schema.object({
+  time: schema.object({
+    field: schema.string(),
+    max_age: schema.string(),
+  }),
+});
+
 export const settingsSchema = schema.object({
   max_page_search_size: schema.maybe(schema.number()),
   // The default value is null, which disables throttling.
@@ -58,6 +71,7 @@ export const settingsSchema = schema.object({
 });
 
 export const sourceSchema = schema.object({
+  runtime_mappings: runtimeMappingsSchema,
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
@@ -94,6 +108,7 @@ export const putTransformsRequestSchema = schema.object(
      * Latest and pivot are mutually exclusive, i.e. exactly one must be specified in the transform configuration
      */
     latest: schema.maybe(latestFunctionSchema),
+    retention_policy: schema.maybe(retentionPolicySchema),
     settings: schema.maybe(settingsSchema),
     source: sourceSchema,
     sync: schema.maybe(syncSchema),

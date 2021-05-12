@@ -41,6 +41,8 @@ export class IndexMigrator {
 
       pollInterval: context.pollInterval,
 
+      setStatus: context.setStatus,
+
       async isMigrated() {
         return !(await requiresMigration(context));
       },
@@ -134,7 +136,7 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
     return;
   }
 
-  const { body: templates } = await client.cat.templates<Array<{ name: string }>>({
+  const { body: templates } = await client.cat.templates({
     format: 'json',
     name: obsoleteIndexTemplatePattern,
   });
@@ -147,7 +149,7 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
 
   log.info(`Removing index templates: ${templateNames}`);
 
-  return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name })));
+  return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name: name! })));
 }
 
 /**
@@ -185,7 +187,12 @@ async function migrateSourceToDest(context: Context) {
     await Index.write(
       client,
       dest.indexName,
-      await migrateRawDocs(serializer, documentMigrator.migrateAndConvert, docs, log)
+      await migrateRawDocs(
+        serializer,
+        documentMigrator.migrateAndConvert,
+        // @ts-expect-error @elastic/elasticsearch `Hit._id` may be a string | number in ES, but we always expect strings in the SO index.
+        docs
+      )
     );
   }
 }

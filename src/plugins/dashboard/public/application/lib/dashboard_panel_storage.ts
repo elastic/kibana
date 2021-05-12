@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import { Storage } from '../../services/kibana_utils';
 import { NotificationsStart } from '../../services/core';
 import { panelStorageErrorStrings } from '../../dashboard_strings';
@@ -17,16 +18,17 @@ const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
 export class DashboardPanelStorage {
   private sessionStorage: Storage;
 
-  constructor(private toasts: NotificationsStart['toasts']) {
+  constructor(private toasts: NotificationsStart['toasts'], private activeSpaceId: string) {
     this.sessionStorage = new Storage(sessionStorage);
   }
 
   public clearPanels(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
-      const sessionStoragePanels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
-      if (sessionStoragePanels[id]) {
-        delete sessionStoragePanels[id];
-        this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
+      const sessionStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY);
+      const sessionStorageForSpace = sessionStorage?.[this.activeSpaceId] || {};
+      if (sessionStorageForSpace[id]) {
+        delete sessionStorageForSpace[id];
+        this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStorage);
       }
     } catch (e) {
       this.toasts.addDanger({
@@ -38,7 +40,7 @@ export class DashboardPanelStorage {
 
   public getPanels(id = DASHBOARD_PANELS_UNSAVED_ID): SavedDashboardPanel[] | undefined {
     try {
-      return this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[id];
+      return this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[id];
     } catch (e) {
       this.toasts.addDanger({
         title: panelStorageErrorStrings.getPanelsGetError(e.message),
@@ -50,7 +52,7 @@ export class DashboardPanelStorage {
   public setPanels(id = DASHBOARD_PANELS_UNSAVED_ID, newPanels: SavedDashboardPanel[]) {
     try {
       const sessionStoragePanels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
-      sessionStoragePanels[id] = newPanels;
+      set(sessionStoragePanels, [this.activeSpaceId, id], newPanels);
       this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
     } catch (e) {
       this.toasts.addDanger({
@@ -62,7 +64,9 @@ export class DashboardPanelStorage {
 
   public getDashboardIdsWithUnsavedChanges() {
     try {
-      return Object.keys(this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {});
+      return Object.keys(
+        this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] || {}
+      );
     } catch (e) {
       this.toasts.addDanger({
         title: panelStorageErrorStrings.getPanelsGetError(e.message),

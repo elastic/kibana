@@ -16,6 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
+  const retry = getService('retry');
+  const dataGrid = getService('dataGrid');
 
   describe('dashboard embeddable data grid', () => {
     before(async () => {
@@ -31,19 +33,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultDataRange();
+      await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
     });
 
-    describe('saved search filters', function () {
-      it('are added when a cell filter is clicked', async function () {
-        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
-        await find.clickByCssSelector(`[role="gridcell"]:nth-child(2)`);
-        await find.clickByCssSelector(`[data-test-subj="filterOutButton"]`);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await find.clickByCssSelector(`[role="gridcell"]:nth-child(2)`);
-        await find.clickByCssSelector(`[data-test-subj="filterForButton"]`);
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(2);
+    it('should expand the detail row when the toggle arrow is clicked', async function () {
+      await retry.try(async function () {
+        await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: 0 });
+        const detailsEl = await dataGrid.getDetailsRows();
+        const defaultMessageEl = await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+        expect(defaultMessageEl).to.be.ok();
+        await dataGrid.closeFlyout();
       });
+    });
+
+    it('are added when a cell filter is clicked', async function () {
+      await find.clickByCssSelector(`[role="gridcell"]:nth-child(4)`);
+      // needs a short delay between becoming visible & being clickable
+      await PageObjects.common.sleep(250);
+      await find.clickByCssSelector(`[data-test-subj="filterOutButton"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await find.clickByCssSelector(`[role="gridcell"]:nth-child(4)`);
+      await PageObjects.common.sleep(250);
+      await find.clickByCssSelector(`[data-test-subj="filterForButton"]`);
+      const filterCount = await filterBar.getFilterCount();
+      expect(filterCount).to.equal(2);
     });
   });
 }

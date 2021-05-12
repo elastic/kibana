@@ -6,76 +6,35 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { Observable } from 'rxjs';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
-  usageProvider,
-} from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
-import { searchSessionMapping } from './saved_objects';
-import {
-  SearchSessionService,
-  enhancedEsSearchStrategyProvider,
-  eqlSearchStrategyProvider,
-} from './search';
-import { getUiSettings } from './ui_settings';
-import type { DataEnhancedRequestHandlerContext } from './type';
+import { searchSessionSavedObjectType } from './saved_objects';
+import type {
+  DataEnhancedRequestHandlerContext,
+  DataEnhancedSetupDependencies as SetupDependencies,
+  DataEnhancedStartDependencies as StartDependencies,
+} from './type';
 import { ConfigSchema } from '../config';
-
-interface SetupDependencies {
-  data: DataPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-  taskManager: TaskManagerSetupContract;
-}
-export interface StartDependencies {
-  data: DataPluginStart;
-  taskManager: TaskManagerStartContract;
-}
+import { registerUsageCollector } from './collectors';
+import { SearchSessionService } from './search';
 
 export class EnhancedDataServerPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
   private readonly logger: Logger;
   private sessionService!: SearchSessionService;
-  private config$: Observable<ConfigSchema>;
+  private config: ConfigSchema;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get('data_enhanced');
-    this.config$ = this.initializerContext.config.create();
+    this.config = this.initializerContext.config.get<ConfigSchema>();
   }
 
-  public setup(core: CoreSetup<DataPluginStart>, deps: SetupDependencies) {
-    const usage = deps.usageCollection ? usageProvider(core) : undefined;
+  public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
+    core.savedObjects.registerType(searchSessionSavedObjectType);
 
-    core.uiSettings.register(getUiSettings());
-    core.savedObjects.registerType(searchSessionMapping);
-
-    deps.data.search.registerSearchStrategy(
-      ENHANCED_ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider(
-        this.config$,
-        this.initializerContext.config.legacy.globalConfig$,
-        this.logger,
-        usage
-      )
-    );
-
-    deps.data.search.registerSearchStrategy(
-      EQL_SEARCH_STRATEGY,
-      eqlSearchStrategyProvider(this.logger)
-    );
-
-    this.sessionService = new SearchSessionService(
-      this.logger,
-      this.initializerContext.config.create()
-    );
+    this.sessionService = new SearchSessionService(this.logger, this.config, deps.security);
 
     deps.data.__enhance({
       search: {
-        defaultStrategy: ENHANCED_ES_SEARCH_STRATEGY,
         sessionService: this.sessionService,
       },
     });
@@ -86,6 +45,10 @@ export class EnhancedDataServerPlugin
     this.sessionService.setup(core, {
       taskManager: deps.taskManager,
     });
+
+    if (deps.usageCollection) {
+      registerUsageCollector(deps.usageCollection, this.initializerContext, this.logger);
+    }
   }
 
   public start(core: CoreStart, { taskManager }: StartDependencies) {

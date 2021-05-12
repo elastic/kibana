@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
-import { ENGINES_PAGE_SIZE } from '../../../common/constants';
 
 interface EnginesResponse {
   results: object[];
@@ -25,24 +24,35 @@ export function registerEnginesRoutes({
       validate: {
         query: schema.object({
           type: schema.oneOf([schema.literal('indexed'), schema.literal('meta')]),
-          pageIndex: schema.number(),
+          'page[current]': schema.number(),
+          'page[size]': schema.number(),
         }),
       },
     },
     async (context, request, response) => {
-      const { type, pageIndex } = request.query;
-
       return enterpriseSearchRequestHandler.createRequest({
         path: '/as/engines/collection',
-        params: {
-          type,
-          'page[current]': pageIndex,
-          'page[size]': ENGINES_PAGE_SIZE,
-        },
         hasValidData: (body?: EnginesResponse) =>
           Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number',
       })(context, request, response);
     }
+  );
+
+  router.post(
+    {
+      path: '/api/app_search/engines',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          language: schema.maybe(schema.string()),
+          source_engines: schema.maybe(schema.arrayOf(schema.string())),
+          type: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/collection',
+    })
   );
 
   // Single engine endpoints
@@ -56,7 +66,20 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:name/details`,
+      path: '/as/engines/:name/details',
+    })
+  );
+  router.delete(
+    {
+      path: '/api/app_search/engines/{name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name',
     })
   );
   router.get(
@@ -69,7 +92,24 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:name/overview_metrics`,
+      path: '/as/engines/:name/overview_metrics',
+    })
+  );
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}/source_engines',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+        query: schema.object({
+          'page[current]': schema.number(),
+          'page[size]': schema.number(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name/source_engines',
     })
   );
 }

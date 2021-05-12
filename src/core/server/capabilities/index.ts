@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export {
-  CapabilitiesService,
+export { CapabilitiesService } from './capabilities_service';
+export type {
   CapabilitiesSetup,
   CapabilitiesStart,
   ResolveCapabilitiesOptions,
 } from './capabilities_service';
-export { Capabilities, CapabilitiesSwitcher, CapabilitiesProvider } from './types';
+export type { Capabilities, CapabilitiesSwitcher, CapabilitiesProvider } from './types';

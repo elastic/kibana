@@ -77,7 +77,7 @@ export const importRulesRoute = (
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
@@ -101,7 +101,7 @@ export const importRulesRoute = (
           });
         }
         const signalsIndex = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);
+        const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
         if (!indexExists) {
           return siemResponse.error({
             statusCode: 400,
@@ -174,6 +174,7 @@ export const importRulesRoute = (
                   threat_query: threatQuery,
                   threat_mapping: threatMapping,
                   threat_language: threatLanguage,
+                  threat_indicator_path: threatIndicatorPath,
                   concurrent_searches: concurrentSearches,
                   items_per_search: itemsPerSearch,
                   threshold,
@@ -239,6 +240,7 @@ export const importRulesRoute = (
                       threshold,
                       threatFilters,
                       threatIndex,
+                      threatIndicatorPath,
                       threatQuery,
                       threatMapping,
                       threatLanguage,

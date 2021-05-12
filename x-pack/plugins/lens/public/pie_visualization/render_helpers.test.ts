@@ -64,7 +64,22 @@ describe('render helpers', () => {
           { a: 'Foo', b: 6 },
         ],
       };
-      expect(getFilterContext([{ groupByRollup: 'Test', value: 100 }], ['a'], table)).toEqual({
+      expect(
+        getFilterContext(
+          [
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+          ],
+          ['a'],
+          table
+        )
+      ).toEqual({
         data: [
           {
             row: 1,
@@ -90,7 +105,22 @@ describe('render helpers', () => {
           { a: 'Foo', b: 'Three', c: 6 },
         ],
       };
-      expect(getFilterContext([{ groupByRollup: 'Test', value: 100 }], ['a', 'b'], table)).toEqual({
+      expect(
+        getFilterContext(
+          [
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+          ],
+          ['a', 'b'],
+          table
+        )
+      ).toEqual({
         data: [
           {
             row: 1,
@@ -119,8 +149,22 @@ describe('render helpers', () => {
       expect(
         getFilterContext(
           [
-            { groupByRollup: 'Test', value: 100 },
-            { groupByRollup: 'Two', value: 5 },
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+            {
+              groupByRollup: 'Two',
+              value: 5,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
           ],
           ['a', 'b'],
           table

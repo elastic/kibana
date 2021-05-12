@@ -7,15 +7,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../helpers/get_sharing_data';
 import { unhashUrl } from '../../../../../kibana_utils/public';
 import { DiscoverServices } from '../../../build_services';
-import { Adapters } from '../../../../../inspector/common/adapters';
 import { SavedSearch } from '../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../angular/discover_state';
-import { IndexPattern } from '../../../kibana_services';
+import { IndexPattern, ISearchSource } from '../../../kibana_services';
+import { openOptionsPopover } from './open_options_popover';
 
 /**
  * Helper function to build the top nav links
@@ -23,20 +24,38 @@ import { IndexPattern } from '../../../kibana_services';
 export const getTopNavLinks = ({
   getFieldCounts,
   indexPattern,
-  inspectorAdapters,
   navigateTo,
   savedSearch,
   services,
   state,
+  onOpenInspector,
+  searchSource,
 }: {
   getFieldCounts: () => Promise<Record<string, number>>;
   indexPattern: IndexPattern;
-  inspectorAdapters: Adapters;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
+  onOpenInspector: () => void;
+  searchSource: ISearchSource;
 }) => {
+  const options = {
+    id: 'options',
+    label: i18n.translate('discover.localMenu.localMenu.optionsTitle', {
+      defaultMessage: 'Options',
+    }),
+    description: i18n.translate('discover.localMenu.optionsDescription', {
+      defaultMessage: 'Options',
+    }),
+    run: (anchorElement: HTMLElement) =>
+      openOptionsPopover({
+        I18nContext: services.core.i18n.Context,
+        anchorElement,
+      }),
+    testId: 'discoverOptionsButton',
+  };
+
   const newSearch = {
     id: 'new',
     label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
@@ -91,10 +110,9 @@ export const getTopNavLinks = ({
         return;
       }
       const sharingData = await getSharingData(
-        savedSearch.searchSource,
+        searchSource,
         state.appStateContainer.getState(),
-        services.uiSettings,
-        getFieldCounts
+        services.uiSettings
       );
       services.share.toggleShareContextMenu({
         anchorElement,
@@ -105,7 +123,13 @@ export const getTopNavLinks = ({
         objectType: 'search',
         sharingData: {
           ...sharingData,
-          title: savedSearch.title,
+          // CSV reports can be generated without a saved search so we provide a fallback title
+          title:
+            savedSearch.title ||
+            i18n.translate('discover.localMenu.fallbackReportTitle', {
+              defaultMessage: 'Discover search [{date}]',
+              values: { date: moment().toISOString(true) },
+            }),
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
         showPublicUrlSwitch,
@@ -123,13 +147,12 @@ export const getTopNavLinks = ({
     }),
     testId: 'openInspectorButton',
     run: () => {
-      services.inspector.open(inspectorAdapters, {
-        title: savedSearch.title,
-      });
+      onOpenInspector();
     },
   };
 
   return [
+    ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
     openSearch,

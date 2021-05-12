@@ -6,12 +6,8 @@
 
 Kibana can be installed on Windows using the `.zip` package.
 
-This package is free to use under the Elastic license. It contains open source
-and free commercial features and access to paid commercial features.
-<<managing-licenses,Start a 30-day trial>> to try out all of the
-paid commercial features. See the
-https://www.elastic.co/subscriptions[Subscriptions] page for information about
-Elastic license levels.
+This package contains both free and subscription features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page.
@@ -85,6 +81,7 @@ important data later on.
 | config
   | Configuration files including `kibana.yml`
   | $KIBANA_HOME\config
+  | <<settings,KBN_PATH_CONF>>
  d|
 
 | data

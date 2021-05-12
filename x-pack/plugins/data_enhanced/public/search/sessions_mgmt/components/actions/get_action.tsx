@@ -10,30 +10,32 @@ import { IClickActionDescriptor } from '../';
 import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
-import { CancelButton } from './cancel_button';
+import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
-import { ReloadButton } from './reload_button';
+import { InspectButton } from './inspect_button';
 import { ACTION, OnActionComplete } from './types';
+import { RenameButton } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
-  { id, name, expires, reloadUrl }: UISession,
+  uiSession: UISession,
   onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
+  const { id, name, expires } = uiSession;
   switch (actionType) {
-    case ACTION.CANCEL:
+    case ACTION.INSPECT:
+      return {
+        iconType: 'document',
+        textColor: 'default',
+        label: <InspectButton searchSession={uiSession} />,
+      };
+
+    case ACTION.DELETE:
       return {
         iconType: 'crossInACircleFilled',
         textColor: 'default',
-        label: <CancelButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
-      };
-
-    case ACTION.RELOAD:
-      return {
-        iconType: 'refresh',
-        textColor: 'default',
-        label: <ReloadButton api={api} reloadUrl={reloadUrl} />,
+        label: <DeleteButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
       };
 
     case ACTION.EXTEND:
@@ -50,6 +52,13 @@ export const getAction = (
             onActionComplete={onActionComplete}
           />
         ),
+      };
+
+    case ACTION.RENAME:
+      return {
+        iconType: 'pencil',
+        textColor: 'default',
+        label: <RenameButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
       };
 
     default:

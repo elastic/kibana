@@ -34,10 +34,13 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
       const {
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
           metric,
+          query,
+          hostName,
         },
       } = request.body;
 
@@ -51,15 +54,23 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           paginationCursors,
           hasMoreEntries,
           timing,
-        } = await getMetricsHostsAnomalies(
-          requestContext,
+        } = await getMetricsHostsAnomalies({
+          context: requestContext.infra,
           sourceId,
+          anomalyThreshold,
           startTime,
           endTime,
           metric,
+          query,
           sort,
-          pagination
-        );
+          pagination,
+          influencerFilter: hostName
+            ? {
+                fieldName: 'host.name',
+                fieldValue: hostName,
+              }
+            : undefined,
+        });
 
         return response.ok({
           body: getMetricsHostsAnomaliesSuccessReponsePayloadRT.encode({

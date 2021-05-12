@@ -5,36 +5,21 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import {
-  CoreSetup,
-  ILegacyCustomClusterClient,
-  Plugin,
-  Logger,
-  PluginInitializerContext,
-} from 'kibana/server';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'kibana/server';
 
 import { PLUGIN, APP_REQUIRED_CLUSTER_PRIVILEGES } from '../common';
 import { License } from './services';
 import { ApiRoutes } from './routes';
 import { wrapEsError } from './lib';
-import { isEsError } from './shared_imports';
-import { elasticsearchJsPlugin } from './client/elasticsearch_sr';
-import type { Dependencies, SnapshotRestoreRequestHandlerContext } from './types';
+import { handleEsError } from './shared_imports';
+import type { Dependencies } from './types';
 import { SnapshotRestoreConfig } from './config';
-
-async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-  const [core] = await getStartServices();
-  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-  return core.elasticsearch.legacy.createClient('snapshotRestore', esClientConfig);
-}
 
 export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
-  private snapshotRestoreESClient?: ILegacyCustomClusterClient;
 
   constructor(private context: PluginInitializerContext) {
     const { logger } = this.context;
@@ -43,20 +28,17 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
-  public async setup(
+  public setup(
     { http, getStartServices }: CoreSetup,
     { licensing, features, security, cloud }: Dependencies
-  ): Promise<void> {
-    const pluginConfig = await this.context.config
-      .create<SnapshotRestoreConfig>()
-      .pipe(first())
-      .toPromise();
+  ): void {
+    const pluginConfig = this.context.config.get<SnapshotRestoreConfig>();
 
     if (!pluginConfig.enabled) {
       return;
     }
 
-    const router = http.createRouter<SnapshotRestoreRequestHandlerContext>();
+    const router = http.createRouter();
 
     this.license.setup(
       {
@@ -86,17 +68,6 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       ],
     });
 
-    http.registerRouteHandlerContext<SnapshotRestoreRequestHandlerContext, 'snapshotRestore'>(
-      'snapshotRestore',
-      async (ctx, request) => {
-        this.snapshotRestoreESClient =
-          this.snapshotRestoreESClient ?? (await getCustomEsClient(getStartServices));
-        return {
-          client: this.snapshotRestoreESClient.asScoped(request),
-        };
-      }
-    );
-
     this.apiRoutes.setup({
       router,
       license: this.license,
@@ -106,17 +77,11 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
         isSlmEnabled: pluginConfig.slm_ui.enabled,
       },
       lib: {
-        isEsError,
+        handleEsError,
         wrapEsError,
       },
     });
   }
 
   public start() {}
-
-  public stop() {
-    if (this.snapshotRestoreESClient) {
-      this.snapshotRestoreESClient.close();
-    }
-  }
 }

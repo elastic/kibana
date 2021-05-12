@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
-import { AddToDashboardControl } from './add_to_dashboard_control';
+import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
 import { useMlKibana } from '../contexts/kibana';
 import { TimeBuckets } from '../util/time_buckets';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
@@ -35,6 +35,7 @@ import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
+import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -87,7 +88,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewByPerPage,
       swimlaneLimit,
       loading,
+      overallAnnotations,
     } = explorerState;
+
+    const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
 
     const menuItems = useMemo(() => {
       const items = [];
@@ -160,7 +164,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiFlexItem>
                 {selectedCells ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty size="xs" onClick={setSelectedCells.bind(null, undefined)}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      onClick={setSelectedCells.bind(null, undefined)}
+                      data-test-subj="mlAnomalyTimelineClearSelection"
+                    >
                       <FormattedMessage
                         id="xpack.ml.explorer.clearSelectionLabel"
                         defaultMessage="Clear selection"
@@ -218,6 +226,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiPopover>
               </EuiFlexItem>
             )}
+
+            <EuiFlexItem grow={false}>
+              <AnomalyTimelineHelpPopover />
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
@@ -236,6 +248,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             isLoading={loading}
             noDataWarning={<NoOverallData />}
             showTimeline={false}
+            annotationsData={annotations}
           />
 
           <EuiSpacer size="m" />
@@ -253,6 +266,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 })
               }
               timeBuckets={timeBuckets}
+              showLegend={true}
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}
@@ -290,7 +304,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           )}
         </EuiPanel>
         {isAddDashboardsActive && selectedJobs && (
-          <AddToDashboardControl
+          <AddSwimlaneToDashboardControl
             onClose={async (callback) => {
               setIsAddDashboardActive(false);
               if (callback) {

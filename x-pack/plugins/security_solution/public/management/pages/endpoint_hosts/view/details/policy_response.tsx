@@ -29,7 +29,7 @@ import {
  */
 const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {
-    padding: ${(props) => props.theme.eui.paddingSizes.s};
+    padding: ${(props) => props.theme.eui.paddingSizes.xs};
   }
 
   &.euiAccordion-isOpen {

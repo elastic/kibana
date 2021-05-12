@@ -6,7 +6,6 @@ Object {
     "events": Array [
       "error",
       "metric",
-      "sourcemap",
       "transaction",
     ],
   },
@@ -32,6 +31,15 @@ Object {
             "range": Object {
               "observer.version_major": Object {
                 "lt": 7,
+              },
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
               },
             },
           },
@@ -102,14 +110,6 @@ Array [
           "aggs": Object {
             "transactionType": Object {
               "aggs": Object {
-                "agentName": Object {
-                  "top_hits": Object {
-                    "docvalue_fields": Array [
-                      "agent.name",
-                    ],
-                    "size": 1,
-                  },
-                },
                 "avg_duration": Object {
                   "avg": Object {
                     "field": "transaction.duration.us",
@@ -118,7 +118,6 @@ Array [
                 "environments": Object {
                   "terms": Object {
                     "field": "service.environment",
-                    "missing": "",
                   },
                 },
                 "outcomes": Object {
@@ -128,6 +127,18 @@ Array [
                       "failure",
                       "success",
                     ],
+                  },
+                },
+                "sample": Object {
+                  "top_metrics": Object {
+                    "metrics": Array [
+                      Object {
+                        "field": "agent.name",
+                      },
+                    ],
+                    "sort": Object {
+                      "@timestamp": "desc",
+                    },
                   },
                 },
                 "timeseries": Object {
@@ -181,9 +192,56 @@ Array [
                 },
               },
             },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "metric",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "environments": Object {
+              "terms": Object {
+                "field": "service.environment",
+              },
+            },
+            "latest": Object {
+              "top_metrics": Object {
+                "metrics": Array [
+                  Object {
+                    "field": "agent.name",
+                  },
+                ],
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
             Object {
-              "term": Object {
-                "service.environment": "test",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
           ],

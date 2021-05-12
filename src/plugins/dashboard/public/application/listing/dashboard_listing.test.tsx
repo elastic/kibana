@@ -23,6 +23,7 @@ import { createKbnUrlStateStorage } from '../../services/kibana_utils';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
 import { DashboardAppServices, DashboardCapabilities } from '../types';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
@@ -49,11 +50,16 @@ function makeDefaultServices(): DashboardAppServices {
       hits,
     });
   };
+  const dashboardPanelStorage = ({
+    getDashboardIdsWithUnsavedChanges: jest
+      .fn()
+      .mockResolvedValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
+  } as unknown) as DashboardPanelStorage;
+
   return {
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
     dashboardCapabilities: {} as DashboardCapabilities,
-    dashboardPanelStorage: {} as DashboardPanelStorage,
     initializerContext: {} as PluginInitializerContext,
     chrome: chromeServiceMock.createStartContract(),
     navigation: {} as NavigationPublicPluginStart,
@@ -68,8 +74,10 @@ function makeDefaultServices(): DashboardAppServices {
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
     allowByValueEmbeddables: true,
+    dashboardPanelStorage,
     savedDashboards,
     core,
+    visualizations: visualizationsPluginMock.createStartContract(),
   };
 }
 

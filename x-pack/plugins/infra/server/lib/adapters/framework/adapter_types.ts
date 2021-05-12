@@ -17,7 +17,7 @@ import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/ser
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
-import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
+import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';
 import { MlPluginSetup } from '../../../../../ml/server';
 import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 
@@ -28,7 +28,7 @@ export interface InfraServerPluginSetupDeps {
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
-  alerts: AlertingPluginContract;
+  alerting: AlertingPluginContract;
   ml?: MlPluginSetup;
 }
 
@@ -165,23 +165,6 @@ export interface InfraFieldDetails {
 export interface InfraFieldDef {
   [type: string]: InfraFieldDetails;
 }
-
-export interface InfraTSVBResponse {
-  [key: string]: InfraTSVBPanel;
-}
-
-export interface InfraTSVBPanel {
-  id: string;
-  series: InfraTSVBSeries[];
-}
-
-export interface InfraTSVBSeries {
-  id: string;
-  label: string;
-  data: InfraTSVBDataPoint[];
-}
-
-export type InfraTSVBDataPoint = [number, number];
 
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;

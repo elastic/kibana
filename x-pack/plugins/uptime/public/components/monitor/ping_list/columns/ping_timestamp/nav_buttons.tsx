@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { nextAriaLabel, prevAriaLabel } from './translations';
 
 export interface NavButtonsProps {
@@ -34,8 +34,9 @@ export const NavButtons: React.FC<NavButtonsProps> = ({
         disabled={stepNumber === 1}
         color="subdued"
         size="s"
-        onClick={() => {
+        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           setStepNumber(stepNumber - 1);
+          evt.stopPropagation();
         }}
         iconType="arrowLeft"
         aria-label={prevAriaLabel}
@@ -46,8 +47,9 @@ export const NavButtons: React.FC<NavButtonsProps> = ({
         disabled={stepNumber === maxSteps}
         color="subdued"
         size="s"
-        onClick={() => {
+        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           setStepNumber(stepNumber + 1);
+          evt.stopPropagation();
         }}
         iconType="arrowRight"
         aria-label={nextAriaLabel}

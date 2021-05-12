@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
@@ -24,7 +26,7 @@ import {
 } from '../../../../../../embeddable_enhanced/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { ensureNestedTriggers } from '../drilldown_shared';
+import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -66,14 +68,21 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
       );
     }
 
+    const templates = createDrilldownTemplatesFromSiblings(embeddable);
+    const closed$ = new Subject<true>();
+    const close = () => {
+      closed$.next(true);
+      handle.close();
+    };
     const handle = core.overlays.openFlyout(
       toMountPoint(
-        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-          onClose={() => handle.close()}
-          viewMode={'manage'}
+        <plugins.uiActionsEnhanced.DrilldownManager
+          initialRoute={'/manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
+          templates={templates}
+          onClose={close}
         />
       ),
       {
@@ -81,5 +90,24 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
         'data-test-subj': 'editDrilldownFlyout',
       }
     );
+
+    // Close flyout on application change.
+    core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
+      close();
+    });
+
+    // Close flyout on dashboard switch to "view" mode.
+    embeddable
+      .getInput$()
+      .pipe(
+        takeUntil(closed$),
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        filter((mode) => mode !== ViewMode.EDIT),
+        take(1)
+      )
+      .subscribe(() => {
+        close();
+      });
   }
 }

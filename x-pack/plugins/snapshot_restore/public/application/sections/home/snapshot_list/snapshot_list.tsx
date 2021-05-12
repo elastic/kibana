@@ -15,7 +15,6 @@ import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
 import { WithPrivileges, SectionError, Error } from '../../../../shared_imports';
 import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
-import { documentationLinksService } from '../../../services/documentation';
 import { useLoadSnapshots } from '../../../services/http';
 import {
   linkToRepositories,
@@ -24,7 +23,7 @@ import {
   linkToAddPolicy,
   linkToSnapshot,
 } from '../../../services/navigation';
-import { useServices } from '../../../app_context';
+import { useCore, useServices } from '../../../app_context';
 import { useDecodedParams } from '../../../lib';
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
@@ -49,6 +48,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   } = useLoadSnapshots();
 
   const { uiMetricService } = useServices();
+  const { docLinks } = useCore();
 
   const openSnapshotDetailsUrl = (
     repositoryNameToOpen: string,
@@ -219,7 +219,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
                       values={{
                         docLink: (
                           <EuiLink
-                            href={documentationLinksService.getSnapshotDocUrl()}
+                            href={docLinks.links.snapshotRestore.createSnapshot}
                             target="_blank"
                             data-test-subj="documentationLink"
                           >
@@ -270,7 +270,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
                   </p>
                   <p>
                     <EuiLink
-                      href={documentationLinksService.getSnapshotDocUrl()}
+                      href={docLinks.links.snapshotRestore.createSnapshot}
                       target="_blank"
                       data-test-subj="documentationLink"
                     >

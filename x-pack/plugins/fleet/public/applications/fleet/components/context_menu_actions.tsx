@@ -14,9 +14,9 @@ import {
   EuiPopover,
   EuiButton,
 } from '@elastic/eui';
-import { EuiButtonProps } from '@elastic/eui/src/components/button/button';
-import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
-import { EuiContextMenuPanelProps } from '@elastic/eui/src/components/context_menu/context_menu_panel';
+import type { EuiButtonProps } from '@elastic/eui/src/components/button/button';
+import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuPanelProps } from '@elastic/eui/src/components/context_menu/context_menu_panel';
 
 type Props = {
   button?: {

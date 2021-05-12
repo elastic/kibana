@@ -6,7 +6,6 @@
  */
 
 export const AGENT_SAVED_OBJECT_TYPE = 'fleet-agents';
-export const AGENT_EVENT_SAVED_OBJECT_TYPE = 'fleet-agent-events';
 export const AGENT_ACTION_SAVED_OBJECT_TYPE = 'fleet-agent-actions';
 
 export const AGENT_TYPE_PERMANENT = 'PERMANENT';

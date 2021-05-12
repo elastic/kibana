@@ -10,11 +10,23 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { FilterAggForm } from './filter_agg_form';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import { KBN_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/common';
+import {
+  KBN_FIELD_TYPES,
+  RuntimeField,
+} from '../../../../../../../../../../../../src/plugins/data/common';
 import { IndexPattern } from '../../../../../../../../../../../../src/plugins/data/public';
 import { FilterTermForm } from './filter_term_form';
 
 describe('FilterAggForm', () => {
+  const runtimeMappings = {
+    rt_bytes_bigger: {
+      type: 'double',
+      script: {
+        source: "emit(doc['bytes'].value * 2.0)",
+      },
+    } as RuntimeField,
+  };
+
   const indexPattern = ({
     fields: {
       getByName: jest.fn((fieldName: string) => {
@@ -37,7 +49,7 @@ describe('FilterAggForm', () => {
 
     const { getByLabelText, findByTestId, container } = render(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ indexPattern }}>
+        <CreateTransformWizardContext.Provider value={{ indexPattern, runtimeMappings }}>
           <FilterAggForm aggConfig={{}} selectedField="test_text_field" onChange={onChange} />
         </CreateTransformWizardContext.Provider>
       </I18nProvider>
@@ -62,7 +74,7 @@ describe('FilterAggForm', () => {
 
     const { findByTestId } = render(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ indexPattern }}>
+        <CreateTransformWizardContext.Provider value={{ indexPattern, runtimeMappings }}>
           <FilterAggForm aggConfig={{}} selectedField="test_text_field" onChange={onChange} />
         </CreateTransformWizardContext.Provider>
       </I18nProvider>
@@ -90,7 +102,7 @@ describe('FilterAggForm', () => {
 
     const { rerender, findByTestId } = render(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ indexPattern }}>
+        <CreateTransformWizardContext.Provider value={{ indexPattern, runtimeMappings }}>
           <FilterAggForm aggConfig={{}} selectedField="test_text_field" onChange={onChange} />
         </CreateTransformWizardContext.Provider>
       </I18nProvider>
@@ -99,7 +111,7 @@ describe('FilterAggForm', () => {
     // re-render the same component with different props
     rerender(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ indexPattern }}>
+        <CreateTransformWizardContext.Provider value={{ indexPattern, runtimeMappings }}>
           <FilterAggForm aggConfig={{}} selectedField="test_number_field" onChange={onChange} />
         </CreateTransformWizardContext.Provider>
       </I18nProvider>
@@ -127,7 +139,7 @@ describe('FilterAggForm', () => {
 
     const { findByTestId, container } = render(
       <I18nProvider>
-        <CreateTransformWizardContext.Provider value={{ indexPattern }}>
+        <CreateTransformWizardContext.Provider value={{ indexPattern, runtimeMappings }}>
           <FilterAggForm
             aggConfig={{
               filterAgg: 'term',

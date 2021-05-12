@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { ConfigSchema, createConfig } from '../config';
+import { httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { httpServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import type { ConfigType } from '../config';
+import { ConfigSchema } from '../config';
 import { encryptionKeyRotationServiceMock } from '../crypto/index.mock';
 
 export const routeDefinitionParamsMock = {
   create: (config: Record<string, unknown> = {}) => ({
     router: httpServiceMock.createRouter(),
     logger: loggingSystemMock.create().get(),
-    config: createConfig(ConfigSchema.validate(config), loggingSystemMock.create().get()),
+    config: ConfigSchema.validate(config) as ConfigType,
     encryptionKeyRotationService: encryptionKeyRotationServiceMock.create(),
   }),
 };

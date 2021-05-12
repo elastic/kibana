@@ -22,10 +22,10 @@ const renderApp = (
   history: ManagementAppMountParams['history'],
   coreStart: CoreStart,
   share: SharePluginStart,
-  spaces?: SpacesPluginStart
+  spacesApi?: SpacesPluginStart
 ) => {
   ReactDOM.render(
-    React.createElement(JobsListPage, { coreStart, history, share, spaces }),
+    React.createElement(JobsListPage, { coreStart, history, share, spacesApi }),
     element
   );
   return () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateComment, CreateCommentsArray } from './create_comment';
+import { CreateComment, CreateCommentsArray } from '@kbn/securitysolution-io-ts-utils';
 
 export const getCreateCommentsMock = (): CreateComment => ({
   comment: 'some comments',

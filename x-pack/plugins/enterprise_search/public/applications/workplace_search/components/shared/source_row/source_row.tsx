@@ -8,9 +8,6 @@
 import React from 'react';
 
 import classNames from 'classnames';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import _kebabCase from 'lodash/kebabCase';
 
 import {
   EuiFlexGroup,
@@ -26,19 +23,20 @@ import {
 
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { SOURCE_STATUSES as statuses } from '../../../constants';
-import { ContentSourceDetails } from '../../../types';
 import {
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
   getContentSourcePath,
   getSourcesPath,
 } from '../../../routes';
-
+import { ContentSourceDetails } from '../../../types';
 import { SourceIcon } from '../source_icon';
 
 import './source_row.scss';
 
-const CREDENTIALS_INVALID_ERROR_REASON = 1;
+// i18n is not needed here because this is only used to check against the server error, which
+// is not translated by the Kibana team at this time.
+const CREDENTIALS_REFRESH_NEEDED_PREFIX = 'OAuth access token could not be refreshed';
 
 export interface ISourceRow {
   showDetails?: boolean;
@@ -71,21 +69,17 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   const isIndexing = status === statuses.INDEXING;
   const hasError = status === statuses.ERROR || status === statuses.DISCONNECTED;
   const showFix =
-    isOrganization && hasError && allowsReauth && errorReason === CREDENTIALS_INVALID_ERROR_REASON;
+    isOrganization &&
+    hasError &&
+    allowsReauth &&
+    errorReason?.startsWith(CREDENTIALS_REFRESH_NEEDED_PREFIX);
 
-  const rowClass = classNames(
-    'source-row',
-    { 'content-section--disabled': !searchable },
-    { 'source-row source-row--error': hasError }
-  );
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const imageClass = classNames('source-row__icon', { 'source-row__icon--loading': isIndexing });
+  const rowClass = classNames({ 'source-row--error': hasError });
 
   const fixLink = (
     <EuiLinkTo
       to={getSourcesPath(
-        `${ADD_SOURCE_PATH}/${_kebabCase(serviceType)}/re-authenticate?sourceId=${id}`,
+        `${ADD_SOURCE_PATH}/${serviceType}/reauthenticate?sourceId=${id}`,
         isOrganization
       )}
     >
@@ -115,15 +109,9 @@ export const SourceRow: React.FC<SourceRowProps> = ({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <SourceIcon
-              serviceType={isIndexing ? 'loadingSmall' : serviceType}
-              name={name}
-              className={imageClass}
-            />
+            <SourceIcon serviceType={isIndexing ? 'loadingSmall' : serviceType} name={name} />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <span className="source-row__name">{name}</span>
-          </EuiFlexItem>
+          <EuiFlexItem>{name}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiTableRowCell>
       <EuiTableRowCell>
@@ -139,17 +127,13 @@ export const SourceRow: React.FC<SourceRowProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <EuiText
-              className={`source-row__status source-row__status--${status}`}
-              color={status === 'need-more-config' ? 'default' : 'subdued'}
-              size="xs"
-            >
+            <EuiText color={status === 'need-more-config' ? 'default' : 'subdued'} size="xs">
               {statusMessage}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTableRowCell>
-      <EuiTableRowCell className="source-row__document-count" data-test-subj="SourceDocumentCount">
+      <EuiTableRowCell data-test-subj="SourceDocumentCount">
         {isFederatedSource ? remoteTooltip : parseInt(documentCount, 10).toLocaleString('en-US')}
       </EuiTableRowCell>
       {onSearchableToggle && (
@@ -165,7 +149,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
           />
         </EuiTableRowCell>
       )}
-      <EuiTableRowCell className="source-row__actions">
+      <EuiTableRowCell align="right">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
           {showFix && <EuiFlexItem grow={false}>{fixLink}</EuiFlexItem>}
           <EuiFlexItem grow={false}>

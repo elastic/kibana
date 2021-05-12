@@ -9,6 +9,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
 
+// TODO: Remove & Refactor to use the TTV page objects
 interface VisualizeSaveModalArgs {
   saveAsNew?: boolean;
   redirectToOrigin?: boolean;

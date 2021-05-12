@@ -12,7 +12,7 @@ import { AggGroupNames } from '../../data/public';
 import { ColorMode, ColorSchemas } from '../../charts/public';
 import { VisTypeDefinition } from '../../visualizations/public';
 
-import { getGaugeCollections, GaugeOptions } from './editor';
+import { GaugeOptions } from './editor';
 import { toExpressionAst } from './to_ast';
 import { GaugeType } from './types';
 import { GaugeVisParams } from './gauge';
@@ -66,7 +66,6 @@ export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
     },
   },
   editorConfig: {
-    collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,
     schemas: [
       {
@@ -84,6 +83,8 @@ export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
           '!moving_avg',
           '!cumulative_sum',
           '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

@@ -25,7 +25,7 @@ export default {
         core: {
           http: {
             get: (endpoint: string) => {
-              if (endpoint === '/api/apm/ui_filters/environments') {
+              if (endpoint === '/api/apm/environments') {
                 return Promise.resolve(['production']);
               } else {
                 return Promise.resolve({

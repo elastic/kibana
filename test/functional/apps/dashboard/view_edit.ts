@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
   const dashboardName = 'dashboard with filter';
   const filterBar = getService('filterBar');
@@ -67,15 +68,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             storeTimeWithDashboard: true,
           });
 
-          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
           await PageObjects.dashboard.clickDiscardChanges();
-
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
 
           const newTime = await PageObjects.timePicker.getTimeConfig();
 
@@ -89,9 +86,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.submitQuery();
 
           await PageObjects.dashboard.clickDiscardChanges();
-
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
 
           const query = await queryBar.getQueryString();
           expect(query).to.equal(originalQuery);
@@ -113,19 +107,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.dashboard.clickDiscardChanges();
 
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
-
           hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(true);
         });
 
         it('when a new vis is added', async function () {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-
-          await dashboardAddPanel.ensureAddPanelIsShowing();
-          await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
-          await PageObjects.visualize.clickAggBasedVisualizations();
+          await dashboardAddPanel.clickEditorMenuButton();
+          await dashboardAddPanel.clickAggBasedVisualizations();
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel', {
@@ -133,12 +122,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             redirectToOrigin: true,
           });
 
-          await PageObjects.dashboard.clickDiscardChanges();
+          await PageObjects.dashboard.clickDiscardChanges(false);
           // for this sleep see https://github.com/elastic/kibana/issues/22299
           await PageObjects.common.sleep(500);
 
           // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
+          await testSubjects.exists('dashboardDiscardConfirmDiscard');
+          await testSubjects.click('dashboardDiscardConfirmDiscard');
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount);
@@ -149,9 +139,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await dashboardAddPanel.addVisualization('new viz panel');
           await PageObjects.dashboard.clickDiscardChanges();
-
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount);
@@ -171,9 +158,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 19, 2015 @ 06:31:44.000',
             'Sep 19, 2015 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.clickDiscardChanges();
+          await PageObjects.dashboard.clickDiscardChanges(false);
 
-          await PageObjects.common.clickCancelOnModal();
+          await testSubjects.exists('dashboardDiscardConfirmCancel');
+          await testSubjects.click('dashboardDiscardConfirmCancel');
           await PageObjects.dashboard.saveDashboard(dashboardName, {
             storeTimeWithDashboard: true,
           });
@@ -200,9 +188,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const newTime = await PageObjects.timePicker.getTimeConfig();
 
-        await PageObjects.dashboard.clickDiscardChanges();
+        await PageObjects.dashboard.clickDiscardChanges(false);
 
-        await PageObjects.common.clickCancelOnModal();
+        await testSubjects.exists('dashboardDiscardConfirmCancel');
+        await testSubjects.click('dashboardDiscardConfirmCancel');
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
@@ -218,12 +207,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
-        await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setAbsoluteRange(
           'Oct 19, 2014 @ 06:31:44.000',
           'Dec 19, 2014 @ 06:31:44.000'
         );
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await PageObjects.dashboard.clickCancelOutOfEditMode(false);
 
         await PageObjects.common.expectConfirmModalOpenState(false);
       });
@@ -235,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const originalQuery = await queryBar.getQueryString();
         await queryBar.setQuery(`${originalQuery}extra stuff`);
 
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await PageObjects.dashboard.clickCancelOutOfEditMode(false);
 
         await PageObjects.common.expectConfirmModalOpenState(false);
 

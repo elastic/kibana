@@ -9,11 +9,12 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { ManageUsersModal } from './manage_users_modal';
 import { FilterableUsersList } from './filterable_users_list';
 import { GroupManagerModal } from './group_manager_modal';
+import { ManageUsersModal } from './manage_users_modal';
 
 const addGroupUser = jest.fn();
 const removeGroupUser = jest.fn();

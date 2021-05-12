@@ -182,7 +182,7 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
     .map((threat) => {
       return {
         ...threat,
-        technique: trimThreatsWithNoName(threat.technique).map((technique) => {
+        technique: trimThreatsWithNoName(threat.technique ?? []).map((technique) => {
           return {
             ...technique,
             subtechnique:
@@ -219,8 +219,18 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         saved_id: ruleFields.queryBar?.saved_id,
         ...(ruleType === 'threshold' && {
           threshold: {
-            field: ruleFields.threshold?.field[0] ?? '',
+            field: ruleFields.threshold?.field ?? [],
             value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
+            cardinality:
+              !isEmpty(ruleFields.threshold.cardinality?.field) &&
+              ruleFields.threshold.cardinality?.value != null
+                ? [
+                    {
+                      field: ruleFields.threshold.cardinality.field[0],
+                      value: parseInt(ruleFields.threshold.cardinality.value, 10),
+                    },
+                  ]
+                : [],
           },
         }),
       }
@@ -288,6 +298,7 @@ export const formatAboutStepData = (
     isBuildingBlock,
     note,
     ruleNameOverride,
+    threatIndicatorPath,
     timestampOverride,
     ...rest
   } = aboutStepData;
@@ -330,6 +341,7 @@ export const formatAboutStepData = (
       ...singleThreat,
       framework: 'MITRE ATT&CK',
     })),
+    threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,

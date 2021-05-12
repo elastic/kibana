@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { mount } from 'enzyme';
 
 type WrapperOf<F extends (...args: any) => any> = (...args: Parameters<F>) => ReturnType<F>; // eslint-disable-line

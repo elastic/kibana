@@ -8,5 +8,6 @@ node scripts/build_kibana_platform_plugins \
   --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
   --scan-dir "$KIBANA_DIR/test/interpreter_functional/plugins" \
   --scan-dir "$KIBANA_DIR/test/common/fixtures/plugins" \
+  --scan-dir "$KIBANA_DIR/examples" \
   --workers 6 \
   --verbose

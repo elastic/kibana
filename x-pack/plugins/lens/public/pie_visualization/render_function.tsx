@@ -172,7 +172,6 @@ export function PieComponent(
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
-    clockwiseSectors: false,
     minFontSize: 10,
     maxFontSize: 16,
     // Labels are added outside the outer ring when the slice is too small
@@ -223,11 +222,15 @@ export function PieComponent(
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
   });
+
+  const isMetricEmpty = firstTable.rows.every((row) => {
+    return !row[metricColumn.id];
+  });
+
   const isEmpty =
     firstTable.rows.length === 0 ||
-    firstTable.rows.every((row) =>
-      groups.every((colId) => !row[colId] || typeof row[colId] === 'undefined')
-    );
+    firstTable.rows.every((row) => groups.every((colId) => typeof row[colId] === 'undefined')) ||
+    isMetricEmpty;
 
   if (isEmpty) {
     return <EmptyPlaceholder icon={LensIconChartDonut} />;
@@ -252,6 +255,7 @@ export function PieComponent(
 
     onClickValue(desanitizeFilterContext(context));
   };
+
   return (
     <VisualizationContainer
       reportTitle={props.args.title}
@@ -261,6 +265,7 @@ export function PieComponent(
     >
       <Chart>
         <Settings
+          tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}
           debugState={window._echDebugStateFlag ?? false}
           // Legend is hidden in many scenarios
           // - Tiny preview

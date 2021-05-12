@@ -532,7 +532,7 @@ describe('suggestion helpers', () => {
         {
           mockindexpattern: { state: mockDatasourceState, isLoading: false },
         },
-        { id: 'myfield' },
+        { id: 'myfield', humanData: { label: 'myfieldLabel' } },
       ];
     });
 
@@ -543,6 +543,9 @@ describe('suggestion helpers', () => {
         mockDatasourceState,
         {
           id: 'myfield',
+          humanData: {
+            label: 'myfieldLabel',
+          },
         }
       );
     });

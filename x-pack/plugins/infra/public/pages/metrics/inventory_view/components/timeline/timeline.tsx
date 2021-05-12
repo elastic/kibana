@@ -29,7 +29,7 @@ import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_reac
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
-import { useSourceContext } from '../../../../../containers/source';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useTimeline } from '../../hooks/use_timeline';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
@@ -51,7 +51,7 @@ interface Props {
 }
 
 export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
-  const { sourceId } = useSourceContext();
+  const { sourceId, source } = useSourceContext();
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
@@ -70,6 +70,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   const anomalyParams = {
     sourceId: 'default',
+    anomalyThreshold: source?.configuration.anomalyThreshold || 0,
     startTime,
     endTime,
     defaultSortOptions: {

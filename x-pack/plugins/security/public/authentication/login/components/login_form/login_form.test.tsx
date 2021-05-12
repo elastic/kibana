@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
+import { act } from '@testing-library/react';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { act } from '@testing-library/react';
-import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
-import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
-import { findTestSubject } from '@kbn/test/jest';
-import { LoginForm, PageMode } from './login_form';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { ReactWrapper } from 'enzyme';
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { LoginForm, MessageType, PageMode } from './login_form';
 
 function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {
   const assertions: Array<[string, boolean]> =
@@ -90,7 +90,7 @@ describe('LoginForm', () => {
       <LoginForm
         http={coreStartMock.http}
         notifications={coreStartMock.notifications}
-        infoMessage={'Hey this is an info message'}
+        message={{ type: MessageType.Info, content: 'Hey this is an info message' }}
         loginAssistanceMessage=""
         selector={{
           enabled: false,
@@ -152,7 +152,7 @@ describe('LoginForm', () => {
     });
 
     expect(wrapper.find(EuiCallOut).props().title).toEqual(
-      `Invalid username or password. Please try again.`
+      `Username or password is incorrect. Please try again.`
     );
   });
 

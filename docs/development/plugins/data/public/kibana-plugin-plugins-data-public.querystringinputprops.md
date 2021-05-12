@@ -14,15 +14,19 @@ export interface QueryStringInputProps
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [autoSubmit](./kibana-plugin-plugins-data-public.querystringinputprops.autosubmit.md) | <code>boolean</code> |  |
 |  [bubbleSubmitEvent](./kibana-plugin-plugins-data-public.querystringinputprops.bubblesubmitevent.md) | <code>boolean</code> |  |
 |  [className](./kibana-plugin-plugins-data-public.querystringinputprops.classname.md) | <code>string</code> |  |
 |  [dataTestSubj](./kibana-plugin-plugins-data-public.querystringinputprops.datatestsubj.md) | <code>string</code> |  |
 |  [disableAutoFocus](./kibana-plugin-plugins-data-public.querystringinputprops.disableautofocus.md) | <code>boolean</code> |  |
 |  [disableLanguageSwitcher](./kibana-plugin-plugins-data-public.querystringinputprops.disablelanguageswitcher.md) | <code>boolean</code> |  |
-|  [iconType](./kibana-plugin-plugins-data-public.querystringinputprops.icontype.md) | <code>string</code> |  |
+|  [iconType](./kibana-plugin-plugins-data-public.querystringinputprops.icontype.md) | <code>EuiIconProps['type']</code> |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.querystringinputprops.indexpatterns.md) | <code>Array&lt;IIndexPattern &#124; string&gt;</code> |  |
+|  [isClearable](./kibana-plugin-plugins-data-public.querystringinputprops.isclearable.md) | <code>boolean</code> |  |
 |  [isInvalid](./kibana-plugin-plugins-data-public.querystringinputprops.isinvalid.md) | <code>boolean</code> |  |
 |  [languageSwitcherPopoverAnchorPosition](./kibana-plugin-plugins-data-public.querystringinputprops.languageswitcherpopoveranchorposition.md) | <code>PopoverAnchorPosition</code> |  |
+|  [nonKqlMode](./kibana-plugin-plugins-data-public.querystringinputprops.nonkqlmode.md) | <code>'lucene' &#124; 'text'</code> |  |
+|  [nonKqlModeHelpText](./kibana-plugin-plugins-data-public.querystringinputprops.nonkqlmodehelptext.md) | <code>string</code> |  |
 |  [onBlur](./kibana-plugin-plugins-data-public.querystringinputprops.onblur.md) | <code>() =&gt; void</code> |  |
 |  [onChange](./kibana-plugin-plugins-data-public.querystringinputprops.onchange.md) | <code>(query: Query) =&gt; void</code> |  |
 |  [onChangeQueryInputFocus](./kibana-plugin-plugins-data-public.querystringinputprops.onchangequeryinputfocus.md) | <code>(isFocused: boolean) =&gt; void</code> |  |
@@ -33,4 +37,6 @@ export interface QueryStringInputProps
 |  [query](./kibana-plugin-plugins-data-public.querystringinputprops.query.md) | <code>Query</code> |  |
 |  [screenTitle](./kibana-plugin-plugins-data-public.querystringinputprops.screentitle.md) | <code>string</code> |  |
 |  [size](./kibana-plugin-plugins-data-public.querystringinputprops.size.md) | <code>SuggestionsListSize</code> |  |
+|  [storageKey](./kibana-plugin-plugins-data-public.querystringinputprops.storagekey.md) | <code>string</code> |  |
+|  [submitOnBlur](./kibana-plugin-plugins-data-public.querystringinputprops.submitonblur.md) | <code>boolean</code> |  |
 

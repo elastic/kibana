@@ -15,23 +15,10 @@ exports[`TooltipControl render should render hover tooltip 1`] = `
       },
     ]
   }
-  geoFields={
-    Array [
-      Object {},
-    ]
-  }
+  findLayerById={[Function]}
   index={0}
   isLocked={false}
   key="1"
-  layerList={
-    Array [
-      Object {
-        "canShowTooltip": [Function],
-        "getId": [Function],
-        "getMbLayerIds": [Function],
-      },
-    ]
-  }
   location={
     Array [
       -120,
@@ -62,23 +49,10 @@ exports[`TooltipControl render should render locked tooltip 1`] = `
       },
     ]
   }
-  geoFields={
-    Array [
-      Object {},
-    ]
-  }
+  findLayerById={[Function]}
   index={0}
   isLocked={true}
   key="2"
-  layerList={
-    Array [
-      Object {
-        "canShowTooltip": [Function],
-        "getId": [Function],
-        "getMbLayerIds": [Function],
-      },
-    ]
-  }
   location={
     Array [
       -120,

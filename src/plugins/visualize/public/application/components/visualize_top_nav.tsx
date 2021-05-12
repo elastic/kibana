@@ -183,8 +183,12 @@ const TopNav = ({
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe(() => {
-        visInstance.embeddableHandler.reload();
+      .subscribe(async (done) => {
+        try {
+          await visInstance.embeddableHandler.reload();
+        } finally {
+          done();
+        }
       });
     return () => {
       autoRefreshFetchSub.unsubscribe();
@@ -212,7 +216,7 @@ const TopNav = ({
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
-      showSaveQuery={services.visualizeCapabilities.saveQuery}
+      showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       showSearchBar
       useDefaultBehaviors
     />

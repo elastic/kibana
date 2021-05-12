@@ -8,9 +8,9 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import uuid from 'uuid';
+import { ToggleDetailPanel } from './actions';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
-import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
   DataProvider,
@@ -24,12 +24,13 @@ import { SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
-  TimelineExpandedEvent,
+  TimelineExpandedDetail,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
   TimelineStatus,
   TimelineId,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
@@ -40,6 +41,10 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  RESIZED_COLUMN_MIN_WITH,
+} from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -144,7 +149,7 @@ export const addTimelineToStore = ({
 }: AddTimelineParams): TimelineById => {
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
-    activeTimeline.setExpandedEvent({});
+    activeTimeline.setExpandedDetail({});
   }
   return {
     ...timelineById,
@@ -171,7 +176,7 @@ interface AddNewTimelineParams {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
-  expandedEvent?: TimelineExpandedEvent;
+  expandedDetail?: TimelineExpandedDetail;
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -192,7 +197,7 @@ export const addNewTimeline = ({
   dataProviders = [],
   dateRange: maybeDateRange,
   excludedRowRendererIds = [],
-  expandedEvent = {},
+  expandedDetail = {},
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -221,7 +226,7 @@ export const addNewTimeline = ({
       columns,
       dataProviders,
       dateRange,
-      expandedEvent,
+      expandedDetail,
       excludedRowRendererIds,
       filters,
       itemsPerPage,
@@ -303,6 +308,9 @@ export const updateGraphEventId = ({
     [id]: {
       ...timeline,
       graphEventId,
+      ...(graphEventId === '' && id === TimelineId.active
+        ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
+        : {}),
     },
   };
 };
@@ -490,13 +498,14 @@ export const applyDeltaToTimelineColumnWidth = ({
       },
     };
   }
-  const minWidthPixels = getColumnWidthFromType(timeline.columns[columnIndex].type!);
-  const requestedWidth = timeline.columns[columnIndex].width + delta; // raw change in width
-  const width = Math.max(minWidthPixels, requestedWidth); // if the requested width is smaller than the min, use the min
+
+  const requestedWidth =
+    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
+  const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
 
   const columnWithNewWidth = {
     ...timeline.columns[columnIndex],
-    width,
+    initialWidth,
   };
 
   const columns = [
@@ -1430,4 +1439,22 @@ export const updateExcludedRowRenderersIds = ({
       excludedRowRendererIds,
     },
   };
+};
+
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
+  const { tabType } = action;
+
+  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
+  const expandedTabType = tabType ?? TimelineTabs.query;
+
+  return action.panelView && panelViewOptions.has(action.panelView)
+    ? {
+        [expandedTabType]: {
+          params: action.params ? { ...action.params } : {},
+          panelView: action.panelView,
+        },
+      }
+    : {
+        [expandedTabType]: {},
+      };
 };

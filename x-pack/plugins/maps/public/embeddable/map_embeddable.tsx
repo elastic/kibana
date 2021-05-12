@@ -29,6 +29,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import {
   replaceLayerList,
+  setMapSettings,
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
@@ -37,11 +38,13 @@ import {
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
+  setChartsPaletteServiceGetColor,
   setEventHandlers,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
   getMapCenter,
+  getMapBuffer,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
@@ -54,7 +57,13 @@ import {
   RawValue,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
-import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
+import {
+  getUiActions,
+  getCoreI18n,
+  getHttp,
+  getChartsPaletteServiceGetColor,
+  getSearchService,
+} from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
@@ -69,20 +78,30 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-export { MapEmbeddableInput, MapEmbeddableOutput };
+
+function getIsRestore(searchSessionId?: string) {
+  if (!searchSessionId) {
+    return false;
+  }
+  const searchSessionOptions = getSearchService().session.getSearchOptions(searchSessionId);
+  return searchSessionOptions ? searchSessionOptions.isRestore : false;
+}
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
+  private _isActive: boolean;
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
   private _subscription: Subscription;
+  private _prevIsRestore: boolean = false;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters?: Filter[];
+  private _prevSyncColors?: boolean;
   private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
@@ -99,6 +118,7 @@ export class MapEmbeddable
       parent
     );
 
+    this._isActive = true;
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
@@ -126,16 +146,14 @@ export class MapEmbeddable
   }
 
   private _initializeStore() {
+    this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
+
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
 
     this._dispatchSetQuery({
-      query: this.input.query,
-      timeRange: this.input.timeRange,
-      filters: this.input.filters,
       forceRefresh: false,
-      searchSessionId: this.input.searchSessionId,
     });
     if (this.input.refreshConfig) {
       this._dispatchSetRefreshConfig(this.input.refreshConfig);
@@ -210,43 +228,48 @@ export class MapEmbeddable
       this.input.searchSessionId !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
-        query: this.input.query,
-        timeRange: this.input.timeRange,
-        filters: this.input.filters,
         forceRefresh: false,
-        searchSessionId: this.input.searchSessionId,
       });
     }
 
     if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
       this._dispatchSetRefreshConfig(this.input.refreshConfig);
     }
+
+    if (this.input.syncColors !== this._prevSyncColors) {
+      this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
+    }
+
+    const isRestore = getIsRestore(this.input.searchSessionId);
+    if (isRestore !== this._prevIsRestore) {
+      this._prevIsRestore = isRestore;
+      this._savedMap.getStore().dispatch(
+        setMapSettings({
+          disableInteractive: isRestore,
+          hideToolbarOverlay: isRestore,
+        })
+      );
+    }
   }
 
-  _dispatchSetQuery({
-    query,
-    timeRange,
-    filters = [],
-    forceRefresh,
-    searchSessionId,
-  }: {
-    query?: Query;
-    timeRange?: TimeRange;
-    filters?: Filter[];
-    forceRefresh: boolean;
-    searchSessionId?: string;
-  }) {
-    this._prevTimeRange = timeRange;
-    this._prevQuery = query;
-    this._prevFilters = filters;
-    this._prevSearchSessionId = searchSessionId;
+  _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
+    this._prevTimeRange = this.input.timeRange;
+    this._prevQuery = this.input.query;
+    this._prevFilters = this.input.filters;
+    this._prevSearchSessionId = this.input.searchSessionId;
+    const enabledFilters = this.input.filters
+      ? this.input.filters.filter((filter) => !filter.meta.disabled)
+      : [];
     this._savedMap.getStore().dispatch<any>(
       setQuery({
-        filters: filters.filter((filter) => !filter.meta.disabled),
-        query,
-        timeFilters: timeRange,
+        filters: enabledFilters,
+        query: this.input.query,
+        timeFilters: this.input.timeRange,
         forceRefresh,
-        searchSessionId,
+        searchSessionId: this.input.searchSessionId,
+        searchSessionMapBuffer: getIsRestore(this.input.searchSessionId)
+          ? this.input.mapBuffer
+          : undefined,
       })
     );
   }
@@ -259,6 +282,19 @@ export class MapEmbeddable
         interval: refreshConfig.value,
       })
     );
+  }
+
+  async _dispatchSetChartsPaletteServiceGetColor(syncColors?: boolean) {
+    this._prevSyncColors = syncColors;
+    const chartsPaletteServiceGetColor = syncColors
+      ? await getChartsPaletteServiceGetColor()
+      : null;
+    if (syncColors !== this._prevSyncColors) {
+      return;
+    }
+    this._savedMap
+      .getStore()
+      .dispatch(setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor));
   }
 
   /**
@@ -369,6 +405,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
+    this._isActive = false;
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
     }
@@ -384,15 +421,14 @@ export class MapEmbeddable
 
   reload() {
     this._dispatchSetQuery({
-      query: this.input.query,
-      timeRange: this.input.timeRange,
-      filters: this.input.filters,
       forceRefresh: true,
-      searchSessionId: this.input.searchSessionId,
     });
   }
 
   _handleStoreChanges() {
+    if (!this._isActive) {
+      return;
+    }
     const center = getMapCenter(this._savedMap.getStore().getState());
     const zoom = getMapZoom(this._savedMap.getStore().getState());
 
@@ -409,6 +445,7 @@ export class MapEmbeddable
           lon: center.lon,
           zoom,
         },
+        mapBuffer: getMapBuffer(this._savedMap.getStore().getState()),
       });
     }
 

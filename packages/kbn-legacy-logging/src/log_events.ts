@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ResponseObject } from '@hapi/hapi';
 import { EventData, isEventData } from './metadata';
 
 export interface BaseEvent {
@@ -21,7 +22,8 @@ export interface ResponseEvent extends BaseEvent {
   statusCode: number;
   path: string;
   headers: Record<string, string | string[]>;
-  responsePayload: string;
+  responseHeaders: Record<string, string | string[]>;
+  responsePayload: ResponseObject['source'];
   responseTime: string;
   query: Record<string, any>;
 }

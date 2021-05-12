@@ -10,6 +10,7 @@ import './__mocks__/overview_logic.mock';
 import { mockActions, setMockValues } from './__mocks__';
 
 import React from 'react';
+
 import { shallow, mount } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
@@ -17,8 +18,8 @@ import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
-import { RecentActivity } from './recent_activity';
 import { Overview } from './overview';
+import { RecentActivity } from './recent_activity';
 
 describe('Overview', () => {
   describe('non-happy-path states', () => {

@@ -32,5 +32,3 @@ export {
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
 } from './definitions';
-
-export { createMockedReferenceOperation } from './mocks';

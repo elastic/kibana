@@ -17,6 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { Position } from '@elastic/charts';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedPieLayerState } from './types';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
@@ -124,7 +125,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     return null;
   }
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
@@ -250,11 +251,15 @@ const DecimalPlaceSlider = ({
   );
 };
 
-export function DimensionEditor(props: VisualizationDimensionEditorProps<PieVisualizationState>) {
+export function DimensionEditor(
+  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
+    paletteService: PaletteRegistry;
+  }
+) {
   return (
     <>
       <PalettePicker
-        palettes={props.frame.availablePalettes}
+        palettes={props.paletteService}
         activePalette={props.state.palette}
         setPalette={(newPalette) => {
           props.setState({ ...props.state, palette: newPalette });

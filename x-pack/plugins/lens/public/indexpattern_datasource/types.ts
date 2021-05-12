@@ -8,8 +8,10 @@
 import { IFieldType } from 'src/plugins/data/common';
 import { IndexPatternColumn, IncompleteColumn } from './operations';
 import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
+import { DragDropIdentifier } from '../drag_drop/providers';
 
 export {
+  FieldBasedIndexPatternColumn,
   IndexPatternColumn,
   OperationType,
   IncompleteColumn,
@@ -32,6 +34,10 @@ export {
   MovingAverageIndexPatternColumn,
 } from './operations';
 
+export type DraggedField = DragDropIdentifier & {
+  field: IndexPatternField;
+  indexPatternId: string;
+};
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
@@ -52,6 +58,7 @@ export type IndexPatternField = IFieldType & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
   meta?: boolean;
+  runtime?: boolean;
 };
 
 export interface IndexPatternLayer {
@@ -80,6 +87,7 @@ export interface IndexPatternPrivateState {
   existingFields: Record<string, Record<string, boolean>>;
   isFirstExistenceFetch: boolean;
   existenceFetchFailed?: boolean;
+  existenceFetchTimeout?: boolean;
 }
 
 export interface IndexPatternRef {

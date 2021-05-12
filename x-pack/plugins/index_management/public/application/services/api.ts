@@ -40,6 +40,10 @@ import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
 
+interface ReloadIndicesOptions {
+  asSystemRequest?: boolean;
+}
+
 // Temporary hack to provide the uiMetricService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
 let uiMetricService: UiMetricService;
@@ -78,11 +82,17 @@ export async function loadIndices() {
   return response.data ? response.data : response;
 }
 
-export async function reloadIndices(indexNames: string[]) {
+export async function reloadIndices(
+  indexNames: string[],
+  { asSystemRequest }: ReloadIndicesOptions = {}
+) {
   const body = JSON.stringify({
     indexNames,
   });
-  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/reload`, { body });
+  const response = await httpService.httpClient.post(`${API_BASE_PATH}/indices/reload`, {
+    body,
+    asSystemRequest,
+  });
   return response.data ? response.data : response;
 }
 

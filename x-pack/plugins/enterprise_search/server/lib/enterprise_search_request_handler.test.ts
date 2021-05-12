@@ -6,13 +6,19 @@
  */
 
 import { mockConfig, mockLogger } from '../__mocks__';
-import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
+
+import {
+  ENTERPRISE_SEARCH_KIBANA_COOKIE,
+  JSON_HEADER,
+  READ_ONLY_MODE_HEADER,
+} from '../../common/constants';
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
 jest.mock('node-fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
+
 const { Response } = jest.requireActual('node-fetch');
 
 const responseMock = {
@@ -94,6 +100,17 @@ describe('EnterpriseSearchRequestHandler', () => {
         });
       });
 
+      it('passes a body if that body is a string buffer', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { body: Buffer.from('{"bodacious":true}') });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/example', {
+          body: '{"bodacious":true}',
+        });
+      });
+
       it('passes request params', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
           path: '/api/example',
@@ -168,6 +185,40 @@ describe('EnterpriseSearchRequestHandler', () => {
           statusCode: 201,
           headers: mockExpectedResponseHeaders,
         });
+      });
+
+      it('filters out any _sessionData passed back from Enterprise Search', async () => {
+        const jsonWithSessionData = {
+          _sessionData: {
+            secrets: 'no peeking',
+          },
+          regular: 'data',
+        };
+
+        EnterpriseSearchAPI.mockReturn(jsonWithSessionData, { headers: JSON_HEADER });
+
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/prep' });
+        await makeAPICall(requestHandler);
+
+        expect(responseMock.custom).toHaveBeenCalledWith({
+          statusCode: 200,
+          body: {
+            regular: 'data',
+          },
+          headers: mockExpectedResponseHeaders,
+        });
+      });
+    });
+
+    it('works if response contains no json data', async () => {
+      EnterpriseSearchAPI.mockReturn();
+
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/prep' });
+      await makeAPICall(requestHandler);
+
+      expect(responseMock.custom).toHaveBeenCalledWith({
+        statusCode: 200,
+        headers: mockExpectedResponseHeaders,
       });
     });
   });
@@ -376,6 +427,33 @@ describe('EnterpriseSearchRequestHandler', () => {
     });
   });
 
+  describe('setSessionData', () => {
+    it('sets the value of wsOAuthTokenPackage in a cookie', async () => {
+      const tokenPackage = 'some_encrypted_secrets';
+
+      const mockNow = 'Thu, 04 Mar 2021 22:40:32 GMT';
+      const mockInAnHour = 'Thu, 04 Mar 2021 23:40:32 GMT';
+      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => {
+        return new Date(mockNow).valueOf();
+      });
+
+      const sessionDataBody = {
+        _sessionData: { wsOAuthTokenPackage: tokenPackage },
+        regular: 'data',
+      };
+
+      EnterpriseSearchAPI.mockReturn(sessionDataBody, { headers: JSON_HEADER });
+
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/' });
+      await makeAPICall(requestHandler);
+
+      expect(enterpriseSearchRequestHandler.headers).toEqual({
+        ['set-cookie']: `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}; Path=/; Expires=${mockInAnHour}; SameSite=Lax; HttpOnly`,
+        ...mockExpectedResponseHeaders,
+      });
+    });
+  });
+
   it('isEmptyObj', async () => {
     expect(enterpriseSearchRequestHandler.isEmptyObj({})).toEqual(true);
     expect(enterpriseSearchRequestHandler.isEmptyObj({ empty: false })).toEqual(false);
@@ -401,10 +479,12 @@ const EnterpriseSearchAPI = {
       ...expectedParams,
     });
   },
-  mockReturn(response: object, options?: any) {
+  mockReturn(response?: object, options?: any) {
     fetchMock.mockImplementation(() => {
       const headers = Object.assign({}, mockExpectedResponseHeaders, options?.headers);
-      return Promise.resolve(new Response(JSON.stringify(response), { ...options, headers }));
+      return Promise.resolve(
+        new Response(response ? JSON.stringify(response) : undefined, { ...options, headers })
+      );
     });
   },
   mockReturnError() {

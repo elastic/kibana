@@ -40,7 +40,7 @@ import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
-} from '../../../../../alerts/common/parse_duration';
+} from '../../../../../alerting/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { AlertReducerAction, InitialAlert } from './alert_reducer';
 import {
@@ -61,7 +61,7 @@ import {
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerts/common';
+} from '../../../../../alerting/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
@@ -102,8 +102,8 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   }
   if (!alertObject.alertTypeId) {
     errors.alertTypeId.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredAlertTypeIdText', {
-        defaultMessage: 'Alert type is required.',
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredRuleTypeIdText', {
+        defaultMessage: 'Rule type is required.',
       })
     );
   }
@@ -113,7 +113,7 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   if (emptyConnectorActions !== undefined) {
     errors.actionConnectors.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector', {
-        defaultMessage: 'Action connector for {actionTypeId} is required.',
+        defaultMessage: 'Action for {actionTypeId} connector is required.',
         values: { actionTypeId: emptyConnectorActions.actionTypeId },
       })
     );
@@ -135,14 +135,10 @@ export function getAlertErrors(
     ...alertBaseErrors,
   } as IErrorObject;
 
-  const alertActionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
-    return {
-      ...prev,
-      [alertAction.id]: actionTypeRegistry
-        .get(alertAction.actionTypeId)
-        ?.validateParams(alertAction.params).errors,
-    };
-  }, {}) as Record<string, IErrorObject>;
+  const alertActionsErrors = alert.actions.map((alertAction: AlertAction) => {
+    return actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+      .errors;
+  });
   return {
     alertParamsErrors,
     alertBaseErrors,
@@ -160,13 +156,11 @@ export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
 export function isValidAlert(
   alertObject: InitialAlert | Alert,
   validationResult: IErrorObject,
-  actionsErrors: Record<string, IErrorObject>
+  actionsErrors: IErrorObject[]
 ): alertObject is Alert {
   return (
     !hasObjectErrors(validationResult) &&
-    Object.keys(actionsErrors).find((actionErrorsKey) =>
-      hasObjectErrors(actionsErrors[actionErrorsKey])
-    ) === undefined
+    actionsErrors.every((error: IErrorObject) => !hasObjectErrors(error))
   );
 }
 
@@ -277,8 +271,8 @@ export const AlertForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
-            { defaultMessage: 'Unable to load alert types' }
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadRuleTypesMessage',
+            { defaultMessage: 'Unable to load rule types' }
           ),
         });
       }
@@ -581,8 +575,8 @@ export const AlertForm = ({
             fallback={
               <SectionLoading>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingAlertTypeParamsDescription"
-                  defaultMessage="Loading alert type params…"
+                  id="xpack.triggersActionsUI.sections.alertForm.loadingRuleTypeParamsDescription"
+                  defaultMessage="Loading rule type params…"
                 />
               </SectionLoading>
             }
@@ -591,6 +585,7 @@ export const AlertForm = ({
               alertParams={alert.params}
               alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
               alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              alertNotifyWhen={alert.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
               setAlertParams={setAlertParams}
               setAlertProperty={setAlertProperty}
@@ -768,6 +763,7 @@ export const AlertForm = ({
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
                   }}
+                  data-test-subj="intervalInputUnit"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -813,8 +809,8 @@ export const AlertForm = ({
                     className="actActionForm__getMoreActionsLink"
                   >
                     <FormattedMessage
-                      defaultMessage="Get more alert types"
-                      id="xpack.triggersActionsUI.sections.actionForm.getMoreAlertTypesTitle"
+                      defaultMessage="Get more rule types"
+                      id="xpack.triggersActionsUI.sections.actionForm.getMoreRuleTypesTitle"
                     />
                   </EuiLink>
                 </EuiTitle>
@@ -824,8 +820,8 @@ export const AlertForm = ({
               <EuiTitle size="xxs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertForm.alertTypeSelectLabel"
-                    defaultMessage="Select alert type"
+                    id="xpack.triggersActionsUI.sections.alertForm.ruleTypeSelectLabel"
+                    defaultMessage="Select rule type"
                   />
                 </h5>
               </EuiTitle>
@@ -874,8 +870,8 @@ export const AlertForm = ({
       ) : (
         <SectionLoading>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertForm.loadingAlertTypesDescription"
-            defaultMessage="Loading alert types…"
+            id="xpack.triggersActionsUI.sections.alertForm.loadingRuleTypesDescription"
+            defaultMessage="Loading rule types…"
           />
         </SectionLoading>
       )}
@@ -891,8 +887,8 @@ const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedAlertTypesTitle"
-          defaultMessage="You have not been authorized to {operation} any Alert types"
+          id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedRuleTypesTitle"
+          defaultMessage="You have not been authorized to {operation} any Rule types"
           values={{ operation }}
         />
       </h2>
@@ -901,8 +897,8 @@ const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
       <div>
         <p role="banner">
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedAlertTypes"
-            defaultMessage="In order to {operation} an Alert you need to have been granted the appropriate privileges."
+            id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedRuleTypes"
+            defaultMessage="In order to {operation} a Rule you need to have been granted the appropriate privileges."
             values={{ operation }}
           />
         </p>

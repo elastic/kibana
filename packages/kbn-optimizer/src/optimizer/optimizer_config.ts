@@ -17,6 +17,7 @@ import {
   ThemeTag,
   ThemeTags,
   parseThemeTags,
+  omit,
 } from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
@@ -38,16 +39,6 @@ function pickMaxWorkerCount(dist: boolean) {
   const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
   // ensure we always have at least two workers
   return Math.max(maxWorkers, 2);
-}
-
-function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj) as any) {
-    if (!keys.includes(key)) {
-      result[key] = value;
-    }
-  }
-  return result as Omit<T, K>;
 }
 
 interface Options {
@@ -115,6 +106,9 @@ interface Options {
    *  - "k7light"
    */
   themes?: ThemeTag | '*' | ThemeTag[];
+
+  /** path to a limits.yml file that should be used to inform ci-stats of metric limits */
+  limitsPath?: string;
 }
 
 export interface ParsedOptions {
@@ -211,6 +205,7 @@ export class OptimizerConfig {
   }
 
   static create(inputOptions: Options) {
+    const limits = inputOptions.limitsPath ? readLimits(inputOptions.limitsPath) : {};
     const options = OptimizerConfig.parseOptions(inputOptions);
     const plugins = findKibanaPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
     const bundles = [
@@ -223,10 +218,11 @@ export class OptimizerConfig {
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
+              pageLoadAssetSizeLimit: limits.pageLoadAssetSize?.core,
             }),
           ]
         : []),
-      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
+      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot, limits),
     ];
 
     return new OptimizerConfig(
@@ -239,8 +235,7 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags,
-      readLimits()
+      options.themeTags
     );
   }
 
@@ -254,8 +249,7 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags,
-    public readonly limits: Limits
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {

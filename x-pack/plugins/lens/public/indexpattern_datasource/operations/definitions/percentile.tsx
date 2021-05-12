@@ -12,6 +12,7 @@ import { AggFunctionsMapping } from 'src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import {
+  getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
@@ -42,14 +43,17 @@ function ofName(name: string, percentile: number) {
 
 const DEFAULT_PERCENTILE_VALUE = 95;
 
+const supportedFieldTypes = ['number', 'histogram'];
+
 export const percentileOperation: OperationDefinition<PercentileIndexPatternColumn, 'field'> = {
   type: 'percentile',
   displayName: i18n.translate('xpack.lens.indexPattern.percentile', {
     defaultMessage: 'Percentile',
   }),
   input: 'field',
+  filterable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
-    if (fieldType === 'number' && aggregatable && !aggregationRestrictions) {
+    if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -62,7 +66,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
 
     return Boolean(
       newField &&
-        newField.type === 'number' &&
+        supportedFieldTypes.includes(newField.type) &&
         newField.aggregatable &&
         !newField.aggregationRestrictions
     );
@@ -70,12 +74,11 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   getDefaultLabel: (column, indexPattern, columns) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
   buildColumn: ({ field, previousColumn, indexPattern }) => {
-    const existingFormat =
-      previousColumn?.params && 'format' in previousColumn?.params
-        ? previousColumn?.params?.format
-        : undefined;
     const existingPercentileParam =
-      previousColumn?.operationType === 'percentile' && previousColumn?.params.percentile;
+      previousColumn?.operationType === 'percentile' &&
+      previousColumn.params &&
+      'percentile' in previousColumn.params &&
+      previousColumn.params.percentile;
     const newPercentileParam = existingPercentileParam || DEFAULT_PERCENTILE_VALUE;
     return {
       label: ofName(getSafeName(field.name, indexPattern), newPercentileParam),
@@ -84,9 +87,10 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
+      filter: previousColumn?.filter,
       params: {
-        format: existingFormat,
         percentile: newPercentileParam,
+        ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },
@@ -98,17 +102,16 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>('aggPercentiles', {
-      id: columnId,
-      enabled: true,
-      schema: 'metric',
-      field: column.sourceField,
-      percents: [column.params.percentile],
-    }).toAst();
-  },
-  getEsAggsSuffix: (column) => {
-    const value = column.params.percentile;
-    return `.${value}`;
+    return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(
+      'aggSinglePercentile',
+      {
+        id: columnId,
+        enabled: true,
+        schema: 'metric',
+        field: column.sourceField,
+        percentile: column.params.percentile,
+      }
+    ).toAst();
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),

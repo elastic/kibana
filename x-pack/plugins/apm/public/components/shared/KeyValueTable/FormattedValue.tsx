@@ -7,10 +7,10 @@
 
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
-const EmptyValue = styled.span`
+const EmptyValue = euiStyled.span`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
   text-align: left;
 `;

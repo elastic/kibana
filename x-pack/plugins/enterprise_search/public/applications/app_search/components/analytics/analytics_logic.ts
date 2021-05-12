@@ -8,9 +8,9 @@
 import { kea, MakeLogicType } from 'kea';
 import queryString from 'query-string';
 
-import { KibanaLogic } from '../../../shared/kibana';
-import { HttpLogic } from '../../../shared/http';
 import { flashAPIErrors } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
@@ -21,7 +21,6 @@ interface AnalyticsValues extends AnalyticsData, QueryDetails {
 }
 
 interface AnalyticsActions {
-  onAnalyticsUnavailable(): void;
   onAnalyticsDataLoad(data: AnalyticsData): AnalyticsData;
   onQueryDataLoad(data: QueryDetails): QueryDetails;
   loadAnalyticsData(): void;
@@ -31,7 +30,6 @@ interface AnalyticsActions {
 export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsActions>>({
   path: ['enterprise_search', 'app_search', 'analytics_logic'],
   actions: () => ({
-    onAnalyticsUnavailable: true,
     onAnalyticsDataLoad: (data) => data,
     onQueryDataLoad: (data) => data,
     loadAnalyticsData: true,
@@ -43,15 +41,6 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
       {
         loadAnalyticsData: () => true,
         loadQueryData: () => true,
-        onAnalyticsUnavailable: () => false,
-        onAnalyticsDataLoad: () => false,
-        onQueryDataLoad: () => false,
-      },
-    ],
-    analyticsUnavailable: [
-      false,
-      {
-        onAnalyticsUnavailable: () => true,
         onAnalyticsDataLoad: () => false,
         onQueryDataLoad: () => false,
       },
@@ -172,15 +161,9 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
         const url = `/api/app_search/engines/${engineName}/analytics/queries`;
 
         const response = await http.get(url, { query });
-
-        if (response.analyticsUnavailable) {
-          actions.onAnalyticsUnavailable();
-        } else {
-          actions.onAnalyticsDataLoad(response);
-        }
+        actions.onAnalyticsDataLoad(response);
       } catch (e) {
         flashAPIErrors(e);
-        actions.onAnalyticsUnavailable();
       }
     },
     loadQueryData: async (query) => {
@@ -199,14 +182,9 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
 
         const response = await http.get(url, { query: queryParams });
 
-        if (response.analyticsUnavailable) {
-          actions.onAnalyticsUnavailable();
-        } else {
-          actions.onQueryDataLoad(response);
-        }
+        actions.onQueryDataLoad(response);
       } catch (e) {
         flashAPIErrors(e);
-        actions.onAnalyticsUnavailable();
       }
     },
   }),

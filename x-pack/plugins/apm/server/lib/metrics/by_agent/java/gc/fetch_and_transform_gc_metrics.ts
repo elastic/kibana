@@ -7,6 +7,7 @@
 
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
@@ -22,12 +23,16 @@ import { getBucketSize } from '../../../../helpers/get_bucket_size';
 import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 
 export async function fetchAndTransformGcMetrics({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
   chartBase,
   fieldName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -39,6 +44,8 @@ export async function fetchAndTransformGcMetrics({
   const { bucketSize } = getBucketSize({ start, end });
 
   const projection = getMetricsProjection({
+    environment,
+    kuery,
     setup,
     serviceName,
     serviceNodeName,
@@ -120,10 +127,9 @@ export async function fetchAndTransformGcMetrics({
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const bucketValue = bucket.value?.value;
-      const y =
-        bucketValue !== null && bucketValue !== undefined && bucket.value
-          ? round(bucketValue * (60 / bucketSize), 1)
-          : null;
+      const y = isFiniteNumber(bucketValue)
+        ? round(bucketValue * (60 / bucketSize), 1)
+        : null;
 
       return {
         y,

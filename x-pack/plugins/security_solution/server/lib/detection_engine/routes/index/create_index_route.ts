@@ -66,9 +66,7 @@ export const createDetectionIndex = async (
   context: SecuritySolutionRequestHandlerContext,
   siemClient: AppClient
 ): Promise<void> => {
-  const clusterClient = context.core.elasticsearch.legacy.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = clusterClient.callAsCurrentUser;
 
   if (!siemClient) {
     throw new CreateIndexError('', 404);
@@ -76,20 +74,20 @@ export const createDetectionIndex = async (
 
   const index = siemClient.getSignalsIndex();
   await ensureMigrationCleanupPolicy({ alias: index, esClient });
-  const policyExists = await getPolicyExists(callCluster, index);
+  const policyExists = await getPolicyExists(esClient, index);
   if (!policyExists) {
-    await setPolicy(callCluster, index, signalsPolicy);
+    await setPolicy(esClient, index, signalsPolicy);
   }
   if (await templateNeedsUpdate({ alias: index, esClient })) {
-    await setTemplate(callCluster, index, getSignalsTemplate(index));
+    await setTemplate(esClient, index, getSignalsTemplate(index));
   }
-  const indexExists = await getIndexExists(callCluster, index);
+  const indexExists = await getIndexExists(esClient, index);
   if (indexExists) {
-    const indexVersion = await getIndexVersion(callCluster, index);
+    const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
-      await callCluster('indices.rollover', { alias: index });
+      await esClient.indices.rollover({ alias: index });
     }
   } else {
-    await createBootstrapIndex(callCluster, index);
+    await createBootstrapIndex(esClient, index);
   }
 };

@@ -6,7 +6,7 @@
  */
 
 import { coreMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-import { Plugin } from './plugin';
+import { FeaturesPlugin } from './plugin';
 
 describe('Features Plugin', () => {
   let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
@@ -27,11 +27,25 @@ describe('Features Plugin', () => {
         namespaceType: 'single' as 'single',
       },
     ]);
+    typeRegistry.getImportableAndExportableTypes.mockReturnValue([
+      {
+        name: 'hidden-importableAndExportable',
+        hidden: true,
+        mappings: { properties: {} },
+        namespaceType: 'single' as 'single',
+      },
+      {
+        name: 'not-hidden-importableAndExportable',
+        hidden: false,
+        mappings: { properties: {} },
+        namespaceType: 'single' as 'single',
+      },
+    ]);
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
   });
 
   it('returns OSS + registered kibana features', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     const { registerKibanaFeature } = await plugin.setup(coreSetup, {});
     registerKibanaFeature({
       id: 'baz',
@@ -58,7 +72,7 @@ describe('Features Plugin', () => {
   });
 
   it('returns OSS + registered kibana features with timelion when available', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup, {
       visTypeTimelion: { uiEnabled: true },
     });
@@ -87,8 +101,10 @@ describe('Features Plugin', () => {
     `);
   });
 
-  it('registers kibana features with not hidden saved objects types', async () => {
-    const plugin = new Plugin(initContext);
+  it('registers kibana features with visible saved objects types and hidden saved object types that are importable and exportable', async () => {
+    typeRegistry.isHidden.mockReturnValueOnce(true);
+    typeRegistry.isHidden.mockReturnValueOnce(false);
+    const plugin = new FeaturesPlugin(initContext);
     await plugin.setup(coreSetup, {});
     const { getKibanaFeatures } = plugin.start(coreStart);
 
@@ -98,10 +114,12 @@ describe('Features Plugin', () => {
 
     expect(soTypes.includes('foo')).toBe(true);
     expect(soTypes.includes('bar')).toBe(false);
+    expect(soTypes.includes('hidden-importableAndExportable')).toBe(true);
+    expect(soTypes.includes('not-hidden-importableAndExportable')).toBe(false);
   });
 
   it('returns registered elasticsearch features', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     const { registerElasticsearchFeature } = await plugin.setup(coreSetup, {});
     registerElasticsearchFeature({
       id: 'baz',
@@ -123,7 +141,7 @@ describe('Features Plugin', () => {
   });
 
   it('registers a capabilities provider', async () => {
-    const plugin = new Plugin(initContext);
+    const plugin = new FeaturesPlugin(initContext);
     await plugin.setup(coreSetup, {});
 
     expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledTimes(1);

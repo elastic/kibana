@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository } from './lib';
+import type {
+  ISavedObjectsRepository,
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+} from './lib';
 import {
   SavedObject,
   SavedObjectError,
@@ -96,7 +101,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+  extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -129,6 +134,35 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * The Elasticsearch `_score` of this result.
    */
   score: number;
+  /**
+   * The Elasticsearch `sort` value of this result.
+   *
+   * @remarks
+   * This can be passed directly to the `searchAfter` param in the {@link SavedObjectsFindOptions}
+   * in order to page through large numbers of hits. It is recommended you use this alongside
+   * a Point In Time (PIT) that was opened with {@link SavedObjectsClient.openPointInTimeForType}.
+   *
+   * @example
+   * ```ts
+   * const { id } = await savedObjectsClient.openPointInTimeForType('visualization');
+   * const page1 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id },
+   * });
+   * const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+   * const page2 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id: page1.pit_id },
+   *   searchAfter: lastHit.sort,
+   * });
+   * await savedObjectsClient.closePointInTime(page2.pit_id);
+   * ```
+   */
+  sort?: string[];
 }
 
 /**
@@ -139,11 +173,13 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
  *
  * @public
  */
-export interface SavedObjectsFindResponse<T = unknown> {
+export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
+  aggregations?: A;
   saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
   per_page: number;
   page: number;
+  pit_id?: string;
 }
 
 /**
@@ -171,13 +207,15 @@ export interface SavedObjectsCheckConflictsResponse {
  *
  * @public
  */
-export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** If specified, will be used to perform an upsert if the document doesn't exist */
+  upsert?: Attributes;
 }
 
 /**
@@ -309,6 +347,54 @@ export interface SavedObjectsResolveResponse<T = unknown> {
    *    `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
    */
   outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+  /**
+   * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
+   */
+  aliasTargetId?: string;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+  /**
+   * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
+   */
+  keepAlive?: string;
+  /**
+   * An optional ES preference value to be used for the query.
+   */
+  preference?: string;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeResponse {
+  /**
+   * PIT ID returned from ES.
+   */
+  id: string;
+}
+
+/**
+ * @public
+ */
+export type SavedObjectsClosePointInTimeOptions = SavedObjectsBaseOptions;
+
+/**
+ * @public
+ */
+export interface SavedObjectsClosePointInTimeResponse {
+  /**
+   * If true, all search contexts associated with the PIT id are
+   * successfully closed.
+   */
+  succeeded: boolean;
+  /**
+   * The number of search contexts that have been successfully closed.
+   */
+  num_freed: number;
 }
 
 /**
@@ -380,7 +466,9 @@ export class SavedObjectsClient {
    *
    * @param options
    */
-  async find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
+  async find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponse<T, A>> {
     return await this._repository.find(options);
   }
 
@@ -443,7 +531,7 @@ export class SavedObjectsClient {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: SavedObjectsUpdateOptions = {}
+    options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
   }
@@ -503,5 +591,88 @@ export class SavedObjectsClient {
     options?: SavedObjectsRemoveReferencesToOptions
   ) {
     return await this._repository.removeReferencesTo(type, id, options);
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to {@link SavedObjectsClient.find} to search
+   * against that PIT.
+   *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsClient.createPointInTimeFinder} method.
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    return await this._repository.openPointInTimeForType(type, options);
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the
+   * Elasticsearch client, and is included in the Saved Objects Client as a convenience
+   * for consumers who are using {@link SavedObjectsClient.openPointInTimeForType}.
+   *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsClient.createPointInTimeFinder} method.
+   */
+  async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this._repository.closePointInTime(id, options);
+  }
+
+  /**
+   * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
+   * large sets of saved objects. We strongly recommend using this API for
+   * any `find` queries that might return more than 1000 saved objects,
+   * however this API is only intended for use in server-side "batch"
+   * processing of objects where you are collecting all objects in memory
+   * or streaming them back to the client.
+   *
+   * Do NOT use this API in a route handler to facilitate paging through
+   * saved objects on the client-side unless you are streaming all of the
+   * results back to the client at once. Because the returned generator is
+   * stateful, you cannot rely on subsequent http requests retrieving new
+   * pages from the same Kibana server in multi-instance deployments.
+   *
+   * The generator wraps calls to {@link SavedObjectsClient.find} and iterates
+   * over multiple pages of results using `_pit` and `search_after`. This will
+   * open a new Point-In-Time (PIT), and continue paging until a set of
+   * results is received that's smaller than the designated `perPage`.
+   *
+   * Once you have retrieved all of the results you need, it is recommended
+   * to call `close()` to clean up the PIT and prevent Elasticsearch from
+   * consuming resources unnecessarily. This is only required if you are
+   * done iterating and have not yet paged through all of the results: the
+   * PIT will automatically be closed for you once you reach the last page
+   * of results, or if the underlying call to `find` fails for any reason.
+   *
+   * @example
+   * ```ts
+   * const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+   *   type: 'visualization',
+   *   search: 'foo*',
+   *   perPage: 100,
+   * };
+   *
+   * const finder = savedObjectsClient.createPointInTimeFinder(findOptions);
+   *
+   * const responses: SavedObjectFindResponse[] = [];
+   * for await (const response of finder.find()) {
+   *   responses.push(...response);
+   *   if (doneSearching) {
+   *     await finder.close();
+   *   }
+   * }
+   * ```
+   */
+  createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ): ISavedObjectsPointInTimeFinder {
+    return this._repository.createPointInTimeFinder(findOptions, {
+      client: this,
+      // Include dependencies last so that SO client wrappers have their settings applied.
+      ...dependencies,
+    });
   }
 }

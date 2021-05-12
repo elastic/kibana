@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { Capabilities, HttpSetup } from 'kibana/public';
+import { Capabilities, HttpSetup, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter/target/common';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import {
   IndexPatternsContract,
   TimefilterContract,
@@ -23,6 +25,7 @@ import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public'
 import { Document } from '../../persistence/saved_object_store';
 import { LensAttributeService } from '../../lens_attribute_service';
 import { DOC_TYPE } from '../../../common';
+import { ErrorMessage } from '../types';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -32,7 +35,10 @@ export interface LensEmbeddableStartServices {
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
   uiActions?: UiActionsStart;
-  documentToExpression: (doc: Document) => Promise<Ast | null>;
+  usageCollection?: UsageCollectionSetup;
+  documentToExpression: (
+    doc: Document
+  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -49,7 +55,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
-    return capabilities.visualize.save as boolean;
+    return Boolean(capabilities.visualize.save || capabilities.dashboard?.showWriteControls);
   };
 
   canCreateNew() {
@@ -82,6 +88,8 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       coreHttp,
       attributeService,
       indexPatternService,
+      capabilities,
+      usageCollection,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../../async_services');
@@ -92,14 +100,29 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         indexPatternService,
         timefilter,
         expressionRenderer,
-        editable: await this.isEditable(),
         basePath: coreHttp.basePath,
         getTrigger: uiActions?.getTrigger,
         getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
+        capabilities: {
+          canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
+          canSaveVisualizations: Boolean(capabilities.visualize.save),
+        },
+        usageCollection,
       },
       input,
       parent
     );
+  }
+
+  extract(state: EmbeddableStateWithType) {
+    let references: SavedObjectReference[] = [];
+    const typedState = (state as unknown) as LensEmbeddableInput;
+
+    if ('attributes' in typedState && typedState.attributes !== undefined) {
+      references = typedState.attributes.references;
+    }
+
+    return { state, references };
   }
 }

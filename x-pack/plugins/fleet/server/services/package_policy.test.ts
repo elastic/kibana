@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+  httpServerMock,
+} from 'src/core/server/mocks';
+
+import type { SavedObjectsClient, SavedObjectsUpdateResponse } from 'src/core/server';
+import type { KibanaRequest } from 'kibana/server';
+
+import type { PackageInfo, PackagePolicySOAttributes, AgentPolicySOAttributes } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
+import type { ExternalCallback } from '..';
+
+import { createAppContextStartContractMock, xpackMocks } from '../mocks';
+
 import { packagePolicyService } from './package_policy';
-import { PackageInfo, PackagePolicySOAttributes } from '../types';
-import { SavedObjectsUpdateResponse } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
-import { KibanaRequest } from 'kibana/server';
-import { xpackMocks } from '../../../../mocks';
-import { ExternalCallback } from '..';
 import { appContextService } from './app_context';
-import { createAppContextStartContractMock } from '../mocks';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -32,6 +38,17 @@ paths:
       },
     ];
   }
+  if (dataset === 'dataset1_level1') {
+    return [
+      {
+        buffer: Buffer.from(`
+type: log
+metricset: ["dataset1.level1"]
+`),
+      },
+    ];
+  }
+
   return [
     {
       buffer: Buffer.from(`
@@ -62,6 +79,26 @@ jest.mock('./epm/registry', () => {
   };
 });
 
+jest.mock('./agent_policy', () => {
+  return {
+    agentPolicyService: {
+      get: async (soClient: SavedObjectsClient, id: string) => {
+        const agentPolicySO = await soClient.get<AgentPolicySOAttributes>(
+          'ingest-agent-policies',
+          id
+        );
+        if (!agentPolicySO) {
+          return null;
+        }
+        const agentPolicy = { id: agentPolicySO.id, ...agentPolicySO.attributes };
+        agentPolicy.package_policies = [];
+        return agentPolicy;
+      },
+      bumpRevision: () => {},
+    },
+  };
+});
+
 describe('Package policy service', () => {
   describe('compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
@@ -72,6 +109,7 @@ describe('Package policy service', () => {
               type: 'logs',
               dataset: 'package.dataset1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
             },
           ],
           policy_templates: [
@@ -125,6 +163,57 @@ describe('Package policy service', () => {
       ]);
     });
 
+    it('should work with a two level dataset name', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'package.dataset1.level1',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1_level1',
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log' }],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1.level1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1.level1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1.level1'],
+                type: 'log',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should work with config variables at the input level', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
         ({
@@ -133,6 +222,7 @@ describe('Package policy service', () => {
               dataset: 'package.dataset1',
               type: 'logs',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
             },
           ],
           policy_templates: [
@@ -235,6 +325,7 @@ describe('Package policy service', () => {
               dataset: 'package.dataset1',
               type: 'logs',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
             },
           ],
           policy_templates: [
@@ -340,8 +431,8 @@ describe('Package policy service', () => {
       });
       savedObjectsClient.update.mockImplementation(
         async (
-          type: string,
-          id: string
+          _type: string,
+          _id: string
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
           throw savedObjectsClient.errors.createConflictError('abc', '123');
         }
@@ -355,6 +446,133 @@ describe('Package policy service', () => {
           createPackagePolicyMock()
         )
       ).rejects.toThrow('Saved object [abc/123] conflict');
+    });
+
+    it('should only update input vars that are not frozen', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate }
+      );
+
+      const [modifiedInput] = result.inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
     });
   });
 

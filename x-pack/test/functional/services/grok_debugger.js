@@ -13,7 +13,7 @@ export function GrokDebuggerProvider({ getService }) {
   const retry = getService('retry');
 
   // test subject selectors
-  const SUBJ_CONTAINER = 'grokDebugger';
+  const SUBJ_CONTAINER = 'grokDebuggerContainer';
 
   const SUBJ_UI_ACE_EVENT_INPUT = `${SUBJ_CONTAINER} > aceEventInput > codeEditorContainer`;
   const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} > acePatternInput > codeEditorContainer`;
@@ -49,10 +49,8 @@ export function GrokDebuggerProvider({ getService }) {
     }
 
     async assertExists() {
-      await retry.try(async () => {
-        if (!(await testSubjects.exists(SUBJ_CONTAINER))) {
-          throw new Error('Expected to find the grok debugger');
-        }
+      await retry.waitFor('Grok Debugger to exist', async () => {
+        return await testSubjects.exists(SUBJ_CONTAINER);
       });
     }
 

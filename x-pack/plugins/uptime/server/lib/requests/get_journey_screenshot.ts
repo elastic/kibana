@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types/ping';
 
-interface GetJourneyScreenshotParams {
+export interface GetJourneyScreenshotParams {
   checkGroup: string;
   stepIndex: number;
 }
@@ -33,7 +34,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
               'synthetics.type': 'step/screenshot',
             },
           },
-        ],
+        ] as QueryContainer[],
       },
     },
     aggs: {
@@ -60,10 +61,10 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
     return null;
   }
 
-  const stepHit = result?.aggregations?.step.image.hits.hits[0]._source as Ping;
+  const stepHit = result?.aggregations?.step.image.hits.hits[0]?._source as Ping;
 
   return {
-    blob: stepHit.synthetics?.blob ?? null,
+    blob: stepHit?.synthetics?.blob ?? null,
     stepName: stepHit?.synthetics?.step?.name ?? '',
     totalSteps: result?.hits?.total.value,
   };

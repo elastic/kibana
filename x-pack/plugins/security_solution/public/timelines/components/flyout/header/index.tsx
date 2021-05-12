@@ -126,11 +126,11 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
         {show && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {activeTab === TimelineTabs.query && (
+              {(activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql) && (
                 <EuiFlexItem grow={false}>
                   <InspectButton
                     compact
-                    queryId={timelineId}
+                    queryId={`${timelineId}-${activeTab}`}
                     inputId="timeline"
                     inspectIndex={0}
                     isDisabled={!isDataInTimeline}
@@ -159,8 +159,16 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
 export const FlyoutHeaderPanel = React.memo(FlyoutHeaderPanelComponent);
 
 const StyledTimelineHeader = styled(EuiFlexGroup)`
-  margin: 0;
+  ${({ theme }) => `margin: ${theme.eui.euiSizeXS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS};`}
   flex: 0;
+`;
+
+const TimelineStatusInfoContainer = styled.span`
+  ${({ theme }) => `margin-left: ${theme.eui.euiSizeS};`}
+`;
+
+const KpisContainer = styled.div`
+  ${({ theme }) => `margin-right: ${theme.eui.euiSizeM};`}
 `;
 
 const RowFlexItem = styled(EuiFlexItem)`
@@ -311,25 +319,29 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   });
 
   return (
-    <StyledTimelineHeader alignItems="center">
+    <StyledTimelineHeader alignItems="center" gutterSize="s">
       <EuiFlexItem>
         <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
           <RowFlexItem>
             <TimelineName timelineId={timelineId} />
             <SaveTimelineButton timelineId={timelineId} initialFocus="title" />
+            <TimelineStatusInfoContainer>
+              <TimelineStatusInfo timelineId={timelineId} />
+            </TimelineStatusInfoContainer>
           </RowFlexItem>
           <RowFlexItem>
             <TimelineDescription timelineId={timelineId} />
             <SaveTimelineButton timelineId={timelineId} initialFocus="description" />
           </RowFlexItem>
-          <EuiFlexItem>
-            <TimelineStatusInfo timelineId={timelineId} />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={1}>
-        {activeTab === TimelineTabs.query ? <TimelineKPIs kpis={kpis} isLoading={loading} /> : null}
+      <EuiFlexItem grow={false}>
+        <KpisContainer>
+          {activeTab === TimelineTabs.query ? (
+            <TimelineKPIs kpis={kpis} isLoading={loading} />
+          ) : null}
+        </KpisContainer>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

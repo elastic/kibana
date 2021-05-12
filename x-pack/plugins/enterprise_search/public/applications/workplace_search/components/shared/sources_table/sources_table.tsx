@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiTable, EuiTableBody } from '@elastic/eui';
 
 import { TableHeader } from '../../../../shared/table_header/table_header';
-import { SourceRow, ISourceRow } from '../source_row';
 import { ContentSourceDetails } from '../../../types';
+import { SourceRow, ISourceRow } from '../source_row';
 
 interface SourcesTableProps extends ISourceRow {
   sources: ContentSourceDetails[];
@@ -27,7 +27,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
   if (onSearchableToggle) headerItems.push('Searchable');
 
   return (
-    <EuiTable className="table table--emphasized" responsive={false}>
+    <EuiTable responsive={false}>
       <TableHeader extraCell headerItems={headerItems} />
       <EuiTableBody>
         {sources.map((source) => (

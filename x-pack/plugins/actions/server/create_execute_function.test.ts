@@ -28,7 +28,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       preconfiguredActions: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -87,7 +87,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       preconfiguredActions: [
         {
           id: '123',
@@ -158,10 +158,10 @@ describe('execute()', () => {
     );
   });
 
-  test('throws when passing isESOUsingEphemeralEncryptionKey with true as a value', async () => {
+  test('throws when passing isESOCanEncrypt with false as a value', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: true,
+      isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       preconfiguredActions: [],
     });
@@ -173,7 +173,36 @@ describe('execute()', () => {
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+      `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+    );
+  });
+
+  test('throws when isMissingSecrets is true for connector', async () => {
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      isESOCanEncrypt: true,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      preconfiguredActions: [],
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        name: 'mock-action',
+        isMissingSecrets: true,
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    await expect(
+      executeFn(savedObjectsClient, {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        apiKey: null,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to execute action because no secrets are defined for the \\"mock-action\\" connector."`
     );
   });
 
@@ -181,7 +210,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [],
     });
@@ -211,7 +240,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [
         {

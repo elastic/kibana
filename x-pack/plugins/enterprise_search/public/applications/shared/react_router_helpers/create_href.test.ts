@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { httpServiceMock } from 'src/core/public/mocks';
 import { mockHistory } from '../../__mocks__';
+
+import { httpServiceMock } from 'src/core/public/mocks';
 
 import { createHref } from './';
 

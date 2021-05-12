@@ -20,7 +20,7 @@ import { getNodes } from './lib/get_nodes';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initSnapshotRoute = (libs: InfraBackendLibs) => {
-  const { framework } = libs;
+  const { framework, handleEsError } = libs;
 
   framework.registerRoute(
     {
@@ -31,28 +31,40 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const snapshotRequest = pipe(
-          SnapshotRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const snapshotRequest = pipe(
+        SnapshotRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const source = await libs.sources.getSourceConfiguration(
+      const source = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        snapshotRequest.sourceId
+      );
+      const compositeSize = libs.configuration.inventory.compositeSize;
+      const logQueryFields = await libs
+        .getLogQueryFields(
+          snapshotRequest.sourceId,
           requestContext.core.savedObjects.client,
-          snapshotRequest.sourceId
+          requestContext.core.elasticsearch.client.asCurrentUser
+        )
+        .catch(() => undefined);
+
+      UsageCollector.countNode(snapshotRequest.nodeType);
+      const client = createSearchClient(requestContext, framework);
+
+      try {
+        const snapshotResponse = await getNodes(
+          client,
+          snapshotRequest,
+          source,
+          compositeSize,
+          logQueryFields
         );
-
-        UsageCollector.countNode(snapshotRequest.nodeType);
-        const client = createSearchClient(requestContext, framework);
-        const snapshotResponse = await getNodes(client, snapshotRequest, source);
-
         return response.ok({
           body: SnapshotNodeResponseRT.encode(snapshotResponse),
         });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
+      } catch (err) {
+        return handleEsError({ error: err, response });
       }
     }
   );

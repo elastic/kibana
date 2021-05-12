@@ -24,7 +24,7 @@ import {
 } from '../../../../../common/constants';
 import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 import { IField } from '../../../fields/field';
 
 const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: IField) => {

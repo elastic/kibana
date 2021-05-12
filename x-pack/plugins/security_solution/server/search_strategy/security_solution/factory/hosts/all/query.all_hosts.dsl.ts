@@ -43,6 +43,7 @@ export const buildHostsQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
@@ -57,7 +58,7 @@ export const buildHostsQuery = ({
                 sort: [
                   {
                     '@timestamp': {
-                      order: 'desc',
+                      order: 'desc' as const,
                     },
                   },
                 ],
@@ -71,7 +72,6 @@ export const buildHostsQuery = ({
       },
       query: { bool: { filter } },
       size: 0,
-      track_total_hits: false,
     },
   };
 
@@ -87,6 +87,6 @@ const getQueryOrder = (sort: SortField<HostsFields>): QueryOrder => {
     case HostsFields.hostName:
       return { _key: sort.direction };
     default:
-      return assertUnreachable(sort.field as never);
+      return assertUnreachable(sort.field);
   }
 };

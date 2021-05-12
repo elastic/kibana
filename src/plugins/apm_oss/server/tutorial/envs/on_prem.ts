@@ -27,6 +27,7 @@ import {
   createGoAgentInstructions,
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
+  createPhpAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 
 export function onPremInstructions({
@@ -151,6 +152,10 @@ export function onPremInstructions({
           {
             id: INSTRUCTION_VARIANT.DOTNET,
             instructions: createDotNetAgentInstructions(),
+          },
+          {
+            id: INSTRUCTION_VARIANT.PHP,
+            instructions: createPhpAgentInstructions(),
           },
         ],
         statusCheck: {

@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
-import { Datatable, Render, ExpressionFunctionDefinition } from '../../../types';
+import { uniqBy } from 'lodash';
+import { Datatable, ExpressionValueRender, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   filterColumn: string;
+  labelColumn: string;
   valueColumn: string;
   filterGroup: string;
 }
 
 interface Return {
   column: string;
-  choices: any;
+  choices: Array<[string, string]>;
 }
 
 export function dropdownControl(): ExpressionFunctionDefinition<
   'dropdownControl',
   Datatable,
   Arguments,
-  Render<Return>
+  ExpressionValueRender<Return>
 > {
   const { help, args: argHelp } = getFunctionHelp().dropdownControl;
 
@@ -40,6 +41,11 @@ export function dropdownControl(): ExpressionFunctionDefinition<
         required: true,
         help: argHelp.filterColumn,
       },
+      labelColumn: {
+        types: ['string'],
+        required: false,
+        help: argHelp.labelColumn,
+      },
       valueColumn: {
         types: ['string'],
         required: true,
@@ -50,15 +56,18 @@ export function dropdownControl(): ExpressionFunctionDefinition<
         help: argHelp.filterGroup,
       },
     },
-    fn: (input, { valueColumn, filterColumn, filterGroup }) => {
-      let choices = [];
+    fn: (input, { valueColumn, filterColumn, filterGroup, labelColumn }) => {
+      let choices: Array<[string, string]> = [];
+      const labelCol = labelColumn || valueColumn;
 
       const filteredRows = input.rows.filter(
         (row) => row[valueColumn] !== null && row[valueColumn] !== undefined
       );
 
       if (filteredRows.length > 0) {
-        choices = uniq(filteredRows.map((row) => row[valueColumn])).sort();
+        choices = filteredRows.map((row) => [row[valueColumn], row[labelCol]]);
+
+        choices = uniqBy(choices, (choice) => choice[0]);
       }
 
       const column = filterColumn || valueColumn;

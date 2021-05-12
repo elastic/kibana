@@ -376,6 +376,8 @@ export interface DataState {
    */
   readonly resolverComponentInstanceID?: string;
 
+  readonly indices: string[];
+
   /**
    * The `search` part of the URL.
    */

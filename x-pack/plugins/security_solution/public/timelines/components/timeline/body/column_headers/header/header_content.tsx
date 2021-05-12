@@ -22,6 +22,7 @@ interface HeaderContentProps {
   isLoading: boolean;
   isResizing: boolean;
   onClick: () => void;
+  showSortingCapability: boolean;
   sort: Sort[];
 }
 
@@ -31,10 +32,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
   isLoading,
   isResizing,
   onClick,
+  showSortingCapability,
   sort,
 }) => (
   <EventsHeading data-test-subj={`header-${header.id}`} isLoading={isLoading}>
-    {header.aggregatable ? (
+    {header.aggregatable && showSortingCapability ? (
       <EventsHeadingTitleButton
         data-test-subj="header-sort-button"
         onClick={!isResizing && !isLoading ? onClick : noop}
@@ -44,7 +46,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
             data-test-subj="header-tooltip"
             content={<HeaderToolTipContent header={header} />}
           >
-            <>{header.label ?? header.id}</>
+            <>
+              {React.isValidElement(header.display)
+                ? header.display
+                : header.displayAsText ?? header.id}
+            </>
           </EuiToolTip>
         </TruncatableText>
 
@@ -61,7 +67,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
             data-test-subj="header-tooltip"
             content={<HeaderToolTipContent header={header} />}
           >
-            <>{header.label ?? header.id}</>
+            <>
+              {React.isValidElement(header.display)
+                ? header.display
+                : header.displayAsText ?? header.id}
+            </>
           </EuiToolTip>
         </TruncatableText>
       </EventsHeadingTitleSpan>

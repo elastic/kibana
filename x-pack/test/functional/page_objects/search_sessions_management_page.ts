@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SEARCH_SESSIONS_TABLE_ID } from '../../../../src/plugins/data/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -23,7 +24,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     async getList() {
-      const table = await testSubjects.find('searchSessionsMgmtTable');
+      const table = await testSubjects.find(SEARCH_SESSIONS_TABLE_ID);
       const allRows = await table.findAllByTestSubject('searchSessionsRow');
 
       return Promise.all(
@@ -32,7 +33,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
           const viewCell = await row.findByTestSubject('sessionManagementNameCol');
           const actionsCell = await row.findByTestSubject('sessionManagementActionsCol');
           return {
-            name: $.findTestSubject('sessionManagementNameCol').text(),
+            name: $.findTestSubject('sessionManagementNameCol').text().trim(),
             status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
             mainUrl: $.findTestSubject('sessionManagementNameCol').text(),
             created: $.findTestSubject('sessionManagementCreatedCol').text(),
@@ -45,15 +46,13 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
             reload: async () => {
               log.debug('management ui: reload the status');
               await actionsCell.click();
-              await find.clickByCssSelector(
-                '[data-test-subj="sessionManagementPopoverAction-reload"]'
-              );
+              await testSubjects.click('sessionManagementPopoverAction-reload');
             },
-            cancel: async () => {
-              log.debug('management ui: cancel the session');
+            delete: async () => {
+              log.debug('management ui: delete the session');
               await actionsCell.click();
               await find.clickByCssSelector(
-                '[data-test-subj="sessionManagementPopoverAction-cancel"]'
+                '[data-test-subj="sessionManagementPopoverAction-delete"]'
               );
               await PageObjects.common.clickConfirmOnModal();
             },

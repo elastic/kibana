@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ExceptionListType, NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+
 import {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
-  ExceptionListType,
-  NamespaceType,
   Page,
   PerPage,
   TotalOrUndefined,
@@ -32,8 +32,6 @@ export interface Pagination {
 }
 
 export type AddExceptionList = UpdateExceptionListSchema | CreateExceptionListSchema;
-
-export type AddExceptionListItem = CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
 
 export interface PersistHookProps {
   http: HttpStart;
@@ -128,6 +126,8 @@ export interface ExceptionListFilter {
   name?: string | null;
   list_id?: string | null;
   created_by?: string | null;
+  type?: string | null;
+  tags?: string | null;
 }
 
 export interface UseExceptionListsProps {

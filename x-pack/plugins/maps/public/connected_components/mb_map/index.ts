@@ -18,6 +18,7 @@ import {
   clearGoto,
   setMapInitError,
   MapExtentState,
+  setAreTilesLoaded,
 } from '../../actions';
 import {
   getLayerList,
@@ -68,6 +69,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     setMapInitError(errorMessage: string) {
       dispatch(setMapInitError(errorMessage));
+    },
+    setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
+      dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
     },
   };
 }

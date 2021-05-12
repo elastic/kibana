@@ -11,14 +11,15 @@ import { mockKibanaValues, setMockValues, setMockActions, rerender } from '../..
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../shared/loading';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { Loading } from '../../../shared/loading';
 import { LogRetentionCallout } from '../log_retention';
-import { AnalyticsHeader, AnalyticsUnavailable } from './components';
 
 import { AnalyticsLayout } from './analytics_layout';
+import { AnalyticsHeader } from './components';
 
 describe('AnalyticsLayout', () => {
   const { history } = mockKibanaValues;
@@ -26,7 +27,6 @@ describe('AnalyticsLayout', () => {
   const values = {
     history,
     dataLoading: false,
-    analyticsUnavailable: false,
   };
   const actions = {
     loadAnalyticsData: jest.fn(),
@@ -59,13 +59,6 @@ describe('AnalyticsLayout', () => {
     const wrapper = shallow(<AnalyticsLayout title="" />);
 
     expect(wrapper.type()).toEqual(Loading);
-  });
-
-  it('renders an unavailable component if analytics are unavailable', () => {
-    setMockValues({ ...values, analyticsUnavailable: true });
-    const wrapper = shallow(<AnalyticsLayout title="" />);
-
-    expect(wrapper.type()).toEqual(AnalyticsUnavailable);
   });
 
   describe('data loading', () => {

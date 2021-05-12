@@ -34,7 +34,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.display',
       {
-        defaultMessage: 'Only on status change.',
+        defaultMessage: 'Only on status change',
       }
     ),
     'data-test-subj': 'onActionGroupChange',
@@ -77,7 +77,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run with every active alert interval."
+              defaultMessage="Actions repeat at the rule interval when the alert is active."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.description"
             />
           </p>
@@ -166,7 +166,7 @@ export const AlertNotifyWhen = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'Define how often to repeat the action while the alert is active.',
+          defaultMessage: 'Define how often to repeat the action while the rule is active.',
         })}
       />
     </>

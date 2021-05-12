@@ -12,6 +12,7 @@ import {
   CoreStart,
   SavedObjectsServiceStart,
   Logger,
+  Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
@@ -45,6 +46,14 @@ export interface PluginSetupContract {
    * */
   getElasticsearchFeatures(): ElasticsearchFeature[];
   getFeaturesUICapabilities(): UICapabilities;
+
+  /*
+   * In the future, OSS features should register their own subfeature
+   * privileges. This can be done when parts of Reporting are moved to
+   * src/plugins. For now, this method exists for `reporting` to tell
+   * `features` to include Reporting when registering OSS features.
+   */
+  enableReportingUiCapabilities(): void;
 }
 
 export interface PluginStartContract {
@@ -59,19 +68,22 @@ interface TimelionSetupContract {
 /**
  * Represents Features Plugin instance that will be managed by the Kibana plugin system.
  */
-export class Plugin {
+export class FeaturesPlugin
+  implements
+    Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>> {
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
   private isTimelionEnabled: boolean = false;
+  private isReportingEnabled: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
-  ): Promise<RecursiveReadonly<PluginSetupContract>> {
+  ): RecursiveReadonly<PluginSetupContract> {
     this.isTimelionEnabled = visTypeTimelion !== undefined && visTypeTimelion.uiEnabled;
 
     defineRoutes({
@@ -97,6 +109,7 @@ export class Plugin {
         this.featureRegistry
       ),
       getFeaturesUICapabilities,
+      enableReportingUiCapabilities: this.enableReportingUiCapabilities.bind(this),
     });
   }
 
@@ -115,7 +128,15 @@ export class Plugin {
 
   private registerOssFeatures(savedObjects: SavedObjectsServiceStart) {
     const registry = savedObjects.getTypeRegistry();
-    const savedObjectTypes = registry.getVisibleTypes().map((t) => t.name);
+    const savedObjectVisibleTypes = registry.getVisibleTypes().map((t) => t.name);
+    const savedObjectImportableAndExportableHiddenTypes = registry
+      .getImportableAndExportableTypes()
+      .filter((t) => registry.isHidden(t.name))
+      .map((t) => t.name);
+
+    const savedObjectTypes = Array.from(
+      new Set([...savedObjectVisibleTypes, ...savedObjectImportableAndExportableHiddenTypes])
+    );
 
     this.logger.debug(
       `Registering OSS features with SO types: ${savedObjectTypes.join(', ')}. "includeTimelion": ${
@@ -125,10 +146,18 @@ export class Plugin {
     const features = buildOSSFeatures({
       savedObjectTypes,
       includeTimelion: this.isTimelionEnabled,
+      includeReporting: this.isReportingEnabled,
     });
 
     for (const feature of features) {
       this.featureRegistry.registerKibanaFeature(feature);
     }
+  }
+
+  private enableReportingUiCapabilities() {
+    this.logger.debug(
+      `Feature controls for Reporting plugin are enabled. Please assign access to Reporting use Kibana feature controls for applications.`
+    );
+    this.isReportingEnabled = true;
   }
 }

@@ -86,10 +86,19 @@ export class SavedObjectTypeRegistry {
   }
 
   /**
-   * Returns whether the type is multi-namespace (shareable);
+   * Returns whether the type is multi-namespace (shareable *or* isolated);
    * resolves to `false` if the type is not registered
    */
   public isMultiNamespace(type: string) {
+    const namespaceType = this.types.get(type)?.namespaceType;
+    return namespaceType === 'multiple' || namespaceType === 'multiple-isolated';
+  }
+
+  /**
+   * Returns whether the type is multi-namespace (shareable);
+   * resolves to `false` if the type is not registered
+   */
+  public isShareable(type: string) {
     return this.types.get(type)?.namespaceType === 'multiple';
   }
 

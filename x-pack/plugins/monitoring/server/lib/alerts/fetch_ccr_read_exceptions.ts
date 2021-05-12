@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
 
 export async function fetchCCRReadExceptions(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   index: string,
   startMs: number,
   endMs: number,
@@ -68,8 +69,8 @@ export async function fetchCCRReadExceptions(
                     sort: [
                       {
                         timestamp: {
-                          order: 'desc',
-                          unmapped_type: 'long',
+                          order: 'desc' as const,
+                          unmapped_type: 'long' as const,
                         },
                       },
                     ],
@@ -92,11 +93,12 @@ export async function fetchCCRReadExceptions(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: CCRReadExceptionsStats[] = [];
-  const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
+  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+  const { buckets: remoteClusterBuckets = [] } = response.aggregations?.remote_clusters;
 
-  if (!remoteClusterBuckets.length) {
+  if (!remoteClusterBuckets?.length) {
     return stats;
   }
 

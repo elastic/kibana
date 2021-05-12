@@ -7,6 +7,8 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
+import { ENTERPRISE_SEARCH_KIBANA_COOKIE } from '../../../common/constants';
+
 import {
   registerAccountSourcesRoute,
   registerAccountSourcesStatusRoute,
@@ -22,7 +24,7 @@ import {
   registerAccountSourceDisplaySettingsConfig,
   registerAccountSourceSchemasRoute,
   registerAccountSourceReindexJobRoute,
-  registerAccountSourceReindexJobStatusRoute,
+  registerAccountSourceDownloadDiagnosticsRoute,
   registerOrgSourcesRoute,
   registerOrgSourcesStatusRoute,
   registerOrgSourceRoute,
@@ -37,7 +39,7 @@ import {
   registerOrgSourceDisplaySettingsConfig,
   registerOrgSourceSchemasRoute,
   registerOrgSourceReindexJobRoute,
-  registerOrgSourceReindexJobStatusRoute,
+  registerOrgSourceDownloadDiagnosticsRoute,
   registerOrgSourceOauthConfigurationsRoute,
   registerOrgSourceOauthConfigurationRoute,
   registerOauthConnectorParamsRoute,
@@ -154,7 +156,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/account/create_source',
-        payload: 'body',
       });
 
       registerAccountCreateSourceRoute({
@@ -194,7 +195,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/account/sources/{id}/documents',
-        payload: 'body',
       });
 
       registerAccountSourceDocumentsRoute({
@@ -281,7 +281,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'patch',
         path: '/api/workplace_search/account/sources/{id}/settings',
-        payload: 'body',
       });
 
       registerAccountSourceSettingsRoute({
@@ -364,7 +363,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/account/sources/{id}/searchable',
-        payload: 'body',
       });
 
       registerAccountSourceSearchableRoute({
@@ -422,7 +420,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/account/sources/{id}/display_settings/config',
-        payload: 'body',
       });
 
       registerAccountSourceDisplaySettingsConfig({
@@ -489,7 +486,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/account/sources/{id}/schemas',
-        payload: 'body',
       });
 
       registerAccountSourceSchemasRoute({
@@ -544,17 +540,17 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status', () => {
+  describe('GET /api/workplace_search/account/sources/{sourceId}/download_diagnostics', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status',
+        path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
       });
 
-      registerAccountSourceReindexJobStatusRoute({
+      registerAccountSourceDownloadDiagnosticsRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -562,7 +558,7 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/sources/:sourceId/reindex_job/:jobId/status',
+        path: '/ws/sources/:sourceId/download_diagnostics',
       });
     });
   });
@@ -667,7 +663,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/create_source',
-        payload: 'body',
       });
 
       registerOrgCreateSourceRoute({
@@ -707,7 +702,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/sources/{id}/documents',
-        payload: 'body',
       });
 
       registerOrgSourceDocumentsRoute({
@@ -794,7 +788,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'patch',
         path: '/api/workplace_search/org/sources/{id}/settings',
-        payload: 'body',
       });
 
       registerOrgSourceSettingsRoute({
@@ -877,7 +870,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/org/sources/{id}/searchable',
-        payload: 'body',
       });
 
       registerOrgSourceSearchableRoute({
@@ -935,7 +927,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/sources/{id}/display_settings/config',
-        payload: 'body',
       });
 
       registerOrgSourceDisplaySettingsConfig({
@@ -1002,7 +993,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/sources/{id}/schemas',
-        payload: 'body',
       });
 
       registerOrgSourceSchemasRoute({
@@ -1048,17 +1038,17 @@ describe('sources routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status', () => {
+  describe('GET /api/workplace_search/org/sources/{sourceId}/download_diagnostics', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status',
+        path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
       });
 
-      registerOrgSourceReindexJobStatusRoute({
+      registerOrgSourceDownloadDiagnosticsRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -1066,7 +1056,7 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/sources/:sourceId/reindex_job/:jobId/status',
+        path: '/ws/org/sources/:sourceId/download_diagnostics',
       });
     });
   });
@@ -1102,7 +1092,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/settings/connectors',
-        payload: 'body',
       });
 
       registerOrgSourceOauthConfigurationsRoute({
@@ -1133,7 +1122,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/org/settings/connectors',
-        payload: 'body',
       });
 
       registerOrgSourceOauthConfigurationsRoute({
@@ -1187,7 +1175,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/workplace_search/org/settings/connectors/{serviceType}',
-        payload: 'body',
       });
 
       registerOrgSourceOauthConfigurationRoute({
@@ -1218,7 +1205,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/org/settings/connectors/{serviceType}',
-        payload: 'body',
       });
 
       registerOrgSourceOauthConfigurationRoute({
@@ -1265,6 +1251,15 @@ describe('sources routes', () => {
   });
 
   describe('GET /api/workplace_search/sources/create', () => {
+    const tokenPackage = 'some_encrypted_secrets';
+
+    const mockRequest = {
+      headers: {
+        authorization: 'BASIC 123',
+        cookie: `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}`,
+      },
+    };
+
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -1272,7 +1267,6 @@ describe('sources routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/workplace_search/sources/create',
-        payload: 'query',
       });
 
       registerOauthConnectorParamsRoute({
@@ -1282,8 +1276,11 @@ describe('sources routes', () => {
     });
 
     it('creates a request handler', () => {
+      mockRouter.callRoute(mockRequest as any);
+
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/create',
+        params: { token_package: tokenPackage },
       });
     });
   });

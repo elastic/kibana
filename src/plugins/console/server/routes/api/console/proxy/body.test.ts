@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { IKibanaResponse } from 'src/core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 
 import { Readable } from 'stream';
@@ -16,10 +16,14 @@ import * as requestModule from '../../../../lib/proxy_request';
 import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
-  let request: any;
+  let request: (
+    method: string,
+    path: string,
+    response?: string
+  ) => Promise<IKibanaResponse> | IKibanaResponse;
 
   beforeEach(() => {
-    request = (method: string, path: string, response: string) => {
+    request = (method, path, response) => {
       (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub(response));
       const handler = createHandler(getProxyRouteHandlerDeps({}));
 

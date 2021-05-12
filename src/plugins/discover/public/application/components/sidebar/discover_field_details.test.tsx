@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+// @ts-expect-error
+import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -18,7 +18,7 @@ import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 
 const indexPattern = getStubIndexPattern(
   'logstash-*',
-  (cfg: any) => cfg,
+  (cfg: unknown) => cfg,
   'time',
   stubbedLogstashFields(),
   coreMock.createSetup()

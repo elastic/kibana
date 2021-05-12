@@ -8,9 +8,11 @@
 import '../../../__mocks__/enterprise_search_url.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { SideNav, SideNavLink } from '../../../shared/layout';
+
 import { WorkplaceSearchNav } from './';
 
 describe('WorkplaceSearchNav', () => {

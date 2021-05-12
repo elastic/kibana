@@ -8,28 +8,25 @@
 import { getSeverity } from '../../../../common/anomaly_detection';
 import { getServiceHealthStatus } from '../../../../common/service_health_status';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
-import {
-  ServicesItemsProjection,
-  ServicesItemsSetup,
-} from './get_services_items';
+import { ServicesItemsSetup } from './get_services_items';
 
 interface AggregationParams {
+  environment?: string;
   setup: ServicesItemsSetup;
-  projection: ServicesItemsProjection;
   searchAggregatedTransactions: boolean;
 }
 
-export const getHealthStatuses = async (
-  { setup }: AggregationParams,
-  mlAnomaliesEnvironment?: string
-) => {
+export const getHealthStatuses = async ({
+  environment,
+  setup,
+}: AggregationParams) => {
   if (!setup.ml) {
     return [];
   }
 
   const anomalies = await getServiceAnomalies({
     setup,
-    environment: mlAnomaliesEnvironment,
+    environment,
   });
 
   return anomalies.serviceAnomalies.map((anomalyStats) => {

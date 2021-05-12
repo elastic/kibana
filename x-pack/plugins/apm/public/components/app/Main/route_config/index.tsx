@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
-import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
+import { getServiceNodeName } from '../../../../../common/service_nodes';
 import { APMRouteDefinition } from '../../../../application/routes';
 import { toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
@@ -23,7 +22,7 @@ import { AnomalyDetection } from '../../Settings/anomaly_detection';
 import { ApmIndices } from '../../Settings/ApmIndices';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
 import { TraceLink } from '../../TraceLink';
-import { TransactionDetails } from '../../TransactionDetails';
+import { TransactionDetails } from '../../transaction_details';
 import {
   CreateAgentConfigurationRouteHandler,
   EditAgentConfigurationRouteHandler,
@@ -114,6 +113,12 @@ function ServiceDetailsTransactions(
   return <ServiceDetails {...props} tab="transactions" />;
 }
 
+function ServiceDetailsProfiling(
+  props: RouteComponentProps<{ serviceName: string }>
+) {
+  return <ServiceDetails {...props} tab="profiling" />;
+}
+
 function SettingsAgentConfiguration(props: RouteComponentProps<{}>) {
   return (
     <Settings {...props}>
@@ -168,6 +173,7 @@ export const routes: APMRouteDefinition[] = [
     render: renderAsRedirectTo('/services'),
     breadcrumb: 'APM',
   },
+  // !! Need to be kept in sync with the searchDeepLinks in x-pack/plugins/apm/public/plugin.ts
   {
     exact: true,
     path: '/services',
@@ -176,6 +182,7 @@ export const routes: APMRouteDefinition[] = [
       defaultMessage: 'Services',
     }),
   },
+  // !! Need to be kept in sync with the searchDeepLinks in x-pack/plugins/apm/public/plugin.ts
   {
     exact: true,
     path: '/traces',
@@ -288,15 +295,7 @@ export const routes: APMRouteDefinition[] = [
     exact: true,
     path: '/services/:serviceName/nodes/:serviceNodeName/metrics',
     component: withApmServiceContext(ServiceNodeMetrics),
-    breadcrumb: ({ match }) => {
-      const { serviceNodeName } = match.params;
-
-      if (serviceNodeName === SERVICE_NODE_NAME_MISSING) {
-        return UNIDENTIFIED_SERVICE_NODES_LABEL;
-      }
-
-      return serviceNodeName || '';
-    },
+    breadcrumb: ({ match }) => getServiceNodeName(match.params.serviceNodeName),
   },
   {
     exact: true,
@@ -306,6 +305,14 @@ export const routes: APMRouteDefinition[] = [
       const query = toQuery(location.search);
       return query.transactionName as string;
     },
+  },
+  {
+    exact: true,
+    path: '/services/:serviceName/profiling',
+    component: withApmServiceContext(ServiceDetailsProfiling),
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceProfilingTitle', {
+      defaultMessage: 'Profiling',
+    }),
   },
   {
     exact: true,
@@ -321,6 +328,7 @@ export const routes: APMRouteDefinition[] = [
     component: TraceLink,
     breadcrumb: null,
   },
+  // !! Need to be kept in sync with the searchDeepLinks in x-pack/plugins/apm/public/plugin.ts
   {
     exact: true,
     path: '/service-map',

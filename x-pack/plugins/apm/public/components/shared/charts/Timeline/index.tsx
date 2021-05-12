@@ -11,8 +11,8 @@ import { makeWidthFlexible } from 'react-vis';
 import { getPlotValues } from './plotUtils';
 import { TimelineAxis } from './TimelineAxis';
 import { VerticalLines } from './VerticalLines';
-import { ErrorMark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
-import { AgentMark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
+import { ErrorMark } from '../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
+import { AgentMark } from '../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 export type Mark = AgentMark | ErrorMark;
 

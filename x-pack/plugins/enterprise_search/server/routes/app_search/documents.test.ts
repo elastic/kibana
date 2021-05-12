@@ -18,7 +18,6 @@ describe('documents routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/app_search/engines/{engineName}/documents',
-        payload: 'body',
       });
 
       registerDocumentsRoutes({
@@ -30,28 +29,6 @@ describe('documents routes', () => {
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:engineName/documents/new',
-      });
-    });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { body: { documents: [{ foo: 'bar' }] } };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing documents', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('wrong document type', () => {
-        const request = { body: { documents: ['test'] } };
-        mockRouter.shouldThrow(request);
-      });
-
-      it('non-array documents type', () => {
-        const request = { body: { documents: { foo: 'bar' } } };
-        mockRouter.shouldThrow(request);
       });
     });
   });

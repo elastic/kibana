@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Kernel Module Removal",
   "query": "event.category:process and event.type:(start or process_started) and process.args:((rmmod and sudo) or (modprobe and sudo and (\"--remove\" or \"-r\")))",
   "references": [
@@ -74,6 +74,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

@@ -8,6 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { XJsonLang } from '@kbn/monaco';
 
 import {
   EuiFlexItem,
@@ -71,7 +72,7 @@ export const SpecViewer = ({ vegaAdapter, ...rest }: SpecViewerProps) => {
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <CodeEditor
-          languageId="json"
+          languageId={XJsonLang.ID}
           value={spec}
           onChange={() => {}}
           options={{
@@ -82,6 +83,7 @@ export const SpecViewer = ({ vegaAdapter, ...rest }: SpecViewerProps) => {
               enabled: false,
             },
             scrollBeyondLastLine: false,
+            folding: true,
             wordWrap: 'on',
             wrappingIndent: 'indent',
             automaticLayout: true,

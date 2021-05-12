@@ -16,7 +16,7 @@ import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 import { getServices } from '../../../../kibana_services';
 import { getContextUrl } from '../../../helpers/get_context_url';
-import { formatRow } from '../../helpers';
+import { formatRow, formatTopLevelObject } from '../../helpers';
 
 const TAGS_WITH_WS = />\s+</g;
 
@@ -32,6 +32,7 @@ export function noWhiteSpace(html: string): string {
 const MIN_LINE_LENGTH = 20;
 
 interface LazyScope extends ng.IScope {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -94,6 +95,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
         createSummaryRow($scope.row);
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       $scope.inlineFilter = function inlineFilter($event: any, type: string) {
         const column = $($event.currentTarget).data().column;
         const field = $scope.indexPattern.fields.getByName(column);
@@ -105,11 +107,21 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           $scope.row._id,
           $scope.indexPattern.id,
           $scope.columns,
-          getServices().filterManager
+          getServices().filterManager,
+          getServices().addBasePath
+        );
+      };
+
+      $scope.getSingleDocHref = () => {
+        return getServices().addBasePath(
+          `/app/discover#/doc/${$scope.indexPattern.id}/${
+            $scope.row._index
+          }?id=${encodeURIComponent($scope.row._id)}`
         );
       };
 
       // create a tr element that lists the value for each *column*
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function createSummaryRow(row: any) {
         const indexPattern = $scope.indexPattern;
         $scope.flattenedRow = indexPattern.flattenHit(row);
@@ -145,16 +157,32 @@ export function createTableRowDirective($compile: ng.ICompileService) {
         } else {
           $scope.columns.forEach(function (column: string) {
             const isFilterable = mapping(column) && mapping(column).filterable && $scope.filter;
-
-            newHtmls.push(
-              cellTemplate({
-                timefield: false,
-                sourcefield: column === '_source',
-                formatted: _displayField(row, column, true),
-                filterable: isFilterable,
-                column,
-              })
-            );
+            if ($scope.useNewFieldsApi && !mapping(column) && !row.fields[column]) {
+              const innerColumns = Object.fromEntries(
+                Object.entries(row.fields).filter(([key]) => {
+                  return key.indexOf(`${column}.`) === 0;
+                })
+              );
+              newHtmls.push(
+                cellTemplate({
+                  timefield: false,
+                  sourcefield: true,
+                  formatted: formatTopLevelObject(row, innerColumns, indexPattern),
+                  filterable: false,
+                  column,
+                })
+              );
+            } else {
+              newHtmls.push(
+                cellTemplate({
+                  timefield: false,
+                  sourcefield: column === '_source',
+                  formatted: _displayField(row, column, true),
+                  filterable: isFilterable,
+                  column,
+                })
+              );
+            }
           });
         }
 
@@ -163,7 +191,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           const $cell = $cells.eq(i);
           if ($cell.data('discover:html') === html) return;
 
-          const reuse = find($cells.slice(i + 1), function (cell: any) {
+          const reuse = find($cells.slice(i + 1), (cell) => {
             return $.data(cell, 'discover:html') === html;
           });
 
@@ -197,6 +225,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       /**
        * Fill an element with the value of a field
        */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function _displayField(row: any, fieldName: string, truncate = false) {
         const indexPattern = $scope.indexPattern;
         const text = indexPattern.formatField(row, fieldName);

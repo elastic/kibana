@@ -183,6 +183,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
       anomalies: [],
       interval: 'second',
     };
+    // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       let records: AnomalyRecordDoc[] = [];
       body.hits.hits.forEach((hit: any) => {
@@ -401,6 +402,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
     );
 
     const examplesByCategoryId: { [key: string]: any } = {};
+    // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       body.hits.hits.forEach((hit: any) => {
         if (maxExamples) {
@@ -437,6 +439,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
     );
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
+    // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       const source = body.hits.hits[0]._source;
       definition.categoryId = source.category_id;
@@ -576,6 +579,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
       );
       if (fieldToBucket === JOB_ID) {
         finalResults = {
+          // @ts-expect-error incorrect search response type
           jobs: results.aggregations?.unique_terms?.buckets.map(
             (b: { key: string; doc_count: number }) => b.key
           ),
@@ -588,6 +592,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
           },
           {}
         );
+        // @ts-expect-error incorrect search response type
         results.aggregations.jobs.buckets.forEach(
           (bucket: { key: string | number; unique_stopped_partitions: { buckets: any[] } }) => {
             jobs[bucket.key] = bucket.unique_stopped_partitions.buckets.map((b) => b.key);

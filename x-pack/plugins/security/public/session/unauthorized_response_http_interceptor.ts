@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   HttpInterceptor,
   HttpInterceptorResponseError,
-  IHttpInterceptController,
   IAnonymousPaths,
+  IHttpInterceptController,
 } from 'src/core/public';
 
-import { SessionExpired } from './session_expired';
+import type { SessionExpired } from './session_expired';
 
 export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
   constructor(private sessionExpired: SessionExpired, private anonymousPaths: IAnonymousPaths) {}

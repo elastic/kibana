@@ -6,10 +6,9 @@
  */
 
 import { get } from 'lodash/fp';
+import { NamespaceType, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-utils';
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
-import { NamespaceType } from '../../common/schemas';
-import { NamespaceTypeArray } from '../../common/schemas/types/default_namespace_array';
 import {
   SavedObjectType,
   exceptionListAgnosticSavedObjectType,
@@ -74,10 +73,11 @@ export const getGeneralFilters = (
   return Object.keys(filters)
     .map((filterKey) => {
       const value = get(filterKey, filters);
-      if (value != null) {
+      if (value != null && value.trim() !== '') {
         const filtersByNamespace = namespaceTypes
           .map((namespace) => {
-            return `${namespace}.attributes.${filterKey}:${value}*`;
+            const fieldToSearch = filterKey === 'name' ? 'name.text' : filterKey;
+            return `${namespace}.attributes.${fieldToSearch}:${value}`;
           })
           .join(' OR ');
         return `(${filtersByNamespace})`;

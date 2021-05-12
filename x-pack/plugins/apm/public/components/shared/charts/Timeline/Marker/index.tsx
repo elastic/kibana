@@ -6,19 +6,19 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { px } from '../../../../../style/variables';
 import { AgentMarker } from './AgentMarker';
 import { ErrorMarker } from './ErrorMarker';
-import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
-import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
+import { AgentMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
+import { ErrorMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 
 interface Props {
   mark: ErrorMark | AgentMark;
   x: number;
 }
 
-const MarkerContainer = styled.div`
+const MarkerContainer = euiStyled.div`
   position: absolute;
   bottom: 0;
 `;

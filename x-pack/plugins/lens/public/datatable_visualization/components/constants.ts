@@ -7,3 +7,4 @@
 
 export const LENS_EDIT_SORT_ACTION = 'sort';
 export const LENS_EDIT_RESIZE_ACTION = 'resize';
+export const LENS_TOGGLE_ACTION = 'toggle';

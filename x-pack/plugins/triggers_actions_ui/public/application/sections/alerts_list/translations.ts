@@ -28,6 +28,13 @@ export const ALERT_STATUS_ERROR = i18n.translate(
   }
 );
 
+export const ALERT_STATUS_LICENSE_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsList.alertStatusLicenseError',
+  {
+    defaultMessage: 'License Error',
+  }
+);
+
 export const ALERT_STATUS_PENDING = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsList.alertStatusPending',
   {
@@ -60,28 +67,28 @@ export const ALERT_ERROR_UNKNOWN_REASON = i18n.translate(
 export const ALERT_ERROR_READING_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonReading',
   {
-    defaultMessage: 'An error occurred when reading the alert.',
+    defaultMessage: 'An error occurred when reading the rule.',
   }
 );
 
 export const ALERT_ERROR_DECRYPTING_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonDecrypting',
   {
-    defaultMessage: 'An error occurred when decrypting the alert.',
+    defaultMessage: 'An error occurred when decrypting the rule.',
   }
 );
 
 export const ALERT_ERROR_EXECUTION_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonRunning',
   {
-    defaultMessage: 'An error occurred when running the alert.',
+    defaultMessage: 'An error occurred when running the rule.',
   }
 );
 
 export const ALERT_ERROR_LICENSE_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsList.alertErrorReasonLicense',
   {
-    defaultMessage: 'Cannot run alert',
+    defaultMessage: 'Cannot run rule',
   }
 );
 

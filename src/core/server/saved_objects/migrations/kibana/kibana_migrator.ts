@@ -35,13 +35,12 @@ import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 import { runResilientMigrator } from '../../migrationsv2';
-import { migrateRawDocs } from '../core/migrate_raw_docs';
-import { MigrationLogger } from '../core/migration_logger';
+import { migrateRawDocsSafely } from '../core/migrate_raw_docs';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
-  savedObjectsConfig: SavedObjectsMigrationConfigType;
+  soMigrationsConfig: SavedObjectsMigrationConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
@@ -53,6 +52,7 @@ export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
 export interface KibanaMigratorStatus {
   status: MigrationStatus;
   result?: MigrationResult[];
+  waitingIndex?: string;
 }
 
 /**
@@ -68,14 +68,14 @@ export class KibanaMigrator {
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<MigrationResult[]>;
   private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
-    status: 'waiting',
+    status: 'waiting_to_start',
   });
   private readonly activeMappings: IndexMapping;
   private migrationsRetryDelay?: number;
-  // TODO migrationsV2: make private once we release migrations v2
-  public kibanaVersion: string;
-  // TODO migrationsV2: make private once we release migrations v2
-  public readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
+  // TODO migrationsV2: make private once we remove migrations v1
+  public readonly kibanaVersion: string;
+  // TODO migrationsV2: make private once we remove migrations v1
+  public readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -84,14 +84,14 @@ export class KibanaMigrator {
     client,
     typeRegistry,
     kibanaConfig,
-    savedObjectsConfig,
+    soMigrationsConfig,
     kibanaVersion,
     logger,
     migrationsRetryDelay,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaConfig = kibanaConfig;
-    this.savedObjectsConfig = savedObjectsConfig;
+    this.soMigrationsConfig = soMigrationsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
@@ -135,7 +135,6 @@ export class KibanaMigrator {
       if (!rerun) {
         this.status$.next({ status: 'running' });
       }
-
       this.migrationResult = this.runMigrationsInternal().then((result) => {
         // Similar to above, don't publish status updates when rerunning in CI.
         if (!rerun) {
@@ -175,7 +174,7 @@ export class KibanaMigrator {
 
     const migrators = Object.keys(indexMap).map((index) => {
       // TODO migrationsV2: remove old migrations algorithm
-      if (this.savedObjectsConfig.enableV2) {
+      if (this.soMigrationsConfig.enableV2) {
         return {
           migrate: (): Promise<MigrationResult> => {
             return runResilientMigrator({
@@ -185,28 +184,29 @@ export class KibanaMigrator {
               logger: this.log,
               preMigrationScript: indexMap[index].script,
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
-                migrateRawDocs(
+                migrateRawDocsSafely(
                   this.serializer,
                   this.documentMigrator.migrateAndConvert,
-                  rawDocs,
-                  new MigrationLogger(this.log)
+                  rawDocs
                 ),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
+              migrationsConfig: this.soMigrationsConfig,
             });
           },
         };
       } else {
         return new IndexMigrator({
-          batchSize: this.savedObjectsConfig.batchSize,
+          batchSize: this.soMigrationsConfig.batchSize,
           client: createMigrationEsClient(this.client, this.log, this.migrationsRetryDelay),
           documentMigrator: this.documentMigrator,
           index,
           kibanaVersion: this.kibanaVersion,
           log: this.log,
           mappingProperties: indexMap[index].typeMappings,
-          pollInterval: this.savedObjectsConfig.pollInterval,
-          scrollDuration: this.savedObjectsConfig.scrollDuration,
+          setStatus: (status) => this.status$.next(status),
+          pollInterval: this.soMigrationsConfig.pollInterval,
+          scrollDuration: this.soMigrationsConfig.scrollDuration,
           serializer: this.serializer,
           // Only necessary for the migrator of the kibana index.
           obsoleteIndexTemplatePattern:

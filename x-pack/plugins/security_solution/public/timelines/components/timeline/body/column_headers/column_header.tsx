@@ -14,14 +14,15 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   getDraggableFieldId,
 } from '../../../../../common/components/drag_and_drop/helpers';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { Direction } from '../../../../../../common/search_strategy';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnFilterChange } from '../../events';
-import { Direction } from '../../../../../graphql/types';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';
@@ -76,10 +77,10 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   const dispatch = useDispatch();
   const resizableSize = useMemo(
     () => ({
-      width: header.width,
+      width: header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH,
       height: 'auto',
     }),
-    [header.width]
+    [header.initialWidth]
   );
   const resizableStyle: {
     position: 'absolute' | 'relative';
@@ -168,28 +169,40 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
               handleClosePopOverTrigger();
             },
           },
-          {
-            disabled: !header.aggregatable,
-            icon: <EuiIcon type="sortUp" size="s" />,
-            name: i18n.SORT_AZ,
-            onClick: () => {
-              onColumnSort(Direction.asc);
-              handleClosePopOverTrigger();
-            },
-          },
-          {
-            disabled: !header.aggregatable,
-            icon: <EuiIcon type="sortDown" size="s" />,
-            name: i18n.SORT_ZA,
-            onClick: () => {
-              onColumnSort(Direction.desc);
-              handleClosePopOverTrigger();
-            },
-          },
+          ...(tabType !== TimelineTabs.eql
+            ? [
+                {
+                  disabled: !header.aggregatable,
+                  icon: <EuiIcon type="sortUp" size="s" />,
+                  name: i18n.SORT_AZ,
+                  onClick: () => {
+                    onColumnSort(Direction.asc);
+                    handleClosePopOverTrigger();
+                  },
+                },
+                {
+                  disabled: !header.aggregatable,
+                  icon: <EuiIcon type="sortDown" size="s" />,
+                  name: i18n.SORT_ZA,
+                  onClick: () => {
+                    onColumnSort(Direction.desc);
+                    handleClosePopOverTrigger();
+                  },
+                },
+              ]
+            : []),
         ],
       },
     ],
-    [dispatch, handleClosePopOverTrigger, header.aggregatable, header.id, onColumnSort, timelineId]
+    [
+      dispatch,
+      handleClosePopOverTrigger,
+      header.aggregatable,
+      header.id,
+      onColumnSort,
+      tabType,
+      timelineId,
+    ]
   );
 
   const headerButton = useMemo(
@@ -208,7 +221,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         ref={dragProvided.innerRef}
       >
         <EventsThContent>
-          <PopoverContainer $width={header.width}>
+          <PopoverContainer $width={header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH}>
             <EuiPopover
               anchorPosition="downLeft"
               button={headerButton}
@@ -223,7 +236,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         </EventsThContent>
       </EventsTh>
     ),
-    [handleClosePopOverTrigger, headerButton, header.width, hoverActionsOwnFocus, panels]
+    [handleClosePopOverTrigger, headerButton, header.initialWidth, hoverActionsOwnFocus, panels]
   );
 
   const onFocus = useCallback(() => {

@@ -1,0 +1,131 @@
+[[create-panels-with-editors]]
+== Create panels with editors
+
+{kib} provides several editors that you can use to create dashboard panels.
+
+[cols="2"]
+|===
+
+| <<lens,*Lens*>>
+| Create visualizations with the drag and drop editor. *Lens* is recommended for most users.
+
+| <<maps,*Maps*>>
+| Create visualizations with your geographical data.
+
+| <<tsvb,*TSVB*>>
+| Create visualizations with your time series data.
+
+| <<vega,*Vega*>>
+| Create custom visualizations with the *Vega* and *Vega-Lite* grammars.
+
+| <<add-aggregation-based-visualization-panels,*Aggregation based*>>
+| Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
+
+| <<timelion,*Timelion*>>
+| Create visualizations with your time series data using a simple expression language.
+
+|===
+
+[float]
+[[lens-editor]]
+=== Lens
+
+*Lens* is the drag and drop editor that creates visualizations of your data.
+
+With *Lens*, you can:
+
+* Use the automatically generated suggestions to change the visualization type.
+* Create visualizations with multiple layers and indices.
+* Change the aggregation and labels to customize the data.
+
+[role="screenshot"]
+image:dashboard/images/lens_advanced_1_1.png[Lens]
+
+[float]
+[[tsvb-editor]]
+=== TSVB
+
+*TSVB* is a time series data visualization editor that allows you to use the full power of the {es} aggregation framework. 
+
+With *TSVB*, you can:
+
+* Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
+* Annotate time series data with timestamped events from an {es} index.
+* View the data in several types of visualizations, including charts, data tables, and markdown panels.
+* Display multiple <<index-patterns, index patterns>> in each visualization.
+* Customize the data with labels and colors.
+
+[role="screenshot"]
+image::images/tsvb.png[TSVB UI]
+
+[float]
+[[custom-visualizations]]
+=== Custom visualizations
+
+*Vega* and *Vega-Lite* are visualization grammars that are integrated into {kib} for custom visualizations.
+
+* *Vega-Lite* &mdash; A high-level grammar for rapid analysis.
+
+* *Vega* &mdash; A declarative language with support for interactivity.
+
+*Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
+URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
+
+Use *Vega* or *Vega-Lite* when you want to create visualizations with:
+
+* Aggregations that use `nested` or `parent/child` mapping
+* Aggregations without an index pattern
+* Queries that use custom time filters
+* Complex calculations
+* Extracted data from _source instead of aggregations
+* Scatter charts, sankey charts, and custom maps
+* An unsupported visual theme
+
+These grammars have some limitations: they do not support tables, and can't run queries conditionally.
+
+[role="screenshot"]
+image::images/vega.png[Vega UI]
+
+For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resources-and-examples,Resources and examples>>. 
+
+[float]
+[[aggregation-based]]
+=== Aggregation-based
+
+With aggregation-based visualizations, you can:
+
+* Create heat map, tag cloud, gauge, and goal visualizations
+* Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
+* Time series data is not required
+* Use a <<save-open-search,saved search>> as an input
+* Sort data tables and use the summary row and percentage column features
+* Assign colors to series
+* Extend features with plugins
+
+[role="screenshot"]
+image:dashboard/images/aggregation_based.png[Aggregation-based editor]
+
+Aggregation-based visualizations include the following limitations:
+
+* Limited styling options
+* Math is unsupported
+* Multiple indices is unsupported
+
+[float]
+[[timelion-editor]]
+=== Timelion
+
+*Timelion* is driven by a simple expression language that you use to:
+
+* Retrieve time series data from one or more indices
+* Perform math across two or more time series
+* Visualize the results
+
+[role="screenshot"]
+image:dashboard/images/timelion.png[Timelion]
+
+include::lens.asciidoc[]
+include::tsvb.asciidoc[]
+include::vega.asciidoc[]
+include::aggregation-based.asciidoc[]
+include::timelion.asciidoc[]

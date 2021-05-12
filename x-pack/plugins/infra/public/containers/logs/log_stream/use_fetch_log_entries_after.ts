@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
-import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
+import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryAfterCursor } from '../../../../common/log_entry';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
@@ -46,17 +46,17 @@ export const useLogEntriesAfterRequest = ({
   const { search: fetchLogEntriesAfter, requests$: logEntriesAfterSearchRequests$ } = useDataSearch(
     {
       getRequest: useCallback(
-        (cursor: LogEntryAfterCursor['after'], size: number) => {
+        (cursor: LogEntryAfterCursor['after'], params: { size: number; extendTo?: number }) => {
           return !!sourceId
             ? {
                 request: {
                   params: logEntriesSearchRequestParamsRT.encode({
                     after: cursor,
                     columns: columnOverrides,
-                    endTimestamp,
+                    endTimestamp: params?.extendTo ?? endTimestamp,
                     highlightPhrase,
                     query,
-                    size,
+                    size: params.size,
                     sourceId,
                     startTimestamp,
                   }),

@@ -13,11 +13,6 @@ import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
 jest.mock('../services');
 
-jest.mock('../lib/vega', () => ({
-  vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
-}));
-
 describe(`VegaParser.parseAsync`, () => {
   test(`should throw an error in case of $spec is not defined`, async () => {
     const vp = new VegaParser('{}');
@@ -284,7 +279,27 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
+        zoomControl: true,
+        scrollWheelZoom: false,
+      },
+      0
+    )
+  );
+
+  test(
+    'emsTileServiceId',
+    check(
+      {
+        mapStyle: true,
+        emsTileServiceId: 'dark_map',
+      },
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        mapStyle: true,
+        emsTileServiceId: 'dark_map',
         zoomControl: true,
         scrollWheelZoom: false,
       },
@@ -299,7 +314,7 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
         zoomControl: true,
         scrollWheelZoom: false,
         maxBounds: [1, 2, 3, 4],
@@ -308,37 +323,12 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
         zoomControl: true,
         scrollWheelZoom: false,
         maxBounds: [1, 2, 3, 4],
       },
       0
-    )
-  );
-
-  test(
-    'warnings',
-    check(
-      {
-        delayRepaint: true,
-        latitude: 0,
-        longitude: 0,
-        zoom: 'abc', // ignored
-        mapStyle: 'abc',
-        zoomControl: 'abc',
-        scrollWheelZoom: 'abc',
-        maxBounds: [2, 3, 4],
-      },
-      {
-        delayRepaint: true,
-        latitude: 0,
-        longitude: 0,
-        mapStyle: 'default',
-        zoomControl: true,
-        scrollWheelZoom: false,
-      },
-      5
     )
   );
 });

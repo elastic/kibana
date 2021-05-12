@@ -9,10 +9,10 @@
 import { each, cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
-import realHits from 'fixtures/real_hits.js';
-// @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+// @ts-expect-error
+import realHits from '../../../__fixtures__/real_hits.js';
+// @ts-expect-error
+import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
@@ -24,6 +24,8 @@ import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { configMock } from '../../../__mocks__/config';
+import { indexPatternsMock } from '../../../__mocks__/index_patterns';
 
 const mockServices = ({
   history: () => ({
@@ -46,6 +48,12 @@ const mockServices = ({
       }
     },
   },
+  indexPatternFieldEditor: {
+    openEditor: jest.fn(),
+    userPermissions: {
+      editIndexPattern: jest.fn(),
+    },
+  },
 } as unknown) as DiscoverServices;
 
 jest.mock('../../../kibana_services', () => ({
@@ -56,10 +64,10 @@ jest.mock('./lib/get_index_pattern_field_list', () => ({
   getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
 }));
 
-function getCompProps() {
+function getCompProps(): DiscoverSidebarProps {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
-    (cfg: any) => cfg,
+    (cfg: unknown) => cfg,
     'time',
     stubbedLogstashFields(),
     coreMock.createSetup()
@@ -84,20 +92,24 @@ function getCompProps() {
     }
   }
   return {
+    config: configMock,
     columns: ['extension'],
     fieldCounts,
     hits,
     indexPatternList,
+    indexPatterns: indexPatternsMock,
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
     services: mockServices,
-    setIndexPattern: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
+    setAppState: jest.fn(),
+    onEditRuntimeField: jest.fn(),
+    editField: jest.fn(),
   };
 }
 

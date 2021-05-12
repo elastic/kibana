@@ -10,7 +10,9 @@ import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from '
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { metadataQueryStrategyV2 } from './support/query_strategies';
+import { get } from 'lodash';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -22,6 +24,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2()
       );
@@ -36,6 +39,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2()
       );
@@ -63,6 +67,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2()
       );
@@ -80,6 +85,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2(),
         {
@@ -111,6 +117,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2()
       );
@@ -149,6 +156,9 @@ describe('query builder', () => {
             logFactory: loggingSystemMock.create(),
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
+            experimentalFeatures: parseExperimentalConfigValue(
+              createMockConfig().enableExperimental
+            ),
           },
           metadataQueryStrategyV2(),
           {
@@ -195,7 +205,7 @@ describe('query builder', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
 
-      expect(query.body.query.bool.filter[0].bool.should).toContainEqual({
+      expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'agent.id': mockID },
       });
     });
@@ -204,7 +214,7 @@ describe('query builder', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
 
-      expect(query.body.query.bool.filter[0].bool.should).toContainEqual({
+      expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'HostDetails.agent.id': mockID },
       });
     });

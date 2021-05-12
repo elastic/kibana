@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -20,7 +21,7 @@ import {
   CommonAlertFilter,
   IndexShardSizeStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_LARGE_SHARD_SIZE,
@@ -29,7 +30,7 @@ import {
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerts/common';
+import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -48,7 +49,7 @@ export class LargeShardSizeAlert extends BaseAlert {
           description: i18n.translate(
             'xpack.monitoring.alerts.shardSize.actionVariables.shardIndex',
             {
-              defaultMessage: 'List of indices which are experiencing large shard size.',
+              defaultMessage: 'List of indices which are experiencing large average shard size.',
             }
           ),
         },
@@ -59,7 +60,7 @@ export class LargeShardSizeAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams & { indexPattern: string },
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -70,7 +71,7 @@ export class LargeShardSizeAlert extends BaseAlert {
     const { threshold, indexPattern: shardIndexPatterns } = params;
 
     const stats = await fetchIndexShardSize(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       threshold!,
@@ -99,7 +100,7 @@ export class LargeShardSizeAlert extends BaseAlert {
     const { shardIndex, shardSize } = item.meta as IndexShardSizeUIMeta;
     return {
       text: i18n.translate('xpack.monitoring.alerts.shardSize.ui.firingMessage', {
-        defaultMessage: `The following index: #start_link{shardIndex}#end_link has a large shard size of: {shardSize}GB at #absolute`,
+        defaultMessage: `The following index: #start_link{shardIndex}#end_link has a large average shard size of: {shardSize}GB at #absolute`,
         values: {
           shardIndex,
           shardSize,

@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { sendRequest } from './use_request';
 import { appRoutesService } from '../../services';
-import { CheckPermissionsResponse } from '../../types';
+import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../types';
+
+import { sendRequest } from './use_request';
 
 export const sendGetPermissionsCheck = () => {
   return sendRequest<CheckPermissionsResponse>({
     path: appRoutesService.getCheckPermissionsPath(),
     method: 'get',
+  });
+};
+
+export const sendGenerateServiceToken = () => {
+  return sendRequest<GenerateServiceTokenResponse>({
+    path: appRoutesService.getRegenerateServiceTokenPath(),
+    method: 'post',
   });
 };

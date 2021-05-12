@@ -6,19 +6,20 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+
+import type { AgentPolicy, NewAgentPolicy, Output } from '../types';
+
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
-import { Output } from '../types';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
-
   mock.get.mockImplementation(async (type: string, id: string) => {
     return {
       type,
       id,
       references: [],
-      attributes: agentPolicyAttributes,
+      attributes: agentPolicyAttributes as AgentPolicy,
     };
   });
   mock.find.mockImplementation(async (options) => {
@@ -27,7 +28,7 @@ function getSavedObjectMock(agentPolicyAttributes: any) {
         {
           id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
           attributes: {
-            kibana_urls: ['http://localhost:5603'],
+            fleet_server_hosts: ['http://fleetserver:8220'],
           },
           type: 'ingest_manager_settings',
           score: 1,
@@ -69,10 +70,59 @@ function getAgentPolicyUpdateMock() {
   >;
 }
 
+function getAgentPolicyCreateMock() {
+  const soClient = savedObjectsClientMock.create();
+  soClient.create.mockImplementation(async (type, attributes) => {
+    return {
+      attributes: (attributes as unknown) as NewAgentPolicy,
+      id: 'mocked',
+      type: 'mocked',
+      references: [],
+    };
+  });
+  return soClient;
+}
 describe('agent policy', () => {
   beforeEach(() => {
     getAgentPolicyUpdateMock().mockClear();
   });
+
+  describe('create', () => {
+    it('is_managed present and false by default', async () => {
+      // ignore unrelated unique name constraint
+      agentPolicyService.requireUniqueName = async () => {};
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'No is_managed provided',
+          namespace: 'default',
+        })
+      ).resolves.toHaveProperty('is_managed', false);
+
+      const [, attributes] = soClient.create.mock.calls[0];
+      expect(attributes).toHaveProperty('is_managed', false);
+    });
+
+    it('should set is_managed property, if given', async () => {
+      // ignore unrelated unique name constraint
+      agentPolicyService.requireUniqueName = async () => {};
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'is_managed: true provided',
+          namespace: 'default',
+          is_managed: true,
+        })
+      ).resolves.toHaveProperty('is_managed', true);
+
+      const [, attributes] = soClient.create.mock.calls[0];
+      expect(attributes).toHaveProperty('is_managed', true);
+    });
+  });
+
   describe('bumpRevision', () => {
     it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
       const soClient = getSavedObjectMock({
@@ -121,10 +171,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {
@@ -156,10 +203,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {
@@ -192,10 +236,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
-          kibana: {
-            hosts: ['localhost:5603'],
-            protocol: 'http',
-          },
+          hosts: ['http://fleetserver:8220'],
         },
         agent: {
           monitoring: {
@@ -206,6 +247,39 @@ describe('agent policy', () => {
           },
         },
       });
+    });
+  });
+
+  describe('update', () => {
+    it('should update is_managed property, if given', async () => {
+      // ignore unrelated unique name constraint
+      agentPolicyService.requireUniqueName = async () => {};
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'mocked',
+        type: 'mocked',
+        references: [],
+      });
+      await agentPolicyService.update(soClient, esClient, 'mocked', {
+        name: 'mocked',
+        namespace: 'default',
+        is_managed: false,
+      });
+      // soClient.update is called with updated values
+      let calledWith = soClient.update.mock.calls[0];
+      expect(calledWith[2]).toHaveProperty('is_managed', false);
+
+      await agentPolicyService.update(soClient, esClient, 'mocked', {
+        name: 'is_managed: true provided',
+        namespace: 'default',
+        is_managed: true,
+      });
+      // soClient.update is called with updated values
+      calledWith = soClient.update.mock.calls[1];
+      expect(calledWith[2]).toHaveProperty('is_managed', true);
     });
   });
 });

@@ -15,3 +15,32 @@ export const META_ENGINES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngines.title',
   { defaultMessage: 'Meta Engines' }
 );
+
+export const SOURCE_ENGINES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.enginesOverview.metaEnginesTable.sourceEngines.title',
+  { defaultMessage: 'Source Engines' }
+);
+
+export const CREATE_AN_ENGINE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.createEngineButtonLabel',
+  {
+    defaultMessage: 'Create an engine',
+  }
+);
+export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.createMetaEngineButtonLabel',
+  {
+    defaultMessage: 'Create a meta engine',
+  }
+);
+
+export const DELETE_ENGINE_MESSAGE = (engineName: string) =>
+  i18n.translate(
+    'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.successMessage',
+    {
+      defaultMessage: 'Successfully deleted "{engineName}"',
+      values: {
+        engineName,
+      },
+    }
+  );

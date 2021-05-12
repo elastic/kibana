@@ -45,10 +45,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with global_upgrade_assistant_role', () => {
+    describe('global dashboard read with global_upgrade_assistant_role', () => {
       before(async () => {
         await security.testUser.setRoles(
-          ['global_dashboard_all', 'global_upgrade_assistant_role'],
+          ['global_dashboard_read', 'global_upgrade_assistant_role'],
           true
         );
       });
@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      describe('[SkipCloud] global dashboard all with global_upgrade_assistant_role', function () {
+      describe('[SkipCloud] global dashboard read with global_upgrade_assistant_role', function () {
         this.tags('skipCloud');
         it('should render the "Stack" section with Upgrde Assistant', async function () {
           await PageObjects.common.navigateToApp('management');

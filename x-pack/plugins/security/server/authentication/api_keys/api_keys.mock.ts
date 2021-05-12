@@ -6,7 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { APIKeys } from '.';
+
+import type { APIKeys } from './api_keys';
 
 export const apiKeysMock = {
   create: (): jest.Mocked<PublicMethodsOf<APIKeys>> => ({

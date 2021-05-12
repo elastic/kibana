@@ -7,11 +7,12 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
+import { get, cloneDeep } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // @ts-expect-error no ts
 import { esKuery } from '../../es_query';
+
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
@@ -23,7 +24,7 @@ export const validateConvertFilterToKueryNode = (
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
     const filterKueryNode =
-      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
+      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,
@@ -109,7 +110,15 @@ export const validateFilterKueryNode = ({
   return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
     if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
       localNestedKeys = ast.value;
+    } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
+      const key = ast.value.replace('.attributes', '');
+      const mappingKey = 'properties.' + key.split('.').join('.properties.');
+      const field = get(indexMapping, mappingKey);
+      if (field != null && field.type === 'nested') {
+        localNestedKeys = ast.value;
+      }
     }
+
     if (ast.arguments) {
       const myPath = `${path}.${index}`;
       return [
@@ -121,7 +130,7 @@ export const validateFilterKueryNode = ({
           storeValue: ast.type === 'function' && astFunctionType.includes(ast.function),
           path: `${myPath}.arguments`,
           hasNestedKey: ast.type === 'function' && ast.function === 'nested',
-          nestedKeys: localNestedKeys,
+          nestedKeys: localNestedKeys || nestedKeys,
         }),
       ];
     }
@@ -205,7 +214,35 @@ export const hasFilterKeyError = (
   return null;
 };
 
-const fieldDefined = (indexMappings: IndexMapping, key: string) => {
+export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
   const mappingKey = 'properties.' + key.split('.').join('.properties.');
-  return get(indexMappings, mappingKey) != null;
+  if (get(indexMappings, mappingKey) != null) {
+    return true;
+  }
+
+  // If the `mappingKey` does not match a valid path, before returning false,
+  // we want to check and see if the intended path was for a multi-field
+  // such as `x.attributes.field.text` where `field` is mapped to both text
+  // and keyword
+  const propertiesAttribute = 'properties';
+  const indexOfLastProperties = mappingKey.lastIndexOf(propertiesAttribute);
+  const fieldMapping = mappingKey.substr(0, indexOfLastProperties);
+  const fieldType = mappingKey.substr(
+    mappingKey.lastIndexOf(propertiesAttribute) + `${propertiesAttribute}.`.length
+  );
+  const mapping = `${fieldMapping}fields.${fieldType}`;
+  if (get(indexMappings, mapping) != null) {
+    return true;
+  }
+
+  // If the path is for a flattened type field, we'll assume the mappings are defined.
+  const keys = key.split('.');
+  for (let i = 0; i < keys.length; i++) {
+    const path = `properties.${keys.slice(0, i + 1).join('.properties.')}`;
+    if (get(indexMappings, path)?.type === 'flattened') {
+      return true;
+    }
+  }
+
+  return false;
 };

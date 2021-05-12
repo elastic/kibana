@@ -53,6 +53,7 @@ describe('search settings routes', () => {
     boosts,
     result_fields: resultFields,
     search_fields: searchFields,
+    precision: 2,
   };
 
   beforeEach(() => {
@@ -87,7 +88,6 @@ describe('search settings routes', () => {
     const mockRouter = new MockRouter({
       method: 'put',
       path: '/api/app_search/engines/{engineName}/search_settings',
-      payload: 'body',
     });
 
     beforeEach(() => {
@@ -105,18 +105,6 @@ describe('search settings routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:engineName/search_settings',
-      });
-    });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { body: searchSettings };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing required fields', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
       });
     });
   });
@@ -149,7 +137,6 @@ describe('search settings routes', () => {
     const mockRouter = new MockRouter({
       method: 'post',
       path: '/api/app_search/engines/{engineName}/search_settings_search',
-      payload: 'body',
     });
 
     beforeEach(() => {
@@ -170,47 +157,19 @@ describe('search settings routes', () => {
       });
     });
 
-    describe('validates body', () => {
+    describe('validates query', () => {
       it('correctly', () => {
         const request = {
-          body: {
-            boosts,
-            search_fields: searchFields,
+          query: {
+            query: 'foo',
           },
         };
         mockRouter.shouldValidate(request);
       });
 
       it('missing required fields', () => {
-        const request = { body: {} };
-        mockRouter.shouldThrow(request);
-      });
-    });
-
-    describe('validates query', () => {
-      const queryRouter = new MockRouter({
-        method: 'post',
-        path: '/api/app_search/engines/{engineName}/search_settings_search',
-        payload: 'query',
-      });
-
-      it('correctly', () => {
-        registerSearchSettingsRoutes({
-          ...mockDependencies,
-          router: queryRouter.router,
-        });
-
-        const request = {
-          query: {
-            query: 'foo',
-          },
-        };
-        queryRouter.shouldValidate(request);
-      });
-
-      it('missing required fields', () => {
         const request = { query: {} };
-        queryRouter.shouldThrow(request);
+        mockRouter.shouldThrow(request);
       });
     });
   });

@@ -25,7 +25,7 @@ import {
   MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import { POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -47,13 +47,23 @@ jest.mock('../../policy/store/services/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
-describe('when on the list page', () => {
+describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
+  let abortSpy: jest.SpyInstance;
+  beforeAll(() => {
+    const mockAbort = new AbortController();
+    mockAbort.abort();
+    abortSpy = jest.spyOn(window, 'AbortController').mockImplementation(() => mockAbort);
+  });
+
+  afterAll(() => {
+    abortSpy.mockRestore();
+  });
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
@@ -222,9 +232,10 @@ describe('when on the list page', () => {
       > = [];
       let firstPolicyID: string;
       let firstPolicyRev: number;
+
       beforeEach(() => {
         reactTestingLibrary.act(() => {
-          const mockedEndpointData = mockEndpointResultList({ total: 4 });
+          const mockedEndpointData = mockEndpointResultList({ total: 5 });
           const hostListData = mockedEndpointData.hosts;
           const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
@@ -249,9 +260,9 @@ describe('when on the list page', () => {
           };
 
           [
-            { status: HostStatus.ERROR, policy: (p: Policy) => p },
+            { status: HostStatus.UNHEALTHY, policy: (p: Policy) => p },
             {
-              status: HostStatus.ONLINE,
+              status: HostStatus.HEALTHY,
               policy: (p: Policy) => {
                 p.endpoint.id = 'xyz'; // represents change in endpoint policy assignment
                 p.endpoint.revision = 1;
@@ -266,7 +277,14 @@ describe('when on the list page', () => {
               },
             },
             {
-              status: HostStatus.UNENROLLING,
+              status: HostStatus.UPDATING,
+              policy: (p: Policy) => {
+                p.agent.configured.revision += 1; // agent policy change, not propagated to agent yet
+                return p;
+              },
+            },
+            {
+              status: HostStatus.INACTIVE,
               policy: (p: Policy) => {
                 p.agent.configured.revision += 1; // agent policy change, not propagated to agent yet
                 return p;
@@ -307,7 +325,7 @@ describe('when on the list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const rows = await renderResult.findAllByRole('row');
-        expect(rows).toHaveLength(5);
+        expect(rows).toHaveLength(6);
       });
       it('should show total', async () => {
         const renderResult = render();
@@ -315,7 +333,7 @@ describe('when on the list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const total = await renderResult.findByTestId('endpointListTableTotal');
-        expect(total.textContent).toEqual('4 Hosts');
+        expect(total.textContent).toEqual('5 Hosts');
       });
       it('should display correct status', async () => {
         const renderResult = render();
@@ -324,23 +342,30 @@ describe('when on the list page', () => {
         });
         const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
 
-        expect(hostStatuses[0].textContent).toEqual('Error');
-        expect(hostStatuses[0].querySelector('[data-euiicon-type][color="danger"]')).not.toBeNull();
+        expect(hostStatuses[0].textContent).toEqual('Unhealthy');
+        expect(hostStatuses[0].getAttribute('style')).toMatch(
+          /background-color\: rgb\(241\, 216\, 111\)\;/
+        );
 
-        expect(hostStatuses[1].textContent).toEqual('Online');
-        expect(
-          hostStatuses[1].querySelector('[data-euiicon-type][color="success"]')
-        ).not.toBeNull();
+        expect(hostStatuses[1].textContent).toEqual('Healthy');
+        expect(hostStatuses[1].getAttribute('style')).toMatch(
+          /background-color\: rgb\(109\, 204\, 177\)\;/
+        );
 
         expect(hostStatuses[2].textContent).toEqual('Offline');
-        expect(
-          hostStatuses[2].querySelector('[data-euiicon-type][color="subdued"]')
-        ).not.toBeNull();
+        expect(hostStatuses[2].getAttribute('style')).toMatch(
+          /background-color\: rgb\(211\, 218\, 230\)\;/
+        );
 
-        expect(hostStatuses[3].textContent).toEqual('Unenrolling');
-        expect(
-          hostStatuses[3].querySelector('[data-euiicon-type][color="warning"]')
-        ).not.toBeNull();
+        expect(hostStatuses[3].textContent).toEqual('Updating');
+        expect(hostStatuses[3].getAttribute('style')).toMatch(
+          /background-color\: rgb\(121\, 170\, 217\)\;/
+        );
+
+        expect(hostStatuses[4].textContent).toEqual('Inactive');
+        expect(hostStatuses[4].getAttribute('style')).toMatch(
+          /background-color\: rgb\(211\, 218\, 230\)\;/
+        );
       });
 
       it('should display correct policy status', async () => {
@@ -351,14 +376,18 @@ describe('when on the list page', () => {
         const policyStatuses = await renderResult.findAllByTestId('rowPolicyStatus');
 
         policyStatuses.forEach((status, index) => {
+          const policyStatusToRGBColor: Array<[string, string]> = [
+            ['Success', 'background-color: rgb(109, 204, 177);'],
+            ['Warning', 'background-color: rgb(241, 216, 111);'],
+            ['Failure', 'background-color: rgb(255, 126, 98);'],
+            ['Unsupported', 'background-color: rgb(211, 218, 230);'],
+          ];
+          const policyStatusStyleMap: ReadonlyMap<string, string> = new Map<string, string>(
+            policyStatusToRGBColor
+          );
+          const expectedStatusColor: string = policyStatusStyleMap.get(status.textContent!) ?? '';
           expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
-          expect(
-            status.querySelector(
-              `[data-euiicon-type][color=${
-                POLICY_STATUS_TO_HEALTH_COLOR[generatedPolicyStatuses[index]]
-              }]`
-            )
-          ).not.toBeNull();
+          expect(status.getAttribute('style')).toMatch(expectedStatusColor);
         });
       });
 
@@ -368,7 +397,7 @@ describe('when on the list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const outOfDates = await renderResult.findAllByTestId('rowPolicyOutOfDate');
-        expect(outOfDates).toHaveLength(3);
+        expect(outOfDates).toHaveLength(4);
 
         outOfDates.forEach((item, index) => {
           expect(item.textContent).toEqual('Out-of-date');
@@ -645,49 +674,41 @@ describe('when on the list page', () => {
 
     it('should display Success overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink.textContent).toEqual('Success');
-
-      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
-      expect(
-        policyStatusHealth.querySelector('[data-euiicon-type][color="success"]')
-      ).not.toBeNull();
+      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusBadge.textContent).toEqual('Success');
+      expect(policyStatusBadge.getAttribute('style')).toMatch(
+        /background-color\: rgb\(109\, 204\, 177\)\;/
+      );
     });
 
     it('should display Warning overall policy status', async () => {
       mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.warning));
       const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink.textContent).toEqual('Warning');
-
-      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
-      expect(
-        policyStatusHealth.querySelector('[data-euiicon-type][color="warning"]')
-      ).not.toBeNull();
+      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusBadge.textContent).toEqual('Warning');
+      expect(policyStatusBadge.getAttribute('style')).toMatch(
+        /background-color\: rgb\(241\, 216\, 111\)\;/
+      );
     });
 
     it('should display Failed overall policy status', async () => {
       mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.failure));
       const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink.textContent).toEqual('Failed');
-
-      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
-      expect(
-        policyStatusHealth.querySelector('[data-euiicon-type][color="danger"]')
-      ).not.toBeNull();
+      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusBadge.textContent).toEqual('Failed');
+      expect(policyStatusBadge.getAttribute('style')).toMatch(
+        /background-color\: rgb\(255\, 126\, 98\)\;/
+      );
     });
 
     it('should display Unknown overall policy status', async () => {
       mockEndpointListApi(createPolicyResponse('' as HostPolicyResponseActionStatus));
       const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink.textContent).toEqual('Unknown');
-
-      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
-      expect(
-        policyStatusHealth.querySelector('[data-euiicon-type][color="subdued"]')
-      ).not.toBeNull();
+      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusBadge.textContent).toEqual('Unknown');
+      expect(policyStatusBadge.getAttribute('style')).toMatch(
+        /background-color\: rgb\(211\, 218\, 230\)\;/
+      );
     });
 
     it('should include the link to reassignment in Ingest', async () => {

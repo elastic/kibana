@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
@@ -41,6 +41,8 @@ interface TypeSelectionProps {
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
+  showAggsSelection?: boolean;
+  selectedVisType?: BaseVisType;
 }
 
 interface TypeSelectionState {
@@ -69,8 +71,9 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.isLabsEnabled = props.uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
 
     this.state = {
-      showSearchVisModal: false,
-      showGroups: true,
+      showSearchVisModal: Boolean(this.props.selectedVisType),
+      showGroups: !this.props.showAggsSelection,
+      visType: this.props.selectedVisType,
     };
 
     this.trackUiMetric = this.props.usageCollection?.reportUiCounter.bind(
@@ -121,7 +124,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         </EuiModal>
       );
 
-    return <EuiOverlayMask>{selectionModal}</EuiOverlayMask>;
+    return selectionModal;
   }
 
   private onCloseModal = () => {

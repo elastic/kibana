@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { spacesMock } from '../../../spaces/server/mocks';
+
+import { checkAccess } from './check_access';
+
 jest.mock('./enterprise_search_config_api', () => ({
   callEnterpriseSearchConfigAPI: jest.fn(),
 }));
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
-
-import { checkAccess } from './check_access';
-import { spacesMock } from '../../../spaces/server/mocks';
 
 const enabledSpace = {
   id: 'space',
@@ -61,7 +62,7 @@ describe('checkAccess', () => {
     });
   });
 
-  describe('when the spaces plugin is unavailable', () => {
+  describe('when the Spaces plugin is unavailable', () => {
     describe('when security is disabled', () => {
       it('should allow all access', async () => {
         const spaces = undefined;

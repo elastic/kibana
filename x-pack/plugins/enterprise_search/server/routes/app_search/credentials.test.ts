@@ -18,7 +18,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/credentials',
-        payload: 'query',
       });
 
       registerCredentialsRoutes({
@@ -35,11 +34,16 @@ describe('credentials routes', () => {
 
     describe('validates', () => {
       it('correctly', () => {
-        const request = { query: { 'page[current]': 1 } };
+        const request = {
+          query: {
+            'page[current]': 1,
+            'page[size]': 10,
+          },
+        };
         mockRouter.shouldValidate(request);
       });
 
-      it('missing page[current]', () => {
+      it('missing page query params', () => {
         const request = { query: {} };
         mockRouter.shouldThrow(request);
       });
@@ -54,7 +58,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/app_search/credentials',
-        payload: 'body',
       });
 
       registerCredentialsRoutes({
@@ -167,7 +170,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/credentials/details',
-        payload: 'query',
       });
 
       registerCredentialsRoutes({
@@ -191,7 +193,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/app_search/credentials/{name}',
-        payload: 'body',
       });
 
       registerCredentialsRoutes({

@@ -7,7 +7,6 @@
 
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
-export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 export const MAX_TIME_COMPLETE_INSTALL = 60000;
 
 export const FLEET_SERVER_PACKAGE = 'fleet_server';
@@ -15,6 +14,8 @@ export const FLEET_SERVER_PACKAGE = 'fleet_server';
 export const requiredPackages = {
   System: 'system',
   Endpoint: 'endpoint',
+  ElasticAgent: 'elastic_agent',
+  FleetServer: FLEET_SERVER_PACKAGE,
 } as const;
 
 // these are currently identical. we can separate if they later diverge

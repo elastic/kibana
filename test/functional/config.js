@@ -32,8 +32,10 @@ export default async function ({ readConfigFile }) {
 
     servers: commonConfig.get('servers'),
 
-    esTestCluster: commonConfig.get('esTestCluster'),
-
+    esTestCluster: {
+      ...commonConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [
@@ -167,6 +169,21 @@ export default async function ({ readConfigFile }) {
               {
                 names: ['kibana_sample*'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        kibana_sample_read: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['kibana_sample*'],
+                privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
             ],

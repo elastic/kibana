@@ -22,7 +22,6 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiCallOut,
   EuiHorizontalRule,
   EuiSuperSelect,
@@ -368,34 +367,32 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
       </EuiFlyout>
 
       {revertModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
-              defaultMessage: 'Apply snapshot revert',
-            })}
-            onCancel={hideRevertModal}
-            onConfirm={applyRevert}
-            cancelButtonText={i18n.translate(
-              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.cancelButton',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            confirmButtonText={i18n.translate(
-              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteButton',
-              {
-                defaultMessage: 'Apply',
-              }
-            )}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-          >
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.modalBody"
-              defaultMessage="The snapshot revert will be carried out in the background and may take some time."
-            />
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
+            defaultMessage: 'Apply snapshot revert',
+          })}
+          onCancel={hideRevertModal}
+          onConfirm={applyRevert}
+          cancelButtonText={i18n.translate(
+            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.cancelButton',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteButton',
+            {
+              defaultMessage: 'Apply',
+            }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.modalBody"
+            defaultMessage="The snapshot revert will be carried out in the background and may take some time."
+          />
+        </EuiConfirmModal>
       )}
     </>
   );

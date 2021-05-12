@@ -13,7 +13,6 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { Ecs } from '../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { timelineActions } from '../../../../timelines/store/timeline';
-import { useApolloClient } from '../../../../common/utils/apollo_context';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
@@ -24,21 +23,24 @@ import {
 } from '../translations';
 
 interface InvestigateInTimelineActionProps {
-  ariaLabel?: string;
-  ecsRowData: Ecs;
+  ecsRowData: Ecs | Ecs[] | null;
   nonEcsRowData: TimelineNonEcsData[];
+  ariaLabel?: string;
+  alertIds?: string[];
+  fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
+  alertIds,
   ecsRowData,
+  fetchEcsAlertsData,
   nonEcsRowData,
 }) => {
   const {
     data: { search: searchStrategyClient },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const apolloClient = useApolloClient();
 
   const updateTimelineIsLoading = useCallback(
     (payload) => dispatch(timelineActions.updateIsLoading(payload)),
@@ -66,25 +68,39 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     [dispatch, updateTimelineIsLoading]
   );
 
-  const investigateInTimelineAlertClick = useCallback(
-    () =>
-      sendAlertToTimelineAction({
-        apolloClient,
-        createTimeline,
-        ecsData: ecsRowData,
-        nonEcsData: nonEcsRowData,
-        searchStrategyClient,
-        updateTimelineIsLoading,
-      }),
-    [
-      apolloClient,
-      createTimeline,
-      ecsRowData,
-      nonEcsRowData,
-      searchStrategyClient,
-      updateTimelineIsLoading,
-    ]
-  );
+  const investigateInTimelineAlertClick = useCallback(async () => {
+    try {
+      if (ecsRowData != null) {
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsRowData,
+          nonEcsData: nonEcsRowData,
+          searchStrategyClient,
+          updateTimelineIsLoading,
+        });
+      }
+      if (ecsRowData == null && fetchEcsAlertsData) {
+        const alertsEcsData = await fetchEcsAlertsData(alertIds);
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: alertsEcsData,
+          nonEcsData: nonEcsRowData,
+          searchStrategyClient,
+          updateTimelineIsLoading,
+        });
+      }
+    } catch {
+      // TODO show a toaster that something went wrong
+    }
+  }, [
+    alertIds,
+    createTimeline,
+    ecsRowData,
+    fetchEcsAlertsData,
+    nonEcsRowData,
+    searchStrategyClient,
+    updateTimelineIsLoading,
+  ]);
 
   return (
     <ActionIconItem

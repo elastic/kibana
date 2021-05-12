@@ -15,7 +15,7 @@ import { ColorSchemas, ColorSchemaParams } from '../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../visualizations/public';
 import { ValueAxis, ScaleType, AxisType } from '../../vis_type_xy/public';
 
-import { HeatmapOptions, getHeatmapCollections } from './editor';
+import { HeatmapOptions } from './editor';
 import { TimeMarker } from './vislib/visualizations/time_marker';
 import { CommonVislibParams, VislibChartType } from './types';
 import { toExpressionAst } from './to_ast';
@@ -29,6 +29,7 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
   valueAxes: ValueAxis[];
   setColorRange: boolean;
   percentageMode: boolean;
+  percentageFormatPattern?: string;
   times: TimeMarker[];
 }
 
@@ -75,7 +76,6 @@ export const heatmapVisTypeDefinition: VisTypeDefinition<HeatmapVisParams> = {
     },
   },
   editorConfig: {
-    collections: getHeatmapCollections(),
     optionsTemplate: HeatmapOptions,
     schemas: [
       {
@@ -94,6 +94,8 @@ export const heatmapVisTypeDefinition: VisTypeDefinition<HeatmapVisParams> = {
           'cardinality',
           'std_dev',
           'top_hits',
+          '!filtered_metric',
+          '!single_percentile',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

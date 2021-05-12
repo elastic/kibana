@@ -50,7 +50,7 @@ export const getSignalVersionsByIndex = async ({
   esClient: ElasticsearchClient;
   index: string[];
 }): Promise<SignalVersionsByIndex> => {
-  const { body } = await esClient.search<SignalVersionsAggResponse>({
+  const response = await esClient.search({
     index,
     size: 0,
     body: {
@@ -71,6 +71,9 @@ export const getSignalVersionsByIndex = async ({
       },
     },
   });
+
+  // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+  const body = response.body as SignalVersionsAggResponse;
   const indexBuckets = body.aggregations.signals_indices.buckets;
 
   return index.reduce<SignalVersionsByIndex>((agg, _index) => {

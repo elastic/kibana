@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { FunctionComponent } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
+import { StyledComponent } from 'styled-components';
+import { EuiTheme, euiStyled } from '../../../../../src/plugins/kibana_react/common';
 
-export const ToolbarPanel = euiStyled(EuiPanel).attrs(() => ({
-  grow: false,
-  paddingSize: 'none',
-}))`
+// The return type of this component needs to be specified because the inferred
+// return type depends on types that are not exported from EUI. You get a TS4023
+// error if the return type is not specified.
+export const ToolbarPanel: StyledComponent<FunctionComponent, EuiTheme> = euiStyled(EuiPanel).attrs(
+  () => ({
+    grow: false,
+    paddingSize: 'none',
+  })
+)`
   border-top: none;
   border-right: none;
   border-left: none;

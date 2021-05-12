@@ -6,11 +6,14 @@
  */
 
 import React, { useEffect } from 'react';
-
-import { Location } from 'history';
-import { useActions } from 'kea';
 import { useLocation } from 'react-router-dom';
 
+import { Location } from 'history';
+import { useActions, useValues } from 'kea';
+
+import { EuiPage, EuiPageBody } from '@elastic/eui';
+
+import { KibanaLogic } from '../../../../shared/kibana';
 import { Loading } from '../../../../shared/loading';
 
 import { AddSourceLogic } from './add_source/add_source_logic';
@@ -22,11 +25,21 @@ import { AddSourceLogic } from './add_source/add_source_logic';
  */
 export const SourceAdded: React.FC = () => {
   const { search } = useLocation() as Location;
+  const { setChromeIsVisible } = useValues(KibanaLogic);
   const { saveSourceParams } = useActions(AddSourceLogic);
+
+  // We don't want the personal dashboard to flash the Kibana chrome, so we hide it.
+  setChromeIsVisible(false);
 
   useEffect(() => {
     saveSourceParams(search);
   }, []);
 
-  return <Loading />;
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <Loading />
+      </EuiPageBody>
+    </EuiPage>
+  );
 };

@@ -13,9 +13,9 @@ import { createWriteStream, WriteStream } from 'fs';
 import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
 export interface FileAppenderConfig {
-  kind: 'file';
+  type: 'file';
   layout: LayoutConfigType;
-  path: string;
+  fileName: string;
 }
 
 /**
@@ -24,9 +24,9 @@ export interface FileAppenderConfig {
  */
 export class FileAppender implements DisposableAppender {
   public static configSchema = schema.object({
-    kind: schema.literal('file'),
+    type: schema.literal('file'),
     layout: Layouts.configSchema,
-    path: schema.string(),
+    fileName: schema.string(),
   });
 
   /**

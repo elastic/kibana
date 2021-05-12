@@ -122,9 +122,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     const onRefreshBtnClick = useCallback(() => {
       if (refetch != null) {
-        refetch(searchResults, totalSearchResultsCount);
+        refetch();
       }
-    }, [refetch, searchResults, totalSearchResultsCount]);
+    }, [refetch]);
 
     const handleCloseModal = useCallback(() => {
       if (setImportDataModalToggle != null) {
@@ -137,9 +137,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         setImportDataModalToggle(false);
       }
       if (refetch != null) {
-        refetch(searchResults, totalSearchResultsCount);
+        refetch();
       }
-    }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
+    }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
       const timelineActions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
@@ -221,6 +221,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                         : i18n.SELECTED_TIMELINES(selectedItems.length)}
                     </UtilityBarText>
                     <UtilityBarAction
+                      dataTestSubj="batchActions"
                       iconSide="right"
                       iconType="arrowDown"
                       popoverContent={getBatchItemsPopoverContent}
@@ -230,7 +231,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                     </UtilityBarAction>
                   </>
                 )}
-                <UtilityBarAction iconSide="right" iconType="refresh" onClick={onRefreshBtnClick}>
+                <UtilityBarAction
+                  dataTestSubj="refreshButton"
+                  iconSide="right"
+                  iconType="refresh"
+                  onClick={onRefreshBtnClick}
+                >
                   {i18n.REFRESH}
                 </UtilityBarAction>
               </UtilityBarGroup>

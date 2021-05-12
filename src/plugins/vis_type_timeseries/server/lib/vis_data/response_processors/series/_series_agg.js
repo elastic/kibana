@@ -49,6 +49,16 @@ export const SeriesAgg = {
     });
     return [data];
   },
+  count(targetSeries) {
+    const data = [];
+    _.zip(...targetSeries).forEach((row) => {
+      const key = row[0][0];
+      // Filter out undefined or null values
+      const values = row.map((r) => r && r[1]).filter((v) => v || typeof v === 'number');
+      data.push([key, values.length]);
+    });
+    return [data];
+  },
 
   overall_max: overall('max'),
   overall_min: overall('min'),

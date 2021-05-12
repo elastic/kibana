@@ -53,9 +53,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
       // write documents in the future, figure out the end date
       const endDateMillis = Date.now() + (ALERT_INTERVALS_TO_WRITE - 1) * ALERT_INTERVAL_MILLIS;
       endDate = new Date(endDateMillis).toISOString();
-
-      // write documents from now to the future end date in groups
-      createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
     });
 
     afterEach(async () => {
@@ -65,9 +62,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: threshold on hit count < >', async () => {
+      // write documents from now to the future end date in groups
+      createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+
       await createAlert({
         name: 'never fire',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
         thresholdComparator: '<',
         threshold: [0],
       });
@@ -75,6 +76,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await createAlert({
         name: 'always fire',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
         thresholdComparator: '>',
         threshold: [-1],
       });
@@ -102,6 +104,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly with query: threshold on hit count < >', async () => {
+      // write documents from now to the future end date in groups
+      createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+
       const rangeQuery = (rangeThreshold: number) => {
         return {
           query: {
@@ -123,8 +128,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await createAlert({
         name: 'never fire',
         esQuery: JSON.stringify(rangeQuery(ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE + 1)),
-        thresholdComparator: '>=',
-        threshold: [0],
+        size: 100,
+        thresholdComparator: '<',
+        threshold: [-1],
       });
 
       await createAlert({
@@ -132,6 +138,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         esQuery: JSON.stringify(
           rangeQuery(Math.floor((ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE) / 2))
         ),
+        size: 100,
         thresholdComparator: '>=',
         threshold: [0],
       });
@@ -147,6 +154,37 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
         expect(previousTimestamp).to.be.empty();
+      }
+    });
+
+    it('runs correctly: no matches', async () => {
+      await createAlert({
+        name: 'always fire',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        thresholdComparator: '<',
+        threshold: [1],
+      });
+
+      const docs = await waitForDocs(1);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { previousTimestamp, hits } = doc._source;
+        const { name, title, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+        expect(title).to.be(`alert 'always fire' matched query`);
+        const messagePattern = /alert 'always fire' is active:\n\n- Value: 0+\n- Conditions Met: Number of matching documents is less than 1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
+        expect(hits).to.be.empty();
+
+        // during the first execution, the latestTimestamp value should be empty
+        // since this alert always fires, the latestTimestamp value should be updated each execution
+        if (!i) {
+          expect(previousTimestamp).to.be.empty();
+        } else {
+          expect(previousTimestamp).not.to.be.empty();
+        }
       }
     });
 
@@ -173,6 +211,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       name: string;
       timeField?: string;
       esQuery: string;
+      size: number;
       thresholdComparator: string;
       threshold: number[];
       timeWindowSize?: number;
@@ -202,19 +241,21 @@ export default function alertTests({ getService }: FtrProviderContext) {
       };
 
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: params.name,
           consumer: 'alerts',
           enabled: true,
-          alertTypeId: ALERT_TYPE_ID,
+          rule_type_id: ALERT_TYPE_ID,
           schedule: { interval: `${ALERT_INTERVAL_SECONDS}s` },
           actions: [action],
+          notify_when: 'onActiveAlert',
           params: {
             index: [ES_TEST_INDEX_NAME],
             timeField: params.timeField || 'date',
             esQuery: params.esQuery,
+            size: params.size,
             timeWindowSize: params.timeWindowSize || ALERT_INTERVAL_SECONDS * 5,
             timeWindowUnit: 's',
             thresholdComparator: params.thresholdComparator,
@@ -224,7 +265,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .expect(200);
 
       const alertId = createdAlert.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
 
       return alertId;
     }
@@ -233,11 +274,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
 async function createAction(supertest: any, objectRemover: ObjectRemover): Promise<string> {
   const { body: createdAction } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'index action for es query FT',
-      actionTypeId: ACTION_TYPE_ID,
+      connector_type_id: ACTION_TYPE_ID,
       config: {
         index: ES_TEST_OUTPUT_INDEX_NAME,
       },
@@ -246,7 +287,7 @@ async function createAction(supertest: any, objectRemover: ObjectRemover): Promi
     .expect(200);
 
   const actionId = createdAction.id;
-  objectRemover.add(Spaces.space1.id, actionId, 'action', 'actions');
+  objectRemover.add(Spaces.space1.id, actionId, 'connector', 'actions');
 
   return actionId;
 }

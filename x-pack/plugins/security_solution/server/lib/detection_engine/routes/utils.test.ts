@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
@@ -28,8 +28,9 @@ import {
 } from './utils';
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
-import { getResult } from './__mocks__/request_responses';
-import { AlertExecutionStatusErrorReasons } from '../../../../../alerts/common';
+import { getAlertMock } from './__mocks__/request_responses';
+import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
@@ -479,12 +480,12 @@ describe('utils', () => {
       alertsClient = alertsClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const res = await getFailingRules(['my-fake-id'], alertsClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getResult();
+      const foundRule = getAlertMock(getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,

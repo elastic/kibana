@@ -56,11 +56,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
-
-      // Test non-replaced vislib chart types
-      loadTestFile(require.resolve('./_gauge_chart'));
-      loadTestFile(require.resolve('./_heatmap_chart'));
-      loadTestFile(require.resolve('./_pie_chart'));
     });
 
     describe('', function () {
@@ -102,6 +97,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
+      loadTestFile(require.resolve('./_add_to_dashboard.ts'));
 
       if (isOss) {
         loadTestFile(require.resolve('./_tile_map'));

@@ -6,22 +6,26 @@
  */
 
 import { extname } from 'path';
+
 import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
-import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
-import {
-  ASSETS_SAVED_OBJECT_TYPE,
+import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
+
+import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import type {
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
   RegistryDataStream,
 } from '../../../../common';
-import { ArchiveEntry, getArchiveEntry, setArchiveEntry, setArchiveFilelist } from './index';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 import { pkgToPkgKey } from '../registry';
+
+import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
+import type { ArchiveEntry } from './index';
+import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
@@ -83,9 +87,10 @@ export async function archiveEntryToESDocument(opts: {
 
 export async function removeArchiveEntries(opts: {
   savedObjectsClient: SavedObjectsClientContract;
-  refs: PackageAssetReference[];
+  refs?: PackageAssetReference[];
 }) {
   const { savedObjectsClient, refs } = opts;
+  if (!refs) return;
   const results = await Promise.all(
     refs.map((ref) => savedObjectsClient.delete(ASSETS_SAVED_OBJECT_TYPE, ref.id))
   );
@@ -169,7 +174,6 @@ export const getEsPackage = async (
   );
   const assets = bulkRes.saved_objects.map((so) => so.attributes);
 
-  // add asset references to cache
   const paths: string[] = [];
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
   entries.forEach(({ path, buffer }) => {
@@ -178,11 +182,10 @@ export const getEsPackage = async (
       paths.push(path);
     }
   });
-  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
+
   // create the packageInfo
   // TODO: this is mostly copied from validtion.ts, needed in case package does not exist in storage yet or is missing from cache
   // we don't want to reach out to the registry again so recreate it here.  should check whether it exists in packageInfoCache first
-
   const manifestPath = `${pkgName}-${pkgVersion}/manifest.yml`;
   const soResManifest = await savedObjectsClient.get<PackageAsset>(
     ASSETS_SAVED_OBJECT_TYPE,
@@ -226,8 +229,9 @@ export const getEsPackage = async (
         ingest_pipeline: ingestPipeline,
         type,
         dataset,
+        streams: manifestStreams,
       } = dataStreamManifest;
-      const streams = parseAndVerifyStreams(dataStreamManifest, dataStreamPath);
+      const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
       dataStreams.push({
         dataset: dataset || `${pkgName}.${dataStreamPath}`,
@@ -246,6 +250,10 @@ export const getEsPackage = async (
   packageInfo.assets = paths.map((path) => {
     return path.replace(`${pkgName}-${pkgVersion}`, `/package/${pkgName}/${pkgVersion}`);
   });
+
+  // Add asset references to cache
+  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
+  setPackageInfo({ name: pkgName, version: pkgVersion, packageInfo });
 
   return {
     paths,

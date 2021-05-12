@@ -66,20 +66,3 @@
     }
   }
 }
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana",
-    "type": "doc",
-    "id": "config:6.0.0",
-    "source": {
-      "config": {
-        "buildNum": 9007199254740991,
-        "defaultIndex": "logstash-*"
-      },
-      "type": "config",
-      "updated_at": "2019-01-22T19:32:02.235Z"
-    }
-  }
-}

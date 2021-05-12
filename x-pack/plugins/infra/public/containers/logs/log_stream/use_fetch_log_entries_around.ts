@@ -6,9 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs/operators';
-import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
+import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryCursor } from '../../../../common/log_entry';
 import { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
 import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search';
@@ -53,13 +53,15 @@ export const useFetchLogEntriesAround = ({
   type LogEntriesAfterRequest = NonNullable<ReturnType<typeof fetchLogEntriesAfter>>;
 
   const logEntriesAroundSearchRequests$ = useObservable(
-    () => new Subject<[LogEntriesBeforeRequest, Observable<LogEntriesAfterRequest>]>(),
+    () => new ReplaySubject<[LogEntriesBeforeRequest, Observable<LogEntriesAfterRequest>]>(),
     []
   );
 
   const fetchLogEntriesAround = useCallback(
     (cursor: LogEntryCursor, size: number) => {
-      const logEntriesBeforeSearchRequest = fetchLogEntriesBefore(cursor, Math.floor(size / 2));
+      const logEntriesBeforeSearchRequest = fetchLogEntriesBefore(cursor, {
+        size: Math.floor(size / 2),
+      });
 
       if (logEntriesBeforeSearchRequest == null) {
         return;
@@ -75,10 +77,9 @@ export const useFetchLogEntriesAround = ({
             tiebreaker: 0,
           };
 
-          const logEntriesAfterSearchRequest = fetchLogEntriesAfter(
-            cursorAfter,
-            Math.ceil(size / 2)
-          );
+          const logEntriesAfterSearchRequest = fetchLogEntriesAfter(cursorAfter, {
+            size: Math.ceil(size / 2),
+          });
 
           if (logEntriesAfterSearchRequest == null) {
             throw new Error('Failed to create request: no request args given');

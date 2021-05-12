@@ -255,6 +255,9 @@ export const ConnectorEditFlyout = ({
       if (closeAfterSave) {
         closeFlyout();
       }
+      if (connector.isMissingSecrets) {
+        connector.isMissingSecrets = false;
+      }
       if (reloadConnectors) {
         reloadConnectors();
       }
@@ -319,10 +322,7 @@ export const ConnectorEditFlyout = ({
                   }
                 )}
               </EuiText>
-              <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`}
-                target="_blank"
-              >
+              <EuiLink href={docLinks.links.alerting.preconfiguredConnectors} target="_blank">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
                   defaultMessage="Learn more about preconfigured connectors."

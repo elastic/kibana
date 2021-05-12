@@ -27,6 +27,7 @@ class MultiJobActionsMenuUI extends Component {
     this.canDeleteJob = checkPermission('canDeleteJob');
     this.canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
     this.canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
+    this.canCreateMlAlerts = checkPermission('canCreateMlAlerts');
   }
 
   onButtonClick = () => {
@@ -144,6 +145,26 @@ class MultiJobActionsMenuUI extends Component {
       );
     }
 
+    if (this.canCreateMlAlerts && this.props.jobs.length === 1) {
+      items.push(
+        <EuiContextMenuItem
+          key="create alert"
+          icon="bell"
+          disabled={false}
+          onClick={() => {
+            this.props.showCreateAlertFlyout(this.props.jobs.map(({ id }) => id));
+            this.closePopover();
+          }}
+          data-test-subj="mlADJobListMultiSelectCreateAlertActionButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobsActions.createAlertsLabel"
+            defaultMessage="Create alert rule"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
     return (
       <EuiPopover
         button={button}
@@ -162,6 +183,7 @@ MultiJobActionsMenuUI.propTypes = {
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  showCreateAlertFlyout: PropTypes.func.isRequired,
 };
 
 export const MultiJobActionsMenu = MultiJobActionsMenuUI;

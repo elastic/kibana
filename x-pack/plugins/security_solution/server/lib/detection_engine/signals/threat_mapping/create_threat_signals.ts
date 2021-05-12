@@ -12,8 +12,10 @@ import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { combineConcurrentResults } from './utils';
+import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
+  tuples,
   threatMapping,
   query,
   inputIndex,
@@ -23,39 +25,30 @@ export const createThreatSignals = async ({
   savedId,
   services,
   exceptionItems,
-  gap,
-  previousStartedAt,
   listClient,
   logger,
   eventsTelemetry,
   alertId,
   outputIndex,
-  params,
+  ruleSO,
   searchAfterSize,
-  actions,
-  createdBy,
-  createdAt,
-  updatedBy,
-  interval,
-  updatedAt,
-  enabled,
   refresh,
-  tags,
-  throttle,
   threatFilters,
   threatQuery,
   threatLanguage,
   buildRuleMessage,
   threatIndex,
-  name,
+  threatIndicatorPath,
   concurrentSearches,
   itemsPerSearch,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const params = ruleSO.attributes.params;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
+    warning: false,
     bulkCreateTimes: [],
     searchAfterTimes: [],
     lastLookBackDate: null,
@@ -65,7 +58,7 @@ export const createThreatSignals = async ({
   };
 
   let threatListCount = await getThreatListCount({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -75,7 +68,7 @@ export const createThreatSignals = async ({
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
   let threatList = await getThreatList({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -90,12 +83,27 @@ export const createThreatSignals = async ({
     perPage,
   });
 
+  const threatEnrichment = buildThreatEnrichment({
+    buildRuleMessage,
+    exceptionItems,
+    listClient,
+    logger,
+    services,
+    threatFilters,
+    threatIndex,
+    threatIndicatorPath,
+    threatLanguage,
+    threatQuery,
+  });
+
   while (threatList.hits.hits.length !== 0) {
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
+          tuples,
+          threatEnrichment,
           threatMapping,
           query,
           inputIndex,
@@ -105,27 +113,15 @@ export const createThreatSignals = async ({
           savedId,
           services,
           exceptionItems,
-          gap,
-          previousStartedAt,
           listClient,
           logger,
           eventsTelemetry,
           alertId,
           outputIndex,
-          params,
+          ruleSO,
           searchAfterSize,
-          actions,
-          createdBy,
-          createdAt,
-          updatedBy,
-          updatedAt,
-          interval,
-          enabled,
-          tags,
           refresh,
-          throttle,
           buildRuleMessage,
-          name,
           currentThreatList: slicedChunk,
           currentResult: results,
         })
@@ -152,12 +148,13 @@ export const createThreatSignals = async ({
     logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
 
     threatList = await getThreatList({
-      callCluster: services.callCluster,
+      esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
       query: threatQuery,
       language: threatLanguage,
       threatFilters,
       index: threatIndex,
+      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
       sortField: undefined,
       sortOrder: undefined,

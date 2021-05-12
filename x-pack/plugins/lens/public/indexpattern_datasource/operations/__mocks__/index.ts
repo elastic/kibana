@@ -19,6 +19,7 @@ jest.spyOn(actualHelpers, 'getErrorMessages');
 
 export const {
   getAvailableOperationsByMetadata,
+  memoizedGetAvailableOperationsByMetadata,
   getOperations,
   getOperationDisplay,
   getOperationTypesForField,

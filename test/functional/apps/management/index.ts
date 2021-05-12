@@ -14,13 +14,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('management', function () {
     before(async () => {
       await esArchiver.unload('logstash_functional');
-      await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
     });
 
     after(async () => {
       await esArchiver.unload('makelogs');
-      await esArchiver.unload('empty_kibana');
     });
 
     describe('', function () {
@@ -35,6 +33,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
       loadTestFile(require.resolve('./_index_patterns_empty'));
       loadTestFile(require.resolve('./_scripted_fields'));
+      loadTestFile(require.resolve('./_runtime_fields'));
+      loadTestFile(require.resolve('./_field_formatter'));
     });
 
     describe('', function () {

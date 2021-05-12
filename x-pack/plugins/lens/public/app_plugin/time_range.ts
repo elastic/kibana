@@ -26,15 +26,16 @@ const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
  * @param data data plugin contract to manage current now value, time range and session
  * @param lastKnownDoc Current state of the editor
  * @param setState state setter for Lens app state
+ * @param searchSessionId current session id
  */
 export function useTimeRange(
   data: DataPublicPluginStart,
   lastKnownDoc: Document | undefined,
-  setState: React.Dispatch<React.SetStateAction<LensAppState>>
+  setState: React.Dispatch<React.SetStateAction<LensAppState>>,
+  searchSessionId: string
 ) {
   const timefilter = data.query.timefilter.timefilter;
   const { from, to } = data.query.timefilter.timefilter.getTime();
-  const currentNow = data.nowProvider.get();
 
   // Need a stable reference for the frame component of the dateRange
   const resolvedDateRange = useMemo(() => {
@@ -43,10 +44,10 @@ export function useTimeRange(
       to,
     });
     return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
-    // recalculate current date range if current "now" value changes because calculateBounds
-    // depends on it internally
+    // recalculate current date range if the session gets updated because it
+    // might change "now" and calculateBounds depends on it internally
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timefilter, currentNow, from, to]);
+  }, [timefilter, searchSessionId, from, to]);
 
   useEffect(() => {
     const unresolvedTimeRange = timefilter.getTime();

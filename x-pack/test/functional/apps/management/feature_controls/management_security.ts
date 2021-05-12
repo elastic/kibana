@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no management privileges', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all'], true);
+        await security.testUser.setRoles(['global_dashboard_read'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -64,11 +64,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
-          sectionLinks: ['triggersActions'],
+          sectionLinks: ['triggersActions', 'reporting'],
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',
-          sectionLinks: ['indexPatterns', 'objects', 'tags', 'spaces', 'settings'],
+          sectionLinks: [
+            'indexPatterns',
+            'objects',
+            'tags',
+            'search_sessions',
+            'spaces',
+            'settings',
+          ],
         });
       });
     });

@@ -9,24 +9,19 @@ import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
 import { Typeahead } from './Typeahead';
 import { useProcessorEvent } from './use_processor_event';
-
-const Container = styled.div`
-  margin-bottom: 10px;
-`;
 
 interface State {
   suggestions: QuerySuggestion[];
@@ -66,7 +61,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useDynamicIndexPatternFetcher(processorEvent);
+  const { indexPattern } = useDynamicIndexPatternFetcher();
 
   const placeholder = i18n.translate('xpack.apm.kueryBar.placeholder', {
     defaultMessage: `Search {event, select,
@@ -145,16 +140,14 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
   }
 
   return (
-    <Container>
-      <Typeahead
-        isLoading={state.isLoadingSuggestions}
-        initialValue={urlParams.kuery}
-        onChange={onChange}
-        onSubmit={onSubmit}
-        suggestions={state.suggestions}
-        placeholder={placeholder}
-        prepend={props.prepend}
-      />
-    </Container>
+    <Typeahead
+      isLoading={state.isLoadingSuggestions}
+      initialValue={urlParams.kuery}
+      onChange={onChange}
+      onSubmit={onSubmit}
+      suggestions={state.suggestions}
+      placeholder={placeholder}
+      prepend={props.prepend}
+    />
   );
 }

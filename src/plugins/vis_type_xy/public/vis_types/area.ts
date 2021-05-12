@@ -26,7 +26,6 @@ import {
 } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
-import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 
 export const getAreaVisTypeDefinition = (
@@ -126,7 +125,6 @@ export const getAreaVisTypeDefinition = (
     },
   },
   editorConfig: {
-    collections: getConfigCollections(),
     optionTabs: getOptionTabs(showElasticChartsOptions),
     schemas: [
       {
@@ -135,7 +133,7 @@ export const getAreaVisTypeDefinition = (
         title: i18n.translate('visTypeXy.area.metricsTitle', {
           defaultMessage: 'Y-axis',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
         min: 1,
         defaults: [{ schema: 'metric', type: 'count' }],
       },

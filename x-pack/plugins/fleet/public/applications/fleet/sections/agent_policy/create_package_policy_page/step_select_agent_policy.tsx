@@ -9,18 +9,19 @@ import React, { useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiTextColor,
   EuiPortal,
   EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
+
 import { Error } from '../../../components';
-import { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
+import type { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';
 import {
   useGetPackageInfoByKey,
@@ -93,7 +94,11 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     sortOrder: 'asc',
     full: true,
   });
-  const agentPolicies = useMemo(() => agentPoliciesData?.items || [], [agentPoliciesData?.items]);
+  const agentPolicies = useMemo(
+    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
+    [agentPoliciesData?.items]
+  );
+
   const agentPoliciesById = useMemo(() => {
     return agentPolicies.reduce((acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
       acc[policy.id] = policy;

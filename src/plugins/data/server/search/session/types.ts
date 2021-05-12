@@ -15,6 +15,7 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
+import { SearchSessionsConfigSchema } from '../../../config';
 
 export interface IScopedSearchSessionsClient<T = unknown> {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
@@ -29,7 +30,9 @@ export interface IScopedSearchSessionsClient<T = unknown> {
   find: (options: Omit<SavedObjectsFindOptions, 'type'>) => Promise<SavedObjectsFindResponse<T>>;
   update: (sessionId: string, attributes: Partial<T>) => Promise<SavedObjectsUpdateResponse<T>>;
   cancel: (sessionId: string) => Promise<{}>;
+  delete: (sessionId: string) => Promise<{}>;
   extend: (sessionId: string, expires: Date) => Promise<SavedObjectsUpdateResponse<T>>;
+  getConfig: () => SearchSessionsConfigSchema | null;
 }
 
 export interface ISearchSessionService<T = unknown> {

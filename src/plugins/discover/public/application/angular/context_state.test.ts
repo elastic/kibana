@@ -6,23 +6,30 @@
  * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from 'kibana/public';
 import { getState } from './context_state';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager, Filter } from '../../../../data/public';
 import { coreMock } from '../../../../../core/public/mocks';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+
 const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {
   let history: History;
-  let state: any;
+  let state: ReturnType<typeof getState>;
   const getCurrentUrl = () => history.createHref(history.location);
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
-    state = await getState({
+    state = getState({
       defaultStepSize: '4',
       timeFieldName: 'time',
       history,
+      uiSettings: {
+        get: <T>(key: string) =>
+          ((key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown) as T,
+      } as IUiSettingsClient,
     });
     state.startSync();
   });

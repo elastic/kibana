@@ -11,14 +11,14 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
 } from '../../../__mocks__';
+import { groups } from '../../__mocks__/groups.mock';
+import { mockGroupValues } from './__mocks__/group_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { groups } from '../../__mocks__/groups.mock';
-import { mockGroupValues } from './__mocks__/group_logic.mock';
-import { GroupLogic } from './group_logic';
-
 import { GROUPS_PATH } from '../../routes';
+
+import { GroupLogic } from './group_logic';
 
 describe('GroupLogic', () => {
   const { mount } = new LogicMounter(GroupLogic);

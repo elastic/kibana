@@ -565,7 +565,9 @@ Object {
       "conflictDescriptions": undefined,
       "count": 0,
       "customLabel": undefined,
-      "esTypes": undefined,
+      "esTypes": Array [
+        "keyword",
+      ],
       "format": Object {
         "id": "number",
         "params": Object {
@@ -587,7 +589,7 @@ Object {
       "searchable": false,
       "shortDotsEnable": false,
       "subType": undefined,
-      "type": undefined,
+      "type": "string",
     },
     "script date": Object {
       "aggregatable": true,

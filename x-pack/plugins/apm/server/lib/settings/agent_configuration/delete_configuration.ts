@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
 
 export async function deleteConfiguration({
@@ -14,13 +15,15 @@ export async function deleteConfiguration({
   configurationId: string;
   setup: Setup;
 }) {
-  const { internalClient, indices } = setup;
+  return withApmSpan('delete_agent_configuration', async () => {
+    const { internalClient, indices } = setup;
 
-  const params = {
-    refresh: 'wait_for' as const,
-    index: indices.apmAgentConfigurationIndex,
-    id: configurationId,
-  };
+    const params = {
+      refresh: 'wait_for' as const,
+      index: indices.apmAgentConfigurationIndex,
+      id: configurationId,
+    };
 
-  return internalClient.delete(params);
+    return internalClient.delete(params);
+  });
 }

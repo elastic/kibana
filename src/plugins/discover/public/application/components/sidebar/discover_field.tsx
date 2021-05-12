@@ -9,7 +9,16 @@
 import './discover_field.scss';
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip, EuiTitle } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiTitle,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
@@ -62,6 +71,18 @@ export interface DiscoverFieldProps {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 
   multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
+
+  /**
+   * Callback to edit a runtime field from index pattern
+   * @param fieldName name of the field to edit
+   */
+  onEditField?: (fieldName: string) => void;
+
+  /**
+   * Callback to delete a runtime field from index pattern
+   * @param fieldName name of the field to delete
+   */
+  onDeleteField?: (fieldName: string) => void;
 }
 
 export function DiscoverField({
@@ -75,6 +96,8 @@ export function DiscoverField({
   selected,
   trackUiMetric,
   multiFields,
+  onEditField,
+  onDeleteField,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -217,6 +240,33 @@ export function DiscoverField({
     );
   }
 
+  const getFieldInfoIcon = () => {
+    if (field.type !== 'conflict') {
+      return null;
+    }
+    return (
+      <EuiToolTip
+        position="bottom"
+        content={i18n.translate('discover.field.mappingConflict', {
+          defaultMessage:
+            'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
+            'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
+        })}
+      >
+        <EuiIcon
+          tabIndex={0}
+          type="alert"
+          title={i18n.translate('discover.field.mappingConflict.title', {
+            defaultMessage: 'Mapping Conflict',
+          })}
+          size="s"
+        />
+      </EuiToolTip>
+    );
+  };
+
+  const fieldInfoIcon = getFieldInfoIcon();
+
   const shouldRenderMultiFields = !!multiFields;
   const renderMultiFields = () => {
     if (!multiFields) {
@@ -248,6 +298,60 @@ export function DiscoverField({
     );
   };
 
+  const isRuntimeField = Boolean(indexPattern.getFieldByName(field.name)?.runtimeField);
+  const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
+  const canEditField = onEditField && (!isUnknownField || isRuntimeField);
+  const canDeleteField = onDeleteField && isRuntimeField;
+  const popoverTitle = (
+    <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem grow={true}>
+          <h5>{field.displayName}</h5>
+        </EuiFlexItem>
+        {canEditField && (
+          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelEditItem">
+            <EuiButtonIcon
+              onClick={() => {
+                if (onEditField) {
+                  togglePopover();
+                  onEditField(field.name);
+                }
+              }}
+              iconType="pencil"
+              data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
+              aria-label={i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
+                defaultMessage: 'Edit index pattern field',
+              })}
+            />
+          </EuiFlexItem>
+        )}
+        {canDeleteField && (
+          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelDeleteItem">
+            <EuiToolTip
+              content={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
+                defaultMessage: 'Delete index pattern field',
+              })}
+            >
+              <EuiButtonIcon
+                onClick={() => {
+                  if (onDeleteField) {
+                    onDeleteField(field.name);
+                  }
+                }}
+                iconType="trash"
+                data-test-subj={`discoverFieldListPanelDelete-${field.name}`}
+                color="danger"
+                aria-label={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
+                  defaultMessage: 'Delete index pattern field',
+                })}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPopoverTitle>
+  );
+
   return (
     <EuiPopover
       display="block"
@@ -263,6 +367,7 @@ export function DiscoverField({
           fieldIcon={dscFieldIcon}
           fieldAction={actionButton}
           fieldName={fieldName}
+          fieldInfoIcon={fieldInfoIcon}
         />
       }
       isOpen={infoIsOpen}
@@ -270,7 +375,7 @@ export function DiscoverField({
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
-      <EuiPopoverTitle style={{ textTransform: 'none' }}>{field.displayName}</EuiPopoverTitle>
+      {popoverTitle}
       <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {

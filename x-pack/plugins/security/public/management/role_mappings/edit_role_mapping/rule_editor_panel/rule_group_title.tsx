@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiLink,
-  EuiIcon,
-  EuiOverlayMask,
   EuiConfirmModal,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
 } from '@elastic/eui';
+import React, { useState } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RuleGroup, AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
+
+import type { RuleGroup } from '../../model';
+import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
 interface Props {
   rule: RuleGroup;
@@ -87,45 +89,43 @@ export const RuleGroupTitle = (props: Props) => {
   );
 
   const confirmChangeModal = showConfirmChangeModal ? (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        data-test-subj="confirmRuleChangeModal"
-        title={
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.confirmGroupChangePromptTitle"
-            defaultMessage="Change group type?"
-          />
-        }
-        onCancel={() => {
-          setShowConfirmChangeModal(false);
-          setPendingNewRule(null);
-        }}
-        onConfirm={() => {
-          setShowConfirmChangeModal(false);
-          changeRuleDiscardingSubRules(pendingNewRule!);
-          setPendingNewRule(null);
-        }}
-        cancelButtonText={
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.confirmGroupChangeCancelButton"
-            defaultMessage="Cancel"
-          />
-        }
-        confirmButtonText={
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.confirmGroupChangeConfirmButton"
-            defaultMessage="Change anyway"
-          />
-        }
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.switchWithIncompatibleRulesMessage"
-            defaultMessage="This group contains rules that are not compatible with the new type. If you change types, you will lose all rules within this group."
-          />
-        </p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      data-test-subj="confirmRuleChangeModal"
+      title={
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.confirmGroupChangePromptTitle"
+          defaultMessage="Change group type?"
+        />
+      }
+      onCancel={() => {
+        setShowConfirmChangeModal(false);
+        setPendingNewRule(null);
+      }}
+      onConfirm={() => {
+        setShowConfirmChangeModal(false);
+        changeRuleDiscardingSubRules(pendingNewRule!);
+        setPendingNewRule(null);
+      }}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.confirmGroupChangeCancelButton"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.confirmGroupChangeConfirmButton"
+          defaultMessage="Change anyway"
+        />
+      }
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.switchWithIncompatibleRulesMessage"
+          defaultMessage="This group contains rules that are not compatible with the new type. If you change types, you will lose all rules within this group."
+        />
+      </p>
+    </EuiConfirmModal>
   ) : null;
 
   return (

@@ -14,7 +14,7 @@ import { Position } from '@elastic/charts';
 
 import { ValueAxis, SeriesParam } from '../../../../types';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
-import { valueAxis, seriesParam, vis } from './mocks';
+import { valueAxis, seriesParam } from './mocks';
 
 describe('ValueAxesPanel component', () => {
   let setParamByIndex: jest.Mock;
@@ -53,7 +53,6 @@ describe('ValueAxesPanel component', () => {
     defaultProps = {
       seriesParams: [seriesParamCount, seriesParamAverage],
       valueAxes: [axisLeft, axisRight],
-      vis,
       setParamByIndex,
       onValueAxisPositionChanged,
       addValueAxis,

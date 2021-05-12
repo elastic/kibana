@@ -16,8 +16,26 @@ export interface WaterfallDataSeriesConfigProperties {
   showTooltip: boolean;
 }
 
+export interface WaterfallMetadataItem {
+  name: string;
+  value?: string;
+}
+
+export interface WaterfallMetadataEntry {
+  x: number;
+  url: string;
+  requestHeaders?: WaterfallMetadataItem[];
+  responseHeaders?: WaterfallMetadataItem[];
+  certificates?: WaterfallMetadataItem[];
+  details: WaterfallMetadataItem[];
+}
+
 export type WaterfallDataEntry = PlotProperties & {
   config: WaterfallDataSeriesConfigProperties & Record<string, unknown>;
 };
 
+export type WaterfallMetadata = WaterfallMetadataEntry[];
+
 export type WaterfallData = WaterfallDataEntry[];
+
+export type RenderItem<I = any> = (item: I, index: number) => JSX.Element;

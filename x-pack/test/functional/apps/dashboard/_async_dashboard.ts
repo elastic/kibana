@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const log = getService('log');
   const pieChart = getService('pieChart');
   const find = getService('find');
@@ -30,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('sample data dashboard', function describeIndexTests() {
     before(async () => {
+      await esArchiver.emptyKibanaIndex();
       await PageObjects.common.sleep(5000);
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -177,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Checking area, bar and heatmap charts rendered');
       await dashboardExpect.seriesElementCount(15);
       log.debug('Checking saved searches rendered');
-      await dashboardExpect.savedSearchRowCount(50);
+      await dashboardExpect.savedSearchRowCount(10);
       log.debug('Checking input controls rendered');
       await dashboardExpect.inputControlItemCount(3);
       log.debug('Checking tag cloud rendered');

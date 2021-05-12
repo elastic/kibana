@@ -14,17 +14,21 @@ import {
   createGridFilterHandler,
   createGridResizeHandler,
   createGridSortingConfig,
+  createGridHideHandler,
+  createTransposeColumnFilterHandler,
 } from './table_actions';
-import { DatatableColumns, LensGridDirection } from './types';
+import { LensGridDirection } from './types';
+import { ColumnConfig } from './table_basic';
+import { LensMultiTable } from '../../types';
 
-function getDefaultConfig(): DatatableColumns & {
-  type: 'lens_datatable_columns';
-} {
+function getDefaultConfig(): ColumnConfig {
   return {
-    columnIds: [],
-    sortBy: '',
-    sortDirection: 'none',
-    type: 'lens_datatable_columns',
+    columns: [
+      { columnId: 'a', type: 'lens_datatable_column' },
+      { columnId: 'b', type: 'lens_datatable_column' },
+    ],
+    sortingColumnId: '',
+    sortingDirection: 'none',
   };
 }
 
@@ -42,6 +46,19 @@ function createTableRef(
           meta: { type: withDate ? 'date' : 'number', field: 'a' },
         },
       ],
+    },
+  };
+}
+
+function createUntransposedRef(options?: {
+  withDate: boolean;
+}): React.MutableRefObject<LensMultiTable> {
+  return {
+    current: {
+      type: 'lens_multitable',
+      tables: {
+        first: createTableRef(options).current,
+      },
     },
   };
 }
@@ -130,6 +147,138 @@ describe('Table actions', () => {
       });
     });
   });
+
+  describe('Transposed column filtering', () => {
+    it('should set a filter on click with the correct configuration', () => {
+      const onClickValue = jest.fn();
+      const tableRef = createUntransposedRef({ withDate: true });
+      tableRef.current.tables.first.rows = [{ a: 123456 }];
+      const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
+
+      filterHandle(
+        [
+          {
+            originalBucketColumn: tableRef.current.tables.first.columns[0],
+            value: 123456,
+          },
+        ],
+        false
+      );
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: tableRef.current.tables.first,
+            value: 123456,
+          },
+        ],
+        negate: false,
+        timeFieldName: 'a',
+      });
+    });
+
+    it('should set a negate filter on click with the correct configuration', () => {
+      const onClickValue = jest.fn();
+      const tableRef = createUntransposedRef({ withDate: true });
+      tableRef.current.tables.first.rows = [{ a: 123456 }];
+      const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
+
+      filterHandle(
+        [
+          {
+            originalBucketColumn: tableRef.current.tables.first.columns[0],
+            value: 123456,
+          },
+        ],
+        true
+      );
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: tableRef.current.tables.first,
+            value: 123456,
+          },
+        ],
+        negate: true,
+        timeFieldName: undefined,
+      });
+    });
+
+    it('should set a multi filter and look up positions of the values', () => {
+      const onClickValue = jest.fn();
+      const tableRef = createUntransposedRef({ withDate: false });
+      const filterHandle = createTransposeColumnFilterHandler(onClickValue, tableRef);
+      tableRef.current.tables.first.columns = [
+        {
+          id: 'a',
+          name: 'a',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          id: 'b',
+          name: 'b',
+          meta: {
+            type: 'string',
+          },
+        },
+      ];
+      tableRef.current.tables.first.rows = [
+        {
+          a: 'a1',
+          b: 'b1',
+        },
+        {
+          a: 'a2',
+          b: 'b2',
+        },
+        {
+          a: 'a3',
+          b: 'b3',
+        },
+        {
+          a: 'a4',
+          b: 'b4',
+        },
+      ];
+
+      filterHandle(
+        [
+          {
+            originalBucketColumn: tableRef.current.tables.first.columns[0],
+            value: 'a2',
+          },
+          {
+            originalBucketColumn: tableRef.current.tables.first.columns[1],
+            value: 'b3',
+          },
+        ],
+        false
+      );
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 1,
+            table: tableRef.current.tables.first,
+            value: 'a2',
+          },
+          {
+            column: 1,
+            row: 2,
+            table: tableRef.current.tables.first,
+            value: 'b3',
+          },
+        ],
+        negate: false,
+        timeFieldName: undefined,
+      });
+    });
+  });
   describe('Table sorting', () => {
     it('should create the right configuration for all types of sorting', () => {
       const configs: Array<{
@@ -207,7 +356,13 @@ describe('Table actions', () => {
 
       expect(setColumnConfig).toHaveBeenCalledWith({
         ...columnConfig,
-        columnWidth: [{ columnId: 'a', width: 100, type: 'lens_datatable_column_width' }],
+        columns: [
+          { columnId: 'a', width: 100, type: 'lens_datatable_column' },
+          {
+            columnId: 'b',
+            type: 'lens_datatable_column',
+          },
+        ],
       });
 
       expect(onEditAction).toHaveBeenCalledWith({ action: 'resize', columnId: 'a', width: 100 });
@@ -215,16 +370,14 @@ describe('Table actions', () => {
 
     it('should pull out the table custom width from the local state when passing undefined', () => {
       const columnConfig = getDefaultConfig();
-      columnConfig.columnWidth = [
-        { columnId: 'a', width: 100, type: 'lens_datatable_column_width' },
-      ];
+      columnConfig.columns = [{ columnId: 'a', width: 100, type: 'lens_datatable_column' }];
 
       const resizer = createGridResizeHandler(columnConfig, setColumnConfig, onEditAction);
       resizer({ columnId: 'a', width: undefined });
 
       expect(setColumnConfig).toHaveBeenCalledWith({
         ...columnConfig,
-        columnWidth: [],
+        columns: [{ columnId: 'a', width: undefined, type: 'lens_datatable_column' }],
       });
 
       expect(onEditAction).toHaveBeenCalledWith({
@@ -232,6 +385,25 @@ describe('Table actions', () => {
         columnId: 'a',
         width: undefined,
       });
+    });
+  });
+  describe('Column hiding', () => {
+    const setColumnConfig = jest.fn();
+
+    it('should allow to hide column', () => {
+      const columnConfig = getDefaultConfig();
+      const hiding = createGridHideHandler(columnConfig, setColumnConfig, onEditAction);
+      hiding({ columnId: 'a' });
+
+      expect(setColumnConfig).toHaveBeenCalledWith({
+        ...columnConfig,
+        columns: [
+          { columnId: 'a', hidden: true, type: 'lens_datatable_column' },
+          { columnId: 'b', type: 'lens_datatable_column' },
+        ],
+      });
+
+      expect(onEditAction).toHaveBeenCalledWith({ action: 'toggle', columnId: 'a' });
     });
   });
 });

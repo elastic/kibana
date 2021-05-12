@@ -138,6 +138,7 @@ export const useMetricsHostsAnomaliesResults = ({
   endTime,
   startTime,
   sourceId,
+  anomalyThreshold,
   defaultSortOptions,
   defaultPaginationOptions,
   onGetMetricsHostsAnomaliesDatasetsError,
@@ -146,6 +147,7 @@ export const useMetricsHostsAnomaliesResults = ({
   endTime: number;
   startTime: number;
   sourceId: string;
+  anomalyThreshold: number;
   defaultSortOptions: Sort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
@@ -172,24 +174,28 @@ export const useMetricsHostsAnomaliesResults = ({
   const [getMetricsHostsAnomaliesRequest, getMetricsHostsAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async (metric: Metric) => {
+      createPromise: async (metric?: Metric, query?: string, hostName?: string) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
           paginationOptions,
           paginationCursor,
         } = reducerState;
+
         return await callGetMetricHostsAnomaliesAPI(
           {
             sourceId,
+            anomalyThreshold,
             startTime: queryStartTime,
             endTime: queryEndTime,
             metric,
+            query,
             sort: sortOptions,
             pagination: {
               ...paginationOptions,
               cursor: paginationCursor,
             },
+            hostName,
           },
           services.http.fetch
         );
@@ -202,6 +208,7 @@ export const useMetricsHostsAnomaliesResults = ({
             payload: { lastReceivedCursors: requestCursors },
           });
         }
+
         // Check if we have more "next" entries. "Page" covers the "previous" scenario,
         // since we need to know the page we're on anyway.
         if (!paginationCursor || (paginationCursor && 'searchAfter' in paginationCursor)) {
@@ -215,8 +222,10 @@ export const useMetricsHostsAnomaliesResults = ({
     },
     [
       sourceId,
+      anomalyThreshold,
       dispatch,
-      reducerState.timeRange,
+      reducerState.timeRange.start,
+      reducerState.timeRange.end,
       reducerState.sortOptions,
       reducerState.paginationOptions,
       reducerState.paginationCursor,
@@ -291,14 +300,18 @@ export const useMetricsHostsAnomaliesResults = ({
     fetchPreviousPage: reducerState.page > 1 ? handleFetchPreviousPage : undefined,
     fetchNextPage: reducerState.hasNextPage ? handleFetchNextPage : undefined,
     page: reducerState.page,
+    timeRange: reducerState.timeRange,
   };
 };
 
 interface RequestArgs {
   sourceId: string;
+  anomalyThreshold: number;
   startTime: number;
   endTime: number;
-  metric: Metric;
+  metric?: Metric;
+  query?: string;
+  hostName?: string;
   sort: Sort;
   pagination: Pagination;
 }
@@ -307,20 +320,33 @@ export const callGetMetricHostsAnomaliesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { sourceId, startTime, endTime, metric, sort, pagination } = requestArgs;
+  const {
+    sourceId,
+    anomalyThreshold,
+    startTime,
+    endTime,
+    metric,
+    sort,
+    pagination,
+    query,
+    hostName,
+  } = requestArgs;
   const response = await fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getMetricsHostsAnomaliesRequestPayloadRT.encode({
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: {
             startTime,
             endTime,
           },
+          query,
           metric,
           sort,
           pagination,
+          hostName,
         },
       })
     ),

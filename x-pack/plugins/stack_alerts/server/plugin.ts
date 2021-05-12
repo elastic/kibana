@@ -19,10 +19,7 @@ export class AlertingBuiltinsPlugin
     this.logger = ctx.logger.get();
   }
 
-  public async setup(
-    core: CoreSetup<StackAlertsStartDeps>,
-    { alerts, features }: StackAlertsDeps
-  ): Promise<void> {
+  public setup(core: CoreSetup<StackAlertsStartDeps>, { alerting, features }: StackAlertsDeps) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
 
     registerBuiltInAlertTypes({
@@ -30,10 +27,10 @@ export class AlertingBuiltinsPlugin
       data: core
         .getStartServices()
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
-      alerts,
+      alerting,
     });
   }
 
-  public async start(): Promise<void> {}
-  public async stop(): Promise<void> {}
+  public start() {}
+  public stop() {}
 }

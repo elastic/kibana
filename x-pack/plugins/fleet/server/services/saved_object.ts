@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+
 import { SO_SEARCH_LIMIT } from '../constants';
-import { ListWithKuery } from '../types';
+import type { ListWithKuery } from '../types';
 
 /**
  * Escape a value with double quote to use with saved object search
