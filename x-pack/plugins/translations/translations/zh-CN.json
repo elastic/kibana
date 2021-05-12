@@ -23352,7 +23352,6 @@
     "xpack.stackAlerts.threshold.ui.visualization.loadingAlertVisualizationDescription": "正在加载告警可视化……",
     "xpack.stackAlerts.threshold.ui.visualization.thresholdPreviewChart.dataDoesNotExistTextMessage": "确认您的时间范围和筛选正确。",
     "xpack.stackAlerts.threshold.ui.visualization.thresholdPreviewChart.noDataTitle": "没有数据匹配此查询",
-    "xpack.stackAlerts.threshold.ui.visualization.unableToLoadVisualizationMessage": "无法加载可视化",
     "xpack.timelines.placeholder": "插件：{name} 时间线：{timelineId}",
     "xpack.transform.actionDeleteTransform.bulkDeleteDestinationIndexTitle": "删除目标索引",
     "xpack.transform.actionDeleteTransform.bulkDeleteDestIndexPatternTitle": "删除目标索引模式",

@@ -18,7 +18,7 @@ import {
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula/formula';
+import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
 
 interface ColumnChange {
   op: OperationType;
