@@ -17,6 +17,8 @@ import {
   YDomainRange,
   BrushEndListener,
   PointerEvent,
+  LegendPositionConfig,
+  LayoutDirection,
 } from '@elastic/charts';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -109,21 +111,31 @@ function TimelionVisComponent({
     setChart(newChart);
   }, [seriesList.list]);
 
-  // temp solution, will be changed after fix https://github.com/elastic/elastic-charts/issues/878
   const getLegendPosition = useCallback(() => {
     const chartGlobal = chart[0]._global;
+    const legendPositionConf: LegendPositionConfig = {
+      floating: true,
+      vAlign: Position.Top,
+      hAlign: Position.Right,
+      direction: LayoutDirection.Vertical,
+    };
+
     switch (chartGlobal?.legend?.position) {
       case 'ne':
-        return Position.Right;
+        legendPositionConf.vAlign = Position.Top;
+        legendPositionConf.hAlign = Position.Right;
       case 'nw':
-        return Position.Left;
+        legendPositionConf.vAlign = Position.Top;
+        legendPositionConf.hAlign = Position.Left;
       case 'se':
-        return Position.Right;
+        legendPositionConf.vAlign = Position.Bottom;
+        legendPositionConf.hAlign = Position.Right;
       case 'sw':
-        return Position.Left;
-      default:
-        return Position.Left;
+        legendPositionConf.vAlign = Position.Bottom;
+        legendPositionConf.hAlign = Position.Left;
     }
+
+    return legendPositionConf;
   }, [chart]);
 
   const brushEndListener = useCallback<BrushEndListener>(

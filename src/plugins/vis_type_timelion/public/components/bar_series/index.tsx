@@ -16,6 +16,7 @@ export function BarSeriesComponent({ data, index }: { data: any; index: number }
       rect: {
         fill: data.color,
         opacity: !bars.fill || bars.fill < 0 ? 1 : bars.fill,
+        widthPixel: bars.lineWidth,
       },
     },
   };
