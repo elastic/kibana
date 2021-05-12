@@ -212,7 +212,12 @@ If your upgrade migration fails repeatedly, refer to {kibana-ref}/upgrade-migrat
 
 *Cluster performance degradation*
 
-Kibana fails to update and delete {kibana-ref}/search-sessions.html[search sessions objects] created in non-default space, degrading the performance of the cluster due to a flooding of async search API usage.
+Details:
+
+{kib} fails to update and delete {kibana-ref}/search-sessions.html[search sessions objects] created in non-default spaces.
+
+Impact:
+Cluster performance degrades due to a flooding of async search API usage.
 This issue is fixed in 7.12.1 release by {kibana-pull}96123[#96123]. For 7.12.0 workaround refer to {kibana-issue}96124[#96124].
 
 
