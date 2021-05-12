@@ -88,7 +88,9 @@ export class DrawFeatureControl extends Component<Props, {}> {
       );
     } finally {
       this.props.disableDrawState();
-      mbDrawControl.deleteAll();
+      if (mbDrawControl) {
+        mbDrawControl.deleteAll();
+      }
     }
   };
 
