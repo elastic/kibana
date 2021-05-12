@@ -1,3 +1,94 @@
+.lnsFormula {
+  display: flex;
+  flex-direction: column;
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    height: 100%;
+  }
+
+  & > * {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.lnsFormula__editor {
+  border-bottom: $euiBorderThin;
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    display: flex;
+    flex-direction: column;
+  }
+
+  & > * + * {
+    border-top: $euiBorderThin;
+  }
+}
+
+.lnsFormula__editorHeader,
+.lnsFormula__editorFooter {
+  padding: $euiSizeS;
+}
+
+.lnsFormula__editorHeaderGroup,
+.lnsFormula__editorFooterGroup {
+  display: block; // Overrides EUI's styling of `display: flex` on `EuiFlexItem` components
+}
+
+.lnsIndexPatternDimensionEditor-isFullscreen .lnsFormula__editorContent {
+  flex: 1;
+  min-height: 0;
+}
+
+.lnsFormula__editorHelp--inline {
+  align-items: center;
+  display: flex;
+  padding: $euiSizeXS;
+
+  & > * + * {
+    margin-left: $euiSizeXS;
+  }
+}
+
+.lnsFormula__editorError {
+  white-space: nowrap;
+}
+
+.lnsFormula__docs {
+  background: $euiColorEmptyShade;
+}
+
+.lnsFormula__docs--inline {
+  display: flex;
+  flex-direction: column;
+}
+
+.lnsFormula__docsContent {
+  .lnsFormula__docs--overlay & {
+    height: 40vh;
+    width: 65vh;
+  }
+
+  .lnsFormula__docs--inline & {
+    flex: 1;
+    min-height: 0;
+  }
+
+  & > * + * {
+    border-left: $euiBorderThin;
+  }
+}
+
+.lnsFormula__docsNav {
+  background: $euiColorLightestShade;
+  padding: $euiSizeS;
+}
+
+.lnsFormula__docsText {
+  @include euiYScroll;
+  padding: $euiSize;
+}
+
 .lnsFormulaOverflow {
   // Needs to be higher than the modal and all flyouts
   z-index: $euiZLevel9 + 1;

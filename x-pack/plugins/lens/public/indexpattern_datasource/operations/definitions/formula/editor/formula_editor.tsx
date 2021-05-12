@@ -7,7 +7,17 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
@@ -444,106 +454,171 @@ export function FormulaEditor({
   return (
     <div
       className={classNames({
-        'lnsIndexPatternDimensionEditor--fullscreen': isFullscreen,
+        lnsIndexPatternDimensionEditor: true,
+        'lnsIndexPatternDimensionEditor-isFullscreen': isFullscreen,
       })}
     >
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top">
-        <EuiFlexGroup>
-          <EuiFlexItem />
-
-          <EuiFlexItem>
-            <EuiButtonEmpty
-              onClick={() => {
-                toggleFullscreen();
-              }}
-              iconType="fullScreen"
-              size="s"
-              color="text"
-              flush="right"
-            >
-              {isFullscreen
-                ? i18n.translate('xpack.lens.formula.fullScreenCloseLabel', {
-                    defaultMessage: 'Collapse formula',
-                  })
-                : i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
-                    defaultMessage: 'Expand formula',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-        <CodeEditor
-          {...codeEditorOptions}
-          height={200}
-          width={'100%'}
-          options={{
-            ...codeEditorOptions.options,
-            // Shared model and overflow node
-            overflowWidgetsDomNode: overflowDiv1.current,
-            model: editorModel.current,
-          }}
-          editorDidMount={(editor) => {
-            editor1.current = editor;
-            disposables.current.push(
-              editor.onDidFocusEditorWidget(() => {
-                setIsCloseable(false);
-              })
-            );
-            disposables.current.push(
-              editor.onDidBlurEditorWidget(() => {
-                setIsCloseable(true);
-              })
-            );
-            // If we ever introduce a second Monaco editor, we need to toggle
-            // the typing handler to the active editor to maintain the cursor
-            disposables.current.push(
-              editor.onDidChangeModelContent((e) => {
-                onTypeHandler(e, editor);
-              })
-            );
-          }}
-        />
-        <EuiSpacer />
-      </div>
-      <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded lnsIndexPatternDimensionEditor__section--top lnsIndexPatternDimensionEditor__section--bottom">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            {isFullscreen ? (
+        <div className="lnsFormula">
+          <div className="lnsFormula__editor">
+            <div className="lnsFormula__editorHeader">
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem className="lnsFormula__editorHeaderGroup">
+                  {/* TODO: Replace `bolt` with `wordWrap` icon (after latest EUI is deployed) and hook up button to enable/disable word wrapping. */}
+                  <EuiToolTip
+                    content={i18n.translate('xpack.lens.formula.disableWordWrapToolTip', {
+                      defaultMessage: 'Disable word wrap',
+                    })}
+                    delay="long"
+                    position="top"
+                  >
+                    <EuiButtonIcon
+                      iconType="bolt"
+                      color="text"
+                      aria-label={i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
+                        defaultMessage: 'Disable word wrap',
+                      })}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+
+                <EuiFlexItem className="lnsFormula__editorHeaderGroup" grow={false}>
+                  {/* TODO: Replace `bolt` with `fullScreenExit` icon (after latest EUI is deployed). */}
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      toggleFullscreen();
+                    }}
+                    iconType={isFullscreen ? 'bolt' : 'fullScreen'}
+                    size="xs"
+                    color="text"
+                    flush="right"
+                  >
+                    {isFullscreen
+                      ? i18n.translate('xpack.lens.formula.fullScreenExitLabel', {
+                          defaultMessage: 'Collapse',
+                        })
+                      : i18n.translate('xpack.lens.formula.fullScreenEnterLabel', {
+                          defaultMessage: 'Expand',
+                        })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+
+            <div className="lnsFormula__editorContent">
+              <CodeEditor
+                {...codeEditorOptions}
+                options={{
+                  ...codeEditorOptions.options,
+                  // Shared model and overflow node
+                  overflowWidgetsDomNode: overflowDiv1.current,
+                  model: editorModel.current,
+                }}
+                editorDidMount={(editor) => {
+                  editor1.current = editor;
+                  disposables.current.push(
+                    editor.onDidFocusEditorWidget(() => {
+                      setIsCloseable(false);
+                    })
+                  );
+                  disposables.current.push(
+                    editor.onDidBlurEditorWidget(() => {
+                      setIsCloseable(true);
+                    })
+                  );
+                  // If we ever introduce a second Monaco editor, we need to toggle
+                  // the typing handler to the active editor to maintain the cursor
+                  disposables.current.push(
+                    editor.onDidChangeModelContent((e) => {
+                      onTypeHandler(e, editor);
+                    })
+                  );
+                }}
+              />
+            </div>
+
+            <div className="lnsFormula__editorFooter">
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <EuiFlexItem className="lnsFormula__editorFooterGroup">
+                  {isFullscreen ? (
+                    // TODO: Hook up the below `EuiLink` button so that it toggles the presence of the `.lnsFormula__docs--inline` element in fullscreen mode. Note that when docs are hidden, the `arrowDown` button should change to `arrowUp` and the label should change to `Show function reference`.
+                    <EuiToolTip
+                      content={i18n.translate('xpack.lens.formula.editorHelpInlineHideToolTip', {
+                        defaultMessage: 'Hide function reference',
+                      })}
+                      delay="long"
+                      position="top"
+                    >
+                      <EuiLink
+                        aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineHideLabel', {
+                          defaultMessage: 'Hide function reference',
+                        })}
+                        className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
+                        color="text"
+                      >
+                        <EuiIcon type="help" />
+                        <EuiIcon type="arrowDown" />
+                      </EuiLink>
+                    </EuiToolTip>
+                  ) : (
+                    <EuiToolTip
+                      content={i18n.translate('xpack.lens.formula.editorHelpOverlayToolTip', {
+                        defaultMessage: 'Function reference',
+                      })}
+                      delay="long"
+                      position="top"
+                    >
+                      <EuiPopover
+                        panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
+                        panelPaddingSize="none"
+                        anchorPosition="leftCenter"
+                        isOpen={isHelpOpen}
+                        closePopover={() => setIsHelpOpen(false)}
+                        button={
+                          <EuiButtonIcon
+                            className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
+                            onClick={() => setIsHelpOpen(!isHelpOpen)}
+                            iconType="help"
+                            color="text"
+                            aria-label={i18n.translate(
+                              'xpack.lens.formula.editorHelpOverlayLabel',
+                              {
+                                defaultMessage: 'Function reference',
+                              }
+                            )}
+                          />
+                        }
+                      >
+                        <MemoizedFormulaHelp
+                          isFullscreen={isFullscreen}
+                          indexPattern={indexPattern}
+                          operationDefinitionMap={operationDefinitionMap}
+                        />
+                      </EuiPopover>
+                    </EuiToolTip>
+                  )}
+                </EuiFlexItem>
+
+                {/* TODO: Hook up the below so that the error count conditionally appears to notify users of the number of errors in their formula. */}
+                <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
+                  <EuiText className="lnsFormula__editorError" color="danger" size="xs">
+                    <EuiIcon type="alert" /> 1 error
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </div>
+
+          {isFullscreen ? (
+            <div className="lnsFormula__docs lnsFormula__docs--inline">
               <MemoizedFormulaHelp
+                isFullscreen={isFullscreen}
                 indexPattern={indexPattern}
-                isFullscreen={true}
                 operationDefinitionMap={operationDefinitionMap}
               />
-            ) : (
-              <EuiPopover
-                isOpen={isHelpOpen}
-                closePopover={() => setIsHelpOpen(false)}
-                button={
-                  <EuiButtonEmpty
-                    onClick={() => setIsHelpOpen(!isHelpOpen)}
-                    iconType="help"
-                    size="s"
-                    color="text"
-                  >
-                    {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
-                      defaultMessage: 'Function reference',
-                    })}
-                  </EuiButtonEmpty>
-                }
-                anchorPosition="leftDown"
-              >
-                <MemoizedFormulaHelp
-                  isFullscreen={false}
-                  indexPattern={indexPattern}
-                  operationDefinitionMap={operationDefinitionMap}
-                />
-              </EuiPopover>
-            )}
-          </EuiFlexItem>
-
-          <EuiFlexItem>{/* Errors go here */}</EuiFlexItem>
-        </EuiFlexGroup>
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );

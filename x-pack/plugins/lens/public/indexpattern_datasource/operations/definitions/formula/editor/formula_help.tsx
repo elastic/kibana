@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopoverTitle,
   EuiText,
   EuiSelectable,
   EuiSelectableOption,
@@ -108,34 +109,41 @@ function FormulaHelp({
   );
 
   return (
-    <EuiFlexGroup style={isFullscreen ? { height: '100%' } : { height: 400, width: 800 }}>
-      <EuiFlexItem grow={false}>
-        <EuiSelectable
-          options={helpItems}
-          singleSelection={true}
-          searchable
-          onChange={(newOptions) => {
-            const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
-            if (!chosenType) {
-              setSelectedFunction(undefined);
-            } else {
-              setSelectedFunction(chosenType.label);
-            }
-          }}
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      </EuiFlexItem>
-      <EuiFlexItem className="eui-yScroll">
-        <EuiText size="s">
-          <Markdown
-            markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-              defaultMessage: `
+    <>
+      <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="s">
+        Formula reference
+      </EuiPopoverTitle>
+
+      <EuiFlexGroup className="lnsFormula__docsContent" gutterSize="none" responsive={false}>
+        <EuiFlexItem className="lnsFormula__docsNav" grow={1}>
+          <EuiSelectable
+            height="full"
+            options={helpItems}
+            singleSelection={true}
+            searchable
+            onChange={(newOptions) => {
+              const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
+              if (!chosenType) {
+                setSelectedFunction(undefined);
+              } else {
+                setSelectedFunction(chosenType.label);
+              }
+            }}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiFlexItem>
+
+        <EuiFlexItem className="lnsFormula__docsText" grow={2}>
+          <EuiText size="s">
+            <Markdown
+              markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -170,30 +178,31 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-              description:
-                'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+                description:
+                  'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+              })}
+            />
+            {helpItems.map((item, index) => {
+              if (item.isGroupLabel) {
+                return null;
+              } else {
+                return (
+                  <div
+                    ref={(el) => {
+                      if (el) {
+                        scrollTargets.current[item.label] = el;
+                      }
+                    }}
+                  >
+                    <React.Fragment key={index}>{item.description}</React.Fragment>
+                  </div>
+                );
+              }
             })}
-          />
-          {helpItems.map((item, index) => {
-            if (item.isGroupLabel) {
-              return null;
-            } else {
-              return (
-                <div
-                  ref={(el) => {
-                    if (el) {
-                      scrollTargets.current[item.label] = el;
-                    }
-                  }}
-                >
-                  <React.Fragment key={index}>{item.description}</React.Fragment>
-                </div>
-              );
-            }
-          })}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 
