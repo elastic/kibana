@@ -23,6 +23,7 @@ import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
+import { METRICS_TOOLTIP_HEADER_SCREENREADER_LABEL } from './translations';
 
 const getChartHeight = (data: WaterfallData): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
@@ -42,7 +43,9 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
   return relevantItems.length ? (
     <WaterfallChartTooltip>
       <EuiFlexGroup direction="column" gutterSize="none">
-        {sidebarItem && <div>{sidebarItem.url}</div>}
+        {sidebarItem && (
+          <div aria-label={METRICS_TOOLTIP_HEADER_SCREENREADER_LABEL}>{sidebarItem.url}</div>
+        )}
         {relevantItems.map((item, index) => {
           return (
             <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
