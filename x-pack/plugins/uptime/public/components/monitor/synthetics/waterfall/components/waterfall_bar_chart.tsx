@@ -32,7 +32,8 @@ const getChartHeight = (data: WaterfallData): number => {
 };
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
-  const { data, renderTooltipItem } = useWaterfallContext();
+  const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
+  const sidebarItem = sidebarItems?.find((si) => si.index === tooltipInfo.header?.value);
   const relevantItems = data.filter((item) => {
     return (
       item.x === tooltipInfo.header?.value && item.config.showTooltip && item.config.tooltipProps
@@ -41,6 +42,7 @@ const Tooltip = (tooltipInfo: TooltipInfo) => {
   return relevantItems.length ? (
     <WaterfallChartTooltip>
       <EuiFlexGroup direction="column" gutterSize="none">
+        {sidebarItem && <div>{sidebarItem.url}</div>}
         {relevantItems.map((item, index) => {
           return (
             <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
