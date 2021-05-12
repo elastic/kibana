@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { FeatureCollection } from 'geojson';
+import { FeatureCollection, Geometry, Position } from 'geojson';
 import * as topojson from 'topojson-client';
 import { GeometryCollection } from 'topojson-specification';
 import _ from 'lodash';
@@ -158,7 +158,11 @@ export async function fetchGeoJson(
   );
 }
 
-export const addFeatureToIndex = async (indexName: string, geometry: unknown, path: string) => {
+export const addFeatureToIndex = async (
+  indexName: string,
+  geometry: Geometry | Position[],
+  path: string
+) => {
   const data = convertDotNotationStringToObj(path, geometry);
   return await getHttp().fetch({
     path: `${INDEX_FEATURE_PATH}`,

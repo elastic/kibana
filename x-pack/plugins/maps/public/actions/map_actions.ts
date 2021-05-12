@@ -11,6 +11,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import { Geometry, Position } from 'geojson';
 import { DRAW_TYPE } from '../../common/constants';
 import { MapStoreState } from '../reducers/store';
 import {
@@ -351,7 +352,11 @@ export function setVectorLayerIndexName(indexName: string) {
   };
 }
 
-export function addNewFeatureToIndex(indexName: string, geometry: unknown, path: string) {
+export function addNewFeatureToIndex(
+  indexName: string,
+  geometry: Geometry | Position[],
+  path: string
+) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     await addFeatureToIndex(indexName, geometry, path);
     await dispatch(syncDataForAllLayers({ forceRefresh: true }));

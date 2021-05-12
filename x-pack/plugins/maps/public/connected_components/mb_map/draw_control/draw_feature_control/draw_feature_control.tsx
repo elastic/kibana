@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { Map as MbMap } from 'mapbox-gl';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { Feature } from 'geojson';
+import { Feature, Geometry, Position } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import * as jsts from 'jsts';
@@ -71,11 +71,14 @@ export class DrawFeatureControl extends Component<Props, {}> {
             })
           );
         }
-        const featureGeom =
-          this.props.drawMode === DRAW_MODE.DRAW_POINTS
-            ? feature.geometry.coordinates
-            : feature.geometry;
-        this.props.addNewFeatureToIndex(indexPattern, featureGeom, geoField);
+        if ('coordinates' in feature.geometry) {
+          // @ts-ignore /* Single position array only used if point geometry */
+          const featureGeom: Geometry | Position[] =
+            this.props.drawMode === DRAW_MODE.DRAW_POINTS
+              ? feature.geometry.coordinates
+              : feature.geometry;
+          this.props.addNewFeatureToIndex(indexPattern, featureGeom, geoField);
+        }
       });
     } catch (error) {
       getToasts().addWarning(

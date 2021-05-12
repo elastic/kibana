@@ -12,7 +12,6 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 import { FeatureDrawControl } from './feature_draw_controls/feature_draw_control';
-import { FeatureEditControl } from './feature_draw_controls/feature_edit_control';
 import { FitToData } from './fit_to_data';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 
@@ -44,14 +43,11 @@ export function ToolbarOverlay(props: Props) {
     );
   }
 
-  function renderFeatureDrawAndEditControls() {
+  function renderFeatureDrawControl() {
     return props.shapeDrawModeActive || props.pointDrawModeActive ? (
       <>
         <EuiFlexItem>
           <FeatureDrawControl pointsOnly={props.pointDrawModeActive} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FeatureEditControl />
         </EuiFlexItem>
       </>
     ) : null;
@@ -75,7 +71,7 @@ export function ToolbarOverlay(props: Props) {
 
       {renderToolsControl()}
 
-      {renderFeatureDrawAndEditControls()}
+      {renderFeatureDrawControl()}
     </EuiFlexGroup>
   );
 }

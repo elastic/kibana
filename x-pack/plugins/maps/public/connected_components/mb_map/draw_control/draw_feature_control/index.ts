@@ -8,6 +8,7 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
+import { Geometry, Position } from 'geojson';
 import { DrawFeatureControl } from './draw_feature_control';
 import {
   addNewFeatureToIndex,
@@ -28,7 +29,7 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    addNewFeatureToIndex(indexName: string, geometry: unknown, path: string) {
+    addNewFeatureToIndex(indexName: string, geometry: Geometry | Position[], path: string) {
       dispatch(addNewFeatureToIndex(indexName, geometry, path));
     },
     disableDrawState() {
