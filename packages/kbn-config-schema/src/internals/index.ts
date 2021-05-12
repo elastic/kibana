@@ -298,7 +298,7 @@ export const internals: JoiRoot = Joi.extend(
   },
   {
     type: 'record',
-    prepare(value, { error, prefs }) {
+    coerce(value, { error, prefs }) {
       if (value === undefined || isPlainObject(value)) {
         return { value };
       }
@@ -306,12 +306,7 @@ export const internals: JoiRoot = Joi.extend(
       if (prefs.convert && typeof value === 'string') {
         try {
           const parsed = JSON.parse(value);
-          if (isPlainObject(parsed)) {
-            return { value: parsed };
-          }
-          return {
-            errors: [error('record.base')],
-          };
+          return { value: parsed };
         } catch (e) {
           return {
             errors: [error('record.parse')],
@@ -321,6 +316,15 @@ export const internals: JoiRoot = Joi.extend(
       return {
         errors: [error('record.base')],
       };
+    },
+    validate(value, { error }) {
+      if (!isPlainObject(value)) {
+        return {
+          errors: [error('record.base')],
+        };
+      }
+
+      return { value };
     },
     rules: {
       entries: {
@@ -334,24 +338,27 @@ export const internals: JoiRoot = Joi.extend(
             assert: Joi.object().schema(),
           },
         ],
-        validate(value, { error }, args, options) {
-          const result = new Map();
-          for (const [entryKey, entryValue] of value) {
+        method(key, value) {
+          return this.$_addRule({ name: 'entries', args: { key, value } });
+        },
+        validate(value, { error }, args) {
+          const result = {} as Record<string, any>;
+          for (const [entryKey, entryValue] of Object.entries(value)) {
             let validatedEntryKey: any;
             try {
               validatedEntryKey = Joi.attempt(entryKey, args.key, { presence: 'required' });
             } catch (e) {
-              return error('record.key', { entryKey, reason: e.message });
+              return error('record.key', { entryKey, reason: e });
             }
 
             let validatedEntryValue: any;
             try {
               validatedEntryValue = Joi.attempt(entryValue, args.value, { presence: 'required' });
             } catch (e) {
-              return error('record.value', { entryKey, reason: e.message });
+              return error('record.value', { entryKey, reason: e });
             }
 
-            result.set(validatedEntryKey, validatedEntryValue);
+            result[validatedEntryKey] = validatedEntryValue;
           }
           return result;
         },
