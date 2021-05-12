@@ -23,22 +23,20 @@ export const getClickFilterData = (
     const { specId } = point[1];
     // specId for a split series has the format
     // 61ca57f1-469d-11e7-af02-69e470af7417:Men's Accessories, <layer_id>:<split_label>
-    const termArray = specId.split(':');
-    const table = tables[termArray[0]];
+    const [layerId, splitLabel] = specId.split(':');
+    const table = tables[layerId];
 
-    const layer = model.series.filter(({ id }) => id === termArray[0]);
-    let splitLabel = termArray.length > 1 ? termArray[1] : undefined;
+    const layer = model.series.filter(({ id }) => id === layerId);
+    let label = splitLabel;
     // compute label for filters split mode
-    if (layer.length && layer[0].split_mode === BUCKET_TYPES.FILTERS) {
-      const filter = layer[0]?.split_filters?.filter(({ id }) => id === termArray[1]);
-      splitLabel = filter?.[0].filter?.query as string;
+    if (splitLabel && layer.length && layer[0].split_mode === BUCKET_TYPES.FILTERS) {
+      const filter = layer[0]?.split_filters?.filter(({ id }) => id === splitLabel);
+      label = filter?.[0].label || (filter?.[0].filter?.query as string);
     }
     const index = table.rows.findIndex((row) => {
       const condition =
         geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
-      return termArray.length > 1
-        ? condition && row[X_ACCESSOR_INDEX + 2].toString() === splitLabel
-        : condition;
+      return splitLabel ? condition && row[X_ACCESSOR_INDEX + 2].toString() === label : condition;
     });
     if (index < 0) return;
 
@@ -55,6 +53,5 @@ export const getClickFilterData = (
       data.push(...newData);
     }
   });
-
   return data;
 };

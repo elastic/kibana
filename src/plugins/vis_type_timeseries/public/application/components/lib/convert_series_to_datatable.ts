@@ -44,6 +44,7 @@ export const addMetaToColumns = (
     if (column.type === BUCKET_TYPES.FILTERS && column.params) {
       const filters = column.params.map((col) => ({
         input: col.filter,
+        label: col.label,
       }));
       params = {
         filters,
@@ -108,14 +109,17 @@ export const convertSeriesToDataTable = async (
         type: 'date_histogram',
       },
     ];
+
     if (seriesPerLayer.length) {
       id++;
+      const metrics = layer.metrics;
       columns.push({
         id,
-        name: layer.metrics[0].field || seriesPerLayer[0].splitByLabel,
+        name: metrics[metrics.length - 1].field || seriesPerLayer[0].splitByLabel,
         isMetric: true,
-        type: layer.metrics[0].type,
+        type: metrics[metrics.length - 1].type,
       });
+
       // Adds an extra column, if the layer is split by terms or filters aggregation
       if (isGroupedByTerms) {
         id++;
@@ -143,16 +147,8 @@ export const convertSeriesToDataTable = async (
       const data = seriesPerLayer[j].data.map((rowData) => {
         const row: DatatableRow = [rowData[0], rowData[1]];
         // If the layer is split by terms aggregation, the data array should also contain the split value.
-        if (isGroupedByTerms) {
+        if (isGroupedByTerms || filtersColumn) {
           row.push(seriesPerLayer[j].label);
-        }
-        if (filtersColumn) {
-          const params = filtersColumn.params?.find((p) => p.label === seriesPerLayer[j].label);
-          if (params && params.filter) {
-            row.push(params.filter.query);
-          } else {
-            row.push(seriesPerLayer[j].label);
-          }
         }
         return row;
       });
