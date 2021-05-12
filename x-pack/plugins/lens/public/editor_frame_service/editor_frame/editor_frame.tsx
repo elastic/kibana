@@ -333,6 +333,7 @@ export function EditorFrame(props: EditorFrameProps) {
             showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
+            plugins={props.plugins}
           />
         }
         configPanel={
