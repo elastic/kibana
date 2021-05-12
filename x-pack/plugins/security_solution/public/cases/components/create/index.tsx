@@ -44,7 +44,7 @@ export const Create = React.memo(() => {
             useInsertTimeline,
           },
         },
-        owner: APP_ID,
+        owner: [APP_ID],
       })}
     </EuiPanel>
   );

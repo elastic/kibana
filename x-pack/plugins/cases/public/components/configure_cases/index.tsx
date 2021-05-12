@@ -31,6 +31,7 @@ import {
   normalizeCaseConnector,
 } from './utils';
 import * as i18n from './translations';
+import { useOwnerContext } from '../owner_context/use_owner_context';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -52,11 +53,11 @@ const FormWrapper = styled.div`
 
 export interface ConfigureCasesProps {
   userCanCrud: boolean;
-  owner: string;
 }
 
-const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud, owner }) => {
+const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud }) => {
   const { triggersActionsUi } = useKibana().services;
+  const owner = useOwnerContext();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -75,7 +76,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud, o
     refetchCaseConfigure,
     setConnector,
     setClosureType,
-  } = useCaseConfigure(owner);
+  } = useCaseConfigure(owner[0]);
 
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
   const { loading: isLoadingActionTypes, actionTypes, refetchActionTypes } = useActionTypes();

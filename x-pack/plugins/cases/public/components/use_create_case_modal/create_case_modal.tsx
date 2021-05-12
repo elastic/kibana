@@ -42,7 +42,7 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
           onCancel: onCloseCaseModal,
           onSuccess,
           withSteps: false,
-          owner,
+          owner: [owner],
         })}
       </EuiModalBody>
     </EuiModal>

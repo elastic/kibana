@@ -38,6 +38,8 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
+import { useOwnerContext } from '../owner_context/use_owner_context';
+
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
     $isShow
@@ -64,7 +66,6 @@ interface AllCasesGenericProps {
   onRowClick?: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
-  owner: string[];
 }
 
 export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
@@ -78,9 +79,10 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     onRowClick,
     updateCase,
     userCanCrud,
-    owner,
   }) => {
     const { actionLicense } = useGetActionLicense();
+    const owner = useOwnerContext();
+
     const {
       data,
       dispatchUpdateCaseProperty,

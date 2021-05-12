@@ -254,6 +254,9 @@ describe('Case Configuration API', () => {
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: {
+          owner: 'securitySolution',
+        },
       });
     });
 
@@ -274,6 +277,9 @@ describe('Case Configuration API', () => {
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: {
+          owner: 'securitySolution',
+        },
       });
     });
 

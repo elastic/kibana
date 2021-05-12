@@ -44,7 +44,7 @@ describe('useGetReporters', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(spyOnGetReporters).toBeCalledWith(abortCtrl.signal);
+      expect(spyOnGetReporters).toBeCalledWith(abortCtrl.signal, ['securitySolution']);
     });
   });
 

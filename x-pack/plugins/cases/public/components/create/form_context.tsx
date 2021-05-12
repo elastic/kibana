@@ -21,6 +21,7 @@ import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
 import { CaseType, ConnectorTypes } from '../../../common';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
+import { useOwnerContext } from '../owner_context/use_owner_context';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -37,7 +38,6 @@ interface Props {
   children?: JSX.Element | JSX.Element[];
   hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
-  owner: string;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -46,10 +46,10 @@ export const FormContext: React.FC<Props> = ({
   children,
   hideConnectorServiceNowSir,
   onSuccess,
-  owner,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
-  const { connector: configurationConnector } = useCaseConfigure(owner);
+  const owner = useOwnerContext();
+  const { connector: configurationConnector } = useCaseConfigure(owner[0]);
   const { postCase } = usePostCase();
   const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();
@@ -88,6 +88,7 @@ export const FormContext: React.FC<Props> = ({
           type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
+          owner: owner[0],
         });
 
         if (afterCaseCreated && updatedCase) {
@@ -110,6 +111,7 @@ export const FormContext: React.FC<Props> = ({
       connectors,
       postCase,
       caseType,
+      owner,
       afterCaseCreated,
       onSuccess,
       postComment,

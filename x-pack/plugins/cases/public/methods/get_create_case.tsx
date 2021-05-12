@@ -8,10 +8,14 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CreateCaseProps } from '../components/create';
+import { Owner } from '../types';
+import { OwnerProvider } from '../components/owner_context';
 
 const CreateCaseLazy = lazy(() => import('../components/create'));
-export const getCreateCaseLazy = (props: CreateCaseProps) => (
-  <Suspense fallback={<EuiLoadingSpinner />}>
-    <CreateCaseLazy {...props} />
-  </Suspense>
+export const getCreateCaseLazy = (props: CreateCaseProps & Owner) => (
+  <OwnerProvider owner={props.owner}>
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <CreateCaseLazy {...props} />
+    </Suspense>
+  </OwnerProvider>
 );

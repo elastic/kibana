@@ -20,7 +20,6 @@ export interface AllCasesSelectorModalProps {
   onRowClick: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
-  owner: string[];
 }
 
 const Modal = styled(EuiModal)`
@@ -37,7 +36,6 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
   onRowClick,
   updateCase,
   userCanCrud,
-  owner,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
@@ -62,7 +60,6 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
           onRowClick={onClick}
           userCanCrud={userCanCrud}
           updateCase={updateCase}
-          owner={owner}
         />
       </EuiModalBody>
     </Modal>

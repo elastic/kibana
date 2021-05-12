@@ -14,13 +14,13 @@ import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
+import { useOwnerContext } from '../owner_context/use_owner_context';
 
 export interface RecentCasesProps {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
   createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
-  owner: string[];
 }
 
 const RecentCases = ({
@@ -28,8 +28,8 @@ const RecentCases = ({
   caseDetailsNavigation,
   createCaseNavigation,
   maxCasesToShow,
-  owner,
 }: RecentCasesProps) => {
+  const owner = useOwnerContext();
   const currentUser = useCurrentUser();
   const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
     'recentlyCreated'

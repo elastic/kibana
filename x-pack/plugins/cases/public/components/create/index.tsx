@@ -37,7 +37,6 @@ export interface CreateCaseProps {
   onSuccess: (theCase: Case) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   withSteps?: boolean;
-  owner: string;
 }
 
 export const CreateCase = ({
@@ -48,7 +47,6 @@ export const CreateCase = ({
   onSuccess,
   timelineIntegration,
   withSteps,
-  owner,
 }: CreateCaseProps) => (
   <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
     <FormContext
@@ -56,12 +54,10 @@ export const CreateCase = ({
       caseType={caseType}
       hideConnectorServiceNowSir={hideConnectorServiceNowSir}
       onSuccess={onSuccess}
-      owner={owner}
     >
       <CreateCaseForm
         hideConnectorServiceNowSir={hideConnectorServiceNowSir}
         withSteps={withSteps}
-        owner={owner}
       />
       <Container>
         <EuiFlexGroup

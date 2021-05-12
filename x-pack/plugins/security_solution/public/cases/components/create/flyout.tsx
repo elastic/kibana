@@ -65,7 +65,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
             onCancel: onCloseFlyout,
             onSuccess,
             withSteps: false,
-            owner: APP_ID,
+            owner: [APP_ID],
           })}
         </FormWrapper>
       </StyledEuiFlyoutBody>

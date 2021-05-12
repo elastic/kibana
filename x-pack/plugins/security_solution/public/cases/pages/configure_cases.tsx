@@ -56,7 +56,7 @@ const ConfigureCasesPageComponent: React.FC = () => {
         <WhitePageWrapper>
           {cases.getConfigureCases({
             userCanCrud: userPermissions?.crud ?? false,
-            owner: APP_ID,
+            owner: [APP_ID],
           })}
         </WhitePageWrapper>
       </WrapperPage>

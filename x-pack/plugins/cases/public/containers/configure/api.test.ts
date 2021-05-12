@@ -61,6 +61,9 @@ describe('Case Configuration API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: {
+          owner: 'securitySolution',
+        },
       });
     });
 

@@ -43,7 +43,7 @@ describe('useGetTags', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal);
+      expect(spyOnGetTags).toBeCalledWith(abortCtrl.signal, ['securitySolution']);
     });
   });
 

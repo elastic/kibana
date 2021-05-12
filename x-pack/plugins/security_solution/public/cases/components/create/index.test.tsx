@@ -47,7 +47,7 @@ describe('Create case', () => {
     );
 
     expect(mockCreateCase).toHaveBeenCalled();
-    expect(mockCreateCase.mock.calls[0][0].owner).toBe('securitySolution');
+    expect(mockCreateCase.mock.calls[0][0].owner).toBe(['securitySolution']);
   });
 
   it('should redirect to all cases on cancel click', async () => {

@@ -39,13 +39,17 @@ export type StartServices = CoreStart &
     security: SecurityPluginSetup;
   };
 
+export interface Owner {
+  owner: string[];
+}
+
 export interface CasesUiStart {
-  getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
+  getAllCases: (props: AllCasesProps & Owner) => ReactElement<AllCasesProps>;
   getAllCasesSelectorModal: (
-    props: AllCasesSelectorModalProps
+    props: AllCasesSelectorModalProps & Owner
   ) => ReactElement<AllCasesSelectorModalProps>;
   getCaseView: (props: CaseViewProps) => ReactElement<CaseViewProps>;
-  getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
-  getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
-  getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
+  getConfigureCases: (props: ConfigureCasesProps & Owner) => ReactElement<ConfigureCasesProps>;
+  getCreateCase: (props: CreateCaseProps & Owner) => ReactElement<CreateCaseProps>;
+  getRecentCases: (props: RecentCasesProps & Owner) => ReactElement<RecentCasesProps>;
 }

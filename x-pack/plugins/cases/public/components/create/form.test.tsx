@@ -53,7 +53,7 @@ describe('CreateCaseForm', () => {
   it('it renders with steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm owner={'securitySolution'} />
+        <CreateCaseForm />
       </MockHookWrapperComponent>
     );
 
@@ -63,7 +63,7 @@ describe('CreateCaseForm', () => {
   it('it renders without steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm withSteps={false} owner={'securitySolution'} />
+        <CreateCaseForm withSteps={false} />
       </MockHookWrapperComponent>
     );
 
@@ -73,7 +73,7 @@ describe('CreateCaseForm', () => {
   it('it renders all form fields', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm owner={'securitySolution'} />
+        <CreateCaseForm />
       </MockHookWrapperComponent>
     );
 
@@ -87,7 +87,7 @@ describe('CreateCaseForm', () => {
   it('should render spinner when loading', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm owner={'securitySolution'} />
+        <CreateCaseForm />
       </MockHookWrapperComponent>
     );
 
