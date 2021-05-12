@@ -203,7 +203,7 @@ const HostsComponent = () => {
               deleteQuery={deleteQuery}
               docValueFields={docValueFields}
               to={to}
-              filterQuery={tabsFilterQuery || ''} // TODO: is this the right thing to do
+              filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
               setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
