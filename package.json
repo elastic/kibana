@@ -457,7 +457,7 @@
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/storybook": "link:packages/kbn-storybook",
-    "@kbn/telemetry-tools": "link:packages/kbn-telemetry-tools",
+    "@kbn/telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools/npm_module",
     "@kbn/test": "link:packages/kbn-test",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
     "@loaders.gl/polyfills": "^2.3.5",
