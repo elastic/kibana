@@ -13,8 +13,6 @@ import { constructQueryOptions, getAuthorizationFilter } from '../utils';
 
 /**
  * Statistics API contract.
- *
- * @public
  */
 export interface StatsSubClient {
   /**
@@ -25,6 +23,8 @@ export interface StatsSubClient {
 
 /**
  * Creates the interface for retrieving the number of open, closed, and in progress cases.
+ *
+ * @ignore
  */
 export function createStatsSubClient(clientArgs: CasesClientArgs): StatsSubClient {
   return Object.freeze({

@@ -1,8 +1,10 @@
-[cases](../server_client_api.md) / [attachments/get](../modules/attachments_get.md) / FindArgs
+[Cases Client API Interface](../server_client_api.md) / [attachments/get](../modules/attachments_get.md) / FindArgs
 
 # Interface: FindArgs
 
 [attachments/get](../modules/attachments_get.md).FindArgs
+
+Parameters for finding attachments of a case
 
 ## Table of contents
 
@@ -19,7 +21,7 @@
 
 The case ID for finding associated attachments
 
-Defined in: [cases/server/client/attachments/get.ts:45](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/attachments/get.ts#L45)
+Defined in: [attachments/get.ts:48](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/get.ts#L48)
 
 ___
 
@@ -46,4 +48,4 @@ Optional parameters for filtering the returned attachments
 | `sortOrder` | *undefined* \| ``"desc"`` \| ``"asc"`` |
 | `subCaseId` | *undefined* \| *string* |
 
-Defined in: [cases/server/client/attachments/get.ts:49](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/attachments/get.ts#L49)
+Defined in: [attachments/get.ts:52](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/get.ts#L52)

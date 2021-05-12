@@ -50,6 +50,8 @@ export interface DeleteArgs {
 
 /**
  * Delete all comments for a case or sub case.
+ *
+ * @ignore
  */
 export async function deleteAll(
   { caseID, subCaseID }: DeleteAllArgs,
@@ -123,6 +125,11 @@ export async function deleteAll(
   }
 }
 
+/**
+ * Deletes an attachment
+ *
+ * @ignore
+ */
 export async function deleteComment(
   { caseID, attachmentID, subCaseID }: DeleteArgs,
   clientArgs: CasesClientArgs

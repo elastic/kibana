@@ -43,11 +43,25 @@ function shouldCloseByPush(
   );
 }
 
-interface PushParams {
+/**
+ * Parameters for pushing a case to an external system
+ */
+export interface PushParams {
+  /**
+   * The ID of a case
+   */
   caseId: string;
+  /**
+   * The ID of an external system to push to
+   */
   connectorId: string;
 }
 
+/**
+ * Push a case to an external service.
+ *
+ * @ignore
+ */
 export const push = async (
   { connectorId, caseId }: PushParams,
   clientArgs: CasesClientArgs,

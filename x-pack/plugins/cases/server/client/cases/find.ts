@@ -29,6 +29,8 @@ import { CasesClientArgs } from '..';
 
 /**
  * Retrieves a case and optionally its comments and sub case comments.
+ *
+ * @ignore
  */
 export const find = async (
   params: CasesFindRequest,

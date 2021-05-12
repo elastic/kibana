@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { CaseUserActionsResponse } from '../../../common/api';
+import { ICaseUserActionsResponse } from '../typedoc_interfaces';
 import { CasesClientArgs } from '../types';
 import { get } from './get';
 
+/**
+ * Parameters for retrieving user actions for a particular case
+ */
 export interface UserActionGet {
   /**
    * The ID of the case
@@ -22,16 +25,19 @@ export interface UserActionGet {
 
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
- *
- * @public
  */
 export interface UserActionsSubClient {
   /**
    * Retrieves all user actions for a particular case.
    */
-  getAll(clientArgs: UserActionGet): Promise<CaseUserActionsResponse>;
+  getAll(clientArgs: UserActionGet): Promise<ICaseUserActionsResponse>;
 }
 
+/**
+ * Creates an API object for interacting with the user action entities
+ *
+ * @ignore
+ */
 export const createUserActionsSubClient = (clientArgs: CasesClientArgs): UserActionsSubClient => {
   const attachmentSubClient: UserActionsSubClient = {
     getAll: (params: UserActionGet) => get(params, clientArgs),

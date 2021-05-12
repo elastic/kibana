@@ -1,8 +1,10 @@
-[cases](../server_client_api.md) / [attachments/get](../modules/attachments_get.md) / GetAllArgs
+[Cases Client API Interface](../server_client_api.md) / [attachments/get](../modules/attachments_get.md) / GetAllArgs
 
 # Interface: GetAllArgs
 
 [attachments/get](../modules/attachments_get.md).GetAllArgs
+
+Parameters for retrieving all attachments of a case
 
 ## Table of contents
 
@@ -20,7 +22,7 @@
 
 The case ID to retrieve all attachments for
 
-Defined in: [cases/server/client/attachments/get.ts:56](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/attachments/get.ts#L56)
+Defined in: [attachments/get.ts:62](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/get.ts#L62)
 
 ___
 
@@ -30,7 +32,7 @@ ___
 
 Optionally include the attachments associated with a sub case
 
-Defined in: [cases/server/client/attachments/get.ts:60](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/attachments/get.ts#L60)
+Defined in: [attachments/get.ts:66](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/get.ts#L66)
 
 ___
 
@@ -40,4 +42,4 @@ ___
 
 If included the case ID will be ignored and the attachments will be retrieved from the specified ID of the sub case
 
-Defined in: [cases/server/client/attachments/get.ts:64](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/attachments/get.ts#L64)
+Defined in: [attachments/get.ts:70](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/get.ts#L70)

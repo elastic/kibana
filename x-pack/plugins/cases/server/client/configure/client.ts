@@ -54,9 +54,16 @@ import {
 } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
+import {
+  ICasesConfigurePatch,
+  ICasesConfigureRequest,
+  ICasesConfigureResponse,
+} from '../typedoc_interfaces';
 
 /**
  * Defines the internal helper functions.
+ *
+ * @ignore
  */
 export interface InternalConfigureSubClient {
   getFields(params: ConfigurationGetFields): Promise<GetFieldsResponse>;
@@ -69,14 +76,12 @@ export interface InternalConfigureSubClient {
 
 /**
  * This is the public API for interacting with the connector configuration for cases.
- *
- * @public
  */
 export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigureFindRequest): Promise<CasesConfigureResponse | {}>;
+  get(params: GetConfigureFindRequest): Promise<ICasesConfigureResponse | {}>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
@@ -89,17 +94,19 @@ export interface ConfigureSubClient {
    */
   update(
     configurationId: string,
-    configurations: CasesConfigurePatch
-  ): Promise<CasesConfigureResponse>;
+    configurations: ICasesConfigurePatch
+  ): Promise<ICasesConfigureResponse>;
   /**
    * Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
    */
-  create(configuration: CasesConfigureRequest): Promise<CasesConfigureResponse>;
+  create(configuration: ICasesConfigureRequest): Promise<ICasesConfigureResponse>;
 }
 
 /**
  * These functions should not be exposed on the plugin contract. They are for internal use to support the CRUD of
  * configurations.
+ *
+ * @ignore
  */
 export const createInternalConfigurationSubClient = (
   clientArgs: CasesClientArgs,
@@ -117,6 +124,11 @@ export const createInternalConfigurationSubClient = (
   return Object.freeze(configureSubClient);
 };
 
+/**
+ * Creates an API object for interacting with the configuration entities
+ *
+ * @ignore
+ */
 export const createConfigurationSubClient = (
   clientArgs: CasesClientArgs,
   casesInternalClient: CasesClientInternal

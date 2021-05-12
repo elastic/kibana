@@ -1,4 +1,4 @@
-[cases](../server_client_api.md) / [user_actions/client](../modules/user_actions_client.md) / UserActionsSubClient
+[Cases Client API Interface](../server_client_api.md) / [user_actions/client](../modules/user_actions_client.md) / UserActionsSubClient
 
 # Interface: UserActionsSubClient
 
@@ -16,7 +16,7 @@ API for interacting the actions performed by a user when interacting with the ca
 
 ### getAll
 
-▸ **getAll**(`clientArgs`: [*UserActionGet*](user_actions_client.useractionget.md)): *Promise*<{ `action`: ``"add"`` \| ``"create"`` \| ``"delete"`` \| ``"update"`` \| ``"push-to-service"`` ; `action_at`: *string* ; `action_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `action_field`: (``"comment"`` \| ``"owner"`` \| ``"status"`` \| ``"description"`` \| ``"tags"`` \| ``"title"`` \| ``"connector"`` \| ``"settings"`` \| ``"pushed"`` \| ``"sub_case"``)[] ; `new_value`: ``null`` \| *string* ; `old_value`: ``null`` \| *string* ; `owner`: *string*  } & { `action_id`: *string* ; `case_id`: *string* ; `comment_id`: ``null`` \| *string*  } & { `sub_case_id`: *undefined* \| *string*  }[]\>
+▸ **getAll**(`clientArgs`: [*UserActionGet*](user_actions_client.useractionget.md)): *Promise*<[*ICaseUserActionsResponse*](typedoc_interfaces.icaseuseractionsresponse.md)\>
 
 Retrieves all user actions for a particular case.
 
@@ -26,6 +26,6 @@ Retrieves all user actions for a particular case.
 | :------ | :------ |
 | `clientArgs` | [*UserActionGet*](user_actions_client.useractionget.md) |
 
-**Returns:** *Promise*<{ `action`: ``"add"`` \| ``"create"`` \| ``"delete"`` \| ``"update"`` \| ``"push-to-service"`` ; `action_at`: *string* ; `action_by`: { email: string \| null \| undefined; full\_name: string \| null \| undefined; username: string \| null \| undefined; } ; `action_field`: (``"comment"`` \| ``"owner"`` \| ``"status"`` \| ``"description"`` \| ``"tags"`` \| ``"title"`` \| ``"connector"`` \| ``"settings"`` \| ``"pushed"`` \| ``"sub_case"``)[] ; `new_value`: ``null`` \| *string* ; `old_value`: ``null`` \| *string* ; `owner`: *string*  } & { `action_id`: *string* ; `case_id`: *string* ; `comment_id`: ``null`` \| *string*  } & { `sub_case_id`: *undefined* \| *string*  }[]\>
+**Returns:** *Promise*<[*ICaseUserActionsResponse*](typedoc_interfaces.icaseuseractionsresponse.md)\>
 
-Defined in: [cases/server/client/user_actions/client.ts:32](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/user_actions/client.ts#L32)
+Defined in: [user_actions/client.ts:33](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/user_actions/client.ts#L33)

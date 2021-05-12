@@ -19,6 +19,9 @@ import { decodeCommentRequest, ensureAuthorized } from '../utils';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 
+/**
+ * Parameters for updating a single attachment
+ */
 export interface UpdateArgs {
   /**
    * The ID of the case that is associated with this attachment
@@ -87,6 +90,8 @@ async function getCommentableCase({
 
 /**
  * Update an attachment.
+ *
+ * @ignore
  */
 export async function update(
   { caseID, subCaseID, updateRequest: queryParams }: UpdateArgs,

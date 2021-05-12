@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  AllCommentsResponse,
-  CaseResponse,
-  CommentResponse,
-  CommentsResponse,
-} from '../../../common/api';
+import { CommentResponse } from '../../../common/api';
 
 import { CasesClientInternal } from '../client_internal';
+import { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
 import { CasesClientArgs } from '../types';
 import { AddArgs, addComment } from './add';
 import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
@@ -21,14 +17,12 @@ import { update, UpdateArgs } from './update';
 
 /**
  * API for interacting with the attachments to a case.
- *
- * @public
  */
 export interface AttachmentsSubClient {
   /**
    * Adds an attachment to a case.
    */
-  add(params: AddArgs): Promise<CaseResponse>;
+  add(params: AddArgs): Promise<ICaseResponse>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -40,11 +34,11 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindArgs): Promise<CommentsResponse>;
+  find(findArgs: FindArgs): Promise<ICommentsResponse>;
   /**
    * Gets all attachments for a single case.
    */
-  getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
+  getAll(getAllArgs: GetAllArgs): Promise<IAllCommentsResponse>;
   /**
    * Retrieves a single attachment for a case.
    */
@@ -54,9 +48,14 @@ export interface AttachmentsSubClient {
    *
    * The request must include all fields for the attachment. Even the fields that are not changing.
    */
-  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
+  update(updateArgs: UpdateArgs): Promise<ICaseResponse>;
 }
 
+/**
+ * Creates an API object for interacting with attachments.
+ *
+ * @ignore
+ */
 export const createAttachmentsSubClient = (
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal

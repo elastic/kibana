@@ -383,6 +383,11 @@ function partitionPatchRequest(
   };
 }
 
+/**
+ * Updates the specified cases with new values
+ *
+ * @ignore
+ */
 export const update = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs,

@@ -32,11 +32,6 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
         }
 
         const casesClient = await context.cases.getCasesClient();
-        const actionsClient = context.actions?.getActionsClient();
-
-        if (actionsClient == null) {
-          return response.badRequest({ body: 'Action client not found' });
-        }
 
         const params = pipe(
           CasePushRequestParamsRt.decode(request.params),
@@ -45,7 +40,6 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
 
         return response.ok({
           body: await casesClient.cases.push({
-            actionsClient,
             caseId: params.case_id,
             connectorId: params.connector_id,
           }),

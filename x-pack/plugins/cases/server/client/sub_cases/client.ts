@@ -15,7 +15,6 @@ import {
   SubCasesFindResponse,
   SubCasesFindResponseRt,
   SubCasesPatchRequest,
-  SubCasesResponse,
 } from '../../../common/api';
 import { CasesClientArgs, CasesClientInternal } from '..';
 import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common';
@@ -25,6 +24,7 @@ import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { update } from './update';
+import { ISubCaseResponse, ISubCasesFindResponse, ISubCasesResponse } from '../typedoc_interfaces';
 
 interface FindArgs {
   /**
@@ -61,19 +61,21 @@ export interface SubCasesClient {
   /**
    * Retrieves the sub cases matching the search criteria.
    */
-  find(findArgs: FindArgs): Promise<SubCasesFindResponse>;
+  find(findArgs: FindArgs): Promise<ISubCasesFindResponse>;
   /**
    * Retrieves a single sub case.
    */
-  get(getArgs: GetArgs): Promise<SubCaseResponse>;
+  get(getArgs: GetArgs): Promise<ISubCaseResponse>;
   /**
    * Updates the specified sub cases to the new values included in the request.
    */
-  update(subCases: SubCasesPatchRequest): Promise<SubCasesResponse>;
+  update(subCases: SubCasesPatchRequest): Promise<ISubCasesResponse>;
 }
 
 /**
  * Creates a client for handling the different exposed API routes for interacting with sub cases.
+ *
+ * @ignore
  */
 export function createSubCasesClient(
   clientArgs: CasesClientArgs,

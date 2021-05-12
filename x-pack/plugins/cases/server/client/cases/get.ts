@@ -37,6 +37,9 @@ import {
 } from '../utils';
 import { CaseService } from '../../services';
 
+/**
+ * Parameters for finding cases IDs using an alert ID
+ */
 export interface CaseIDsByAlertIDParams {
   /**
    * The alert ID to search for
@@ -51,6 +54,8 @@ export interface CaseIDsByAlertIDParams {
 /**
  * Case Client wrapper function for retrieving the case IDs that have a particular alert ID
  * attached to them. This handles RBAC before calling the saved object API.
+ *
+ * @ignore
  */
 export const getCaseIDsByAlertID = async (
   { alertID, options }: CaseIDsByAlertIDParams,
@@ -107,14 +112,28 @@ export const getCaseIDsByAlertID = async (
   }
 };
 
-interface GetParams {
+/**
+ * The parameters for retrieving a case
+ */
+export interface GetParams {
+  /**
+   * Case ID
+   */
   id: string;
+  /**
+   * Whether to include the attachments for a case in the response
+   */
   includeComments?: boolean;
+  /**
+   * Whether to include the attachments for all children of a case in the response
+   */
   includeSubCaseComments?: boolean;
 }
 
 /**
  * Retrieves a case and optionally its comments and sub case comments.
+ *
+ * @ignore
  */
 export const get = async (
   { id, includeComments, includeSubCaseComments }: GetParams,

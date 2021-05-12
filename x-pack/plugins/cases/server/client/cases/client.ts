@@ -5,57 +5,38 @@
  * 2.0.
  */
 
-import { ActionsClient } from '../../../../actions/server';
 import {
   CasePostRequest,
-  CaseResponse,
   CasesPatchRequest,
-  CasesResponse,
   CasesFindRequest,
-  CasesFindResponse,
   User,
   AllTagsFindRequest,
   AllReportersFindRequest,
 } from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
+import {
+  ICasePostRequest,
+  ICaseResponse,
+  ICasesFindRequest,
+  ICasesFindResponse,
+  ICasesPatchRequest,
+  ICasesResponse,
+} from '../typedoc_interfaces';
 import { CasesClientArgs } from '../types';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
-import { CaseIDsByAlertIDParams, get, getCaseIDsByAlertID, getReporters, getTags } from './get';
-import { push } from './push';
+import {
+  CaseIDsByAlertIDParams,
+  get,
+  getCaseIDsByAlertID,
+  GetParams,
+  getReporters,
+  getTags,
+} from './get';
+import { push, PushParams } from './push';
 import { update } from './update';
-
-interface CaseGet {
-  /**
-   * Case ID
-   */
-  id: string;
-  /**
-   * Whether to include the attachments for a case in the response
-   */
-  includeComments?: boolean;
-  /**
-   * Whether to include the attachments for all children of a case in the response
-   */
-  includeSubCaseComments?: boolean;
-}
-
-interface CasePush {
-  /**
-   * The actions framework's client
-   */
-  actionsClient: ActionsClient;
-  /**
-   * The ID of a case
-   */
-  caseId: string;
-  /**
-   * The ID of an external system to push to
-   */
-  connectorId: string;
-}
 
 /**
  * API for interacting with the cases entities.
@@ -64,25 +45,25 @@ export interface CasesSubClient {
   /**
    * Creates a case.
    */
-  create(data: CasePostRequest): Promise<CaseResponse>;
+  create(data: ICasePostRequest): Promise<ICaseResponse>;
   /**
    * Returns cases that match the search criteria.
    *
    * If the `owner` field is left empty then all the cases that the user has access to will be returned.
    */
-  find(params: CasesFindRequest): Promise<CasesFindResponse>;
+  find(params: ICasesFindRequest): Promise<ICasesFindResponse>;
   /**
    * Retrieves a single case with the specified ID.
    */
-  get(params: CaseGet): Promise<CaseResponse>;
+  get(params: GetParams): Promise<ICaseResponse>;
   /**
    * Pushes a specific case to an external system.
    */
-  push(args: CasePush): Promise<CaseResponse>;
+  push(args: PushParams): Promise<ICaseResponse>;
   /**
    * Update the specified cases with the passed in values.
    */
-  update(cases: CasesPatchRequest): Promise<CasesResponse>;
+  update(cases: ICasesPatchRequest): Promise<ICasesResponse>;
   /**
    * Delete a case and all its comments.
    *
@@ -105,6 +86,8 @@ export interface CasesSubClient {
 
 /**
  * Creates the interface for CRUD on cases objects.
+ *
+ * @ignore
  */
 export const createCasesSubClient = (
   clientArgs: CasesClientArgs,
@@ -114,8 +97,8 @@ export const createCasesSubClient = (
   const casesSubClient: CasesSubClient = {
     create: (data: CasePostRequest) => create(data, clientArgs),
     find: (params: CasesFindRequest) => find(params, clientArgs),
-    get: (params: CaseGet) => get(params, clientArgs),
-    push: (params: CasePush) => push(params, clientArgs, casesClient, casesClientInternal),
+    get: (params: GetParams) => get(params, clientArgs),
+    push: (params: PushParams) => push(params, clientArgs, casesClient, casesClientInternal),
     update: (cases: CasesPatchRequest) => update(cases, clientArgs, casesClientInternal),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),

@@ -1,8 +1,10 @@
-[cases](../server_client_api.md) / [cases/get](../modules/cases_get.md) / CaseIDsByAlertIDParams
+[Cases Client API Interface](../server_client_api.md) / [cases/get](../modules/cases_get.md) / CaseIDsByAlertIDParams
 
 # Interface: CaseIDsByAlertIDParams
 
 [cases/get](../modules/cases_get.md).CaseIDsByAlertIDParams
+
+Parameters for finding cases IDs using an alert ID
 
 ## Table of contents
 
@@ -19,7 +21,7 @@
 
 The alert ID to search for
 
-Defined in: [cases/server/client/cases/get.ts:44](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/cases/get.ts#L44)
+Defined in: [cases/get.ts:47](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/cases/get.ts#L47)
 
 ___
 
@@ -35,4 +37,4 @@ The filtering options when searching for associated cases.
 | :------ | :------ |
 | `owner` | *undefined* \| *string* \| *string*[] |
 
-Defined in: [cases/server/client/cases/get.ts:48](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/cases/get.ts#L48)
+Defined in: [cases/get.ts:51](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/cases/get.ts#L51)

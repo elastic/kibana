@@ -16,14 +16,10 @@ import { checkEnabledCaseConnectorOrThrow } from '../../common';
 import { CasesClientArgs } from '..';
 import { ensureAuthorized } from '../utils';
 import { Operations } from '../../authorization';
-
-interface GetParams {
-  caseId: string;
-  subCaseId?: string;
-}
+import { UserActionGet } from './client';
 
 export const get = async (
-  { caseId, subCaseId }: GetParams,
+  { caseId, subCaseId }: UserActionGet,
   clientArgs: CasesClientArgs
 ): Promise<CaseUserActionsResponse> => {
   const { savedObjectsClient, userActionService, logger, authorization, auditLogger } = clientArgs;

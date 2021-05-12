@@ -1,16 +1,25 @@
 {
   "entryPoints": [
     "../server/client/client.ts",
+    "../server/client/typedoc_interfaces.ts",
     "../server/client/attachments",
-    "../server/client/cases",
-    "../server/client/configure",
-    "../server/client/stats",
-    "../server/client/sub_cases",
-    "../server/client/user_actions"
+    "../server/client/cases/client.ts",
+    "../server/client/cases/get.ts",
+    "../server/client/cases/push.ts",
+    "../server/client/configure/client.ts",
+    "../server/client/stats/client.ts",
+    "../server/client/sub_cases/client.ts",
+    "../server/client/user_actions/client.ts"
   ],
+  "exclude": [
+    "**/mock.ts",
+    "../server/client/cases/+(mock.ts|utils.ts|utils.test.ts|types.ts)"
+  ],
+  "excludeExternals": true,
   "out": "server",
   "theme": "markdown",
   "plugin": "typedoc-plugin-markdown",
   "entryDocument": "server_client_api.md",
-  "readme": "none"
+  "readme": "none",
+  "name": "Cases Client API Interface"
 }

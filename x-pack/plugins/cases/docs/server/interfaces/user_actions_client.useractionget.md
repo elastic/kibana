@@ -1,8 +1,10 @@
-[cases](../server_client_api.md) / [user_actions/client](../modules/user_actions_client.md) / UserActionGet
+[Cases Client API Interface](../server_client_api.md) / [user_actions/client](../modules/user_actions_client.md) / UserActionGet
 
 # Interface: UserActionGet
 
 [user_actions/client](../modules/user_actions_client.md).UserActionGet
+
+Parameters for retrieving user actions for a particular case
 
 ## Table of contents
 
@@ -19,7 +21,7 @@
 
 The ID of the case
 
-Defined in: [cases/server/client/user_actions/client.ts:16](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/user_actions/client.ts#L16)
+Defined in: [user_actions/client.ts:19](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/user_actions/client.ts#L19)
 
 ___
 
@@ -29,4 +31,4 @@ ___
 
 If specified then a sub case will be used for finding all the user actions
 
-Defined in: [cases/server/client/user_actions/client.ts:20](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/user_actions/client.ts#L20)
+Defined in: [user_actions/client.ts:23](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/user_actions/client.ts#L23)

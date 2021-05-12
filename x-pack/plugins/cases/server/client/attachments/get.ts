@@ -38,6 +38,9 @@ import {
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
+/**
+ * Parameters for finding attachments of a case
+ */
 export interface FindArgs {
   /**
    * The case ID for finding associated attachments
@@ -49,6 +52,9 @@ export interface FindArgs {
   queryParams?: FindQueryParams;
 }
 
+/**
+ * Parameters for retrieving all attachments of a case
+ */
 export interface GetAllArgs {
   /**
    * The case ID to retrieve all attachments for
@@ -77,6 +83,8 @@ export interface GetArgs {
 
 /**
  * Retrieves the attachments for a case entity. This support pagination.
+ *
+ * @ignore
  */
 export async function find(
   { caseID, queryParams }: FindArgs,
@@ -167,6 +175,8 @@ export async function find(
 
 /**
  * Retrieves a single attachment by its ID.
+ *
+ * @ignore
  */
 export async function get(
   { attachmentID, caseID }: GetArgs,
@@ -207,6 +217,8 @@ export async function get(
 /**
  * Retrieves all the attachments for a case. The `includeSubCaseComments` can be used to include the sub case comments for
  * collections. If the entity is a sub case, pass in the subCaseID.
+ *
+ * @ignore
  */
 export async function getAll(
   { caseID, includeSubCaseComments, subCaseID }: GetAllArgs,

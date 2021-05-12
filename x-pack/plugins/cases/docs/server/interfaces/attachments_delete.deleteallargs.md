@@ -1,4 +1,4 @@
-[cases](../server_client_api.md) / [attachments/delete](../modules/attachments_delete.md) / DeleteAllArgs
+[Cases Client API Interface](../server_client_api.md) / [attachments/delete](../modules/attachments_delete.md) / DeleteAllArgs
 
 # Interface: DeleteAllArgs
 
@@ -21,7 +21,7 @@ Parameters for deleting all comments of a case or sub case.
 
 The case ID to delete all attachments for
 
-Defined in: [cases/server/client/attachments/delete.ts:26](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/attachments/delete.ts#L26)
+Defined in: [attachments/delete.ts:26](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/delete.ts#L26)
 
 ___
 
@@ -31,4 +31,4 @@ ___
 
 If specified the caseID will be ignored and this value will be used to find a sub case for deleting all the attachments
 
-Defined in: [cases/server/client/attachments/delete.ts:30](https://github.com/jonathan-buttner/kibana/blob/7a61a8b912c/x-pack/plugins/cases/server/client/attachments/delete.ts#L30)
+Defined in: [attachments/delete.ts:30](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/delete.ts#L30)

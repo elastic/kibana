@@ -312,6 +312,11 @@ export interface AddArgs {
   comment: CommentRequest;
 }
 
+/**
+ * Create an attachment to a case.
+ *
+ * @ignore
+ */
 export const addComment = async (
   addArgs: AddArgs,
   clientArgs: CasesClientArgs,
