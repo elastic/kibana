@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.status).to.be(200);
           parseBfetchResponse(resp).forEach((responseJson, i) => {
             expect(responseJson.id).to.be(i);
-            verifyErrorResponse(responseJson.error, 400, 'search_phase_execution_exception', false);
+            verifyErrorResponse(responseJson.error, 400, 'search_phase_execution_exception', true);
           });
         });
       });
