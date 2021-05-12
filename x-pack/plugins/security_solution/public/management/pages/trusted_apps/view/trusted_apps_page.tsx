@@ -39,7 +39,7 @@ import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/ty
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { ABOUT_TRUSTED_APPS } from './translations';
 import { EmptyState } from './components/empty_state';
-import { SearchBar } from './components/search_bar';
+import { SearchBar } from '../../../components/search_bar';
 
 export const TrustedAppsPage = memo(() => {
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
