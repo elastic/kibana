@@ -102,37 +102,6 @@ export class IndexBootstrapper {
           },
         },
       });
-    } else {
-      // const { body: aliases } = (await esClient.indices.getAlias({
-      //   index: indexAliasName,
-      // })) as { body: Record<string, { aliases: Record<string, { is_write_index: boolean }> }> };
-      // const writeIndex = Object.entries(aliases).find(
-      //   ([indexName, alias]) => alias.aliases[indexAliasName]?.is_write_index === true
-      // )![0];
-      // const { body: fieldsInWriteIndex } = await esClient.fieldCaps({
-      //   index: writeIndex,
-      //   fields: '*',
-      // });
-      // const fieldsNotOrDifferentInIndex = Object.entries(this.options.fieldMap).filter(
-      //   ([fieldName, descriptor]) => {
-      //     return (
-      //       !fieldsInWriteIndex.fields[fieldName] ||
-      //       !fieldsInWriteIndex.fields[fieldName][descriptor.type]
-      //     );
-      //   }
-      // );
-      // if (fieldsNotOrDifferentInIndex.length > 0) {
-      //   this.options.logger.debug(
-      //     `Some fields were not found in write index mapping: ${Object.keys(
-      //       Object.fromEntries(fieldsNotOrDifferentInIndex)
-      //     ).join(',')}`
-      //   );
-      //   this.options.logger.info(`Updating index mapping due to new fields`);
-      //   await esClient.indices.putMapping({
-      //     index: indexAliasName,
-      //     body: mappings,
-      //   });
-      // }
     }
   }
 }

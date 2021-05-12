@@ -92,6 +92,7 @@ export class RuleRegistryPlugin
       },
     });
 
+    // TODO: remove before merge
     testEventLogImplementation(this.eventLogService, this.logger);
 
     return {
