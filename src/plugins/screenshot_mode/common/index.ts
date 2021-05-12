@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IScreenshotModeService } from './types';
-
-export class ScreenshotModeService implements IScreenshotModeService {
-  private _isScreenshotMode = true;
-
-  public isScreenshotMode = () => {
-    return this._isScreenshotMode;
-  };
-}
+export {
+  getScreenshotMode,
+  setScreenshotModeEnabled,
+  setScreenshotModeDisabled,
+} from './get_set_screenshot_mode';

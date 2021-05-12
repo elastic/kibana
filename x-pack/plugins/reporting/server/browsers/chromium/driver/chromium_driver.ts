@@ -98,6 +98,10 @@ export class HeadlessChromiumDriver {
     // Reset intercepted request count
     this.interceptedCount = 0;
 
+    await this.page.evaluateOnNewDocument(
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../../../../src/plugins/screenshot_mode/server').setScreenshotModeEnabled
+    );
     await this.page.setRequestInterception(true);
 
     this.registerListeners(conditionalHeaders, logger);

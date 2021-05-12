@@ -1,12 +1,27 @@
 # Screenshot Mode
 
-This plugin is used to inform other plugins about whether the current UI is being viewed for screenshot purposes. The service exposed by this plugin informs consumers whether they should render UI to optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
+The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
 
-The plugin is low-level as it has no dependencies of its own, so other
-low-level plugins can depend on it.
+The primary intention is to inform other lower-level plugins (plugins that don't depend on other plugins) that we do not expect an actual user to interact with browser. In this way we can avoid loading unnecessary resources (code and data).
+
+**NB** This plugin should have no other dependencies to avoid any possibility of circular dependencies.
 
 ---
 
 ## Development
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment.
+### How to test in screenshot mode
+
+Please note: the following information is subject to change over time.
+
+In order to test whether we are correctly detecting screenshot mode, developers can run the following JS snippet:
+
+```js
+window.localStorage.setItem('__KBN_SCREENSHOT_MODE_ENABLED_KEY__', true);
+```
+
+To get out of screenshot mode, run the following snippet:
+
+```js
+window.localStorage.removeItem('__KBN_SCREENSHOT_MODE_ENABLED_KEY__');
+```

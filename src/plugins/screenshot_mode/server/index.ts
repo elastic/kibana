@@ -8,6 +8,8 @@
 
 import { ScreenshotModePlugin } from './plugin';
 
+export { setScreenshotModeEnabled } from '../common';
+
 export function plugin() {
   return new ScreenshotModePlugin();
 }

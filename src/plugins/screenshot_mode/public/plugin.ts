@@ -10,14 +10,12 @@ import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 
 import { ScreenshotModePluginSetup } from './types';
 
-import { ScreenshotModeService } from './screenshot_mode_service';
+import { getScreenshotMode } from '../common';
 
 export class ScreenshotModePlugin implements Plugin<ScreenshotModePluginSetup> {
-  private readonly screenshotModeService = new ScreenshotModeService();
-
   public setup(core: CoreSetup): ScreenshotModePluginSetup {
     return {
-      isScreenshotMode: this.screenshotModeService.isScreenshotMode,
+      isScreenshotMode: () => getScreenshotMode() === true,
     };
   }
 

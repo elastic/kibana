@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
-
-export function plugin() {
-  return new ScreenshotModePlugin();
-}
-
-export { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
-
-export { setScreenshotModeEnabled } from '../common';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/plugins/screenshot_mode'],
+};
