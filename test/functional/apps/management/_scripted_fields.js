@@ -27,7 +27,6 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const deployment = getService('deployment');
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -187,16 +186,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const isOss = await deployment.isOss();
-        if (!isOss) {
-          await filterBar.removeAllFilters();
-          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Average of ram_Pain1'
-          );
-        }
+        await filterBar.removeAllFilters();
+        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          '@timestamp',
+          'Median of ram_Pain1'
+        );
       });
     });
 
@@ -277,15 +274,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const isOss = await deployment.isOss();
-        if (!isOss) {
-          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Top values of painString'
-          );
-        }
+        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          'Top values of painString'
+        );
       });
     });
 
@@ -367,15 +361,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const isOss = await deployment.isOss();
-        if (!isOss) {
-          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'Top values of painBool'
-          );
-        }
+        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          'Top values of painBool'
+        );
       });
     });
 
@@ -460,15 +451,10 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const isOss = await deployment.isOss();
-        if (!isOss) {
-          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-            'painDate'
-          );
-        }
+        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // verify Lens opens a visualization
+        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain('painDate');
       });
     });
   });
