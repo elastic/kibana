@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ConditionalToolTip should just work 1`] = `
+exports[`ConditionalToolTip renders correctly 1`] = `
 <div
-  data-test-subj="conditionalTooltipContent"
+  data-test-subj="conditionalTooltipContent-host-01"
   style={
     Object {
       "minWidth": 200,
@@ -29,19 +29,23 @@ exports[`ConditionalToolTip should just work 1`] = `
     >
       <EuiFlexItem
         className="eui-textTruncate eui-displayBlock"
+        data-test-subj="conditionalTooltipContent-metric"
         grow={1}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+          data-test-subj="conditionalTooltipContent-metric"
         >
           CPU usage
         </div>
       </EuiFlexItem>
       <EuiFlexItem
+        data-test-subj="conditionalTooltipContent-value"
         grow={false}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="conditionalTooltipContent-value"
         >
           10%
         </div>
@@ -57,19 +61,23 @@ exports[`ConditionalToolTip should just work 1`] = `
     >
       <EuiFlexItem
         className="eui-textTruncate eui-displayBlock"
+        data-test-subj="conditionalTooltipContent-metric"
         grow={1}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+          data-test-subj="conditionalTooltipContent-metric"
         >
           Memory usage
         </div>
       </EuiFlexItem>
       <EuiFlexItem
+        data-test-subj="conditionalTooltipContent-value"
         grow={false}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="conditionalTooltipContent-value"
         >
           80%
         </div>
@@ -85,19 +93,23 @@ exports[`ConditionalToolTip should just work 1`] = `
     >
       <EuiFlexItem
         className="eui-textTruncate eui-displayBlock"
+        data-test-subj="conditionalTooltipContent-metric"
         grow={1}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+          data-test-subj="conditionalTooltipContent-metric"
         >
           Outbound traffic
         </div>
       </EuiFlexItem>
       <EuiFlexItem
+        data-test-subj="conditionalTooltipContent-value"
         grow={false}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="conditionalTooltipContent-value"
         >
           8Mbit/s
         </div>
@@ -113,19 +125,23 @@ exports[`ConditionalToolTip should just work 1`] = `
     >
       <EuiFlexItem
         className="eui-textTruncate eui-displayBlock"
+        data-test-subj="conditionalTooltipContent-metric"
         grow={1}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+          data-test-subj="conditionalTooltipContent-metric"
         >
           Inbound traffic
         </div>
       </EuiFlexItem>
       <EuiFlexItem
+        data-test-subj="conditionalTooltipContent-value"
         grow={false}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="conditionalTooltipContent-value"
         >
           8Mbit/s
         </div>
@@ -141,19 +157,23 @@ exports[`ConditionalToolTip should just work 1`] = `
     >
       <EuiFlexItem
         className="eui-textTruncate eui-displayBlock"
+        data-test-subj="conditionalTooltipContent-metric"
         grow={1}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+          data-test-subj="conditionalTooltipContent-metric"
         >
           My Custom Label
         </div>
       </EuiFlexItem>
       <EuiFlexItem
+        data-test-subj="conditionalTooltipContent-value"
         grow={false}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="conditionalTooltipContent-value"
         >
           34.1%
         </div>
@@ -169,19 +189,23 @@ exports[`ConditionalToolTip should just work 1`] = `
     >
       <EuiFlexItem
         className="eui-textTruncate eui-displayBlock"
+        data-test-subj="conditionalTooltipContent-metric"
         grow={1}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+          data-test-subj="conditionalTooltipContent-metric"
         >
           Avg of host.network.out.packets
         </div>
       </EuiFlexItem>
       <EuiFlexItem
+        data-test-subj="conditionalTooltipContent-value"
         grow={false}
       >
         <div
           className="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="conditionalTooltipContent-value"
         >
           4,392.2
         </div>

@@ -69,7 +69,7 @@ export const ConditionalToolTip = withTheme(({ theme, node, nodeType, currentTim
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];
   return (
-    <div style={{ minWidth: 200 }} data-test-subj="conditionalTooltipContent">
+    <div style={{ minWidth: 200 }} data-test-subj={`conditionalTooltipContent-${node.name}`}>
       <div
         style={{
           borderBottom: `1px solid ${theme?.eui.euiColorMediumShade}`,
@@ -91,10 +91,14 @@ export const ConditionalToolTip = withTheme(({ theme, node, nodeType, currentTim
           : createInventoryMetricFormatter({ type: metricName });
         return (
           <EuiFlexGroup gutterSize="s" key={metric.name}>
-            <EuiFlexItem grow={1} className="eui-textTruncate eui-displayBlock">
+            <EuiFlexItem
+              grow={1}
+              className="eui-textTruncate eui-displayBlock"
+              data-test-subj="conditionalTooltipContent-metric"
+            >
               {customMetric ? getCustomMetricLabel(customMetric) : name}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="conditionalTooltipContent-value">
               {(metric.value && formatter(metric.value)) || '-'}
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -102,7 +102,7 @@ describe('ConditionalToolTip', () => {
         <ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />
       </EuiThemeProvider>
     );
-    const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent"]');
+    const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
     expect(toJson(tooltip)).toMatchSnapshot();
 
     expect(mockedUseSnapshot).toBeCalledWith(
