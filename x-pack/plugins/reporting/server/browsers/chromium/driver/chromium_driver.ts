@@ -18,6 +18,12 @@ import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ElementPosition } from '../../../lib/screenshots';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
+// We use "require" here to ensure the import does not have external references due to code bundling that
+// commonly happens during transpiling which would be missing in the environment puppeteer creates.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const setScreenshotModeEnabled = require('../../../../../../../src/plugins/screenshot_mode/server')
+  .setScreenshotModeEnabled;
+
 export interface ChromiumDriverOptions {
   inspect: boolean;
   networkPolicy: NetworkPolicy;
@@ -99,12 +105,7 @@ export class HeadlessChromiumDriver {
     // Reset intercepted request count
     this.interceptedCount = 0;
 
-    await this.page.evaluateOnNewDocument(
-      // We use "require" here to ensure the import does not have external references due to code bundling that
-      // commonly happens during transpiling.
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../../../../../src/plugins/screenshot_mode/server').setScreenshotModeEnabled
-    );
+    await this.page.evaluateOnNewDocument(setScreenshotModeEnabled);
     await this.page.setRequestInterception(true);
 
     this.registerListeners(conditionalHeaders, logger);

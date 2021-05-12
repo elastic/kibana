@@ -12,6 +12,6 @@ export function plugin() {
   return new ScreenshotModePlugin();
 }
 
-export { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
+export { ScreenshotModePluginSetup } from './types';
 
 export { setScreenshotModeEnabled } from '../common';
