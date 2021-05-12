@@ -613,15 +613,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       (acc, { type, id }) => acc.add(`${type}:${id}`),
       new Set<string>()
     );
+    const retrievedObjectsSet = response.objects.reduce(
+      (acc, { type, id }) => acc.add(`${type}:${id}`),
+      new Set<string>()
+    );
     const traversedObjects = new Set<string>();
     const filteredObjectsMap = new Map<string, SavedObjectReferenceWithContext>();
     const getIsAuthorizedForInboundReference = (inbound: { type: string; id: string }) => {
       const found = filteredObjectsMap.get(`${inbound.type}:${inbound.id}`);
       return found && !found.isMissing; // If true, this object can be linked back to one of the requested objects
     };
-    let loopCount = 0;
     let objectsToProcess = [...response.objects];
-    while (++loopCount && objectsToProcess.length > 0) {
+    while (objectsToProcess.length > 0) {
       const obj = objectsToProcess.shift()!;
       const { type, id, spaces, inboundReferences } = obj;
       const objKey = `${type}:${id}`;
@@ -659,14 +662,31 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         filteredObjectsMap.set(objKey, obj);
       } else if (!isAuthorizedForObject && isAuthorizedForGraph) {
         filteredObjectsMap.set(objKey, { ...obj, spaces: [], isMissing: true });
-      } else if (
-        isAuthorizedForObject &&
-        !isAuthorizedForGraph &&
-        inboundReferences.some((x) => !traversedObjects.has(`${x.type}:${x.id}`)) &&
-        loopCount <= response.objects.length // circuit-breaker to prevent infinite loops
-      ) {
-        // this object has inbound reference(s) that we haven't traversed yet; bump it to the back of the list
-        objectsToProcess = [...objectsToProcess, obj];
+      } else if (isAuthorizedForObject && !isAuthorizedForGraph) {
+        const hasUntraversedInboundReferences = inboundReferences.some(
+          (ref) =>
+            !traversedObjects.has(`${ref.type}:${ref.id}`) &&
+            retrievedObjectsSet.has(`${ref.type}:${ref.id}`)
+        );
+
+        if (hasUntraversedInboundReferences) {
+          // this object has inbound reference(s) that we haven't traversed yet; bump it to the back of the list
+          objectsToProcess = [...objectsToProcess, obj];
+        } else {
+          // There should never be a missing inbound reference.
+          // If there is, then something has gone terribly wrong.
+          const missingInboundReference = inboundReferences.find(
+            (ref) =>
+              !traversedObjects.has(`${ref.type}:${ref.id}`) &&
+              !retrievedObjectsSet.has(`${ref.type}:${ref.id}`)
+          );
+
+          if (missingInboundReference) {
+            throw new Error(
+              `Unexpected inbound reference to "${missingInboundReference.type}:${missingInboundReference.id}"`
+            );
+          }
+        }
       }
     }
 

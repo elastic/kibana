@@ -1243,6 +1243,36 @@ describe('#collectMultiNamespaceReferences', () => {
         expectAuditEvent(AUDIT_ACTION, 'failure', reqObj3);
       });
     });
+
+    test(`throws an error if the base client result includes a requested object without a valid inbound reference`, async () => {
+      // We *shouldn't* ever get an inbound reference that is not also present in the base client response objects array.
+      const spaces = [spaceX];
+
+      const obj1 = { ...reqObj1, spaces, inboundReferences: [] };
+      const obj2 = {
+        type: 'a',
+        id: '2',
+        spaces,
+        ...getInboundRefsFrom({ type: 'some-type', id: 'some-id' }),
+      };
+      clientOpts.baseClient.collectMultiNamespaceReferences.mockResolvedValueOnce({
+        objects: [obj1, obj2],
+      });
+      mockEnsureAuthorized.mockResolvedValue({
+        status: 'partially_authorized',
+        typeActionMap: new Map().set('a', {
+          bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+      });
+      // When the loop gets to obj2, it will determine that the user is authorized for the object but *not* for the graph. However, it will
+      // also determine that there is *no* valid inbound reference tying this object back to what was requested. In this case, throw an
+      // error.
+
+      const options = { namespace: spaceX }; // spaceX is the current space
+      await expect(() =>
+        client.collectMultiNamespaceReferences([reqObj1], options)
+      ).rejects.toThrowError('Unexpected inbound reference to "some-type:some-id"');
+    });
   });
 
   describe(`checks privileges`, () => {
@@ -1431,46 +1461,6 @@ describe('#collectMultiNamespaceReferences', () => {
       expectAuditEvent(AUDIT_ACTION, 'success', obj8);
       expectAuditEvent(AUDIT_ACTION, 'success', obj6);
       // obj2, obj4, and obj7 are intentionally excluded from the audit record because we did not return any information about them to the user
-    });
-  });
-
-  test(`circuit-breaker works as expected`, async () => {
-    // We *shouldn't* ever get an inbound reference that is not also present in the base client response objects array.
-    // The circuit-breaker is in place to prevent an infinite loop in the event this did happen.
-    const reqObj1 = { type: 'a', id: '1' };
-    const spaces = [spaceX];
-
-    const obj1 = { ...reqObj1, spaces, inboundReferences: [] };
-    const obj2 = { type: 'b', id: '2', spaces, ...getInboundRefsFrom(obj1) };
-    const obj3 = {
-      type: 'a',
-      id: '3',
-      spaces,
-      ...getInboundRefsFrom(obj2, { type: 'some-type', id: 'some-id' }),
-    };
-    clientOpts.baseClient.collectMultiNamespaceReferences.mockResolvedValueOnce({
-      objects: [obj1, obj2, obj3],
-    });
-    mockEnsureAuthorized.mockResolvedValue({
-      status: 'partially_authorized',
-      typeActionMap: new Map().set('a', {
-        bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
-      }),
-      // the user is not authorized to read type 'b',
-    });
-    // When the loop gets to obj3, it will determine that the user is authorized for the object but *not* for the graph (because the user is
-    // not authorized to read obj3's inbound reference, obj2). However, it will also determine that there is another inbound reference that
-    // it hasn't traversed yet (some-type:some-id), so it will push obj3 to the end of the array and continue to loop. The circuit-breaker
-    // will end the loop in this scenario.
-
-    const options = { namespace: spaceX }; // spaceX is the current space
-    const result = await client.collectMultiNamespaceReferences([reqObj1], options);
-    expect(result).toEqual({
-      objects: [
-        obj1,
-        { ...obj2, spaces: [], isMissing: true }, // obj2 is marked as Missing because the user was not authorized to access it
-        // obj3 is not included at all because the user was not authorized to access its inbound reference (obj4)
-      ],
     });
   });
 });
