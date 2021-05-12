@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPopover,
+  EuiText,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
@@ -531,10 +532,10 @@ export function FormulaEditor({
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem className="lnsFormula__editorFooterGroup">
                   {isFullscreen ? (
-                    // TODO: Hook up the below `EuiLink` button so that it toggles the presence of the `.lnsFormula__docs--inline` element in fullscreen mode. Note that when docs are hidden, the `arrowDown` button should change to `arrowUp`.
+                    // TODO: Hook up the below `EuiLink` button so that it toggles the presence of the `.lnsFormula__docs--inline` element in fullscreen mode. Note that when docs are hidden, the `arrowDown` button should change to `arrowUp` and the label should change to `Show function reference`.
                     <EuiLink
-                      aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineShowLabel', {
-                        defaultMessage: 'Show function reference',
+                      aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineHideLabel', {
+                        defaultMessage: 'Hide function reference',
                       })}
                       className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
                       color="text"
@@ -569,8 +570,11 @@ export function FormulaEditor({
                   )}
                 </EuiFlexItem>
 
+                {/* TODO: Hook up the below so that the error count conditionally appears to notify users of the number of errors in their formula. */}
                 <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
-                  Error count
+                  <EuiText className="lnsFormula__editorError" color="danger" size="xs">
+                    <EuiIcon type="alert" /> 1 error
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>
