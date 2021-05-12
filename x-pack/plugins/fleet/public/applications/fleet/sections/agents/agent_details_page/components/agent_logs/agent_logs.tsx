@@ -6,11 +6,11 @@
  */
 
 import url from 'url';
+import { stringify } from 'querystring';
 
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { encode } from 'rison-node';
-import { stringify } from 'query-string';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -170,20 +170,17 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
       http.basePath.prepend(
         url.format({
           pathname: '/app/logs/stream',
-          search: stringify(
-            {
-              logPosition: encode({
-                start: state.start,
-                end: state.end,
-                streamLive: false,
-              }),
-              logFilter: encode({
-                expression: logStreamQuery,
-                kind: 'kuery',
-              }),
-            },
-            { sort: false, encode: false }
-          ),
+          search: stringify({
+            logPosition: encode({
+              start: state.start,
+              end: state.end,
+              streamLive: false,
+            }),
+            logFilter: encode({
+              expression: logStreamQuery,
+              kind: 'kuery',
+            }),
+          }),
         })
       ),
     [http.basePath, state.start, state.end, logStreamQuery]
