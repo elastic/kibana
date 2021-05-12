@@ -50,7 +50,7 @@ describe('useConfigure', () => {
   test('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -68,7 +68,7 @@ describe('useConfigure', () => {
   test('fetch case configuration', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -100,7 +100,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -112,7 +112,7 @@ describe('useConfigure', () => {
   test('correctly sets mappings', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -125,7 +125,7 @@ describe('useConfigure', () => {
   test('set isLoading to true when fetching case configuration', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -138,7 +138,7 @@ describe('useConfigure', () => {
   test('persist case configuration', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -167,7 +167,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -193,7 +193,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -222,7 +222,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -246,7 +246,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -267,7 +267,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
 
       await waitForNextUpdate();
@@ -303,7 +303,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+        useCaseConfigure('securitySolution')
       );
 
       await waitForNextUpdate();

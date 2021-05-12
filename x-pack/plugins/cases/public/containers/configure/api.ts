@@ -38,12 +38,16 @@ export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConne
 };
 
 // TODO: refactor
-export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfigure | null> => {
+export const getCaseConfigure = async ({
+  signal,
+  owner,
+}: ApiProps & { owner: string[] }): Promise<CaseConfigure | null> => {
   const response = await KibanaServices.get().http.fetch<CasesConfigurationsResponse>(
     CASE_CONFIGURE_URL,
     {
       method: 'GET',
       signal,
+      query: { ...(owner.length > 0 ? { owner } : {}) },
     }
   );
 

@@ -77,6 +77,7 @@ const defaultPostCase = {
 const defaultCreateCaseForm = {
   isLoadingConnectors: false,
   connectors: [],
+  owner: 'securitySolution',
 };
 
 const defaultPostPushToService = {

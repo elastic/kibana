@@ -154,7 +154,12 @@ export const initialState: State = {
   id: '',
 };
 
-export const useCaseConfigure = (): ReturnUseCaseConfigure => {
+/**
+ * Configurations across multiple plugins in
+ * not supported at the moment. For that reason owner: string;
+ * instead of owner: string[]
+ */
+export const useCaseConfigure = (owner: string): ReturnUseCaseConfigure => {
   const [state, dispatch] = useReducer(configureCasesReducer, initialState);
   const toasts = useToasts();
   const setCurrentConfiguration = useCallback((configuration: ConnectorConfiguration) => {
@@ -234,7 +239,10 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       abortCtrlRefetchRef.current = new AbortController();
 
       setLoading(true);
-      const res = await getCaseConfigure({ signal: abortCtrlRefetchRef.current.signal });
+      const res = await getCaseConfigure({
+        signal: abortCtrlRefetchRef.current.signal,
+        owner: [owner],
+      });
 
       if (!isCancelledRefetchRef.current) {
         if (res != null) {
@@ -295,8 +303,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         const res =
           state.version.length === 0
             ? await postCaseConfigure(
-                // TODO: use constant after https://github.com/elastic/kibana/pull/97646 is being merged
-                { ...connectorObj, owner: 'securitySolution' },
+                { ...connectorObj, owner },
                 abortCtrlPersistRef.current.signal
               )
             : await patchCaseConfigure(
@@ -347,17 +354,17 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       }
     },
     [
-      setClosureType,
-      setConnector,
-      setCurrentConfiguration,
-      setMappings,
       setPersistLoading,
+      state.version,
+      state.id,
+      state.currentConfiguration.connector,
+      owner,
+      setConnector,
+      setClosureType,
       setVersion,
       setID,
-      state.currentConfiguration.connector,
-      state.version,
-      // TODO: do we need this?
-      state.id,
+      setMappings,
+      setCurrentConfiguration,
       toasts,
     ]
   );

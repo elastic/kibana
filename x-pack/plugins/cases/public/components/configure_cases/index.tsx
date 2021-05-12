@@ -52,9 +52,10 @@ const FormWrapper = styled.div`
 
 export interface ConfigureCasesProps {
   userCanCrud: boolean;
+  owner: string;
 }
 
-const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud }) => {
+const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud, owner }) => {
   const { triggersActionsUi } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
@@ -74,7 +75,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
     refetchCaseConfigure,
     setConnector,
     setClosureType,
-  } = useCaseConfigure();
+  } = useCaseConfigure(owner);
 
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
   const { loading: isLoadingActionTypes, actionTypes, refetchActionTypes } = useActionTypes();

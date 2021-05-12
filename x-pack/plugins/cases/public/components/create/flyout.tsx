@@ -57,7 +57,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       <EuiFlyoutBody>
         <FormWrapper>
           <FormContext onSuccess={onSuccess} afterCaseCreated={afterCaseCreated} owner={owner}>
-            <CreateCaseForm withSteps={false} />
+            <CreateCaseForm withSteps={false} owner={owner} />
             <Container>
               <SubmitCaseButton />
             </Container>

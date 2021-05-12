@@ -49,7 +49,7 @@ export const FormContext: React.FC<Props> = ({
   owner,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
-  const { connector: configurationConnector } = useCaseConfigure();
+  const { connector: configurationConnector } = useCaseConfigure(owner);
   const { postCase } = usePostCase();
   const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();
