@@ -101,16 +101,23 @@ export class RuleDataClient implements IRuleDataClient {
     const concreteIndexName = `${alias}-000001`;
 
     if (!aliasExists) {
-      await clusterClient.indices.create({
-        index: concreteIndexName,
-        body: {
-          aliases: {
-            [alias]: {
-              is_write_index: true,
+      try {
+        await clusterClient.indices.create({
+          index: concreteIndexName,
+          body: {
+            aliases: {
+              [alias]: {
+                is_write_index: true,
+              },
             },
           },
-        },
-      });
+        });
+      } catch (err) {
+        // something might have created the index already, that sounds OK
+        if (err?.meta?.body?.type !== 'resource_already_exists_exception') {
+          throw err;
+        }
+      }
     }
 
     const { body: simulateResponse } = await clusterClient.transport.request({
