@@ -141,12 +141,12 @@ export const internals: JoiRoot = Joi.extend(
         }
       } catch (e) {
         return {
-          errors: [error('duration.parse')],
+          errors: [error('duration.parse', { message: e.message })],
         };
       }
       return { value };
     },
-    prepare(value, { error }) {
+    validate(value, { error }) {
       if (!isDuration(value)) {
         return {
           errors: [error('duration.base')],
@@ -241,7 +241,7 @@ export const internals: JoiRoot = Joi.extend(
             return { value: new Map(Object.entries(parsed)) };
           }
           return {
-            errors: [error('map.base')],
+            value: parsed,
           };
         } catch (e) {
           return {
@@ -251,7 +251,7 @@ export const internals: JoiRoot = Joi.extend(
       }
       return { value };
     },
-    prepare(value, { error }) {
+    validate(value, { error }) {
       if (!isMap(value)) {
         return {
           errors: [error('map.base')],
@@ -272,6 +272,9 @@ export const internals: JoiRoot = Joi.extend(
             assert: Joi.object().schema(),
           },
         ],
+        method(key, value) {
+          return this.$_addRule({ name: 'entries', args: { key, value } });
+        },
         validate(value, { error }, args, options) {
           const result = new Map();
           for (const [entryKey, entryValue] of value) {
@@ -279,14 +282,14 @@ export const internals: JoiRoot = Joi.extend(
             try {
               validatedEntryKey = Joi.attempt(entryKey, args.key, { presence: 'required' });
             } catch (e) {
-              return error('map.key', { entryKey, reason: e.message });
+              return error('map.key', { entryKey, reason: e });
             }
 
             let validatedEntryValue: any;
             try {
               validatedEntryValue = Joi.attempt(entryValue, args.value, { presence: 'required' });
             } catch (e) {
-              return error('map.value', { entryKey, reason: e.message });
+              return error('map.value', { entryKey, reason: e });
             }
 
             result.set(validatedEntryKey, validatedEntryValue);
