@@ -137,6 +137,7 @@ export function CustomizablePalette({
           display="rowCompressed"
         >
           <EuiSuperSelect
+            data-test-subj="lnsDatatable_dynamicColoring_continuity"
             options={[
               {
                 value: 'above',

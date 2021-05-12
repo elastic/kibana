@@ -96,7 +96,7 @@ describe('Color Stops component', () => {
 
     act(() => {
       component
-        .find('[data-test-subj="lnsDatatable_dynamicColoring_custom_stops"]')
+        .find('[data-test-subj="lnsDatatable_dynamicColoring_stop_row_0"]')
         .first()
         .prop('onBlur')!({} as React.FocusEvent);
     });
