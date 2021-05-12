@@ -189,17 +189,18 @@ describe('#rawDocExistsInNamespace', () => {
   }
 
   describe('single-namespace type', () => {
-    const docInDefaultSpace = createRawDoc(SINGLE_NAMESPACE_TYPE, { namespace: undefined });
-    const docInSomeSpace = createRawDoc(SINGLE_NAMESPACE_TYPE, { namespace: 'some-space' });
-
-    it('returns true when the document namespace matches', () => {
-      expect(rawDocExistsInNamespace(registry, docInDefaultSpace, undefined)).toBe(true);
-      expect(rawDocExistsInNamespace(registry, docInSomeSpace, 'some-space')).toBe(true);
-    });
-
-    it('returns false when the document namespace does not match', () => {
-      expect(rawDocExistsInNamespace(registry, docInDefaultSpace, 'other-space')).toBe(false);
-      expect(rawDocExistsInNamespace(registry, docInSomeSpace, 'other-space')).toBe(false);
+    it('returns true regardless of namespace or namespaces fields', () => {
+      // Technically, a single-namespace type does not exist in a space unless it has a namespace prefix in its raw ID and a matching
+      // 'namespace' field. However, historically we have not enforced the latter, we have just relied on searching for and deserializing
+      // documents with the correct namespace prefix. We may revisit this in the future.
+      const doc1 = createRawDoc(SINGLE_NAMESPACE_TYPE, { namespace: 'some-space' }); // the namespace field is ignored
+      const doc2 = createRawDoc(SINGLE_NAMESPACE_TYPE, { namespaces: ['some-space'] }); // the namespaces field is ignored
+      expect(rawDocExistsInNamespace(registry, doc1, undefined)).toBe(true);
+      expect(rawDocExistsInNamespace(registry, doc1, 'some-space')).toBe(true);
+      expect(rawDocExistsInNamespace(registry, doc1, 'other-space')).toBe(true);
+      expect(rawDocExistsInNamespace(registry, doc2, undefined)).toBe(true);
+      expect(rawDocExistsInNamespace(registry, doc2, 'some-space')).toBe(true);
+      expect(rawDocExistsInNamespace(registry, doc2, 'other-space')).toBe(true);
     });
   });
 
