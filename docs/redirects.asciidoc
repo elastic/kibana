@@ -303,11 +303,6 @@ This content has moved. Refer to <<kuery-query>>.
 
 This content has moved. Refer to <<discover-view-surrounding-documents>>.
 
-[role="exclude",id="reload-fields"]
-== Explore and configure the data fields
-
-This content has moved. Refer to <<managing-fields>>.
-
 [role="exclude",id="field-formatters-string"]
 == String field formatters
 
