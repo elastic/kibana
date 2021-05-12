@@ -175,6 +175,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Drags field to geo field workspace
+     *
+     * @param field  - the desired geo_point or geo_shape field
+     * */
+    async dragFieldToGeoFieldWorkspace(field: string) {
+      await browser.html5DragAndDrop(
+        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector('lnsGeoFieldWorkspace')
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
      * Drags field to workspace
      *
      * @param field  - the desired field for the dimension
