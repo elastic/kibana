@@ -289,7 +289,10 @@ function createAliasKueryFilter(objects: SavedObjectReferenceWithContext[]) {
     acc.push(buildNode('and', [match1, match2]));
     return acc;
   }, []);
-  return buildNode('or', kueryNodes);
+  return buildNode('and', [
+    buildNode('not', buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.disabled`, true)), // ignore aliases that have been disabled
+    buildNode('or', kueryNodes),
+  ]);
 }
 
 /** Takes an object with a `type` and `id` field and returns a key string */

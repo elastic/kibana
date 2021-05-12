@@ -476,6 +476,25 @@
 {
   "type": "doc",
   "value": {
+    "id": "legacy-url-alias:other_space:sharedtype:default_only",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "default_only",
+        "targetNamespace": "other_space",
+        "targetType": "sharedtype",
+        "targetId": "other_id",
+        "disabled": true
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "sharedtype:default_and_space_1",
     "index": ".kibana",
     "source": {

@@ -342,9 +342,13 @@ describe('collectMultiNamespaceReferences', () => {
       expectMgetArgs(1, obj1, obj2);
       expectMgetArgs(2, obj3); // obj3 is retrieved in a second cluster call
       expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      const kueryFilterArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments;
+      expect(kueryFilterArgs).toHaveLength(2);
+      const typeAndIdFilters = kueryFilterArgs[1].arguments;
+      expect(typeAndIdFilters).toHaveLength(3);
       [obj1, obj2, obj3].forEach(({ type, id }, i) => {
-        const kueryArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments[i].arguments;
-        expect(kueryArgs).toEqual([
+        const typeAndIdFilter = typeAndIdFilters[i].arguments;
+        expect(typeAndIdFilter).toEqual([
           expect.objectContaining({
             arguments: expect.arrayContaining([{ type: 'literal', value: type }]),
           }),
@@ -382,8 +386,13 @@ describe('collectMultiNamespaceReferences', () => {
 
       await collectMultiNamespaceReferences(params);
       expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
-      const kueryArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments[0].arguments;
-      expect(kueryArgs).toEqual([
+
+      const kueryFilterArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments;
+      expect(kueryFilterArgs).toHaveLength(2);
+      const typeAndIdFilters = kueryFilterArgs[1].arguments;
+      expect(typeAndIdFilters).toHaveLength(1);
+      const typeAndIdFilter = typeAndIdFilters[0].arguments;
+      expect(typeAndIdFilter).toEqual([
         expect.objectContaining({
           arguments: expect.arrayContaining([{ type: 'literal', value: obj1.type }]),
         }),
