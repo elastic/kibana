@@ -55,7 +55,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     layerId: table.layerId,
     legend: {
       isVisible: state?.legend?.isVisible ?? true,
-      position: state?.legend?.position ?? Position.Top,
+      position: state?.legend?.position ?? Position.Right,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {

@@ -59,7 +59,7 @@ describe('heatmap suggestions', () => {
             },
             legend: {
               isVisible: true,
-              position: Position.Top,
+              position: Position.Right,
               type: LEGEND_FUNCTION,
             },
           },
@@ -108,7 +108,7 @@ describe('heatmap suggestions', () => {
             },
             legend: {
               isVisible: true,
-              position: Position.Top,
+              position: Position.Right,
               type: LEGEND_FUNCTION,
             },
           },
@@ -170,7 +170,7 @@ describe('heatmap suggestions', () => {
             },
             legend: {
               isVisible: true,
-              position: Position.Top,
+              position: Position.Right,
               type: LEGEND_FUNCTION,
             },
           },
@@ -240,7 +240,7 @@ describe('heatmap suggestions', () => {
             },
             legend: {
               isVisible: true,
-              position: Position.Top,
+              position: Position.Right,
               type: LEGEND_FUNCTION,
             },
           },

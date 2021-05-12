@@ -111,7 +111,7 @@ export const getHeatmapVisualization = ({
         shape: CHART_SHAPES.HEATMAP,
         legend: {
           isVisible: true,
-          position: Position.Top,
+          position: Position.Right,
           type: LEGEND_FUNCTION,
         },
         gridConfig: {

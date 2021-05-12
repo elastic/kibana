@@ -28,7 +28,7 @@ function exampleState(): HeatmapVisualizationState {
     layerId: 'test-layer',
     legend: {
       isVisible: true,
-      position: Position.Top,
+      position: Position.Right,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {
@@ -56,7 +56,7 @@ describe('heatmap', () => {
         shape: CHART_SHAPES.HEATMAP,
         legend: {
           isVisible: true,
-          position: Position.Top,
+          position: Position.Right,
           type: LEGEND_FUNCTION,
         },
         gridConfig: {
@@ -269,7 +269,7 @@ describe('heatmap', () => {
                         function: LEGEND_FUNCTION,
                         arguments: {
                           isVisible: [true],
-                          position: [Position.Top],
+                          position: [Position.Right],
                         },
                       },
                     ],
