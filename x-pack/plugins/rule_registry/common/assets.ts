@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const DEFAULT_ASSET_NAMESPACE = 'alerts';
-
 export const TECHNICAL_COMPONENT_TEMPLATE_NAME = `technical-mappings`;
 export const ECS_COMPONENT_TEMPLATE_NAME = `ecs-mappings`;
 export const DEFAULT_ILM_POLICY_ID = 'ilm-policy';

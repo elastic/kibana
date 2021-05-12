@@ -18,15 +18,14 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
   }
 
   public setup(core: CoreSetup): RuleRegistryPluginSetupContract {
-    const globalConfig = this.initContext.config.legacy.get();
     const config = this.initContext.config.get<RuleRegistryPluginConfig>();
 
     const logger = this.initContext.logger.get();
 
     const service = new RuleDataPluginService({
       logger,
-      isWriteEnabled: config.unsafe.write.enabled,
-      kibanaIndex: globalConfig.kibana.index,
+      isWriteEnabled: config.write.enabled,
+      index: config.index,
       getClusterClient: async () => {
         const [coreStart] = await core.getStartServices();
 

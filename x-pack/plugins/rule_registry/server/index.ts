@@ -18,9 +18,10 @@ export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_ty
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    unsafe: schema.object({
-      write: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+    write: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
     }),
+    index: schema.string({ defaultValue: '.alerts' }),
   }),
 };
 

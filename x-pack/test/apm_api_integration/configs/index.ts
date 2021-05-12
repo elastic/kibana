@@ -17,9 +17,6 @@ const apmFtrConfigs = {
   },
   rules: {
     license: 'trial' as const,
-    kibanaConfig: {
-      'xpack.ruleRegistry.unsafe.write.enabled': 'true',
-    },
   },
 };
 
