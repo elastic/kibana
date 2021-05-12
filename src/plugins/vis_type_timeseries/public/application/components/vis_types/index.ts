@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-
+import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
@@ -45,6 +45,10 @@ export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVi
 export interface TimeseriesVisProps {
   model: TimeseriesVisParams;
   onBrush: (gte: string, lte: string, series: PanelData[]) => Promise<void>;
+  onFilterClick: (
+    series: PanelData[],
+    points: Array<[GeometryValue, XYChartSeriesIdentifier]>
+  ) => Promise<void>;
   onUiState: (
     field: string,
     value: {

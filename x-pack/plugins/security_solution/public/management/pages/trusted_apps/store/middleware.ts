@@ -64,8 +64,9 @@ import {
   getListItems,
   editItemState,
 } from './selectors';
-import { parseQueryFilterToKQL } from './utils';
+import { parseQueryFilterToKQL } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
+import { SEARCHABLE_FIELDS } from '../constants';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -97,7 +98,7 @@ const refreshListIfNeeded = async (
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
-        kuery: parseQueryFilterToKQL(filter) || undefined,
+        kuery: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
       });
 
       store.dispatch(
