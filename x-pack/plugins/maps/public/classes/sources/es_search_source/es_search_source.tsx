@@ -464,7 +464,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return this._tooltipFields.length > 0;
   }
 

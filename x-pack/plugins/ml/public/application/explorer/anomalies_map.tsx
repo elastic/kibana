@@ -28,14 +28,9 @@ import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
 import { EMSTermJoinConfig } from '../../../../maps/public';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
+import { COMMON_EMS_LAYER_IDS } from '../../../common/constants/embeddable_map';
 
 const MAX_ENTITY_VALUES = 3;
-const COMMON_EMS_LAYER_IDS = [
-  'world_countries',
-  'administrative_regions_lvl2',
-  'usa_zip_codes',
-  'usa_states',
-];
 
 function getAnomalyRows(anomalies: AnomaliesTableRecord[], jobId: string) {
   const anomalyRows: Record<
