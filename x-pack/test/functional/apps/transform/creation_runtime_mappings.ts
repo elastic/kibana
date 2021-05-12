@@ -53,7 +53,15 @@ export default function ({ getService }: FtrProviderContext) {
         chartAvailable: true,
         id: '@timestamp',
       },
-      { chartAvailable: false, id: '@version', legend: 'Chart not supported.' },
+      {
+        chartAvailable: true,
+        id: '@version',
+        legend: '1 category',
+        colorStats: [
+          { color: '#000000', percentage: 10 },
+          { color: '#54B399', percentage: 90 },
+        ],
+      },
       {
         chartAvailable: true,
         id: 'airline',
@@ -67,7 +75,8 @@ export default function ({ getService }: FtrProviderContext) {
         chartAvailable: true,
         id: 'responsetime',
         colorStats: [
-          { color: '#54B399', percentage: 5 },
+          // below 10% threshold
+          // { color: '#54B399', percentage: 5 },
           { color: '#000000', percentage: 95 },
         ],
       },
@@ -84,11 +93,20 @@ export default function ({ getService }: FtrProviderContext) {
         chartAvailable: true,
         id: 'rt_responsetime_x_2',
         colorStats: [
-          { color: '#54B399', percentage: 5 },
+          // below 10% threshold
+          // { color: '#54B399', percentage: 5 },
           { color: '#000000', percentage: 95 },
         ],
       },
-      { chartAvailable: false, id: 'type', legend: 'Chart not supported.' },
+      {
+        chartAvailable: true,
+        id: 'type',
+        legend: '1 category',
+        colorStats: [
+          { color: '#000000', percentage: 10 },
+          { color: '#54B399', percentage: 90 },
+        ],
+      },
     ];
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [

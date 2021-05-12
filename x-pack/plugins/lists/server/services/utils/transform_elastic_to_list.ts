@@ -7,7 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import { ListArraySchema, SearchEsListSchema } from '../../../common/schemas';
+import { ListArraySchema } from '../../../common/schemas';
+import { SearchEsListSchema } from '../../schemas/elastic_response';
 
 import { encodeHitVersion } from './encode_hit_version';
 

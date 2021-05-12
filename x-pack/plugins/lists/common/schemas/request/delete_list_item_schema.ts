@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { id } from '@kbn/securitysolution-io-ts-utils';
 
-import { id, list_id, valueOrUndefined } from '../common/schemas';
+import { list_id, valueOrUndefined } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const deleteListItemSchema = t.intersection([

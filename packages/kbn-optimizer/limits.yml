@@ -46,7 +46,7 @@ pageLoadAssetSize:
   lens: 96624
   licenseManagement: 41817
   licensing: 29004
-  lists: 228500
+  lists: 280504
   logstash: 53548
   management: 46112
   maps: 80000
@@ -96,7 +96,7 @@ pageLoadAssetSize:
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 113478
-  visualizations: 295025
+  visualizations: 90000
   visualize: 57431
   watcher: 43598
   runtimeFields: 41752

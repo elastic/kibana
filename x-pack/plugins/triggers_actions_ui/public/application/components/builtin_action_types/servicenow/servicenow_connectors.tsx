@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 
 import {
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +15,6 @@ import {
   EuiFieldPassword,
   EuiSpacer,
   EuiLink,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -26,6 +24,7 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
@@ -96,7 +95,14 @@ const ServiceNowConnectorFields: React.FC<
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
+          <EuiFormRow fullWidth>
+            {getEncryptedFieldNotifyLabel(
+              !action.id,
+              2,
+              action.isMissingSecrets ?? false,
+              i18n.REENTER_VALUES_LABEL
+            )}
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -156,24 +162,6 @@ const ServiceNowConnectorFields: React.FC<
     </>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <EuiText size="s" data-test-subj="rememberValuesMessage">
-        {i18n.REMEMBER_VALUES_LABEL}
-      </EuiText>
-    );
-  }
-  return (
-    <EuiCallOut
-      size="s"
-      iconType="iInCircle"
-      title={i18n.REENTER_VALUES_LABEL}
-      data-test-subj="reenterValuesMessage"
-    />
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

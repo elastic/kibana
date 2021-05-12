@@ -23,8 +23,10 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { RoleIndexPrivilege } from '../../../../../../common/model';
+import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';
 
 const fromOption = (option: any) => option.label;
@@ -35,7 +37,7 @@ interface Props {
   indexPrivilege: RoleIndexPrivilege;
   indexPatterns: string[];
   availableIndexPrivileges: string[];
-  availableFields: string[];
+  indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
   onChange: (indexPrivilege: RoleIndexPrivilege) => void;
   onDelete: () => void;
   isRoleReadOnly: boolean;
@@ -50,9 +52,16 @@ interface State {
   grantedFields: string[];
   exceptedFields: string[];
   documentQuery?: string;
+  isFieldListLoading: boolean;
+  flsOptions: string[];
 }
 
 export class IndexPrivilegeForm extends Component<Props, State> {
+  // This is distinct from the field within `this.state`.
+  // We want to make sure that only one request for fields is in-flight at a time,
+  // and relying on state for this is error prone.
+  private isFieldListLoading: boolean = false;
+
   constructor(props: Props) {
     super(props);
 
@@ -64,7 +73,15 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       grantedFields: grant,
       exceptedFields: except,
       documentQuery: props.indexPrivilege.query,
+      isFieldListLoading: false,
+      flsOptions: [],
     };
+  }
+
+  public componentDidMount() {
+    if (this.state.fieldSecurityExpanded && this.props.allowFieldLevelSecurity) {
+      this.loadFLSOptions(this.props.indexPrivilege.names);
+    }
   }
 
   public render() {
@@ -149,11 +166,30 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     );
   };
 
+  private loadFLSOptions = (indexNames: string[], force = false) => {
+    if (!force && (this.isFieldListLoading || indexNames.length === 0)) return;
+
+    this.isFieldListLoading = true;
+    this.setState({
+      isFieldListLoading: true,
+    });
+
+    this.props.indicesAPIClient
+      .getFields(indexNames.join(','))
+      .then((fields) => {
+        this.isFieldListLoading = false;
+        this.setState({ flsOptions: fields, isFieldListLoading: false });
+      })
+      .catch(() => {
+        this.isFieldListLoading = false;
+        this.setState({ flsOptions: [], isFieldListLoading: false });
+      });
+  };
+
   private getFieldLevelControls = () => {
     const {
       allowFieldLevelSecurity,
       allowDocumentLevelSecurity,
-      availableFields,
       indexPrivilege,
       isRoleReadOnly,
     } = this.props;
@@ -210,11 +246,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                     <Fragment>
                       <EuiComboBox
                         data-test-subj={`fieldInput${this.props.formIndex}`}
-                        options={availableFields ? availableFields.map(toOption) : []}
+                        options={this.state.flsOptions.map(toOption)}
                         selectedOptions={grant.map(toOption)}
                         onCreateOption={this.onCreateGrantedField}
                         onChange={this.onGrantedFieldsChange}
                         isDisabled={this.props.isRoleReadOnly}
+                        async={true}
+                        isLoading={this.state.isFieldListLoading}
                       />
                     </Fragment>
                   </EuiFormRow>
@@ -233,11 +271,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                     <Fragment>
                       <EuiComboBox
                         data-test-subj={`deniedFieldInput${this.props.formIndex}`}
-                        options={availableFields ? availableFields.map(toOption) : []}
+                        options={this.state.flsOptions.map(toOption)}
                         selectedOptions={except.map(toOption)}
                         onCreateOption={this.onCreateDeniedField}
                         onChange={this.onDeniedFieldsChange}
                         isDisabled={isRoleReadOnly}
+                        async={true}
+                        isLoading={this.state.isFieldListLoading}
                       />
                     </Fragment>
                   </EuiFormRow>
@@ -362,6 +402,11 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     const hasSavedFieldSecurity =
       this.state.exceptedFields.length > 0 || this.state.grantedFields.length > 0;
 
+    // If turning on, then request available fields
+    if (willToggleOn) {
+      this.loadFLSOptions(this.props.indexPrivilege.names);
+    }
+
     if (willToggleOn && !hasConfiguredFieldSecurity && hasSavedFieldSecurity) {
       this.props.onChange({
         ...this.props.indexPrivilege,
@@ -380,13 +425,22 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       ...this.props.indexPrivilege,
       names: newIndexPatterns,
     });
+    // If FLS controls are visible, then forcefully request a new set of options
+    if (this.state.fieldSecurityExpanded) {
+      this.loadFLSOptions(newIndexPatterns, true);
+    }
   };
 
   private onIndexPatternsChange = (newPatterns: EuiComboBoxOptionOption[]) => {
+    const names = newPatterns.map(fromOption);
     this.props.onChange({
       ...this.props.indexPrivilege,
-      names: newPatterns.map(fromOption),
+      names,
     });
+    // If FLS controls are visible, then forcefully request a new set of options
+    if (this.state.fieldSecurityExpanded) {
+      this.loadFLSOptions(names, true);
+    }
   };
 
   private onPrivilegeChange = (newPrivileges: EuiComboBoxOptionOption[]) => {

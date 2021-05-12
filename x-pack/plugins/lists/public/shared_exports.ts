@@ -39,4 +39,4 @@ export {
   UseExceptionListsSuccess,
 } from './exceptions/types';
 export * as ExceptionBuilder from './exceptions/components/builder/index';
-export { transformNewItemOutput } from './exceptions/transforms';
+export { transformNewItemOutput, transformOutput } from './exceptions/transforms';

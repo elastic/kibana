@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Volume Shadow Copy Deletion via VssAdmin",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:vssadmin.exe and process.args:(delete and shadows)",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"vssadmin.exe\" or process.pe.original_file_name == \"VSSADMIN.EXE\") and\n  process.args : \"delete\" and process.args : \"shadows\"\n",
   "risk_score": 73,
   "rule_id": "b5ea4bfe-a1b2-421f-9d47-22a75a6f2921",
   "severity": "high",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 8
+  "type": "eql",
+  "version": 9
 }

@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFormRow,
@@ -17,6 +18,7 @@ import {
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
 } from '@elastic/eui';
 
 import type { AgentPolicy, PackageInfo, PackagePolicy, NewPackagePolicy } from '../../../types';
@@ -193,6 +195,25 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
                   defaultMessage="Namespace"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
+                  defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
+                  values={{
+                    learnMore: (
+                      <EuiLink
+                        href="https://www.elastic.co/guide/en/fleet/current/data-streams.html#data-streams-naming-scheme"
+                        target="_blank"
+                      >
+                        {i18n.translate(
+                          'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                          { defaultMessage: 'Learn more' }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
                 />
               }
             >

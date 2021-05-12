@@ -23,32 +23,31 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "beatsManagement",
         "id": "def-common.BeatsManagementConfigType",
         "type": "Type",
-        "label": "BeatsManagementConfigType",
         "tags": [],
+        "label": "BeatsManagementConfigType",
         "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly defaultUserRoles: string[]; readonly encryptionKey: string; readonly enrollmentTokensTtlInSeconds: number; }"
+        ],
         "source": {
           "path": "x-pack/plugins/beats_management/common/index.ts",
           "lineNumber": 23
         },
-        "signature": [
-          "{ readonly enabled: boolean; readonly defaultUserRoles: string[]; readonly encryptionKey: string; readonly enrollmentTokensTtlInSeconds: number; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
-        "tags": [],
+        "parentPluginId": "beatsManagement",
         "id": "def-common.beatsManagementConfigSchema",
         "type": "Object",
+        "tags": [],
         "label": "beatsManagementConfigSchema",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/beats_management/common/index.ts",
-          "lineNumber": 12
-        },
         "signature": [
           "ObjectType",
           "<{ enabled: ",
@@ -60,6 +59,11 @@
           "<string>; enrollmentTokensTtlInSeconds: ",
           "Type"
         ],
+        "source": {
+          "path": "x-pack/plugins/beats_management/common/index.ts",
+          "lineNumber": 12
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ]

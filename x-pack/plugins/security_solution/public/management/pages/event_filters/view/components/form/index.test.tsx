@@ -111,8 +111,6 @@ describe('Event filter form', () => {
       });
     });
 
-    expect(store.getState()!.management!.eventFilters!.form!.entry!.comments![0].comment).toBe(
-      'Exception comment'
-    );
+    expect(store.getState()!.management!.eventFilters!.form!.newComment).toBe('Exception comment');
   });
 });
