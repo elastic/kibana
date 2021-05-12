@@ -46,21 +46,61 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
     feature: KibanaFeature
   ): string[] {
     const getAlertingPrivilege = (
-      operations: Record<AlertingType, string[]>,
+      operations: string[],
       privilegedTypes: readonly string[],
+      alertingEntity: string,
       consumer: string
     ) =>
-      privilegedTypes.flatMap((privilegedType) =>
-        Object.values(AlertingType).flatMap((alertingType) =>
-          operations[alertingType].map((operation) =>
-            this.actions.alerting.get(privilegedType, consumer, alertingType, operation)
-          )
+      privilegedTypes.flatMap((type) =>
+        operations.map((operation) =>
+          this.actions.alerting.get(type, consumer, alertingEntity, operation)
         )
       );
 
+    let ruleAll: string[] = [];
+    let ruleRead: string[] = [];
+    let alertAll: string[] = [];
+    let alertRead: string[] = [];
+    if (Array.isArray(privilegeDefinition.alerting?.all)) {
+      ruleAll = [...(privilegeDefinition.alerting?.all ?? [])];
+      alertAll = [...(privilegeDefinition.alerting?.all ?? [])];
+    } else {
+      const allObject = privilegeDefinition.alerting?.all as {
+        rule?: readonly string[];
+        alert?: readonly string[];
+      };
+      const rule = allObject?.rule ?? [];
+      const alert = allObject?.alert ?? [];
+      ruleAll = [...rule];
+      alertAll = [...alert];
+    }
+
+    if (Array.isArray(privilegeDefinition.alerting?.read)) {
+      ruleRead = [...(privilegeDefinition.alerting?.read ?? [])];
+      alertRead = [...(privilegeDefinition.alerting?.read ?? [])];
+    } else {
+      const readObject = privilegeDefinition.alerting?.read as {
+        rule?: readonly string[];
+        alert?: readonly string[];
+      };
+      const rule = readObject?.rule ?? [];
+      const alert = readObject?.alert ?? [];
+      ruleRead = [...rule];
+      alertRead = [...alert];
+    }
+
+    if (feature.id === 'stackAlerts') {
+      console.log(`ruleAll ${ruleAll}`);
+      console.log(`ruleRead ${ruleRead}`);
+      console.log(`alertAll ${alertAll}`);
+      console.log(`alertRead ${alertRead}`);
+    }
+
     return uniq([
-      ...getAlertingPrivilege(allOperations, privilegeDefinition.alerting?.all ?? [], feature.id),
-      ...getAlertingPrivilege(readOperations, privilegeDefinition.alerting?.read ?? [], feature.id),
+      ...getAlertingPrivilege(allOperations.rule, ruleAll, 'rule', feature.id),
+      ...getAlertingPrivilege(allOperations.alert, alertAll, 'alert', feature.id),
+      ...getAlertingPrivilege(readOperations.rule, ruleRead, 'rule', feature.id),
+      ...getAlertingPrivilege(readOperations.alert, alertRead, 'alert', feature.id),
     ]);
   }
 }

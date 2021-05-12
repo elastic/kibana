@@ -91,7 +91,7 @@ export interface FeatureKibanaPrivileges {
      *  }
      * ```
      */
-    all?: readonly string[];
+    all?: readonly string[] | { rule?: readonly string[]; alert?: readonly string[] };
 
     /**
      * List of alert types which users should have read-only access to when granted this privilege.
@@ -102,7 +102,7 @@ export interface FeatureKibanaPrivileges {
      *  }
      * ```
      */
-    read?: readonly string[];
+    read?: readonly string[] | { rule?: readonly string[]; alert?: readonly string[] };
   };
   /**
    * If your feature requires access to specific saved objects, then specify your access needs here.

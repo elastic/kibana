@@ -99,6 +99,8 @@ export function privilegesFactory(
           delete featurePrivileges[feature.id];
         }
       }
+
+      console.log(`stackAlerts: ${JSON.stringify(featurePrivileges.stackAlerts)}`);
       return {
         features: featurePrivileges,
         global: {

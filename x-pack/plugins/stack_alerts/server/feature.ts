@@ -31,8 +31,14 @@ export const BUILT_IN_ALERTS_FEATURE = {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: {
-        all: [IndexThreshold, GeoContainment, ElasticsearchQuery],
-        read: [],
+        all: {
+          rule: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+          alert: [],
+        },
+        read: {
+          rule: [],
+          alert: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+        },
       },
       savedObject: {
         all: [],
@@ -48,8 +54,14 @@ export const BUILT_IN_ALERTS_FEATURE = {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: {
-        all: [],
-        read: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+        all: {
+          rule: [],
+          alert: [],
+        },
+        read: {
+          rule: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+          alert: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+        },
       },
       savedObject: {
         all: [],
@@ -59,4 +71,36 @@ export const BUILT_IN_ALERTS_FEATURE = {
       ui: [],
     },
   },
+  subFeatures: [
+    {
+      name: 'Manage Alerts',
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'alert_manage',
+              name: 'Manage Alerts',
+              includeIn: 'all',
+              alerting: {
+                all: {
+                  rule: [],
+                  alert: [IndexThreshold, GeoContainment, ElasticsearchQuery],
+                },
+                read: {
+                  rule: [],
+                  alert: [],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
