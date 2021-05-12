@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import { LAT_INDEX, LON_INDEX } from '../../../../common/constants';
-import { FeaturesTooltip } from '../features_tooltip/features_tooltip';
+import { FeaturesTooltip } from '../features_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 
 const noop = () => {};
@@ -55,24 +55,8 @@ export class TooltipPopover extends Component {
     });
   };
 
-  // Must load original geometry instead of using geometry from mapbox feature.
-  // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
-  _loadFeatureGeometry = ({ layerId, featureId }) => {
-    const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer || typeof featureId === 'undefined') {
-      return null;
-    }
-
-    const targetFeature = tooltipLayer.getFeatureById(featureId);
-    if (!targetFeature) {
-      return null;
-    }
-
-    return targetFeature.geometry;
-  };
-
   _loadFeatureProperties = async ({ layerId, featureId, mbProperties }) => {
-    const tooltipLayer = this._findLayerById(layerId);
+    const tooltipLayer = this.props.findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
@@ -86,28 +70,8 @@ export class TooltipPopover extends Component {
     return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
-  _loadPreIndexedShape = async ({ layerId, featureId }) => {
-    const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer || typeof featureId === 'undefined') {
-      return null;
-    }
-
-    const targetFeature = tooltipLayer.getFeatureById(featureId);
-    if (!targetFeature) {
-      return null;
-    }
-
-    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
-  };
-
-  _findLayerById = (layerId) => {
-    return this.props.layerList.find((layer) => {
-      return layer.getId() === layerId;
-    });
-  };
-
   _getLayerName = async (layerId) => {
-    const layer = this._findLayerById(layerId);
+    const layer = this.props.findLayerById(layerId);
     if (!layer) {
       return null;
     }
@@ -125,7 +89,6 @@ export class TooltipPopover extends Component {
       features: this.props.features,
       isLocked: this.props.isLocked,
       loadFeatureProperties: this._loadFeatureProperties,
-      loadFeatureGeometry: this._loadFeatureGeometry,
       getLayerName: this._getLayerName,
     };
 
@@ -135,12 +98,7 @@ export class TooltipPopover extends Component {
 
     return (
       <EuiText size="xs" style={{ maxWidth: '425px' }}>
-        <FeaturesTooltip
-          {...publicProps}
-          findLayerById={this._findLayerById}
-          geoFields={this.props.geoFields}
-          loadPreIndexedShape={this._loadPreIndexedShape}
-        />
+        <FeaturesTooltip {...publicProps} findLayerById={this.props.findLayerById} />
       </EuiText>
     );
   };

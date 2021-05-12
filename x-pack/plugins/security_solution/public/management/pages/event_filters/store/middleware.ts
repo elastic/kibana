@@ -14,11 +14,11 @@ import {
 
 import { EventFiltersHttpService } from '../service';
 
-import { EventFiltersListPageState } from '../state';
 import { getLastLoadedResourceState } from '../../../state/async_resource_state';
 
 import {
   CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
   transformNewItemOutput,
   transformOutput,
   UpdateExceptionListItemSchema,
@@ -34,7 +34,17 @@ import {
   getSubmissionResource,
   getNewComment,
 } from './selector';
-import { EventFiltersService, EventFiltersServiceGetListOptions } from '../types';
+import {
+  EventFiltersListPageData,
+  EventFiltersListPageState,
+  EventFiltersService,
+  EventFiltersServiceGetListOptions,
+} from '../types';
+import {
+  createFailedResourceState,
+  createLoadedResourceState,
+  createLoadingResourceState,
+} from '../../../state';
 
 const addNewComments = (
   entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema,
@@ -59,10 +69,9 @@ const eventFiltersCreate: MiddlewareActionHandler = async (store, eventFiltersSe
     if (!formEntry) return;
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
-      payload: {
-        type: 'LoadingResourceState',
-        previousState: { type: 'UninitialisedResourceState' },
-      },
+      payload: createLoadingResourceState<ExceptionListItemSchema>({
+        type: 'UninitialisedResourceState',
+      }),
     });
 
     const sanitizedEntry = transformNewItemOutput(formEntry as CreateExceptionListItemSchema);
@@ -145,19 +154,15 @@ const eventFiltersUpdate = async (
     });
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
-      payload: {
-        type: 'LoadedResourceState',
-        data: exception,
-      },
+      payload: createLoadedResourceState(exception),
     });
   } catch (error) {
     store.dispatch({
       type: 'eventFiltersFormStateChanged',
-      payload: {
-        type: 'FailedResourceState',
-        error: error.body || error,
-        lastLoadedState: getLastLoadedResourceState(submissionResourceState),
-      },
+      payload: createFailedResourceState(
+        error.body ?? error,
+        getLastLoadedResourceState(submissionResourceState)
+      ),
     });
   }
 };
@@ -192,12 +197,9 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
 ) => {
   dispatch({
     type: 'eventFiltersListPageDataExistsChanged',
-    payload: {
-      type: 'LoadingResourceState',
-      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      previousState: getListPageDataExistsState(getState()),
-    },
+    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+    // @ts-ignore
+    payload: createLoadingResourceState(getListPageDataExistsState(getState())),
   });
 
   try {
@@ -205,18 +207,12 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
 
     dispatch({
       type: 'eventFiltersListPageDataExistsChanged',
-      payload: {
-        type: 'LoadedResourceState',
-        data: Boolean(anythingInListResults.total),
-      },
+      payload: createLoadedResourceState(Boolean(anythingInListResults.total)),
     });
   } catch (error) {
     dispatch({
       type: 'eventFiltersListPageDataExistsChanged',
-      payload: {
-        type: 'FailedResourceState',
-        error: error.body || error,
-      },
+      payload: createFailedResourceState<boolean>(error.body ?? error),
     });
   }
 };
@@ -250,13 +246,10 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
 
       dispatch({
         type: 'eventFiltersListPageDataChanged',
-        payload: {
-          type: 'LoadedResourceState',
-          data: {
-            query,
-            content: results,
-          },
-        },
+        payload: createLoadedResourceState({
+          query,
+          content: results,
+        }),
       });
 
       dispatch({
@@ -276,10 +269,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
     } catch (error) {
       dispatch({
         type: 'eventFiltersListPageDataChanged',
-        payload: {
-          type: 'FailedResourceState',
-          error: error.body || error,
-        },
+        payload: createFailedResourceState<EventFiltersListPageData>(error.body ?? error),
       });
     }
   }
