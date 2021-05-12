@@ -6,21 +6,22 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import type {
   Query,
   RefreshInterval,
   TimeRange,
 } from '../../../../../../../src/plugins/data/common/query';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,
   IContainer,
 } from '../../../../../../../src/plugins/embeddable/public';
-import { ServicesErrorRateEmbeddableComponent } from './services_error_rate_embeddable_component';
+import { ThroughputEmbeddableComponent } from './throughput_embeddable_component';
 
-export const SERVICES_ERROR_RATE_EMBEDDABLE = 'SERVICES_ERROR_RATE_EMBEDDABLE';
-export interface ServicesErrorRateInput extends EmbeddableInput {
+export const THROUGHPUT_EMBEDDABLE = 'THROUGHPUT_EMBEDDABLE';
+export interface ThroughputInput extends EmbeddableInput {
+  serviceName: string;
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
   query: Query;
@@ -28,14 +29,11 @@ export interface ServicesErrorRateInput extends EmbeddableInput {
   timeRange: TimeRange;
 }
 
-export class ServicesErrorRateEmbeddable extends Embeddable<
-  ServicesErrorRateInput,
-  {}
-> {
-  public readonly type = SERVICES_ERROR_RATE_EMBEDDABLE;
+export class ThroughputEmbeddable extends Embeddable<ThroughputInput, {}> {
+  public readonly type = THROUGHPUT_EMBEDDABLE;
   private node?: HTMLElement;
 
-  constructor(initialInput: ServicesErrorRateInput, parent?: IContainer) {
+  constructor(initialInput: ThroughputInput, parent?: IContainer) {
     super(initialInput, {}, parent);
   }
 
@@ -44,10 +42,7 @@ export class ServicesErrorRateEmbeddable extends Embeddable<
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
-    ReactDOM.render(
-      <ServicesErrorRateEmbeddableComponent embeddable={this} />,
-      node
-    );
+    ReactDOM.render(<ThroughputEmbeddableComponent embeddable={this} />, node);
   }
 
   public reload() {}

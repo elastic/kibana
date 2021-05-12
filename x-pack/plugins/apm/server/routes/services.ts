@@ -772,40 +772,6 @@ const serviceAlertsRoute = createApmServerRoute({
   },
 });
 
-const servicesErrorRatesRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/services/error_rate',
-  params: t.type({
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      t.partial({ transactionType: t.string }),
-    ]),
-  }),
-  options: {
-    tags: ['access:apm'],
-  },
-  handler: async (resources) => {
-    const { params } = resources;
-    const setup = await setupRequest(resources);
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
-
-    const {
-      query: { environment, transactionType },
-    } = params;
-
-    const servicesErrorRate = await getServicesErrorRate({
-      searchAggregatedTransactions,
-      environment,
-      transactionType,
-      setup,
-    });
-    return { servicesErrorRate };
-  },
-});
-
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
   .add(serviceMetadataDetailsRoute)
@@ -824,5 +790,4 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceDependenciesRoute)
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute)
-  .add(serviceAlertsRoute)
-  .add(servicesErrorRatesRoute);
+  .add(serviceAlertsRoute);

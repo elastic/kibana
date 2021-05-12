@@ -11,20 +11,16 @@ import {
   IContainer,
 } from '../../../../../../../src/plugins/embeddable/public';
 import {
-  ServicesErrorRateEmbeddable,
-  ServicesErrorRateInput,
-  SERVICES_ERROR_RATE_EMBEDDABLE,
-} from './services_error_rate_embeddable';
+  ThroughputEmbeddable,
+  ThroughputInput,
+  THROUGHPUT_EMBEDDABLE,
+} from './throughput_embeddable';
 import { APP_ID, APP_NAME, APP_ICON } from '../constants';
 
-export class ServicesErrorRateEmbeddableFactoryDefinition
+export class ThroughputEmbeddableFactoryDefinition
   implements
-    EmbeddableFactoryDefinition<
-      ServicesErrorRateInput,
-      {},
-      ServicesErrorRateEmbeddable
-    > {
-  public readonly type = SERVICES_ERROR_RATE_EMBEDDABLE;
+    EmbeddableFactoryDefinition<ThroughputInput, {}, ThroughputEmbeddable> {
+  public readonly type = THROUGHPUT_EMBEDDABLE;
 
   public readonly grouping = [
     {
@@ -38,19 +34,13 @@ export class ServicesErrorRateEmbeddableFactoryDefinition
     return true;
   }
 
-  public async create(
-    initialInput: ServicesErrorRateInput,
-    parent?: IContainer
-  ) {
-    return new ServicesErrorRateEmbeddable(initialInput, parent);
+  public async create(initialInput: ThroughputInput, parent?: IContainer) {
+    return new ThroughputEmbeddable(initialInput, parent);
   }
 
   public getDisplayName() {
-    return i18n.translate(
-      'xpack.apm.embeddables.servicesErrorRate.displayName',
-      {
-        defaultMessage: 'Services Error rate chart',
-      }
-    );
+    return i18n.translate('xpack.apm.embeddables.throughputChart.displayName', {
+      defaultMessage: 'Throughput chart',
+    });
   }
 }
