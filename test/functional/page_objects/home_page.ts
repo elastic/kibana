@@ -12,10 +12,7 @@ export class HomePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
-  private readonly deployment = this.ctx.getService('deployment');
   private readonly common = this.ctx.getPageObject('common');
-
-  private isOss = true;
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -72,10 +69,7 @@ export class HomePageObject extends FtrService {
 
   async launchSampleDashboard(id: string) {
     await this.launchSampleDataSet(id);
-    this.isOss = await this.deployment.isOss();
-    if (!this.isOss) {
-      await this.find.clickByLinkText('Dashboard');
-    }
+    await this.find.clickByLinkText('Dashboard');
   }
 
   async launchSampleDataSet(id: string) {
