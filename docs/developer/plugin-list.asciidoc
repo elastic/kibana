@@ -181,6 +181,10 @@ Content is fetched from the remote (https://feeds.elastic.co and https://feeds-s
 oss plugins.
 
 
+|{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]
+|The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
+
+
 |{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
 |securityOss is responsible for educating users about Elastic's free security features,
 so they can properly protect the data within their clusters.
