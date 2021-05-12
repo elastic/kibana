@@ -19,9 +19,9 @@ export function getComparisonChartTheme(theme: EuiTheme) {
   return {
     areaSeriesStyle: {
       area: {
-        fill: theme.eui.euiColorLightestShade,
+        fill: theme.eui.euiColorLightShade,
         visible: true,
-        opacity: 1,
+        opacity: 0.5,
       },
       line: {
         stroke: theme.eui.euiColorMediumShade,
