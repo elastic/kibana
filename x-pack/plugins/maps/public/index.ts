@@ -25,4 +25,4 @@ export { MapsStartApi } from './api';
 
 export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './embeddable';
 
-export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
+export type { EMSTermJoinConfig, AutoSuggestConfig } from './ems_autosuggest';
