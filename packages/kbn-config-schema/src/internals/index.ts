@@ -82,7 +82,7 @@ export const internals: JoiRoot = Joi.extend(
       }
       return { value };
     },
-    prepare(value, { error }) {
+    validate(value, { error }) {
       // If value isn't defined, let Joi handle default value if it's defined.
       if (value instanceof ByteSizeValue) {
         return { value };
