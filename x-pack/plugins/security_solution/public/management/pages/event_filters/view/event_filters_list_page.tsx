@@ -11,7 +11,7 @@ import { Dispatch } from 'redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { AppAction } from '../../../../common/store/actions';
@@ -38,6 +38,8 @@ import {
   ExceptionItem,
   ExceptionItemProps,
 } from '../../../../common/components/exceptions/viewer/exception_item';
+
+import { SearchBar } from '../../../components/search_bar';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -154,6 +156,10 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
+  const handleOnSearch = useCallback((query: string) => navigateCallback({ filter: query }), [
+    navigateCallback,
+  ]);
+
   return (
     <AdministrationListPage
       beta={false}
@@ -193,6 +199,12 @@ export const EventFiltersListPage = memo(() => {
         />
       )}
 
+      {doesDataExist && (
+        <>
+          <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
         items={listItems}
         ItemComponent={ExceptionItem}
