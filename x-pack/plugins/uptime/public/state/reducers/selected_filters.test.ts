@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { selectedFiltersReducer } from './selected_filters.ts';
+import { selectedFiltersReducer } from './selected_filters';
 import {
   getSelectedFilters,
   setSelectedFilters,
