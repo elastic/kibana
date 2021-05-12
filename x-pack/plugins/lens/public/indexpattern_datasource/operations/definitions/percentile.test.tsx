@@ -196,6 +196,24 @@ describe('percentile', () => {
       expect(percentileColumn.params.percentile).toEqual(75);
       expect(percentileColumn.label).toEqual('75th percentile of test');
     });
+
+    it('should create a percentile from formula with filter', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
+      const percentileColumn = percentileOperation.buildColumn(
+        {
+          indexPattern,
+          field: bytesField,
+          layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        },
+        { percentile: 75, kql: 'bytes > 100' }
+      );
+      expect(percentileColumn.dataType).toEqual('number');
+      expect(percentileColumn.params.percentile).toEqual(75);
+      expect(percentileColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
+      expect(percentileColumn.label).toEqual('75th percentile of test');
+    });
   });
 
   describe('isTransferable', () => {

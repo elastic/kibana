@@ -159,10 +159,6 @@ export function insertNewColumn({
     if (field) {
       throw new Error(`Can't create operation ${op} with the provided field ${field.name}`);
     }
-    if (operationDefinition.input === 'managedReference') {
-      // TODO: need to create on the fly the new columns for Formula,
-      // like we do for fullReferences to show a seamless transition
-    }
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;

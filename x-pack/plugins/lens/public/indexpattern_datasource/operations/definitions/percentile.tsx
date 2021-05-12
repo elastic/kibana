@@ -17,6 +17,7 @@ import {
   getSafeName,
   isValidNumber,
   useDebounceWithOptions,
+  getFilter,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 
@@ -89,7 +90,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
-      filter: previousColumn?.filter,
+      filter: getFilter(previousColumn, columnParams),
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),

@@ -19,7 +19,12 @@ import {
   hasDateField,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { getFormatFromPreviousColumn, isValidNumber, useDebounceWithOptions } from '../helpers';
+import {
+  getFormatFromPreviousColumn,
+  isValidNumber,
+  useDebounceWithOptions,
+  getFilter,
+} from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
@@ -88,14 +93,6 @@ export const movingAverageOperation: OperationDefinition<
   ) => {
     const metric = layer.columns[referenceIds[0]];
     const { window = WINDOW_DEFAULT_VALUE } = columnParams;
-    let filter = previousColumn?.filter;
-    if (columnParams) {
-      if ('kql' in columnParams) {
-        filter = { query: columnParams.kql ?? '', language: 'kuery' };
-      } else if ('lucene' in columnParams) {
-        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
-      }
-    }
     return {
       label: ofName(metric?.label, previousColumn?.timeScale),
       dataType: 'number',
@@ -104,7 +101,7 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
-      filter,
+      filter: getFilter(previousColumn, columnParams),
       params: {
         window,
         ...getFormatFromPreviousColumn(previousColumn),

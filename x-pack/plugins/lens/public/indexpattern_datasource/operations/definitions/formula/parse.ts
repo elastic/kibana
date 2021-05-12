@@ -16,6 +16,10 @@ import { findVariables, getOperationParams, groupArgsByType } from './util';
 import { FormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
 
+function getManagedId(mainId: string, index: number) {
+  return `${mainId}X${index}`;
+}
+
 function parseAndExtract(
   text: string,
   layer: IndexPatternLayer,
@@ -90,7 +94,7 @@ function extractColumns(
         },
         mappedParams
       );
-      const newColId = `${idPrefix}X${columns.length}`;
+      const newColId = getManagedId(idPrefix, columns.length);
       newCol.customLabel = true;
       newCol.label = newColId;
       columns.push({ column: newCol, location: node.location });
@@ -111,7 +115,7 @@ function extractColumns(
       mathColumn.params.tinymathAst = consumedParam!;
       columns.push({ column: mathColumn });
       mathColumn.customLabel = true;
-      mathColumn.label = `${idPrefix}X${columns.length - 1}`;
+      mathColumn.label = getManagedId(idPrefix, columns.length - 1);
 
       const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
       const newCol = (nodeOperation as OperationDefinition<
@@ -121,11 +125,11 @@ function extractColumns(
         {
           layer,
           indexPattern,
-          referenceIds: [`${idPrefix}X${columns.length - 1}`],
+          referenceIds: [getManagedId(idPrefix, columns.length - 1)],
         },
         mappedParams
       );
-      const newColId = `${idPrefix}X${columns.length}`;
+      const newColId = getManagedId(idPrefix, columns.length);
       newCol.customLabel = true;
       newCol.label = newColId;
       columns.push({ column: newCol, location: node.location });
@@ -144,7 +148,7 @@ function extractColumns(
   });
   mathColumn.references = variables.map(({ value }) => value);
   mathColumn.params.tinymathAst = root!;
-  const newColId = `${idPrefix}X${columns.length}`;
+  const newColId = getManagedId(idPrefix, columns.length);
   mathColumn.customLabel = true;
   mathColumn.label = newColId;
   columns.push({ column: mathColumn });
@@ -178,8 +182,8 @@ export function regenerateLayerFromAst(
   });
 
   extracted.forEach(({ column, location }, index) => {
-    columns[`${columnId}X${index}`] = column;
-    if (location) locations[`${columnId}X${index}`] = location;
+    columns[getManagedId(columnId, index)] = column;
+    if (location) locations[getManagedId(columnId, index)] = location;
   });
 
   columns[columnId] = {
@@ -189,7 +193,7 @@ export function regenerateLayerFromAst(
       formula: text,
       isFormulaBroken: !isValid,
     },
-    references: !isValid ? [] : [`${columnId}X${extracted.length - 1}`],
+    references: !isValid ? [] : [getManagedId(columnId, extracted.length - 1)],
   };
 
   return {
@@ -203,8 +207,4 @@ export function regenerateLayerFromAst(
     },
     locations,
   };
-
-  // TODO
-  // turn ast into referenced columns
-  // set state
 }
