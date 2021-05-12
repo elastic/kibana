@@ -49,6 +49,7 @@ import { createSharedServices, SharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
+import { mlCorrelationsSearchStrategyProvider } from './lib/search_strategies/correlations';
 import { trainedModelsRoutes } from './routes/trained_models';
 import {
   setupSavedObjects,
@@ -218,6 +219,14 @@ export class MlServerPlugin
     if (plugins.usageCollection) {
       registerCollector(plugins.usageCollection, this.kibanaIndexConfig.kibana.index);
     }
+
+    // search strategies for async partial search results
+    coreSetup.getStartServices().then(([coreStart, depsStart]) => {
+      plugins.data.search.registerSearchStrategy(
+        'mlCorrelationsSearchStrategy',
+        mlCorrelationsSearchStrategyProvider()
+      );
+    });
 
     return { ...sharedServices };
   }
