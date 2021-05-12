@@ -373,7 +373,7 @@ export function App({
             setState((s) => ({
               ...s,
               isLoading: false,
-              persistedDoc: doc,
+              ...(!_.isEqual(state.persistedDoc, doc) ? { persistedDoc: doc } : null),
               lastKnownDoc: doc,
               query: doc.state.query,
               indexPatternsForTopNav: indexPatterns,
@@ -402,8 +402,7 @@ export function App({
     attributeService,
     redirectTo,
     chrome.recentlyAccessed,
-    state.persistedDoc?.savedObjectId,
-    state.persistedDoc?.state,
+    state.persistedDoc,
   ]);
 
   const tagsIds =
@@ -792,43 +791,41 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   const { EditorFrameContainer } = editorFrame;
   return (
     <EditorFrameContainer
-      {...{
-        searchSessionId,
-        dateRange: resolvedDateRange,
-        query,
-        filters,
-        savedQuery,
-        doc: persistedDoc,
-        onError,
-        showNoDataPopover,
-        initialContext,
-        onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
-          if (isSaveable !== oldIsSaveable) {
-            setState((s) => ({ ...s, isSaveable }));
-          }
-          if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
-            setState((s) => ({ ...s, lastKnownDoc: doc }));
-          }
-          if (!_.isEqual(activeDataRef.current, activeData)) {
-            setState((s) => ({ ...s, activeData }));
-          }
+      doc={persistedDoc}
+      searchSessionId={searchSessionId}
+      dateRange={resolvedDateRange}
+      query={query}
+      filters={filters}
+      savedQuery={savedQuery}
+      onError={onError}
+      showNoDataPopover={showNoDataPopover}
+      initialContext={initialContext}
+      onChange={({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
+        if (isSaveable !== oldIsSaveable) {
+          setState((s) => ({ ...s, isSaveable }));
+        }
+        if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
+          setState((s) => ({ ...s, lastKnownDoc: doc }));
+        }
+        if (!_.isEqual(activeDataRef.current, activeData)) {
+          setState((s) => ({ ...s, activeData }));
+        }
 
-          // Update the cached index patterns if the user made a change to any of them
-          if (
-            indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-            filterableIndexPatterns.some(
-              (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-            )
-          ) {
-            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
-              ({ indexPatterns }) => {
-                if (indexPatterns) {
-                  setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
-                }
+        // Update the cached index patterns if the user made a change to any of them
+        if (
+          indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+          filterableIndexPatterns.some(
+            (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+          )
+        ) {
+          getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
+            ({ indexPatterns }) => {
+              if (indexPatterns) {
+                setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
               }
-            );
-          }
-        },
+            }
+          );
+        }
       }}
     />
   );
