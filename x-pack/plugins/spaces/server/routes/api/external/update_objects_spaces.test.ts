@@ -104,17 +104,6 @@ describe('update_objects_spaces', () => {
       });
     });
 
-    it(`requires at least 1 space ID`, async () => {
-      const { updateObjectsSpaces } = await setup();
-      const payload = { objects, spacesToAdd: [], spacesToRemove: [] };
-
-      expect(() =>
-        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"spacesToAdd and/or spacesToRemove must be a non-empty array of strings"`
-      );
-    });
-
     it(`requires space IDs to be unique`, async () => {
       const { updateObjectsSpaces } = await setup();
       const targetSpaces = ['a-space', 'a-space'];
@@ -146,18 +135,6 @@ describe('update_objects_spaces', () => {
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
       ).toThrowErrorMatchingInlineSnapshot(
         `"[spacesToRemove.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""`
-      );
-    });
-
-    it(`requires spacesToAdd and spacesToRemove not to intersect`, async () => {
-      const { updateObjectsSpaces } = await setup();
-      const targetSpaces = ['a-space'];
-      const payload = { objects, spacesToAdd: targetSpaces, spacesToRemove: targetSpaces };
-
-      expect(() =>
-        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"spacesToAdd and spacesToRemove cannot contain any of the same strings"`
       );
     });
 

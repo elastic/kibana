@@ -164,7 +164,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCoreFieldMapping](./kibana-plugin-core-server.savedobjectscorefieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsCreatePointInTimeFinderDependencies](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.md) |  |
-|  [SavedObjectsCreatePointInTimeFinderOptions](./kibana-plugin-core-server.savedobjectscreatepointintimefinderoptions.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-core-server.savedobjectsdeleteoptions.md) |  |
 |  [SavedObjectsExportByObjectOptions](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) | Options for the [export by objects API](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md) |
@@ -316,6 +315,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientFactoryProvider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) | Provider to invoke to retrieve a [SavedObjectsClientFactory](./kibana-plugin-core-server.savedobjectsclientfactory.md)<!-- -->. |
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
 |  [SavedObjectsClosePointInTimeOptions](./kibana-plugin-core-server.savedobjectsclosepointintimeoptions.md) |  |
+|  [SavedObjectsCreatePointInTimeFinderOptions](./kibana-plugin-core-server.savedobjectscreatepointintimefinderoptions.md) |  |
 |  [SavedObjectsExportTransform](./kibana-plugin-core-server.savedobjectsexporttransform.md) | Transformation function used to mutate the exported objects of the associated type.<!-- -->A type's export transform function will be executed once per user-initiated export, for all objects of that type. |
 |  [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) | Describe a [saved object type mapping](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) field.<!-- -->Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html) For the mapping documentation |
 |  [SavedObjectsImportHook](./kibana-plugin-core-server.savedobjectsimporthook.md) | A hook associated with a specific saved object type, that will be invoked during the import process. The hook will have access to the objects of the registered type.<!-- -->Currently, the only supported feature for import hooks is to return warnings to be displayed in the UI when the import succeeds. The only interactions the hook can have with the import process is via the hook's response. Mutating the objects inside the hook's code will have no effect. |

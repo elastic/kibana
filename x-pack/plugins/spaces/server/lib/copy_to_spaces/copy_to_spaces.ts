@@ -84,6 +84,8 @@ export function copySavedObjectsToSpacesFactory(
       const objectsToImport: SavedObject[] = [];
       for (const { namespaces, ...object } of filteredObjects) {
         if (!namespaces?.includes(spaceId)) {
+          // We check to ensure that each object doesn't already exist in the destination. If we don't do this, the consumer will see a
+          // conflict and have the option to skip or overwrite the object, both of which are effectively a no-op.
           objectsToImport.push(object);
         }
       }

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import intersection from 'lodash/intersection';
-
 import { schema } from '@kbn/config-schema';
 
 import { ALL_SPACES_ID } from '../../../../common/constants';
@@ -39,23 +37,11 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/_update_objects_spaces',
       validate: {
-        body: schema.object(
-          {
-            objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),
-            spacesToAdd: spacesSchema,
-            spacesToRemove: spacesSchema,
-          },
-          {
-            validate: ({ spacesToAdd, spacesToRemove }) => {
-              if (!spacesToAdd.length && !spacesToRemove.length) {
-                return 'spacesToAdd and/or spacesToRemove must be a non-empty array of strings';
-              }
-              if (intersection(spacesToAdd, spacesToRemove).length > 0) {
-                return 'spacesToAdd and spacesToRemove cannot contain any of the same strings';
-              }
-            },
-          }
-        ),
+        body: schema.object({
+          objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),
+          spacesToAdd: spacesSchema,
+          spacesToRemove: spacesSchema,
+        }),
       },
     },
     createLicensedRouteHandler(async (_context, request, response) => {

@@ -28,6 +28,8 @@ import type { RepositoryEsClient } from './repository_es_client';
 
 /**
  * An object that should have its spaces updated.
+ *
+ * @public
  */
 export interface SavedObjectsUpdateObjectsSpacesObject {
   /** The type of the object to update */
@@ -50,6 +52,8 @@ export interface SavedObjectsUpdateObjectsSpacesObject {
 
 /**
  * Options for the update operation.
+ *
+ * @public
  */
 export interface SavedObjectsUpdateObjectsSpacesOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
@@ -58,6 +62,8 @@ export interface SavedObjectsUpdateObjectsSpacesOptions extends SavedObjectsBase
 
 /**
  * The response when objects' spaces are updated.
+ *
+ * @public
  */
 export interface SavedObjectsUpdateObjectsSpacesResponse {
   objects: SavedObjectsUpdateObjectsSpacesResponseObject[];
@@ -65,6 +71,8 @@ export interface SavedObjectsUpdateObjectsSpacesResponse {
 
 /**
  * Details about a specific object's update result.
+ *
+ * @public
  */
 export interface SavedObjectsUpdateObjectsSpacesResponseObject {
   /** The type of the referenced object */
@@ -85,6 +93,11 @@ type Either = Left | Right;
 const isLeft = (either: Either): either is Left => either.tag === 'Left';
 const isRight = (either: Either): either is Right => either.tag === 'Right';
 
+/**
+ * Parameters for the updateObjectsSpaces function.
+ *
+ * @internal
+ */
 export interface UpdateObjectsSpacesParams {
   registry: ISavedObjectTypeRegistry;
   allowedTypes: string[];

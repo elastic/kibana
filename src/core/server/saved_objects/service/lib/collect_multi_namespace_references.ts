@@ -37,6 +37,8 @@ const ALIAS_SEARCH_PER_PAGE = 100;
  *
  * Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with
  * the `namespaceType: 'multi'`).
+ *
+ * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesObject {
   id: string;
@@ -45,6 +47,8 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject {
 
 /**
  * Options for collecting references.
+ *
+ * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesOptions
   extends SavedObjectsBaseOptions {
@@ -54,6 +58,8 @@ export interface SavedObjectsCollectMultiNamespaceReferencesOptions
 
 /**
  * A returned input object or one of its references, with additional context.
+ *
+ * @public
  */
 export interface SavedObjectReferenceWithContext {
   /** The type of the referenced object */
@@ -82,6 +88,8 @@ export interface SavedObjectReferenceWithContext {
 
 /**
  * The response when object references are collected.
+ *
+ * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
   objects: SavedObjectReferenceWithContext[];
@@ -89,6 +97,8 @@ export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
 
 /**
  * Parameters for the collectMultiNamespaceReferences function.
+ *
+ * @internal
  */
 export interface CollectMultiNamespaceReferencesParams {
   registry: ISavedObjectTypeRegistry;
@@ -240,7 +250,6 @@ async function checkLegacyUrlAliases(
     type: LEGACY_URL_ALIAS_TYPE,
     perPage: ALIAS_SEARCH_PER_PAGE,
     filter,
-    searchBehavior: 'page',
   });
   const aliasesMap = new Map<string, Set<string>>();
   let error: Error | undefined;

@@ -2,18 +2,11 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [SavedObjectsCreatePointInTimeFinderOptions](./kibana-plugin-core-server.savedobjectscreatepointintimefinderoptions.md)
 
-## SavedObjectsCreatePointInTimeFinderOptions interface
+## SavedObjectsCreatePointInTimeFinderOptions type
 
 
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsCreatePointInTimeFinderOptions extends Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'> 
+export declare type SavedObjectsCreatePointInTimeFinderOptions = Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'>;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [searchBehavior](./kibana-plugin-core-server.savedobjectscreatepointintimefinderoptions.searchbehavior.md) | <code>'searchAfter' &#124; 'page'</code> | Controls the search behavior of the <code>find</code> function:<!-- -->\* <code>'searchAfter'</code>: sort the results by updated\_at, and iterate through results using the last hit sort value \* <code>'page'</code>: do not sort the results, and instead iterate through the results in sequential pages<!-- -->Default: <code>'searchAfter'</code> |
-

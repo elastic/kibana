@@ -2172,8 +2172,6 @@ export interface SavedObjectReference {
     type: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectReferenceWithContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectReferenceWithContext {
     id: string;
@@ -2343,8 +2341,6 @@ export interface SavedObjectsClosePointInTimeResponse {
     succeeded: boolean;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsCollectMultiNamespaceReferencesObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsCollectMultiNamespaceReferencesObject {
     // (undocumented)
@@ -2353,15 +2349,11 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject {
     type: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsCollectMultiNamespaceReferencesOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsCollectMultiNamespaceReferencesOptions extends SavedObjectsBaseOptions {
     purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsCollectMultiNamespaceReferencesResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
     // (undocumented)
@@ -2421,9 +2413,7 @@ export interface SavedObjectsCreatePointInTimeFinderDependencies {
 }
 
 // @public (undocumented)
-export interface SavedObjectsCreatePointInTimeFinderOptions extends Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'> {
-    searchBehavior?: 'searchAfter' | 'page';
-}
+export type SavedObjectsCreatePointInTimeFinderOptions = Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'>;
 
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
@@ -3023,8 +3013,6 @@ export interface SavedObjectsTypeMappingDefinition {
     properties: SavedObjectsMappingProperties;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsUpdateObjectsSpacesObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsUpdateObjectsSpacesObject {
     id: string;
@@ -3035,23 +3023,17 @@ export interface SavedObjectsUpdateObjectsSpacesObject {
     version?: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsUpdateObjectsSpacesOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsUpdateObjectsSpacesOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsUpdateObjectsSpacesResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsUpdateObjectsSpacesResponse {
     // (undocumented)
     objects: SavedObjectsUpdateObjectsSpacesResponseObject[];
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsUpdateObjectsSpacesResponseObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsUpdateObjectsSpacesResponseObject {
     error?: SavedObjectError;

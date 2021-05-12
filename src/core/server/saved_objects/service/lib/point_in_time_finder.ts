@@ -18,18 +18,10 @@ type PointInTimeFinderClient = Pick<
 /**
  * @public
  */
-export interface SavedObjectsCreatePointInTimeFinderOptions
-  extends Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'> {
-  /**
-   * Controls the search behavior of the `find` function:
-   *
-   *  * `'searchAfter'`: sort the results by updated_at, and iterate through results using the last hit sort value
-   *  * `'page'`: do not sort the results, and instead iterate through the results in sequential pages
-   *
-   * Default: `'searchAfter'`
-   */
-  searchBehavior?: 'searchAfter' | 'page';
-}
+export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
+  SavedObjectsFindOptions,
+  'page' | 'pit' | 'searchAfter'
+>;
 
 /**
  * @public
@@ -76,15 +68,13 @@ export class PointInTimeFinder<T = unknown, A = unknown>
   readonly #log: Logger;
   readonly #client: PointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;
-  readonly #searchBehavior: 'searchAfter' | 'page';
   #open: boolean = false;
   #pitId?: string;
 
   constructor(
-    finderOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     { logger, client }: PointInTimeFinderDependencies
   ) {
-    const { searchBehavior = 'searchAfter', ...findOptions } = finderOptions;
     this.#log = logger.get('point-in-time-finder');
     this.#client = client;
     this.#findOptions = {
@@ -93,7 +83,6 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       perPage: 1000,
       ...findOptions,
     };
-    this.#searchBehavior = searchBehavior;
   }
 
   async *find() {
@@ -108,13 +97,13 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     await this.open();
 
     let lastResultsCount: number;
-    let page = 1;
     let lastHitSortValue: estypes.Id[] | undefined;
     do {
-      const results =
-        this.#searchBehavior === 'searchAfter'
-          ? await this.findNextAfter(lastHitSortValue)
-          : await this.findNextPage(page++);
+      const results = await this.findNext({
+        findOptions: this.#findOptions,
+        id: this.#pitId,
+        searchAfter: lastHitSortValue,
+      });
       this.#pitId = results.pit_id;
       lastResultsCount = results.saved_objects.length;
       lastHitSortValue = this.getLastHitSortValue(results);
@@ -164,27 +153,24 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     }
   }
 
-  private async findNextAfter(searchAfter?: estypes.Id[]) {
-    return await this.findNext({
-      // Sort fields are required to use searchAfter, so we set some defaults here
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-      searchAfter,
-      ...this.#findOptions,
-    });
-  }
-
-  private async findNextPage(page: number) {
-    return await this.findNext({ page, ...this.#findOptions });
-  }
-
-  private async findNext(findOptions: SavedObjectsFindOptions) {
-    const id = this.#pitId;
+  private async findNext({
+    findOptions,
+    id,
+    searchAfter,
+  }: {
+    findOptions: SavedObjectsFindOptions;
+    id?: string;
+    searchAfter?: estypes.Id[];
+  }) {
     try {
       return await this.#client.find<T, A>({
+        // Sort fields are required to use searchAfter, so we set some defaults here
+        sortField: 'updated_at',
+        sortOrder: 'desc',
         // Bump keep_alive by 2m on every new request to allow for the ES client
         // to make multiple retries in the event of a network failure.
         pit: id ? { id, keepAlive: '2m' } : undefined,
+        searchAfter,
         ...findOptions,
       });
     } catch (e) {

@@ -130,9 +130,14 @@ export function rawDocExistsInNamespace(
 ) {
   const rawDocType = raw._source.type;
 
-  // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
-  // of the document ID format and don't need to check this
-  if (!registry.isMultiNamespace(rawDocType)) {
+  if (registry.isSingleNamespace(rawDocType)) {
+    // In current usage, when deserializing a raw document we already rely on the guarantees of the document ID format with its namespace
+    // prefix, but we also check the namespace field here in case this function is ever used in a different context.
+    return namespace === raw._source.namespace;
+  }
+
+  if (registry.isNamespaceAgnostic(rawDocType)) {
+    // Namespace-agnostic object types always exist in all namespaces.
     return true;
   }
 

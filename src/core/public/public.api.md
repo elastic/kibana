@@ -1173,8 +1173,6 @@ export interface SavedObjectReference {
     type: string;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectReferenceWithContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectReferenceWithContext {
     id: string;
@@ -1256,8 +1254,6 @@ export class SavedObjectsClient {
 // @public
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
-// Warning: (ae-missing-release-tag) "SavedObjectsCollectMultiNamespaceReferencesResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
     // (undocumented)
