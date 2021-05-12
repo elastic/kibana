@@ -33,9 +33,19 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('new charts library visualize ciGroup7', function () {
       this.tags('ciGroup7');
 
-      before(async () => await update(false));
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:legacyChartsLibrary': false,
+        });
+        await browser.refresh();
+      });
 
-      after(async () => await update(true));
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:legacyChartsLibrary': true,
+        });
+        await browser.refresh();
+      });
 
       // Test replaced vislib chart types
       loadTestFile(require.resolve('./_area_chart'));
@@ -104,11 +114,4 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_vega_chart'));
     });
   });
-
-  async function update(x: boolean) {
-    await kibanaServer.uiSettings.update({
-      'visualization:visualize:legacyChartsLibrary': x,
-    });
-    await browser.refresh();
-  }
 }
