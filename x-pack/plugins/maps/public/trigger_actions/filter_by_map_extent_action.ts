@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
+import {
+  Embeddable,
+  EmbeddableInput,
+  ViewMode,
+} from '../../../../../src/plugins/embeddable/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 
@@ -37,7 +41,9 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
     return 'filter';
   },
   isCompatible: async ({ embeddable }: FilterByMapExtentActionContext) => {
-    return embeddable.type === MAP_SAVED_OBJECT_TYPE;
+    return (
+      embeddable.type === MAP_SAVED_OBJECT_TYPE && embeddable.getInput().viewMode === ViewMode.EDIT
+    );
   },
   execute: async ({ embeddable }: FilterByMapExtentActionContext) => {
     embeddable.updateInput({
