@@ -148,6 +148,7 @@ WARNING: Deleting an index pattern breaks all visualizations, saved searches, an
 . Delete (image:management/index-patterns/images/delete.png[Delete icon]) the index pattern.
 
 [float]
+[[reload-fields]]
 === What’s next
 
 Learn how to <<managing-index-patterns,manage the data fields>> in your index patterns.
