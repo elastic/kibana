@@ -31,7 +31,12 @@ interface ConfigMatch {
   matchType: MATCH_TYPE;
 }
 
-const wellKnownColumnNames = [
+interface WellKnown {
+  emsConfig: EMSTermJoinConfig;
+  regex: RegExp;
+}
+
+const WELLKNOWN_FIELD_ALIASES: WellKnown[] = [
   {
     regex: /(country|countries)/i, // anything with country|countries in it (matches sample data)
     emsConfig: {
@@ -62,7 +67,7 @@ const wellKnownColumnNames = [
   },
 ];
 
-const wellKnownColumnFormats = [
+const WELLKNOWN_FIELD_VALUE_PATTERNS: WellKnown[] = [
   {
     regex: /(^\d{5}$)/, // 5-digit zipcode
     emsConfig: {
@@ -117,15 +122,32 @@ function sortMatch(match1: UniqueMatch, match2: UniqueMatch): number {
   return match2.matchTypes.length - match2.matchTypes.length;
 }
 
+function removePatternFailures(
+  matches: ConfigMatch[],
+  sampleValues: Array<string | number>
+): ConfigMatch[] {
+  return matches.filter((match: ConfigMatch) => {
+    const wellKnownPattern = WELLKNOWN_FIELD_VALUE_PATTERNS.find((pattern) => {
+      return isTermJoinEqual(pattern.emsConfig, match.config);
+    });
+    return wellKnownPattern ? validateWithPattern(sampleValues, wellKnownPattern) : true;
+  });
+}
+
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: AutoSuggestConfig
 ): Promise<EMSTermJoinConfig | null> {
-  const matches: ConfigMatch[] = [];
+  let matches: ConfigMatch[] = [];
 
   // Get the fuzzy ones based on field-name
   if (sampleValuesConfig.fieldName) {
     const fieldNameMatches: EMSTermJoinConfig[] = suggestByName(sampleValuesConfig.fieldName);
     matches.push(...addMatchType(fieldNameMatches, MATCH_TYPE.FIELD_ALIAS));
+  }
+
+  // Filter out the ones that fail the regex-pattern (if any)
+  if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
+    matches = removePatternFailures(matches, sampleValuesConfig.sampleValues);
   }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
@@ -148,7 +170,7 @@ export async function suggestEMSTermJoinConfig(
 }
 
 function suggestByName(columnName: string): EMSTermJoinConfig[] {
-  const matches = wellKnownColumnNames.filter((wellknown) => {
+  const matches = WELLKNOWN_FIELD_ALIASES.filter((wellknown) => {
     return columnName.match(wellknown.regex);
   });
 
@@ -157,16 +179,25 @@ function suggestByName(columnName: string): EMSTermJoinConfig[] {
   });
 }
 
-function suggestByFieldPattern(values: Array<string | number>): EMSTermJoinConfig[] {
-  const matches = wellKnownColumnFormats.filter((wellknown) => {
-    for (let i = 0; i < values.length; i++) {
-      const value = values[i].toString();
-      // must satisfy all checks, otherwise reject
-      if (!value.match(wellknown.regex)) {
-        return false;
-      }
+function matchesPattern(value: number | string, wellknown: WellKnown): boolean {
+  value = value.toString();
+  return !!value.match(wellknown.regex);
+}
+
+function validateWithPattern(values: Array<string | number>, wellknown: WellKnown) {
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i].toString();
+    // must satisfy all checks, otherwise reject
+    if (!matchesPattern(value, wellknown)) {
+      return false;
     }
-    return true;
+  }
+  return true;
+}
+
+function suggestByFieldPattern(values: Array<string | number>): EMSTermJoinConfig[] {
+  const matches = WELLKNOWN_FIELD_VALUE_PATTERNS.filter((wellknown) => {
+    return validateWithPattern(values, wellknown);
   });
 
   return matches.map((m) => {
