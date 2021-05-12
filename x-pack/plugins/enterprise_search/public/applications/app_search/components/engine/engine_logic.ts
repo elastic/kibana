@@ -8,7 +8,6 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpLogic } from '../../../shared/http';
-import { IIndexingStatus } from '../../../shared/schema/types';
 
 import { EngineDetails, EngineTypes } from './types';
 
@@ -27,7 +26,6 @@ interface EngineValues {
 interface EngineActions {
   setEngineData(engine: EngineDetails): { engine: EngineDetails };
   setEngineName(engineName: string): { engineName: string };
-  setIndexingStatus(activeReindexJob: IIndexingStatus): { activeReindexJob: IIndexingStatus };
   setEngineNotFound(notFound: boolean): { notFound: boolean };
   clearEngine(): void;
   initializeEngine(): void;
@@ -38,7 +36,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   actions: {
     setEngineData: (engine) => ({ engine }),
     setEngineName: (engineName) => ({ engineName }),
-    setIndexingStatus: (activeReindexJob) => ({ activeReindexJob }),
     setEngineNotFound: (notFound) => ({ notFound }),
     clearEngine: true,
     initializeEngine: true,
@@ -56,10 +53,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       {
         setEngineData: (_, { engine }) => engine,
         clearEngine: () => ({}),
-        setIndexingStatus: (state, { activeReindexJob }) => ({
-          ...state,
-          activeReindexJob,
-        }),
       },
     ],
     engineName: [

@@ -88,28 +88,6 @@ describe('EngineLogic', () => {
       });
     });
 
-    describe('setIndexingStatus', () => {
-      describe('engine', () => {
-        it('should set the nested obj property to the provided value', () => {
-          mount({ engine: mockEngineData });
-          const mockReindexJob = {
-            percentageComplete: 50,
-            numDocumentsWithErrors: 2,
-            activeReindexJobId: '123',
-          };
-          EngineLogic.actions.setIndexingStatus(mockReindexJob);
-
-          expect(EngineLogic.values).toEqual({
-            ...DEFAULT_VALUES,
-            engine: {
-              ...mockEngineData,
-              activeReindexJob: mockReindexJob,
-            },
-          });
-        });
-      });
-    });
-
     describe('setEngineNotFound', () => {
       describe('engineNotFound', () => {
         it('should be set to the provided value', () => {
