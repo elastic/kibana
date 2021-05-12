@@ -77,31 +77,22 @@ describe('FilterPopover component', () => {
 
       fireEvent.click(uptimeFilterButton);
 
-      const generateLabelForSelected = (item: string) => {
+      const generateLabelText = (item: string, isSelected: boolean) => {
         if (selectedPropsItems.find((i) => i === item)) {
-          return `Remove filter by ${props.title} ${item}.`;
-        } else {
-          return `Filter by ${props.title} ${item}.`;
+          return `${isSelected ? 'Remove filter' : 'Filter'} by ${props.title} ${item}.`;
         }
-      };
-
-      const generateLabelForUnselected = (item: string) => {
-        if (selectedPropsItems.find((i) => i === item)) {
-          return `Filter by ${props.title} ${item}.`;
-        } else {
-          return `Remove filter by ${props.title} ${item}.`;
-        }
+        return `${isSelected ? 'Filter' : 'Remove filter'} by ${props.title} ${item}.`;
       };
 
       itemsToClick.forEach((item) => {
-        const optionButton = getByLabelText(generateLabelForSelected(item));
+        const optionButton = getByLabelText(generateLabelText(item, true));
         fireEvent.click(optionButton);
       });
 
       fireEvent.click(uptimeFilterButton);
 
       await waitForElementToBeRemoved(() =>
-        queryByLabelText(generateLabelForUnselected(itemsToClick[0]))
+        queryByLabelText(generateLabelText(itemsToClick[0], false))
       );
 
       expect(props.onFilterFieldChange).toHaveBeenCalledTimes(1);
