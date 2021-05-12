@@ -19,6 +19,7 @@ import {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   EPM_API_ROUTES,
+  FLEET_SERVER_SERVERS_INDEX,
   FleetServerAgent,
   GetPackagesResponse,
   PACKAGE_POLICY_API_ROUTES,
@@ -27,6 +28,8 @@ import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 import { FleetAgentGenerator } from './data_generators/fleet_agent_generator';
+
+const fleetAgentGenerator = new FleetAgentGenerator();
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -44,8 +47,15 @@ export async function indexHostsAndAlerts(
 ) {
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
+
+  // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
+  if (fleet) {
+    await enableFleetServerIfNecessary(client);
+  }
+
   // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
+
   for (let i = 0; i < numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
     await indexHostDocs({
@@ -68,9 +78,11 @@ export async function indexHostsAndAlerts(
       options,
     });
   }
+
   await client.indices.refresh({
     index: eventIndex,
   });
+
   // TODO: Unclear why the documents are not showing up after the call to refresh.
   // Waiting 5 seconds allows the indices to refresh automatically and
   // the documents become available in API/integration tests.
@@ -104,7 +116,6 @@ async function indexHostDocs({
 }) {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
-  const fleetAgentGenerator = new FleetAgentGenerator();
   const kibanaVersion = await fetchKibanaVersion(kbnClient);
   let hostMetadata: HostMetadata;
   let wasAgentEnrolled = false;
@@ -138,7 +149,6 @@ async function indexHostDocs({
 
         enrolledAgent = await indexFleetAgentForHost(
           client,
-          fleetAgentGenerator,
           hostMetadata!,
           realPolicies[appliedPolicyId].policy_id,
           kibanaVersion
@@ -312,9 +322,49 @@ const fetchKibanaVersion = async (kbnClient: KbnClientWithApiKeySupport) => {
   return version;
 };
 
+/**
+ * Will ensure that at least one fleet server is present in the `.fleet-servers` index. This will
+ * enable the `Agent` section of kibana Fleet to be displayed
+ *
+ * @param esClient
+ * @param version
+ */
+const enableFleetServerIfNecessary = async (esClient: Client, version: string = '8.0.0') => {
+  const res = await esClient.search<{}, {}>({
+    index: FLEET_SERVER_SERVERS_INDEX,
+    ignore_unavailable: true,
+  });
+
+  // @ts-expect-error value is number | TotalHits
+  if (res.body.hits.total.value > 0) {
+    return;
+  }
+
+  // Create a Fake fleet-server in this kibana instance
+  await esClient.index({
+    index: FLEET_SERVER_SERVERS_INDEX,
+    body: {
+      agent: {
+        id: '12988155-475c-430d-ac89-84dc84b67cd1',
+        version: '',
+      },
+      host: {
+        architecture: 'linux',
+        id: 'c3e5f4f690b4a3ff23e54900701a9513',
+        ip: ['127.0.0.1', '::1', '10.201.0.213', 'fe80::4001:aff:fec9:d5'],
+        name: 'endpoint-data-generator',
+      },
+      server: {
+        id: '12988155-475c-430d-ac89-84dc84b67cd1',
+        version: '8.0.0-SNAPSHOT',
+      },
+      '@timestamp': '2021-05-12T18:42:52.009482058Z',
+    },
+  });
+};
+
 const indexFleetAgentForHost = async (
   esClient: Client,
-  fleetAgentGenerator: FleetAgentGenerator,
   endpointHost: HostMetadata,
   agentPolicyId: string,
   kibanaVersion: string = '8.0.0'
