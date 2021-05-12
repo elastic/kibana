@@ -132,7 +132,7 @@ describe('Schema', () => {
     });
   });
 
-  it('renders a schema add field modal', () => {
+  it('renders a modal that lets a user add a new schema field', () => {
     setMockValues({ isModalOpen: true });
     const wrapper = shallow(<Schema />);
 
