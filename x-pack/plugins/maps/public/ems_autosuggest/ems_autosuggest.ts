@@ -205,23 +205,34 @@ export async function suggestEMSTermJoinConfig(
   }
 
   // Filter out the ones that fail the regex-pattern (if any)
+  // if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
+  //   matches = removePatternFailures(matches, sampleValuesConfig.sampleValues);
+  //
+  //   // Filter out the ones that fail ems-validation
+  //   if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
+  //     matches = await removeEmsValueMismatches(
+  //       matches,
+  //       sampleValuesConfig.sampleValues,
+  //       sampleValuesConfig.emsLayerIds
+  //     );
+  //   }
+  // }
+
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     matches = removePatternFailures(matches, sampleValuesConfig.sampleValues);
-
-    // Filter out the ones that fail ems-validation
-    if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
-      matches = await removeEmsValueMismatches(
-        matches,
-        sampleValuesConfig.sampleValues,
-        sampleValuesConfig.emsLayerIds
-      );
-    }
-  }
-
-  if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     const patternMatches = suggestByFieldPattern(sampleValuesConfig.sampleValues);
     matches.push(...addMatchType(patternMatches, MATCH_TYPE.FIELD_VALUE_PATTERN));
+
     if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
+      // Filter out the ones that fail ems-validation
+      if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
+        matches = await removeEmsValueMismatches(
+          matches,
+          sampleValuesConfig.sampleValues,
+          sampleValuesConfig.emsLayerIds
+        );
+      }
+
       const emsMatches = await suggestByEMSLayerIds(
         sampleValuesConfig.emsLayerIds,
         sampleValuesConfig.sampleValues
