@@ -22,6 +22,7 @@ import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 const fieldsOne = [
   {
@@ -267,6 +268,7 @@ describe('IndexPattern Data Panel', () => {
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),
       hasSuggestionForField: jest.fn(() => false),
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
   });
 

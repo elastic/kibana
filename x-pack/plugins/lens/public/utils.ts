@@ -42,3 +42,10 @@ export const desanitizeFilterContext = (
   }
   return result;
 };
+
+export function getVisualizeGeoFieldMessage(fieldType: string) {
+  return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
+    defaultMessage: `Lens cannot visualize {fieldType} fields`,
+    values: { fieldType },
+  });
+}

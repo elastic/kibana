@@ -45,7 +45,7 @@ import {
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
-import { IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
@@ -53,6 +53,9 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
+import { DraggingIdentifier } from '../drag_drop';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
@@ -78,12 +81,14 @@ export function getIndexPatternDatasource({
   data,
   charts,
   indexPatternFieldEditor,
+  uiActions,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   charts: ChartsPluginSetup;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  uiActions: UiActionsStart;
 }) {
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
@@ -197,6 +202,7 @@ export function getIndexPatternDatasource({
             indexPatternFieldEditor={indexPatternFieldEditor}
             {...props}
             core={core}
+            uiActions={uiActions}
           />
         </I18nProvider>,
         domElement
@@ -319,6 +325,34 @@ export function getIndexPatternDatasource({
     },
     getDropProps,
     onDrop,
+
+    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
+      if (dragging.field === undefined || dragging.indexPatternId === undefined) {
+        return undefined;
+      }
+
+      const draggedField = dragging as DraggingIdentifier & {
+        field: IndexPatternField;
+        indexPatternId: string;
+      };
+      const geoFieldType =
+        draggedField.field.esTypes &&
+        draggedField.field.esTypes.find((esType) => {
+          return ['geo_point', 'geo_shape'].includes(esType);
+        });
+      return geoFieldType
+        ? () => {
+            return (
+              <GeoFieldWorkspacePanel
+                uiActions={uiActions}
+                fieldType={geoFieldType}
+                indexPatternId={draggedField.indexPatternId}
+                fieldName={draggedField.field.name}
+              />
+            );
+          }
+        : undefined;
+    },
 
     // Reset the temporary invalid state when closing the editor, but don't
     // update the state if it's not needed
