@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const parseQueryFilterToKQL = (filter: string, fields: string[]): string => {
+export const parseQueryFilterToKQL = (filter: string, fields: Readonly<string[]>): string => {
   if (!filter) return '';
   const kuery = fields
     .map(

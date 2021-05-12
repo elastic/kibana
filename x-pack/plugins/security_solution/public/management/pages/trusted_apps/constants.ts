@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const SEARCHABLE_FIELDS = [`name`, `description`, `entries.value`, `entries.entries.value`];
+export const SEARCHABLE_FIELDS: Readonly<string[]> = [
+  `name`,
+  `description`,
+  `entries.value`,
+  `entries.entries.value`,
+];
