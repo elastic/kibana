@@ -22,93 +22,171 @@ exports[`ConditionalToolTip should just work 1`] = `
   </div>
   <EuiFlexGroup
     gutterSize="s"
+    key="cpu"
   >
-    <EuiFlexItem
-      className="eui-textTruncate eui-displayBlock"
-      grow={1}
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      CPU usage
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      10%
-    </EuiFlexItem>
+      <EuiFlexItem
+        className="eui-textTruncate eui-displayBlock"
+        grow={1}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+        >
+          CPU usage
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          10%
+        </div>
+      </EuiFlexItem>
+    </div>
   </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="s"
+    key="memory"
   >
-    <EuiFlexItem
-      className="eui-textTruncate eui-displayBlock"
-      grow={1}
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      Memory usage
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      80%
-    </EuiFlexItem>
+      <EuiFlexItem
+        className="eui-textTruncate eui-displayBlock"
+        grow={1}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+        >
+          Memory usage
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          80%
+        </div>
+      </EuiFlexItem>
+    </div>
   </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="s"
+    key="tx"
   >
-    <EuiFlexItem
-      className="eui-textTruncate eui-displayBlock"
-      grow={1}
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      Outbound traffic
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      8Mbit/s
-    </EuiFlexItem>
+      <EuiFlexItem
+        className="eui-textTruncate eui-displayBlock"
+        grow={1}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+        >
+          Outbound traffic
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          8Mbit/s
+        </div>
+      </EuiFlexItem>
+    </div>
   </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="s"
+    key="rx"
   >
-    <EuiFlexItem
-      className="eui-textTruncate eui-displayBlock"
-      grow={1}
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      Inbound traffic
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      8Mbit/s
-    </EuiFlexItem>
+      <EuiFlexItem
+        className="eui-textTruncate eui-displayBlock"
+        grow={1}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+        >
+          Inbound traffic
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          8Mbit/s
+        </div>
+      </EuiFlexItem>
+    </div>
   </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="s"
+    key="cedd6ca0-5775-11eb-a86f-adb714b6c486"
   >
-    <EuiFlexItem
-      className="eui-textTruncate eui-displayBlock"
-      grow={1}
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      My Custom Label
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      34.1%
-    </EuiFlexItem>
+      <EuiFlexItem
+        className="eui-textTruncate eui-displayBlock"
+        grow={1}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+        >
+          My Custom Label
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          34.1%
+        </div>
+      </EuiFlexItem>
+    </div>
   </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="s"
+    key="e12dd700-5775-11eb-a86f-adb714b6c486"
   >
-    <EuiFlexItem
-      className="eui-textTruncate eui-displayBlock"
-      grow={1}
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      Avg of host.network.out.packets
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      4,392.2
-    </EuiFlexItem>
+      <EuiFlexItem
+        className="eui-textTruncate eui-displayBlock"
+        grow={1}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrow1 eui-textTruncate eui-displayBlock"
+        >
+          Avg of host.network.out.packets
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          4,392.2
+        </div>
+      </EuiFlexItem>
+    </div>
   </EuiFlexGroup>
 </div>
 `;
