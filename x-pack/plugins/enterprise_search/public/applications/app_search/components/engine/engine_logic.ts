@@ -18,6 +18,7 @@ interface EngineValues {
   engineName: string;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
+  hasSchemaErrors: boolean;
   hasSchemaConflicts: boolean;
   hasUnconfirmedSchemaFields: boolean;
   engineNotFound: boolean;
@@ -79,6 +80,12 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   selectors: ({ selectors }) => ({
     isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === EngineTypes.meta],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
+    // Indexed engines
+    hasSchemaErrors: [
+      () => [selectors.engine],
+      ({ activeReindexJob }) => activeReindexJob?.numDocumentsWithErrors > 0,
+    ],
+    // Meta engines
     hasSchemaConflicts: [
       () => [selectors.engine],
       (engine) => !!(engine?.schemaConflicts && Object.keys(engine.schemaConflicts).length > 0),

@@ -43,6 +43,7 @@ describe('EngineLogic', () => {
     engineName: '',
     isMetaEngine: false,
     isSampleEngine: false,
+    hasSchemaErrors: false,
     hasSchemaConflicts: false,
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
@@ -224,6 +225,24 @@ describe('EngineLogic', () => {
           ...DEFAULT_VALUES,
           engine: mockMetaEngine,
           isMetaEngine: true,
+        });
+      });
+    });
+
+    describe('hasSchemaErrors', () => {
+      it('should be set based on engine.activeReindexJob.numDocumentsWithErrors', () => {
+        const mockSchemaEngine = {
+          ...mockEngineData,
+          activeReindexJob: {
+            numDocumentsWithErrors: 10,
+          },
+        };
+        mount({ engine: mockSchemaEngine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          engine: mockSchemaEngine,
+          hasSchemaErrors: true,
         });
       });
     });
