@@ -7,12 +7,21 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { LayoutParams, PreserveLayout } from '../../../lib/layouts';
 import { ScreenshotResults } from '../../../lib/screenshots';
 import { ConditionalHeaders } from '../../common';
+
+function getBase64DecodedSize(value: string) {
+  // @see https://en.wikipedia.org/wiki/Base64#Output_padding
+  return (
+    (value.length * 3) / 4 -
+    Number(value[value.length - 1] === '=') -
+    Number(value[value.length - 2] === '=')
+  );
+}
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
   const getScreenshots = await reporting.getScreenshotsObservable();
@@ -40,20 +49,24 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
       layout,
       browserTimezone,
     }).pipe(
-      map((results: ScreenshotResults[]) => {
-        if (apmScreenshots) apmScreenshots.end();
-        if (apmTrans) apmTrans.end();
+      tap(([{ screenshots }]) => {
+        const [{ base64EncodedData }] = screenshots;
+        const byteLength = getBase64DecodedSize(base64EncodedData);
 
-        return {
-          base64: results[0].screenshots[0].base64EncodedData,
-          warnings: results.reduce((found, current) => {
-            if (current.error) {
-              found.push(current.error.message);
-            }
-            return found;
-          }, [] as string[]),
-        };
-      })
+        logger.debug(`PNG buffer byte length: ${byteLength}`);
+        apmTrans?.setLabel('byte_length', byteLength, false);
+        apmScreenshots?.end();
+        apmTrans?.end();
+      }),
+      map((results: ScreenshotResults[]) => ({
+        base64: results[0].screenshots[0].base64EncodedData,
+        warnings: results.reduce((found, current) => {
+          if (current.error) {
+            found.push(current.error.message);
+          }
+          return found;
+        }, [] as string[]),
+      }))
     );
 
     return screenshots$;
