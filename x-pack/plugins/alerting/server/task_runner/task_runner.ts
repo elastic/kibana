@@ -271,14 +271,20 @@ export class TaskRunner<
         tags,
         createdBy,
         updatedBy,
-        consumer,
-        schedule,
-        createdAt,
-        updatedAt,
-        throttle,
-        notifyWhen,
-        enabled,
-        actions,
+        rule: {
+          name,
+          tags,
+          consumer,
+          enabled,
+          schedule,
+          actions,
+          createdBy,
+          updatedBy,
+          createdAt,
+          updatedAt,
+          throttle,
+          notifyWhen,
+        },
       });
     } catch (err) {
       event.message = `alert execution failure: ${alertLabel}`;

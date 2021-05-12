@@ -207,18 +207,23 @@ describe('Task Runner', () => {
     expect(call.tags).toEqual(['alert-', '-tags']);
     expect(call.createdBy).toBe('alert-creator');
     expect(call.updatedBy).toBe('alert-updater');
-    expect(call.consumer).toBe('bar');
-    expect(call.schedule).toMatchInlineSnapshot(`
+    expect(call.rule).not.toBe(null);
+    expect(call.rule.name).toBe('alert-name');
+    expect(call.rule.tags).toEqual(['alert-', '-tags']);
+    expect(call.rule.consumer).toBe('bar');
+    expect(call.rule.enabled).toBe(true);
+    expect(call.rule.schedule).toMatchInlineSnapshot(`
     Object {
       "interval": "10s",
     }
     `);
-    expect(call.createdAt).toBe(mockDate);
-    expect(call.updatedAt).toBe(mockDate);
-    expect(call.notifyWhen).toBe('onActiveAlert');
-    expect(call.throttle).toBe(null);
-    expect(call.enabled).toBe(true);
-    expect(call.actions).toMatchInlineSnapshot(`
+    expect(call.rule.createdBy).toBe('alert-creator');
+    expect(call.rule.updatedBy).toBe('alert-updater');
+    expect(call.rule.createdAt).toBe(mockDate);
+    expect(call.rule.updatedAt).toBe(mockDate);
+    expect(call.rule.notifyWhen).toBe('onActiveAlert');
+    expect(call.rule.throttle).toBe(null);
+    expect(call.rule.actions).toMatchInlineSnapshot(`
     Array [
       Object {
         "actionTypeId": "action",

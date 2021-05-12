@@ -32,8 +32,7 @@ import {
   AlertNotifyWhenType,
   WithoutReservedActionGroups,
   ActionVariable,
-  IntervalSchedule,
-  AlertAction,
+  SanitizedRuleConfig,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -91,20 +90,13 @@ export interface AlertExecutorOptions<
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
   params: Params;
   state: State;
+  rule: SanitizedRuleConfig;
   spaceId: string;
   namespace?: string;
-  consumer: string;
   name: string;
   tags: string[];
   createdBy: string | null;
   updatedBy: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  throttle: string | null;
-  notifyWhen: AlertNotifyWhenType | null;
-  schedule: IntervalSchedule;
-  enabled: boolean;
-  actions: AlertAction[];
 }
 
 export type ExecutorType<

@@ -44,16 +44,22 @@ describe('rules_notification_alert_type', () => {
       previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
       createdBy: 'elastic',
       updatedBy: 'elastic',
-      createdAt: new Date('2019-12-14T16:40:33.400Z'),
-      updatedAt: new Date('2019-12-14T16:40:33.400Z'),
-      consumer: 'foo',
-      throttle: null,
-      notifyWhen: null,
-      schedule: {
-        interval: '1h',
+      rule: {
+        name: 'name',
+        tags: [],
+        consumer: 'foo',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdAt: new Date('2019-12-14T16:40:33.400Z'),
+        updatedAt: new Date('2019-12-14T16:40:33.400Z'),
+        throttle: null,
+        notifyWhen: null,
       },
-      enabled: true,
-      actions: [],
     };
 
     alert = rulesNotificationAlertType({

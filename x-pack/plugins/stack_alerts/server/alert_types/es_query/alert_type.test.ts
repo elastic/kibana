@@ -157,16 +157,22 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      consumer: '',
-      throttle: null,
-      notifyWhen: null,
-      schedule: {
-        interval: '1h',
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
       },
-      enabled: true,
-      actions: [],
     });
 
     expect(alertServices.alertInstanceFactory).not.toHaveBeenCalled();
@@ -227,16 +233,22 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      consumer: '',
-      throttle: null,
-      notifyWhen: null,
-      schedule: {
-        interval: '1h',
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
       },
-      enabled: true,
-      actions: [],
     });
 
     expect(alertServices.alertInstanceFactory).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
@@ -372,16 +384,22 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      consumer: '',
-      throttle: null,
-      notifyWhen: null,
-      schedule: {
-        interval: '1h',
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
       },
-      enabled: true,
-      actions: [],
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
@@ -440,16 +458,22 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      consumer: '',
-      throttle: null,
-      notifyWhen: null,
-      schedule: {
-        interval: '1h',
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
       },
-      enabled: true,
-      actions: [],
     };
     const result = await alertType.executor(executorOptions);
 
@@ -546,16 +570,22 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      consumer: '',
-      throttle: null,
-      notifyWhen: null,
-      schedule: {
-        interval: '1h',
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
       },
-      enabled: true,
-      actions: [],
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
@@ -621,16 +651,22 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      consumer: '',
-      throttle: null,
-      notifyWhen: null,
-      schedule: {
-        interval: '1h',
+      rule: {
+        name: uuid.v4(),
+        tags: [],
+        consumer: '',
+        enabled: true,
+        schedule: {
+          interval: '1h',
+        },
+        actions: [],
+        createdBy: null,
+        updatedBy: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        throttle: null,
+        notifyWhen: null,
       },
-      enabled: true,
-      actions: [],
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;

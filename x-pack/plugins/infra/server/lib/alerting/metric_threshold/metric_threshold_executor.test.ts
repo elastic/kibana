@@ -37,16 +37,22 @@ const mockOptions = {
   tags: [],
   createdBy: null,
   updatedBy: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  consumer: '',
-  throttle: null,
-  notifyWhen: null,
-  schedule: {
-    interval: '1h',
+  rule: {
+    name: '',
+    tags: [],
+    consumer: '',
+    enabled: true,
+    schedule: {
+      interval: '1h',
+    },
+    actions: [],
+    createdBy: null,
+    updatedBy: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    throttle: null,
+    notifyWhen: null,
   },
-  enabled: true,
-  actions: [],
 };
 
 describe('The metric threshold alert type', () => {
