@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiProgress } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { isEmpty, memoize } from 'lodash/fp';
+import { difference, head, isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 
@@ -22,6 +22,7 @@ import {
   FilterOptions,
   SortFieldCase,
   SubCase,
+  caseStatuses,
 } from '../../../common';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
@@ -73,14 +74,17 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     caseDetailsNavigation,
     configureCasesNavigation,
     createCaseNavigation,
-    hiddenStatuses,
+    hiddenStatuses = [],
     isSelectorView,
     onRowClick,
     updateCase,
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
-    const initialFilterOptions = hiddenStatuses ? { status: CaseStatuses.open } : {};
+    const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
+    const initialFilterOptions =
+      !isEmpty(hiddenStatuses) && firstAvailableStatus ? { status: firstAvailableStatus } : {};
+
     const {
       data,
       dispatchUpdateCaseProperty,
