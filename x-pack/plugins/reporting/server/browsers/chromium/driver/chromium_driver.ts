@@ -10,6 +10,7 @@ import { map, truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
+import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
 import { getDisallowedOutgoingUrlError } from '../';
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
@@ -99,6 +100,8 @@ export class HeadlessChromiumDriver {
     this.interceptedCount = 0;
 
     await this.page.evaluateOnNewDocument(
+      // We use "require" here to ensure the import does not have external references due to code bundling that
+      // commonly happens during transpiling.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../../../../../../../src/plugins/screenshot_mode/server').setScreenshotModeEnabled
     );
@@ -265,6 +268,7 @@ export class HeadlessChromiumDriver {
           {
             ...interceptedRequest.request.headers,
             ...conditionalHeaders.headers,
+            [KBN_SCREENSHOT_MODE_HEADER]: 'true',
           },
           (value, name) => ({
             name,

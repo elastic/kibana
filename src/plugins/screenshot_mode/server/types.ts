@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
+import { RequestHandlerContext } from 'src/core/server';
 
-export { setScreenshotModeEnabled } from '../common';
-
-export { ScreenshotModeRequestHandlerContext } from './types';
-
-export { KBN_SCREENSHOT_MODE_HEADER } from './constants';
-
-export function plugin() {
-  return new ScreenshotModePlugin();
+export interface ScreenshotModeRequestHandlerContext extends RequestHandlerContext {
+  screenshotMode: {
+    isScreenshot: boolean;
+  };
 }

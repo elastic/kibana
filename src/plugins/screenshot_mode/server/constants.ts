@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
-
-export { setScreenshotModeEnabled } from '../common';
-
-export { ScreenshotModeRequestHandlerContext } from './types';
-
-export { KBN_SCREENSHOT_MODE_HEADER } from './constants';
-
-export function plugin() {
-  return new ScreenshotModePlugin();
-}
+export const KBN_SCREENSHOT_MODE_HEADER = 'x-kbn-screenshot-mode'.toLowerCase();

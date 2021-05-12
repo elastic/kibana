@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KEY__';
+export const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KEY__';
 
 /**
  * This function is responsible for detecting whether we are currently in screenshot mode.
@@ -17,7 +17,7 @@ const KBN_SCREENSHOT_MODE_ENABLED_KEY = '__KBN_SCREENSHOT_MODE_ENABLED_KEY__';
  */
 export const getScreenshotMode = (): unknown => {
   return (
-    window[KBN_SCREENSHOT_MODE_ENABLED_KEY] ||
+    ((window as unknown) as Record<string, unknown>)[KBN_SCREENSHOT_MODE_ENABLED_KEY] ||
     window.localStorage.getItem(KBN_SCREENSHOT_MODE_ENABLED_KEY) === 'true'
   );
 };
