@@ -7,7 +7,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
+import { Geometry } from 'geojson';
 import { Query } from '../../../../../src/plugins/data/common';
 import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
 
@@ -41,10 +43,20 @@ export type Goto = {
   center?: MapCenterAndZoom;
 };
 
+export const GEOMETRY_FILTER_ACTION = 'GEOMETRY_FILTER_ACTION';
+
+export type TooltipFeatureAction = {
+  label: string;
+  id: typeof GEOMETRY_FILTER_ACTION;
+  form: ReactNode;
+};
+
 export type TooltipFeature = {
   id?: number | string;
   layerId: string;
+  geometry?: Geometry;
   mbProperties: GeoJsonProperties;
+  actions: TooltipFeatureAction[];
 };
 
 export type TooltipState = {

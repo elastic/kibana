@@ -64,11 +64,13 @@ export const labsServiceFactory: LabsServiceFactory = () => {
   const setProjectStatus = (id: ProjectID, env: EnvironmentName, value: boolean) => {
     statuses[id] = { ...statuses[id], [env]: value };
   };
+  const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
 
   return {
     getProjectIDs,
     getProject,
     getProjects,
+    isProjectEnabled,
     setProjectStatus,
     reset: () => {
       statuses = reset();

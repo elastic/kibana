@@ -9,6 +9,7 @@ import { ApplicationStart } from 'kibana/public';
 import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './actions';
 export * from './os';
 export * from './trusted_apps';
 
@@ -413,6 +414,11 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
+export interface HostMetaDataInfo {
+  metadata: HostMetadata;
+  query_strategy_version: MetadataQueryStrategyVersions;
+}
+
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
@@ -465,6 +471,12 @@ export type HostMetadata = Immutable<{
         endpoint_policy_version: number;
         version: number;
       };
+    };
+    configuration: {
+      isolation?: boolean;
+    };
+    state: {
+      isolation?: boolean;
     };
   };
   agent: {
