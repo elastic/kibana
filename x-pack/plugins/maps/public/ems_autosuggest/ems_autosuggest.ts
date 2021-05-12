@@ -134,6 +134,65 @@ function removePatternFailures(
   });
 }
 
+async function getEMSFileLayer(layerId: string): Promise<FileLayer | undefined> {
+  const fileLayers: FileLayer[] = await getEmsFileLayers();
+  return fileLayers.find((fl: FileLayer) => fl.hasId(layerId));
+}
+
+async function removeEmsValueMismatches(
+  matches: ConfigMatch[],
+  sampleValues: Array<string | number>,
+  emsLayerIds: string[]
+): Promise<ConfigMatch[]> {
+  const validations: Array<Promise<{ match: ConfigMatch; validated: boolean }>> = matches.map(
+    async (match: ConfigMatch) => {
+      if (emsLayerIds.indexOf(match.config.layerId) < 0) {
+        // Client does not ask for an explicit check, let it pass
+        return {
+          match,
+          validated: true,
+        };
+      }
+
+      const emsFileLayer = await getEMSFileLayer(match.config.layerId);
+      if (!emsFileLayer) {
+        // Cannot find it in ems, no need to check, let it pass
+        return {
+          match,
+          validated: true,
+        };
+      }
+
+      const emsFields = emsFileLayer.getFields();
+      const emsField = emsFields.find((field) => {
+        return field.id === match.config.field;
+      });
+
+      if (!emsField) {
+        // Cannot find it in ems, no need to check, let it pass
+        return {
+          match,
+          validated: true,
+        };
+      }
+
+      const emsJson = await emsFileLayer.getGeoJson();
+      return {
+        match,
+        validated: matchesEmsField(emsJson, emsField.id, sampleValues),
+      };
+    }
+  );
+
+  const validated: Array<{ match: ConfigMatch; validated: boolean }> = (
+    await Promise.all(validations)
+  ).filter((v) => {
+    return v.validated;
+  });
+
+  return validated.map((v) => v.match);
+}
+
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: AutoSuggestConfig
 ): Promise<EMSTermJoinConfig | null> {
@@ -148,9 +207,20 @@ export async function suggestEMSTermJoinConfig(
   // Filter out the ones that fail the regex-pattern (if any)
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     matches = removePatternFailures(matches, sampleValuesConfig.sampleValues);
+
+    // Filter out the ones that fail ems-validation
+    if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
+      matches = await removeEmsValueMismatches(
+        matches,
+        sampleValuesConfig.sampleValues,
+        sampleValuesConfig.emsLayerIds
+      );
+    }
   }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
+    const patternMatches = suggestByFieldPattern(sampleValuesConfig.sampleValues);
+    matches.push(...addMatchType(patternMatches, MATCH_TYPE.FIELD_VALUE_PATTERN));
     if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
       const emsMatches = await suggestByEMSLayerIds(
         sampleValuesConfig.emsLayerIds,
@@ -158,9 +228,6 @@ export async function suggestEMSTermJoinConfig(
       );
       matches.push(...addMatchType(emsMatches, MATCH_TYPE.FIELD_VALUE_EMS_MATCH));
     }
-
-    const patternMatches = suggestByFieldPattern(sampleValuesConfig.sampleValues);
-    matches.push(...addMatchType(patternMatches, MATCH_TYPE.FIELD_VALUE_PATTERN));
   }
 
   const uniqueMatches: UniqueMatch[] = collectMatches(matches);
@@ -173,7 +240,6 @@ function suggestByName(columnName: string): EMSTermJoinConfig[] {
   const matches = WELLKNOWN_FIELD_ALIASES.filter((wellknown) => {
     return columnName.match(wellknown.regex);
   });
-
   return matches.map((m) => {
     return m.emsConfig;
   });
@@ -230,17 +296,12 @@ async function getMatchesForEMSLayer(
   emsLayerId: string,
   sampleValues: Array<string | number>
 ): Promise<EMSTermJoinConfig[]> {
-  const fileLayers: FileLayer[] = await getEmsFileLayers();
-  const emsFileLayer: FileLayer | undefined = fileLayers.find((fl: FileLayer) =>
-    fl.hasId(emsLayerId)
-  );
-
+  const emsFileLayer: FileLayer | undefined = await getEMSFileLayer(emsLayerId);
   if (!emsFileLayer) {
     return [];
   }
 
   const emsFields = emsFileLayer.getFields();
-
   try {
     const emsJson = await emsFileLayer.getGeoJson();
     const matches: EMSTermJoinConfig[] = [];
