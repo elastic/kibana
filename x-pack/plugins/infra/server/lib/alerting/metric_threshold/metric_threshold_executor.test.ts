@@ -45,6 +45,8 @@ const mockOptions = {
   schedule: {
     interval: '1h',
   },
+  enabled: true,
+  actions: [],
 };
 
 describe('The metric threshold alert type', () => {

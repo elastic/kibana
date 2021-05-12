@@ -217,6 +217,27 @@ describe('Task Runner', () => {
     expect(call.updatedAt).toBe(mockDate);
     expect(call.notifyWhen).toBe('onActiveAlert');
     expect(call.throttle).toBe(null);
+    expect(call.enabled).toBe(true);
+    expect(call.actions).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "actionTypeId": "action",
+        "group": "default",
+        "id": "1",
+        "params": Object {
+          "foo": true,
+        },
+      },
+      Object {
+        "actionTypeId": "action",
+        "group": "recovered",
+        "id": "2",
+        "params": Object {
+          "isResolved": true,
+        },
+      },
+    ]
+    `);
     expect(call.services.alertInstanceFactory).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();

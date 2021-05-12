@@ -74,6 +74,8 @@ const getPayload = (
   schedule: {
     interval: '1h',
   },
+  enabled: true,
+  actions: [],
 });
 
 describe('signal_rule_alert_type', () => {

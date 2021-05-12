@@ -33,6 +33,7 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
   IntervalSchedule,
+  AlertAction,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -102,6 +103,8 @@ export interface AlertExecutorOptions<
   throttle: string | null;
   notifyWhen: AlertNotifyWhenType | null;
   schedule: IntervalSchedule;
+  enabled: boolean;
+  actions: AlertAction[];
 }
 
 export type ExecutorType<

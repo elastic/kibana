@@ -52,6 +52,8 @@ describe('rules_notification_alert_type', () => {
       schedule: {
         interval: '1h',
       },
+      enabled: true,
+      actions: [],
     };
 
     alert = rulesNotificationAlertType({

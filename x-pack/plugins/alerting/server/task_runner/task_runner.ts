@@ -227,6 +227,8 @@ export class TaskRunner<
       updatedBy,
       createdAt,
       updatedAt,
+      enabled,
+      actions,
     } = alert;
     const {
       params: { alertId },
@@ -275,6 +277,8 @@ export class TaskRunner<
         updatedAt,
         throttle,
         notifyWhen,
+        enabled,
+        actions,
       });
     } catch (err) {
       event.message = `alert execution failure: ${alertLabel}`;

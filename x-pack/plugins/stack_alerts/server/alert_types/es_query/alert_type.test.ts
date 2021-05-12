@@ -165,6 +165,8 @@ describe('alertType', () => {
       schedule: {
         interval: '1h',
       },
+      enabled: true,
+      actions: [],
     });
 
     expect(alertServices.alertInstanceFactory).not.toHaveBeenCalled();
@@ -233,6 +235,8 @@ describe('alertType', () => {
       schedule: {
         interval: '1h',
       },
+      enabled: true,
+      actions: [],
     });
 
     expect(alertServices.alertInstanceFactory).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
@@ -376,6 +380,8 @@ describe('alertType', () => {
       schedule: {
         interval: '1h',
       },
+      enabled: true,
+      actions: [],
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
@@ -442,6 +448,8 @@ describe('alertType', () => {
       schedule: {
         interval: '1h',
       },
+      enabled: true,
+      actions: [],
     };
     const result = await alertType.executor(executorOptions);
 
@@ -546,6 +554,8 @@ describe('alertType', () => {
       schedule: {
         interval: '1h',
       },
+      enabled: true,
+      actions: [],
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
@@ -619,6 +629,8 @@ describe('alertType', () => {
       schedule: {
         interval: '1h',
       },
+      enabled: true,
+      actions: [],
     });
 
     const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
