@@ -21,6 +21,7 @@ import { HeatmapRenderProps } from './types';
 import './index.scss';
 import { LensFilterEvent } from '../types';
 import { desanitizeFilterContext } from '../utils';
+import { search } from '../../../../../src/plugins/data/public';
 
 declare global {
   interface Window {
@@ -64,6 +65,21 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const xValuesFormatter = formatFactory(xAxisMeta.params);
   const yValuesFormatter = formatFactory(yAxisColumn.meta.params);
   const valueFormatter = formatFactory(valueColumn.meta.params);
+
+  const xDomain = (() => {
+    if (!isTimeBasedSwimLane) return null;
+    const dateInterval = search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
+      ?.interval;
+    if (!dateInterval) return null;
+    const intervalDuration = search.aggs.parseInterval(dateInterval);
+    if (!intervalDuration) return null;
+
+    return {
+      min: data.dateRange?.fromDate.getTime(),
+      max: data.dateRange?.toDate.getTime(),
+      minInterval: intervalDuration.as('milliseconds'),
+    };
+  })();
 
   // @ts-ignore
   const onElementClick: ElementClickListener = (e: HeatmapElementEvent[]) => {
@@ -151,6 +167,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         showLegend={args.legend.isVisible}
         legendPosition={args.legend.position}
         debugState={window._echDebugStateFlag ?? false}
+        {...(xDomain ? { xDomain } : {})}
       />
       <Heatmap
         id={'heatmap'}
