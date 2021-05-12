@@ -22187,8 +22187,6 @@
     "xpack.securitySolution.trustedapps.list.backButton": "返回",
     "xpack.securitySolution.trustedapps.list.columns.actions": "操作",
     "xpack.securitySolution.trustedapps.list.pageTitle": "受信任的应用程序",
-    "xpack.securitySolution.trustedapps.list.search.button": "刷新",
-    "xpack.securitySolution.trustedapps.list.search.placeholder": "搜索",
     "xpack.securitySolution.trustedapps.list.totalCount": "{totalItemCount, plural, other {# 个受信任的应用程序}}",
     "xpack.securitySolution.trustedapps.listEmptyState.message": "当前在您的终端上没有受信任应用程序。",
     "xpack.securitySolution.trustedapps.listEmptyState.title": "添加您的首个受信任应用程序",

@@ -28,7 +28,7 @@ describe('Search bar', () => {
   it('should have a default value', () => {
     const expectedDefaultValue = 'this is a default value';
     const element = mount(getElement(expectedDefaultValue));
-    const defaultValue = element.find('[data-test-subj="trustedAppSearchField"]').first().props()
+    const defaultValue = element.find('[data-test-subj="searchField"]').first().props()
       .defaultValue;
     expect(defaultValue).toBe(expectedDefaultValue);
   });
@@ -38,7 +38,7 @@ describe('Search bar', () => {
     const element = mount(getElement());
     expect(onSearchMock).toHaveBeenCalledTimes(0);
     const searchFieldProps = element
-      .find('[data-test-subj="trustedAppSearchField"]')
+      .find('[data-test-subj="searchField"]')
       .first()
       .props() as EuiFieldSearchPropsFake;
 
@@ -53,7 +53,7 @@ describe('Search bar', () => {
     const element = mount(getElement(expectedDefaultValue));
     expect(onSearchMock).toHaveBeenCalledTimes(0);
 
-    element.find('[data-test-subj="trustedAppSearchButton"]').first().simulate('click');
+    element.find('[data-test-subj="searchButton"]').first().simulate('click');
     expect(onSearchMock).toHaveBeenCalledTimes(1);
     expect(onSearchMock).toHaveBeenCalledWith(expectedDefaultValue);
   });
