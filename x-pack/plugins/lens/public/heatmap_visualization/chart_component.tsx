@@ -8,8 +8,10 @@
 import React, { FC, useEffect, useState } from 'react';
 import {
   Chart,
+  ElementClickListener,
   Heatmap,
   HeatmapBrushEvent,
+  HeatmapElementEvent,
   HeatmapSpec,
   ScaleType,
   Settings,
@@ -17,6 +19,8 @@ import {
 import { VisualizationContainer } from '../visualization_container';
 import { HeatmapRenderProps } from './types';
 import './index.scss';
+import { LensFilterEvent } from '../types';
+import { desanitizeFilterContext } from '../utils';
 
 declare global {
   interface Window {
@@ -32,29 +36,67 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   args,
   timeZone,
   formatFactory,
+  onClickValue,
+  onSelectRange,
 }) => {
   const isDarkTheme = false;
-  const onElementClick = () => {};
 
   const table = Object.values(data.tables)[0];
 
   const chartData = table.rows;
 
-  const xAxisDef = table.columns.find((v) => v.id === args.xAccessor);
-  const yAxisDef = table.columns.find((v) => v.id === args.yAccessor);
-  const valueDef = table.columns.find((v) => v.id === args.valueAccessor);
+  const xAxisColumnIndex = table.columns.findIndex((v) => v.id === args.xAccessor);
+  const yAxisColumnIndex = table.columns.findIndex((v) => v.id === args.yAccessor);
 
-  if (!xAxisDef || !valueDef || !yAxisDef) {
+  const xAxisColumn = table.columns[xAxisColumnIndex];
+  const yAxisColumn = table.columns[yAxisColumnIndex];
+  const valueColumn = table.columns.find((v) => v.id === args.valueAccessor);
+
+  if (!xAxisColumn || !valueColumn || !yAxisColumn) {
     // Chart is not ready
     return null;
   }
 
-  const xAxisMeta = xAxisDef.meta;
-  const xScaleType = xAxisMeta.type === 'date' ? ScaleType.Time : ScaleType.Ordinal;
+  const xAxisMeta = xAxisColumn.meta;
+  const isTimeBasedSwimLane = xAxisMeta.type === 'date';
+  const xScaleType = isTimeBasedSwimLane ? ScaleType.Time : ScaleType.Ordinal;
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
-  const yValuesFormatter = formatFactory(yAxisDef.meta.params);
-  const valueFormatter = formatFactory(valueDef.meta.params);
+  const yValuesFormatter = formatFactory(yAxisColumn.meta.params);
+  const valueFormatter = formatFactory(valueColumn.meta.params);
+
+  // @ts-ignore
+  const onElementClick: ElementClickListener = (e: HeatmapElementEvent[]) => {
+    const cell = e[0][0];
+    const { x, y } = cell.datum;
+
+    const xAxisFieldName = xAxisColumn.meta.field;
+    const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
+
+    const points = [
+      {
+        row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
+        column: xAxisColumnIndex,
+        value: x,
+      },
+      {
+        row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
+        column: yAxisColumnIndex,
+        value: y,
+      },
+    ];
+
+    const context: LensFilterEvent['data'] = {
+      data: points.map((point) => ({
+        row: point.row,
+        column: point.column,
+        value: point.value,
+        table,
+      })),
+      timeFieldName,
+    };
+    onClickValue(desanitizeFilterContext(context));
+  };
 
   const config: HeatmapSpec['config'] = {
     onBrushEnd: (e: HeatmapBrushEvent) => {},
@@ -83,7 +125,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       // eui color subdued
       fill: `#6a717d`,
       padding: 8,
-      name: yAxisDef.name,
+      name: yAxisColumn.name,
       formatter: (v: number | string) => yValuesFormatter.convert(v),
     },
     xAxisLabel: {
@@ -91,7 +133,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       // eui color subdued
       fill: `#98A2B3`,
       formatter: (v: number | string) => xValuesFormatter.convert(v),
-      name: xAxisDef.name,
+      name: xAxisColumn.name,
     },
     brushMask: {
       fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
@@ -112,7 +154,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       />
       <Heatmap
         id={'heatmap'}
-        name={valueDef.name}
+        name={valueColumn.name}
         colorScale={ScaleType.Linear}
         data={chartData}
         xAccessor={args.xAccessor}

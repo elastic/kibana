@@ -14,7 +14,7 @@ import {
   ExpressionFunctionDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions';
-import { FormatFactory, LensMultiTable } from '../types';
+import { FormatFactory, LensBrushEvent, LensFilterEvent, LensMultiTable } from '../types';
 import {
   FUNCTION_NAME,
   HEATMAP_GRID_FUNCTION,
@@ -244,11 +244,20 @@ export const getHeatmapRenderer = (dependencies: {
     handlers: IInterpreterRenderHandlers
   ) => {
     const formatFactory = await dependencies.formatFactory;
+    const onClickValue = (data: LensFilterEvent['data']) => {
+      handlers.event({ name: 'filter', data });
+    };
+    const onSelectRange = (data: LensBrushEvent['data']) => {
+      handlers.event({ name: 'brush', data });
+    };
+
     ReactDOM.render(
       <I18nProvider>
         {
           <HeatmapChartReportable
             {...config}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
             timeZone={dependencies.timeZone}
             formatFactory={formatFactory}
           />
@@ -259,6 +268,7 @@ export const getHeatmapRenderer = (dependencies: {
         handlers.done();
       }
     );
+
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });

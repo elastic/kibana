@@ -7,7 +7,7 @@
 
 import { Position } from '@elastic/charts';
 import { PaletteOutput } from '../../../../../src/plugins/charts/common';
-import { FormatFactory, LensMultiTable } from '../types';
+import { FormatFactory, LensBrushEvent, LensFilterEvent, LensMultiTable } from '../types';
 import {
   CHART_SHAPES,
   HEATMAP_GRID_FUNCTION,
@@ -54,6 +54,8 @@ export interface HeatmapExpressionProps {
 export type HeatmapRenderProps = HeatmapExpressionProps & {
   timeZone: string;
   formatFactory: FormatFactory;
+  onClickValue: (data: LensFilterEvent['data']) => void;
+  onSelectRange: (data: LensBrushEvent['data']) => void;
 };
 
 export interface HeatmapLegendConfig {
