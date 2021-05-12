@@ -21,6 +21,7 @@ import {
   KibanaVersionMismatchAlert,
   ElasticsearchVersionMismatchAlert,
   BaseAlert,
+  TaskManagerDurationAlert,
 } from './';
 import {
   ALERT_CLUSTER_HEALTH,
@@ -37,6 +38,7 @@ import {
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_CCR_READ_EXCEPTIONS,
   ALERT_LARGE_SHARD_SIZE,
+  ALERT_TASK_MANAGER_DURATION,
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerting/server';
 import { Alert } from '../../../alerting/common';
@@ -56,6 +58,7 @@ const BY_TYPE = {
   [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: ElasticsearchVersionMismatchAlert,
   [ALERT_CCR_READ_EXCEPTIONS]: CCRReadExceptionsAlert,
   [ALERT_LARGE_SHARD_SIZE]: LargeShardSizeAlert,
+  [ALERT_TASK_MANAGER_DURATION]: TaskManagerDurationAlert,
 };
 
 export class AlertsFactory {

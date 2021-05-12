@@ -28,8 +28,15 @@ import {
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_KIBANA, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
+import {
+  CODE_PATH_KIBANA,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_TASK_MANAGER_DURATION,
+  KIBANA_SYSTEM_ID,
+} from '../../../../common/constants';
 import { AlertsCallout } from '../../../alerts/callout';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -77,10 +84,95 @@ uiRoutes.when('/kibana/instances/:uuid', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH],
+            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH, ALERT_TASK_MANAGER_DURATION],
           },
         },
       });
+
+      const renderReact = (data) => {
+        this.renderReact(
+          <SetupModeRenderer
+            scope={$scope}
+            injector={$injector}
+            productName={KIBANA_SYSTEM_ID}
+            render={({ flyoutComponent, bottomBarComponent }) => (
+              <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                {flyoutComponent}
+                <EuiPage>
+                  <EuiPageBody>
+                    <EuiPanel>
+                      <DetailStatus stats={data.kibanaSummary} alerts={this.alerts} />
+                    </EuiPanel>
+                    <EuiSpacer size="m" />
+                    <AlertsCallout alerts={this.alerts} />
+                    <EuiPageContent>
+                      <EuiFlexGrid columns={2} gutterSize="s">
+                        <EuiFlexItem grow={true}>
+                          <MonitoringTimeseriesContainer
+                            series={data.metrics.kibana_requests}
+                            onBrush={this.onBrush}
+                            zoomInfo={this.zoomInfo}
+                          />
+                          <EuiSpacer />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={true}>
+                          <MonitoringTimeseriesContainer
+                            series={data.metrics.kibana_response_times}
+                            onBrush={this.onBrush}
+                            zoomInfo={this.zoomInfo}
+                          />
+                          <EuiSpacer />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={true}>
+                          <MonitoringTimeseriesContainer
+                            series={data.metrics.kibana_memory}
+                            onBrush={this.onBrush}
+                            zoomInfo={this.zoomInfo}
+                          />
+                          <EuiSpacer />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={true}>
+                          <MonitoringTimeseriesContainer
+                            series={data.metrics.kibana_average_concurrent_connections}
+                            onBrush={this.onBrush}
+                            zoomInfo={this.zoomInfo}
+                          />
+                          <EuiSpacer />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={true}>
+                          <MonitoringTimeseriesContainer
+                            series={data.metrics.kibana_os_load}
+                            onBrush={this.onBrush}
+                            zoomInfo={this.zoomInfo}
+                          />
+                          <EuiSpacer />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={true}>
+                          <MonitoringTimeseriesContainer
+                            series={data.metrics.kibana_process_delay}
+                            onBrush={this.onBrush}
+                            zoomInfo={this.zoomInfo}
+                          />
+                          <EuiSpacer />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={true}>
+                          <MonitoringTimeseriesContainer
+                            series={data.metrics.kibana_task_manager}
+                            onBrush={this.onBrush}
+                            zoomInfo={this.zoomInfo}
+                          />
+                          <EuiSpacer />
+                        </EuiFlexItem>
+                      </EuiFlexGrid>
+                    </EuiPageContent>
+                  </EuiPageBody>
+                </EuiPage>
+                {bottomBarComponent}
+              </SetupModeContext.Provider>
+            )}
+          />
+        );
+      };
 
       $scope.$watch(
         () => this.data,
@@ -98,69 +190,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
             })
           );
 
-          this.renderReact(
-            <EuiPage>
-              <EuiPageBody>
-                <EuiPanel>
-                  <DetailStatus stats={data.kibanaSummary} />
-                </EuiPanel>
-                <EuiSpacer size="m" />
-                <AlertsCallout alerts={this.alerts} />
-                <EuiPageContent>
-                  <EuiFlexGrid columns={2} gutterSize="s">
-                    <EuiFlexItem grow={true}>
-                      <MonitoringTimeseriesContainer
-                        series={data.metrics.kibana_requests}
-                        onBrush={this.onBrush}
-                        zoomInfo={this.zoomInfo}
-                      />
-                      <EuiSpacer />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={true}>
-                      <MonitoringTimeseriesContainer
-                        series={data.metrics.kibana_response_times}
-                        onBrush={this.onBrush}
-                        zoomInfo={this.zoomInfo}
-                      />
-                      <EuiSpacer />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={true}>
-                      <MonitoringTimeseriesContainer
-                        series={data.metrics.kibana_memory}
-                        onBrush={this.onBrush}
-                        zoomInfo={this.zoomInfo}
-                      />
-                      <EuiSpacer />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={true}>
-                      <MonitoringTimeseriesContainer
-                        series={data.metrics.kibana_average_concurrent_connections}
-                        onBrush={this.onBrush}
-                        zoomInfo={this.zoomInfo}
-                      />
-                      <EuiSpacer />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={true}>
-                      <MonitoringTimeseriesContainer
-                        series={data.metrics.kibana_os_load}
-                        onBrush={this.onBrush}
-                        zoomInfo={this.zoomInfo}
-                      />
-                      <EuiSpacer />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={true}>
-                      <MonitoringTimeseriesContainer
-                        series={data.metrics.kibana_process_delay}
-                        onBrush={this.onBrush}
-                        zoomInfo={this.zoomInfo}
-                      />
-                      <EuiSpacer />
-                    </EuiFlexItem>
-                  </EuiFlexGrid>
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          );
+          renderReact(data);
         }
       );
     }

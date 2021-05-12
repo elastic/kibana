@@ -25,7 +25,7 @@ import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictiona
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
-import { healthRoute } from './routes';
+import { healthRoute, MonitoredHealth } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 
 export type TaskManagerSetupContract = {
@@ -42,6 +42,8 @@ export type TaskManagerStartContract = Pick<
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
+  } & {
+    getTaskManagerHealth: () => MonitoredHealth | undefined;
   };
 
 export class TaskManagerPlugin
@@ -54,6 +56,7 @@ export class TaskManagerPlugin
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
+  private getLatestTaskManagerHealth?: () => MonitoredHealth | undefined;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -79,13 +82,15 @@ export class TaskManagerPlugin
 
     // Routes
     const router = core.http.createRouter();
-    const serviceStatus$ = healthRoute(
+    const { serviceStatus$, getLatestTaskManagerHealth } = healthRoute(
       router,
       this.monitoringStats$,
       this.logger,
       this.taskManagerId,
       this.config!
     );
+
+    this.getLatestTaskManagerHealth = getLatestTaskManagerHealth;
 
     core.getStartServices().then(async () => {
       core.status.set(
@@ -165,6 +170,8 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
+      getTaskManagerHealth: () =>
+        this.getLatestTaskManagerHealth ? this.getLatestTaskManagerHealth() : undefined,
     };
   }
 

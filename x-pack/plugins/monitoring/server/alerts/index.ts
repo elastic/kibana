@@ -20,4 +20,5 @@ export { NodesChangedAlert } from './nodes_changed_alert';
 export { ElasticsearchVersionMismatchAlert } from './elasticsearch_version_mismatch_alert';
 export { KibanaVersionMismatchAlert } from './kibana_version_mismatch_alert';
 export { LogstashVersionMismatchAlert } from './logstash_version_mismatch_alert';
+export { TaskManagerDurationAlert } from './task_manager_duration_alert';
 export { AlertsFactory } from './alerts_factory';

@@ -253,4 +253,19 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
+  kibana_task_manager_duration_p99: new KibanaMetric({
+    field: 'kibana_stats.task_manager.runtime.duration.p99',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Label', {
+      defaultMessage: 'P99 Duration',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Description',
+      {
+        defaultMessage: 'TODO: FILL IN',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
 };

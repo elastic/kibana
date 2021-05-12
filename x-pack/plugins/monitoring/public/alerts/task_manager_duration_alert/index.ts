@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { healthRoute, MonitoredHealth } from './health';
+export { createTaskManagerDurationAlertType } from './task_manager_duration_alert';

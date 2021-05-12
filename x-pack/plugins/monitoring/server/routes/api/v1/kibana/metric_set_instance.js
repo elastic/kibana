@@ -24,4 +24,8 @@ export const metricSet = [
     keys: ['kibana_requests_total', 'kibana_requests_disconnects'],
     name: 'kibana_requests',
   },
+  {
+    keys: ['kibana_task_manager_duration_p99'],
+    name: 'kibana_task_manager',
+  },
 ];

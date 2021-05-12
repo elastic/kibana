@@ -167,6 +167,10 @@ export interface AlertCpuUsageNodeStats extends AlertNodeStats {
   containerQuota: number;
 }
 
+export interface AlertTaskManagerDurationStats extends AlertNodeStats {
+  p99: number;
+}
+
 export interface AlertThreadPoolRejectionsStats {
   clusterUuid: string;
   nodeId: string;

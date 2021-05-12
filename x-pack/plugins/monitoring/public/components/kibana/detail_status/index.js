@@ -11,7 +11,7 @@ import { KibanaStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-export function DetailStatus({ stats }) {
+export function DetailStatus({ stats, alerts }) {
   const {
     transport_address: transportAddress,
     os_memory_free: osFreeMemory,
@@ -57,6 +57,7 @@ export function DetailStatus({ stats }) {
     <SummaryStatus
       metrics={metrics}
       status={status}
+      alerts={alerts}
       IconComponent={IconComponent}
       data-test-subj="kibanaDetailStatus"
     />

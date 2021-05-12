@@ -29,6 +29,7 @@ import {
 } from '../common/constants';
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
 import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
+import { createTaskManagerDurationAlertType } from './alerts/task_manager_duration_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
 import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
@@ -173,6 +174,7 @@ export class MonitoringPlugin
     alertTypeRegistry.register(createDiskUsageAlertType());
     alertTypeRegistry.register(createMemoryUsageAlertType());
     alertTypeRegistry.register(createMissingMonitoringDataAlertType());
+    alertTypeRegistry.register(createTaskManagerDurationAlertType());
     alertTypeRegistry.register(
       createThreadPoolRejectionsAlertType(
         ALERT_THREAD_POOL_SEARCH_REJECTIONS,

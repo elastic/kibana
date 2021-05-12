@@ -237,6 +237,7 @@ export const ALERT_THREAD_POOL_SEARCH_REJECTIONS = `${ALERT_PREFIX}alert_thread_
 export const ALERT_THREAD_POOL_WRITE_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_write_rejections`;
 export const ALERT_CCR_READ_EXCEPTIONS = `${ALERT_PREFIX}ccr_read_exceptions`;
 export const ALERT_LARGE_SHARD_SIZE = `${ALERT_PREFIX}shard_size`;
+export const ALERT_TASK_MANAGER_DURATION = `${ALERT_PREFIX}task_manager_duration`;
 
 /**
  * Legacy alerts details/label for server and public use
@@ -480,6 +481,26 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Alert if the average shard size is larger than the configured threshold.',
     }),
   },
+  [ALERT_TASK_MANAGER_DURATION]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate(
+          'xpack.monitoring.alerts.taskManagerDuration.paramDetails.threshold.label',
+          {
+            defaultMessage: `TODO: FILL IN`,
+          }
+        ),
+        type: AlertParamType.Number,
+        append: 's',
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.taskManagerDuration.label', {
+      defaultMessage: 'Task manager duration',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.taskManagerDuration.description', {
+      defaultMessage: 'TODO: FILL IN',
+    }),
+  },
 };
 
 export const ALERT_PANEL_MENU = [
@@ -504,6 +525,7 @@ export const ALERT_PANEL_MENU = [
       { alertName: ALERT_DISK_USAGE },
       { alertName: ALERT_MEMORY_USAGE },
       { alertName: ALERT_LARGE_SHARD_SIZE },
+      { alertName: ALERT_TASK_MANAGER_DURATION },
     ],
   },
   {
@@ -538,6 +560,7 @@ export const ALERTS = [
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_CCR_READ_EXCEPTIONS,
   ALERT_LARGE_SHARD_SIZE,
+  ALERT_TASK_MANAGER_DURATION,
 ];
 
 /**

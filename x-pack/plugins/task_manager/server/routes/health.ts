@@ -26,7 +26,11 @@ import {
 } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 
-type MonitoredHealth = RawMonitoringStats & { id: string; status: HealthStatus; timestamp: string };
+export type MonitoredHealth = RawMonitoringStats & {
+  id: string;
+  status: HealthStatus;
+  timestamp: string;
+};
 
 const LEVEL_SUMMARY = {
   [ServiceStatusLevels.available.toString()]: 'Task Manager is healthy',
@@ -49,7 +53,10 @@ export function healthRoute(
   logger: Logger,
   taskManagerId: string,
   config: TaskManagerConfig
-): Observable<TaskManagerServiceStatus> {
+): {
+  serviceStatus$: Observable<TaskManagerServiceStatus>;
+  getLatestTaskManagerHealth: () => MonitoredHealth | undefined;
+} {
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
   // consider the system unhealthy
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
@@ -114,7 +121,11 @@ export function healthRoute(
       });
     }
   );
-  return serviceStatus$;
+  return {
+    serviceStatus$,
+    getLatestTaskManagerHealth: () =>
+      lastMonitoredStats ? calculateStatus(lastMonitoredStats) : undefined,
+  };
 }
 
 export function withServiceStatus(

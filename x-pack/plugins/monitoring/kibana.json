@@ -19,7 +19,8 @@
     "triggersActionsUi",
     "alerting",
     "actions",
-    "encryptedSavedObjects"
+    "encryptedSavedObjects",
+    "taskManager"
   ],
   "server": true,
   "ui": true,

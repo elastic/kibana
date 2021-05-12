@@ -29,6 +29,8 @@ export {
   TaskManagerStartContract,
 } from './plugin';
 
+export { MonitoredHealth } from './routes';
+
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
   deprecations: () => [

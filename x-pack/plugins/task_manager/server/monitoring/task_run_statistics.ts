@@ -71,6 +71,7 @@ interface FillPoolRawStat extends JsonObject {
     [FillPoolResult.RunningAtCapacity]: number;
     [FillPoolResult.PoolFilled]: number;
   };
+  duration: AveragedStat;
 }
 
 interface ResultFrequency extends JsonObject {

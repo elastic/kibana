@@ -185,7 +185,7 @@ export class MonitoringPlugin
     };
   }
 
-  async start(core: CoreStart, { licensing }: PluginsStart) {
+  async start(core: CoreStart, { licensing, taskManager }: PluginsStart) {
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
     // Start our license service which will ensure
     // the appropriate licenses are present
@@ -195,6 +195,10 @@ export class MonitoringPlugin
       config,
       log: this.log,
     });
+
+    if (this.bulkUploader && taskManager) {
+      this.bulkUploader.setGetTaskHealth(taskManager.getTaskManagerHealth);
+    }
 
     // If collection is enabled, start it
     const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);

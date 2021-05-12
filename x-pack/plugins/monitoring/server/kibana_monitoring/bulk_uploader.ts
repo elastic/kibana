@@ -22,6 +22,7 @@ import { sendBulkPayload } from './lib';
 import { getKibanaSettings } from './collectors';
 import type { MonitoringConfig } from '../config';
 import type { IBulkUploader } from '../types';
+import { MonitoredHealth } from '../../../task_manager/server';
 
 export interface BulkUploaderOptions {
   log: Logger;
@@ -70,6 +71,8 @@ export class BulkUploader implements IBulkUploader {
   private _timer: NodeJS.Timer | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
+  private getTaskManagerHealth?: () => MonitoredHealth | undefined;
+
   constructor({
     log,
     config,
@@ -140,17 +143,27 @@ export class BulkUploader implements IBulkUploader {
     this.stop('Connection issue detected');
   }
 
+  public setGetTaskHealth(getTaskManagerHealth: () => MonitoredHealth | undefined) {
+    this.getTaskManagerHealth = getTaskManagerHealth;
+  }
+
   /**
    * Retrieves the OpsMetrics in the same format as the `kibana_stats` collector
    * @private
    */
   private async getOpsMetrics() {
-    const {
-      process: { pid, ...process },
-      collected_at: collectedAt,
-      requests: { statusCodes, ...requests },
-      ...lastMetrics
-    } = await this.opsMetrics$.pipe(take(1)).toPromise();
+    const [
+      {
+        process: { pid, ...process },
+        collected_at: collectedAt,
+        requests: { statusCodes, ...requests },
+        ...lastMetrics
+      },
+      health,
+    ] = await Promise.all([
+      this.opsMetrics$.pipe(take(1)).toPromise(),
+      this.getTaskManagerHealthMetrics(),
+    ]);
     return {
       ...lastMetrics,
       process,
@@ -160,7 +173,26 @@ export class BulkUploader implements IBulkUploader {
         max: lastMetrics.response_times.max_in_millis,
       },
       timestamp: moment.utc(collectedAt).toISOString(),
+      ...health,
     };
+  }
+
+  private async getTaskManagerHealthMetrics() {
+    if (this.getTaskManagerHealth) {
+      const health = this.getTaskManagerHealth();
+      if (health) {
+        return {
+          task_manager: {
+            runtime: {
+              duration: {
+                p99: health.stats.runtime?.value.polling.duration?.p99,
+              },
+            },
+          },
+        };
+      }
+    }
+    return undefined;
   }
 
   private async _fetchAndUpload(esClient: ElasticsearchClient) {
