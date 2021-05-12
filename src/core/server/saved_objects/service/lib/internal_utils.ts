@@ -12,7 +12,7 @@ import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../seriali
 import type { SavedObject } from '../../types';
 import { decodeRequestVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsErrorHelpers } from './errors';
-import { SavedObjectsUtils } from './utils';
+import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
 
 /**
  * Checks the raw response of a bulk operation and returns an error if necessary.
@@ -49,7 +49,6 @@ export function getBulkOperationError(
         };
     }
   }
-  return undefined;
 }
 
 /**
@@ -139,6 +138,6 @@ export function rawDocExistsInNamespace(
   const namespaces = raw._source.namespaces;
   const existsInNamespace =
     namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ||
-    namespaces?.includes('*');
+    namespaces?.includes(ALL_NAMESPACES_STRING);
   return existsInNamespace ?? false;
 }

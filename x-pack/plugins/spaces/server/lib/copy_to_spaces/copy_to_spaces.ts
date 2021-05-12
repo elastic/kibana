@@ -33,7 +33,7 @@ export function copySavedObjectsToSpacesFactory(
       request,
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
-      includeNamespaces: !options.createNewCopies, // if we are not creating new copies, then include namespaces
+      includeNamespaces: !options.createNewCopies, // if we are not creating new copies, then include namespaces; this will ensure we can check for objects that already exist in the destination space below
       excludeExportDetails: true,
       objects: options.objects,
     });

@@ -1149,7 +1149,7 @@ describe('getSortedObjectsForExport()', () => {
       ]);
     });
 
-    test('return results include `namespaces` attribute when includeNamespaces option is used', async () => {
+    test('return results including the `namespaces` attribute when includeNamespaces option is used', async () => {
       const createSavedObject = (obj: any) => ({ ...obj, attributes: {}, references: [] });
       const objectResults = [
         createSavedObject({ type: 'multi', id: '1', namespaces: ['foo'] }),

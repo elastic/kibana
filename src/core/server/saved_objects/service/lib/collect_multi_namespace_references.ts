@@ -22,21 +22,23 @@ import type {
 import type { RepositoryEsClient } from './repository_es_client';
 
 /**
- * When we collect an object's outbound references, we will only go a maximium of this many levels deep before we throw an error.
+ * When we collect an object's outbound references, we will only go a maximum of this many levels deep before we throw an error.
  */
 const MAX_REFERENCE_GRAPH_DEPTH = 20;
 
 /**
- * How many aliases to search for per page. This is smaller than the PointInTimeFinder's default of 1000.
+ * How many aliases to search for per page. This is smaller than the PointInTimeFinder's default of 1000. We specify 100 for the page count
+ * because this is a relatively unimportant operation, and we want to avoid blocking the Elasticsearch thread pool for longer than
+ * necessary.
  */
 const ALIAS_SEARCH_PER_PAGE = 100;
 
 /**
  * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the
- * `namespaceType: 'multi'` or `namespaceType: 'multi-isolated'` option).
+ * `namespaceType: 'multiple'` or `namespaceType: 'multiple-isolated'` option).
  *
  * Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with
- * the `namespaceType: 'multi'`).
+ * the `namespaceType: 'multiple'`).
  *
  * @public
  */

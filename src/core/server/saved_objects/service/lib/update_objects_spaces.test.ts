@@ -42,10 +42,21 @@ const SHAREABLE_OBJ_TYPE = 'type-a';
 const NON_SHAREABLE_OBJ_TYPE = 'type-b';
 const SHAREABLE_HIDDEN_OBJ_TYPE = 'type-c';
 
+const mockCurrentTime = new Date('2021-05-01T10:20:30Z');
+
+beforeAll(() => {
+  jest.useFakeTimers('modern');
+  jest.setSystemTime(mockCurrentTime);
+});
+
 beforeEach(() => {
   mockGetExpectedVersionProperties.mockReturnValue(EXPECTED_VERSION_PROPS);
   mockRawDocExistsInNamespace.mockReset();
   mockRawDocExistsInNamespace.mockReturnValue(true); // return true by default
+});
+
+afterAll(() => {
+  jest.useRealTimers();
 });
 
 describe('#updateObjectsSpaces', () => {
@@ -136,7 +147,7 @@ describe('#updateObjectsSpaces', () => {
           },
         };
         return action === 'update'
-          ? [operation, { doc: expect.objectContaining({ namespaces }) }] // 'update' uses an operation and document metadata
+          ? [operation, { doc: { namespaces, updated_at: mockCurrentTime.toISOString() } }] // 'update' uses an operation and document metadata
           : [operation]; // 'delete' only uses an operation
       }
     );

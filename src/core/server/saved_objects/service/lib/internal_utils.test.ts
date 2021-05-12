@@ -14,6 +14,7 @@ import {
   getSavedObjectFromSource,
   rawDocExistsInNamespace,
 } from './internal_utils';
+import { ALL_NAMESPACES_STRING } from './utils';
 
 describe('#getBulkOperationError', () => {
   const type = 'obj-type';
@@ -207,7 +208,9 @@ describe('#rawDocExistsInNamespace', () => {
   describe('multi-namespace type', () => {
     const docInDefaultSpace = createRawDoc(MULTI_NAMESPACE_TYPE, { namespaces: ['default'] });
     const docInSomeSpace = createRawDoc(MULTI_NAMESPACE_TYPE, { namespaces: ['some-space'] });
-    const docInAllSpaces = createRawDoc(MULTI_NAMESPACE_TYPE, { namespaces: ['*'] });
+    const docInAllSpaces = createRawDoc(MULTI_NAMESPACE_TYPE, {
+      namespaces: [ALL_NAMESPACES_STRING],
+    });
     const docInNoSpace = createRawDoc(MULTI_NAMESPACE_TYPE, { namespaces: [] });
 
     it('returns true when the document namespaces matches', () => {
