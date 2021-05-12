@@ -221,8 +221,45 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
-      // TODO: move this to a sub feature
       cases: ['securitySolution'],
+      subFeatures: [
+        {
+          name: 'Cases',
+          privilegeGroups: [
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'cases_all',
+                  includeIn: 'all',
+                  name: 'All',
+                  savedObject: {
+                    all: [...caseSavedObjects],
+                    read: [],
+                  },
+                  ui: ['crud-case'], // uiCapabilities.siem.crud-case
+                  cases: {
+                    all: ['securitySolution'],
+                  },
+                },
+                {
+                  id: 'cases_read',
+                  includeIn: 'read',
+                  name: 'Read',
+                  savedObject: {
+                    all: [],
+                    read: [...caseSavedObjects],
+                  },
+                  ui: ['read-case'], // uiCapabilities.siem.read-case
+                  cases: {
+                    read: ['securitySolution'],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
       privileges: {
         all: {
           cases: {
@@ -232,13 +269,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
-            all: [
-              'alert',
-              ...caseSavedObjects,
-              'exception-list',
-              'exception-list-agnostic',
-              ...savedObjectTypes,
-            ],
+            all: ['alert', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
             read: ['config'],
           },
           alerting: {
@@ -250,21 +281,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ui: ['show', 'crud'],
         },
         read: {
-          app: [...securitySubPlugins, 'kibana'],
           cases: {
             read: ['securitySolution'],
           },
+          app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
             all: [],
-            read: [
-              'config',
-              ...caseSavedObjects,
-              'exception-list',
-              'exception-list-agnostic',
-              ...savedObjectTypes,
-            ],
+            read: ['config', 'exception-list', 'exception-list-agnostic', ...savedObjectTypes],
           },
           alerting: {
             read: [SIGNALS_ID, NOTIFICATIONS_ID],
