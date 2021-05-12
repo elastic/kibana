@@ -68,8 +68,8 @@ export function alertExecutionStatusFromRaw(
   }
 }
 
-export const ALERT_EXECUTION_STATUS_PENDING = {
+export const getAlertExecutionStatusPending = (lastExecutionDate: string) => ({
   status: 'pending' as AlertExecutionStatuses,
-  lastExecutionDate: new Date().toISOString(),
+  lastExecutionDate,
   error: null,
-};
+});

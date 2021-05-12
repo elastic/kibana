@@ -35,4 +35,7 @@ export function getImportWarnings(
   ];
 }
 
-export const GO_TO_CONNECTORS_BUTTON_LABLE = 'Go to connectors';
+export const GO_TO_CONNECTORS_BUTTON_LABLE = i18n.translate(
+  'xpack.actions.savedObjects.goToConnectorsButtonText',
+  { defaultMessage: 'Go to connectors' }
+);

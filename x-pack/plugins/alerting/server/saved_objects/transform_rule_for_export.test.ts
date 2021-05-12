@@ -75,6 +75,13 @@ describe('transform rule for export', () => {
   ];
 
   it('should disable rule and clear sensitive values', () => {
+    jest.mock('../lib/alert_execution_status', () => ({
+      getAlertExecutionStatusPending: () => ({
+        status: 'pending',
+        lastExecutionDate: '2020-08-20T19:23:38Z',
+        error: null,
+      }),
+    }));
     expect(transformRulesForExport(mockRules)).toEqual(
       mockRules.map((rule) => ({
         ...rule,
@@ -84,6 +91,11 @@ describe('transform rule for export', () => {
           apiKey: null,
           apiKeyOwner: null,
           scheduledTaskId: null,
+          executionStatus: {
+            status: 'pending',
+            lastExecutionDate: '2020-08-20T19:23:38Z',
+            error: null,
+          },
         },
       }))
     );
