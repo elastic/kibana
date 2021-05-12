@@ -2686,7 +2686,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-generator@link:packages/kbn-plugin-generator":
+"@kbn/plugin-generator@link:bazel-bin/packages/kbn-plugin-generator/npm_module":
   version "0.0.0"
   uid ""
 
@@ -2726,7 +2726,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
+"@kbn/telemetry-tools@link:bazel-bin/packages/kbn-telemetry-tools/npm_module":
   version "0.0.0"
   uid ""
 
