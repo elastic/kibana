@@ -94,9 +94,9 @@ export async function fetchCCRReadExceptions(
 
   const response = await callCluster('search', params);
   const stats: CCRReadExceptionsStats[] = [];
-  const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
+  const { buckets: remoteClusterBuckets } = response.aggregations?.remote_clusters;
 
-  if (!remoteClusterBuckets.length) {
+  if (!remoteClusterBuckets?.length) {
     return stats;
   }
 

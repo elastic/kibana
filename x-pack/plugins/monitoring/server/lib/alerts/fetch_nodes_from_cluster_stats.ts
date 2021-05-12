@@ -88,8 +88,11 @@ export async function fetchNodesFromClusterStats(
   };
 
   const response = await callCluster('search', params);
-  const nodes = [];
-  const clusterBuckets = response.aggregations.clusters.buckets;
+  const nodes = [] as AlertClusterStatsNodes[];
+  const clusterBuckets = response.aggregations?.clusters?.buckets;
+  if (!clusterBuckets?.length) {
+    return nodes;
+  }
   for (const clusterBucket of clusterBuckets) {
     const clusterUuid = clusterBucket.key;
     const hits = clusterBucket.top.hits.hits;

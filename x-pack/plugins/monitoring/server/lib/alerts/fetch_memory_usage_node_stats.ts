@@ -93,9 +93,9 @@ export async function fetchMemoryUsageNodeStats(
 
   const response = await callCluster('search', params);
   const stats: AlertMemoryUsageNodeStats[] = [];
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
 
-  if (!clusterBuckets.length) {
+  if (!clusterBuckets?.length) {
     return stats;
   }
 
@@ -111,7 +111,7 @@ export async function fetchMemoryUsageNodeStats(
         clusterUuid: clusterBucket.key,
         nodeId: node.key,
         nodeName: get(node, 'name.buckets[0].key'),
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
       });
     }
   }
