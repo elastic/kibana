@@ -2687,7 +2687,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-generator@link:packages/kbn-plugin-generator":
+"@kbn/plugin-generator@link:bazel-bin/packages/kbn-plugin-generator/npm_module":
   version "0.0.0"
   uid ""
 

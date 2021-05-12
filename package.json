@@ -454,7 +454,7 @@
     "@kbn/eslint-plugin-eslint": "link:bazel-bin/packages/kbn-eslint-plugin-eslint/npm_module",
     "@kbn/expect": "link:bazel-bin/packages/kbn-expect/npm_module",
     "@kbn/optimizer": "link:packages/kbn-optimizer",
-    "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
+    "@kbn/plugin-generator": "link:bazel-bin/packages/kbn-plugin-generator/npm_module",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/storybook": "link:packages/kbn-storybook",
