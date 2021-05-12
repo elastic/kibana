@@ -84,6 +84,7 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-utils
 - @kbn/securitysolution-io-ts-utils
 - @kbn/std
+- @kbn/telemetry-utils
 - @kbn/tinymath
 - @kbn/utility-types
 - @kbn/utils

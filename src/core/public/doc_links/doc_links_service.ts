@@ -184,7 +184,7 @@ export class DocLinksService {
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#remote-cluster-proxy-settings`,
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
-          transportSettings: `${ELASTICSEARCH_DOCS}modules-transport.html`,
+          transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
         },
@@ -347,7 +347,7 @@ export class DocLinksService {
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
         },
         snapshotRestore: {
-          guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
+          guide: `${KIBANA_DOCS}snapshot-repositories.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html#change-index-settings-during-restore`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
           registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
