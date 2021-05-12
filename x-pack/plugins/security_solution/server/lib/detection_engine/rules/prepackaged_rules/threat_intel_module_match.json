@@ -16,7 +16,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Threat Intel Filebeat Module Indicator Match",
-  "note": "## Triage and Analysis\nIf an indicator matches a local observation, the following enriched fields will be generated to identify the indicator, field, and type matched.\n\n- `threatintel.indicator.matched.atomic` - this identifies the atomic indicator that matched the local observation\n- `threatintel.indicator.matched.field` - this identifies the indicator field that matched the local observation\n- `threatintel.indicator.matched.type` - this identifies the indicator type that matched the local observation\n",
+  "note": "## Triage and Analysis\n\nIf an indicator matches a local observation, the following enriched fields will be generated to identify the indicator, field, and type matched.\n\n- `threatintel.indicator.matched.atomic` - this identifies the atomic indicator that matched the local observation\n- `threatintel.indicator.matched.field` - this identifies the indicator field that matched the local observation\n- `threatintel.indicator.matched.type` - this identifies the indicator type that matched the local observation\n",
   "query": "file.hash.*:* or file.pe.imphash:* or source.ip:* or destination.ip:* or url.full:* or registry.path:*",
   "references": [
     "https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-threatintel.html"
