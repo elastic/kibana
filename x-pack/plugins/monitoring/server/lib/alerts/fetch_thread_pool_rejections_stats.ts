@@ -103,8 +103,15 @@ export async function fetchThreadPoolRejectionStats(
 
   for (const clusterBucket of clusterBuckets) {
     for (const node of clusterBucket.nodes.buckets) {
-      const mostRecentDoc = get(node, 'most_recent.hits.hits[0]') as { timestamp: string, sort: string[], _index: string };
-      const leastRecentDoc = get(node, 'least_recent.hits.hits[0]') as { timestamp: string, sort: string[] };
+      const mostRecentDoc = get(node, 'most_recent.hits.hits[0]') as {
+        timestamp: string;
+        sort: string[];
+        _index: string;
+      };
+      const leastRecentDoc = get(node, 'least_recent.hits.hits[0]') as {
+        timestamp: string;
+        sort: string[];
+      };
 
       if (!mostRecentDoc || !leastRecentDoc) {
         continue;

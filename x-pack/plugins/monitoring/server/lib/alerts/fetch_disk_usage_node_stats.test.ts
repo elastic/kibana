@@ -65,7 +65,7 @@ describe('fetchDiskUsageNodeStats', () => {
         nodeName: 'theNodeName',
         nodeId: 'theNodeId',
         diskUsage: 10,
-        ccs: null,
+        ccs: undefined,
       },
     ]);
   });
