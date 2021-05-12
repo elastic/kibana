@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { JSON_CONTENT, JSON_VIEW_TAB, TABLE_TAB } from '../screens/alerts_details';
+import {
+  JSON_CONTENT,
+  JSON_VIEW_TAB,
+  TABLE_TAB,
+  THREAT_INTEL_TAB,
+} from '../screens/alerts_details';
 
 export const openJsonView = () => {
   cy.get(JSON_VIEW_TAB).click();
@@ -13,6 +18,10 @@ export const openJsonView = () => {
 
 export const openTable = () => {
   cy.get(TABLE_TAB).click();
+};
+
+export const openThreatIndicatorDetails = () => {
+  cy.get(THREAT_INTEL_TAB).click();
 };
 
 export const scrollJsonViewToBottom = () => {
