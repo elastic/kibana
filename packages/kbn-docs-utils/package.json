@@ -11,8 +11,5 @@
   "scripts": {
     "kbn:bootstrap": "../../node_modules/.bin/tsc",
     "kbn:watch": "../../node_modules/.bin/tsc --watch"
-  },
-  "dependencies": {
-    "@kbn/config": "link:../kbn-config"
   }
 }

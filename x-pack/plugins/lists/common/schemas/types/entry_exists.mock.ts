@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EXISTS, FIELD, OPERATOR } from '../../constants.mock';
+import { EntryExists } from '@kbn/securitysolution-io-ts-utils';
 
-import { EntryExists } from './entry_exists';
+import { EXISTS, FIELD, OPERATOR } from '../../constants.mock';
 
 export const getEntryExistsMock = (): EntryExists => ({
   field: FIELD,

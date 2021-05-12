@@ -14,31 +14,3 @@ export const FIELD_NAME = i18n.translate('xpack.enterpriseSearch.schema.fieldNam
 export const FIELD_TYPE = i18n.translate('xpack.enterpriseSearch.schema.fieldTypeLabel', {
   defaultMessage: 'Field type',
 });
-
-export const ERROR_TABLE_ID_HEADER = i18n.translate(
-  'xpack.enterpriseSearch.schema.errorsTable.heading.id',
-  {
-    defaultMessage: 'id',
-  }
-);
-
-export const ERROR_TABLE_ERROR_HEADER = i18n.translate(
-  'xpack.enterpriseSearch.schema.errorsTable.heading.error',
-  {
-    defaultMessage: 'Error',
-  }
-);
-
-export const ERROR_TABLE_REVIEW_CONTROL = i18n.translate(
-  'xpack.enterpriseSearch.schema.errorsTable.control.review',
-  {
-    defaultMessage: 'Review',
-  }
-);
-
-export const ERROR_TABLE_VIEW_LINK = i18n.translate(
-  'xpack.enterpriseSearch.schema.errorsTable.link.view',
-  {
-    defaultMessage: 'View',
-  }
-);

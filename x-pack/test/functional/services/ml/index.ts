@@ -48,6 +48,7 @@ import { MachineLearningAlertingProvider } from './alerting';
 import { SwimLaneProvider } from './swim_lane';
 import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
 import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
+import { TrainedModelsProvider } from './trained_models';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -108,6 +109,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const testResources = MachineLearningTestResourcesProvider(context);
   const alerting = MachineLearningAlertingProvider(context, commonUI);
   const swimLane = SwimLaneProvider(context);
+  const trainedModels = TrainedModelsProvider(context, api, commonUI);
 
   return {
     anomaliesTable,
@@ -151,5 +153,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     swimLane,
     testExecution,
     testResources,
+    trainedModels,
   };
 }

@@ -6,9 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-utils';
 
 import { cursor, filter, sort_field, sort_order } from '../common/schemas';
-import { StringToPositiveNumber } from '../types/string_to_positive_number';
 import { RequiredKeepUndefined } from '../../types';
 
 export const findListSchema = t.exact(

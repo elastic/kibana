@@ -14,13 +14,6 @@ export const ALERT_FETCH_FAILURE = i18n.translate(
   }
 );
 
-export const PRIVILEGE_FETCH_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.alerts.errorFetchingAlertsDescription',
-  {
-    defaultMessage: 'Failed to query alerts',
-  }
-);
-
 export const SIGNAL_GET_NAME_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.alerts.errorGetAlertDescription',
   {

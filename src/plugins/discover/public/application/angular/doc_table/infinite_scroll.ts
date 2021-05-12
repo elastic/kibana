@@ -9,6 +9,7 @@
 import $ from 'jquery';
 
 interface LazyScope extends ng.IScope {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -19,6 +20,7 @@ export function createInfiniteScrollDirective() {
       more: '=',
     },
     link: ($scope: LazyScope, $element: JQuery) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let checkTimer: any;
       /**
        * depending on which version of Discover is displayed, different elements are scrolling

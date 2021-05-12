@@ -234,6 +234,7 @@ export function getColumns({
             anchorPosition="leftCenter"
             button={
               <EuiButtonIcon
+                data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
                 iconType="boxesHorizontal"
                 onClick={() =>
                   toggleRowActionMenu(instanceItem.serviceNodeName)
@@ -257,6 +258,7 @@ export function getColumns({
       render: (instanceItem: MainStatsServiceInstanceItem) => {
         return (
           <EuiButtonIcon
+            data-test-subj={`instanceDetailsButton_${instanceItem.serviceNodeName}`}
             onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}
             aria-label={
               itemIdToExpandedRowMap[instanceItem.serviceNodeName]
