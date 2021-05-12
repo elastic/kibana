@@ -61,6 +61,7 @@ export const TimeSeries = ({
   series,
   yAxis,
   onBrush,
+  onFilterClick,
   xAxisFormatter,
   annotations,
   syncColors,
@@ -118,6 +119,10 @@ export const TimeSeries = ({
     onBrush(min, max, series);
   };
 
+  const handleElementClick = (points) => {
+    onFilterClick(series, points);
+  };
+
   const getSeriesColor = useCallback(
     (seriesName, seriesGroupId, seriesId) => {
       const seriesById = series.filter((s) => s.seriesId === seriesGroupId);
@@ -142,6 +147,7 @@ export const TimeSeries = ({
         showLegendExtra={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
+        onElementClick={(args) => handleElementClick(args)}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
