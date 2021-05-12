@@ -1,4 +1,8 @@
-# How to generate the docs
+# Cases Client API Docs
+
+This directory contains generated docs using `typedoc` for the cases client API that can be called from other server
+plugins. This README will describe how to generate a new version of these markdown docs in the event that new methods
+or parameters are added.
 
 ## Install dependencies
 
