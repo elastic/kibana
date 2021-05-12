@@ -7,6 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { debounce } from 'lodash';
+import { duration } from 'moment';
 import {
   CoreSetup,
   CoreStart,
@@ -39,11 +40,26 @@ import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 import {
   registerSearchSessionsTask,
-  scheduleSearchSessionsTasks,
+  scheduleSearchSessionsTask,
   unscheduleSearchSessionsTask,
-} from './monitoring_task';
+} from './setup_task';
 import { SearchSessionsConfig, SearchStatus } from './types';
 import { DataEnhancedStartDependencies } from '../../type';
+import {
+  checkPersistedSessions,
+  SEARCH_SESSIONS_TASK_ID,
+  SEARCH_SESSIONS_TASK_TYPE,
+} from './check_persisted_sessions';
+import {
+  SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+  checkNonPersistedSessions,
+  SEARCH_SESSIONS_CLEANUP_TASK_ID,
+} from './cleanup_stale_sessions';
+import {
+  SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+  SEARCH_SESSIONS_EXPIRE_TASK_ID,
+  checkCompleteSessionExpiration,
+} from './expire_persisted_sessions';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -85,11 +101,35 @@ export class SearchSessionService
   }
 
   public setup(core: CoreSetup<DataEnhancedStartDependencies>, deps: SetupDependencies) {
-    registerSearchSessionsTask(core, {
+    const taskDeps = {
       config: this.config,
       taskManager: deps.taskManager,
       logger: this.logger,
-    });
+    };
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_TASK_TYPE,
+      'persisted session progress',
+      checkPersistedSessions
+    );
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+      'non persisted session cleanup',
+      checkNonPersistedSessions
+    );
+
+    registerSearchSessionsTask(
+      core,
+      taskDeps,
+      SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+      'complete session expiration',
+      checkCompleteSessionExpiration
+    );
   }
 
   public async start(core: CoreStart, deps: StartDependencies) {
@@ -99,14 +139,37 @@ export class SearchSessionService
   public stop() {}
 
   private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
+    const taskDeps = {
+      config: this.config,
+      taskManager: deps.taskManager,
+      logger: this.logger,
+    };
+
     if (this.sessionConfig.enabled) {
-      scheduleSearchSessionsTasks(
-        deps.taskManager,
-        this.logger,
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_TASK_ID,
+        SEARCH_SESSIONS_TASK_TYPE,
         this.sessionConfig.trackingInterval
       );
+
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_CLEANUP_TASK_ID,
+        SEARCH_SESSIONS_CLEANUP_TASK_TYPE,
+        duration('60', 's')
+      );
+
+      scheduleSearchSessionsTask(
+        taskDeps,
+        SEARCH_SESSIONS_EXPIRE_TASK_ID,
+        SEARCH_SESSIONS_EXPIRE_TASK_TYPE,
+        duration('60', 'm')
+      );
     } else {
-      unscheduleSearchSessionsTask(deps.taskManager, this.logger);
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_TASK_ID);
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_CLEANUP_TASK_ID);
+      unscheduleSearchSessionsTask(taskDeps, SEARCH_SESSIONS_EXPIRE_TASK_ID);
     }
   };
 
