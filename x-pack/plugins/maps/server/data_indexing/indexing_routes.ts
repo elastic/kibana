@@ -13,10 +13,12 @@ import {
   INDEX_SOURCE_API_PATH,
   GIS_API_PATH,
   MAX_DRAWING_SIZE_BYTES,
+  GET_MATCHING_INDEXES_PATH,
 } from '../../common/constants';
 import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import { getMatchingIndexes } from './get_indexes_matching_pattern';
 
 export function initIndexingRoutes({
   router,
@@ -96,6 +98,34 @@ export function initIndexingRoutes({
         logger.error(result.error);
         return response.custom({
           body: result.error.message,
+          statusCode: 500,
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: `${GET_MATCHING_INDEXES_PATH}/{indexPattern}`,
+      validate: {
+        params: schema.object({
+          indexPattern: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const result = await getMatchingIndexes(
+        request.params.indexPattern,
+        context.core.elasticsearch.client
+      );
+      if (result.success) {
+        return response.ok({ body: result });
+      } else {
+        if (result.error) {
+          logger.error(result.error);
+        }
+        return response.custom({
+          body: result?.error?.message,
           statusCode: 500,
         });
       }

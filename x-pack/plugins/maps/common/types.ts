@@ -11,6 +11,11 @@ export interface CreateDocSourceResp {
   error?: Error;
 }
 
+export interface MatchingIndexesResp {
+  matchingIndexes?: string[];
+  success: boolean;
+}
+
 export interface IndexSourceMappings {
   _meta?: {
     created_by: string;

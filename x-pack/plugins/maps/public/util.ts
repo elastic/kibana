@@ -12,7 +12,7 @@ import * as topojson from 'topojson-client';
 import { GeometryCollection } from 'topojson-specification';
 import _ from 'lodash';
 import fetch from 'node-fetch';
-import { INDEX_FEATURE_PATH } from '../common';
+import { GET_MATCHING_INDEXES_PATH, INDEX_FEATURE_PATH } from '../common';
 
 import {
   GIS_API_PATH,
@@ -187,4 +187,11 @@ const convertDotNotationStringToObj = (
 
 const convertObjectToBlob = (obj: unknown) => {
   return new Blob([JSON.stringify(obj)], { type: 'application/json' });
+};
+
+export const getMatchingIndexes = async (indexPattern: string) => {
+  return await getHttp().fetch({
+    path: `${GET_MATCHING_INDEXES_PATH}/${indexPattern}`,
+    method: 'GET',
+  });
 };

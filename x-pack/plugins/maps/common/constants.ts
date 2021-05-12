@@ -43,6 +43,7 @@ export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
+export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';

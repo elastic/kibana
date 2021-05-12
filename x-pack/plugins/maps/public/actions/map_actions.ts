@@ -62,7 +62,7 @@ import {
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { addFeatureToIndex } from '../util';
+import { addFeatureToIndex, getMatchingIndexes } from '../util';
 
 export interface MapExtentState {
   zoom: number;
@@ -358,6 +358,8 @@ export function addNewFeatureToIndex(
   path: string
 ) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    const matchingIndexes = await getMatchingIndexes('t*');
+    console.log(matchingIndexes);
     await addFeatureToIndex(indexName, geometry, path);
     await dispatch(syncDataForAllLayers({ forceRefresh: true }));
   };
