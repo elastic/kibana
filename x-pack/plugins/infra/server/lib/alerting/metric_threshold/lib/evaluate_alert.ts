@@ -60,7 +60,6 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
         filterQuery,
         timeframe
       );
-      console.log(currentValues);
       const { threshold, warningThreshold, comparator, warningComparator } = criterion;
       const pointsEvaluator = (points: any[] | typeof NaN | null, t?: number[], c?: Comparator) => {
         if (!t || !c) return [false];
