@@ -41,6 +41,8 @@ import {
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../migrations/core';
+import { TaskEither } from 'fp-ts/lib/TaskEither';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -408,7 +410,7 @@ describe('migration actions', () => {
         'reindex_target',
         Option.none,
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -440,13 +442,13 @@ describe('migration actions', () => {
         'reindex_target_excluded_docs',
         Option.none,
         false,
-        Option.of({
+        {
           bool: {
             must_not: ['f_agent_event', 'another_unused_type'].map((type) => ({
               term: { type },
             })),
           },
-        })
+        }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -477,7 +479,7 @@ describe('migration actions', () => {
         'reindex_target_2',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -510,7 +512,7 @@ describe('migration actions', () => {
         'reindex_target_3',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -527,7 +529,7 @@ describe('migration actions', () => {
         'reindex_target_3',
         Option.none,
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -577,7 +579,7 @@ describe('migration actions', () => {
         'reindex_target_4',
         Option.some(`ctx._source.title = ctx._source.title + '_updated'`),
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -627,7 +629,7 @@ describe('migration actions', () => {
         'reindex_target_5',
         Option.none,
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
@@ -662,7 +664,7 @@ describe('migration actions', () => {
         'reindex_target_6',
         Option.none,
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, reindexTaskId, '10s');
 
@@ -677,14 +679,9 @@ describe('migration actions', () => {
     });
     it('resolves left index_not_found_exception if source index does not exist', async () => {
       expect.assertions(1);
-      const res = (await reindex(
-        client,
-        'no_such_index',
-        'reindex_target',
-        Option.none,
-        false,
-        Option.none
-      )()) as Either.Right<ReindexResponse>;
+      const res = (await reindex(client, 'no_such_index', 'reindex_target', Option.none, false, {
+        match_all: {},
+      })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask(client, res.right.taskId, '10s');
       await expect(task()).resolves.toMatchInlineSnapshot(`
                             Object {
@@ -704,7 +701,7 @@ describe('migration actions', () => {
         'existing_index_with_write_block',
         Option.none,
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '10s');
@@ -726,7 +723,7 @@ describe('migration actions', () => {
         'existing_index_with_write_block',
         Option.none,
         true,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '10s');
@@ -748,7 +745,7 @@ describe('migration actions', () => {
         'reindex_target',
         Option.none,
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '0s');
@@ -775,7 +772,7 @@ describe('migration actions', () => {
         'reindex_target_7',
         Option.none,
         false,
-        Option.none
+        { match_all: {} }
       )()) as Either.Right<ReindexResponse>;
       await waitForReindexTask(client, res.right.taskId, '10s')();
 
@@ -840,7 +837,7 @@ describe('migration actions', () => {
       const readWithPitTask = readWithPit(
         client,
         pitResponse.right.pitId,
-        Option.none,
+        { match_all: {} },
         1000,
         undefined
       );
@@ -856,7 +853,7 @@ describe('migration actions', () => {
       const readWithPitTask = readWithPit(
         client,
         pitResponse.right.pitId,
-        Option.none,
+        { match_all: {} },
         3,
         undefined
       );
@@ -865,14 +862,14 @@ describe('migration actions', () => {
       await expect(docsResponse.right.outdatedDocuments.length).toBe(3);
     });
 
-    it('it excludes documents not matching the provided "unusedTypesQuery"', async () => {
+    it('it excludes documents not matching the provided "query"', async () => {
       const openPitTask = openPit(client, 'existing_index_with_docs');
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
       const readWithPitTask = readWithPit(
         client,
         pitResponse.right.pitId,
-        Option.some({
+        {
           bool: {
             must_not: [
               {
@@ -887,7 +884,7 @@ describe('migration actions', () => {
               },
             ],
           },
-        }),
+        },
         1000,
         undefined
       );
@@ -904,8 +901,93 @@ describe('migration actions', () => {
       `);
     });
 
+    it('only returns documents that match the provided "query"', async () => {
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const readWithPitTask = readWithPit(
+        client,
+        pitResponse.right.pitId,
+        {
+          match: { title: { query: 'doc' } },
+        },
+        1000,
+        undefined
+      );
+
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+
+      expect(docsResponse.right.outdatedDocuments.map((doc) => doc._source.title).sort())
+        .toMatchInlineSnapshot(`
+        Array [
+          "doc 1",
+          "doc 2",
+          "doc 3",
+        ]
+      `);
+    });
+
+    it('returns docs with _seq_no and _primary_term when specified', async () => {
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const readWithPitTask = readWithPit(
+        client,
+        pitResponse.right.pitId,
+        {
+          match: { title: { query: 'doc' } },
+        },
+        1000,
+        undefined,
+        true
+      );
+
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+
+      expect(docsResponse.right.outdatedDocuments).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            _seq_no: expect.any(Number),
+            _primary_term: expect.any(Number),
+          }),
+        ])
+      );
+    });
+
+    it('does not return docs with _seq_no and _primary_term if not specified', async () => {
+      const openPitTask = openPit(client, 'existing_index_with_docs');
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const readWithPitTask = readWithPit(
+        client,
+        pitResponse.right.pitId,
+        {
+          match: { title: { query: 'doc' } },
+        },
+        1000,
+        undefined
+      );
+
+      const docsResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+
+      expect(docsResponse.right.outdatedDocuments).toEqual(
+        expect.arrayContaining([
+          expect.not.objectContaining({
+            _seq_no: expect.any(Number),
+            _primary_term: expect.any(Number),
+          }),
+        ])
+      );
+    });
+
     it('rejects if PIT does not exist', async () => {
-      const readWithPitTask = readWithPit(client, 'no_such_pit', Option.none, 1000, undefined);
+      const readWithPitTask = readWithPit(
+        client,
+        'no_such_pit',
+        { match_all: {} },
+        1000,
+        undefined
+      );
       await expect(readWithPitTask()).rejects.toThrow('illegal_argument_exception');
     });
   });
@@ -934,86 +1016,32 @@ describe('migration actions', () => {
   });
 
   describe('transformDocs', () => {
-    it('applies "transformRawDocs" and writes result into an index', async () => {
-      const index = 'transform_docs_index';
+    it('applies "transformRawDocs" and returns the transformed documents', async () => {
       const originalDocs = [
         { _id: 'foo:1', _source: { type: 'dashboard', value: 1 } },
         { _id: 'foo:2', _source: { type: 'dashboard', value: 2 } },
       ];
 
-      const createIndexTask = createIndex(client, index, {
-        dynamic: true,
-        properties: {},
-      });
-      await createIndexTask();
-
-      async function tranformRawDocs(docs: SavedObjectsRawDoc[]): Promise<SavedObjectsRawDoc[]> {
-        for (const doc of docs) {
-          doc._source.value += 1;
-        }
-        return docs;
+      function innerTransformRawDocs(
+        docs: SavedObjectsRawDoc[]
+      ): TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> {
+        return async () => {
+          const processedDocs: SavedObjectsRawDoc[] = [];
+          for (const doc of docs) {
+            doc._source.value += 1;
+            processedDocs.push(doc);
+          }
+          return Either.right({ processedDocs });
+        };
       }
+      const transformTask = transformDocs(innerTransformRawDocs, originalDocs);
 
-      const transformTask = transformDocs(client, tranformRawDocs, originalDocs, index, 'wait_for');
-
-      const result = (await transformTask()) as Either.Right<'bulk_index_succeeded'>;
-
-      expect(result.right).toBe('bulk_index_succeeded');
-
-      const { body } = await client.search<{ value: number }>({
-        index,
-      });
-      const hits = body.hits.hits;
-
-      const foo1 = hits.find((h) => h._id === 'foo:1');
-      expect(foo1?._source?.value).toBe(2);
-
-      const foo2 = hits.find((h) => h._id === 'foo:2');
+      const resultsWithProcessDocs = ((await transformTask()) as Either.Right<DocumentsTransformSuccess>)
+        .right.processedDocs;
+      expect(resultsWithProcessDocs.length).toEqual(2);
+      const foo2 = resultsWithProcessDocs.find((h) => h._id === 'foo:2');
       expect(foo2?._source?.value).toBe(3);
     });
-  });
-
-  describe('searchForOutdatedDocuments', () => {
-    it('only returns documents that match the outdatedDocumentsQuery', async () => {
-      expect.assertions(2);
-      const resultsWithQuery = ((await searchForOutdatedDocuments(client, {
-        batchSize: 1000,
-        targetIndex: 'existing_index_with_docs',
-        outdatedDocumentsQuery: {
-          match: { title: { query: 'doc' } },
-        },
-      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(resultsWithQuery.length).toBe(3);
-
-      const resultsWithoutQuery = ((await searchForOutdatedDocuments(client, {
-        batchSize: 1000,
-        targetIndex: 'existing_index_with_docs',
-        outdatedDocumentsQuery: undefined,
-      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(resultsWithoutQuery.length).toBe(5);
-    });
-    it('resolves with _id, _source, _seq_no and _primary_term', async () => {
-      expect.assertions(1);
-      const results = ((await searchForOutdatedDocuments(client, {
-        batchSize: 1000,
-        targetIndex: 'existing_index_with_docs',
-        outdatedDocumentsQuery: {
-          match: { title: { query: 'doc' } },
-        },
-      })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
-      expect(results).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            _id: expect.any(String),
-            _seq_no: expect.any(Number),
-            _primary_term: expect.any(Number),
-            _source: expect.any(Object),
-          }),
-        ])
-      );
-    });
-    // I haven't been able to find a way to reproduce a partial search result
-    // it.todo('rejects if only partial search results can be obtained');
   });
 
   describe('waitForPickupUpdatedMappingsTask', () => {

@@ -6,16 +6,17 @@
  */
 
 import * as t from 'io-ts';
-
-import { sort_field, sort_order } from '../common/schemas';
-import { RequiredKeepUndefined } from '../../types';
-import { StringToPositiveNumber } from '../types/string_to_positive_number';
 import {
   DefaultNamespaceArray,
   DefaultNamespaceArrayTypeDecoded,
-} from '../types/default_namespace_array';
-import { NonEmptyStringArray } from '../types/non_empty_string_array';
-import { EmptyStringArray, EmptyStringArrayDecoded } from '../types/empty_string_array';
+  EmptyStringArray,
+  EmptyStringArrayDecoded,
+  NonEmptyStringArray,
+  StringToPositiveNumber,
+} from '@kbn/securitysolution-io-ts-utils';
+
+import { sort_field, sort_order } from '../common/schemas';
+import { RequiredKeepUndefined } from '../../types';
 
 export const findExceptionListItemSchema = t.intersection([
   t.exact(

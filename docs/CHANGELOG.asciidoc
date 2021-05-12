@@ -192,6 +192,25 @@ To display the cluster data in *Discover*, load documents directly from `_source
 // end::notable-breaking-changes[]
 
 [float]
+[[known-issues-v7.12.0]]
+=== Known issues
+
+When upgrading to 7.12.0, {kib} retries failed saved object migrations without user intervention.
+
+Impacts include:
+
+* In 7.12.0, upgrade migrations fail because of a large number of documents in the `.kibana` index when you use **Fleet**.
+* Corrupt saved objects caused by manual editing or integrations.
+* User-defined index templates that cause new `.kibana*` indices to have incompatible settings or mappings.
+* An unhealthy {es} cluster.
+* Different versions of {kib} connected to the same {es} index.
+* Incompatible `xpack.tasks.index` configuration setting.
+
+If your upgrade migration fails repeatedly, refer to {kibana-ref}/upgrade-migrations.html#preventing-migration-failures[preventing migration failures].
+
+// end::known-issues[]
+
+[float]
 [[deprecations-7.12.0]]
 === Deprecations
 

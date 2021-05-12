@@ -16,7 +16,7 @@ interface SourceNode {
   uuid: string;
 }
 type TopHitType = ElasticsearchResponseHit & {
-  _source: { index_stats: Partial<ElasticsearchIndexStats>; source_node: SourceNode };
+  _source: { index_stats?: Partial<ElasticsearchIndexStats>; source_node?: SourceNode };
 };
 
 const memoizedIndexPatterns = (globPatterns: string) => {
@@ -109,14 +109,13 @@ export async function fetchIndexShardSize(
   };
 
   const { body: response } = await esClient.search(params);
-  const stats: IndexShardSizeStats[] = [];
   // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
-  const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
-
-  if (!clusterBuckets.length) {
+  const { buckets: clusterBuckets } = response.aggregations?.clusters;
+  const stats: IndexShardSizeStats[] = [];
+  if (!clusterBuckets?.length) {
     return stats;
   }
+  const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
   const thresholdBytes = threshold * gbMultiplier;
   for (const clusterBucket of clusterBuckets) {
     const indexBuckets = clusterBucket.over_threshold.index.buckets;
@@ -137,7 +136,7 @@ export async function fetchIndexShardSize(
         _source: { source_node: sourceNode, index_stats: indexStats },
       } = topHit;
 
-      if (!indexStats || !indexStats.primaries) {
+      if (!indexStats || !indexStats.primaries || !sourceNode) {
         continue;
       }
 

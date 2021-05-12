@@ -77,7 +77,6 @@ import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import * as React_3 from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Reporter } from '@kbn/analytics';
 import { Request as Request_2 } from '@hapi/hapi';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics as RequestStatistics_2 } from 'src/plugins/inspector/common';
@@ -102,6 +101,7 @@ import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
 import { URL } from 'url';
@@ -2307,7 +2307,7 @@ export const search: {
         })[];
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
-        Ipv4Address: typeof Ipv4Address;
+        IpAddress: typeof IpAddress;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
         isNumberType: (agg: import("../common").AggConfig) => boolean;
         isStringType: (agg: import("../common").AggConfig) => boolean;
@@ -2745,7 +2745,7 @@ export interface WaitUntilNextSessionCompletesOptions {
 // src/plugins/data/public/index.ts:410:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:419:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:420:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/index.ts:421:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/index.ts:421:1 - (ae-forgotten-export) The symbol "IpAddress" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:422:1 - (ae-forgotten-export) The symbol "isDateHistogramBucketAggConfig" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:426:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:427:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts

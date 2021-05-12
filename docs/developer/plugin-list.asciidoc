@@ -123,7 +123,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_usage_collection/README.md[kibanaUsageCollection]
-|This plugin registers the basic usage collectors from Kibana:
+|This plugin registers the Platform Usage Collectors in Kibana.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_utils/README.md[kibanaUtils]
@@ -472,6 +472,12 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
+|This is the metrics and entities plugin where you add can add transforms for your project
+and group those transforms into modules. You can also re-use existing transforms in your
+modules as well.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
