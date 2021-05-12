@@ -263,7 +263,7 @@ We were able to connect 2,200 running agents and run a [single job with 1,800 pa
 
 We also created a job with 5 parallel steps, and triggered 300 parallel builds at once. The jobs executed and finished quickly, across ~1500 agents, with no issues and very little overhead. Interestingly, it seems that we were able to see the effects of our test in Buildkite's status page graphs (see below), but, from a user perspective, we were unable to notice any issues.
 
-![Status Graphs](../images/0016_buildkite_uptime.png)
+![Status Graphs](../images/0018_buildkite_uptime.png)
 
 #### Stable
 
@@ -289,11 +289,11 @@ The Buildkite UI is very easy to use, and works as expected. Here is some of the
 - Artifacts uploaded by each step
 - The entire agent/job configuration at the time the step executed, expressed as environment variables
 
-![Example Build](../images/0016_buildkite_build.png)
+![Example Build](../images/0018_buildkite_build.png)
 
 Note that dependencies between steps are mostly not shown in the UI. See screenshot below for an example. There are several layers of dependencies between all of the steps in this pipeline. The only one that is shown is the final step (`Post All`), which executes after all steps beforehand are finished. There are some other strategies to help organize the steps (such as the new grouping functionality) if we need.
 
-![Dependencies](../images/0016_buildkite_deps.png)
+![Dependencies](../images/0018_buildkite_deps.png)
 
 Buildkite has rich build page customization via "annotations" which will let us surface custom information. See the [customization section](#customization-1).
 
@@ -511,7 +511,7 @@ The current version of the agent manager only handles GCP-based agents, but supp
 
 It is also designed to itself be stateless, so that it is easy to deploy and reason about. State is effectively stored in GCP and Buildkite.
 
-![High-Level Design](../images/0016_agent_manager.png)
+![High-Level Design](../images/0018_agent_manager.png)
 
 The high-level design for the agent manager is pretty straightforward. There are three primary stages during execution:
 
@@ -780,7 +780,7 @@ The [Stage View](https://kibana-ci.elastic.co/job/elastic+kibana+pipeline-pull-r
 
 [Pipeline Steps](https://kibana-ci.elastic.co/job/elastic+kibana+pipeline-pull-request/) (Choose a build -> Pipeline Steps) shows information fairly accurately (sometimes logs/errors are not attached to any steps, and do not show), but is very difficult to read. There are entire pages of largely irrelevant information (Setting environment variables, starting a `try` block, etc), which is difficult to read through, especially developers who don't interact with Jenkins every day.
 
-![Pipeline Steps](../images/0016_jenkins_pipeline_steps.png)
+![Pipeline Steps](../images/0018_jenkins_pipeline_steps.png)
 
 We push a lot of information to GitHub and Slack, and have even built custom UIs, to try to minimize how much people need to interact directly with Jenkins. In particular, when things go wrong, it is very difficult to investigate using the Jenkins UI.
 
