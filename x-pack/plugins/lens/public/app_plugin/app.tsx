@@ -790,49 +790,50 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   lastKnownDoc: React.MutableRefObject<Document | undefined>;
   activeData: React.MutableRefObject<Record<string, Datatable> | undefined>;
 }) {
+  const { EditorFrameContainer } = editorFrame;
   return (
-    <NativeRenderer
-      className="lnsApp__frame"
-      render={editorFrame.mount}
-      nativeProps={{
-        searchSessionId,
-        dateRange: resolvedDateRange,
-        query,
-        filters,
-        savedQuery,
-        doc: persistedDoc,
-        onError,
-        showNoDataPopover,
-        initialContext,
-        onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
-          if (isSaveable !== oldIsSaveable) {
-            setState((s) => ({ ...s, isSaveable }));
-          }
-          if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
-            setState((s) => ({ ...s, lastKnownDoc: doc }));
-          }
-          if (!_.isEqual(activeDataRef.current, activeData)) {
-            setState((s) => ({ ...s, activeData }));
-          }
+    <div className="lnsApp__frame">
+      <EditorFrameContainer
+        {...{
+          searchSessionId,
+          dateRange: resolvedDateRange,
+          query,
+          filters,
+          savedQuery,
+          doc: persistedDoc,
+          onError,
+          showNoDataPopover,
+          initialContext,
+          onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
+            if (isSaveable !== oldIsSaveable) {
+              setState((s) => ({ ...s, isSaveable }));
+            }
+            if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
+              setState((s) => ({ ...s, lastKnownDoc: doc }));
+            }
+            if (!_.isEqual(activeDataRef.current, activeData)) {
+              setState((s) => ({ ...s, activeData }));
+            }
 
-          // Update the cached index patterns if the user made a change to any of them
-          if (
-            indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-            filterableIndexPatterns.some(
-              (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-            )
-          ) {
-            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
-              ({ indexPatterns }) => {
-                if (indexPatterns) {
-                  setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
+            // Update the cached index patterns if the user made a change to any of them
+            if (
+              indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+              filterableIndexPatterns.some(
+                (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+              )
+            ) {
+              getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
+                ({ indexPatterns }) => {
+                  if (indexPatterns) {
+                    setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
+                  }
                 }
-              }
-            );
-          }
-        },
-      }}
-    />
+              );
+            }
+          },
+        }}
+      />
+    </div>
   );
 });
 
