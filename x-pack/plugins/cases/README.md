@@ -266,4 +266,4 @@ For IBM Resilient connectors:
 [all-cases-modal-img]: images/all_cases_selector_modal.png
 [recent-cases-img]: images/recent_cases.png
 [case-view-img]: images/case_view.png
-[cases-client-api-docs]: docs/server/server_client_api.md
+[cases-client-api-docs]: docs/server/cases_client_api.md

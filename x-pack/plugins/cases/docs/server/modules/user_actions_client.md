@@ -1,4 +1,4 @@
-[Cases Client API Interface](../server_client_api.md) / user_actions/client
+[Cases Client API Interface](../cases_client_api.md) / user_actions/client
 
 # Module: user\_actions/client
 

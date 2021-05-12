@@ -1,4 +1,4 @@
-[Cases Client API Interface](../server_client_api.md) / attachments/delete
+[Cases Client API Interface](../cases_client_api.md) / attachments/delete
 
 # Module: attachments/delete
 

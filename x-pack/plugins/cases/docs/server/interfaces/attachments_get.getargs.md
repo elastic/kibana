@@ -1,4 +1,4 @@
-[Cases Client API Interface](../server_client_api.md) / [attachments/get](../modules/attachments_get.md) / GetArgs
+[Cases Client API Interface](../cases_client_api.md) / [attachments/get](../modules/attachments_get.md) / GetArgs
 
 # Interface: GetArgs
 
@@ -19,7 +19,7 @@
 
 The ID of the attachment to retrieve
 
-Defined in: [attachments/get.ts:81](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/get.ts#L81)
+Defined in: [attachments/get.ts:81](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/get.ts#L81)
 
 ___
 
@@ -29,4 +29,4 @@ ___
 
 The ID of the case to retrieve an attachment from
 
-Defined in: [attachments/get.ts:77](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/get.ts#L77)
+Defined in: [attachments/get.ts:77](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/get.ts#L77)

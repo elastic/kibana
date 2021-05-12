@@ -1,4 +1,4 @@
-[Cases Client API Interface](../server_client_api.md) / [cases/push](../modules/cases_push.md) / PushParams
+[Cases Client API Interface](../cases_client_api.md) / [cases/push](../modules/cases_push.md) / PushParams
 
 # Interface: PushParams
 
@@ -21,7 +21,7 @@ Parameters for pushing a case to an external system
 
 The ID of a case
 
-Defined in: [cases/push.ts:53](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/cases/push.ts#L53)
+Defined in: [cases/push.ts:53](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/cases/push.ts#L53)
 
 ___
 
@@ -31,4 +31,4 @@ ___
 
 The ID of an external system to push to
 
-Defined in: [cases/push.ts:57](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/cases/push.ts#L57)
+Defined in: [cases/push.ts:57](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/cases/push.ts#L57)

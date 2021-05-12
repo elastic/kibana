@@ -1,4 +1,4 @@
-[Cases Client API Interface](../server_client_api.md) / attachments/get
+[Cases Client API Interface](../cases_client_api.md) / attachments/get
 
 # Module: attachments/get
 

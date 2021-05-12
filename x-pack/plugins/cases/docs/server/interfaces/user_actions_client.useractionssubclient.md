@@ -1,4 +1,4 @@
-[Cases Client API Interface](../server_client_api.md) / [user_actions/client](../modules/user_actions_client.md) / UserActionsSubClient
+[Cases Client API Interface](../cases_client_api.md) / [user_actions/client](../modules/user_actions_client.md) / UserActionsSubClient
 
 # Interface: UserActionsSubClient
 
@@ -28,4 +28,4 @@ Retrieves all user actions for a particular case.
 
 **Returns:** *Promise*<[*ICaseUserActionsResponse*](typedoc_interfaces.icaseuseractionsresponse.md)\>
 
-Defined in: [user_actions/client.ts:33](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/user_actions/client.ts#L33)
+Defined in: [user_actions/client.ts:33](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/user_actions/client.ts#L33)

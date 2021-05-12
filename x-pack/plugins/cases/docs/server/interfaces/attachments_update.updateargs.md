@@ -1,4 +1,4 @@
-[Cases Client API Interface](../server_client_api.md) / [attachments/update](../modules/attachments_update.md) / UpdateArgs
+[Cases Client API Interface](../cases_client_api.md) / [attachments/update](../modules/attachments_update.md) / UpdateArgs
 
 # Interface: UpdateArgs
 
@@ -22,7 +22,7 @@ Parameters for updating a single attachment
 
 The ID of the case that is associated with this attachment
 
-Defined in: [attachments/update.ts:29](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/update.ts#L29)
+Defined in: [attachments/update.ts:29](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/update.ts#L29)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 The ID of a sub case, if specified a sub case will be searched for to perform the attachment update instead of on a case
 
-Defined in: [attachments/update.ts:37](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/update.ts#L37)
+Defined in: [attachments/update.ts:37](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/update.ts#L37)
 
 ___
 
@@ -42,4 +42,4 @@ ___
 
 The full attachment request with the fields updated with appropriate values
 
-Defined in: [attachments/update.ts:33](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/attachments/update.ts#L33)
+Defined in: [attachments/update.ts:33](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/update.ts#L33)

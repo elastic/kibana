@@ -19,7 +19,7 @@
   "out": "server",
   "theme": "markdown",
   "plugin": "typedoc-plugin-markdown",
-  "entryDocument": "server_client_api.md",
+  "entryDocument": "cases_client_api.md",
   "readme": "none",
   "name": "Cases Client API Interface"
 }

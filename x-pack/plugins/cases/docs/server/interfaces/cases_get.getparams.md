@@ -1,4 +1,4 @@
-[Cases Client API Interface](../server_client_api.md) / [cases/get](../modules/cases_get.md) / GetParams
+[Cases Client API Interface](../cases_client_api.md) / [cases/get](../modules/cases_get.md) / GetParams
 
 # Interface: GetParams
 
@@ -22,7 +22,7 @@ The parameters for retrieving a case
 
 Case ID
 
-Defined in: [cases/get.ts:122](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/cases/get.ts#L122)
+Defined in: [cases/get.ts:122](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/cases/get.ts#L122)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 Whether to include the attachments for a case in the response
 
-Defined in: [cases/get.ts:126](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/cases/get.ts#L126)
+Defined in: [cases/get.ts:126](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/cases/get.ts#L126)
 
 ___
 
@@ -42,4 +42,4 @@ ___
 
 Whether to include the attachments for all children of a case in the response
 
-Defined in: [cases/get.ts:130](https://github.com/jonathan-buttner/kibana/blob/74ceeee50da/x-pack/plugins/cases/server/client/cases/get.ts#L130)
+Defined in: [cases/get.ts:130](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/cases/get.ts#L130)
