@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '../../../../rule_registry/common/technical_rule_data_field_names';
+import { ALERT_UUID } from '@kbn/rule-data-utils/target/technical_field_names';
 import { RuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,

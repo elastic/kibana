@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { RULE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
+import { RULE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
 import { AlertType } from '../../../../../common/alert_types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';

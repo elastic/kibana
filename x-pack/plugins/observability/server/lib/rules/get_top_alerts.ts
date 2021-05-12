@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ALERT_UUID,
-  TIMESTAMP,
-} from '../../../../rule_registry/common/technical_rule_data_field_names';
+import { ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils/target/technical_field_names';
 import { RuleDataClient } from '../../../../rule_registry/server';
 import { kqlQuery, rangeQuery } from '../../utils/queries';
 

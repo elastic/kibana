@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
-import { TopAlert } from '../';
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
@@ -30,7 +29,8 @@ import {
   ALERT_SEVERITY_LEVEL,
   RULE_CATEGORY,
   RULE_NAME,
-} from '../../../../../rule_registry/common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { TopAlert } from '../';
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
