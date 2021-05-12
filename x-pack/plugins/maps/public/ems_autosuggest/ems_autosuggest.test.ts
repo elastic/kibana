@@ -193,15 +193,6 @@ describe('suggestEMSTermJoinConfig', () => {
       });
     });
 
-    test('country - (with sampleValues, this should get rejected because not validated by ems)', async () => {
-      const termJoinConfig = await suggestEMSTermJoinConfig({
-        fieldName: 'Country_name',
-        sampleValues: ['Zaire', 'Mesopotamia'],
-        emsLayerIds: ['world_countries'],
-      });
-      expect(termJoinConfig).toEqual(null);
-    });
-
     test('mismatch', async () => {
       const termJoinConfig = await suggestEMSTermJoinConfig({
         sampleValues: ['90201', 'foobar'],
@@ -279,16 +270,34 @@ describe('suggestEMSTermJoinConfig', () => {
       });
     });
 
-    test('5-digit zip code with column name and ems validation (not all data in ems)', async () => {
+    test('5-digit zip code with column name and skipping ems validation', async () => {
       const termJoinConfig = await suggestEMSTermJoinConfig({
-        sampleValues: ['90201', '40204'],
-        emsLayerIds: ['world_countries', 'usa_zip_codes'],
+        sampleValues: ['40205', '40204'],
+        emsLayerIds: ['world_countries'],
         fieldName: 'zip',
       });
       expect(termJoinConfig).toEqual({
         layerId: 'usa_zip_codes',
         field: 'zip',
       });
+    });
+
+    test('5-digit zip code with column name and ems validation (rejected because requires explicit ems validation)', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        fieldName: 'zip',
+        sampleValues: ['90201', '40204'],
+        emsLayerIds: ['world_countries', 'usa_zip_codes'],
+      });
+      expect(termJoinConfig).toEqual(null);
+    });
+
+    test('country - (with sampleValues, this should get rejected because not validated by ems)', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        fieldName: 'Country_name',
+        sampleValues: ['Zaire', 'Mesopotamia'],
+        emsLayerIds: ['world_countries'],
+      });
+      expect(termJoinConfig).toEqual(null);
     });
   });
 });

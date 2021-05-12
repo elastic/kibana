@@ -119,7 +119,41 @@ function collectMatches(matches: ConfigMatch[]): UniqueMatch[] {
 }
 
 function sortMatch(match1: UniqueMatch, match2: UniqueMatch): number {
-  return match2.matchTypes.length - match2.matchTypes.length;
+  const countDiff = match2.matchTypes.length - match1.matchTypes.length;
+  if (countDiff !== 0) {
+    // prefer more matches
+    return countDiff;
+  }
+
+  // prefer ems validation
+  if (
+    match1.matchTypes.includes(MATCH_TYPE.FIELD_VALUE_EMS_MATCH) &&
+    !match2.matchTypes.includes(MATCH_TYPE.FIELD_VALUE_EMS_MATCH)
+  ) {
+    return -1;
+  }
+  if (
+    !match1.matchTypes.includes(MATCH_TYPE.FIELD_VALUE_EMS_MATCH) &&
+    match2.matchTypes.includes(MATCH_TYPE.FIELD_VALUE_EMS_MATCH)
+  ) {
+    return 1;
+  }
+
+  // prefer pattern validation
+  if (
+    match1.matchTypes.includes(MATCH_TYPE.FIELD_VALUE_PATTERN) &&
+    !match2.matchTypes.includes(MATCH_TYPE.FIELD_VALUE_PATTERN)
+  ) {
+    return -1;
+  }
+  if (
+    !match1.matchTypes.includes(MATCH_TYPE.FIELD_VALUE_PATTERN) &&
+    match2.matchTypes.includes(MATCH_TYPE.FIELD_VALUE_PATTERN)
+  ) {
+    return 1;
+  }
+
+  return 0;
 }
 
 function removePatternFailures(
@@ -203,20 +237,6 @@ export async function suggestEMSTermJoinConfig(
     const fieldNameMatches: EMSTermJoinConfig[] = suggestByName(sampleValuesConfig.fieldName);
     matches.push(...addMatchType(fieldNameMatches, MATCH_TYPE.FIELD_ALIAS));
   }
-
-  // Filter out the ones that fail the regex-pattern (if any)
-  // if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
-  //   matches = removePatternFailures(matches, sampleValuesConfig.sampleValues);
-  //
-  //   // Filter out the ones that fail ems-validation
-  //   if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
-  //     matches = await removeEmsValueMismatches(
-  //       matches,
-  //       sampleValuesConfig.sampleValues,
-  //       sampleValuesConfig.emsLayerIds
-  //     );
-  //   }
-  // }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
     matches = removePatternFailures(matches, sampleValuesConfig.sampleValues);
