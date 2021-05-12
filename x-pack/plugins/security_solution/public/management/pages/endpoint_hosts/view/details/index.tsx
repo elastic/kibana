@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, memo, useMemo } from 'react';
-import moment from 'moment';
+import React, { useCallback, useEffect, memo, useMemo, useState } from 'react';
 
 import {
   EuiFlyout,
@@ -20,6 +19,8 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutFooter,
+  EuiPagination,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,8 +33,12 @@ import {
   uiQueryParams,
   detailsData,
   detailsError,
-  showView,
   detailsLoading,
+  activityLogData,
+  activityLogError,
+  activityLogLoading,
+  showView,
+  listData,
   policyResponseConfigurations,
   policyResponseActions,
   policyResponseFailedOrWarningActionCount,
@@ -48,7 +53,7 @@ import { EndpointDetails } from './endpoint_details';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { PolicyResponse } from './policy_response';
 import * as i18 from '../translations';
-import { EndpointAction, HostMetadata } from '../../../../../../common/endpoint/types';
+import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
 import {
   EndpointDetailsFlyoutTabs,
@@ -60,50 +65,6 @@ import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 
-export const dummyEndpointActions: EndpointAction[] = [
-  {
-    action_id: '1',
-    '@timestamp': moment().subtract(2, 'hours').fromNow().toString(),
-    expiration: moment().add(1, 'day').fromNow().toString(),
-    type: 'INPUT_ACTION',
-    input_type: 'endpoint',
-    agents: ['x', 'y', 'z'],
-    user_id: 'ash',
-    data: {
-      command: 'isolate',
-      comment: 'Sem et tortor consequat id porta nibh venenatis cras sed.',
-    },
-  },
-  {
-    action_id: '2',
-    '@timestamp': moment().subtract(4, 'hours').fromNow().toString(),
-    expiration: moment().add(1, 'day').fromNow().toString(),
-    type: 'INPUT_ACTION',
-    input_type: 'endpoint',
-    agents: ['x', 'y', 'z'],
-    user_id: 'someone',
-    data: {
-      command: 'unisolate',
-      comment: 'Turpis egestas pretium aenean pharetra.',
-    },
-  },
-  {
-    action_id: '3',
-    '@timestamp': moment().subtract(1, 'day').fromNow().toString(),
-    expiration: moment().add(3, 'day').fromNow().toString(),
-    type: 'INPUT_ACTION',
-    input_type: 'endpoint',
-    agents: ['x', 'y', 'z'],
-    user_id: 'ash',
-    data: {
-      command: 'isolate',
-      comment:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
-        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    },
-  },
-];
-
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
   const toasts = useToasts();
@@ -113,18 +74,27 @@ export const EndpointDetailsFlyout = memo(() => {
     ...queryParamsWithoutSelectedEndpoint
   } = queryParams;
   const details = useEndpointSelector(detailsData);
+  const activityLog = useEndpointSelector(activityLogData);
+  const activityLoading = useEndpointSelector(activityLogLoading);
+  const activityError = useEndpointSelector(activityLogError);
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const loading = useEndpointSelector(detailsLoading);
   const error = useEndpointSelector(detailsError);
   const show = useEndpointSelector(showView);
 
+  const pageCount = useEndpointSelector(listData).length;
+  const [activePage, setActivePage] = useState<number>(0);
+  const onPageClick = useCallback((pageNumber) => {
+    setActivePage(pageNumber);
+  }, []);
+
   const handleFlyoutClose = useCallback(() => {
     history.push(urlFromQueryParams(queryParamsWithoutSelectedEndpoint));
   }, [history, queryParamsWithoutSelectedEndpoint]);
 
   useEffect(() => {
-    if (error !== undefined) {
+    if (error !== undefined || activityError !== undefined) {
       toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.endpoint.details.errorTitle', {
           defaultMessage: 'Could not find host',
@@ -134,7 +104,7 @@ export const EndpointDetailsFlyout = memo(() => {
         }),
       });
     }
-  }, [error, toasts]);
+  }, [error, activityError, toasts]);
 
   return (
     <EuiFlyout
@@ -145,7 +115,7 @@ export const EndpointDetailsFlyout = memo(() => {
       paddingSize="m"
     >
       <EuiFlyoutHeader hasBorder>
-        {loading ? (
+        {loading || activityLoading ? (
           <EuiLoadingContent lines={1} />
         ) : (
           <EuiToolTip content={details?.host?.hostname} anchorClassName="eui-textTruncate">
@@ -160,7 +130,7 @@ export const EndpointDetailsFlyout = memo(() => {
           </EuiToolTip>
         )}
       </EuiFlyoutHeader>
-      {details === undefined ? (
+      {details === undefined || activityLog === undefined ? (
         <>
           <EuiFlyoutBody>
             <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
@@ -189,7 +159,7 @@ export const EndpointDetailsFlyout = memo(() => {
                         {
                           id: EndpointDetailsTabsTypes.activityLog,
                           name: i18.ACTIVITY_LOG,
-                          content: <EndpointActivityLog endpointActions={dummyEndpointActions} />,
+                          content: <EndpointActivityLog endpointActions={activityLog} />,
                         },
                       ]}
                     />
@@ -201,6 +171,14 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={details} />}
         </>
       )}
+      <EuiFlyoutFooter>
+        <EuiPagination
+          pageCount={pageCount}
+          activePage={activePage}
+          onPageClick={onPageClick}
+          compressed
+        />
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 });

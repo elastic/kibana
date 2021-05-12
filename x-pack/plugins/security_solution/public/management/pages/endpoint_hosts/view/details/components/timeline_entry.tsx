@@ -8,49 +8,35 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiComment, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { EndpointAction } from '../../../../../../../common/endpoint/types';
+import { EuiComment, EuiText } from '@elastic/eui';
+import { Immutable, EndpointAction } from '../../../../../../../common/endpoint/types';
 
-const TimelineItem = styled(EuiComment)`
-  figure {
-    border: 0;
-  }
-  figcaption.euiCommentEvent__header {
-    background-color: transparent;
-    border: 0;
-  }
-`;
+const TimelineItem = styled(EuiComment)``;
 
-const CommentItem = styled.div`
-  max-width: 85%;
-  > div {
-    display: inline-flex;
-  }
-`;
-
-export const TimelineEntry = ({ endpointAction }: { endpointAction: EndpointAction }) => {
+export const TimelineEntry = ({
+  endpointAction,
+}: {
+  endpointAction: Immutable<EndpointAction>;
+}) => {
   const isIsolated = endpointAction?.data.command === 'isolate';
   const timelineIcon = isIsolated ? 'lock' : 'lockOpen';
-  const event = `${isIsolated ? 'isolated' : 'unisolated'} the endpoint`;
+  const event = `${isIsolated ? 'isolated' : 'unisolated'} host`;
   const hasComment = !!endpointAction.data.comment;
+  // do this better when we can distinguish between endpoint events vs user events
+  const commentType = endpointAction.user_id === 'sys' ? 'update' : 'regular';
   return (
     <TimelineItem
-      type="regular"
+      type={commentType}
       username={endpointAction.user_id}
+      timestamp={endpointAction['@timestamp']}
       event={event}
       timelineIcon={timelineIcon}
       data-test-subj="timelineEntry"
     >
-      <EuiText size="s">{endpointAction['@timestamp']}</EuiText>
-      <EuiSpacer size="m" />
       {hasComment ? (
-        <CommentItem>
-          <EuiPanel hasBorder={true} paddingSize="s">
-            <EuiText size="s">
-              <p>{endpointAction.data.comment}</p>
-            </EuiText>
-          </EuiPanel>
-        </CommentItem>
+        <EuiText size="s">
+          <p>{endpointAction.data.comment}</p>
+        </EuiText>
       ) : undefined}
     </TimelineItem>
   );

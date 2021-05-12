@@ -19,6 +19,10 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   total: 0,
   loading: false,
   error: undefined,
+  // TODO refactor to bundle details and activity log together
+  activityLog: undefined,
+  activityLogLoading: false,
+  activityLogError: undefined,
   details: undefined,
   detailsLoading: false,
   detailsError: undefined,
@@ -119,6 +123,19 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       ...state,
       detailsError: action.payload,
       detailsLoading: false,
+    };
+  } else if (action.type === 'serverReturnedEndpointDetailsActivityLog') {
+    return {
+      ...state,
+      activityLog: action.payload,
+      activityLogError: undefined,
+      activityLogLoading: false,
+    };
+  } else if (action.type === 'serverFailedToReturnEndpointDetailsActivityLog') {
+    return {
+      ...state,
+      activityLogError: action.payload,
+      activityLogLoading: false,
     };
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {

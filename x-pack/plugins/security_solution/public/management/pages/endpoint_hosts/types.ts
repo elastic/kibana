@@ -14,6 +14,7 @@ import {
   PolicyData,
   MetadataQueryStrategyVersions,
   HostStatus,
+  EndpointAction,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../fleet/common';
@@ -32,12 +33,19 @@ export interface EndpointState {
   loading: boolean;
   /** api error from retrieving host list */
   error?: ServerApiError;
+  // TODO bundle details and activity log together
   /** details data for a specific host */
   details?: Immutable<HostMetadata>;
   /** details page is retrieving data */
   detailsLoading: boolean;
   /** api error from retrieving host details */
   detailsError?: ServerApiError;
+  /** activity detail of a specific endpoint */
+  activityLog?: Immutable<EndpointAction[]>;
+  /** details/activity log page is retrieving data */
+  activityLogLoading: boolean;
+  /** api error from retrieving endpoint activity details */
+  activityLogError?: ServerApiError;
   /** Holds the Policy Response for the Host currently being displayed in the details */
   policyResponse?: HostPolicyResponse;
   /** policyResponse is being retrieved */

@@ -39,11 +39,19 @@ export const listLoading = (state: Immutable<EndpointState>): boolean => state.l
 
 export const listError = (state: Immutable<EndpointState>) => state.error;
 
+// TODO  update details and activityLog selectors
 export const detailsData = (state: Immutable<EndpointState>) => state.details;
 
 export const detailsLoading = (state: Immutable<EndpointState>): boolean => state.detailsLoading;
 
 export const detailsError = (state: Immutable<EndpointState>) => state.detailsError;
+
+export const activityLogData = (state: Immutable<EndpointState>) => state.activityLog;
+
+export const activityLogLoading = (state: Immutable<EndpointState>): boolean =>
+  state.activityLogLoading;
+
+export const activityLogError = (state: Immutable<EndpointState>) => state.activityLogError;
 
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 

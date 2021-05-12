@@ -6,6 +6,7 @@
  */
 
 import {
+  EndpointAction as EndpointIsolationAction,
   HostResultList,
   HostInfo,
   GetHostPolicyResponse,
@@ -33,6 +34,16 @@ interface ServerReturnedEndpointDetails {
 
 interface ServerFailedToReturnEndpointDetails {
   type: 'serverFailedToReturnEndpointDetails';
+  payload: ServerApiError;
+}
+
+interface ServerReturnedEndpointDetailsActivityLog {
+  type: 'serverReturnedEndpointDetailsActivityLog';
+  payload: EndpointIsolationAction[];
+}
+
+interface ServerFailedToReturnEndpointDetailsActivityLog {
+  type: 'serverFailedToReturnEndpointDetailsActivityLog';
   payload: ServerApiError;
 }
 
@@ -139,6 +150,8 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
+  | ServerReturnedEndpointDetailsActivityLog
+  | ServerFailedToReturnEndpointDetailsActivityLog
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding

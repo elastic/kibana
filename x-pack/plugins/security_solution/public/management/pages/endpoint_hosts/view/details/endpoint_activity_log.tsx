@@ -9,16 +9,22 @@ import React from 'react';
 
 import { EuiFieldSearch, EuiSpacer } from '@elastic/eui';
 import { TimelineEntry } from './components/timeline_entry';
-import { EndpointAction } from '../../../../../../common/endpoint/types';
+import { Immutable, EndpointAction } from '../../../../../../common/endpoint/types';
 
-export const EndpointActivityLog = ({ endpointActions }: { endpointActions: EndpointAction[] }) => (
-  <>
-    <EuiFieldSearch compressed fullWidth placeholder="Search activity log" />
-    <EuiSpacer size="l" />
-    {endpointActions.map((endpointAction) => (
-      <TimelineEntry key={endpointAction['@timestamp']} endpointAction={endpointAction} />
-    ))}
-  </>
-);
+export const EndpointActivityLog = ({
+  endpointActions,
+}: {
+  endpointActions: Immutable<EndpointAction[]>;
+}) => {
+  return (
+    <>
+      <EuiFieldSearch compressed fullWidth placeholder="Search activity log" />
+      <EuiSpacer size="l" />
+      {endpointActions.map((endpointAction) => (
+        <TimelineEntry key={endpointAction['@timestamp']} endpointAction={endpointAction} />
+      ))}
+    </>
+  );
+};
 
 EndpointActivityLog.displayName = 'EndpointActivityLog';

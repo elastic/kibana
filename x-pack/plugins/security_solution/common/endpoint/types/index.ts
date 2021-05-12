@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { float } from '@elastic/elasticsearch/api/types';
 import { ApplicationStart } from 'kibana/public';
+import { EndpointAction } from './actions';
 import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
@@ -182,6 +184,38 @@ export interface HostResultList {
   query_strategy_version: MetadataQueryStrategyVersions;
   /* policy IDs and versions */
   policy_info?: HostInfo['policy_info'];
+}
+
+// TODO update types when actual API is ready
+interface ActivityLog {
+  _index: string;
+  _id: string;
+  _score: float;
+  _source: EndpointAction;
+}
+
+/**
+ * Returned by the server via /endpoint/activity_log/:endpoint_id
+ * or /endpoint/endpoint_activity_log/:endpoint_id
+ *
+ */
+export interface ActivityLogList {
+  hits: {
+    total: {
+      value: number;
+      relation: string;
+    };
+    max_score: float;
+    hits: ActivityLog[];
+  };
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  took: number;
+  timed_out: boolean;
 }
 
 /**
