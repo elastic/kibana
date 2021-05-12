@@ -32,15 +32,26 @@ export const calculateStatus$ = (
           message,
           incompatibleNodes,
           warningNodes,
+          nodesInfoRequestError,
         }): ServiceStatus<ElasticsearchStatusMeta> => {
           if (!isCompatible) {
+            if (!nodesInfoRequestError) {
+              return {
+                level: ServiceStatusLevels.critical,
+                summary:
+                  // Message should always be present, but this is a safe fallback
+                  message ??
+                  `Some Elasticsearch nodes are not compatible with this version of Kibana`,
+                meta: { warningNodes, incompatibleNodes },
+              };
+            }
             return {
               level: ServiceStatusLevels.critical,
               summary:
                 // Message should always be present, but this is a safe fallback
                 message ??
                 `Some Elasticsearch nodes are not compatible with this version of Kibana`,
-              meta: { warningNodes, incompatibleNodes },
+              meta: { warningNodes, incompatibleNodes, nodesInfoRequestError },
             };
           } else if (warningNodes.length > 0) {
             return {

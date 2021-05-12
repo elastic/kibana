@@ -103,23 +103,23 @@ describe('mapNodesVersionCompatibility', () => {
     );
   });
 
-  it('returns isCompatible=false without an extended message when a requestError is not provided', async () => {
+  it('returns isCompatible=false without an extended message when a nodesInfoRequestError is not provided', async () => {
     const result = mapNodesVersionCompatibility({ nodes: {} }, KIBANA_VERSION, false);
     expect(result.isCompatible).toBe(false);
-    expect(result.requestError).toBeUndefined();
+    expect(result.nodesInfoRequestError).toBeUndefined();
     expect(result.message).toMatchInlineSnapshot(
       `"Unable to retrieve version information from Elasticsearch nodes."`
     );
   });
 
-  it('returns isCompatible=false with an extended message when a requestError is present', async () => {
+  it('returns isCompatible=false with an extended message when a nodesInfoRequestError is present', async () => {
     const result = mapNodesVersionCompatibility(
-      { nodes: {}, requestError: new Error('connection refused') },
+      { nodes: {}, nodesInfoRequestError: new Error('connection refused') },
       KIBANA_VERSION,
       false
     );
     expect(result.isCompatible).toBe(false);
-    expect(result.requestError).toBeTruthy();
+    expect(result.nodesInfoRequestError).toBeTruthy();
     expect(result.message).toMatchInlineSnapshot(
       `"Unable to retrieve version information from Elasticsearch nodes. connection refused"`
     );
