@@ -102,6 +102,28 @@ describe('mapNodesVersionCompatibility', () => {
       `"You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.1.1 @ http_address (ip)"`
     );
   });
+
+  it('returns isCompatible=false without an extended message when a requestError is not provided', async () => {
+    const result = mapNodesVersionCompatibility({ nodes: {} }, KIBANA_VERSION, false);
+    expect(result.isCompatible).toBe(false);
+    expect(result.requestError).toBeUndefined();
+    expect(result.message).toMatchInlineSnapshot(
+      `"Unable to retrieve version information from Elasticsearch nodes."`
+    );
+  });
+
+  it('returns isCompatible=false with an extended message when a requestError is present', async () => {
+    const result = mapNodesVersionCompatibility(
+      { nodes: {}, requestError: new Error('connection refused') },
+      KIBANA_VERSION,
+      false
+    );
+    expect(result.isCompatible).toBe(false);
+    expect(result.requestError).toBeTruthy();
+    expect(result.message).toMatchInlineSnapshot(
+      `"Unable to retrieve version information from Elasticsearch nodes. connection refused"`
+    );
+  });
 });
 
 describe('pollEsNodesVersion', () => {
@@ -152,7 +174,7 @@ describe('pollEsNodesVersion', () => {
     expect.assertions(2);
     const expectedCompatibilityResults = [false];
     const expectedMessageResults = [
-      'Unable to retrieve version information from Elasticsearch nodes: mock request error',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
     ];
     jest.clearAllMocks();
 
@@ -180,8 +202,8 @@ describe('pollEsNodesVersion', () => {
     expect.assertions(4);
     const expectedCompatibilityResults = [false, false];
     const expectedMessageResults = [
-      'Unable to retrieve version information from Elasticsearch nodes: mock request error',
-      'Unable to retrieve version information from Elasticsearch nodes: mock request error 2',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error 2',
     ];
     jest.clearAllMocks();
 
@@ -212,9 +234,9 @@ describe('pollEsNodesVersion', () => {
     const expectedCompatibilityResults = [false, false, true, false];
     const expectedMessageResults = [
       'This version of Kibana (v5.1.0) is incompatible with the following Elasticsearch nodes in your cluster: v5.0.0 @ http_address (ip)',
-      'Unable to retrieve version information from Elasticsearch nodes: mock request error',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
       "You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.2.0 @ http_address (ip), v5.1.1-Beta1 @ http_address (ip)",
-      'Unable to retrieve version information from Elasticsearch nodes: mock request error 2',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error 2',
     ];
     jest.clearAllMocks();
 

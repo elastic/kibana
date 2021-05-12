@@ -19,7 +19,6 @@ import {
 } from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
 import type { ElasticsearchClient } from '../client';
-import { isUnauthorizedError, UnauthorizedError } from '../client/errors';
 
 export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
@@ -50,7 +49,7 @@ export interface NodesVersionCompatibility {
   incompatibleNodes: NodeInfo[];
   warningNodes: NodeInfo[];
   kibanaVersion: string;
-  nodesInfoError?: UnauthorizedError | Error;
+  requestError?: Error;
 }
 
 function getHumanizedNodeName(node: NodeInfo) {
@@ -59,23 +58,28 @@ function getHumanizedNodeName(node: NodeInfo) {
 }
 
 export function mapNodesVersionCompatibility(
-  nodesInfo: NodesInfo,
+  nodesInfoResponse: NodesInfo & { requestError?: Error },
   kibanaVersion: string,
-  ignoreVersionMismatch: boolean,
-  nodesInfoError?: UnauthorizedError | Error
+  ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
-  if (Object.keys(nodesInfo.nodes ?? {}).length === 0 && nodesInfoError) {
+  if (Object.keys(nodesInfoResponse.nodes ?? {}).length === 0) {
+    // Note: If the a requestError is present, the message contains the requestError.message as a suffix
+    let message = `Unable to retrieve version information from Elasticsearch nodes.`;
+    if (nodesInfoResponse.requestError) {
+      message = message + ` ${nodesInfoResponse.requestError.message}`;
+    }
     return {
       isCompatible: false,
-      message: `Unable to retrieve version information from Elasticsearch nodes: ${nodesInfoError.message}`,
+      message,
       incompatibleNodes: [],
       warningNodes: [],
       kibanaVersion,
+      requestError: nodesInfoResponse.requestError, // optionally stringify the whole Error or parts of it that we're interested in
     };
   }
-  const nodes = Object.keys(nodesInfo.nodes)
+  const nodes = Object.keys(nodesInfoResponse.nodes)
     .sort() // Sorting ensures a stable node ordering for comparison
-    .map((key) => nodesInfo.nodes[key])
+    .map((key) => nodesInfoResponse.nodes[key])
     .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
 
   // Aggregate incompatible ES nodes.
@@ -115,24 +119,17 @@ export function mapNodesVersionCompatibility(
     kibanaVersion,
   };
 }
-// Returns true if NodesVersionCompatibility entries' messages contain an es error and the error is the same
-// Returns true if neither message contains an error, handing off the compatibility check to the other conditions
+// Returns true if NodesVersionCompatibility requestError is the same
 function compareNodesInfoErrorMessages(
   prev: NodesVersionCompatibility,
   curr: NodesVersionCompatibility
 ): boolean {
-  const messageIsErrorCase = (str: string = '') =>
-    str.startsWith('Unable to retrieve version information from Elasticsearch nodes: ');
-  if (messageIsErrorCase(prev.message) && messageIsErrorCase(curr.message)) {
-    return prev.message === curr.message;
-  } else if (!messageIsErrorCase(prev.message) && !messageIsErrorCase(curr.message)) {
-    return true;
-  }
-  return false;
+  return prev.requestError?.message === curr.requestError?.message;
 }
 // Returns true if two NodesVersionCompatibility entries match
 function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
   const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
+  // if we pass the full error back in here, we can check to see if it's the same error rather than checking
   return (
     curr.isCompatible === prev.isCompatible &&
     curr.incompatibleNodes.length === prev.incompatibleNodes.length &&
@@ -151,7 +148,6 @@ export const pollEsNodesVersion = ({
   esVersionCheckInterval: healthCheckInterval,
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking Elasticsearch version');
-  let nodesInfoError: Error | undefined;
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
       return from(
@@ -161,18 +157,12 @@ export const pollEsNodesVersion = ({
       ).pipe(
         map(({ body }) => body),
         catchError((_err) => {
-          if (isUnauthorizedError(_err)) {
-            nodesInfoError = _err as UnauthorizedError;
-          } else {
-            nodesInfoError = _err as Error;
-          }
-
-          return of({ nodes: {} });
+          return of({ nodes: {}, requestError: _err }); // I don't know how to map over this now
         })
       );
     }),
-    map((nodesInfo: NodesInfo) =>
-      mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch, nodesInfoError)
+    map((nodesInfoResponse: NodesInfo & { requestError?: Error }) =>
+      mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch)
     ),
     distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions or if we return an error and that error changes
   );
