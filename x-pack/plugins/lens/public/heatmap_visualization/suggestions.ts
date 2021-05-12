@@ -45,10 +45,11 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
 
   /**
    * Hide for:
-   * - reduced tables
+   * - reduced and reorder tables
    * - tables with just a single bucket dimension
    */
-  const hide = table.changeType === 'reduced' || isSingleBucketDimension;
+  const hide =
+    table.changeType === 'reduced' || table.changeType === 'reorder' || isSingleBucketDimension;
 
   const newState: HeatmapVisualizationState = {
     shape: CHART_SHAPES.HEATMAP,
