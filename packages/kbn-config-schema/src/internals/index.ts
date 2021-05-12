@@ -77,7 +77,7 @@ export const internals: JoiRoot = Joi.extend(
         }
       } catch (e) {
         return {
-          errors: [error('bytes.parse')],
+          errors: [error('bytes.parse', { message: e.message })],
         };
       }
       return { value };
@@ -99,7 +99,10 @@ export const internals: JoiRoot = Joi.extend(
             assert: Joi.alternatives([Joi.number(), Joi.string()]).required(),
           },
         ],
-        validate(value, { error }, args, options) {
+        method(limit) {
+          return this.$_addRule({ name: 'min', args: { limit } });
+        },
+        validate(value, { error }, args) {
           const limit = ensureByteSizeValue(args.limit);
           if (value.isLessThan(limit)) {
             return error('bytes.min', { value, limit });
@@ -115,7 +118,10 @@ export const internals: JoiRoot = Joi.extend(
             assert: Joi.alternatives([Joi.number(), Joi.string()]).required(),
           },
         ],
-        validate(value, { error }, args, options) {
+        method(limit) {
+          return this.$_addRule({ name: 'max', args: { limit } });
+        },
+        validate(value, { error }, args) {
           const limit = ensureByteSizeValue(args.limit);
           if (value.isGreaterThan(limit)) {
             return error('bytes.max', { value, limit });
