@@ -91,7 +91,7 @@ describe('CoreUsageDataService', () => {
       const savedObjectsStartPromise = Promise.resolve(
         savedObjectsServiceMock.createStartContract()
       );
-      const changedDeprecatedConfigPath$ = configServiceMock.create().getChangedPath$();
+      const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
       service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
 
       const savedObjects = await savedObjectsStartPromise;
@@ -106,7 +106,7 @@ describe('CoreUsageDataService', () => {
         const savedObjectsStartPromise = Promise.resolve(
           savedObjectsServiceMock.createStartContract()
         );
-        const changedDeprecatedConfigPath$ = configServiceMock.create().getChangedPath$();
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
         const coreUsageData = service.setup({
           http,
           metrics,
@@ -133,7 +133,7 @@ describe('CoreUsageDataService', () => {
         const savedObjectsStartPromise = Promise.resolve(
           savedObjectsServiceMock.createStartContract()
         );
-        const changedDeprecatedConfigPath$ = configServiceMock.create().getChangedPath$();
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
         const coreUsageData = service.setup({
           http,
           metrics,
@@ -804,7 +804,7 @@ describe('CoreUsageDataService', () => {
           savedObjectsServiceMock.createStartContract()
         );
 
-        const changedDeprecatedConfigPath$ = configServiceMock.create().getChangedPath$();
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
         service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
 
         // Use the stopTimer$ to delay calling stop() until the third frame

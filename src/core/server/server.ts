@@ -153,7 +153,7 @@ export class Server {
       http: httpSetup,
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
-      changedDeprecatedConfigPath$: this.configService.getChangedPath$(),
+      changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
