@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+
 import type { ListsPluginRouter } from '../types';
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { createListItemSchema, listItemSchema } from '../../common/schemas';
-import { validate } from '../../common/shared_imports';
 
 import { getListClient } from '.';
 

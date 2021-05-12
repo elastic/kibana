@@ -9,7 +9,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Zoom Meeting with no Passcode",
-  "note": "This rule requires the Zoom Filebeat module.",
+  "note": "## Config\n\nThe Zoom Filebeat module or similarly structured data is required to be compatible with this rule.",
   "query": "event.type:creation and event.module:zoom and event.dataset:zoom.webhook and event.action:meeting.created and not zoom.meeting.password:*",
   "references": [
     "https://blog.zoom.us/a-message-to-our-users/",
@@ -46,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 4
 }
