@@ -6,10 +6,10 @@
  */
 
 import { EntriesArray, validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListsPluginRouter } from '../types';
 import { LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import {
   ExceptionListItemSchema,
   FoundExceptionListSchema,
@@ -20,6 +20,8 @@ import {
 import { getSavedObjectType } from '../services/exception_lists/utils';
 import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
 import { escapeQuotes } from '../services/utils/escape_query';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getExceptionListClient, getListClient } from '.';
 
