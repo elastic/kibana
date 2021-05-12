@@ -22,6 +22,7 @@ import { EmbeddableSetup } from '../../embeddable/server';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './embeddable/dashboard_container_embeddable_factory';
+import { getUISettings } from './ui_settings';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -53,6 +54,8 @@ export class DashboardPlugin
     plugins.embeddable.registerEmbeddableFactory(
       dashboardPersistableStateServiceFactory(plugins.embeddable)
     );
+
+    core.uiSettings.register(getUISettings());
 
     return {};
   }

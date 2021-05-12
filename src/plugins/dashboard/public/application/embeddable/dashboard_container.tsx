@@ -38,6 +38,7 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { DashboardCapabilities } from '../types';
+import { PresentationUtilPluginStart } from '../../services/presentation_util';
 
 export interface DashboardContainerInput extends ContainerInput {
   dashboardCapabilities?: DashboardCapabilities;
@@ -68,6 +69,7 @@ export interface DashboardContainerServices {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   http: CoreStart['http'];
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 interface IndexSignature {
@@ -245,7 +247,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <DashboardViewport container={this} switchViewMode={this.switchViewMode} />
+          <this.services.presentationUtil.ContextProvider>
+            <DashboardViewport container={this} switchViewMode={this.switchViewMode} />
+          </this.services.presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       dom
