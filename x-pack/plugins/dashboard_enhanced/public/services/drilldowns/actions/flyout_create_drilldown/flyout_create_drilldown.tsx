@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { skip, take, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableContext,
+  ViewMode,
 } from '../../../../../../../../src/plugins/embeddable/public';
 import {
   isEnhancedEmbeddable,
@@ -111,5 +112,19 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
       close();
     });
+
+    // Close flyout on dashboard switch to "view" mode.
+    embeddable
+      .getInput$()
+      .pipe(
+        takeUntil(closed$),
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        filter((mode) => mode !== ViewMode.EDIT),
+        take(1)
+      )
+      .subscribe(() => {
+        close();
+      });
   }
 }

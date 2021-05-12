@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
+
+import { AppAction } from '../../../../common/store/actions';
+import { getEventFiltersListPath } from '../../../common/routing';
 import { AdministrationListPage as _AdministrationListPage } from '../../../components/administration_list_page';
+
 import { EventFiltersListEmptyState } from './components/empty';
 import { useEventFiltersNavigateCallback, useEventFiltersSelector } from './hooks';
 import { EventFiltersFlyout } from './components/flyout';
@@ -21,6 +28,8 @@ import {
   getListPagination,
   getCurrentLocation,
   getListPageDoesDataExist,
+  getActionError,
+  getFormEntry,
 } from '../store/selector';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
@@ -29,6 +38,8 @@ import {
   ExceptionItem,
   ExceptionItemProps,
 } from '../../../../common/components/exceptions/viewer/exception_item';
+
+import { SearchBar } from '../../../components/search_bar';
 
 type EventListPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -46,6 +57,10 @@ const AdministrationListPage = styled(_AdministrationListPage)`
 `;
 
 export const EventFiltersListPage = memo(() => {
+  const history = useHistory();
+  const dispatch = useDispatch<Dispatch<AppAction>>();
+  const isActionError = useEventFiltersSelector(getActionError);
+  const formEntry = useEventFiltersSelector(getFormEntry);
   const listItems = useEventFiltersSelector(getListItems);
   const pagination = useEventFiltersSelector(getListPagination);
   const isLoading = useEventFiltersSelector(getListIsLoading);
@@ -56,6 +71,35 @@ export const EventFiltersListPage = memo(() => {
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
 
+  // Clean url params if wrong
+  useEffect(() => {
+    if ((location.show === 'edit' && !location.id) || (location.show === 'create' && !!location.id))
+      navigateCallback({
+        show: 'create',
+        id: undefined,
+      });
+  }, [location, navigateCallback]);
+
+  // Catch fetch error -> actionError + empty entry in form
+  useEffect(() => {
+    if (isActionError && !formEntry) {
+      // Replace the current URL route so that user does not keep hitting this page via browser back/fwd buttons
+      history.replace(
+        getEventFiltersListPath({
+          ...location,
+          show: undefined,
+          id: undefined,
+        })
+      );
+      dispatch({
+        type: 'eventFiltersFormStateChanged',
+        payload: {
+          type: 'UninitialisedResourceState',
+        },
+      });
+    }
+  }, [dispatch, formEntry, history, isActionError, location, navigateCallback]);
+
   const handleAddButtonClick = useCallback(
     () =>
       navigateCallback({
@@ -65,7 +109,7 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleAddCancelButtonClick = useCallback(
+  const handleCancelButtonClick = useCallback(
     () =>
       navigateCallback({
         show: undefined,
@@ -74,9 +118,15 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleItemEdit: ExceptionItemProps['onEditException'] = useCallback((item) => {
-    // TODO: implement edit item
-  }, []);
+  const handleItemEdit: ExceptionItemProps['onEditException'] = useCallback(
+    (item: ExceptionListItemSchema) => {
+      navigateCallback({
+        show: 'edit',
+        id: item.id,
+      });
+    },
+    [navigateCallback]
+  );
 
   const handleItemDelete: ExceptionItemProps['onDeleteException'] = useCallback((args) => {
     // TODO: implement delete item
@@ -91,6 +141,7 @@ export const EventFiltersListPage = memo(() => {
       onDeleteException: handleItemDelete,
       showModified: true,
       showName: true,
+      'data-test-subj': `eventFilterCard`,
     }),
     [handleItemDelete, handleItemEdit]
   );
@@ -104,6 +155,10 @@ export const EventFiltersListPage = memo(() => {
     },
     [navigateCallback]
   );
+
+  const handleOnSearch = useCallback((query: string) => navigateCallback({ filter: query }), [
+    navigateCallback,
+  ]);
 
   return (
     <AdministrationListPage
@@ -136,8 +191,20 @@ export const EventFiltersListPage = memo(() => {
         )
       }
     >
-      {showFlyout && <EventFiltersFlyout onCancel={handleAddCancelButtonClick} />}
+      {showFlyout && (
+        <EventFiltersFlyout
+          onCancel={handleCancelButtonClick}
+          id={location.id}
+          type={location.show}
+        />
+      )}
 
+      {doesDataExist && (
+        <>
+          <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <PaginatedContent<Immutable<ExceptionListItemSchema>, typeof ExceptionItem>
         items={listItems}
         ItemComponent={ExceptionItem}
@@ -147,6 +214,7 @@ export const EventFiltersListPage = memo(() => {
         loading={isLoading}
         pagination={pagination}
         contentClassName="event-filter-container"
+        data-test-subj="eventFiltersContent"
         noItemsMessage={
           !doesDataExist && (
             <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />

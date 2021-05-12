@@ -84,14 +84,19 @@ beforeAll(() => {
   expect(project.getSourceFiles().length).toBeGreaterThan(0);
 
   const pluginA = getKibanaPlatformPlugin('pluginA');
+  const pluginB = getKibanaPlatformPlugin(
+    'pluginB',
+    Path.resolve(__dirname, '__fixtures__/src/plugin_b')
+  );
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA];
+  const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
 
-  const { pluginApiMap } = getPluginApiMap(project, plugins, log);
+  const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
   writePluginDocs(mdxOutputFolder, doc, log);
+  writePluginDocs(mdxOutputFolder, pluginApiMap.pluginB, log);
 });
 
 it('Setup type is extracted', () => {
@@ -336,6 +341,16 @@ describe('interfaces and classes', () => {
     expect(anInterface?.signature).toBeUndefined();
   });
 
+  it('deprecated interface exported correctly', () => {
+    const anInterface = doc.client.find((c) => c.label === 'AnotherInterface');
+    expect(anInterface).toBeDefined();
+
+    expect(anInterface?.deprecated).toBeTruthy();
+    expect(anInterface?.references).toBeDefined();
+    expect(anInterface?.references!.length).toBe(2);
+    expect(anInterface?.removeBy).toEqual('8.0');
+  });
+
   it('Interface which extends exported correctly', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
@@ -344,9 +359,6 @@ describe('interfaces and classes', () => {
 
     expect(linkCount(exampleInterface?.signature!)).toBe(2);
 
-    // TODO: uncomment if the bug is fixed.
-    // This is wrong, the link should be to `AnotherInterface`
-    // Another bug, this link is not being captured.
     expect(exampleInterface?.signature).toMatchInlineSnapshot(`
       Array [
         Object {

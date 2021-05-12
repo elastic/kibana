@@ -7,10 +7,13 @@
 
 import { HttpStart } from 'kibana/public';
 import {
+  ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '../../../../shared_imports';
+import { Immutable } from '../../../../../common/endpoint/types';
+
 import { EVENT_FILTER_LIST, EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../constants';
 import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { EventFiltersService } from '../types';
@@ -45,11 +48,13 @@ export class EventFiltersHttpService implements EventFiltersService {
     page,
     sortField,
     sortOrder,
+    filter,
   }: Partial<{
     page: number;
     perPage: number;
     sortField: string;
     sortOrder: string;
+    filter: string;
   }> = {}): Promise<FoundExceptionListItemSchema> {
     const http = await this.httpWrapper();
     return http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
@@ -60,12 +65,30 @@ export class EventFiltersHttpService implements EventFiltersService {
         sort_order: sortOrder,
         list_id: [ENDPOINT_EVENT_FILTERS_LIST_ID],
         namespace_type: ['agnostic'],
+        filter,
       },
     });
   }
 
   async addEventFilters(exception: ExceptionListItemSchema | CreateExceptionListItemSchema) {
     return (await this.httpWrapper()).post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      body: JSON.stringify(exception),
+    });
+  }
+
+  async getOne(id: string) {
+    return (await this.httpWrapper()).get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      query: {
+        id,
+        namespace_type: 'agnostic',
+      },
+    });
+  }
+
+  async updateOne(
+    exception: Immutable<UpdateExceptionListItemSchema>
+  ): Promise<ExceptionListItemSchema> {
+    return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
     });
   }

@@ -127,6 +127,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.data[0].doc_count).to.be(0);
         expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);
         expect(stats.stack_stats.data[0].size_in_bytes).to.be.a('number');
+
+        expect(stats.stack_stats.kibana.plugins.saved_objects_counts).to.be.an('object');
+        expect(stats.stack_stats.kibana.plugins.saved_objects_counts.by_type).to.be.an('array');
+        expect(stats.stack_stats.kibana.plugins.saved_objects_counts.by_type).to.eql([
+          { type: 'config', count: 2 },
+          { type: 'dashboard', count: 2 },
+          { type: 'index-pattern', count: 2 },
+          { type: 'visualization', count: 2 },
+        ]);
       });
 
       it('should validate mandatory fields exist', () => {

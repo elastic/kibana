@@ -6,23 +6,24 @@
  */
 
 import * as t from 'io-ts';
-
 import {
-  ItemId,
+  CreateCommentsArray,
+  DefaultCreateCommentsArray,
+  DefaultUuid,
+  EntriesArray,
   OsTypeArray,
   Tags,
   description,
   exceptionListItemType,
   meta,
   name,
+  nonEmptyEndpointEntriesArray,
   osTypeArrayOrUndefined,
   tags,
-} from '../common/schemas';
+} from '@kbn/securitysolution-io-ts-utils';
+
+import { ItemId } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { CreateCommentsArray, DefaultCreateCommentsArray } from '../types';
-import { nonEmptyEndpointEntriesArray } from '../types/endpoint';
-import { EntriesArray } from '../types/entries';
-import { DefaultUuid } from '../../shared_imports';
 
 export const createEndpointListItemSchema = t.intersection([
   t.exact(

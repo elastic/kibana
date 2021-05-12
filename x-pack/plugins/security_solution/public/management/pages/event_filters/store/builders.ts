@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState } from '../state';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
+import { EventFiltersListPageState } from '../types';
 
 export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
   entries: [],
@@ -15,6 +15,7 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     hasNameError: false,
     hasItemsError: false,
     hasOSError: false,
+    newComment: '',
     submissionResourceState: { type: 'UninitialisedResourceState' },
   },
   location: {

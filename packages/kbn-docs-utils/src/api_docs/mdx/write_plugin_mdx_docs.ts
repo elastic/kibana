@@ -65,7 +65,7 @@ export function writePluginDoc(folder: string, doc: PluginApi, log: ToolingLog):
   let mdx =
     dedent(`
 ---
-id: ${getPluginApiDocId(doc.id, log)}
+id: ${getPluginApiDocId(doc.id)}
 slug: /kibana-dev-docs/${doc.id}PluginApi
 title: ${doc.id}
 image: https://source.unsplash.com/400x175/?github

@@ -30,8 +30,6 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           'Defining `xpack.security.authc.providers` as an array of provider types is deprecated. Use extended `object` format instead.',
       });
     }
-
-    return settings;
   },
   (settings, fromPath, addDeprecation) => {
     const hasProviderType = (providerType: string) => {
@@ -51,7 +49,6 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.',
       });
     }
-    return settings;
   },
   (settings, fromPath, addDeprecation) => {
     const samlProviders = (settings?.xpack?.security?.authc?.providers?.saml ?? {}) as Record<
@@ -64,8 +61,6 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           '`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` is deprecated and is no longer used',
       });
     }
-
-    return settings;
   },
   (settings, fromPath, addDeprecation) => {
     if (settings?.xpack?.security?.enabled === false) {
@@ -75,6 +70,5 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           'To turn off security features, disable them in Elasticsearch instead.',
       });
     }
-    return settings;
   },
 ];

@@ -6,9 +6,9 @@
  */
 
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { setHttp } from '../../crud_app/services';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -28,6 +28,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
   beforeAll(() => {
     startMock = coreMock.createStart();
     setHttp(startMock.http);
+    initDocumentation(docLinksServiceMock.createStartContract());
   });
 
   beforeEach(() => {

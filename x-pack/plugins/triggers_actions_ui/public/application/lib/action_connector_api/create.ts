@@ -14,7 +14,7 @@ import type {
 } from '../../../types';
 
 const rewriteBodyRequest: RewriteResponseCase<
-  Omit<ActionConnectorWithoutId, 'referencedByCount'>
+  Omit<ActionConnectorWithoutId, 'referencedByCount' | 'isMissingSecrets'>
 > = ({ actionTypeId, isPreconfigured, ...res }) => ({
   ...res,
   connector_type_id: actionTypeId,
