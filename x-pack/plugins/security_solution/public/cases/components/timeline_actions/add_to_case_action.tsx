@@ -240,7 +240,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
             href: formatUrl(getCreateCaseUrl()),
             onClick: goToCreateCase,
           },
-          disabledStatuses: [CaseStatuses.closed, StatusAll],
+          hiddenStatuses: [CaseStatuses.closed, StatusAll],
           onRowClick: onCaseClicked,
           updateCase: onCaseSuccess,
           userCanCrud: userPermissions?.crud ?? false,

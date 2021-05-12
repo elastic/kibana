@@ -14,18 +14,18 @@ interface Props {
   stats: Record<CaseStatusWithAllStatus, number | null>;
   selectedStatus: CaseStatusWithAllStatus;
   onStatusChanged: (status: CaseStatusWithAllStatus) => void;
-  disabledStatuses?: CaseStatusWithAllStatus[];
+  hiddenStatuses?: CaseStatusWithAllStatus[];
 }
 
 const StatusFilterComponent: React.FC<Props> = ({
   stats,
   selectedStatus,
   onStatusChanged,
-  disabledStatuses = [],
+  hiddenStatuses = [],
 }) => {
   const caseStatuses = Object.keys(statuses) as CaseStatusWithAllStatus[];
   const options: Array<EuiSuperSelectOption<CaseStatusWithAllStatus>> = [StatusAll, ...caseStatuses]
-    .filter((status) => !disabledStatuses.includes(status))
+    .filter((status) => !hiddenStatuses.includes(status))
     .map((status) => ({
       value: status,
       inputDisplay: (

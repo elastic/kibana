@@ -60,7 +60,7 @@ interface AllCasesGenericProps {
   caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelectorView)
   configureCasesNavigation?: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelectorView)
   createCaseNavigation: CasesNavigation;
-  disabledStatuses?: CaseStatusWithAllStatus[];
+  hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
@@ -73,14 +73,14 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
     caseDetailsNavigation,
     configureCasesNavigation,
     createCaseNavigation,
-    disabledStatuses,
+    hiddenStatuses,
     isSelectorView,
     onRowClick,
     updateCase,
     userCanCrud,
   }) => {
     const { actionLicense } = useGetActionLicense();
-    const initialFilterOptions = disabledStatuses ? { status: CaseStatuses.open } : {};
+    const initialFilterOptions = hiddenStatuses ? { status: CaseStatuses.open } : {};
     const {
       data,
       dispatchUpdateCaseProperty,
@@ -290,7 +290,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
               status: filterOptions.status,
             }}
             setFilterRefetch={setFilterRefetch}
-            disabledStatuses={disabledStatuses}
+            hiddenStatuses={hiddenStatuses}
           />
           <CasesTable
             columns={columns}
