@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { operator } from '../operator';
+import { listOperator as operator } from '../list_operator';
 import { nonEmptyOrNullableStringArray } from '../../non_empty_or_nullable_string_array';
 import { NonEmptyString } from '../../non_empty_string';
 

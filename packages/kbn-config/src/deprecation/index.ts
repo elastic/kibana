@@ -8,6 +8,7 @@
 
 export type {
   ConfigDeprecation,
+  ConfigDeprecationCommand,
   ConfigDeprecationWithContext,
   ConfigDeprecationFactory,
   AddConfigDeprecation,

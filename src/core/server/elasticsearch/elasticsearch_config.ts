@@ -147,7 +147,7 @@ const deprecations: ConfigDeprecationProvider = () => [
   (settings, fromPath, addDeprecation) => {
     const es = settings[fromPath];
     if (!es) {
-      return settings;
+      return;
     }
     if (es.username === 'elastic') {
       addDeprecation({
@@ -171,7 +171,7 @@ const deprecations: ConfigDeprecationProvider = () => [
         message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`,
       });
     }
-    return settings;
+    return;
   },
 ];
 
