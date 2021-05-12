@@ -24,6 +24,7 @@ import {
   SETUP_GUIDE_PATH,
   SOURCES_PATH,
   SOURCE_ADDED_PATH,
+  OAUTH_AUTHORIZE_PATH,
   PERSONAL_SOURCES_PATH,
   ORG_SETTINGS_PATH,
   ROLE_MAPPINGS_PATH,
@@ -38,6 +39,7 @@ import { PrivateSourcesLayout } from './views/content_sources/private_sources_la
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';
+import { OAuthAuthorize } from './views/oauth_authorize';
 import { Overview } from './views/overview';
 import { RoleMappings } from './views/role_mappings';
 import { Security } from './views/security';
@@ -99,6 +101,9 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
             <Overview />
           </Layout>
         )}
+      </Route>
+      <Route path={OAUTH_AUTHORIZE_PATH}>
+        <OAuthAuthorize />
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
         <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
