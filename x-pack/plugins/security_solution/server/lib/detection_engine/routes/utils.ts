@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import Joi from 'joi';
 import { errors } from '@elastic/elasticsearch';
 import { has, snakeCase } from 'lodash/fp';
 import { SanitizedAlert } from '../../../../../alerting/common';
@@ -233,7 +232,12 @@ export const transformBulkError = (
   }
 };
 
-export const buildRouteValidation = <T>(schema: Joi.Schema): RouteValidationFunction<T> => (
+interface Schema {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  validate: (input: any) => { value: any; error?: Error };
+}
+
+export const buildRouteValidation = <T>(schema: Schema): RouteValidationFunction<T> => (
   payload: T,
   { ok, badRequest }
 ) => {
@@ -360,6 +364,9 @@ export const getFailingRules = async (
         };
       }, {});
   } catch (exc) {
+    if (Boom.isBoom(exc)) {
+      throw exc;
+    }
     throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
   }
 };
