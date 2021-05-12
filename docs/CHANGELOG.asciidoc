@@ -218,7 +218,9 @@ Details:
 
 Impact:
 Cluster performance degrades due to a flooding of async search API usage.
-This issue is fixed in 7.12.1 release by {kibana-pull}96123[#96123]. For 7.12.0 workaround refer to {kibana-issue}96124[#96124].
+For information on the workaround for 7.12.0, refer to {kibana-issue}96124[#96124].
+
+For information on the fix in 7.12.1, refer to {kibana-pull}96123[#96123]. 
 
 
 // end::known-issues[]
