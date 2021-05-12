@@ -201,7 +201,6 @@ describe(`#logBulkAuthorizationSuccess`, () => {
         "alerting_authorization_success",
         "foo-user Authorized to create: \\"alert-type-id\\" rules for \\"myApp\\", \\"other-alert-type-id\\" rules for \\"myOtherApp\\"",
         Object {
-          "authorizationType": "rule",
           "authorizedEntries": Array [
             Array [
               "alert-type-id",
@@ -246,7 +245,6 @@ describe(`#logBulkAuthorizationSuccess`, () => {
         "alerting_authorization_success",
         "foo-user Authorized to create: \\"alert-type-id\\" rules by \\"myApp\\", \\"other-alert-type-id\\" rules by \\"myOtherApp\\"",
         Object {
-          "authorizationType": "rule",
           "authorizedEntries": Array [
             Array [
               "alert-type-id",
