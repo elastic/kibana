@@ -50,7 +50,7 @@ export class Config {
       values: Record<string, any>,
       childSchema: any
     ): boolean {
-      if (!childSchema.$_terms.keys) {
+      if (!childSchema.$_terms.keys && !childSchema.$_terms.patterns) {
         return false;
       }
 
