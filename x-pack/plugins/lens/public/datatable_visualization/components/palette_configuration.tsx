@@ -279,6 +279,7 @@ export function CustomizablePalette({
         >
           <CustomStops
             key={`${activePalette.name}-${rangeType}`}
+            reverse={activePalette.params?.reverse}
             colorStops={colorStopsToShow}
             rangeType={rangeType}
             dataBounds={dataBounds}

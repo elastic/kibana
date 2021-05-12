@@ -349,6 +349,7 @@ export const getDatatableVisualization = ({
                   column.palette?.params?.name === 'custom'
                     ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
                     : [],
+                reverse: false, // managed at UI level
               };
 
               return {

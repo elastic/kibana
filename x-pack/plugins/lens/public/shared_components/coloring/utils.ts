@@ -43,7 +43,7 @@ export function applyPaletteParams(
     dataBounds,
   });
 
-  if (activePalette?.params?.reverse && displayStops) {
+  if (activePalette?.params?.reverse && activePalette?.params?.name !== CUSTOM_PALETTE) {
     displayStops = reversePalette(displayStops);
   }
   return displayStops;
