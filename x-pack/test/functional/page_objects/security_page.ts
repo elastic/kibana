@@ -22,6 +22,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const comboBox = getService('comboBox');
   const supertest = getService('supertestWithoutAuth');
   const deployment = getService('deployment');
+  const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['common', 'header', 'error']);
 
   interface LoginOptions {
@@ -450,7 +451,10 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
       if (roleObj.elasticsearch.indices[0].query) {
         await testSubjects.click('restrictDocumentsQuery0');
-        await testSubjects.setValue('queryInput0', roleObj.elasticsearch.indices[0].query);
+        await monacoEditor.setCodeEditorValue(
+          0,
+          JSON.stringify(roleObj.elasticsearch.indices[0].query)
+        );
       }
 
       const globalPrivileges = (roleObj.kibana as any).global;

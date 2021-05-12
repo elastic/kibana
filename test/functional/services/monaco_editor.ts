@@ -27,5 +27,19 @@ export function MonacoEditorProvider({ getService }: FtrProviderContext) {
 
       return values[nthIndex] as string;
     }
+
+    public async setCodeEditorValue(nthIndex: number, value: string) {
+      await retry.try(async () => {
+        await browser.execute(
+          (editorIndex, codeEditorValue) => {
+            const editor = (window as any).MonacoEnvironment.monaco.editor;
+            const instance = editor.getModels()[editorIndex];
+            instance.setValue(JSON.parse(codeEditorValue));
+          },
+          nthIndex,
+          value
+        );
+      });
+    }
   })();
 }
