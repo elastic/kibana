@@ -19,7 +19,7 @@ import {
   NormalizedMetricValueRT,
   PercentilesTypeRT,
   PercentilesKeyedTypeRT,
-  TopHitsTypeRT,
+  TopMetricsTypeRT,
   MetricValueTypeRT,
 } from '../types';
 
@@ -57,8 +57,8 @@ const getValue = (valueObject: ValueObjectType) => {
     return valueObject.value;
   }
 
-  if (TopHitsTypeRT.is(valueObject)) {
-    return valueObject.hits.hits.map((hit) => hit._source);
+  if (TopMetricsTypeRT.is(valueObject)) {
+    return valueObject.top.map((res) => res.metrics);
   }
 
   return null;

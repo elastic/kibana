@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  ConfigDeprecationLogger,
-  CoreSetup,
-  CoreStart,
-  PluginConfigDescriptor,
-} from 'kibana/server';
+import type { CoreSetup, CoreStart, PluginConfigDescriptor } from 'kibana/server';
 import { get } from 'lodash';
 
 import { configSchema, ConfigSchema } from '../config';
@@ -23,18 +18,24 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     // TODO: Remove deprecation once defaultAppId is deleted
-    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', true),
-    (completeConfig: Record<string, any>, rootPath: string, log: ConfigDeprecationLogger) => {
+    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', { silent: true }),
+    (completeConfig, rootPath, addDeprecation) => {
       if (
         get(completeConfig, 'kibana.defaultAppId') === undefined &&
         get(completeConfig, 'kibana_legacy.defaultAppId') === undefined
       ) {
-        return completeConfig;
+        return;
       }
-      log(
-        `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`
-      );
-      return completeConfig;
+      addDeprecation({
+        message: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
+        correctiveActions: {
+          manualSteps: [
+            'Go to Stack Management > Advanced Settings',
+            'Update the "defaultRoute" setting under the General section',
+            'Remove "kibana.defaultAppId" from the kibana.yml config file',
+          ],
+        },
+      });
     },
   ],
 };

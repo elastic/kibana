@@ -7,7 +7,7 @@
  */
 
 import { Vis } from '../types';
-import {
+import type {
   VisualizeInput,
   VisualizeEmbeddable,
   VisualizeByValueInput,
@@ -31,6 +31,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { IndexPattern } from '../../../data/public';
+import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
@@ -67,17 +68,20 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       indexPatterns = [vis.data.indexPattern];
     }
 
-    const editable = getCapabilities().visualize.save as boolean;
+    const capabilities = {
+      visualizeSave: Boolean(getCapabilities().visualize.save),
+      dashboardSave: Boolean(getCapabilities().dashboard?.showWriteControls),
+    };
 
-    return new VisualizeEmbeddable(
+    return createVisualizeEmbeddableAsync(
       getTimeFilter(),
       {
         vis,
         indexPatterns,
         editPath,
         editUrl,
-        editable,
         deps,
+        capabilities,
       },
       input,
       attributeService,

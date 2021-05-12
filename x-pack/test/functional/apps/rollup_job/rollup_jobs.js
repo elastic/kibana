@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common', 'security']);
   const security = getService('security');

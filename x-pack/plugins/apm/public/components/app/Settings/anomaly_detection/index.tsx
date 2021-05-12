@@ -14,7 +14,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { LicensePrompt } from '../../../shared/LicensePrompt';
+import { LicensePrompt } from '../../../shared/license_prompt';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 

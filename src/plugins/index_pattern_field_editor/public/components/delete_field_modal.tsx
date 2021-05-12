@@ -64,14 +64,14 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
     typeConfirm: i18n.translate(
       'indexPatternFieldEditor.deleteRuntimeField.confirmModal.typeConfirm',
       {
-        defaultMessage: "Type 'REMOVE' to confirm",
+        defaultMessage: 'Enter REMOVE to confirm',
       }
     ),
     warningRemovingFields: i18n.translate(
       'indexPatternFieldEditor.deleteRuntimeField.confirmModal.warningRemovingFields',
       {
         defaultMessage:
-          'Warning: Removing fields may break searches or visualizations that rely on this field.',
+          'Removing fields can break searches and visualizations that rely on this field.',
       }
     ),
   };
@@ -87,7 +87,7 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
   const i18nTexts = geti18nTexts(fieldsToDelete);
   const { modalTitle, confirmButtonText, cancelButtonText, warningMultipleFields } = i18nTexts;
   const isMultiple = Boolean(fieldsToDelete.length > 1);
-  const [confirmContent, setConfirmContent] = useState<string>();
+  const [confirmContent, setConfirmContent] = useState<string>('');
   return (
     <EuiConfirmModal
       title={modalTitle}

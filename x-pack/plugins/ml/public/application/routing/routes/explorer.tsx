@@ -159,6 +159,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(jobIds)]);
 
+  useEffect(() => {
+    return () => {
+      // upon component unmounting
+      // clear any data to prevent next page from rendering old charts
+      explorerService.clearExplorerData();
+    };
+  }, []);
+
   /**
    * TODO get rid of the intermediate state in explorerService.
    * URL state should be the only source of truth for related props.

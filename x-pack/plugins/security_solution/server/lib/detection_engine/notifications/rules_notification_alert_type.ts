@@ -14,7 +14,7 @@ import {
 } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
-import { RuleAlertAttributes } from '../signals/types';
+import { AlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
@@ -38,7 +38,7 @@ export const rulesNotificationAlertType = ({
   },
   minimumLicenseRequired: 'basic',
   async executor({ startedAt, previousStartedAt, alertId, services, params }) {
-    const ruleAlertSavedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
+    const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
       params.ruleAlertId
     );

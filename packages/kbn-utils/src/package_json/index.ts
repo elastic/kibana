@@ -14,3 +14,7 @@ export const kibanaPackageJson = {
   __dirname: dirname(resolve(REPO_ROOT, 'package.json')),
   ...require(resolve(REPO_ROOT, 'package.json')),
 };
+
+export const isKibanaDistributable = () => {
+  return kibanaPackageJson.build && kibanaPackageJson.build.distributable === true;
+};

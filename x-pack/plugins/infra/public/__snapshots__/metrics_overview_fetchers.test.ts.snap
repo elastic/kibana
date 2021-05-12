@@ -3,19 +3,7 @@
 exports[`Metrics UI Observability Homepage Functions createMetricsFetchData() should just work 1`] = `
 Object {
   "appLink": "/app/metrics/inventory?waffleTime=(currentTime:1593696311629,isAutoReloading:!f)",
-  "stats": Object {
-    "cpu": Object {
-      "type": "percent",
-      "value": 0.10691011235955057,
-    },
-    "hosts": Object {
-      "type": "number",
-      "value": 1,
-    },
-    "memory": Object {
-      "type": "percent",
-      "value": 0.5389775280898876,
-    },
-  },
+  "series": Array [],
+  "sort": [Function],
 }
 `;

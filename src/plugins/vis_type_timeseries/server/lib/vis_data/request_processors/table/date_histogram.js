@@ -13,15 +13,18 @@ import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
+
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(req, panel, esQueryConfig, indexPattern, capabilities, uiSettings) {
+export function dateHistogram(req, panel, esQueryConfig, seriesIndex, capabilities, uiSettings) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPattern);
+    const { timeField, interval } = getIntervalAndTimefield(panel, {}, seriesIndex);
+
     const meta = {
       timeField,
-      index: indexPattern?.title,
+      index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
+      panelId: panel.id,
     };
 
     const getDateHistogramForLastBucketMode = () => {
@@ -32,7 +35,7 @@ export function dateHistogram(req, panel, esQueryConfig, indexPattern, capabilit
         barTargetUiSettings
       );
       const { from, to } = getTimerange(req);
-      const timezone = capabilities.searchTimezone;
+      const { timezone } = capabilities;
 
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);

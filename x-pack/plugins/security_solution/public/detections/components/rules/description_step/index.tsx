@@ -36,7 +36,7 @@ import {
   buildThresholdDescription,
   buildThreatMappingDescription,
 } from './helpers';
-import { buildMlJobDescription } from './ml_job_description';
+import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { Threats, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -74,8 +74,8 @@ export const StepRuleDescriptionComponent = <T,>({
     if (key === 'machineLearningJobId') {
       return [
         ...acc,
-        buildMlJobDescription(
-          get(key, data) as string,
+        buildMlJobsDescription(
+          get(key, data) as string[],
           (get(key, schema) as { label: string }).label
         ),
       ];

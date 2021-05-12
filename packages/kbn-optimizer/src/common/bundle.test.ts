@@ -42,7 +42,6 @@ it('creates cache keys', () => {
         "id": "bar",
         "manifestPath": undefined,
         "outputDir": "/foo/bar/target",
-        "pageLoadAssetSizeLimit": undefined,
         "publicDirNames": Array [
           "public",
         ],

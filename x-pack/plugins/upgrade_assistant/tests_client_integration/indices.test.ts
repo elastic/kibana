@@ -35,7 +35,7 @@ describe('Indices tab', () => {
     };
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadStatusResponse(upgradeStatusMockResponse);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(upgradeStatusMockResponse);
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
 
       await act(async () => {
@@ -118,20 +118,13 @@ describe('Indices tab', () => {
         indices: [],
       };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(noDeprecationsResponse);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
       });
 
-      const { actions, component } = testBed;
-
-      component.update();
-
-      // Navigate to the indices tab
-      await act(async () => {
-        actions.clickTab('indices');
-      });
+      const { component } = testBed;
 
       component.update();
     });
@@ -139,7 +132,7 @@ describe('Indices tab', () => {
     test('renders prompt', () => {
       const { exists, find } = testBed;
       expect(exists('noDeprecationsPrompt')).toBe(true);
-      expect(find('noDeprecationsPrompt').text()).toContain('All clear!');
+      expect(find('noDeprecationsPrompt').text()).toContain('Ready to upgrade!');
     });
   });
 
@@ -151,7 +144,7 @@ describe('Indices tab', () => {
         message: 'Forbidden',
       };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
@@ -163,7 +156,59 @@ describe('Indices tab', () => {
 
       expect(exists('permissionsError')).toBe(true);
       expect(find('permissionsError').text()).toContain(
-        'You do not have sufficient privileges to view this page.'
+        'You are not authorized to view Elasticsearch deprecations.'
+      );
+    });
+
+    test('handles upgrade error', async () => {
+      const error = {
+        statusCode: 426,
+        error: 'Upgrade required',
+        message: 'There are some nodes running a different version of Elasticsearch',
+        attributes: {
+          allNodesUpgraded: true,
+        },
+      };
+
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+
+      await act(async () => {
+        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+      });
+
+      const { component, exists, find } = testBed;
+
+      component.update();
+
+      expect(exists('upgradedCallout')).toBe(true);
+      expect(find('upgradedCallout').text()).toContain(
+        'Your configuration is up to date. Kibana and all Elasticsearch nodes are running the same version.'
+      );
+    });
+
+    test('handles partially upgrade error', async () => {
+      const error = {
+        statusCode: 426,
+        error: 'Upgrade required',
+        message: 'There are some nodes running a different version of Elasticsearch',
+        attributes: {
+          allNodesUpgraded: false,
+        },
+      };
+
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
+
+      await act(async () => {
+        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+      });
+
+      const { component, exists, find } = testBed;
+
+      component.update();
+
+      expect(exists('partiallyUpgradedWarning')).toBe(true);
+      expect(find('partiallyUpgradedWarning').text()).toContain(
+        'Upgrade Kibana to the same version as your Elasticsearch cluster. One or more nodes in the cluster is running a different version than Kibana.'
       );
     });
 
@@ -174,7 +219,7 @@ describe('Indices tab', () => {
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
@@ -184,9 +229,9 @@ describe('Indices tab', () => {
 
       component.update();
 
-      expect(exists('upgradeStatusError')).toBe(true);
-      expect(find('upgradeStatusError').text()).toContain(
-        'An error occurred while retrieving the checkup results.'
+      expect(exists('requestError')).toBe(true);
+      expect(find('requestError').text()).toContain(
+        'Could not retrieve Elasticsearch deprecations.'
       );
     });
   });

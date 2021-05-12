@@ -170,15 +170,12 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  Ipv4Address,
+  IpAddress,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
@@ -238,6 +235,8 @@ export {
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
+  AsyncSearchResponse,
+  AsyncSearchStatusResponse,
 } from './search';
 
 // Search namespace
@@ -248,7 +247,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    Ipv4Address,
+    IpAddress,
     isNumberType,
     isStringType,
     isType,
@@ -263,8 +262,6 @@ export const search = {
     toAbsoluteDates,
     calcAutoIntervalLessThan,
   },
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
 };

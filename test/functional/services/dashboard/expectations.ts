@@ -208,14 +208,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       await this.textWithinTestSubjectsExists(values, 'markdownBody');
     }
 
-    async savedSearchRowCount(expectedCount: number) {
-      log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
+    async savedSearchRowCount(expectedMinCount: number) {
+      log.debug(`DashboardExpect.savedSearchRowCount(${expectedMinCount})`);
       await retry.try(async () => {
         const savedSearchRows = await testSubjects.findAll(
           'docTableExpandToggleColumn',
           findTimeout
         );
-        expect(savedSearchRows.length).to.be(expectedCount);
+        expect(savedSearchRows.length).to.be.above(expectedMinCount);
       });
     }
 

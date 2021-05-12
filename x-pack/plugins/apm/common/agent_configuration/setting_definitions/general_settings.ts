@@ -26,7 +26,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'The maximum total compressed size of the request body which is sent to the APM Server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs'],
+    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs', 'php'],
   },
 
   // API Request Time
@@ -44,7 +44,7 @@ export const generalSettings: RawSettingDefinition[] = [
           "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting.",
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs'],
+    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs', 'php'],
   },
 
   // Capture body
@@ -69,7 +69,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'transactions', value: 'transactions' },
       { text: 'all', value: 'all' },
     ],
-    excludeAgents: ['js-base', 'rum-js'],
+    excludeAgents: ['js-base', 'rum-js', 'php'],
   },
 
   // Capture headers
@@ -87,7 +87,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'If set to `true`, the agent will capture HTTP request and response headers (including cookies), as well as message headers/properties when using messaging frameworks (like Kafka).\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs'],
+    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php'],
   },
 
   // LOG_LEVEL
@@ -111,7 +111,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'critical', value: 'critical' },
       { text: 'off', value: 'off' },
     ],
-    includeAgents: ['dotnet', 'ruby', 'java', 'python', 'nodejs', 'go'],
+    includeAgents: ['dotnet', 'ruby', 'java', 'python', 'nodejs', 'go', 'php'],
   },
 
   // Recording
@@ -163,7 +163,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs'],
+    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php'],
   },
 
   // STACK_TRACE_LIMIT

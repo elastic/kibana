@@ -171,8 +171,10 @@ export const AdvancedDetectorModal: FC<Props> = ({
       byField,
       overField,
       partitionField,
-      // @ts-expect-error
-      excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
+      excludeFrequent:
+        excludeFrequentOption.label !== ''
+          ? (excludeFrequentOption.label as estypes.ExcludeFrequent)
+          : null,
       description: descriptionOption !== '' ? descriptionOption : null,
       customRules: null,
     };

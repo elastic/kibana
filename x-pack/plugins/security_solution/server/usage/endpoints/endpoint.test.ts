@@ -14,7 +14,6 @@ import {
   MockOSVersion,
 } from './endpoint.mocks';
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from '../../../../fleet/common/types/models/agent';
 import { Agent } from '../../../../fleet/common';
 import * as endpointTelemetry from './index';
 import * as fleetSavedObjects from './fleet_saved_objects';
@@ -28,9 +27,7 @@ describe('test security solution endpoint telemetry', () => {
   let getEndpointIntegratedFleetMetadataSpy: jest.SpyInstance<
     Promise<{ agents: Agent[]; total: number; page: number; perPage: number } | undefined>
   >;
-  let getLatestFleetEndpointEventSpy: jest.SpyInstance<
-    Promise<SavedObjectsFindResponse<AgentEventSOAttributes>>
-  >;
+  let getLatestFleetEndpointEventSpy: jest.SpyInstance<Promise<SavedObjectsFindResponse>>;
 
   beforeAll(() => {
     getLatestFleetEndpointEventSpy = jest.spyOn(fleetSavedObjects, 'getLatestFleetEndpointEvent');

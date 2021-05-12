@@ -24,10 +24,26 @@ const initTestBed = registerTestBed<RestoreSnapshotFormTestSubject>(
 );
 
 const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
-  const { find, component, form } = testBed;
+  const { find, component, form, exists } = testBed;
+
   return {
     findDataStreamCallout() {
       return find('dataStreamWarningCallOut');
+    },
+
+    canGoToADifferentStep() {
+      const canGoNext = find('restoreSnapshotsForm.nextButton').props().disabled !== true;
+      const canGoPrevious = exists('restoreSnapshotsForm.backButton')
+        ? find('restoreSnapshotsForm.nextButton').props().disabled !== true
+        : true;
+      return canGoNext && canGoPrevious;
+    },
+
+    toggleModifyIndexSettings() {
+      act(() => {
+        form.toggleEuiSwitch('modifyIndexSettingsSwitch');
+      });
+      component.update();
     },
 
     toggleGlobalState() {
@@ -35,6 +51,28 @@ const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
         form.toggleEuiSwitch('includeGlobalStateSwitch');
       });
 
+      component.update();
+    },
+
+    toggleIncludeAliases() {
+      act(() => {
+        form.toggleEuiSwitch('includeAliasesSwitch');
+      });
+
+      component.update();
+    },
+
+    goToStep(step: number) {
+      while (--step > 0) {
+        find('nextButton').simulate('click');
+      }
+      component.update();
+    },
+
+    async clickRestore() {
+      await act(async () => {
+        find('restoreButton').simulate('click');
+      });
       component.update();
     },
   };
@@ -58,5 +96,11 @@ export const setup = async (): Promise<RestoreSnapshotTestBed> => {
 export type RestoreSnapshotFormTestSubject =
   | 'snapshotRestoreStepLogistics'
   | 'includeGlobalStateSwitch'
+  | 'includeAliasesSwitch'
+  | 'nextButton'
+  | 'restoreButton'
   | 'systemIndicesInfoCallOut'
-  | 'dataStreamWarningCallOut';
+  | 'dataStreamWarningCallOut'
+  | 'restoreSnapshotsForm.backButton'
+  | 'restoreSnapshotsForm.nextButton'
+  | 'modifyIndexSettingsSwitch';

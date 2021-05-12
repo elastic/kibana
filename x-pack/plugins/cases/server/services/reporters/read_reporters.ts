@@ -7,7 +7,7 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 
-import { CaseAttributes, User } from '../../../common/api';
+import { CaseAttributes, User } from '../../../common';
 import { CASE_SAVED_OBJECT } from '../../saved_object_types';
 
 export const convertToReporters = (caseObjects: Array<SavedObject<CaseAttributes>>): User[] =>

@@ -194,17 +194,18 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 ),
             },
             {
-              content: (
-                <AgentDetailsActionMenu
-                  agent={agentData.item}
-                  assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
-                  onCancelReassign={
-                    routeState && routeState.onDoneNavigateTo
-                      ? reassignCancelClickHandler
-                      : undefined
-                  }
-                />
-              ),
+              content:
+                isAgentPolicyLoading || agentPolicyData?.item?.is_managed ? undefined : (
+                  <AgentDetailsActionMenu
+                    agent={agentData.item}
+                    assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
+                    onCancelReassign={
+                      routeState && routeState.onDoneNavigateTo
+                        ? reassignCancelClickHandler
+                        : undefined
+                    }
+                  />
+                ),
             },
           ].map((item, index) => (
             <EuiFlexItem grow={false} key={index}>

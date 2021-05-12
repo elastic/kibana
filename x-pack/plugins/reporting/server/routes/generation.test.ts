@@ -6,14 +6,18 @@
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { of } from 'rxjs';
-import sinon from 'sinon';
+import { ElasticsearchClient } from 'kibana/server';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockLevelLogger, createMockReportingCore } from '../test_helpers';
-import { createMockPluginSetup } from '../test_helpers/create_mock_reportingplugin';
+import {
+  createMockConfigSchema,
+  createMockPluginSetup,
+} from '../test_helpers/create_mock_reportingplugin';
 import { registerJobGenerationRoutes } from './generation';
 import type { ReportingRequestHandlerContext } from '../types';
 
@@ -24,27 +28,18 @@ describe('POST /api/reporting/generate', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let mockExportTypesRegistry: ExportTypesRegistry;
-  let callClusterStub: any;
   let core: ReportingCore;
+  let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
 
-  const config = {
-    get: jest.fn().mockImplementation((...args) => {
-      const key = args.join('.');
-      switch (key) {
-        case 'queue.indexInterval':
-          return 'year';
-        case 'queue.timeout':
-          return 10000;
-        case 'index':
-          return '.reporting';
-        case 'queue.pollEnabled':
-          return true;
-        default:
-          return;
-      }
-    }),
-    kbnConfig: { get: jest.fn() },
-  };
+  const config = createMockConfigSchema({
+    queue: {
+      indexInterval: 'year',
+      timeout: 10000,
+      pollEnabled: true,
+    },
+    index: '.reporting',
+  });
+
   const mockLogger = createMockLevelLogger();
 
   beforeEach(async () => {
@@ -52,15 +47,10 @@ describe('POST /api/reporting/generate', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({})
+      () => ({ usesUiCapabilities: jest.fn() })
     );
 
-    callClusterStub = sinon.stub().resolves({});
-
     const mockSetupDeps = createMockPluginSetup({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: callClusterStub } },
-      },
       security: {
         license: { isEnabled: () => true },
         authc: {
@@ -85,6 +75,9 @@ describe('POST /api/reporting/generate', () => {
       runTaskFnFactory: () => async () => ({ runParamsTest: { test2: 'yes' } } as any),
     });
     core.getExportTypesRegistry = () => mockExportTypesRegistry;
+
+    mockEsClient = (await core.getEsClient()).asInternalUser as typeof mockEsClient;
+    mockEsClient.index.mockResolvedValue({ body: {} } as any);
   });
 
   afterEach(async () => {
@@ -144,7 +137,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 500 if job handler throws an error', async () => {
-    callClusterStub.withArgs('index').rejects('silly');
+    mockEsClient.index.mockRejectedValueOnce('silly');
 
     registerJobGenerationRoutes(core, mockLogger);
 
@@ -157,7 +150,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it(`returns 200 if job handler doesn't error`, async () => {
-    callClusterStub.withArgs('index').resolves({ _id: 'foo', _index: 'foo-index' });
+    mockEsClient.index.mockResolvedValueOnce({ body: { _id: 'foo', _index: 'foo-index' } } as any);
     registerJobGenerationRoutes(core, mockLogger);
 
     await server.start();

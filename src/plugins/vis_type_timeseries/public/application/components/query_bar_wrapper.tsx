@@ -9,7 +9,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import { CoreStartContext } from '../contexts/query_input_bar_context';
-import { IndexPatternValue } from '../../../common/types';
+import { DefaultIndexPatternContext } from '../contexts/default_index_context';
+import type { IndexPatternValue } from '../../../common/types';
 
 import { QueryStringInput, QueryStringInputProps } from '../../../../../plugins/data/public';
 import { getDataStart } from '../../services';
@@ -24,27 +25,32 @@ export function QueryBarWrapper({ query, onChange, indexPatterns }: QueryBarWrap
   const [indexes, setIndexes] = useState<QueryStringInputProps['indexPatterns']>([]);
 
   const coreStartContext = useContext(CoreStartContext);
+  const defaultIndex = useContext(DefaultIndexPatternContext);
 
   useEffect(() => {
     async function fetchIndexes() {
       const i: QueryStringInputProps['indexPatterns'] = [];
 
       for (const index of indexPatterns ?? []) {
-        if (isStringTypeIndexPattern(index)) {
-          i.push(index);
-        } else if (index?.id) {
-          const fetchedIndex = await fetchIndexPattern(index, indexPatternsService);
+        if (index) {
+          if (isStringTypeIndexPattern(index)) {
+            i.push(index);
+          } else if (index?.id) {
+            const { indexPattern } = await fetchIndexPattern(index, indexPatternsService);
 
-          if (fetchedIndex.indexPattern) {
-            i.push(fetchedIndex.indexPattern);
+            if (indexPattern) {
+              i.push(indexPattern);
+            }
           }
+        } else if (defaultIndex) {
+          i.push(defaultIndex);
         }
       }
       setIndexes(i);
     }
 
     fetchIndexes();
-  }, [indexPatterns, indexPatternsService]);
+  }, [indexPatterns, indexPatternsService, defaultIndex]);
 
   return (
     <QueryStringInput

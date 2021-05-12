@@ -2,8 +2,10 @@
   "id": "presentationUtil",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
-  "requiredPlugins": ["savedObjects"],
+  "requiredPlugins": [
+    "savedObjects"
+  ],
   "optionalPlugins": []
 }

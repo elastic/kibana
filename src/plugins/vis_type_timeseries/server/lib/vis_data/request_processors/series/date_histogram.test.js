@@ -23,7 +23,6 @@ describe('dateHistogram(req, panel, series)', () => {
     req = {
       body: {
         timerange: {
-          timezone: 'UTC',
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
         },
@@ -33,6 +32,7 @@ describe('dateHistogram(req, panel, series)', () => {
       index_pattern: '*',
       time_field: '@timestamp',
       interval: '10s',
+      id: 'panelId',
     };
     series = { id: 'test' };
     config = {
@@ -40,7 +40,7 @@ describe('dateHistogram(req, panel, series)', () => {
       queryStringOptions: {},
     };
     indexPattern = {};
-    capabilities = new DefaultSearchCapabilities(req);
+    capabilities = new DefaultSearchCapabilities({ timezone: 'UTC', maxBucketsLimit: 2000 });
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
@@ -90,6 +90,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -131,6 +132,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -175,6 +177,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '20s',
             timeField: 'timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -231,6 +234,7 @@ describe('dateHistogram(req, panel, series)', () => {
               seriesId: 'test',
               bucketSize: 10,
               intervalString: '10s',
+              panelId: 'panelId',
             },
           },
         },

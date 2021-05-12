@@ -29,41 +29,6 @@ jest.mock('../../application/explorer/explorer_utils', () => ({
   }),
   getSelectionJobIds: jest.fn(() => ['test-job']),
   getSelectionTimeRange: jest.fn(() => ({ earliestMs: 1521309543000, latestMs: 1616003942999 })),
-  loadDataForCharts: jest.fn().mockImplementation(() =>
-    Promise.resolve([
-      {
-        job_id: 'cw_multi_1',
-        result_type: 'record',
-        probability: 6.057139142746412e-13,
-        multi_bucket_impact: -5,
-        record_score: 89.71961,
-        initial_record_score: 98.36826274948001,
-        bucket_span: 900,
-        detector_index: 0,
-        is_interim: false,
-        timestamp: 1572892200000,
-        partition_field_name: 'instance',
-        partition_field_value: 'i-d17dcd4c',
-        function: 'mean',
-        function_description: 'mean',
-        typical: [1.6177685422858146],
-        actual: [7.235333333333333],
-        field_name: 'CPUUtilization',
-        influencers: [
-          {
-            influencer_field_name: 'region',
-            influencer_field_values: ['sa-east-1'],
-          },
-          {
-            influencer_field_name: 'instance',
-            influencer_field_values: ['i-d17dcd4c'],
-          },
-        ],
-        instance: ['i-d17dcd4c'],
-        region: ['sa-east-1'],
-      },
-    ])
-  ),
 }));
 
 describe('useAnomalyChartsInputResolver', () => {
@@ -113,6 +78,42 @@ describe('useAnomalyChartsInputResolver', () => {
         timeFieldName: '@timestamp',
         errorMessages: undefined,
       })
+    );
+
+    anomalyExplorerChartsServiceMock.loadDataForCharts$.mockImplementation(() =>
+      Promise.resolve([
+        {
+          job_id: 'cw_multi_1',
+          result_type: 'record',
+          probability: 6.057139142746412e-13,
+          multi_bucket_impact: -5,
+          record_score: 89.71961,
+          initial_record_score: 98.36826274948001,
+          bucket_span: 900,
+          detector_index: 0,
+          is_interim: false,
+          timestamp: 1572892200000,
+          partition_field_name: 'instance',
+          partition_field_value: 'i-d17dcd4c',
+          function: 'mean',
+          function_description: 'mean',
+          typical: [1.6177685422858146],
+          actual: [7.235333333333333],
+          field_name: 'CPUUtilization',
+          influencers: [
+            {
+              influencer_field_name: 'region',
+              influencer_field_values: ['sa-east-1'],
+            },
+            {
+              influencer_field_name: 'instance',
+              influencer_field_values: ['i-d17dcd4c'],
+            },
+          ],
+          instance: ['i-d17dcd4c'],
+          region: ['sa-east-1'],
+        },
+      ])
     );
 
     const coreStartMock = createCoreStartMock();

@@ -664,96 +664,87 @@ exports[`Inspector Data View component should render single table without select
                 hasArrow={true}
                 id="inspectorDownloadData"
                 isOpen={false}
-                ownFocus={false}
+                ownFocus={true}
                 panelPaddingSize="none"
                 repositionOnScroll={true}
               >
-                <EuiOutsideClickDetector
-                  onOutsideClick={[Function]}
+                <div
+                  className="euiPopover euiPopover--anchorDownCenter"
+                  id="inspectorDownloadData"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorDownCenter"
-                    id="inspectorDownloadData"
-                    onKeyDown={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
+                    className="euiPopover__anchor"
                   >
-                    <div
-                      className="euiPopover__anchor"
+                    <EuiButton
+                      iconSide="right"
+                      iconType="arrowDown"
+                      onClick={[Function]}
+                      size="s"
                     >
-                      <EuiButton
+                      <EuiButtonDisplay
+                        baseClassName="euiButton"
+                        disabled={false}
+                        element="button"
                         iconSide="right"
                         iconType="arrowDown"
+                        isDisabled={false}
                         onClick={[Function]}
                         size="s"
+                        type="button"
                       >
-                        <EuiButtonDisplay
-                          baseClassName="euiButton"
+                        <button
+                          className="euiButton euiButton--primary euiButton--small"
                           disabled={false}
-                          element="button"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          isDisabled={false}
                           onClick={[Function]}
-                          size="s"
+                          style={
+                            Object {
+                              "minWidth": undefined,
+                            }
+                          }
                           type="button"
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--small"
-                            disabled={false}
-                            onClick={[Function]}
-                            style={
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="right"
+                            iconType="arrowDown"
+                            textProps={
                               Object {
-                                "minWidth": undefined,
+                                "className": "euiButton__text",
                               }
                             }
-                            type="button"
                           >
-                            <EuiButtonContent
-                              className="euiButton__content"
-                              iconSide="right"
-                              iconType="arrowDown"
-                              textProps={
-                                Object {
-                                  "className": "euiButton__text",
-                                }
-                              }
+                            <span
+                              className="euiButtonContent euiButtonContent--iconRight euiButton__content"
                             >
-                              <span
-                                className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                              <EuiIcon
+                                className="euiButtonContent__icon"
+                                size="m"
+                                type="arrowDown"
                               >
-                                <EuiIcon
-                                  className="euiButtonContent__icon"
-                                  size="m"
-                                  type="arrowDown"
-                                >
-                                  <span
-                                    className="euiButtonContent__icon"
-                                    data-euiicon-type="arrowDown"
-                                    size="m"
-                                  />
-                                </EuiIcon>
                                 <span
-                                  className="euiButton__text"
+                                  className="euiButtonContent__icon"
+                                  data-euiicon-type="arrowDown"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                              <span
+                                className="euiButton__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Download CSV"
+                                  id="data.inspector.table.downloadCSVToggleButtonLabel"
+                                  values={Object {}}
                                 >
-                                  <FormattedMessage
-                                    defaultMessage="Download CSV"
-                                    id="data.inspector.table.downloadCSVToggleButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    Download CSV
-                                  </FormattedMessage>
-                                </span>
+                                  Download CSV
+                                </FormattedMessage>
                               </span>
-                            </EuiButtonContent>
-                          </button>
-                        </EuiButtonDisplay>
-                      </EuiButton>
-                    </div>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonDisplay>
+                    </EuiButton>
                   </div>
-                </EuiOutsideClickDetector>
+                </div>
               </EuiPopover>
             </DataDownloadOptions>
           </div>
@@ -1121,19 +1112,19 @@ exports[`Inspector Data View component should render single table without select
                                     </span>
                                   </EuiI18n>
                                 </EuiInnerText>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="Click to sort in ascending order"
-                                      token="euiTableHeaderCell.clickForAscending"
-                                    >
-                                      Click to sort in ascending order
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
                               </span>
+                              <EuiScreenReaderOnly>
+                                <span
+                                  className="euiScreenReaderOnly"
+                                >
+                                  <EuiI18n
+                                    default="Click to sort in ascending order"
+                                    token="euiTableHeaderCell.clickForAscending"
+                                  >
+                                    Click to sort in ascending order
+                                  </EuiI18n>
+                                </span>
+                              </EuiScreenReaderOnly>
                             </button>
                           </th>
                         </EuiTableHeaderCell>
@@ -1304,81 +1295,72 @@ exports[`Inspector Data View component should render single table without select
                             display="inlineBlock"
                             hasArrow={true}
                             isOpen={false}
-                            ownFocus={false}
+                            ownFocus={true}
                             panelPaddingSize="none"
                           >
-                            <EuiOutsideClickDetector
-                              onOutsideClick={[Function]}
+                            <div
+                              className="euiPopover euiPopover--anchorUpRight"
                             >
                               <div
-                                className="euiPopover euiPopover--anchorUpRight"
-                                onKeyDown={[Function]}
-                                onMouseDown={[Function]}
-                                onMouseUp={[Function]}
-                                onTouchEnd={[Function]}
-                                onTouchStart={[Function]}
+                                className="euiPopover__anchor"
                               >
-                                <div
-                                  className="euiPopover__anchor"
+                                <EuiButtonEmpty
+                                  color="text"
+                                  data-test-subj="tablePaginationPopoverButton"
+                                  iconSide="right"
+                                  iconType="arrowDown"
+                                  onClick={[Function]}
+                                  size="xs"
                                 >
-                                  <EuiButtonEmpty
-                                    color="text"
+                                  <button
+                                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
                                     data-test-subj="tablePaginationPopoverButton"
-                                    iconSide="right"
-                                    iconType="arrowDown"
+                                    disabled={false}
                                     onClick={[Function]}
-                                    size="xs"
+                                    type="button"
                                   >
-                                    <button
-                                      className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
-                                      data-test-subj="tablePaginationPopoverButton"
-                                      disabled={false}
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <EuiButtonContent
-                                        className="euiButtonEmpty__content"
-                                        iconSide="right"
-                                        iconType="arrowDown"
-                                        textProps={
-                                          Object {
-                                            "className": "euiButtonEmpty__text",
-                                          }
+                                    <EuiButtonContent
+                                      className="euiButtonEmpty__content"
+                                      iconSide="right"
+                                      iconType="arrowDown"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButtonEmpty__text",
                                         }
+                                      }
+                                    >
+                                      <span
+                                        className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                                       >
-                                        <span
-                                          className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                        <EuiIcon
+                                          className="euiButtonContent__icon"
+                                          size="m"
+                                          type="arrowDown"
                                         >
-                                          <EuiIcon
-                                            className="euiButtonContent__icon"
-                                            size="m"
-                                            type="arrowDown"
-                                          >
-                                            <span
-                                              className="euiButtonContent__icon"
-                                              data-euiicon-type="arrowDown"
-                                              size="m"
-                                            />
-                                          </EuiIcon>
                                           <span
-                                            className="euiButtonEmpty__text"
+                                            className="euiButtonContent__icon"
+                                            data-euiicon-type="arrowDown"
+                                            size="m"
+                                          />
+                                        </EuiIcon>
+                                        <span
+                                          className="euiButtonEmpty__text"
+                                        >
+                                          <EuiI18n
+                                            default="Rows per page"
+                                            token="euiTablePagination.rowsPerPage"
                                           >
-                                            <EuiI18n
-                                              default="Rows per page"
-                                              token="euiTablePagination.rowsPerPage"
-                                            >
-                                              Rows per page
-                                            </EuiI18n>
-                                            : 
-                                            20
-                                          </span>
+                                            Rows per page
+                                          </EuiI18n>
+                                          : 
+                                          20
                                         </span>
-                                      </EuiButtonContent>
-                                    </button>
-                                  </EuiButtonEmpty>
-                                </div>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonEmpty>
                               </div>
-                            </EuiOutsideClickDetector>
+                            </div>
                           </EuiPopover>
                         </div>
                       </EuiFlexItem>
@@ -1420,7 +1402,7 @@ exports[`Inspector Data View component should render single table without select
                                   >
                                     <button
                                       aria-label="Previous page"
-                                      className="euiButtonIcon euiButtonIcon--text"
+                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                       data-test-subj="pagination-button-previous"
                                       disabled={true}
                                       onClick={[Function]}
@@ -1490,13 +1472,13 @@ exports[`Inspector Data View component should render single table without select
                                             href="#__table_generated-id"
                                             isDisabled={true}
                                             onClick={[Function]}
-                                            size="xs"
+                                            size="s"
                                           >
                                             <button
                                               aria-controls="__table_generated-id"
                                               aria-current={true}
                                               aria-label="Page 1 of 1"
-                                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                                               data-test-subj="pagination-button-0"
                                               disabled={true}
                                               onClick={[Function]}
@@ -1552,7 +1534,7 @@ exports[`Inspector Data View component should render single table without select
                                   >
                                     <button
                                       aria-label="Next page"
-                                      className="euiButtonIcon euiButtonIcon--text"
+                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                       data-test-subj="pagination-button-next"
                                       disabled={true}
                                       onClick={[Function]}
@@ -2028,85 +2010,76 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                         hasArrow={true}
                         id="inspectorTableChooser"
                         isOpen={false}
-                        ownFocus={false}
+                        ownFocus={true}
                         panelPaddingSize="none"
                         repositionOnScroll={true}
                       >
-                        <EuiOutsideClickDetector
-                          onOutsideClick={[Function]}
+                        <div
+                          className="euiPopover euiPopover--anchorDownLeft"
+                          id="inspectorTableChooser"
                         >
                           <div
-                            className="euiPopover euiPopover--anchorDownLeft"
-                            id="inspectorTableChooser"
-                            onKeyDown={[Function]}
-                            onMouseDown={[Function]}
-                            onMouseUp={[Function]}
-                            onTouchEnd={[Function]}
-                            onTouchStart={[Function]}
+                            className="euiPopover__anchor"
                           >
-                            <div
-                              className="euiPopover__anchor"
+                            <EuiButtonEmpty
+                              data-test-subj="inspectorTableChooser"
+                              iconSide="right"
+                              iconType="arrowDown"
+                              onClick={[Function]}
+                              size="s"
                             >
-                              <EuiButtonEmpty
+                              <button
+                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
                                 data-test-subj="inspectorTableChooser"
-                                iconSide="right"
-                                iconType="arrowDown"
+                                disabled={false}
                                 onClick={[Function]}
-                                size="s"
+                                type="button"
                               >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
-                                  data-test-subj="inspectorTableChooser"
-                                  disabled={false}
-                                  onClick={[Function]}
-                                  type="button"
-                                >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconSide="right"
-                                    iconType="arrowDown"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
+                                <EuiButtonContent
+                                  className="euiButtonEmpty__content"
+                                  iconSide="right"
+                                  iconType="arrowDown"
+                                  textProps={
+                                    Object {
+                                      "className": "euiButtonEmpty__text",
                                     }
+                                  }
+                                >
+                                  <span
+                                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                                   >
-                                    <span
-                                      className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                    <EuiIcon
+                                      className="euiButtonContent__icon"
+                                      size="m"
+                                      type="arrowDown"
                                     >
-                                      <EuiIcon
-                                        className="euiButtonContent__icon"
-                                        size="m"
-                                        type="arrowDown"
-                                      >
-                                        <span
-                                          className="euiButtonContent__icon"
-                                          data-euiicon-type="arrowDown"
-                                          size="m"
-                                        />
-                                      </EuiIcon>
                                       <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        <FormattedMessage
-                                          defaultMessage="Table {index}"
-                                          id="data.inspector.table.tableLabel"
-                                          values={
-                                            Object {
-                                              "index": 1,
-                                            }
+                                        className="euiButtonContent__icon"
+                                        data-euiicon-type="arrowDown"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                    <span
+                                      className="euiButtonEmpty__text"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Table {index}"
+                                        id="data.inspector.table.tableLabel"
+                                        values={
+                                          Object {
+                                            "index": 1,
                                           }
-                                        >
-                                          Table 1
-                                        </FormattedMessage>
-                                      </span>
+                                        }
+                                      >
+                                        Table 1
+                                      </FormattedMessage>
                                     </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </div>
+                                  </span>
+                                </EuiButtonContent>
+                              </button>
+                            </EuiButtonEmpty>
                           </div>
-                        </EuiOutsideClickDetector>
+                        </div>
                       </EuiPopover>
                     </div>
                   </EuiFlexItem>
@@ -2220,96 +2193,87 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                 hasArrow={true}
                 id="inspectorDownloadData"
                 isOpen={false}
-                ownFocus={false}
+                ownFocus={true}
                 panelPaddingSize="none"
                 repositionOnScroll={true}
               >
-                <EuiOutsideClickDetector
-                  onOutsideClick={[Function]}
+                <div
+                  className="euiPopover euiPopover--anchorDownCenter"
+                  id="inspectorDownloadData"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorDownCenter"
-                    id="inspectorDownloadData"
-                    onKeyDown={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
+                    className="euiPopover__anchor"
                   >
-                    <div
-                      className="euiPopover__anchor"
+                    <EuiButton
+                      iconSide="right"
+                      iconType="arrowDown"
+                      onClick={[Function]}
+                      size="s"
                     >
-                      <EuiButton
+                      <EuiButtonDisplay
+                        baseClassName="euiButton"
+                        disabled={false}
+                        element="button"
                         iconSide="right"
                         iconType="arrowDown"
+                        isDisabled={false}
                         onClick={[Function]}
                         size="s"
+                        type="button"
                       >
-                        <EuiButtonDisplay
-                          baseClassName="euiButton"
+                        <button
+                          className="euiButton euiButton--primary euiButton--small"
                           disabled={false}
-                          element="button"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          isDisabled={false}
                           onClick={[Function]}
-                          size="s"
+                          style={
+                            Object {
+                              "minWidth": undefined,
+                            }
+                          }
                           type="button"
                         >
-                          <button
-                            className="euiButton euiButton--primary euiButton--small"
-                            disabled={false}
-                            onClick={[Function]}
-                            style={
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconSide="right"
+                            iconType="arrowDown"
+                            textProps={
                               Object {
-                                "minWidth": undefined,
+                                "className": "euiButton__text",
                               }
                             }
-                            type="button"
                           >
-                            <EuiButtonContent
-                              className="euiButton__content"
-                              iconSide="right"
-                              iconType="arrowDown"
-                              textProps={
-                                Object {
-                                  "className": "euiButton__text",
-                                }
-                              }
+                            <span
+                              className="euiButtonContent euiButtonContent--iconRight euiButton__content"
                             >
-                              <span
-                                className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                              <EuiIcon
+                                className="euiButtonContent__icon"
+                                size="m"
+                                type="arrowDown"
                               >
-                                <EuiIcon
-                                  className="euiButtonContent__icon"
-                                  size="m"
-                                  type="arrowDown"
-                                >
-                                  <span
-                                    className="euiButtonContent__icon"
-                                    data-euiicon-type="arrowDown"
-                                    size="m"
-                                  />
-                                </EuiIcon>
                                 <span
-                                  className="euiButton__text"
+                                  className="euiButtonContent__icon"
+                                  data-euiicon-type="arrowDown"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                              <span
+                                className="euiButton__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Download CSV"
+                                  id="data.inspector.table.downloadCSVToggleButtonLabel"
+                                  values={Object {}}
                                 >
-                                  <FormattedMessage
-                                    defaultMessage="Download CSV"
-                                    id="data.inspector.table.downloadCSVToggleButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    Download CSV
-                                  </FormattedMessage>
-                                </span>
+                                  Download CSV
+                                </FormattedMessage>
                               </span>
-                            </EuiButtonContent>
-                          </button>
-                        </EuiButtonDisplay>
-                      </EuiButton>
-                    </div>
+                            </span>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonDisplay>
+                    </EuiButton>
                   </div>
-                </EuiOutsideClickDetector>
+                </div>
               </EuiPopover>
             </DataDownloadOptions>
           </div>
@@ -2702,19 +2666,19 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                     </span>
                                   </EuiI18n>
                                 </EuiInnerText>
-                                <EuiScreenReaderOnly>
-                                  <span
-                                    className="euiScreenReaderOnly"
-                                  >
-                                    <EuiI18n
-                                      default="Click to sort in ascending order"
-                                      token="euiTableHeaderCell.clickForAscending"
-                                    >
-                                      Click to sort in ascending order
-                                    </EuiI18n>
-                                  </span>
-                                </EuiScreenReaderOnly>
                               </span>
+                              <EuiScreenReaderOnly>
+                                <span
+                                  className="euiScreenReaderOnly"
+                                >
+                                  <EuiI18n
+                                    default="Click to sort in ascending order"
+                                    token="euiTableHeaderCell.clickForAscending"
+                                  >
+                                    Click to sort in ascending order
+                                  </EuiI18n>
+                                </span>
+                              </EuiScreenReaderOnly>
                             </button>
                           </th>
                         </EuiTableHeaderCell>
@@ -2885,81 +2849,72 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                             display="inlineBlock"
                             hasArrow={true}
                             isOpen={false}
-                            ownFocus={false}
+                            ownFocus={true}
                             panelPaddingSize="none"
                           >
-                            <EuiOutsideClickDetector
-                              onOutsideClick={[Function]}
+                            <div
+                              className="euiPopover euiPopover--anchorUpRight"
                             >
                               <div
-                                className="euiPopover euiPopover--anchorUpRight"
-                                onKeyDown={[Function]}
-                                onMouseDown={[Function]}
-                                onMouseUp={[Function]}
-                                onTouchEnd={[Function]}
-                                onTouchStart={[Function]}
+                                className="euiPopover__anchor"
                               >
-                                <div
-                                  className="euiPopover__anchor"
+                                <EuiButtonEmpty
+                                  color="text"
+                                  data-test-subj="tablePaginationPopoverButton"
+                                  iconSide="right"
+                                  iconType="arrowDown"
+                                  onClick={[Function]}
+                                  size="xs"
                                 >
-                                  <EuiButtonEmpty
-                                    color="text"
+                                  <button
+                                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
                                     data-test-subj="tablePaginationPopoverButton"
-                                    iconSide="right"
-                                    iconType="arrowDown"
+                                    disabled={false}
                                     onClick={[Function]}
-                                    size="xs"
+                                    type="button"
                                   >
-                                    <button
-                                      className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
-                                      data-test-subj="tablePaginationPopoverButton"
-                                      disabled={false}
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <EuiButtonContent
-                                        className="euiButtonEmpty__content"
-                                        iconSide="right"
-                                        iconType="arrowDown"
-                                        textProps={
-                                          Object {
-                                            "className": "euiButtonEmpty__text",
-                                          }
+                                    <EuiButtonContent
+                                      className="euiButtonEmpty__content"
+                                      iconSide="right"
+                                      iconType="arrowDown"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButtonEmpty__text",
                                         }
+                                      }
+                                    >
+                                      <span
+                                        className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                                       >
-                                        <span
-                                          className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                        <EuiIcon
+                                          className="euiButtonContent__icon"
+                                          size="m"
+                                          type="arrowDown"
                                         >
-                                          <EuiIcon
-                                            className="euiButtonContent__icon"
-                                            size="m"
-                                            type="arrowDown"
-                                          >
-                                            <span
-                                              className="euiButtonContent__icon"
-                                              data-euiicon-type="arrowDown"
-                                              size="m"
-                                            />
-                                          </EuiIcon>
                                           <span
-                                            className="euiButtonEmpty__text"
+                                            className="euiButtonContent__icon"
+                                            data-euiicon-type="arrowDown"
+                                            size="m"
+                                          />
+                                        </EuiIcon>
+                                        <span
+                                          className="euiButtonEmpty__text"
+                                        >
+                                          <EuiI18n
+                                            default="Rows per page"
+                                            token="euiTablePagination.rowsPerPage"
                                           >
-                                            <EuiI18n
-                                              default="Rows per page"
-                                              token="euiTablePagination.rowsPerPage"
-                                            >
-                                              Rows per page
-                                            </EuiI18n>
-                                            : 
-                                            20
-                                          </span>
+                                            Rows per page
+                                          </EuiI18n>
+                                          : 
+                                          20
                                         </span>
-                                      </EuiButtonContent>
-                                    </button>
-                                  </EuiButtonEmpty>
-                                </div>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonEmpty>
                               </div>
-                            </EuiOutsideClickDetector>
+                            </div>
                           </EuiPopover>
                         </div>
                       </EuiFlexItem>
@@ -3001,7 +2956,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                   >
                                     <button
                                       aria-label="Previous page"
-                                      className="euiButtonIcon euiButtonIcon--text"
+                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                       data-test-subj="pagination-button-previous"
                                       disabled={true}
                                       onClick={[Function]}
@@ -3071,13 +3026,13 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                             href="#__table_generated-id"
                                             isDisabled={true}
                                             onClick={[Function]}
-                                            size="xs"
+                                            size="s"
                                           >
                                             <button
                                               aria-controls="__table_generated-id"
                                               aria-current={true}
                                               aria-label="Page 1 of 1"
-                                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
                                               data-test-subj="pagination-button-0"
                                               disabled={true}
                                               onClick={[Function]}
@@ -3133,7 +3088,7 @@ exports[`Inspector Data View component should support multiple datatables 1`] = 
                                   >
                                     <button
                                       aria-label="Next page"
-                                      className="euiButtonIcon euiButtonIcon--text"
+                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                       data-test-subj="pagination-button-next"
                                       disabled={true}
                                       onClick={[Function]}

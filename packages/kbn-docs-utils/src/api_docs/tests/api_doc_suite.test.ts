@@ -15,8 +15,8 @@ import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
 import { ApiDeclaration, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
-import { getPluginApi } from '../get_plugin_api';
 import { groupPluginApi } from '../utils';
+import { getPluginApiMap } from '../get_plugin_api_map';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -84,13 +84,19 @@ beforeAll(() => {
   expect(project.getSourceFiles().length).toBeGreaterThan(0);
 
   const pluginA = getKibanaPlatformPlugin('pluginA');
+  const pluginB = getKibanaPlatformPlugin(
+    'pluginB',
+    Path.resolve(__dirname, '__fixtures__/src/plugin_b')
+  );
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA];
+  const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
 
-  doc = getPluginApi(project, plugins[0], plugins, log);
+  const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
 
+  doc = pluginApiMap.pluginA;
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
   writePluginDocs(mdxOutputFolder, doc, log);
+  writePluginDocs(mdxOutputFolder, pluginApiMap.pluginB, log);
 });
 
 it('Setup type is extracted', () => {
@@ -137,7 +143,12 @@ describe('functions', () => {
   it('function referencing missing type has link removed', () => {
     const fn = doc.client.find((c) => c.label === 'fnWithNonExportedRef');
     expect(linkCount(fn?.signature!)).toBe(0);
+    expect(fn?.children).toBeDefined();
+    expect(fn?.children!.length).toBe(1);
+    expect(fn?.children![0].signature).toBeDefined();
+    expect(linkCount(fn?.children![0].signature!)).toBe(0);
   });
+
   it('arrow function is exported correctly', () => {
     const fn = doc.client.find((c) => c.label === 'arrowFn');
     // Using the same data as the not an arrow function so this is refactored.
@@ -217,6 +228,13 @@ describe('objects', () => {
 });
 
 describe('Misc types', () => {
+  it('Type referencing not exported type has the link removed', () => {
+    const api = doc.client.find((c) => c.label === 'IRefANotExportedType');
+    expect(api).toBeDefined();
+    expect(api?.signature).toBeDefined();
+    expect(linkCount(api?.signature!)).toBe(0);
+  });
+
   it('Explicitly typed array is returned with the correct type', () => {
     const aStrArray = doc.client.find((c) => c.label === 'aStrArray');
     expect(aStrArray).toBeDefined();
@@ -323,6 +341,16 @@ describe('interfaces and classes', () => {
     expect(anInterface?.signature).toBeUndefined();
   });
 
+  it('deprecated interface exported correctly', () => {
+    const anInterface = doc.client.find((c) => c.label === 'AnotherInterface');
+    expect(anInterface).toBeDefined();
+
+    expect(anInterface?.deprecated).toBeTruthy();
+    expect(anInterface?.references).toBeDefined();
+    expect(anInterface?.references!.length).toBe(2);
+    expect(anInterface?.removeBy).toEqual('8.0');
+  });
+
   it('Interface which extends exported correctly', () => {
     const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
@@ -331,9 +359,6 @@ describe('interfaces and classes', () => {
 
     expect(linkCount(exampleInterface?.signature!)).toBe(2);
 
-    // TODO: uncomment if the bug is fixed.
-    // This is wrong, the link should be to `AnotherInterface`
-    // Another bug, this link is not being captured.
     expect(exampleInterface?.signature).toMatchInlineSnapshot(`
       Array [
         Object {

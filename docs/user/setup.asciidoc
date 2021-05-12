@@ -54,6 +54,8 @@ include::{kib-repo-dir}/setup/start-stop.asciidoc[]
 
 include::{kib-repo-dir}/setup/access.asciidoc[]
 
+include::security/tutorials/how-to-secure-access-to-kibana.asciidoc[]
+
 include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
 
 include::{kib-repo-dir}/setup/upgrade.asciidoc[]

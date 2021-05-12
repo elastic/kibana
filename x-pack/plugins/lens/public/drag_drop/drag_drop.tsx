@@ -45,6 +45,16 @@ interface BaseProps {
    */
   onDrop?: DropHandler;
   /**
+   * The event handler that fires when this element is dragged.
+   */
+  onDragStart?: (
+    target?: DroppableEvent['currentTarget'] | KeyboardEvent<HTMLButtonElement>['currentTarget']
+  ) => void;
+  /**
+   * The event handler that fires when the dragging of this element ends.
+   */
+  onDragEnd?: () => void;
+  /**
    * The value associated with this item.
    */
   value: DragDropIdentifier;
@@ -116,10 +126,6 @@ interface DragInnerProps extends BaseProps {
     activeDropTarget: DragContextState['activeDropTarget'];
     dropTargetsByOrder: DragContextState['dropTargetsByOrder'];
   };
-  onDragStart?: (
-    target?: DroppableEvent['currentTarget'] | KeyboardEvent<HTMLButtonElement>['currentTarget']
-  ) => void;
-  onDragEnd?: () => void;
   extraKeyboardHandler?: (e: KeyboardEvent<HTMLButtonElement>) => void;
   ariaDescribedBy?: string;
 }
@@ -479,14 +485,18 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   }, [order, registerDropTarget, dropTypes, keyboardMode]);
 
   useEffect(() => {
+    let isMounted = true;
     if (activeDropTarget && activeDropTarget.id !== value.id) {
       setIsInZone(false);
     }
     setTimeout(() => {
-      if (!activeDropTarget) {
+      if (!activeDropTarget && isMounted) {
         setIsInZone(false);
       }
     }, 1000);
+    return () => {
+      isMounted = false;
+    };
   }, [activeDropTarget, setIsInZone, value.id]);
 
   const dragEnter = () => {

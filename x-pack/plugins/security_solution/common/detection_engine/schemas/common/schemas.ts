@@ -22,6 +22,7 @@ import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greate
 import { PositiveInteger } from '../types/positive_integer';
 import { NonEmptyString } from '../types/non_empty_string';
 import { parseScheduleDates } from '../../parse_schedule_dates';
+import { machine_learning_job_id_normalized } from '../types/normalized_ml_job_id';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -75,14 +76,25 @@ export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-a
 export const filtersOrUndefined = t.union([filters, t.undefined]);
 export type FiltersOrUndefined = t.TypeOf<typeof filtersOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const saved_object_attribute_single: t.Type<SavedObjectAttributeSingle> = t.recursion(
   'saved_object_attribute_single',
   () => t.union([t.string, t.number, t.boolean, t.null, t.undefined, saved_object_attributes])
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const saved_object_attribute: t.Type<SavedObjectAttribute> = t.recursion(
   'saved_object_attribute',
   () => t.union([saved_object_attribute_single, t.array(saved_object_attribute_single)])
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const saved_object_attributes: t.Type<SavedObjectAttributes> = t.recursion(
   'saved_object_attributes',
   () => t.record(t.string, saved_object_attribute)
@@ -171,10 +183,24 @@ export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const language = t.keyof({ eql: null, kuery: null, lucene: null });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Language = t.TypeOf<typeof language>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const languageOrUndefined = t.union([language, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type LanguageOrUndefined = t.TypeOf<typeof languageOrUndefined>;
 
 export const license = t.string;
@@ -230,7 +256,7 @@ export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
 export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
 
-export const machine_learning_job_id = t.string;
+export const machine_learning_job_id = t.union([t.string, machine_learning_job_id_normalized]);
 export type MachineLearningJobId = t.TypeOf<typeof machine_learning_job_id>;
 
 export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id, t.undefined]);
@@ -245,7 +271,14 @@ export type Meta = t.TypeOf<typeof meta>;
 export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const max_signals = PositiveIntegerGreaterThanZero;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type MaxSignals = t.TypeOf<typeof max_signals>;
 
 export const maxSignalsOrUndefined = t.union([max_signals, t.undefined]);
@@ -257,10 +290,21 @@ export type Name = t.TypeOf<typeof name>;
 export const nameOrUndefined = t.union([name, t.undefined]);
 export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const operator = t.keyof({
   equals: null,
 });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Operator = t.TypeOf<typeof operator>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export enum OperatorEnum {
   EQUALS = 'equals',
 }
@@ -271,8 +315,19 @@ export type RiskScore = t.TypeOf<typeof risk_score>;
 export const riskScoreOrUndefined = t.union([risk_score, t.undefined]);
 export type RiskScoreOrUndefined = t.TypeOf<typeof riskScoreOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const risk_score_mapping_field = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const risk_score_mapping_value = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const risk_score_mapping_item = t.exact(
   t.type({
     field: risk_score_mapping_field,
@@ -282,7 +337,14 @@ export const risk_score_mapping_item = t.exact(
   })
 );
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const risk_score_mapping = t.array(risk_score_mapping_item);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type RiskScoreMapping = t.TypeOf<typeof risk_score_mapping>;
 
 export const riskScoreMappingOrUndefined = t.union([risk_score_mapping, t.undefined]);
@@ -294,14 +356,39 @@ export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
 export const ruleNameOverrideOrUndefined = t.union([rule_name_override, t.undefined]);
 export type RuleNameOverrideOrUndefined = t.TypeOf<typeof ruleNameOverrideOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Severity = t.TypeOf<typeof severity>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const severityOrUndefined = t.union([severity, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const severity_mapping_field = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const severity_mapping_value = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const severity_mapping_item = t.exact(
   t.type({
     field: severity_mapping_field,
@@ -310,12 +397,30 @@ export const severity_mapping_item = t.exact(
     severity,
   })
 );
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type SeverityMappingItem = t.TypeOf<typeof severity_mapping_item>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const severity_mapping = t.array(severity_mapping_item);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type SeverityMapping = t.TypeOf<typeof severity_mapping>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const severityMappingOrUndefined = t.union([severity_mapping, t.undefined]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type SeverityMappingOrUndefined = t.TypeOf<typeof severityMappingOrUndefined>;
 
 export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
@@ -406,29 +511,92 @@ export type Fields = t.TypeOf<typeof fields>;
 export const fieldsOrUndefined = t.union([fields, t.undefined]);
 export type FieldsOrUndefined = t.TypeOf<typeof fieldsOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_framework = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_tactic_id = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_tactic_name = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_tactic_reference = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_tactic = t.type({
   id: threat_tactic_id,
   name: threat_tactic_name,
   reference: threat_tactic_reference,
 });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type ThreatTactic = t.TypeOf<typeof threat_tactic>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_subtechnique_id = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_subtechnique_name = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_subtechnique_reference = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_subtechnique = t.type({
   id: threat_subtechnique_id,
   name: threat_subtechnique_name,
   reference: threat_subtechnique_reference,
 });
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type ThreatSubtechnique = t.TypeOf<typeof threat_subtechnique>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_subtechniques = t.array(threat_subtechnique);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_technique_id = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_technique_name = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_technique_reference = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_technique = t.intersection([
   t.exact(
     t.type({
@@ -443,8 +611,20 @@ export const threat_technique = t.intersection([
     })
   ),
 ]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat_techniques = t.array(threat_technique);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threat = t.intersection([
   t.exact(
     t.type({
@@ -458,9 +638,20 @@ export const threat = t.intersection([
     })
   ),
 ]);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Threat = t.TypeOf<typeof threat>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const threats = t.array(threat);
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Threats = t.TypeOf<typeof threats>;
 
 export const threatsOrUndefined = t.union([threats, t.undefined]);
@@ -494,7 +685,7 @@ export const threshold = t.intersection([
   thresholdField,
   t.exact(
     t.partial({
-      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
+      cardinality: t.array(thresholdCardinalityField),
     })
   ),
 ]);
@@ -507,7 +698,7 @@ export const thresholdNormalized = t.intersection([
   thresholdFieldNormalized,
   t.exact(
     t.partial({
-      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
+      cardinality: t.array(thresholdCardinalityField),
     })
   ),
 ]);
@@ -516,16 +707,38 @@ export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
 export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const created_at = IsoDateString;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const updated_at = IsoDateString;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const updated_by = t.string;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const created_by = t.string;
 export const updatedByOrNull = t.union([updated_by, t.null]);
 export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
 export const createdByOrNull = t.union([created_by, t.null]);
 export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export const version = PositiveIntegerGreaterThanZero;
+
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
+ */
 export type Version = t.TypeOf<typeof version>;
 
 export const versionOrUndefined = t.union([version, t.undefined]);

@@ -44,6 +44,8 @@ import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
+import { isPopulatedObject } from '../../../../../common/util/object_utils';
+import { RuntimeMappings } from '../../../../../common/types/fields';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -133,10 +135,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     timeRange: TimeRange
   ): Promise<TimeRange> => {
     if (useFullIndexData) {
+      const runtimeMappings = indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
       const { start, end } = await ml.getTimeFieldRange({
         index: indexPattern.title,
         timeFieldName: indexPattern.timeFieldName,
         query: combinedQuery,
+        ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
       });
       return {
         start: start.epoch,

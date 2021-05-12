@@ -29,7 +29,7 @@ interface Props {
   serviceName: string;
 }
 
-type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics'>;
+type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 const INITIAL_STATE = {
   transactionGroups: [] as ApiResponse['transactionGroups'],
   isAggregationAccurate: true,
@@ -77,6 +77,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -86,7 +87,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics',
+          'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -107,14 +108,13 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
 
         return {
           ...response,
-          // Everytime the primary statistics is refetched, updates the requestId making the comparison API to be refetched.
+          // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
           requestId: uuid(),
           transactionGroupsTotalItems: response.transactionGroups.length,
           transactionGroups: currentPageTransactionGroups,
         };
       });
     },
-    // comparisonType is listed as dependency even thought it is not used. This is needed to trigger the comparison api when it is changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
@@ -127,15 +127,18 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       pageIndex,
       direction,
       field,
+      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
       comparisonType,
+      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
+      comparisonEnabled,
     ]
   );
 
   const { transactionGroups, requestId, transactionGroupsTotalItems } = data;
 
   const {
-    data: transactionGroupComparisonStatistics,
-    status: transactionGroupComparisonStatisticsStatus,
+    data: transactionGroupDetailedStatistics,
+    status: transactionGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (
@@ -147,7 +150,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics',
+            'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -168,7 +171,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         });
       }
     },
-    // only fetches comparison statistics when requestId is invalidated by primary statistics api call
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
     { preservePreviousData: false }
@@ -177,13 +180,13 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const columns = getColumns({
     serviceName,
     latencyAggregationType,
-    transactionGroupComparisonStatistics,
+    transactionGroupDetailedStatistics,
     comparisonEnabled,
   });
 
   const isLoading =
     status === FETCH_STATUS.LOADING ||
-    transactionGroupComparisonStatisticsStatus === FETCH_STATUS.LOADING;
+    transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
 
   const pagination = {
     pageIndex,
@@ -212,6 +215,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
             <TransactionOverviewLink
               serviceName={serviceName}
               latencyAggregationType={latencyAggregationType}
+              transactionType={transactionType}
             >
               {i18n.translate(
                 'xpack.apm.serviceOverview.transactionsTableLinkText',

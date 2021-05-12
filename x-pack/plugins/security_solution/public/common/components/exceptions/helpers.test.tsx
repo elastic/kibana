@@ -30,6 +30,7 @@ import {
   getFileCodeSignature,
   getProcessCodeSignature,
   retrieveAlertOsTypes,
+  filterIndexPatterns,
 } from './helpers';
 import { AlertData, EmptyEntry } from './types';
 import {
@@ -49,22 +50,79 @@ import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/
 import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
+import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import {
   ENTRIES,
   ENTRIES_WITH_IDS,
   OLD_DATE_RELATIVE_TO_DATE_NOW,
 } from '../../../../../lists/common/constants.mock';
+import { EntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-utils';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-  EntriesArray,
-  OsTypeArray,
 } from '../../../../../lists/common/schemas';
-import { IIndexPattern } from 'src/plugins/data/common';
+import { IFieldType, IIndexPattern } from 'src/plugins/data/common';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
+
+const getMockIndexPattern = (): IIndexPattern => ({
+  fields,
+  id: '1234',
+  title: 'logstash-*',
+});
+
+const mockEndpointFields = [
+  {
+    name: 'file.path.caseless',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    name: 'file.Ext.code_signature.status',
+    type: 'string',
+    esTypes: ['text'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+    subType: { nested: { path: 'file.Ext.code_signature' } },
+  },
+];
+
+const mockLinuxEndpointFields = [
+  {
+    name: 'file.path',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    name: 'file.Ext.code_signature.status',
+    type: 'string',
+    esTypes: ['text'],
+    count: 0,
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+    subType: { nested: { path: 'file.Ext.code_signature' } },
+  },
+];
+
+export const getEndpointField = (name: string) =>
+  mockEndpointFields.find((field) => field.name === name) as IFieldType;
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -73,6 +131,35 @@ describe('Exception helpers', () => {
 
   afterEach(() => {
     moment.tz.setDefault('Browser');
+  });
+
+  describe('#filterIndexPatterns', () => {
+    test('it returns index patterns without filtering if list type is "detection"', () => {
+      const mockIndexPatterns = getMockIndexPattern();
+      const output = filterIndexPatterns(mockIndexPatterns, 'detection', ['windows']);
+
+      expect(output).toEqual(mockIndexPatterns);
+    });
+
+    test('it returns filtered index patterns if list type is "endpoint"', () => {
+      const mockIndexPatterns = {
+        ...getMockIndexPattern(),
+        fields: [...fields, ...mockEndpointFields],
+      };
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['windows']);
+
+      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockEndpointFields] });
+    });
+
+    test('it returns filtered index patterns if list type is "endpoint" and os contains "linux"', () => {
+      const mockIndexPatterns = {
+        ...getMockIndexPattern(),
+        fields: [...fields, ...mockLinuxEndpointFields],
+      };
+      const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['linux']);
+
+      expect(output).toEqual({ ...getMockIndexPattern(), fields: [...mockLinuxEndpointFields] });
+    });
   });
 
   describe('#getOperatorType', () => {

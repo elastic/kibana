@@ -5,28 +5,72 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { PageContent } from '../../public/application/components/page_content';
+import { DeprecationsOverview } from '../../public/application/components/overview';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
+  memoryRouter: {
+    initialEntries: [`/overview`],
+    componentRoutePath: '/overview',
+  },
   doMountAsync: true,
 };
 
-export type OverviewTestBed = TestBed<OverviewTestSubjects>;
+export type OverviewTestBed = TestBed<OverviewTestSubjects> & {
+  actions: ReturnType<typeof createActions>;
+};
 
-export const setup = async (overrides?: any): Promise<OverviewTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(PageContent, overrides), testBedConfig);
+const createActions = (testBed: TestBed) => {
+  /**
+   * User Actions
+   */
+
+  const clickDeprecationToggle = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('upgradeAssistantDeprecationToggle').simulate('click');
+    });
+
+    component.update();
+  };
+
+  return {
+    clickDeprecationToggle,
+  };
+};
+
+export const setup = async (overrides?: Record<string, unknown>): Promise<OverviewTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(DeprecationsOverview, overrides),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
-  return testBed;
+  return {
+    ...testBed,
+    actions: createActions(testBed),
+  };
 };
 
 export type OverviewTestSubjects =
-  | 'comingSoonPrompt'
-  | 'upgradeAssistantPageContent'
+  | 'overviewPageContent'
+  | 'esStatsPanel'
+  | 'esStatsPanel.totalDeprecations'
+  | 'esStatsPanel.criticalDeprecations'
+  | 'kibanaStatsPanel'
+  | 'kibanaStatsPanel.totalDeprecations'
+  | 'kibanaStatsPanel.criticalDeprecations'
+  | 'deprecationLoggingFormRow'
+  | 'requestErrorIconTip'
+  | 'partiallyUpgradedErrorIconTip'
+  | 'upgradedErrorIconTip'
+  | 'unauthorizedErrorIconTip'
   | 'upgradedPrompt'
   | 'partiallyUpgradedPrompt'
   | 'upgradeAssistantDeprecationToggle'
-  | 'deprecationLoggingStep'
+  | 'updateLoggingError'
+  | 'fetchLoggingError'
   | 'upgradeStatusError';

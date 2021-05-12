@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import type { CanvasElementColorStats, MlCommonUI } from './common_ui';
+import type { CanvasElementColorStats } from '../canvas_element';
+import type { MlCommonUI } from './common_ui';
 import { MlApi } from './api';
 import {
   isRegressionAnalysis,
@@ -24,6 +25,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const aceEditor = getService('aceEditor');
 
   return {
     async assertJobTypeSelectExists() {
@@ -236,6 +238,69 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async assertRuntimeMappingSwitchExists() {
+      await testSubjects.existOrFail('mlDataFrameAnalyticsRuntimeMappingsEditorSwitch');
+    },
+
+    async assertRuntimeMappingEditorExists() {
+      await testSubjects.existOrFail('mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor');
+    },
+
+    async assertRuntimeMappingsEditorSwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getRuntimeMappingsEditorSwitchCheckedState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Advanced runtime mappings editor switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async getRuntimeMappingsEditorSwitchCheckedState(): Promise<boolean> {
+      const subj = 'mlDataFrameAnalyticsRuntimeMappingsEditorSwitch';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      return isSelected === 'true';
+    },
+
+    async toggleRuntimeMappingsEditorSwitch(toggle: boolean) {
+      const subj = 'mlDataFrameAnalyticsRuntimeMappingsEditorSwitch';
+      if ((await this.getRuntimeMappingsEditorSwitchCheckedState()) !== toggle) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(subj);
+          await this.assertRuntimeMappingsEditorSwitchCheckState(toggle);
+        });
+      }
+    },
+
+    async setRuntimeMappingsEditorContent(input: string) {
+      await aceEditor.setValue('mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor', input);
+    },
+
+    async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
+      await this.assertRuntimeMappingEditorExists();
+
+      const runtimeMappingsEditorString = await aceEditor.getValue(
+        'mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor'
+      );
+      // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
+      // This means we might not get back valid JSON so we only test against the first few lines
+      // and see if the string matches.
+      const splicedAdvancedEditorValue = runtimeMappingsEditorString.split('\n').splice(0, 3);
+      expect(splicedAdvancedEditorValue).to.eql(
+        expectedContent,
+        `Expected the first editor lines to be '${expectedContent}' (got '${splicedAdvancedEditorValue}')`
+      );
+    },
+
+    async applyRuntimeMappings() {
+      const subj = 'mlDataFrameAnalyticsRuntimeMappingsApplyButton';
+      await testSubjects.existOrFail(subj);
+      await testSubjects.clickWhenNotDisabled(subj);
+      const isEnabled = await testSubjects.isEnabled(subj);
+      expect(isEnabled).to.eql(
+        false,
+        `Expected runtime mappings 'Apply changes' button to be disabled, got enabled.`
+      );
+    },
+
     async assertDependentVariableSelection(expectedSelection: string[]) {
       await this.waitForDependentVariableInputLoaded();
       const actualSelection = await comboBox.getComboBoxSelectedOptions(
@@ -271,6 +336,45 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         expectedValue,
         ['#000000']
       );
+    },
+
+    async setScatterplotMatrixSampleSizeSelectValue(selectValue: string) {
+      await testSubjects.selectValue('mlScatterplotMatrixSampleSizeSelect', selectValue);
+
+      const actualSelectState = await testSubjects.getAttribute(
+        'mlScatterplotMatrixSampleSizeSelect',
+        'value'
+      );
+
+      expect(actualSelectState).to.eql(
+        selectValue,
+        `Sample size should be '${selectValue}' (got '${actualSelectState}')`
+      );
+    },
+
+    async getScatterplotMatrixRandomizeQuerySwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlScatterplotMatrixRandomizeQuerySwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertScatterplotMatrixRandomizeQueryCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getScatterplotMatrixRandomizeQuerySwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Randomize query check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async setScatterplotMatrixRandomizeQueryCheckState(checkState: boolean) {
+      await retry.tryForTime(30000, async () => {
+        if ((await this.getScatterplotMatrixRandomizeQuerySwitchCheckState()) !== checkState) {
+          await testSubjects.click('mlScatterplotMatrixRandomizeQuerySwitch');
+        }
+        await this.assertScatterplotMatrixRandomizeQueryCheckState(checkState);
+      });
     },
 
     async assertTrainingPercentInputExists() {

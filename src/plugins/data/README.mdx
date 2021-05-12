@@ -5,7 +5,7 @@ title: Data services
 image: https://source.unsplash.com/400x175/?Search
 summary: The data plugin contains services for searching, querying and filtering.
 date: 2020-12-02
-tags: ['kibana','dev', 'contributor', 'api docs']
+tags: ['kibana', 'dev', 'contributor', 'api docs']
 ---
 
 # data
@@ -149,7 +149,6 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
   - Remove a scripted field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
   - Update a scripted field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
 
-
 ### Index Patterns API
 
 Index Patterns REST API allows you to create, retrieve and delete index patterns. I also
@@ -212,10 +211,9 @@ The endpoint returns the created index pattern object.
 
 ```json
 {
-    "index_pattern": {}
+  "index_pattern": {}
 }
 ```
-
 
 #### Fetch an index pattern by ID
 
@@ -229,22 +227,21 @@ Returns an index pattern object.
 
 ```json
 {
-    "index_pattern": {
-        "id": "...",
-        "version": "...",
-        "title": "...",
-        "type": "...",
-        "intervalName": "...",
-        "timeFieldName": "...",
-        "sourceFilters": [],
-        "fields": {},
-        "typeMeta": {},
-        "fieldFormats": {},
-        "fieldAttrs": {}
-    }
+  "index_pattern": {
+    "id": "...",
+    "version": "...",
+    "title": "...",
+    "type": "...",
+    "intervalName": "...",
+    "timeFieldName": "...",
+    "sourceFilters": [],
+    "fields": {},
+    "typeMeta": {},
+    "fieldFormats": {},
+    "fieldAttrs": {}
+  }
 }
 ```
-
 
 #### Delete an index pattern by ID
 
@@ -256,21 +253,21 @@ DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 Returns an '200 OK` response with empty body on success.
 
-
 #### Partially update an index pattern by ID
 
 Update part of an index pattern. Only provided fields will be updated on the
 index pattern, missing fields will stay as they are persisted.
 
 These fields can be update partially:
-  - `title`
-  - `timeFieldName`
-  - `intervalName`
-  - `fields` (optionally refresh fields)
-  - `sourceFilters`
-  - `fieldFormatMap`
-  - `type`
-  - `typeMeta`
+
+- `title`
+- `timeFieldName`
+- `intervalName`
+- `fields` (optionally refresh fields)
+- `sourceFilters`
+- `fieldFormatMap`
+- `type`
+- `typeMeta`
 
 Update a title of an index pattern.
 
@@ -318,17 +315,13 @@ This endpoint returns the updated index pattern object.
 
 ```json
 {
-    "index_pattern": {
-
-    }
+  "index_pattern": {}
 }
 ```
-
 
 ### Fields API
 
 Fields API allows to change field metadata, such as `count`, `customLabel`, and `format`.
-
 
 #### Update fields
 
@@ -383,12 +376,9 @@ This endpoint returns the updated index pattern object.
 
 ```json
 {
-    "index_pattern": {
-
-    }
+  "index_pattern": {}
 }
 ```
-
 
 ### Scripted Fields API
 
@@ -487,7 +477,7 @@ Returns the field object.
 
 ```json
 {
-    "field": {}
+  "field": {}
 }
 ```
 
@@ -529,47 +519,86 @@ POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/scri
 }
 ```
 
-
 ## Query
 
 The query service is responsible for managing the configuration of a search query (`QueryState`): filters, time range, query string, and settings such as the auto refresh behavior and saved queries.
 
 It contains sub-services for each of those configurations:
- - `data.query.filterManager` - Manages the `filters` component of a `QueryState`. The global filter state (filters that are persisted between applications) are owned by this service.
- - `data.query.timefilter` - Responsible for the time range filter and the auto refresh behavior settings.
- - `data.query.queryString` - Responsible for the query string and query language settings.
- - `data.query.savedQueries` - Responsible for persisting a `QueryState` into a `SavedObject`, so it can be restored and used by other applications.
 
- Any changes to the `QueryState` are published on the `data.query.state$`, which is useful when wanting to persist global state or run a search upon data changes.
+- `data.query.filterManager` - Manages the `filters` component of a `QueryState`. The global filter state (filters that are persisted between applications) are owned by this service.
+- `data.query.timefilter` - Responsible for the time range filter and the auto refresh behavior settings.
+- `data.query.queryString` - Responsible for the query string and query language settings.
+- `data.query.savedQueries` - Responsible for persisting a `QueryState` into a `SavedObject`, so it can be restored and used by other applications.
 
- A simple use case is:
+Any changes to the `QueryState` are published on the `data.query.state$`, which is useful when wanting to persist global state or run a search upon data changes.
 
- ```.ts
- function searchOnChange(indexPattern: IndexPattern, aggConfigs: AggConfigs) {
-    data.query.state$.subscribe(() => {
+A simple use case is:
 
-        // Constuct the query portion of the search request
-        const query = data.query.getEsQuery(indexPattern);
+```.ts
+function searchOnChange(indexPattern: IndexPattern, aggConfigs: AggConfigs) {
+   data.query.state$.subscribe(() => {
 
-        // Construct a request
-        const request = {
-            params: {
-                index: indexPattern.title,
-                body: {
-                    aggs: aggConfigs.toDsl(),
-                    query,
-                },
-            },
-        };
+       // Constuct the query portion of the search request
+       const query = data.query.getEsQuery(indexPattern);
 
-        // Search with the `data.query` config
-        const search$ = data.search.search(request);
+       // Construct a request
+       const request = {
+           params: {
+               index: indexPattern.title,
+               body: {
+                   aggs: aggConfigs.toDsl(),
+                   query,
+               },
+           },
+       };
 
-        ...
-    });
- }
+       // Search with the `data.query` config
+       const search$ = data.search.search(request);
 
- ```
+       ...
+   });
+}
+
+```
+
+### Timefilter
+
+`data.query.timefilter` is responsible for the time range filter and the auto refresh behavior settings.
+
+#### Autorefresh
+
+Timefilter provides an API for setting and getting current auto refresh state:
+
+```ts
+const { pause, value } = data.query.timefilter.timefilter.getRefreshInterval();
+
+data.query.timefilter.timefilter.setRefreshInterval({ pause: false, value: 5000 }); // start auto refresh with 5 seconds interval
+```
+
+Timefilter API also provides an `autoRefreshFetch$` observables that apps should use to get notified
+when it is time to refresh data because of auto refresh.
+This API expects apps to confirm when they are done with reloading the data.
+The confirmation mechanism is needed to prevent excessive queue of fetches.
+
+```
+import { refetchData } from '../my-app'
+
+const autoRefreshFetch$ = data.query.timefilter.timefilter.getAutoRefreshFetch$()
+autoRefreshFetch$.subscribe((done) => {
+  try {
+    await refetchData();
+  } finally {
+    // confirm that data fetching was finished
+    done();
+  }
+})
+
+function unmount() {
+  // don't forget to unsubscribe when leaving the app
+  autoRefreshFetch$.unsubscribe()
+}
+
+```
 
 ## Search
 
@@ -594,8 +623,7 @@ The `SearchSource` API is a convenient way to construct and run an Elasticsearch
 
 #### Default Search Strategy
 
-One benefit of using the low-level search API, is partial response support in X-Pack, allowing for a better and more responsive user experience.
-In OSS only the final result is returned.
+One benefit of using the low-level search API, is partial response support, allowing for a better and more responsive user experience.
 
 ```.ts
     import { isCompleteResponse } from '../plugins/data/public';

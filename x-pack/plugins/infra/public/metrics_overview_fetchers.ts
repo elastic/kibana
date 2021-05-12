@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+/*
+ * Copyright
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
-import { OverviewRequest, OverviewResponse } from '../common/http_api/overview_api';
+import { TopNodesRequest, TopNodesResponse } from '../common/http_api/overview_api';
 import { InfraClientCoreSetup } from './types';
 
 export const createMetricsHasData = (
@@ -20,38 +28,33 @@ export const createMetricsHasData = (
 
 export const createMetricsFetchData = (
   getStartServices: InfraClientCoreSetup['getStartServices']
-) => async ({ absoluteTime }: FetchDataParams): Promise<MetricsFetchDataResponse> => {
+) => async ({ absoluteTime, bucketSize }: FetchDataParams): Promise<MetricsFetchDataResponse> => {
   const [coreServices] = await getStartServices();
   const { http } = coreServices;
 
-  const { start, end } = absoluteTime;
+  const makeRequest = async (overrides: Partial<TopNodesRequest> = {}) => {
+    const { start, end } = absoluteTime;
 
-  const overviewRequest: OverviewRequest = {
-    sourceId: 'default',
-    timerange: {
-      from: start,
-      to: end,
-    },
+    const overviewRequest: TopNodesRequest = {
+      sourceId: 'default',
+      bucketSize,
+      size: 5,
+      timerange: {
+        from: start,
+        to: end,
+      },
+      ...overrides,
+    };
+    const results = await http.post<TopNodesResponse>('/api/metrics/overview/top', {
+      body: JSON.stringify(overviewRequest),
+    });
+    return {
+      appLink: `/app/metrics/inventory?waffleTime=(currentTime:${end},isAutoReloading:!f)`,
+      series: results.series,
+      sort: async (by: string, direction: string) =>
+        makeRequest({ sort: by, sortDirection: direction }),
+    };
   };
 
-  const results = await http.post<OverviewResponse>('/api/metrics/overview', {
-    body: JSON.stringify(overviewRequest),
-  });
-  return {
-    appLink: `/app/metrics/inventory?waffleTime=(currentTime:${end},isAutoReloading:!f)`,
-    stats: {
-      hosts: {
-        type: 'number',
-        value: results.stats.hosts.value,
-      },
-      cpu: {
-        type: 'percent',
-        value: results.stats.cpu.value,
-      },
-      memory: {
-        type: 'percent',
-        value: results.stats.memory.value,
-      },
-    },
-  };
+  return await makeRequest();
 };

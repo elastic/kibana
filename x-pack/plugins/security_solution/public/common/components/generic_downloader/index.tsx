@@ -12,6 +12,7 @@ import * as i18n from './translations';
 
 import { ExportDocumentsProps } from '../../../detections/containers/detection_engine/rules';
 import { useStateToaster, errorToToaster } from '../toasters';
+import { TimelineErrorResponse } from '../../../../common/types/timeline';
 
 const InvisibleAnchor = styled.a`
   display: none;
@@ -22,7 +23,7 @@ export type ExportSelectedData = ({
   filename,
   ids,
   signal,
-}: ExportDocumentsProps) => Promise<Blob>;
+}: ExportDocumentsProps) => Promise<Blob | TimelineErrorResponse>;
 
 export interface GenericDownloaderProps {
   filename: string;

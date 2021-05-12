@@ -9,9 +9,9 @@
 import { each, cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
+// @ts-expect-error
 import realHits from '../../../__fixtures__/real_hits.js';
-// @ts-ignore
+// @ts-expect-error
 import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
@@ -48,6 +48,12 @@ const mockServices = ({
       }
     },
   },
+  indexPatternFieldEditor: {
+    openEditor: jest.fn(),
+    userPermissions: {
+      editIndexPattern: jest.fn(),
+    },
+  },
 } as unknown) as DiscoverServices;
 
 jest.mock('../../../kibana_services', () => ({
@@ -61,7 +67,7 @@ jest.mock('./lib/get_index_pattern_field_list', () => ({
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = getStubIndexPattern(
     'logstash-*',
-    (cfg: any) => cfg,
+    (cfg: unknown) => cfg,
     'time',
     stubbedLogstashFields(),
     coreMock.createSetup()
@@ -102,6 +108,8 @@ function getCompProps(): DiscoverSidebarProps {
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
     setAppState: jest.fn(),
+    onEditRuntimeField: jest.fn(),
+    editField: jest.fn(),
   };
 }
 

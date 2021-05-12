@@ -23,7 +23,13 @@ Object {
 }
 `;
 
+exports[`Error CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Error CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Error CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Error CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
@@ -258,7 +264,13 @@ Object {
 }
 `;
 
+exports[`Span CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Span CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Span CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Span CLOUD_MACHINE_TYPE 1`] = `undefined`;
 
@@ -485,7 +497,13 @@ Object {
 }
 `;
 
+exports[`Transaction CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
 exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_INSTANCE_ID 1`] = `undefined`;
+
+exports[`Transaction CLOUD_INSTANCE_NAME 1`] = `undefined`;
 
 exports[`Transaction CLOUD_MACHINE_TYPE 1`] = `undefined`;
 

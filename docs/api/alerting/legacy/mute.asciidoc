@@ -1,0 +1,44 @@
+[[alerts-api-mute]]
+=== Legacy mute alert instance API
+++++
+<titleabbrev>Legacy mute alert instance</titleabbrev>
+++++
+
+deprecated::[7.13.0,Use <<mute-alert-api>> instead.]
+
+Mute an alert instance.
+
+[[alerts-api-mute-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/alerts/alert/<id>/alert_instance/<alert_instance_id>/_mute`
+
+`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/alert_instance/<alert_instance_id>/_mute`
+
+[[alerts-api-mute-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the alert whose instance you want to mute.
+
+`alert_instance_id`::
+  (Required, string) The ID of the alert instance that you want to mute.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[alerts-api-mute-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Mute alert instance with ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/alerts/alert/41893910-6bca-11eb-9e0d-85d233e3ee35/alert_instance/dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2/_mute
+--------------------------------------------------
+// KIBANA

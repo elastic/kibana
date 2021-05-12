@@ -18,6 +18,7 @@ import { registry } from './registry';
 interface Config {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
+  kibanaConfig?: Record<string, string>;
 }
 
 const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
@@ -37,7 +38,7 @@ const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async 
 };
 
 export function createTestConfig(config: Config) {
-  const { license, name } = config;
+  const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackAPITestsConfig = await readConfigFile(
@@ -79,7 +80,15 @@ export function createTestConfig(config: Config) {
         ...xPackAPITestsConfig.get('esTestCluster'),
         license,
       },
-      kbnTestServer: xPackAPITestsConfig.get('kbnTestServer'),
+      kbnTestServer: {
+        ...xPackAPITestsConfig.get('kbnTestServer'),
+        serverArgs: [
+          ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+          ...(kibanaConfig
+            ? Object.entries(kibanaConfig).map(([key, value]) => `--${key}=${value}`)
+            : []),
+        ],
+      },
     };
   };
 }

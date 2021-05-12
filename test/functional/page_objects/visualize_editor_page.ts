@@ -128,9 +128,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async changeHeatmapColorNumbers(value = 6) {
-      const input = await testSubjects.find(`heatmapColorsNumber`);
-      await input.clearValueWithKeyboard();
-      await input.type(`${value}`);
+      await testSubjects.setValue('heatmapColorsNumber', `${value}`);
     }
 
     public async getBucketErrorMessage() {
@@ -353,6 +351,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       const accordion = await testSubjects.find(`advancedParams-${aggId}`);
       const accordionButton = await find.descendantDisplayedByCssSelector('button', accordion);
       await accordionButton.click();
+    }
+
+    public async inputValueInCodeEditor(value: string) {
+      const codeEditor = await find.byCssSelector('.react-monaco-editor-container');
+      const textarea = await codeEditor.findByClassName('monaco-mouse-cursor-text');
+
+      await textarea.click();
+      await browser.pressKeys(value);
     }
 
     public async clickReset() {

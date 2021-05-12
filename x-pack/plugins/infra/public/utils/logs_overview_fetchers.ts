@@ -12,6 +12,7 @@ import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
 import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
+import { resolveLogSourceConfiguration } from '../../common/log_sources';
 
 interface StatsAggregation {
   buckets: Array<{
@@ -54,10 +55,15 @@ export function getLogsOverviewDataFetcher(
       core.http.fetch
     );
 
+    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
+      sourceConfiguration.data.configuration,
+      startPlugins.data.indexPatterns
+    );
+
     const { stats, series } = await fetchLogsOverview(
       {
-        index: sourceConfiguration.data.configuration.logAlias,
-        timestampField: sourceConfiguration.data.configuration.fields.timestamp,
+        index: resolvedLogSourceConfiguration.indices,
+        timestampField: resolvedLogSourceConfiguration.timestampField,
       },
       params,
       data

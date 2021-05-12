@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './actions';
 export { DEFAULT_META } from './default_meta';

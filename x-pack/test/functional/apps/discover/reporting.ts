@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/95592
-  describe.skip('Discover CSV Export', () => {
+  describe('Discover CSV Export', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('reporting/ecommerce');
@@ -42,9 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Check Available', () => {
       beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
-      it('is not available if new', async () => {
+      it('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('becomes available when saved', async () => {
@@ -53,11 +52,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
-      it('becomes available/not available when a saved search is created, changed and saved again', async () => {
+      it('remains available regardless of the saved search state', async () => {
         // create new search, csv export is not available
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         // save search, csv export is available
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
         await PageObjects.reporting.openCsvReportingPanel();
@@ -65,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // add filter, csv export is not available
         await filterBar.addFilter('currency', 'is', 'EUR');
         await PageObjects.reporting.openCsvReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         // save search again, csv export is available
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
         await PageObjects.reporting.openCsvReportingPanel();

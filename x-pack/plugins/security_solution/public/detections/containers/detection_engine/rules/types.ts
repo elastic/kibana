@@ -123,7 +123,7 @@ export const RuleSchema = t.intersection([
     last_success_message: t.string,
     last_success_at: t.string,
     meta: MetaRule,
-    machine_learning_job_id: t.string,
+    machine_learning_job_id: t.array(t.string),
     output_index: t.string,
     query: t.string,
     rule_name_override,

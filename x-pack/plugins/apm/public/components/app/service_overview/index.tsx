@@ -6,12 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 import { LatencyChart } from '../../shared/charts/latency_chart';
@@ -46,22 +44,12 @@ export function ServiceOverview({
   // observe the window width and set the flex directions of rows accordingly
   const { isMedium } = useBreakPoints();
   const rowDirection = isMedium ? 'column' : 'row';
-
-  const { transactionType } = useApmServiceContext();
-  const transactionTypeLabel = i18n.translate(
-    'xpack.apm.serviceOverview.searchBar.transactionTypeLabel',
-    { defaultMessage: 'Type: {transactionType}', values: { transactionType } }
-  );
   const isRumAgent = isRumAgentName(agentName);
 
   return (
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
-        <SearchBar
-          prepend={transactionTypeLabel}
-          showCorrelations
-          showTimeComparison
-        />
+        <SearchBar showTransactionTypeSelector showTimeComparison />
         <EuiPage>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
@@ -131,7 +119,7 @@ export function ServiceOverview({
             {!isRumAgent && (
               <EuiFlexItem>
                 <EuiFlexGroup
-                  direction={rowDirection}
+                  direction="column"
                   gutterSize="s"
                   responsive={false}
                 >

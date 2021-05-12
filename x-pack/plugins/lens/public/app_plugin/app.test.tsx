@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
@@ -72,10 +72,12 @@ const { TopNavMenu } = navigationStartMock.ui;
 
 function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   return {
-    mount: jest.fn((el, props) => {}),
+    mount: jest.fn(async (el, props) => {}),
     unmount: jest.fn(() => {}),
   };
 }
+
+const sessionIdSubject = new Subject<string>();
 
 function createMockSearchService() {
   let sessionIdCounter = 1;
@@ -84,6 +86,7 @@ function createMockSearchService() {
       start: jest.fn(() => `sessionId-${sessionIdCounter++}`),
       clear: jest.fn(),
       getSessionId: jest.fn(() => `sessionId-${sessionIdCounter}`),
+      getSession$: jest.fn(() => sessionIdSubject.asObservable()),
     },
   };
 }
@@ -155,11 +158,7 @@ function createMockTimefilter() {
     getBounds: jest.fn(() => timeFilter),
     getRefreshInterval: () => {},
     getRefreshIntervalDefaults: () => {},
-    getAutoRefreshFetch$: () => ({
-      subscribe: ({ next }: { next: () => void }) => {
-        return next;
-      },
-    }),
+    getAutoRefreshFetch$: () => new Observable(),
   };
 }
 
@@ -1273,6 +1272,26 @@ describe('Lens App', () => {
       );
     });
 
+    it('updates the query if saved query is selected', () => {
+      const { component } = mountWith({});
+      act(() => {
+        component.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+          id: '2',
+          attributes: {
+            title: 'new title',
+            description: '',
+            query: { query: 'abc:def', language: 'lucene' },
+          },
+        });
+      });
+      expect(TopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { query: 'abc:def', language: 'lucene' },
+        }),
+        {}
+      );
+    });
+
     it('clears all existing unpinned filters when the active saved query is cleared', () => {
       const { component, frame, services } = mountWith({});
       act(() =>
@@ -1328,6 +1347,24 @@ describe('Lens App', () => {
         expect.any(Element),
         expect.objectContaining({
           searchSessionId: `sessionId-2`,
+        })
+      );
+    });
+
+    it('re-renders the frame if session id changes from the outside', async () => {
+      const services = makeDefaultServices();
+      const { frame } = mountWith({ props: undefined, services });
+
+      act(() => {
+        sessionIdSubject.next('new-session-id');
+      });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `new-session-id`,
         })
       );
     });

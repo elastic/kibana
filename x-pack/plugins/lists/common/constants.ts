@@ -60,3 +60,12 @@ export const ENDPOINT_TRUSTED_APPS_LIST_NAME = 'Endpoint Security Trusted Apps L
 
 /** Description of trusted apps agnostic list */
 export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION = 'Endpoint Security Trusted Apps List';
+
+/** ID of event filters agnostic list */
+export const ENDPOINT_EVENT_FILTERS_LIST_ID = 'endpoint_event_filters';
+
+/** Name of event filters agnostic list */
+export const ENDPOINT_EVENT_FILTERS_LIST_NAME = 'Endpoint Security Event Filters List';
+
+/** Description of event filters agnostic list */
+export const ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION = 'Endpoint Security Event Filters List';

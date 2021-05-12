@@ -17,7 +17,7 @@ import {
 } from '../../__fixtures__';
 
 import { initCaseConfigureGetActionConnector } from './get_connectors';
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
+import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common';
 import { getActions } from '../../__mocks__/request_responses';
 
 describe('GET connectors', () => {

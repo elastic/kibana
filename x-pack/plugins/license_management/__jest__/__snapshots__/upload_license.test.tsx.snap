@@ -268,9 +268,11 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -340,7 +342,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                 >
                                   <button
                                     aria-label="Closes this modal window"
-                                    class="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                    class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
                                     type="button"
                                   >
                                     <span
@@ -453,7 +455,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                   >
                                     <button
                                       aria-label="Closes this modal window"
-                                      className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                      className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
                                       disabled={false}
                                       onClick={[Function]}
                                       type="button"
@@ -1300,9 +1302,11 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -1385,12 +1389,14 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                           className="euiForm__errors"
                           color="danger"
                           role="alert"
+                          tabIndex={-1}
                           title="Please address the highlighted errors."
                         >
                           <div
                             aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
                             role="alert"
+                            tabIndex={-1}
                           >
                             <div
                               className="euiCallOutHeader"
@@ -2025,9 +2031,11 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -2110,12 +2118,14 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                           className="euiForm__errors"
                           color="danger"
                           role="alert"
+                          tabIndex={-1}
                           title="Please address the highlighted errors."
                         >
                           <div
                             aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
                             role="alert"
+                            tabIndex={-1}
                           >
                             <div
                               className="euiCallOutHeader"
@@ -2750,9 +2760,11 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -2835,12 +2847,14 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                           className="euiForm__errors"
                           color="danger"
                           role="alert"
+                          tabIndex={-1}
                           title="Please address the highlighted errors."
                         >
                           <div
                             aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
                             role="alert"
+                            tabIndex={-1}
                           >
                             <div
                               className="euiCallOutHeader"
@@ -3475,9 +3489,11 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           <EuiPanel
             className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             paddingSize="l"
+            role="main"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              role="main"
             >
               <EuiPageContentBody>
                 <div
@@ -3560,12 +3576,14 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                           className="euiForm__errors"
                           color="danger"
                           role="alert"
+                          tabIndex={-1}
                           title="Please address the highlighted errors."
                         >
                           <div
                             aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
                             role="alert"
+                            tabIndex={-1}
                           >
                             <div
                               className="euiCallOutHeader"

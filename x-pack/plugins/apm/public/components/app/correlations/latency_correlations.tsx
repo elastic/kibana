@@ -32,8 +32,12 @@ import { useFieldNames } from './use_field_names';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUiTracker } from '../../../../../observability/public';
 
+type OverallLatencyApiResponse = NonNullable<
+  APIReturnType<'GET /api/apm/correlations/latency/overall_distribution'>
+>;
+
 type CorrelationsApiResponse = NonNullable<
-  APIReturnType<'GET /api/apm/correlations/slow_transactions'>
+  APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>
 >;
 
 interface Props {
@@ -71,11 +75,45 @@ export function LatencyCorrelations({ onClose }: Props) {
     75
   );
 
-  const { data, status } = useFetcher(
+  const { data: overallData, status: overallStatus } = useFetcher(
     (callApmApi) => {
-      if (start && end && hasFieldNames) {
+      if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/correlations/slow_transactions',
+          endpoint: 'GET /api/apm/correlations/latency/overall_distribution',
+          params: {
+            query: {
+              environment,
+              kuery,
+              serviceName,
+              transactionName,
+              transactionType,
+              start,
+              end,
+            },
+          },
+        });
+      }
+    },
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      transactionName,
+      transactionType,
+    ]
+  );
+
+  const maxLatency = overallData?.maxLatency;
+  const distributionInterval = overallData?.distributionInterval;
+  const fieldNamesCommaSeparated = fieldNames.join(',');
+
+  const { data: correlationsData, status: correlationsStatus } = useFetcher(
+    (callApmApi) => {
+      if (start && end && hasFieldNames && maxLatency && distributionInterval) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/correlations/latency/slow_transactions',
           params: {
             query: {
               environment,
@@ -86,7 +124,9 @@ export function LatencyCorrelations({ onClose }: Props) {
               start,
               end,
               durationPercentile: durationPercentile.toString(10),
-              fieldNames: fieldNames.join(','),
+              fieldNames: fieldNamesCommaSeparated,
+              maxLatency: maxLatency.toString(10),
+              distributionInterval: distributionInterval.toString(10),
             },
           },
         });
@@ -101,8 +141,10 @@ export function LatencyCorrelations({ onClose }: Props) {
       transactionName,
       transactionType,
       durationPercentile,
-      fieldNames,
+      fieldNamesCommaSeparated,
       hasFieldNames,
+      maxLatency,
+      distributionInterval,
     ]
   );
 
@@ -134,8 +176,13 @@ export function LatencyCorrelations({ onClose }: Props) {
                 </h4>
               </EuiTitle>
               <LatencyDistributionChart
-                data={hasFieldNames ? data : undefined}
-                status={status}
+                overallData={overallData}
+                correlationsData={
+                  hasFieldNames && correlationsData
+                    ? correlationsData?.significantTerms
+                    : undefined
+                }
+                status={overallStatus}
                 selectedSignificantTerm={selectedSignificantTerm}
               />
             </EuiFlexItem>
@@ -147,8 +194,12 @@ export function LatencyCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latency.percentageColumnName',
               { defaultMessage: '% of slow transactions' }
             )}
-            significantTerms={hasFieldNames ? data?.significantTerms : []}
-            status={status}
+            significantTerms={
+              hasFieldNames && correlationsData
+                ? correlationsData?.significantTerms
+                : []
+            }
+            status={correlationsStatus}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             onFilter={onClose}
           />
@@ -167,25 +218,23 @@ export function LatencyCorrelations({ onClose }: Props) {
   );
 }
 
-function getDistributionYMax(data?: CorrelationsApiResponse) {
-  if (!data?.overall) {
-    return 0;
+function getAxisMaxes(data?: OverallLatencyApiResponse) {
+  if (!data?.overallDistribution) {
+    return { xMax: 0, yMax: 0 };
   }
-
-  const yValues = [
-    ...data.overall.distribution.map((p) => p.y ?? 0),
-    ...data.significantTerms.flatMap((term) =>
-      term.distribution.map((p) => p.y ?? 0)
-    ),
-  ];
-  return Math.max(...yValues);
+  const { overallDistribution } = data;
+  const xValues = overallDistribution.map((p) => p.x ?? 0);
+  const yValues = overallDistribution.map((p) => p.y ?? 0);
+  return {
+    xMax: Math.max(...xValues),
+    yMax: Math.max(...yValues),
+  };
 }
 
 function getSelectedDistribution(
-  data: CorrelationsApiResponse,
+  significantTerms: CorrelationsApiResponse['significantTerms'],
   selectedSignificantTerm: SelectedSignificantTerm
 ) {
-  const { significantTerms } = data;
   if (!significantTerms) {
     return [];
   }
@@ -199,23 +248,22 @@ function getSelectedDistribution(
 }
 
 function LatencyDistributionChart({
-  data,
+  overallData,
+  correlationsData,
   selectedSignificantTerm,
   status,
 }: {
-  data?: CorrelationsApiResponse;
+  overallData?: OverallLatencyApiResponse;
+  correlationsData?: CorrelationsApiResponse['significantTerms'];
   selectedSignificantTerm: SelectedSignificantTerm | null;
   status: FETCH_STATUS;
 }) {
   const theme = useTheme();
-  const xMax = Math.max(
-    ...(data?.overall?.distribution.map((p) => p.x ?? 0) ?? [])
-  );
+  const { xMax, yMax } = getAxisMaxes(overallData);
   const durationFormatter = getDurationFormatter(xMax);
-  const yMax = getDistributionYMax(data);
 
   return (
-    <ChartContainer height={200} hasData={!!data} status={status}>
+    <ChartContainer height={200} hasData={!!overallData} status={status}>
       <Chart>
         <Settings
           showLegend
@@ -224,7 +272,7 @@ function LatencyDistributionChart({
             headerFormatter: (obj) => {
               const start = durationFormatter(obj.value);
               const end = durationFormatter(
-                obj.value + data?.distributionInterval
+                obj.value + overallData?.distributionInterval
               );
 
               return `${start.value} - ${end.formatted}`;
@@ -254,12 +302,12 @@ function LatencyDistributionChart({
           xAccessor={'x'}
           yAccessors={['y']}
           color={theme.eui.euiColorVis1}
-          data={data?.overall?.distribution || []}
+          data={overallData?.overallDistribution || []}
           minBarHeight={5}
           tickFormat={(d) => `${roundFloat(d)}%`}
         />
 
-        {data && selectedSignificantTerm ? (
+        {correlationsData && selectedSignificantTerm ? (
           <BarSeries
             id={i18n.translate(
               'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
@@ -276,7 +324,10 @@ function LatencyDistributionChart({
             xAccessor={'x'}
             yAccessors={['y']}
             color={theme.eui.euiColorVis2}
-            data={getSelectedDistribution(data, selectedSignificantTerm)}
+            data={getSelectedDistribution(
+              correlationsData,
+              selectedSignificantTerm
+            )}
             minBarHeight={5}
             tickFormat={(d) => `${roundFloat(d)}%`}
           />

@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
+import { mockHistory } from './react_router_history.mock';
 
-import { mockHistory } from './';
+import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 
 export const mockKibanaValues = {
   config: { host: 'http://localhost:3002' },
   charts: chartPluginMock.createStartContract(),
   cloud: {
     isCloudEnabled: false,
-    cloudDeploymentUrl: 'https://cloud.elastic.co/deployments/some-id',
+    deployment_url: 'https://cloud.elastic.co/deployments/some-id',
   },
   history: mockHistory,
   navigateToUrl: jest.fn(),
   setBreadcrumbs: jest.fn(),
+  setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   renderHeaderActions: jest.fn(),
 };

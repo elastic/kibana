@@ -8,7 +8,7 @@
 
 import { buildRequestBody } from './build_request_body';
 
-import type { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
+import type { FetchedIndexPattern, Panel, Series } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
@@ -17,9 +17,9 @@ import type { DefaultSearchCapabilities } from '../../search_strategies';
 
 export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
+  panel: Panel,
   panelIndex: FetchedIndexPattern,
-  series: SeriesItemsSchema,
+  series: Series,
   capabilities: DefaultSearchCapabilities,
   {
     esQueryConfig,
@@ -39,7 +39,7 @@ export async function getSeriesRequestParams(
     panel,
     series,
     esQueryConfig,
-    seriesIndex.indexPattern,
+    seriesIndex,
     capabilities,
     uiSettings
   );
@@ -48,6 +48,7 @@ export async function getSeriesRequestParams(
     index: seriesIndex.indexPatternString,
     body: {
       ...request,
+      runtime_mappings: seriesIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
     },
   };

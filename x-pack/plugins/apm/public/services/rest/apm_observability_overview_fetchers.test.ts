@@ -10,10 +10,10 @@ import {
   fetchObservabilityOverviewPageData,
   getHasData,
 } from './apm_observability_overview_fetchers';
-import * as createCallApmApi from './createCallApmApi';
+import { getCallApmApiSpy } from './callApmApiSpy';
 
 describe('Observability dashboard data', () => {
-  const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi');
+  const callApmApiMock = getCallApmApiSpy();
   const params = {
     absoluteTime: {
       start: moment('2020-07-02T13:25:11.629Z').valueOf(),
@@ -46,11 +46,14 @@ describe('Observability dashboard data', () => {
       callApmApiMock.mockImplementation(() =>
         Promise.resolve({
           serviceCount: 10,
-          transactionCoordinates: [
-            { x: 1, y: 1 },
-            { x: 2, y: 2 },
-            { x: 3, y: 3 },
-          ],
+          transactionPerMinute: {
+            value: 2,
+            timeseries: [
+              { x: 1, y: 1 },
+              { x: 2, y: 2 },
+              { x: 3, y: 3 },
+            ],
+          },
         })
       );
       const response = await fetchObservabilityOverviewPageData(params);
@@ -81,7 +84,7 @@ describe('Observability dashboard data', () => {
       callApmApiMock.mockImplementation(() =>
         Promise.resolve({
           serviceCount: 0,
-          transactionCoordinates: [],
+          transactionPerMinute: { value: null, timeseries: [] as any },
         })
       );
       const response = await fetchObservabilityOverviewPageData(params);
@@ -108,7 +111,10 @@ describe('Observability dashboard data', () => {
       callApmApiMock.mockImplementation(() =>
         Promise.resolve({
           serviceCount: 0,
-          transactionCoordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
+          transactionPerMinute: {
+            value: 0,
+            timeseries: [{ x: 1 }, { x: 2 }, { x: 3 }],
+          },
         })
       );
       const response = await fetchObservabilityOverviewPageData(params);

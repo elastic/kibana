@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
 
   describe('dashboard lens by value', function () {
     before(async () => {
@@ -27,7 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can add a lens panel by value', async () => {
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await PageObjects.lens.createAndAddLensFromDashboard({});
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.eql(1);

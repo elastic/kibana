@@ -12,19 +12,13 @@ export const fetchMetricsData: FetchData<MetricsFetchDataResponse> = () => {
 };
 
 const response: MetricsFetchDataResponse = {
-  appLink: '/app/apm',
-  stats: {
-    hosts: { value: 11, type: 'number' },
-    cpu: { value: 0.8, type: 'percent' },
-    memory: { value: 0.362, type: 'percent' },
-  },
+  appLink: '/app/metrics',
+  sort: async () => response,
+  series: [],
 };
 
 export const emptyResponse: MetricsFetchDataResponse = {
-  appLink: '/app/apm',
-  stats: {
-    hosts: { value: 0, type: 'number' },
-    cpu: { value: 0, type: 'percent' },
-    memory: { value: 0, type: 'percent' },
-  },
+  appLink: '/app/metrics',
+  sort: async () => emptyResponse,
+  series: [],
 };

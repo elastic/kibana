@@ -24,7 +24,7 @@ import {
 import { useLayerList } from './useLayerList';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { RenderTooltipContentParams } from '../../../../../../maps/public';
+import type { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
 import { useMapFilters } from './useMapFilters';
 import { EmbeddableStart } from '../../../../../../../../src/plugins/embeddable/public';

@@ -172,7 +172,7 @@ export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRules
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
-  machine_learning_job_id: 'some_job_id',
+  machine_learning_job_id: ['some_job_id'],
   type: 'machine_learning',
 });
 
@@ -189,7 +189,7 @@ export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): Updat
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
-  machine_learning_job_id: 'some_job_id',
+  machine_learning_job_id: ['some_job_id'],
   type: 'machine_learning',
 });
 
@@ -344,7 +344,7 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
     name: 'Simple ML Rule',
     description: 'Simple Machine Learning Rule',
     anomaly_threshold: 44,
-    machine_learning_job_id: 'some_job_id',
+    machine_learning_job_id: ['some_job_id'],
     type: 'machine_learning',
   };
 };
@@ -683,7 +683,7 @@ export const getWebHookAction = () => ({
 export const getRuleWithWebHookAction = (
   id: string,
   enabled = false,
-  rule?: QueryCreateSchema
+  rule?: CreateRulesSchema
 ): CreateRulesSchema | UpdateRulesSchema => {
   const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
   return {
@@ -776,6 +776,17 @@ export const countDownES = async (
     retryCount,
     timeoutWait
   );
+};
+
+/**
+ * Refresh an index, making changes available to search.
+ * Useful for tests where we want to ensure that a rule does NOT create alerts, e.g. testing exceptions.
+ * @param es The ElasticSearch handle
+ */
+export const refreshIndex = async (es: KibanaClient, index?: string) => {
+  await es.indices.refresh({
+    index,
+  });
 };
 
 /**
@@ -877,7 +888,7 @@ export const createNewAction = async (supertest: SuperTest<supertestAsPromised.T
 
 /**
  * Helper to cut down on the noise in some of the tests. This
- * creates a new action and expects a 200 and does not do any retries.
+ * uses the find API to get an immutable rule by id.
  * @param supertest The supertest deps
  */
 export const findImmutableRuleById = async (
@@ -1107,7 +1118,7 @@ export const installPrePackagedRules = async (
  */
 export const createRuleWithExceptionEntries = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  rule: QueryCreateSchema,
+  rule: CreateRulesSchema,
   entries: NonEmptyEntriesArray[]
 ): Promise<FullResponseSchema> => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -1141,7 +1152,7 @@ export const createRuleWithExceptionEntries = async (
   // the rule to sometimes not filter correctly the first time with an exception list
   // or other timing issues. Then afterwards wait for the rule to have succeeded before
   // returning.
-  const ruleWithException: QueryCreateSchema = {
+  const ruleWithException: CreateRulesSchema = {
     ...rule,
     enabled: false,
     exceptions_list: [
@@ -1201,4 +1212,17 @@ export const deleteMigrations = async ({
       })
     )
   );
+};
+
+export const getOpenSignals = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  es: KibanaClient,
+  rule: FullResponseSchema
+) => {
+  await waitForRuleSuccessOrStatus(supertest, rule.id);
+  // Critically important that we wait for rule success AND refresh the write index in that order before we
+  // assert that no signals were created. Otherwise, signals could be written but not available to query yet
+  // when we search, causing tests that check that signals are NOT created to pass when they should fail.
+  await refreshIndex(es, rule.output_index);
+  return getSignalsByIds(supertest, [rule.id]);
 };

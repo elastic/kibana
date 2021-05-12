@@ -14,6 +14,7 @@ import {
   ADD_LAYER,
   SET_LAYER_ERROR_STATUS,
   ADD_WAITING_FOR_MAP_READY_LAYER,
+  CLEAR_LAYER_PROP,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
   SET_LAYER_VISIBILITY,
@@ -49,6 +50,7 @@ import {
 
 import { getDefaultMapSettings } from './default_map_settings';
 import {
+  clearLayerProp,
   getLayerIndex,
   removeTrackedLayerState,
   rollbackTrackedLayerState,
@@ -258,6 +260,8 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
       };
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
+    case CLEAR_LAYER_PROP:
+      return clearLayerProp(state, action.id, action.propName);
     case UPDATE_SOURCE_PROP:
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:

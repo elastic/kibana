@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import {
   CreateIndexRequest,
@@ -13,7 +12,7 @@ import {
   IndexRequest,
 } from '@elastic/elasticsearch/api/types';
 import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMRequestHandlerContext } from '../../../../routes/typings';
+import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   ESSearchResponse,
   ESSearchRequest,
@@ -31,11 +30,9 @@ export type APMInternalClient = ReturnType<typeof createInternalESClient>;
 
 export function createInternalESClient({
   context,
+  debug,
   request,
-}: {
-  context: APMRequestHandlerContext;
-  request: KibanaRequest;
-}) {
+}: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
   const { asInternalUser } = context.core.elasticsearch.client;
 
   function callEs<T extends { body: any }>({
@@ -53,7 +50,7 @@ export function createInternalESClient({
         title: getDebugTitle(request),
         body: getDebugBody(params, requestType),
       }),
-      debug: context.params.query._inspect,
+      debug,
       isCalledWithInternalUser: true,
       request,
       requestType,

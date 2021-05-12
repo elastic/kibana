@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { emsWorldLayerId } from '../../../../../common';
+
 jest.mock('../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
@@ -71,7 +73,7 @@ describe('createLayerDescriptor', () => {
       maxZoom: 24,
       minZoom: 0,
       sourceDescriptor: {
-        id: 'world_countries',
+        id: emsWorldLayerId,
         tooltipProperties: ['name', 'iso2'],
         type: 'EMS_FILE',
       },

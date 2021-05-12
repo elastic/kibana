@@ -162,9 +162,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.delete(type, id, options);
   }
 
-  public async find<T>(options: SavedObjectsFindOptions) {
+  public async find<T, A>(options: SavedObjectsFindOptions) {
     return await this.handleEncryptedAttributesInBulkResponse(
-      await this.options.baseClient.find<T>(options),
+      await this.options.baseClient.find<T, A>(options),
       undefined
     );
   }

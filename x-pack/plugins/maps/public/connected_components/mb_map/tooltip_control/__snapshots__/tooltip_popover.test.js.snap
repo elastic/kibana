@@ -19,7 +19,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
   hasArrow={true}
   id="mapTooltip"
   isOpen={true}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="m"
   style={
     Object {
@@ -48,17 +48,9 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
           },
         ]
       }
-      findLayerById={[Function]}
-      geoFields={
-        Array [
-          Object {},
-        ]
-      }
       getLayerName={[Function]}
       isLocked={false}
-      loadFeatureGeometry={[Function]}
       loadFeatureProperties={[Function]}
-      loadPreIndexedShape={[Function]}
     />
   </EuiText>
 </EuiPopover>
@@ -83,7 +75,7 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
   hasArrow={true}
   id="mapTooltip"
   isOpen={true}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="m"
   style={
     Object {
@@ -106,7 +98,6 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
     }
     getLayerName={[Function]}
     isLocked={false}
-    loadFeatureGeometry={[Function]}
     loadFeatureProperties={[Function]}
   >
     Custom tooltip content

@@ -48,6 +48,7 @@ export function ServiceOverviewThroughputChart({
     start,
     end,
     comparisonType,
+    comparisonEnabled,
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -98,7 +99,7 @@ export function ServiceOverviewThroughputChart({
           {
             data: data.previousPeriod,
             type: 'area',
-            color: theme.eui.euiColorLightestShade,
+            color: theme.eui.euiColorMediumShade,
             title: i18n.translate(
               'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
               { defaultMessage: 'Previous period' }

@@ -22,7 +22,7 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
 });
 
 interface JsonCodeEditorProps {
-  json: Record<string, any>;
+  json: Record<string, unknown>;
   width?: string | number;
   hasLineNumbers?: boolean;
 }

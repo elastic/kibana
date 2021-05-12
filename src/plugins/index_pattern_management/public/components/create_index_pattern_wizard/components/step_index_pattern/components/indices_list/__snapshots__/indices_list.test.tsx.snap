@@ -61,7 +61,7 @@ exports[`IndicesList should change pages 1`] = `
         hasArrow={true}
         id="customizablePagination"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
@@ -154,7 +154,7 @@ exports[`IndicesList should change per page 1`] = `
         hasArrow={true}
         id="customizablePagination"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
@@ -269,7 +269,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         hasArrow={true}
         id="customizablePagination"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
@@ -370,7 +370,7 @@ exports[`IndicesList should render normally 1`] = `
         hasArrow={true}
         id="customizablePagination"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
@@ -535,7 +535,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         hasArrow={true}
         id="customizablePagination"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel

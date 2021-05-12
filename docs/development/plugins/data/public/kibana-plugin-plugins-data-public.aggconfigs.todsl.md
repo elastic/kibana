@@ -7,15 +7,8 @@
 <b>Signature:</b>
 
 ```typescript
-toDsl(hierarchical?: boolean): Record<string, any>;
+toDsl(): Record<string, any>;
 ```
-
-## Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  hierarchical | <code>boolean</code> |  |
-
 <b>Returns:</b>
 
 `Record<string, any>`

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual } from 'lodash';
 
-import { Schema } from '../../../shared/types';
+import { Schema } from '../../../shared/schema/types';
 
 import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from './constants';
 import {
@@ -59,14 +59,8 @@ const convertToFieldResultSetting = (serverFieldResultSetting: ServerFieldResult
 
 export const clearAllFields = (fields: FieldResultSettingObject) => updateAllFields(fields, {});
 
-export const clearAllServerFields = (fields: ServerFieldResultSettingObject) =>
-  updateAllFields(fields, {});
-
 export const resetAllFields = (fields: FieldResultSettingObject) =>
   updateAllFields(fields, DEFAULT_FIELD_SETTINGS);
-
-export const resetAllServerFields = (fields: ServerFieldResultSettingObject) =>
-  updateAllFields(fields, { raw: {} });
 
 export const convertServerResultFieldsToResultFields = (
   serverResultFields: ServerFieldResultSettingObject,
@@ -119,8 +113,8 @@ export const splitResultFields = (resultFields: FieldResultSettingObject, schema
 };
 
 export const areFieldsEmpty = (fields: FieldResultSettingObject) => {
-  const anyNonEmptyField = Object.values(fields).find((resultSettings) => {
-    return !isEmpty(resultSettings);
+  const anyNonEmptyField = Object.values(fields).find((field) => {
+    return (field as FieldResultSetting).raw || (field as FieldResultSetting).snippet;
   });
   return !anyNonEmptyField;
 };

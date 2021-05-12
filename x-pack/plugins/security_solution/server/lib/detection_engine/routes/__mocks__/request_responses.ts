@@ -31,10 +31,11 @@ import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engin
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
-import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
-import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
+import { RuleParams } from '../../schemas/rule_schemas';
+import { Alert } from '../../../../../../alerting/common';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -171,7 +172,7 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getResult()],
+  data: [getAlertMock(getQueryRuleParams())],
 });
 
 export const nonRuleFindResult = (): FindHit => ({
@@ -337,71 +338,20 @@ export const createActionResult = (): ActionResult => ({
 });
 
 export const nonRuleAlert = () => ({
-  ...getResult(),
+  // Defaulting to QueryRuleParams because ts doesn't like empty objects
+  ...getAlertMock(getQueryRuleParams()),
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
   name: 'Non-Rule Alert',
   alertTypeId: 'something',
 });
 
-export const getResult = (): RuleAlertType => ({
+export const getAlertMock = <T extends RuleParams>(params: T): Alert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
   alertTypeId: 'siem.signals',
   consumer: 'siem',
-  params: {
-    author: ['Elastic'],
-    buildingBlockType: undefined,
-    anomalyThreshold: undefined,
-    description: 'Detecting root and admin users',
-    ruleId: 'rule-1',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    eventCategoryOverride: undefined,
-    falsePositives: [],
-    from: 'now-6m',
-    immutable: false,
-    savedId: undefined,
-    query: 'user.name: root or user.name: admin',
-    language: 'kuery',
-    license: 'Elastic License',
-    machineLearningJobId: undefined,
-    outputIndex: '.siem-signals',
-    timelineId: 'some-timeline-id',
-    timelineTitle: 'some-timeline-title',
-    meta: { someMeta: 'someField' },
-    filters: [
-      {
-        query: {
-          match_phrase: {
-            'host.name': 'some-host',
-          },
-        },
-      },
-    ],
-    riskScore: 50,
-    riskScoreMapping: [],
-    ruleNameOverride: undefined,
-    maxSignals: 100,
-    severity: 'high',
-    severityMapping: [],
-    to: 'now',
-    type: 'query',
-    threat: getThreatMock(),
-    threshold: undefined,
-    timestampOverride: undefined,
-    threatFilters: undefined,
-    threatMapping: undefined,
-    threatLanguage: undefined,
-    threatIndex: undefined,
-    threatIndicatorPath: undefined,
-    threatQuery: undefined,
-    references: ['http://www.example.com', 'https://ww.example.com'],
-    note: '# Investigative notes',
-    version: 1,
-    exceptionsList: getListArrayMock(),
-    concurrentSearches: undefined,
-    itemsPerSearch: undefined,
-  },
+  params,
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),
   schedule: { interval: '5m' },
@@ -421,53 +371,6 @@ export const getResult = (): RuleAlertType => ({
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
 });
-
-export const getMlResult = (): RuleAlertType => {
-  const result = getResult();
-
-  return {
-    ...result,
-    params: {
-      ...result.params,
-      query: undefined,
-      language: undefined,
-      filters: undefined,
-      index: undefined,
-      type: 'machine_learning',
-      anomalyThreshold: 44,
-      machineLearningJobId: 'some_job_id',
-    },
-  };
-};
-
-export const getThresholdResult = (): RuleAlertType => {
-  const result = getResult();
-
-  return {
-    ...result,
-    params: {
-      ...result.params,
-      type: 'threshold',
-      threshold: {
-        field: 'host.ip',
-        value: 5,
-      },
-    },
-  };
-};
-
-export const getEqlResult = (): RuleAlertType => {
-  const result = getResult();
-
-  return {
-    ...result,
-    params: {
-      ...result.params,
-      type: 'eql',
-      query: 'process where true',
-    },
-  };
-};
 
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',

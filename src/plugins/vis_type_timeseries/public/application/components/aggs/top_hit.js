@@ -25,7 +25,8 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { PANEL_TYPES } from '../../../../common/panel_types';
+import { PANEL_TYPES } from '../../../../common/enums';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -100,8 +101,9 @@ const TopHitAggUi = (props) => {
     order: 'desc',
   };
   const model = { ...defaults, ...props.model };
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
 
   const aggWithOptionsRestrictFields = [
     PANEL_TYPES.TABLE,
@@ -114,8 +116,8 @@ const TopHitAggUi = (props) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-
-  const field = fields[indexPattern].find((f) => f.name === model.field);
+  const fieldsSelector = getIndexPatternKey(indexPattern);
+  const field = fields[fieldsSelector].find((f) => f.name === model.field);
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 
@@ -156,21 +158,17 @@ const TopHitAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.fieldLabel" defaultMessage="Field" />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={aggWithOptionsRestrictFields}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={aggWithOptionsRestrictFields}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -221,23 +219,19 @@ const TopHitAggUi = (props) => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('order_by')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.topHit.orderByLabel"
                 defaultMessage="Order by"
               />
             }
-          >
-            <FieldSelect
-              restrict={ORDER_DATE_RESTRICT_FIELDS}
-              value={model.order_by}
-              onChange={handleSelectChange('order_by')}
-              indexPattern={indexPattern}
-              fields={fields}
-            />
-          </EuiFormRow>
+            restrict={ORDER_DATE_RESTRICT_FIELDS}
+            value={model.order_by}
+            onChange={handleSelectChange('order_by')}
+            indexPattern={indexPattern}
+            fields={fields}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow

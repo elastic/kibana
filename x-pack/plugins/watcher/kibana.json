@@ -5,6 +5,7 @@
   "requiredPlugins": [
     "home",
     "licensing",
+    "licenseApiGuard",
     "management",
     "charts",
     "data",

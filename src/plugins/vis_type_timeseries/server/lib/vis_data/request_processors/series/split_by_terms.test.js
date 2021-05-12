@@ -8,11 +8,18 @@
 
 import { splitByTerms } from './split_by_terms';
 
-describe('splitByTerms(req, panel, series)', () => {
+describe('splitByTerms', () => {
   let panel;
   let series;
   let req;
+  let config;
+  let seriesIndex;
+
   beforeEach(() => {
+    config = {
+      allowLeadingWildcards: true,
+      queryStringOptions: { analyze_wildcard: true },
+    };
     panel = {
       time_field: 'timestamp',
     };
@@ -31,17 +38,18 @@ describe('splitByTerms(req, panel, series)', () => {
         },
       },
     };
+    seriesIndex = {};
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    splitByTerms(req, panel, series)(next)({});
+    splitByTerms(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns a valid terms agg', () => {
     const next = (doc) => doc;
-    const doc = splitByTerms(req, panel, series)(next)({});
+    const doc = splitByTerms(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -61,7 +69,7 @@ describe('splitByTerms(req, panel, series)', () => {
     const next = (doc) => doc;
     series.terms_order_by = '_key';
     series.terms_direction = 'asc';
-    const doc = splitByTerms(req, panel, series)(next)({});
+    const doc = splitByTerms(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -80,7 +88,7 @@ describe('splitByTerms(req, panel, series)', () => {
   test('returns a valid terms agg with custom sort', () => {
     series.terms_order_by = 'avgmetric';
     const next = (doc) => doc;
-    const doc = splitByTerms(req, panel, series)(next)({});
+    const doc = splitByTerms(req, panel, series, config, seriesIndex)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -106,7 +114,7 @@ describe('splitByTerms(req, panel, series)', () => {
   test('calls next and does not add a terms agg', () => {
     series.split_mode = 'everything';
     const next = jest.fn((doc) => doc);
-    const doc = splitByTerms(req, panel, series)(next)({});
+    const doc = splitByTerms(req, panel, series, config, seriesIndex)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});
   });

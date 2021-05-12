@@ -83,7 +83,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
           defaultMessage: 'Visual options',
         })}
         type="visualOptions"
-        groupPosition="right"
+        groupPosition="left"
         buttonDataTestSubj="lnsVisualOptionsButton"
         isDisabled={isDisabled}
       >

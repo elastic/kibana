@@ -14,14 +14,14 @@ search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("../common").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("../common").IBucketAggConfig): boolean;
         } | {
             display: string;
             val: string;
         })[];
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
-        Ipv4Address: typeof Ipv4Address;
+        IpAddress: typeof IpAddress;
         isNumberType: (agg: import("../common").AggConfig) => boolean;
         isStringType: (agg: import("../common").AggConfig) => boolean;
         isType: (...types: string[]) => (agg: import("../common").AggConfig) => boolean;
@@ -36,8 +36,6 @@ search: {
         toAbsoluteDates: typeof toAbsoluteDates;
         calcAutoIntervalLessThan: typeof calcAutoIntervalLessThan;
     };
-    getRequestInspectorStats: typeof getRequestInspectorStats;
-    getResponseInspectorStats: typeof getResponseInspectorStats;
     tabifyAggResponse: typeof tabifyAggResponse;
     tabifyGetColumns: typeof tabifyGetColumns;
 }

@@ -5,49 +5,56 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
+import {
+  Criteria,
+  Direction,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiTableSortingType,
+} from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+import React, { useState, useCallback } from 'react';
+import {
+  MetricsFetchDataResponse,
+  MetricsFetchDataSeries,
+  NumberOrNull,
+  StringOrNull,
+} from '../../../..';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { StyledStat } from '../../styled_stat';
+import { HostLink } from './host_link';
+import { formatDuration } from './lib/format_duration';
+import { MetricWithSparkline } from './metric_with_sparkline';
+
+const SPARK_LINE_COLUMN_WIDTH = '120px';
+const COLOR_ORANGE = 7;
+const COLOR_BLUE = 1;
+const COLOR_GREEN = 0;
+const COLOR_PURPLE = 3;
 
 interface Props {
   bucketSize?: string;
 }
 
-/**
- * EuiProgress doesn't support custom color, when it does this component can be removed.
- */
-const StyledProgress = styled.div<{ color?: string }>`
-  progress {
-    &.euiProgress--native {
-      &::-webkit-progress-value {
-        background-color: ${(props) => props.color};
-      }
+const percentFormatter = (value: NumberOrNull) =>
+  value === null ? '' : numeral(value).format('0[.0]%');
 
-      &::-moz-progress-bar {
-        background-color: ${(props) => props.color};
-      }
-    }
+const numberFormatter = (value: NumberOrNull) =>
+  value === null ? '' : numeral(value).format('0[.0]');
 
-    &.euiProgress--indeterminate {
-      &:before {
-        background-color: ${(props) => props.color};
-      }
-    }
-  }
-`;
+const bytesPerSecondFormatter = (value: NumberOrNull) =>
+  value === null ? '' : numeral(value).format('0b') + '/s';
 
 export function MetricsSection({ bucketSize }: Props) {
-  const theme = useContext(ThemeContext);
   const { forceUpdate, hasData } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const [sortDirection, setSortDirection] = useState<Direction>('asc');
+  const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
+  const [sortedData, setSortedData] = useState<MetricsFetchDataResponse | null>(null);
 
   const { data, status } = useFetcher(
     () => {
@@ -64,16 +71,138 @@ export function MetricsSection({ bucketSize }: Props) {
     [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
+  const handleTableChange = useCallback(
+    ({ sort }: Criteria<MetricsFetchDataSeries>) => {
+      if (sort) {
+        const { field, direction } = sort;
+        setSortField(field);
+        setSortDirection(direction);
+        if (data) {
+          (async () => {
+            const response = await data.sort(field, direction);
+            setSortedData(response || null);
+          })();
+        }
+      }
+    },
+    [data, setSortField, setSortDirection]
+  );
+
   if (!hasData.infra_metrics?.hasData) {
     return null;
   }
 
   const isLoading = status === FETCH_STATUS.LOADING;
+  const isPending = status === FETCH_STATUS.LOADING;
+  if (isLoading || isPending) {
+    return <pre>Loading</pre>;
+  }
 
-  const { appLink, stats } = data || {};
+  if (!data) {
+    return <pre>No Data</pre>;
+  }
 
-  const cpuColor = theme.eui.euiColorVis7;
-  const memoryColor = theme.eui.euiColorVis0;
+  const columns: Array<EuiBasicTableColumn<MetricsFetchDataSeries>> = [
+    {
+      field: 'uptime',
+      name: i18n.translate('xpack.observability.overview.metrics.colunms.uptime', {
+        defaultMessage: 'Uptime',
+      }),
+      sortable: true,
+      width: '80px',
+      render: (value: NumberOrNull) => (value == null ? 'N/A' : formatDuration(value / 1000)),
+    },
+    {
+      field: 'name',
+      name: i18n.translate('xpack.observability.overview.metrics.colunms.hostname', {
+        defaultMessage: 'Hostname',
+      }),
+      sortable: true,
+      truncateText: true,
+      isExpander: true,
+      render: (value: StringOrNull, record: MetricsFetchDataSeries) => (
+        <HostLink
+          id={record.id}
+          name={value}
+          provider={record.provider}
+          platform={record.platform}
+          timerange={{ from: absoluteStart, to: absoluteEnd }}
+        />
+      ),
+    },
+    {
+      field: 'cpu',
+      name: i18n.translate('xpack.observability.overview.metrics.colunms.cpu', {
+        defaultMessage: 'CPU %',
+      }),
+      sortable: true,
+      width: SPARK_LINE_COLUMN_WIDTH,
+      render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
+        <MetricWithSparkline
+          id="cpu"
+          value={value}
+          formatter={percentFormatter}
+          timeseries={record.timeseries}
+          color={COLOR_ORANGE}
+        />
+      ),
+    },
+    {
+      field: 'load',
+      name: i18n.translate('xpack.observability.overview.metrics.colunms.load15', {
+        defaultMessage: 'Load 15',
+      }),
+      sortable: true,
+      width: SPARK_LINE_COLUMN_WIDTH,
+      render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
+        <MetricWithSparkline
+          id="load"
+          value={value}
+          formatter={numberFormatter}
+          timeseries={record.timeseries}
+          color={COLOR_BLUE}
+        />
+      ),
+    },
+    {
+      field: 'rx',
+      name: 'RX',
+      sortable: true,
+      width: SPARK_LINE_COLUMN_WIDTH,
+      render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
+        <MetricWithSparkline
+          id="rx"
+          value={value}
+          formatter={bytesPerSecondFormatter}
+          timeseries={record.timeseries}
+          color={COLOR_GREEN}
+        />
+      ),
+    },
+    {
+      field: 'tx',
+      name: 'TX',
+      sortable: true,
+      width: SPARK_LINE_COLUMN_WIDTH,
+      render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
+        <MetricWithSparkline
+          id="tx"
+          value={value}
+          formatter={bytesPerSecondFormatter}
+          timeseries={record.timeseries}
+          color={COLOR_PURPLE}
+        />
+      ),
+    },
+  ];
+
+  const sorting: EuiTableSortingType<MetricsFetchDataSeries> = {
+    sort: { field: sortField, direction: sortDirection },
+  };
+
+  const viewData = sortedData || data;
+
+  const { appLink } = data || {};
 
   return (
     <SectionContainer
@@ -88,52 +217,12 @@ export function MetricsSection({ bucketSize }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <StyledStat
-            title={numeral(stats?.hosts.value).format('0a')}
-            description={i18n.translate('xpack.observability.overview.metrics.hosts', {
-              defaultMessage: 'Hosts',
-            })}
-            isLoading={isLoading}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <StyledStat
-            title={numeral(stats?.cpu.value).format('0.0%')}
-            description={i18n.translate('xpack.observability.overview.metrics.cpuUsage', {
-              defaultMessage: 'CPU usage',
-            })}
-            isLoading={isLoading}
-            color={cpuColor}
-          >
-            <EuiSpacer size="s" />
-            <StyledProgress color={cpuColor}>
-              <EuiProgress
-                value={stats?.cpu.value}
-                max={1}
-                style={{ width: '100px' }}
-                color="accent"
-              />
-            </StyledProgress>
-          </StyledStat>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <StyledStat
-            title={numeral(stats?.memory.value).format('0.0%')}
-            description={i18n.translate('xpack.observability.overview.metrics.memoryUsage', {
-              defaultMessage: 'Memory usage',
-            })}
-            isLoading={isLoading}
-            color={memoryColor}
-          >
-            <EuiSpacer size="s" />
-            <StyledProgress color={memoryColor}>
-              <EuiProgress value={stats?.memory.value} max={1} style={{ width: '100px' }} />
-            </StyledProgress>
-          </StyledStat>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiBasicTable
+        onChange={handleTableChange}
+        sorting={sorting}
+        items={viewData?.series ?? []}
+        columns={columns}
+      />
     </SectionContainer>
   );
 }

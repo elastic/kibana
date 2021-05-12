@@ -20,14 +20,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   async function getAlertsByName(name: string) {
     const {
       body: { data: alerts },
-    } = await supertest.get(`/api/alerts/_find?search=${name}&search_fields=name`).expect(200);
+    } = await supertest
+      .get(`/api/alerting/rules/_find?search=${name}&search_fields=name`)
+      .expect(200);
 
     return alerts;
   }
 
   async function deleteAlerts(alertIds: string[]) {
     alertIds.forEach(async (alertId: string) => {
-      await supertest.delete(`/api/alerts/alert/${alertId}`).set('kbn-xsrf', 'foo').expect(204, '');
+      await supertest
+        .delete(`/api/alerting/rule/${alertId}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204, '');
     });
   }
 

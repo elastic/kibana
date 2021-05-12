@@ -20,7 +20,7 @@ import {
   TRANSACTION_DURATION_COUNTRY,
   TRANSACTION_DURATION_REGION,
 } from './useLayerList';
-import { RenderTooltipContentParams } from '../../../../../../maps/public';
+import type { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { I18LABELS } from '../translations';
 
 type MapToolTipProps = Partial<RenderTooltipContentParams>;

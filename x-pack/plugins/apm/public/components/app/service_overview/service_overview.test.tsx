@@ -22,9 +22,12 @@ import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_b
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
 import { waitFor } from '@testing-library/dom';
-import * as callApmApiModule from '../../../services/rest/createCallApmApi';
 import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  getCallApmApiSpy,
+  getCreateCallApmApiSpy,
+} from '../../../services/rest/callApmApiSpy';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -69,6 +72,7 @@ describe('ServiceOverview', () => {
         agentName: 'java',
         transactionType: 'request',
         transactionTypes: ['request'],
+        alerts: [],
       });
     jest
       .spyOn(useAnnotationsHooks, 'useAnnotationsContext')
@@ -82,32 +86,30 @@ describe('ServiceOverview', () => {
 
     /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      'GET /api/apm/services/{serviceName}/error_groups/primary_statistics': {
-        error_groups: [],
+      'GET /api/apm/services/{serviceName}/error_groups/main_statistics': {
+        error_groups: [] as any[],
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics': {
-        transactionGroups: [],
+      'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics': {
+        transactionGroups: [] as any[],
         totalTransactionGroups: 0,
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': [],
-      'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics': [],
+      'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics': [],
     };
     /* eslint-enable @typescript-eslint/naming-convention */
 
-    jest
-      .spyOn(callApmApiModule, 'createCallApmApi')
-      .mockImplementation(() => {});
-
-    const callApmApi = jest
-      .spyOn(callApmApiModule, 'callApmApi')
-      .mockImplementation(({ endpoint }) => {
+    const callApmApiSpy = getCallApmApiSpy().mockImplementation(
+      ({ endpoint }) => {
         const response = calls[endpoint as keyof typeof calls];
 
         return response
           ? Promise.resolve(response)
           : Promise.reject(`Response for ${endpoint} is not defined`);
-      });
+      }
+    );
+
+    getCreateCallApmApiSpy().mockImplementation(() => callApmApiSpy as any);
     jest
       .spyOn(useTransactionBreakdownHooks, 'useTransactionBreakdown')
       .mockReturnValue({
@@ -124,7 +126,7 @@ describe('ServiceOverview', () => {
     );
 
     await waitFor(() =>
-      expect(callApmApi).toHaveBeenCalledTimes(Object.keys(calls).length)
+      expect(callApmApiSpy).toHaveBeenCalledTimes(Object.keys(calls).length)
     );
 
     expect((await findAllByText('Latency')).length).toBeGreaterThan(0);

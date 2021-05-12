@@ -6,7 +6,7 @@
  */
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   AreaSeries,
   Axis,
   Chart,
@@ -102,7 +102,7 @@ export function TransactionBreakdownChartContents({
         {showAnnotations && (
           <LineAnnotation
             id="annotations"
-            domainType={AnnotationDomainTypes.XDomain}
+            domainType={AnnotationDomainType.XDomain}
             dataValues={annotations.map((annotation) => ({
               dataValue: annotation['@timestamp'],
               header: asAbsoluteDateTime(annotation['@timestamp']),

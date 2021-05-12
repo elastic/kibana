@@ -10,7 +10,8 @@ import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrap
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import type { CanvasElementColorStats, MlCommonUI } from './common_ui';
+import type { CanvasElementColorStats } from '../canvas_element';
+import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningDataFrameAnalyticsResultsProvider(
   { getService }: FtrProviderContext,
@@ -84,14 +85,60 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       });
     },
 
+    async setScatterplotMatrixSampleSizeSelectValue(selectValue: string) {
+      await testSubjects.selectValue('mlScatterplotMatrixSampleSizeSelect', selectValue);
+
+      const actualSelectState = await testSubjects.getAttribute(
+        'mlScatterplotMatrixSampleSizeSelect',
+        'value'
+      );
+
+      expect(actualSelectState).to.eql(
+        selectValue,
+        `Sample size should be '${selectValue}' (got '${actualSelectState}')`
+      );
+    },
+
+    async getScatterplotMatrixRandomizeQuerySwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlScatterplotMatrixRandomizeQuerySwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertScatterplotMatrixRandomizeQueryCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getScatterplotMatrixRandomizeQuerySwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Randomize query check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async setScatterplotMatrixRandomizeQueryCheckState(checkState: boolean) {
+      await retry.tryForTime(30000, async () => {
+        if ((await this.getScatterplotMatrixRandomizeQuerySwitchCheckState()) !== checkState) {
+          await testSubjects.click('mlScatterplotMatrixRandomizeQuerySwitch');
+        }
+        await this.assertScatterplotMatrixRandomizeQueryCheckState(checkState);
+      });
+    },
+
     async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
       await testSubjects.existOrFail('mlDFExpandableSection-splom > mlScatterplotMatrix loaded', {
         timeout: 5000,
       });
       await testSubjects.scrollIntoView('mlDFExpandableSection-splom > mlScatterplotMatrix loaded');
-      await mlCommonUI.assertColorsInCanvasElement('mlDFExpandableSection-splom', expectedValue, [
-        '#000000',
-      ]);
+      await mlCommonUI.assertColorsInCanvasElement(
+        'mlDFExpandableSection-splom',
+        expectedValue,
+        ['#000000'],
+        undefined,
+        undefined,
+        // increased tolerance up from 10 to 20
+        // since the returned randomized colors vary quite a bit on each run.
+        20
+      );
     },
 
     async assertFeatureImportanceDecisionPathChartElementsExists() {

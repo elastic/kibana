@@ -124,6 +124,72 @@ describe('action_form', () => {
     actionParamsFields: mockedActionParamsFields,
   };
 
+  const allActions = [
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test',
+      actionTypeId: actionType.id,
+      name: 'Test connector',
+      config: {},
+      isPreconfigured: false,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test2',
+      actionTypeId: actionType.id,
+      name: 'Test connector 2',
+      config: {},
+      isPreconfigured: true,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test3',
+      actionTypeId: preconfiguredOnly.id,
+      name: 'Preconfigured Only',
+      config: {},
+      isPreconfigured: true,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: 'test4',
+      actionTypeId: preconfiguredOnly.id,
+      name: 'Regular connector',
+      config: {},
+      isPreconfigured: false,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: '.servicenow',
+      actionTypeId: '.servicenow',
+      name: 'Non consumer connector',
+      config: {},
+      isPreconfigured: false,
+    },
+    {
+      secrets: {},
+      isMissingSecrets: false,
+      id: '.jira',
+      actionTypeId: disabledByActionType.id,
+      name: 'Connector with disabled action group',
+      config: {},
+      isPreconfigured: false,
+    },
+    {
+      secrets: null,
+      isMissingSecrets: true,
+      id: '.jira',
+      actionTypeId: actionType.id,
+      name: 'Connector with disabled action group',
+      config: {},
+      isPreconfigured: false,
+    },
+  ];
+
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
@@ -131,56 +197,7 @@ describe('action_form', () => {
       const actionTypeRegistry = actionTypeRegistryMock.create();
 
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
-      loadAllActions.mockResolvedValueOnce([
-        {
-          secrets: {},
-          id: 'test',
-          actionTypeId: actionType.id,
-          name: 'Test connector',
-          config: {},
-          isPreconfigured: false,
-        },
-        {
-          secrets: {},
-          id: 'test2',
-          actionTypeId: actionType.id,
-          name: 'Test connector 2',
-          config: {},
-          isPreconfigured: true,
-        },
-        {
-          secrets: {},
-          id: 'test3',
-          actionTypeId: preconfiguredOnly.id,
-          name: 'Preconfigured Only',
-          config: {},
-          isPreconfigured: true,
-        },
-        {
-          secrets: {},
-          id: 'test4',
-          actionTypeId: preconfiguredOnly.id,
-          name: 'Regular connector',
-          config: {},
-          isPreconfigured: false,
-        },
-        {
-          secrets: {},
-          id: '.servicenow',
-          actionTypeId: '.servicenow',
-          name: 'Non consumer connector',
-          config: {},
-          isPreconfigured: false,
-        },
-        {
-          secrets: {},
-          id: '.jira',
-          actionTypeId: disabledByActionType.id,
-          name: 'Connector with disabled action group',
-          config: {},
-          isPreconfigured: false,
-        },
-      ]);
+      loadAllActions.mockResolvedValueOnce(allActions);
       const mocks = coreMock.createSetup();
       const [
         {
@@ -467,6 +484,14 @@ describe('action_form', () => {
       );
       actionOption.first().simulate('click');
       const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
+      const numConnectors = allActions.filter((action) => action.actionTypeId === actionType.id)
+        .length;
+      const numConnectorsWithMissingSecrets = allActions.filter(
+        (action) => action.actionTypeId === actionType.id && action.isMissingSecrets
+      ).length;
+      expect((combobox.first().props() as any).options.length).toEqual(
+        numConnectors - numConnectorsWithMissingSecrets
+      );
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
               Array [
                 Object {

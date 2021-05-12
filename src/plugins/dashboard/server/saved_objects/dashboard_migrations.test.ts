@@ -6,13 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectReference, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { savedObjectsServiceMock } from '../../../../core/server/mocks';
 import { createEmbeddableSetupMock } from '../../../embeddable/server/mocks';
 import { createDashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 import { DashboardDoc730ToLatest } from '../../common';
+import {
+  createExtract,
+  createInject,
+} from '../../common/embeddable/dashboard_container_persistable_state';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
+const extract = createExtract(embeddableSetupMock);
+const inject = createInject(embeddableSetupMock);
+const extractImplementation = (state: EmbeddableStateWithType) => {
+  if (state.type === 'dashboard') {
+    return extract(state);
+  }
+  return { state, references: [] };
+};
+const injectImplementation = (
+  state: EmbeddableStateWithType,
+  references: SavedObjectReference[]
+) => {
+  if (state.type === 'dashboard') {
+    return inject(state, references);
+  }
+
+  return state;
+};
+embeddableSetupMock.extract.mockImplementation(extractImplementation);
+embeddableSetupMock.inject.mockImplementation(injectImplementation);
+
 const migrations = createDashboardSavedObjectTypeMigrations({
   embeddable: embeddableSetupMock,
 });
@@ -25,10 +51,10 @@ describe('dashboard', () => {
 
     test('skips error on empty object', () => {
       expect(migration({} as SavedObjectUnsanitizedDoc, contextMock)).toMatchInlineSnapshot(`
-Object {
-  "references": Array [],
-}
-`);
+        Object {
+          "references": Array [],
+        }
+      `);
     });
 
     test('skips errors when searchSourceJSON is null', () => {
@@ -45,29 +71,29 @@ Object {
       };
       const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": null,
-    },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-  "type": "dashboard",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": null,
+            },
+            "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+            Object {
+              "id": "2",
+              "name": "panel_1",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        }
+      `);
     });
 
     test('skips errors when searchSourceJSON is undefined', () => {
@@ -84,29 +110,29 @@ Object {
       };
       const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": undefined,
-    },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-  "type": "dashboard",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": undefined,
+            },
+            "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+            Object {
+              "id": "2",
+              "name": "panel_1",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        }
+      `);
     });
 
     test('skips error when searchSourceJSON is not a string', () => {
@@ -122,29 +148,29 @@ Object {
         },
       };
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": 123,
-    },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-  "type": "dashboard",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": 123,
+            },
+            "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+            Object {
+              "id": "2",
+              "name": "panel_1",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        }
+      `);
     });
 
     test('skips error when searchSourceJSON is invalid json', () => {
@@ -160,29 +186,29 @@ Object {
         },
       };
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{abc123}",
-    },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-  "type": "dashboard",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{abc123}",
+            },
+            "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+            Object {
+              "id": "2",
+              "name": "panel_1",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        }
+      `);
     });
 
     test('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
@@ -199,29 +225,29 @@ Object {
       };
       const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true}",
-    },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-  "type": "dashboard",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true}",
+            },
+            "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+            Object {
+              "id": "2",
+              "name": "panel_1",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        }
+      `);
     });
 
     test('extracts "index" attribute from doc', () => {
@@ -238,34 +264,34 @@ Object {
       };
       const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
-    },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "pattern*",
-      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-  "type": "dashboard",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+            },
+            "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "pattern*",
+              "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+              "type": "index-pattern",
+            },
+            Object {
+              "id": "1",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+            Object {
+              "id": "2",
+              "name": "panel_1",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        }
+      `);
     });
 
     test('extracts index patterns from filter', () => {
@@ -293,34 +319,34 @@ Object {
       const migratedDoc = migration(doc, contextMock);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
-    },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "my-index",
-      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-  "type": "dashboard",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+            },
+            "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "my-index",
+              "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+              "type": "index-pattern",
+            },
+            Object {
+              "id": "1",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+            Object {
+              "id": "2",
+              "name": "panel_1",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        }
+      `);
     });
 
     test('skips error when panelsJSON is not a string', () => {
@@ -331,14 +357,14 @@ Object {
         },
       } as SavedObjectUnsanitizedDoc;
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "panelsJSON": 123,
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "panelsJSON": 123,
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     test('skips error when panelsJSON is not valid JSON', () => {
@@ -349,14 +375,14 @@ Object {
         },
       } as SavedObjectUnsanitizedDoc;
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "panelsJSON": "{123abc}",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "panelsJSON": "{123abc}",
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     test('skips panelsJSON when its not an array', () => {
@@ -367,14 +393,14 @@ Object {
         },
       } as SavedObjectUnsanitizedDoc;
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "panelsJSON": "{}",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "panelsJSON": "{}",
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     test('skips error when a panel is missing "type" attribute', () => {
@@ -385,14 +411,14 @@ Object {
         },
       } as SavedObjectUnsanitizedDoc;
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "panelsJSON": "[{\\"id\\":\\"123\\"}]",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "panelsJSON": "[{\\"id\\":\\"123\\"}]",
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     test('skips error when a panel is missing "id" attribute', () => {
@@ -403,14 +429,14 @@ Object {
         },
       } as SavedObjectUnsanitizedDoc;
       expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "panelsJSON": "[{\\"type\\":\\"visualization\\"}]",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "panelsJSON": "[{\\"type\\":\\"visualization\\"}]",
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     test('extract panel references from doc', () => {
@@ -423,25 +449,25 @@ Object {
       } as SavedObjectUnsanitizedDoc;
       const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-}
-`);
+        Object {
+          "attributes": Object {
+            "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+            Object {
+              "id": "2",
+              "name": "panel_1",
+              "type": "visualization",
+            },
+          ],
+        }
+      `);
     });
   });
 
@@ -475,19 +501,57 @@ Object {
 
     test('should migrate 7.3.0 doc without embeddable state to extract', () => {
       const newDoc = migration(doc, contextMock);
-      expect(newDoc).toEqual(doc);
+      expect(newDoc).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "description": "",
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"query\\":{\\"language\\":\\"kuery\\",\\"query\\":\\"\\"},\\"filter\\":[{\\"query\\":{\\"match_phrase\\":{\\"machine.os.keyword\\":\\"osx\\"}},\\"$state\\":{\\"store\\":\\"appState\\"},\\"meta\\":{\\"type\\":\\"phrase\\",\\"key\\":\\"machine.os.keyword\\",\\"params\\":{\\"query\\":\\"osx\\"},\\"disabled\\":false,\\"negate\\":false,\\"alias\\":null,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+            },
+            "optionsJSON": "{\\"useMargins\\":true,\\"hidePanelTitles\\":false}",
+            "panelsJSON": "[{\\"version\\":\\"7.9.3\\",\\"type\\":\\"visualization\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\"},\\"panelIndex\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"embeddableConfig\\":{\\"enhancements\\":{\\"dynamicActions\\":{\\"events\\":[]}}},\\"panelRefName\\":\\"panel_82fa0882-9f9e-476a-bbb9-03555e5ced91\\"}]",
+            "timeRestore": false,
+            "title": "Dashboard A",
+            "version": 1,
+          },
+          "id": "376e6260-1f5e-11eb-91aa-7b6d5f8a61d6",
+          "references": Array [
+            Object {
+              "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+              "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+              "type": "index-pattern",
+            },
+            Object {
+              "id": "14e2e710-4258-11e8-b3aa-73fdaf54bfc9",
+              "name": "82fa0882-9f9e-476a-bbb9-03555e5ced91:panel_82fa0882-9f9e-476a-bbb9-03555e5ced91",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        }
+      `);
     });
 
     test('should migrate 7.3.0 doc and extract embeddable state', () => {
-      embeddableSetupMock.extract.mockImplementationOnce((state) => ({
-        state: { ...state, __extracted: true },
-        references: [{ id: '__new', name: '__newRefName', type: '__newType' }],
-      }));
+      embeddableSetupMock.extract.mockImplementation((state) => {
+        const stateAndReferences = extractImplementation(state);
+        const { references } = stateAndReferences;
+        let { state: newState } = stateAndReferences;
+
+        if (state.enhancements !== undefined && Object.keys(state.enhancements).length !== 0) {
+          newState = { ...state, __extracted: true } as any;
+          references.push({ id: '__new', name: '__newRefName', type: '__newType' });
+        }
+
+        return { state: newState, references };
+      });
 
       const newDoc = migration(doc, contextMock);
       expect(newDoc).not.toEqual(doc);
       expect(newDoc.references).toHaveLength(doc.references.length + 1);
       expect(JSON.parse(newDoc.attributes.panelsJSON)[0].embeddableConfig.__extracted).toBe(true);
+
+      embeddableSetupMock.extract.mockImplementation(extractImplementation);
     });
   });
 });

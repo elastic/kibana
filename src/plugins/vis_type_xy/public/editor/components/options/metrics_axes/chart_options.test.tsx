@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { ChartOptions, ChartOptionsParams } from './chart_options';
-import { SeriesParam, ChartMode } from '../../../../types';
+import { SeriesParam, ChartMode, AxisMode } from '../../../../types';
 import { LineOptions } from './line_options';
 import { valueAxis, seriesParam } from './mocks';
 import { ChartType } from '../../../../../common';
@@ -70,5 +70,15 @@ describe('ChartOptions component', () => {
     comp.find({ paramName }).prop('setValue')(paramName, ChartMode.Normal);
 
     expect(setParamByIndex).toBeCalledWith('seriesParams', 0, paramName, ChartMode.Normal);
+  });
+
+  it('should set "stacked" mode and disabled control if the referenced axis is "percentage"', () => {
+    defaultProps.valueAxes[0].scale.mode = AxisMode.Percentage;
+    defaultProps.chart.mode = ChartMode.Normal;
+    const paramName = 'mode';
+    const comp = mount(<ChartOptions {...defaultProps} />);
+
+    expect(setParamByIndex).toBeCalledWith('seriesParams', 0, paramName, ChartMode.Stacked);
+    expect(comp.find({ paramName }).prop('disabled')).toBeTruthy();
   });
 });

@@ -5,5 +5,5 @@
   "ui": true,
   "server": true,
   "requiredPlugins": ["mapsEms"],
-  "requiredBundles": ["kibanaReact", "visDefaultEditor", "mapsEms"]
+  "requiredBundles": ["visDefaultEditor", "mapsEms"]
 }

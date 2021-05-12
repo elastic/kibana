@@ -21,9 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/94532
-  describe.skip('discover histogram', function describeIndexTests() {
+  describe('discover histogram', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');
@@ -107,8 +107,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
       await testSubjects.click('discoverChartToggle');
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(true);
+      await retry.waitFor(`Discover histogram to be displayed`, async () => {
+        canvasExists = await elasticChart.canvasExists();
+        return canvasExists;
+      });
+
       await PageObjects.discover.saveSearch('persisted hidden histogram');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

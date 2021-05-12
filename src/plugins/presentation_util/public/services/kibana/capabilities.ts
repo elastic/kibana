@@ -8,7 +8,7 @@
 
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../create';
-import { PresentationCapabilitiesService } from '..';
+import { PresentationCapabilitiesService } from '../capabilities';
 
 export type CapabilitiesServiceFactory = KibanaPluginServiceFactory<
   PresentationCapabilitiesService,
@@ -16,10 +16,12 @@ export type CapabilitiesServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const capabilitiesServiceFactory: CapabilitiesServiceFactory = ({ coreStart }) => {
-  const { dashboard } = coreStart.application.capabilities;
+  const { dashboard, visualize, advancedSettings } = coreStart.application.capabilities;
 
   return {
     canAccessDashboards: () => Boolean(dashboard.show),
     canCreateNewDashboards: () => Boolean(dashboard.createNew),
+    canSaveVisualizations: () => Boolean(visualize.save),
+    canSetAdvancedSettings: () => Boolean(advancedSettings.save),
   };
 };

@@ -11,7 +11,7 @@ import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { UIFilters } from '../../../typings/ui_filters';
-import { APMRequestHandlerContext } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../../routes/typings';
 import {
   ApmIndicesConfig,
   getApmIndices,
@@ -44,7 +44,7 @@ export interface SetupTimeRange {
 }
 
 interface SetupRequestParams {
-  query?: {
+  query: {
     _inspect?: boolean;
 
     /**
@@ -64,13 +64,19 @@ type InferSetup<TParams extends SetupRequestParams> = Setup &
   (TParams extends { query: { start: number } } ? { start: number } : {}) &
   (TParams extends { query: { end: number } } ? { end: number } : {});
 
-export async function setupRequest<TParams extends SetupRequestParams>(
-  context: APMRequestHandlerContext<TParams>,
-  request: KibanaRequest
-): Promise<InferSetup<TParams>> {
+export async function setupRequest<TParams extends SetupRequestParams>({
+  context,
+  params,
+  core,
+  plugins,
+  request,
+  config,
+  logger,
+}: APMRouteHandlerResources & {
+  params: TParams;
+}): Promise<InferSetup<TParams>> {
   return withApmSpan('setup_request', async () => {
-    const { config, logger } = context;
-    const { query } = context.params;
+    const { query } = params;
 
     const [indices, includeFrozen] = await Promise.all([
       getApmIndices({
@@ -88,7 +94,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       indices,
       apmEventClient: createApmEventClient({
         esClient: context.core.elasticsearch.client.asCurrentUser,
-        debug: context.params.query._inspect,
+        debug: query._inspect,
         request,
         indices,
         options: { includeFrozen },
@@ -96,11 +102,12 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       internalClient: createInternalESClient({
         context,
         request,
+        debug: query._inspect,
       }),
       ml:
-        context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
+        plugins.ml && isActivePlatinumLicense(context.licensing.license)
           ? getMlSetup(
-              context.plugins.ml,
+              plugins.ml.setup,
               context.core.savedObjects.client,
               request
             )
@@ -118,8 +125,8 @@ export async function setupRequest<TParams extends SetupRequestParams>(
 }
 
 function getMlSetup(
-  ml: Required<APMRequestHandlerContext['plugins']>['ml'],
-  savedObjectsClient: APMRequestHandlerContext['core']['savedObjects']['client'],
+  ml: Required<APMRouteHandlerResources['plugins']>['ml']['setup'],
+  savedObjectsClient: APMRouteHandlerResources['context']['core']['savedObjects']['client'],
   request: KibanaRequest
 ) {
   return {

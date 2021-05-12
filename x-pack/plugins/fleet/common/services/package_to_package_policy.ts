@@ -11,10 +11,10 @@ import type {
   RegistryVarsEntry,
   RegistryStream,
   PackagePolicyConfigRecord,
-  PackagePolicyConfigRecordEntry,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   NewPackagePolicy,
+  PackagePolicyConfigRecordEntry,
 } from '../types';
 
 const getStreamsForInputType = (

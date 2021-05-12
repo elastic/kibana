@@ -23,6 +23,7 @@ import { createKbnUrlStateStorage } from '../../services/kibana_utils';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
 import { DashboardAppServices, DashboardCapabilities } from '../types';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
@@ -76,6 +77,7 @@ function makeDefaultServices(): DashboardAppServices {
     dashboardPanelStorage,
     savedDashboards,
     core,
+    visualizations: visualizationsPluginMock.createStartContract(),
   };
 }
 

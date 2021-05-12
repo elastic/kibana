@@ -10,7 +10,7 @@
 import { omit } from 'lodash';
 import chalk from 'chalk';
 import { KibanaRequest } from '../../../../../../../src/core/server';
-import { inspectableEsQueriesMap } from '../../../routes/create_api';
+import { inspectableEsQueriesMap } from '../../../routes/register_routes';
 
 function formatObj(obj: Record<string, any>) {
   return JSON.stringify(obj, null, 2);

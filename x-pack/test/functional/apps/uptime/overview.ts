@@ -188,9 +188,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can change query syntax to kql', async () => {
-        await testSubjects.click('syntaxChangeToKql');
-        await testSubjects.click('toggleKqlSyntax');
-        await testSubjects.exists('syntaxChangeToSimple');
+        await testSubjects.click('switchQueryLanguageButton');
+        await testSubjects.click('languageToggle');
       });
 
       it('runs filter query without issues', async () => {

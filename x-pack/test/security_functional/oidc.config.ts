@@ -27,6 +27,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../security_api_integration/fixtures/oidc/oidc_provider'
   );
 
+  const testEndpointsPlugin = resolve(__dirname, './fixtures/common/test_endpoints');
+
   return {
     testFiles: [resolve(__dirname, './tests/oidc')],
 
@@ -61,6 +63,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${oidcOpPPlugin}`,
+        `--plugin-path=${testEndpointsPlugin}`,
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         '--xpack.security.authc.selector.enabled=false',

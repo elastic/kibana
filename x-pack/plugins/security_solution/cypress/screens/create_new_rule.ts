@@ -108,9 +108,8 @@ export const LOOK_BACK_INTERVAL =
 export const LOOK_BACK_TIME_TYPE =
   '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
-export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button';
-
-export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
+export const MACHINE_LEARNING_DROPDOWN_INPUT =
+  '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 

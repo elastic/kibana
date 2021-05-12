@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { SimulatePipelineDocument } from '@elastic/elasticsearch/api/types';
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
-import { pipelineSchema } from './pipeline_schema';
+import { pipelineSchema } from './shared';
 
 const bodySchema = schema.object({
   pipeline: schema.object(pipelineSchema),
@@ -20,7 +20,7 @@ const bodySchema = schema.object({
 export const registerSimulateRoute = ({
   router,
   license,
-  lib: { isEsError },
+  lib: { handleEsError },
 }: RouteDependencies): void => {
   router.post(
     {
@@ -30,29 +30,22 @@ export const registerSimulateRoute = ({
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
 
       const { pipeline, documents, verbose } = req.body;
 
       try {
-        const response = await callAsCurrentUser('ingest.simulate', {
+        const { body: response } = await clusterClient.asCurrentUser.ingest.simulate({
           verbose,
           body: {
             pipeline,
-            docs: documents,
+            docs: documents as SimulatePipelineDocument[],
           },
         });
 
         return res.ok({ body: response });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        throw error;
+        return handleEsError({ error, response: res });
       }
     })
   );

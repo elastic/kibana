@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
 import {
   ML_JOB_AGGREGATION,

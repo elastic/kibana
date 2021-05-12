@@ -33,6 +33,7 @@ export async function runDockerGenerator(
     image: boolean;
     ubi?: boolean;
     ironbank?: boolean;
+    dockerBuildDate?: string;
   }
 ) {
   // UBI var config
@@ -53,7 +54,7 @@ export async function runDockerGenerator(
   const artifactPrefix = `kibana${artifactFlavor}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
-  const dockerBuildDate = new Date().toISOString();
+  const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo(
     'build',

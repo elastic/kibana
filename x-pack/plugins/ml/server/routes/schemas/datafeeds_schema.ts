@@ -37,8 +37,8 @@ export const datafeedConfigSchema = schema.object({
   aggs: schema.maybe(schema.any()),
   chunking_config: schema.maybe(
     schema.object({
-      mode: schema.maybe(schema.string()),
-      time_span: schema.maybe(schema.string()),
+      mode: schema.oneOf([schema.literal('auto'), schema.literal('manual'), schema.literal('off')]),
+      time_span: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
     })
   ),
   frequency: schema.maybe(schema.string()),
@@ -57,6 +57,4 @@ export const datafeedConfigSchema = schema.object({
 
 export const datafeedIdSchema = schema.object({ datafeedId: schema.string() });
 
-export const deleteDatafeedQuerySchema = schema.maybe(
-  schema.object({ force: schema.maybe(schema.any()) })
-);
+export const deleteDatafeedQuerySchema = schema.object({ force: schema.maybe(schema.boolean()) });

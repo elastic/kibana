@@ -683,6 +683,44 @@ describe('IndexPatternDimensionEditorPanel', () => {
     );
   });
 
+  it('should remove customLabel flag if label is set to default', () => {
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={getStateWithColumns({
+          col1: {
+            ...bytesColumn,
+            label: 'Custom label',
+            customLabel: true,
+          },
+        })}
+      />
+    );
+
+    act(() => {
+      wrapper
+        .find('input[data-test-subj="indexPattern-label-edit"]')
+        .simulate('change', { target: { value: 'Maximum of bytes' } });
+    });
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              label: 'Maximum of bytes',
+              customLabel: false,
+              // Other parts of this don't matter for this test
+            }),
+          },
+        },
+      },
+    });
+  });
+
   describe('transient invalid state', () => {
     it('should set the state if selecting an operation incompatible with the current field', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
@@ -1757,7 +1795,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     );
   });
 
-  it('should clear the dimension when removing the selection in field combobox', () => {
+  it('should keep the latest valid dimension when removing the selection in field combobox', () => {
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
     act(() => {
@@ -1767,20 +1805,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!([]);
     });
 
-    expect(setState).toHaveBeenCalledWith(
-      {
-        ...state,
-        layers: {
-          first: {
-            indexPatternId: '1',
-            columns: {},
-            columnOrder: [],
-            incompleteColumns: {},
-          },
-        },
-      },
-      { shouldRemoveDimension: false, shouldReplaceDimension: false }
-    );
+    expect(setState).not.toHaveBeenCalled();
   });
 
   it('allows custom format', () => {

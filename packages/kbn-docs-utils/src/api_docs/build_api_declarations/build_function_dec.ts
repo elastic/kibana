@@ -17,11 +17,8 @@ import {
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { buildApiDecsForParameters } from './build_parameter_decs';
 import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
-import { getCommentsFromNode } from './js_doc_utils';
-import { getApiSectionId } from '../utils';
-import { getJSDocReturnTagComment, getJSDocs, getJSDocTagNames } from './js_doc_utils';
-import { getSourceForNode } from './utils';
-import { getSignature } from './get_signature';
+import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 
 /**
  * Takes the various function-like node declaration types and converts them into an ApiDeclaration.
@@ -34,29 +31,34 @@ export function buildFunctionDec(
   node: FunctionDeclaration | MethodDeclaration | ConstructorDeclaration | MethodSignature,
   plugins: KibanaPlatformPlugin[],
   anchorLink: AnchorLink,
-  log: ToolingLog
+  currentPluginId: string,
+  log: ToolingLog,
+  captureReferences: boolean
 ): ApiDeclaration {
   const label = Node.isConstructorDeclaration(node)
     ? 'Constructor'
     : node.getName() || '(WARN: Missing name)';
   const fn = {
-    id: getApiSectionId(anchorLink),
+    ...buildBasicApiDeclaration({
+      currentPluginId,
+      anchorLink,
+      node,
+      captureReferences,
+      plugins,
+      log,
+      apiName: label,
+    }),
     type: TypeKind.FunctionKind,
-    label,
-    signature: getSignature(node, plugins, log),
-    description: getCommentsFromNode(node),
     children: buildApiDecsForParameters(
       node.getParameters(),
       plugins,
       anchorLink,
+      currentPluginId,
       log,
+      captureReferences,
       getJSDocs(node)
     ),
-    tags: getJSDocTagNames(node),
     returnComment: getJSDocReturnTagComment(node),
-    source: getSourceForNode(node),
   };
-
-  log.warning(`fn ${label} has tags: ${fn.tags.join(', ')}`);
   return fn;
 }

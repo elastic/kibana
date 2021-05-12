@@ -12,6 +12,7 @@ import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
 import { MlUrlGenerator } from '../../../../ml/public';
+import { ApmRuleRegistry } from '../../plugin';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -76,6 +77,11 @@ const mockCore = {
   },
 };
 
+const mockApmRuleRegistry = ({
+  getTypeByRuleId: () => undefined,
+  registerType: () => undefined,
+} as unknown) as ApmRuleRegistry;
+
 const mockConfig: ConfigSchema = {
   serviceMapEnabled: true,
   ui: {
@@ -96,6 +102,9 @@ const mockPlugin = {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
   },
+  observability: {
+    isAlertingExperienceEnabled: () => false,
+  },
 };
 
 const mockAppMountParameters = {
@@ -107,6 +116,7 @@ export const mockApmPluginContextValue = {
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
+  apmRuleRegistry: mockApmRuleRegistry,
 };
 
 export function MockApmPluginContextWrapper({

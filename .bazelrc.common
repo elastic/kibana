@@ -10,25 +10,25 @@
 build --experimental_guard_against_concurrent_changes
 run --experimental_guard_against_concurrent_changes
 test --experimental_guard_against_concurrent_changes
+query --experimental_guard_against_concurrent_changes
 
 ## Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
-build --disk_cache=~/.bazel-cache/disk-cache
+common --disk_cache=~/.bazel-cache/disk-cache
 
 ## Bazel repo cache settings
-build --repository_cache=~/.bazel-cache/repository-cache
+common --repository_cache=~/.bazel-cache/repository-cache
 
 # Bazel will create symlinks from the workspace directory to output artifacts.
-# Build results will be placed in a directory called "bazel/bin"
+# Build results will be placed in a directory called "bazel-bin"
 # This will still create a bazel-out symlink in
 # the project directory, which must be excluded from the
 # editor's search path.
-build --symlink_prefix=bazel/
 # To disable the symlinks altogether (including bazel-out) we can use
 # build --symlink_prefix=/
 # however this makes it harder to find outputs.
 
 # Prevents the creation of bazel-out dir
-build --experimental_no_product_name_out_symlink
+# build --experimental_no_product_name_out_symlink
 
 # Make direct file system calls to create symlink trees
 build --experimental_inprocess_symlink_creation
@@ -36,13 +36,16 @@ build --experimental_inprocess_symlink_creation
 # Incompatible flags to run with
 build --incompatible_no_implicit_file_export
 build --incompatible_restrict_string_escapes
+query --incompatible_no_implicit_file_export
+query --incompatible_restrict_string_escapes
 
 # Log configs
 ## different from default
 common --color=yes
-build --show_task_finish
-build --noshow_progress
+common --noshow_progress
+common --show_task_finish
 build --noshow_loading_progress
+query --noshow_loading_progress
 build --show_result=0
 
 # Specifies desired output mode for running tests.
@@ -83,7 +86,7 @@ test:debug --test_output=streamed --test_strategy=exclusive --test_timeout=9999 
 run:debug --define=VERBOSE_LOGS=1 -- --node_options=--inspect-brk
 # The following option will change the build output of certain rules such as terser and may not be desirable in all cases
 # It will also output both the repo cache and action cache to a folder inside the repo
-build:debug --compilation_mode=dbg --show_result=1 --disk_cache=bazel/disk-cache --repository_cache=bazel/repository-cache
+build:debug --compilation_mode=dbg --show_result=0 --noshow_loading_progress --noshow_progress --show_task_finish
 
 # Turn off legacy external runfiles
 # This prevents accidentally depending on this feature, which Bazel will remove.

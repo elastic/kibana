@@ -685,6 +685,11 @@ export interface NavigateToAppOptions {
    * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
    */
   replace?: boolean;
+
+  /**
+   * if true, will open the app in new tab, will share session information via window.open if base
+   */
+  openInNewTab?: boolean;
 }
 
 /** @public */

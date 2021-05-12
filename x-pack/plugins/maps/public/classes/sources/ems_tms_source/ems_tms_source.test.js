@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../meta', () => {
+jest.mock('../../../util', () => {
   return {
     getEmsTmsServices: () => {
       class MockTMSService {
@@ -42,7 +42,8 @@ describe('EMSTMSSource', () => {
       id: 'road_map',
     });
 
-    const attributions = await emsTmsSource.getAttributions();
+    const attributionProvider = emsTmsSource.getAttributionProvider();
+    const attributions = await attributionProvider();
     expect(attributions).toEqual([
       {
         label: 'foobar',

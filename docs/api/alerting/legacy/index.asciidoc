@@ -1,0 +1,18 @@
+[[alerts-api]]
+=== Deprecated 7.x APIs
+
+These APIs are deprecated and will be removed as of 8.0.
+
+include::create.asciidoc[leveloffset=+1]
+include::delete.asciidoc[leveloffset=+1]
+include::disable.asciidoc[leveloffset=+1]
+include::enable.asciidoc[leveloffset=+1]
+include::find.asciidoc[leveloffset=+1]
+include::get.asciidoc[leveloffset=+1]
+include::health.asciidoc[leveloffset=+1]
+include::list.asciidoc[leveloffset=+1]
+include::mute.asciidoc[leveloffset=+1]
+include::mute_all.asciidoc[leveloffset=+1]
+include::unmute.asciidoc[leveloffset=+1]
+include::unmute_all.asciidoc[leveloffset=+1]
+include::update.asciidoc[leveloffset=+1]

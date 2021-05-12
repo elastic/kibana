@@ -35,7 +35,35 @@ describe('CoreUsageDataService', () => {
     });
 
   let service: CoreUsageDataService;
-  const configService = configServiceMock.create();
+  const mockConfig = {
+    unused_config: {},
+    elasticsearch: { username: 'kibana_system', password: 'changeme' },
+    plugins: { paths: ['pluginA', 'pluginAB', 'pluginB'] },
+    server: { port: 5603, basePath: '/zvt', rewriteBasePath: true },
+    logging: { json: false },
+    pluginA: {
+      enabled: true,
+      objectConfig: {
+        debug: true,
+        username: 'some_user',
+      },
+      arrayOfNumbers: [1, 2, 3],
+    },
+    pluginAB: {
+      enabled: false,
+    },
+    pluginB: {
+      arrayOfObjects: [
+        { propA: 'a', propB: 'b' },
+        { propA: 'a2', propB: 'b2' },
+      ],
+    },
+  };
+
+  const configService = configServiceMock.create({
+    getConfig$: mockConfig,
+  });
+
   configService.atPath.mockImplementation((path) => {
     if (path === 'elasticsearch') {
       return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
@@ -146,6 +174,7 @@ describe('CoreUsageDataService', () => {
 
         const { getCoreUsageData } = service.start({
           savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage: new Map(),
           elasticsearch,
         });
         expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
@@ -187,6 +216,13 @@ describe('CoreUsageDataService', () => {
                   "ipAllowlistConfigured": false,
                 },
                 "rewriteBasePath": false,
+                "securityResponseHeaders": Object {
+                  "disableEmbedding": false,
+                  "permissionsPolicyConfigured": false,
+                  "referrerPolicy": "no-referrer-when-downgrade",
+                  "strictTransportSecurity": "NULL",
+                  "xContentTypeOptions": "nosniff",
+                },
                 "socketTimeout": 120000,
                 "ssl": Object {
                   "certificateAuthoritiesConfigured": false,
@@ -272,6 +308,453 @@ describe('CoreUsageDataService', () => {
             },
           }
         `);
+      });
+    });
+
+    describe('getConfigsUsageData', () => {
+      const elasticsearch = elasticsearchServiceMock.createStart();
+      const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
+      let exposedConfigsToUsage: Map<string, Record<string, boolean>>;
+      beforeEach(() => {
+        exposedConfigsToUsage = new Map();
+      });
+
+      it('loops over all used configs once each', async () => {
+        configService.getUsedPaths.mockResolvedValue([
+          'pluginA.objectConfig.debug',
+          'logging.json',
+        ]);
+
+        exposedConfigsToUsage.set('pluginA', {
+          objectConfig: true,
+        });
+
+        const { getConfigsUsageData } = service.start({
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage,
+          elasticsearch,
+        });
+
+        const mockGetMarkedAsSafe = jest.fn().mockReturnValue({});
+        // @ts-expect-error
+        service.getMarkedAsSafe = mockGetMarkedAsSafe;
+        await getConfigsUsageData();
+
+        expect(mockGetMarkedAsSafe).toBeCalledTimes(2);
+        expect(mockGetMarkedAsSafe.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Map {
+                "pluginA" => Object {
+                  "objectConfig": true,
+                },
+              },
+              "pluginA.objectConfig.debug",
+              "pluginA",
+            ],
+            Array [
+              Map {
+                "pluginA" => Object {
+                  "objectConfig": true,
+                },
+              },
+              "logging.json",
+              undefined,
+            ],
+          ]
+        `);
+      });
+
+      it('plucks pluginId from config path correctly', async () => {
+        exposedConfigsToUsage.set('pluginA', {
+          enabled: false,
+        });
+        exposedConfigsToUsage.set('pluginAB', {
+          enabled: false,
+        });
+
+        configService.getUsedPaths.mockResolvedValue(['pluginA.enabled', 'pluginAB.enabled']);
+
+        const { getConfigsUsageData } = service.start({
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage,
+          elasticsearch,
+        });
+
+        await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "pluginA.enabled": "[redacted]",
+            "pluginAB.enabled": "[redacted]",
+          }
+        `);
+      });
+
+      it('returns an object of plugin config usage', async () => {
+        exposedConfigsToUsage.set('unused_config', { never_reported: true });
+        exposedConfigsToUsage.set('server', { basePath: true });
+        exposedConfigsToUsage.set('pluginA', { elasticsearch: false });
+        exposedConfigsToUsage.set('plugins', { paths: false });
+        exposedConfigsToUsage.set('pluginA', { arrayOfNumbers: false });
+
+        configService.getUsedPaths.mockResolvedValue([
+          'elasticsearch.username',
+          'elasticsearch.password',
+          'plugins.paths',
+          'server.port',
+          'server.basePath',
+          'server.rewriteBasePath',
+          'logging.json',
+          'pluginA.enabled',
+          'pluginA.objectConfig.debug',
+          'pluginA.objectConfig.username',
+          'pluginA.arrayOfNumbers',
+          'pluginAB.enabled',
+          'pluginB.arrayOfObjects',
+        ]);
+
+        const { getConfigsUsageData } = service.start({
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage,
+          elasticsearch,
+        });
+
+        await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "elasticsearch.password": "[redacted]",
+            "elasticsearch.username": "[redacted]",
+            "logging.json": false,
+            "pluginA.arrayOfNumbers": "[redacted]",
+            "pluginA.enabled": true,
+            "pluginA.objectConfig.debug": true,
+            "pluginA.objectConfig.username": "[redacted]",
+            "pluginAB.enabled": false,
+            "pluginB.arrayOfObjects": "[redacted]",
+            "plugins.paths": "[redacted]",
+            "server.basePath": "/zvt",
+            "server.port": 5603,
+            "server.rewriteBasePath": true,
+          }
+        `);
+      });
+
+      describe('config explicitly exposed to usage', () => {
+        it('returns [redacted] on unsafe complete match', async () => {
+          exposedConfigsToUsage.set('pluginA', {
+            'objectConfig.debug': false,
+          });
+          exposedConfigsToUsage.set('server', {
+            basePath: false,
+          });
+
+          configService.getUsedPaths.mockResolvedValue([
+            'pluginA.objectConfig.debug',
+            'server.basePath',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "pluginA.objectConfig.debug": "[redacted]",
+              "server.basePath": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns config value on safe complete match', async () => {
+          exposedConfigsToUsage.set('server', {
+            basePath: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue(['server.basePath']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "server.basePath": "/zvt",
+            }
+          `);
+        });
+
+        it('returns [redacted] on unsafe parent match', async () => {
+          exposedConfigsToUsage.set('pluginA', {
+            objectConfig: false,
+          });
+
+          configService.getUsedPaths.mockResolvedValue([
+            'pluginA.objectConfig.debug',
+            'pluginA.objectConfig.username',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "pluginA.objectConfig.debug": "[redacted]",
+              "pluginA.objectConfig.username": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns config value on safe parent match', async () => {
+          exposedConfigsToUsage.set('pluginA', {
+            objectConfig: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue([
+            'pluginA.objectConfig.debug',
+            'pluginA.objectConfig.username',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "pluginA.objectConfig.debug": true,
+              "pluginA.objectConfig.username": "some_user",
+            }
+          `);
+        });
+
+        it('returns [redacted] on explicitly marked as safe array of objects', async () => {
+          exposedConfigsToUsage.set('pluginB', {
+            arrayOfObjects: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue(['pluginB.arrayOfObjects']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "pluginB.arrayOfObjects": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns values on explicitly marked as safe array of numbers', async () => {
+          exposedConfigsToUsage.set('pluginA', {
+            arrayOfNumbers: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue(['pluginA.arrayOfNumbers']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "pluginA.arrayOfNumbers": Array [
+                1,
+                2,
+                3,
+              ],
+            }
+          `);
+        });
+
+        it('returns values on explicitly marked as safe array of strings', async () => {
+          exposedConfigsToUsage.set('plugins', {
+            paths: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue(['plugins.paths']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "plugins.paths": Array [
+                "pluginA",
+                "pluginAB",
+                "pluginB",
+              ],
+            }
+          `);
+        });
+      });
+
+      describe('config not explicitly exposed to usage', () => {
+        it('returns [redacted] for string configs', async () => {
+          exposedConfigsToUsage.set('pluginA', {
+            objectConfig: false,
+          });
+
+          configService.getUsedPaths.mockResolvedValue([
+            'pluginA.objectConfig.debug',
+            'pluginA.objectConfig.username',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "pluginA.objectConfig.debug": "[redacted]",
+              "pluginA.objectConfig.username": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns config value on safe parent match', async () => {
+          configService.getUsedPaths.mockResolvedValue([
+            'elasticsearch.password',
+            'elasticsearch.username',
+            'pluginA.objectConfig.username',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "elasticsearch.password": "[redacted]",
+              "elasticsearch.username": "[redacted]",
+              "pluginA.objectConfig.username": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns [redacted] on implicit array of objects', async () => {
+          configService.getUsedPaths.mockResolvedValue(['pluginB.arrayOfObjects']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "pluginB.arrayOfObjects": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns values on implicit array of numbers', async () => {
+          configService.getUsedPaths.mockResolvedValue(['pluginA.arrayOfNumbers']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "pluginA.arrayOfNumbers": Array [
+                1,
+                2,
+                3,
+              ],
+            }
+          `);
+        });
+        it('returns [redacted] on implicit array of strings', async () => {
+          configService.getUsedPaths.mockResolvedValue(['plugins.paths']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "plugins.paths": "[redacted]",
+            }
+          `);
+        });
+
+        it('returns config value for numbers', async () => {
+          configService.getUsedPaths.mockResolvedValue(['server.port']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "server.port": 5603,
+            }
+          `);
+        });
+
+        it('returns config value for booleans', async () => {
+          configService.getUsedPaths.mockResolvedValue([
+            'pluginA.objectConfig.debug',
+            'logging.json',
+          ]);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "logging.json": false,
+              "pluginA.objectConfig.debug": true,
+            }
+          `);
+        });
+
+        it('ignores exposed to usage configs but not used', async () => {
+          exposedConfigsToUsage.set('pluginA', {
+            objectConfig: true,
+          });
+
+          configService.getUsedPaths.mockResolvedValue(['logging.json']);
+
+          const { getConfigsUsageData } = service.start({
+            savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+            exposedConfigsToUsage,
+            elasticsearch,
+          });
+
+          await expect(getConfigsUsageData()).resolves.toMatchInlineSnapshot(`
+            Object {
+              "logging.json": false,
+            }
+          `);
+        });
       });
     });
   });

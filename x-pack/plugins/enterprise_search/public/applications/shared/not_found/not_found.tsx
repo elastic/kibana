@@ -73,7 +73,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ product = {}, breadcrumbs })
       <SetPageChrome trail={breadcrumbs} />
       <SendTelemetry action="error" metric="not_found" />
 
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <EuiEmptyPrompt
           title={<Logo />}
           body={

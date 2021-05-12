@@ -10,7 +10,7 @@ import {
   getImportRulesRequest,
   getImportRulesRequestOverwriteTrue,
   getEmptyFindResult,
-  getResult,
+  getAlertMock,
   getFindResultWithSingleHit,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
@@ -26,6 +26,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -34,7 +35,7 @@ describe('import_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.create>;
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -42,7 +43,7 @@ describe('import_rules_route', () => {
     config = createMockConfig();
     const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
     request = getImportRulesRequest(hapiStream);
-    ml = mlServicesMock.create();
+    ml = mlServicesMock.createSetupContract();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
@@ -170,7 +171,7 @@ describe('import_rules_route', () => {
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.alertsClient.create.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({

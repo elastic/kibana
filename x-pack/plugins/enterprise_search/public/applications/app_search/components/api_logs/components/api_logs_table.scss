@@ -1,0 +1,5 @@
+.apiLogDetailButton {
+  // More closely mimics the regular line height of an EuiLink /
+  // compresses table rows back to the standard height
+  height: $euiSizeL !important;
+}

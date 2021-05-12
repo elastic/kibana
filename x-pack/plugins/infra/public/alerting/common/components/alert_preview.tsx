@@ -174,7 +174,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
               title={
                 <PreviewTextString
                   previewResult={previewResult}
-                  hasWarningThreshold={hasWarningThreshold}
+                  hasWarningThreshold={Boolean(hasWarningThreshold)}
                 />
               }
             >

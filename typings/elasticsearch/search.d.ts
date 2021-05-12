@@ -370,6 +370,16 @@ export type AggregateOf<
   missing: {
     doc_count: number;
   } & SubAggregateOf<TAggregationContainer, TDocument>;
+  multi_terms: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: Array<
+      {
+        doc_count: number;
+        key: string[];
+      } & SubAggregateOf<TAggregationContainer, TDocument>
+    >;
+  };
   nested: {
     doc_count: number;
   } & SubAggregateOf<TAggregationContainer, TDocument>;

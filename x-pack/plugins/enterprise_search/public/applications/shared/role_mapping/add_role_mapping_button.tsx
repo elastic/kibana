@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const AddRoleMappingButton: React.FC<Props> = ({ path }) => (
-  <EuiButtonTo to={path} fill color="secondary">
+  <EuiButtonTo to={path} fill>
     {ADD_ROLE_MAPPING_BUTTON}
   </EuiButtonTo>
 );

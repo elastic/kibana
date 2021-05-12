@@ -6,7 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { createRoute } from '../create_route';
+import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { createApmServerRoute } from '../create_apm_server_route';
 import {
   getApmIndices,
   getApmIndexSettings,
@@ -14,29 +15,30 @@ import {
 import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices';
 
 // get list of apm indices and values
-export const apmIndexSettingsRoute = createRoute({
+const apmIndexSettingsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/apm-index-settings',
   options: { tags: ['access:apm'] },
-  handler: async ({ context }) => {
-    const apmIndexSettings = await getApmIndexSettings({ context });
+  handler: async ({ config, context }) => {
+    const apmIndexSettings = await getApmIndexSettings({ config, context });
     return { apmIndexSettings };
   },
 });
 
 // get apm indices configuration object
-export const apmIndicesRoute = createRoute({
+const apmIndicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/apm-indices',
   options: { tags: ['access:apm'] },
-  handler: async ({ context }) => {
+  handler: async (resources) => {
+    const { context, config } = resources;
     return await getApmIndices({
       savedObjectsClient: context.core.savedObjects.client,
-      config: context.config,
+      config,
     });
   },
 });
 
 // save ui indices
-export const saveApmIndicesRoute = createRoute({
+const saveApmIndicesRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/settings/apm-indices/save',
   options: {
     tags: ['access:apm', 'access:apm_write'],
@@ -53,9 +55,15 @@ export const saveApmIndicesRoute = createRoute({
       /* eslint-enable @typescript-eslint/naming-convention */
     }),
   }),
-  handler: async ({ context }) => {
-    const { body } = context.params;
+  handler: async (resources) => {
+    const { params, context } = resources;
+    const { body } = params;
     const savedObjectsClient = context.core.savedObjects.client;
     return await saveApmIndices(savedObjectsClient, body);
   },
 });
+
+export const apmIndicesRouteRepository = createApmServerRouteRepository()
+  .add(apmIndexSettingsRoute)
+  .add(apmIndicesRoute)
+  .add(saveApmIndicesRoute);

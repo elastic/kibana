@@ -10,17 +10,12 @@ import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import type { CanvasElementColorStats } from '../canvas_element';
+
 interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
 }
-
-// key: color hex code, e.g. #FF3344
-// value: the expected percentage of the color to be present in the canvas element
-export type CanvasElementColorStats = Array<{
-  key: string;
-  value: number;
-}>;
 
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 
@@ -249,6 +244,29 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
           )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
         );
       });
+    },
+
+    async assertRowsNumberPerPage(testSubj: string, rowsNumber: 10 | 25 | 100) {
+      const textContent = await testSubjects.getVisibleText(
+        `${testSubj} > tablePaginationPopoverButton`
+      );
+      expect(textContent).to.be(`Rows per page: ${rowsNumber}`);
+    },
+
+    async ensurePagePopupOpen(testSubj: string) {
+      await retry.tryForTime(5000, async () => {
+        const isOpen = await testSubjects.exists('tablePagination-10-rows');
+        if (!isOpen) {
+          await testSubjects.click(`${testSubj} > tablePaginationPopoverButton`);
+          await testSubjects.existOrFail('tablePagination-10-rows');
+        }
+      });
+    },
+
+    async setRowsNumberPerPage(testSubj: string, rowsNumber: 10 | 25 | 100) {
+      await this.ensurePagePopupOpen(testSubj);
+      await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
+      await this.assertRowsNumberPerPage(testSubj, rowsNumber);
     },
   };
 }

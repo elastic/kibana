@@ -14,6 +14,7 @@ export {
   DashboardDocPre700,
 } from './bwc/types';
 export {
+  DashboardContainerStateWithType,
   SavedDashboardPanelTo60,
   SavedDashboardPanel610,
   SavedDashboardPanel620,

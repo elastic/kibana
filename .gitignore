@@ -75,5 +75,6 @@ report.asciidoc
 .yarn-local-mirror
 
 # Bazel
-/bazel
-/.bazelrc.user
+bazel
+bazel-*
+.bazelrc.user

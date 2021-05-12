@@ -13,6 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
+import { SortResults } from '@elastic/elasticsearch/api/types';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -42,6 +43,15 @@ import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 import { ShardError } from '../../types';
 import { RuleStatusService } from './rule_status_service';
+import {
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  QueryRuleParams,
+  RuleParams,
+  SavedQueryRuleParams,
+  ThreatRuleParams,
+  ThresholdRuleParams,
+} from '../schemas/rule_schemas';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -824,4 +834,38 @@ export const getThresholdTermsHash = (
         .join(',')
     )
     .digest('hex');
+};
+
+export const isEqlParams = (params: RuleParams): params is EqlRuleParams => params.type === 'eql';
+export const isThresholdParams = (params: RuleParams): params is ThresholdRuleParams =>
+  params.type === 'threshold';
+export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>
+  params.type === 'query';
+export const isSavedQueryParams = (params: RuleParams): params is SavedQueryRuleParams =>
+  params.type === 'saved_query';
+export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =>
+  params.type === 'threat_match';
+export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
+  params.type === 'machine_learning';
+
+/**
+ * Prevent javascript from returning Number.MAX_SAFE_INTEGER when Elasticsearch expects
+ * Java's Long.MAX_VALUE. This happens when sorting fields by date which are
+ * unmapped in the provided index
+ *
+ * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
+ *
+ * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
+ * @param sortIds SortResults | undefined
+ * @returns SortResults
+ */
+export const getSafeSortIds = (sortIds: SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    // haven't determined when we would receive a null value for a sort id
+    // but in case we do, default to sending the stringified Java max_int
+    if (sortId == null || sortId === '' || sortId >= Number.MAX_SAFE_INTEGER) {
+      return '9223372036854775807';
+    }
+    return sortId;
+  });
 };

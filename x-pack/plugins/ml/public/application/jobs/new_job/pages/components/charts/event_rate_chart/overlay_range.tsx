@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { RectAnnotation, LineAnnotation, AnnotationDomainTypes, Position } from '@elastic/charts';
+import { RectAnnotation, LineAnnotation, AnnotationDomainType, Position } from '@elastic/charts';
 import { timeFormatter } from '../../../../../../../../common/util/date_utils';
 
 interface Props {
@@ -40,7 +40,7 @@ export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMar
       />
       <LineAnnotation
         id="annotation_1"
-        domainType={AnnotationDomainTypes.XDomain}
+        domainType={AnnotationDomainType.XDomain}
         dataValues={[{ dataValue: start }]}
         style={{
           line: {

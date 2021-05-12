@@ -41,14 +41,6 @@ describe('AttributeSelector', () => {
     expect(wrapper.find('[data-test-subj="AttributeSelector"]').exists()).toBe(true);
   });
 
-  it('renders disabled panel with className', () => {
-    const wrapper = shallow(<AttributeSelector {...baseProps} disabled />);
-
-    expect(wrapper.find('[data-test-subj="AttributeSelector"]').prop('className')).toEqual(
-      'euiPanel--disabled'
-    );
-  });
-
   describe('Auth Providers', () => {
     const findAuthProvidersSelect = (wrapper: ShallowWrapper) =>
       wrapper.find('[data-test-subj="AuthProviderSelect"]');

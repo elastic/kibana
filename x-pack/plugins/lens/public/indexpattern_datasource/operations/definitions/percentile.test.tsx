@@ -127,7 +127,7 @@ describe('percentile', () => {
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
-            percents: [23],
+            percentile: [23],
             field: ['a'],
           }),
         })

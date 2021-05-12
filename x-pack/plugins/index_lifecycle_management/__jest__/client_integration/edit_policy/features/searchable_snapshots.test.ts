@@ -36,7 +36,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
     component.update();
   });
 
-  test('enabling searchable snapshot should hide force merge, freeze and shrink in subsequent phases', async () => {
+  test('enabling searchable snapshot should hide force merge, freeze, readonly and shrink in subsequent phases', async () => {
     const { actions } = testBed;
 
     await actions.warm.enable(true);
@@ -44,16 +44,20 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
     expect(actions.warm.forceMergeFieldExists()).toBeTruthy();
     expect(actions.warm.shrinkExists()).toBeTruthy();
+    expect(actions.warm.readonlyExists()).toBeTruthy();
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
     expect(actions.cold.freezeExists()).toBeTruthy();
+    expect(actions.cold.readonlyExists()).toBeTruthy();
 
     await actions.hot.setSearchableSnapshot('my-repo');
 
     expect(actions.warm.forceMergeFieldExists()).toBeFalsy();
     expect(actions.warm.shrinkExists()).toBeFalsy();
+    expect(actions.warm.readonlyExists()).toBeFalsy();
     // searchable snapshot in cold is still visible
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
     expect(actions.cold.freezeExists()).toBeFalsy();
+    expect(actions.cold.readonlyExists()).toBeFalsy();
   });
 
   test('disabling rollover toggle, but enabling default rollover', async () => {
@@ -73,8 +77,10 @@ describe('<EditPolicy /> searchable snapshots', () => {
     const repository = 'myRepo';
     await actions.hot.setSearchableSnapshot(repository);
     await actions.cold.enable(true);
+    await actions.cold.setMinAgeValue('10');
     await actions.cold.toggleSearchableSnapshot(true);
     await actions.frozen.enable(true);
+    await actions.frozen.setMinAgeValue('15');
 
     await actions.savePolicy();
     const latestRequest = server.requests[server.requests.length - 1];
@@ -92,8 +98,10 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
     await actions.hot.setSearchableSnapshot('myRepo');
     await actions.cold.enable(true);
+    await actions.cold.setMinAgeValue('10');
     await actions.cold.toggleSearchableSnapshot(true);
     await actions.frozen.enable(true);
+    await actions.frozen.setMinAgeValue('15');
 
     // We update the repository in one phase
     await actions.frozen.setSearchableSnapshot('changed');
@@ -157,6 +165,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
         const { actions } = testBed;
         await actions.cold.enable(true);
+        await actions.cold.setMinAgeValue('10');
         await actions.cold.toggleSearchableSnapshot(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];

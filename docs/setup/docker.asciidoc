@@ -15,35 +15,58 @@ These images contain both free and subscription features.
 <<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 [float]
-[[pull-image]]
-=== Pull the image
-
-Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
-against the Elastic Docker registry.
+[[run-kibana-on-docker-for-dev]]
+=== Run {kib} on Docker for development
 
 ifeval::["{release-state}"=="unreleased"]
 
-However, version {version} of Kibana has not yet been released, so no Docker
-image is currently available for this version.
+NOTE: No Docker images are currently available for {kib} {version}.
 
 endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-["source","txt",subs="attributes"]
---------------------------------------------
-docker pull {docker-repo}:{version}
---------------------------------------------
+To start an {es} container for development or testing, run:
+
+[source,sh,subs="attributes"]
+----
+docker network create elastic
+docker pull {es-docker-image}
+docker run --name es01-test --net elastic -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" {es-docker-image}
+----
+
+To start {kib} and connect it to your {es} container, run the following commands
+in a new terminal session:
+
+[source,sh,subs="attributes"]
+----
+docker pull {docker-image}
+docker run --name kib01-test --net elastic -p 5601:5601 -e "ELASTICSEARCH_HOSTS=http://es01-test:9200" {docker-image}
+----
+
+To access {kib}, go to http://localhost:5601[http://localhost:5601].
 
 [float]
-=== Run Kibana on Docker for development
-Kibana can be quickly started and connected to a local Elasticsearch container for development
-or testing use with the following command:
---------------------------------------------
-docker run --link YOUR_ELASTICSEARCH_CONTAINER_NAME_OR_ID:elasticsearch -p 5601:5601 {docker-repo}:{version}
---------------------------------------------
-endif::[]
+=== Stop Docker containers
 
+To stop your containers, run:
+
+[source,sh]
+----
+docker stop es01-test
+docker stop kib01-test
+----
+
+To remove the containers and their network, run:
+
+[source,sh]
+----
+docker network rm elastic
+docker rm es01-test
+docker rm kib01-test
+----
+
+endif::[]
 [float]
 [[configuring-kibana-docker]]
 === Configure Kibana on Docker

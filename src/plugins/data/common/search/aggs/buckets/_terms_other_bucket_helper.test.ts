@@ -16,16 +16,33 @@ import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
+import type { IndexPatternField } from '../../../index_patterns';
+import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
 
 const indexPattern = {
   id: '1234',
   title: 'logstash-*',
   fields: [
     {
-      name: 'field',
+      name: 'machine.os.raw',
+      type: 'string',
+      esTypes: ['string'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+    },
+    {
+      name: 'geo.src',
+      type: 'string',
+      esTypes: ['string'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
     },
   ],
-} as any;
+} as IndexPattern;
+
+indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
 
 const singleTerm = {
   aggs: [
@@ -416,7 +433,7 @@ describe('Terms Agg Other bucket helper', () => {
           aggConfigs.aggs[0] as IBucketAggConfig,
           otherAggConfig()
         );
-        expect(mergedResponse.aggregations['1'].buckets[3].key).toEqual('__other__');
+        expect((mergedResponse!.aggregations!['1'] as any).buckets[3].key).toEqual('__other__');
       }
     });
 
@@ -438,7 +455,7 @@ describe('Terms Agg Other bucket helper', () => {
           otherAggConfig()
         );
 
-        expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].key).toEqual(
+        expect((mergedResponse!.aggregations!['1'] as any).buckets[1]['2'].buckets[3].key).toEqual(
           '__other__'
         );
       }
@@ -454,7 +471,7 @@ describe('Terms Agg Other bucket helper', () => {
         aggConfigs.aggs[0] as IBucketAggConfig
       );
       expect(
-        updatedResponse.aggregations['1'].buckets.find(
+        (updatedResponse!.aggregations!['1'] as any).buckets.find(
           (bucket: Record<string, any>) => bucket.key === '__missing__'
         )
       ).toBeDefined();

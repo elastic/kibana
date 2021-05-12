@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CANCEL_BUTTON } from '../constants';
+import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
+import { FLYOUT_ARIA_LABEL_ID } from '../constants';
 import { DocumentCreationLogic, DocumentCreationButtons } from '../index';
 
 export const ShowCreationModes: React.FC = () => {
@@ -40,7 +41,7 @@ export const ShowCreationModes: React.FC = () => {
         <DocumentCreationButtons />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={closeDocumentCreation}>{FLYOUT_CANCEL_BUTTON}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
       </EuiFlyoutFooter>
     </>
   );

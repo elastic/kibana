@@ -23,7 +23,7 @@ export type ConfigObservable = Observable<SharedGlobalConfig>;
 export type VisTypeTimeseriesRequestHandlerContext = DataRequestHandlerContext;
 export type VisTypeTimeseriesRouter = IRouter<VisTypeTimeseriesRequestHandlerContext>;
 export type VisTypeTimeseriesVisDataRequest = KibanaRequest<{}, {}, VisPayload>;
-export type VisTypeTimeseriesFieldsRequest = KibanaRequest<{}, { index: string }, {}>;
+export type VisTypeTimeseriesFieldsRequest = KibanaRequest<{}, { index: string }, any>;
 export type VisTypeTimeseriesRequest =
   | VisTypeTimeseriesFieldsRequest
   | VisTypeTimeseriesVisDataRequest;

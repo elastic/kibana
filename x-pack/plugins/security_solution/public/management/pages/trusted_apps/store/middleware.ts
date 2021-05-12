@@ -46,6 +46,7 @@ import {
   getLastLoadedListResourceState,
   getCurrentLocationPageIndex,
   getCurrentLocationPageSize,
+  getCurrentLocationFilter,
   needsRefreshOfListData,
   getCreationSubmissionResourceState,
   getCreationDialogFormEntry,
@@ -63,7 +64,9 @@ import {
   getListItems,
   editItemState,
 } from './selectors';
+import { parseQueryFilterToKQL } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
+import { SEARCHABLE_FIELDS } from '../constants';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -90,9 +93,12 @@ const refreshListIfNeeded = async (
     try {
       const pageIndex = getCurrentLocationPageIndex(store.getState());
       const pageSize = getCurrentLocationPageSize(store.getState());
+      const filter = getCurrentLocationFilter(store.getState());
+
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
+        kuery: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
       });
 
       store.dispatch(
@@ -104,6 +110,7 @@ const refreshListIfNeeded = async (
             pageSize,
             totalItemsCount: response.total,
             timestamp: Date.now(),
+            filter,
           },
         })
       );

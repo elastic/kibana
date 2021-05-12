@@ -7,15 +7,18 @@
 
 import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
 import { AgentsRequestOptions } from '../../../../../common/search_strategy';
-// import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
+import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildAgentsQuery = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filterQuery,
   pagination: { cursorStart, querySize },
   sort,
+  aggregations,
 }: AgentsRequestOptions): ISearchRequestParams => {
-  // const filter = [...createQueryFilterClauses(filterQuery)];
+  const filter = [
+    { term: { active: { value: 'true' } } },
+    ...createQueryFilterClauses(filterQuery),
+  ];
 
   const dslQuery = {
     allowNoIndices: true,
@@ -23,12 +26,11 @@ export const buildAgentsQuery = ({
     ignoreUnavailable: true,
     body: {
       query: {
-        term: {
-          active: {
-            value: 'true',
-          },
+        bool: {
+          filter,
         },
       },
+      aggs: aggregations,
       track_total_hits: true,
       sort: [
         {

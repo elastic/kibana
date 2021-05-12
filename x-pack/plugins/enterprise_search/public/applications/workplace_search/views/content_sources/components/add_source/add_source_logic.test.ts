@@ -276,7 +276,7 @@ describe('AddSourceLogic', () => {
         const addSourceProps = { sourceIndex: 1, reAuthenticate: true };
         AddSourceLogic.actions.initializeAddSource(addSourceProps);
 
-        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReAuthenticateStep);
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReauthenticateStep);
       });
     });
 
@@ -458,7 +458,12 @@ describe('AddSourceLogic', () => {
           AddSourceLogic.actions.getSourceReConnectData('github');
 
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/reauth_prepare'
+            '/api/workplace_search/org/sources/github/reauth_prepare',
+            {
+              query: {
+                kibana_host: '',
+              },
+            }
           );
           await nextTick();
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
@@ -648,7 +653,12 @@ describe('AddSourceLogic', () => {
         AddSourceLogic.actions.getSourceReConnectData('123');
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/reauth_prepare'
+          '/api/workplace_search/account/sources/123/reauth_prepare',
+          {
+            query: {
+              kibana_host: '',
+            },
+          }
         );
       });
 

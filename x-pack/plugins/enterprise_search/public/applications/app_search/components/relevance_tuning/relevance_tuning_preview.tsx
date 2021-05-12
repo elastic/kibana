@@ -48,7 +48,7 @@ export const RelevanceTuningPreview: React.FC = () => {
   const { engineName, isMetaEngine } = useValues(EngineLogic);
 
   return (
-    <EuiPanel>
+    <EuiPanel color="subdued">
       <EuiTitle size="m">
         <h2>
           {i18n.translate('xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.title', {

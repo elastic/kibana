@@ -10,7 +10,7 @@ import { trackUserRequest } from './ui_metric';
 import { sendGet, sendPost, sendPut, sendDelete, SendGetOptions } from './http';
 import { Cluster } from '../../../common/lib';
 
-export async function loadClusters(options: SendGetOptions) {
+export async function loadClusters(options?: SendGetOptions) {
   return await sendGet(undefined, options);
 }
 

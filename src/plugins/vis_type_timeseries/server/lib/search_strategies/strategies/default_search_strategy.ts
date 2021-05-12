@@ -15,15 +15,21 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequest,
 } from '../../../types';
+import { MAX_BUCKETS_SETTING } from '../../../../common/constants';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   async checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest
   ) {
+    const uiSettings = requestContext.core.uiSettings.client;
+
     return {
       isViable: true,
-      capabilities: new DefaultSearchCapabilities(req),
+      capabilities: new DefaultSearchCapabilities({
+        timezone: req.body.timerange?.timezone,
+        maxBucketsLimit: await uiSettings.get(MAX_BUCKETS_SETTING),
+      }),
     };
   }
 

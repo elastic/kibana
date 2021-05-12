@@ -4,7 +4,7 @@
 <titleabbrev>Legacy Update connector</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<update-connector-api>> instead.
+deprecated::[7.13.0,Use <<update-connector-api>> instead.]
 
 Updates the attributes for an existing connector.
 
@@ -70,6 +70,7 @@ The API returns the following:
     "refresh": false,
     "executionTimeField": null
   },
-  "isPreconfigured": false
+  "isPreconfigured": false,
+  "isMissingSecrets": false
 }
 --------------------------------------------------

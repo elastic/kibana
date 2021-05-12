@@ -15,14 +15,14 @@ const log = new ToolingLog({
 });
 
 describe(`enumeratePatterns`, () => {
-  it(`should resolve x-pack/plugins/reporting/server/browsers/extract/unzip.js to kibana-reporting`, () => {
+  it(`should resolve x-pack/plugins/reporting/server/browsers/extract/unzip.ts to kibana-reporting`, () => {
     const actual = enumeratePatterns(REPO_ROOT)(log)(
       new Map([['x-pack/plugins/reporting', ['kibana-reporting']]])
     );
 
     expect(
       actual[0].includes(
-        'x-pack/plugins/reporting/server/browsers/extract/unzip.js kibana-reporting'
+        'x-pack/plugins/reporting/server/browsers/extract/unzip.ts kibana-reporting'
       )
     ).toBe(true);
   });
@@ -35,13 +35,13 @@ describe(`enumeratePatterns`, () => {
       'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app'
     );
   });
-  it(`should resolve x-pack/plugins/security_solution/public/common/components/exceptions/builder/translations.ts to kibana-security`, () => {
+  it(`should resolve x-pack/plugins/security_solution/public/common/components/exceptions/edit_exception_modal/translations.ts to kibana-security`, () => {
     const short = 'x-pack/plugins/security_solution';
     const actual = enumeratePatterns(REPO_ROOT)(log)(new Map([[short, ['kibana-security']]]));
 
     expect(
       actual[0].includes(
-        `${short}/public/common/components/exceptions/builder/translations.ts kibana-security`
+        `${short}/public/common/components/exceptions/edit_exception_modal/translations.ts kibana-security`
       )
     ).toBe(true);
   });

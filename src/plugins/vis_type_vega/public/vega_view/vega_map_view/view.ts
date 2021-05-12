@@ -7,9 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
+import type { Map, Style, MapboxOptions } from 'mapbox-gl';
 
 import { View, parse } from 'vega';
+// @ts-expect-error
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
 import { getMapServiceSettings } from '../../services';
@@ -22,10 +24,16 @@ import {
   userConfiguredLayerId,
   vegaLayerId,
 } from './constants';
-
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
-
 import './vega_map_view.scss';
+
+// @ts-expect-error
+import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
+// @ts-expect-error
+import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
+
+mapboxgl.workerUrl = mbWorkerUrl;
+mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   const mapCanvas = mapBoxInstance.getCanvas();
@@ -115,7 +123,7 @@ export class VegaMapView extends VegaBaseView {
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
     if (!this._$container) return;
 
-    const mapBoxInstance = new Map({
+    const mapBoxInstance = new mapboxgl.Map({
       style,
       customAttribution,
       container: this._$container.get(0),
@@ -142,7 +150,7 @@ export class VegaMapView extends VegaBaseView {
 
   private initControls(mapBoxInstance: Map) {
     if (this.shouldShowZoomControl) {
-      mapBoxInstance.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+      mapBoxInstance.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
     }
 
     // disable map rotation using right click + drag
@@ -175,6 +183,7 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
+        vegaControls: this._$controls.get(0),
         updateVegaView,
       },
     });
@@ -182,7 +191,7 @@ export class VegaMapView extends VegaBaseView {
 
   protected async _initViewCustomizations() {
     const vegaView = new View(
-      parse(injectMapPropsIntoSpec(this._parser.spec)),
+      parse(injectMapPropsIntoSpec(this._parser.spec), undefined, { ast: true }),
       this._vegaViewConfig
     );
 

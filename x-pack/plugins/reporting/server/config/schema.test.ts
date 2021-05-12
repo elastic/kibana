@@ -107,6 +107,7 @@ describe('Reporting Config Schema', () => {
           "allow": Array [
             "reporting_user",
           ],
+          "enabled": true,
         },
       }
     `);
@@ -211,6 +212,7 @@ describe('Reporting Config Schema', () => {
           "allow": Array [
             "reporting_user",
           ],
+          "enabled": true,
         },
       }
     `);

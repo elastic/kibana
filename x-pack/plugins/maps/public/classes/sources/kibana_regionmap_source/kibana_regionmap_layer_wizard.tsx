@@ -13,7 +13,7 @@ import { KibanaRegionmapSource, sourceTitle } from './kibana_regionmap_source';
 import { VectorLayer } from '../../layers/vector_layer';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { getKibanaRegionList } from '../../../meta';
+import { getKibanaRegionList } from '../../../util';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const kibanaRegionMapLayerWizardConfig: LayerWizard = {

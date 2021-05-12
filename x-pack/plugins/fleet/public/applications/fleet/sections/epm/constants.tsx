@@ -33,6 +33,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   map: 'Map',
   data_stream_ilm_policy: 'Data Stream ILM Policy',
   lens: 'Lens',
+  security_rule: 'Security Rule',
   ml_module: 'ML Module',
 };
 
@@ -48,6 +49,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   visualization: 'visualizeApp',
   map: 'emsApp',
   lens: 'lensApp',
+  security_rule: 'securityApp',
   ml_module: 'mlApp',
 };
 

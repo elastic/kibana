@@ -26,17 +26,28 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { SpacesPluginStart } from '../../spaces/server';
+import { SpacesPluginStart, SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
+import {
+  ensureCleanupFailedExecutionsTaskScheduled,
+  registerCleanupFailedExecutionsTaskDefinition,
+} from './cleanup_failed_executions';
 
-import { ActionsConfig } from './config';
-import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
+import { ActionsConfig, getValidatedConfig } from './config';
+import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
+import {
+  ActionExecutor,
+  TaskRunnerFactory,
+  LicenseState,
+  ILicenseState,
+  spaceIdToNamespace,
+} from './lib';
 import {
   Services,
   ActionType,
@@ -53,11 +64,11 @@ import { defineRoutes } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
-  setupSavedObjects,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
-} from './saved_objects';
+} from './constants/saved_objects';
+import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
@@ -68,12 +79,10 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
-
-const EVENT_LOG_PROVIDER = 'actions';
-export const EVENT_LOG_ACTIONS = {
-  execute: 'execute',
-  executeViaHttp: 'execute-via-http',
-};
+import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
+import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
+import { AlertHistoryEsIndexConnectorId } from '../common';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 
 export interface PluginSetupContract {
   registerType<
@@ -98,6 +107,7 @@ export interface PluginStartContract {
   preconfiguredActions: PreConfiguredAction[];
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
+    actionId: string,
     params: Params,
     variables: Record<string, unknown>
   ): Params;
@@ -111,6 +121,7 @@ export interface ActionsPluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -141,8 +152,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly kibanaIndexConfig: { kibana: { index: string } };
 
   constructor(initContext: PluginInitializerContext) {
-    this.actionsConfig = initContext.config.get<ActionsConfig>();
     this.logger = initContext.logger.get('actions');
+    this.actionsConfig = getValidatedConfig(
+      this.logger,
+      resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
+    );
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
     this.kibanaIndexConfig = initContext.config.legacy.get();
@@ -162,7 +176,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
@@ -178,12 +191,22 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
+    if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
+      this.preconfiguredActions.push(getAlertHistoryEsIndex());
+    }
+
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
-      this.preconfiguredActions.push({
-        ...this.actionsConfig.preconfigured[preconfiguredId],
-        id: preconfiguredId,
-        isPreconfigured: true,
-      });
+      if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
+        this.preconfiguredActions.push({
+          ...this.actionsConfig.preconfigured[preconfiguredId],
+          id: preconfiguredId,
+          isPreconfigured: true,
+        });
+      } else {
+        this.logger.warn(
+          `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
+        );
+      }
     }
 
     const actionTypeRegistry = new ActionTypeRegistry({
@@ -199,6 +222,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
 
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.actionTypeRegistry!);
+
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
@@ -210,6 +235,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     if (usageCollection) {
       registerActionsUsageCollector(
         usageCollection,
+        this.actionsConfig,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
     }
@@ -229,6 +255,18 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     // Routes
     defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
+
+    // Cleanup failed execution task definition
+    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
+      registerCleanupFailedExecutionsTaskDefinition(plugins.taskManager, {
+        actionTypeRegistry,
+        logger: this.logger,
+        coreStartServices: core.getStartServices(),
+        config: this.actionsConfig.cleanupFailedExecutionsTask,
+        kibanaIndex: this.kibanaIndexConfig.kibana.index,
+        taskManagerIndex: plugins.taskManager.index,
+      });
+    }
 
     return {
       registerType: <
@@ -337,23 +375,33 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       preconfiguredActions,
     });
 
-    const spaceIdToNamespace = (spaceId?: string) => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
-        : undefined;
-    };
-
     taskRunnerFactory!.initialize({
       logger,
       actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
         this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+
+    if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
+      createAlertHistoryIndexTemplate({
+        client: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
+    }
+
+    // Cleanup failed execution task
+    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
+      ensureCleanupFailedExecutionsTaskScheduled(
+        plugins.taskManager,
+        this.logger,
+        this.actionsConfig.cleanupFailedExecutionsTask
+      );
+    }
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
@@ -468,12 +516,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
   actionTypeRegistry: ActionTypeRegistry | undefined,
   actionTypeId: string,
+  actionId: string,
   params: Params,
   variables: Record<string, unknown>
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables) as Params;
+    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
   } else {
     return renderMustacheObject(params, variables);
   }

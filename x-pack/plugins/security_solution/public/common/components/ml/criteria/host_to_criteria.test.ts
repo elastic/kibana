@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostItem } from '../../../../graphql/types';
+import { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
 import { CriteriaFields } from '../types';
 import { hostToCriteria } from './host_to_criteria';
 
@@ -28,6 +28,7 @@ describe('host_to_criteria', () => {
   test('returns an empty array if the host.name is null', () => {
     const hostItem: HostItem = {
       host: {
+        // @ts-expect-error
         name: null,
       },
     };

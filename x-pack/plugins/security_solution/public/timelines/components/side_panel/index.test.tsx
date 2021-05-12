@@ -10,7 +10,6 @@ import React from 'react';
 
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -21,26 +20,12 @@ import { createStore, State } from '../../../common/store';
 import { DetailsPanel } from './index';
 import { TimelineExpandedDetail, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
-jest.mock('react-apollo', () => {
-  const original = jest.requireActual('react-apollo');
-  return {
-    ...original,
-    // eslint-disable-next-line react/display-name
-    Query: () => <></>,
-  };
-});
 
 describe('Details Panel Component', () => {
   const state: State = { ...mockGlobalState };
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   const dataLessExpandedDetail = {
     [TimelineTabs.query]: {
@@ -89,13 +74,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
-      store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
+      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     test('it should not render the DetailsPanel if no expanded detail has been set in the reducer', () => {
@@ -123,13 +102,7 @@ describe('Details Panel Component', () => {
   describe('DetailsPanel:EventDetails: rendering', () => {
     beforeEach(() => {
       state.timeline.timelineById.test.expandedDetail = eventExpandedDetail;
-      store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
+      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     test('it should render the Details Panel when the panelView is set and the associated params are set', () => {
@@ -167,13 +140,7 @@ describe('Details Panel Component', () => {
   describe('DetailsPanel:HostDetails: rendering', () => {
     beforeEach(() => {
       state.timeline.timelineById.test.expandedDetail = hostExpandedDetail;
-      store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
+      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     test('it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set', () => {
@@ -190,13 +157,7 @@ describe('Details Panel Component', () => {
   describe('DetailsPanel:NetworkDetails: rendering', () => {
     beforeEach(() => {
       state.timeline.timelineById.test.expandedDetail = networkExpandedDetail;
-      store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
+      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     test('it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set', () => {

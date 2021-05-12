@@ -78,6 +78,7 @@ export type RawSavedDashboardPanel730ToLatest = Pick<
   readonly name?: string;
 
   panelIndex: string;
+  panelRefName?: string;
 };
 
 // NOTE!!

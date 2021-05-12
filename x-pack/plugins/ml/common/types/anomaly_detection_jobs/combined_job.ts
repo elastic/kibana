@@ -9,8 +9,9 @@ import { Datafeed } from './datafeed';
 import { DatafeedStats } from './datafeed_stats';
 import { Job } from './job';
 import { JobStats } from './job_stats';
+import type { JobAlertingRuleStats } from '../alerts';
 
-export type JobWithStats = Job & JobStats;
+export type JobWithStats = Job & JobStats & JobAlertingRuleStats;
 export type DatafeedWithStats = Datafeed & DatafeedStats;
 
 // in older implementations of the job config, the datafeed was placed inside the job

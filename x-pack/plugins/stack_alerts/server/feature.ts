@@ -15,7 +15,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 export const BUILT_IN_ALERTS_FEATURE = {
   id: STACK_ALERTS_FEATURE_ID,
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Stack Alerts',
+    defaultMessage: 'Stack Rules',
   }),
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,

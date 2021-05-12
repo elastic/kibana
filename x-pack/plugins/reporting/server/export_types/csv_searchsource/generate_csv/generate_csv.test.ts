@@ -326,7 +326,7 @@ it('uses the scrollId to page all the data', async () => {
   expect(csvResult.content).toMatchSnapshot();
 });
 
-describe('fields', () => {
+describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
   it('cells can be multi-value', async () => {
     searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
       if (key === 'fields') {
@@ -494,6 +494,140 @@ describe('fields', () => {
 
     expect(csvResult.content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
+  });
+});
+
+describe('fields from job.columns (7.13+ generated)', () => {
+  it('cells can be multi-value', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                _id: 'my-cool-id',
+                _index: 'my-cool-index',
+                _version: 4,
+                fields: {
+                  product: 'coconut',
+                  category: [`cool`, `rad`],
+                },
+              },
+            ],
+            total: 1,
+          },
+        },
+      })
+    );
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({ searchSource: {}, columns: ['product', 'category'] }),
+      mockConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      logger
+    );
+    const csvResult = await generateCsv.generateData();
+
+    expect(csvResult.content).toMatchSnapshot();
+  });
+
+  it('columns can be top-level fields such as _id and _index', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                _id: 'my-cool-id',
+                _index: 'my-cool-index',
+                _version: 4,
+                fields: {
+                  product: 'coconut',
+                  category: [`cool`, `rad`],
+                },
+              },
+            ],
+            total: 1,
+          },
+        },
+      })
+    );
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({ searchSource: {}, columns: ['_id', '_index', 'product', 'category'] }),
+      mockConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      logger
+    );
+    const csvResult = await generateCsv.generateData();
+
+    expect(csvResult.content).toMatchSnapshot();
+  });
+
+  it('empty columns defaults to using searchSource.getFields()', async () => {
+    searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
+      if (key === 'fields') {
+        return ['product'];
+      }
+      return mockSearchSourceGetFieldDefault(key);
+    });
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                _id: 'my-cool-id',
+                _index: 'my-cool-index',
+                _version: 4,
+                fields: {
+                  product: 'coconut',
+                  category: [`cool`, `rad`],
+                },
+              },
+            ],
+            total: 1,
+          },
+        },
+      })
+    );
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({ searchSource: {}, columns: [] }),
+      mockConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      logger
+    );
+    const csvResult = await generateCsv.generateData();
+
+    expect(csvResult.content).toMatchSnapshot();
   });
 });
 

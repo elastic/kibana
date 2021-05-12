@@ -8,9 +8,8 @@
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
@@ -40,7 +39,7 @@ describe('renderApp', () => {
   });
 
   it('renders the app', () => {
-    const { core, config } = mockApmPluginContextValue;
+    const { core, config, apmRuleRegistry } = mockApmPluginContextValue;
     const plugins = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
@@ -87,13 +86,14 @@ describe('renderApp', () => {
     let unmount: () => void;
 
     act(() => {
-      unmount = renderApp(
-        (core as unknown) as CoreStart,
-        (plugins as unknown) as ApmPluginSetupDeps,
-        (params as unknown) as AppMountParameters,
+      unmount = renderApp({
+        coreStart: core as any,
+        pluginsSetup: plugins as any,
+        appMountParameters: params as any,
+        pluginsStart: startDeps as any,
         config,
-        (startDeps as unknown) as ApmPluginStartDeps
-      );
+        apmRuleRegistry,
+      });
     });
 
     expect(() => {

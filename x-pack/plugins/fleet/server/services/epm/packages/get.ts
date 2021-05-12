@@ -19,7 +19,6 @@ import type {
   RegistryPackage,
   EpmPackageAdditions,
 } from '../../../../common/types';
-import type { KibanaAssetType } from '../../../types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
 import { appContextService } from '../../';
@@ -259,12 +258,4 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
-}
-
-export async function getKibanaSavedObject(
-  savedObjectsClient: SavedObjectsClientContract,
-  type: KibanaAssetType,
-  id: string
-) {
-  return savedObjectsClient.get(type, id);
 }
