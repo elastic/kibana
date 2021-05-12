@@ -109,7 +109,6 @@
   "apm": {
     "totalEvents": null,
     "memRss": null,
-    "memTotal": null,
     "apms": {
       "total": null
     },
