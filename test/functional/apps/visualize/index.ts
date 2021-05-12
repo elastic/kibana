@@ -37,75 +37,71 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       after(async () => await update(true));
 
-      [
-        // Test replaced vislib chart types
-        './_line_chart_split_chart',
-        './_point_series_options',
-        './_vertical_bar_chart',
-        './_vertical_bar_chart_nontimeindex',
-        './_line_chart_split_series',
-      ].forEach(load);
+      // Test replaced vislib chart types
+      loadTestFile(require.resolve('./_area_chart'));
+      loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
+      loadTestFile(require.resolve('./_point_series_options'));
+      loadTestFile(require.resolve('./_vertical_bar_chart'));
+      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
     });
 
     describe('visualize ciGroup9', function () {
       this.tags('ciGroup9');
 
-      [
-        './_embedding_chart',
-        './_area_chart',
-        './_data_table',
-        './_data_table_nontimeindex',
-        './_data_table_notimeindex_filters',
-      ].forEach(load);
+      loadTestFile(require.resolve('./_embedding_chart'));
+      loadTestFile(require.resolve('./_area_chart'));
+      loadTestFile(require.resolve('./_data_table'));
+      loadTestFile(require.resolve('./_data_table_nontimeindex'));
+      loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
 
       // this check is not needed when the CI doesn't run anymore for the OSS
-      if (!isOss) load('./_chart_types');
+      if (!isOss) loadTestFile(require.resolve('./_chart_types'));
     });
 
     describe('visualize ciGroup10', function () {
       this.tags('ciGroup10');
 
-      [
-        './_inspector',
-        './_experimental_vis',
-        './_gauge_chart',
-        './_heatmap_chart',
-        './input_control_vis',
-        './_histogram_request_start',
-        './_metric_chart',
-      ].forEach(load);
+      loadTestFile(require.resolve('./_inspector'));
+      loadTestFile(require.resolve('./_experimental_vis'));
+      loadTestFile(require.resolve('./_gauge_chart'));
+      loadTestFile(require.resolve('./_heatmap_chart'));
+      loadTestFile(require.resolve('./input_control_vis'));
+      loadTestFile(require.resolve('./_histogram_request_start'));
+      loadTestFile(require.resolve('./_metric_chart'));
     });
 
     describe('visualize ciGroup4', function () {
       this.tags('ciGroup4');
 
-      [
-        './_pie_chart',
-        './_point_series_options',
-        './_markdown_vis',
-        './_shared_item',
-        './_lab_mode',
-        './_linked_saved_searches',
-        './_visualize_listing',
-        './_add_to_dashboard.ts',
-      ].forEach(load);
+      loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
+      loadTestFile(require.resolve('./_pie_chart'));
+      loadTestFile(require.resolve('./_point_series_options'));
+      loadTestFile(require.resolve('./_markdown_vis'));
+      loadTestFile(require.resolve('./_shared_item'));
+      loadTestFile(require.resolve('./_lab_mode'));
+      loadTestFile(require.resolve('./_linked_saved_searches'));
+      loadTestFile(require.resolve('./_visualize_listing'));
+      loadTestFile(require.resolve('./_add_to_dashboard.ts'));
 
-      if (isOss) ['./_tile_map', './_region_map'].forEach(load);
+      if (isOss) {
+        loadTestFile(require.resolve('./_tile_map'));
+        loadTestFile(require.resolve('./_region_map'));
+      }
     });
 
     describe('visualize ciGroup12', function () {
       this.tags('ciGroup12');
 
-      [
-        './_tag_cloud',
-        './_vertical_bar_chart',
-        './_vertical_bar_chart_nontimeindex',
-        './_tsvb_chart',
-        './_tsvb_time_series',
-        './_tsvb_markdown',
-        './_tsvb_table',
-        './_vega_chart',
-      ].forEach(load);
+      loadTestFile(require.resolve('./_tag_cloud'));
+      loadTestFile(require.resolve('./_vertical_bar_chart'));
+      loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
+      loadTestFile(require.resolve('./_tsvb_chart'));
+      loadTestFile(require.resolve('./_tsvb_time_series'));
+      loadTestFile(require.resolve('./_tsvb_markdown'));
+      loadTestFile(require.resolve('./_tsvb_table'));
+      loadTestFile(require.resolve('./_vega_chart'));
     });
   });
 
@@ -114,9 +110,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       'visualization:visualize:legacyChartsLibrary': x,
     });
     await browser.refresh();
-  }
-
-  function load(x: string) {
-    loadTestFile(require.resolve(x));
   }
 }
