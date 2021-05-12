@@ -16,6 +16,7 @@ import {
   EuiLink,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
@@ -464,13 +465,21 @@ export function FormulaEditor({
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup">
                   {/* TODO: Replace `bolt` with `wordWrap` icon (after latest EUI is deployed) and hook up button to enable/disable word wrapping. */}
-                  <EuiButtonIcon
-                    iconType="bolt"
-                    color="text"
-                    aria-label={i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.lens.formula.disableWordWrapToolTip', {
                       defaultMessage: 'Disable word wrap',
                     })}
-                  />
+                    delay="long"
+                    position="top"
+                  >
+                    <EuiButtonIcon
+                      iconType="bolt"
+                      color="text"
+                      aria-label={i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
+                        defaultMessage: 'Disable word wrap',
+                      })}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
 
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup" grow={false}>
@@ -533,40 +542,59 @@ export function FormulaEditor({
                 <EuiFlexItem className="lnsFormula__editorFooterGroup">
                   {isFullscreen ? (
                     // TODO: Hook up the below `EuiLink` button so that it toggles the presence of the `.lnsFormula__docs--inline` element in fullscreen mode. Note that when docs are hidden, the `arrowDown` button should change to `arrowUp` and the label should change to `Show function reference`.
-                    <EuiLink
-                      aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineHideLabel', {
+                    <EuiToolTip
+                      content={i18n.translate('xpack.lens.formula.editorHelpInlineHideToolTip', {
                         defaultMessage: 'Hide function reference',
                       })}
-                      className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
-                      color="text"
+                      delay="long"
+                      position="top"
                     >
-                      <EuiIcon type="help" />
-                      <EuiIcon type="arrowDown" />
-                    </EuiLink>
+                      <EuiLink
+                        aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineHideLabel', {
+                          defaultMessage: 'Hide function reference',
+                        })}
+                        className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
+                        color="text"
+                      >
+                        <EuiIcon type="help" />
+                        <EuiIcon type="arrowDown" />
+                      </EuiLink>
+                    </EuiToolTip>
                   ) : (
-                    <EuiPopover
-                      panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
-                      panelPaddingSize="none"
-                      anchorPosition="leftCenter"
-                      isOpen={isHelpOpen}
-                      closePopover={() => setIsHelpOpen(false)}
-                      button={
-                        <EuiButtonIcon
-                          className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
-                          onClick={() => setIsHelpOpen(!isHelpOpen)}
-                          iconType="help"
-                          color="text"
-                          aria-label={i18n.translate('xpack.lens.formula.editorHelpOverlayLabel', {
-                            defaultMessage: 'Function reference',
-                          })}
-                        />
-                      }
+                    <EuiToolTip
+                      content={i18n.translate('xpack.lens.formula.editorHelpOverlayToolTip', {
+                        defaultMessage: 'Function reference',
+                      })}
+                      delay="long"
+                      position="top"
                     >
-                      <MemoizedFormulaHelp
-                        indexPattern={indexPattern}
-                        operationDefinitionMap={operationDefinitionMap}
-                      />
-                    </EuiPopover>
+                      <EuiPopover
+                        panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
+                        panelPaddingSize="none"
+                        anchorPosition="leftCenter"
+                        isOpen={isHelpOpen}
+                        closePopover={() => setIsHelpOpen(false)}
+                        button={
+                          <EuiButtonIcon
+                            className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
+                            onClick={() => setIsHelpOpen(!isHelpOpen)}
+                            iconType="help"
+                            color="text"
+                            aria-label={i18n.translate(
+                              'xpack.lens.formula.editorHelpOverlayLabel',
+                              {
+                                defaultMessage: 'Function reference',
+                              }
+                            )}
+                          />
+                        }
+                      >
+                        <MemoizedFormulaHelp
+                          indexPattern={indexPattern}
+                          operationDefinitionMap={operationDefinitionMap}
+                        />
+                      </EuiPopover>
+                    </EuiToolTip>
                   )}
                 </EuiFlexItem>
 
