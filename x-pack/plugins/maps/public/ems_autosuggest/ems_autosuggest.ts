@@ -245,13 +245,11 @@ export async function suggestEMSTermJoinConfig(
 
     if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
       // Filter out the ones that fail ems-validation
-      if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
-        matches = await removeEmsValueMismatches(
-          matches,
-          sampleValuesConfig.sampleValues,
-          sampleValuesConfig.emsLayerIds
-        );
-      }
+      matches = await removeEmsValueMismatches(
+        matches,
+        sampleValuesConfig.sampleValues,
+        sampleValuesConfig.emsLayerIds
+      );
 
       const emsMatches = await suggestByEMSLayerIds(
         sampleValuesConfig.emsLayerIds,

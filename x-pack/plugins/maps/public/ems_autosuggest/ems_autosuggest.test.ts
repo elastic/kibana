@@ -299,5 +299,28 @@ describe('suggestEMSTermJoinConfig', () => {
       });
       expect(termJoinConfig).toEqual(null);
     });
+
+    test('5-digit zip code - should prioritize pattern-matches over field-alias matches', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        fieldName: 'country',
+        sampleValues: ['40205', '40204'],
+      });
+      expect(termJoinConfig).toEqual({
+        layerId: 'usa_zip_codes',
+        field: 'zip',
+      });
+    });
+
+    test('5-digit zip code - cannot validate against ems, but still matches pattern', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        fieldName: 'zip',
+        sampleValues: ['40205', '40204'],
+        emsLayerIds: ['world_countries'],
+      });
+      expect(termJoinConfig).toEqual({
+        layerId: 'usa_zip_codes',
+        field: 'zip',
+      });
+    });
   });
 });
