@@ -19,9 +19,10 @@ export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rul
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    unsafe: schema.object({
-      write: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+    write: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
     }),
+    index: schema.string({ defaultValue: '.alerts' }),
   }),
 };
 

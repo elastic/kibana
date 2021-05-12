@@ -7,7 +7,6 @@
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { DEFAULT_ASSET_NAMESPACE } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import {
   DEFAULT_ILM_POLICY_ID,
@@ -24,7 +23,7 @@ interface RuleDataPluginServiceConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
-  kibanaIndex: string;
+  index: string;
 }
 
 function createSignal() {
@@ -154,6 +153,6 @@ export class RuleDataPluginService {
   }
 
   getFullAssetName(assetName?: string) {
-    return [this.options.kibanaIndex, DEFAULT_ASSET_NAMESPACE, assetName].filter(Boolean).join('-');
+    return [this.options.index, assetName].filter(Boolean).join('-');
   }
 }
