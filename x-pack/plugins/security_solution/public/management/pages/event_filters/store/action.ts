@@ -23,7 +23,7 @@ export type EventFiltersListPageDataExistsChanged = Action<'eventFiltersListPage
 };
 
 export type EventFilterForDeletion = Action<'eventFilterForDeletion'> & {
-  payload: Pick<ExceptionListItemSchema, 'id' | 'name'>;
+  payload: ExceptionListItemSchema;
 };
 
 export type EventFilterDeletionReset = Action<'eventFilterDeletionReset'>;

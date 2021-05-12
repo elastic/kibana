@@ -71,7 +71,7 @@ export interface EventFiltersListPageState {
     dataExist: AsyncResourceState<boolean>;
     /** state for deletion of items from the list */
     deletion: {
-      item: Pick<ExceptionListItemSchema, 'id' | 'name'> | undefined;
+      item: ExceptionListItemSchema | undefined;
       status: AsyncResourceState<ExceptionListItemSchema>;
     };
   };

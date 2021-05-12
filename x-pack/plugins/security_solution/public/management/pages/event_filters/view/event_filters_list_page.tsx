@@ -135,7 +135,8 @@ export const EventFiltersListPage = memo(() => {
     ({ id }) => {
       dispatch({
         type: 'eventFilterForDeletion',
-        payload: listItems.find((item) => item.id === id)!,
+        // Casting below needed due to error around the comments array needing to be mutable
+        payload: listItems.find((item) => item.id === id)! as ExceptionListItemSchema,
       });
     },
     [dispatch, listItems]
