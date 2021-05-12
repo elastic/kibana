@@ -51,6 +51,7 @@ describe('#defaultValue', () => {
         "_events": Object {},
         "_eventsCount": 0,
         "_maxListeners": undefined,
+        Symbol(kCapture): false,
       }
     `);
   });

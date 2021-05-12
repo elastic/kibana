@@ -55,7 +55,6 @@ export const internals: JoiRoot = Joi.extend(
   {
     type: 'stream',
     prepare(value, { error }) {
-      // If value isn't defined, let Joi handle default value if it's defined.
       if (value instanceof Stream) {
         return { value };
       }
