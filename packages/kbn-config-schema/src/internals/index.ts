@@ -53,20 +53,6 @@ export const internals: JoiRoot = Joi.extend(
     },
   },
   {
-    type: 'binary',
-    base: Joi.binary(),
-    coerce(value, { error }) {
-      // If value isn't defined, let Joi handle default value if it's defined.
-      if (value !== undefined && !(typeof value === 'object' && Buffer.isBuffer(value))) {
-        return {
-          errors: [error('binary.base')],
-        };
-      }
-
-      return { value };
-    },
-  },
-  {
     type: 'stream',
     prepare(value, { error }) {
       // If value isn't defined, let Joi handle default value if it's defined.
@@ -220,13 +206,8 @@ export const internals: JoiRoot = Joi.extend(
       }
       if (prefs.convert && typeof value === 'string') {
         try {
-          const parsed = JSON.parse(value);
-          if (Array.isArray(parsed)) {
-            return { value: parsed };
-          }
-          return {
-            errors: [error('array.base')],
-          };
+          // ensuring that the parsed object is an array is done by the base's validation
+          return { value: JSON.parse(value) };
         } catch (e) {
           return {
             errors: [error('array.parse')],
