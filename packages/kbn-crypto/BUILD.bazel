@@ -2,7 +2,7 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
-PKG_BASE_NAME = "kbn-cypto"
+PKG_BASE_NAME = "kbn-crypto"
 PKG_REQUIRE_NAME = "@kbn/crypto"
 
 SOURCE_FILES = glob(
