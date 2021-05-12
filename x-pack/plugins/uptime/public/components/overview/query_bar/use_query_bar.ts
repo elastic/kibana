@@ -21,7 +21,7 @@ export enum SyntaxType {
 }
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
-const DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL = 2000;
+const DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL = 800;
 
 interface UseQueryBarUtils {
   // The Query object used by the search bar
