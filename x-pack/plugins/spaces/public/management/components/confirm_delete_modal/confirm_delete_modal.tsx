@@ -90,12 +90,12 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
           <EuiCallOut
             color="warning"
             iconType="alert"
-            title={i18n.translate('xpack.spaces.management.confirmDeleteModal.cancelButtonLabel', {
+            title={i18n.translate('xpack.spaces.management.confirmDeleteModal.currentSpaceTitle', {
               defaultMessage: 'You are currently in this space.',
             })}
           >
             <FormattedMessage
-              id="xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
+              id="xpack.spaces.management.confirmDeleteModal.currentSpaceDescription"
               defaultMessage="Once deleted, you must choose a different space."
             />
           </EuiCallOut>
@@ -121,7 +121,7 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
         </p>
         <p>
           <FormattedMessage
-            id="xpack.security.management.users.confirmDelete.cannotUndoWarning"
+            id="xpack.spaces.management.confirmDeleteModal.cannotUndoWarning"
             defaultMessage="You can't recover deleted spaces."
           />
         </p>
