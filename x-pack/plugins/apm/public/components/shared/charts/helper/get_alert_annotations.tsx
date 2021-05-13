@@ -9,6 +9,13 @@ import { ValuesType } from 'utility-types';
 import { RectAnnotation } from '@elastic/charts';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { rgba } from 'polished';
+import {
+  ALERT_DURATION,
+  RULE_ID,
+  ALERT_START,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 type Alert = ValuesType<
@@ -30,10 +37,11 @@ export function getAlertAnnotations({
   theme: EuiTheme;
 }) {
   return alerts?.flatMap((alert) => {
-    const uuid = alert['kibana.rac.alert.uuid']!;
-    const start = new Date(alert['kibana.rac.alert.start']!).getTime();
-    const end = start + alert['kibana.rac.alert.duration.us']! / 1000;
-    const color = getAlertColor({ ruleId: alert['rule.id']!, theme });
+    const parsed = parseTechnicalFields(alert);
+    const uuid = parsed[ALERT_UUID]!;
+    const start = new Date(parsed[ALERT_START]!).getTime();
+    const end = start + parsed[ALERT_DURATION]! / 1000;
+    const color = getAlertColor({ ruleId: parsed[RULE_ID]!, theme });
 
     return [
       <RectAnnotation
