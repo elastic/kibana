@@ -24,7 +24,7 @@ For the basic steps of the build we only require you to use one of the following
 - macOS
 
 However if as part of the build you also want to generate Linux installation packages (deb, rpm) or Docker images there 
-are other dependencies to have in mind as those installation packages and docker images generation are run using fpm, dpkg, rpm, and Docker.
+are other dependencies to have in mind as those installation packages and Docker images generation are run using fpm, dpkg, rpm, and Docker.
 
 ### For Linux Installation Packages Build
 
@@ -81,7 +81,7 @@ For Docker, the installation instructions can be found at [Install Docker Engine
 In a great majority of the use cases where we need to build a Kibana distributable, we just need the archives containing the 
 node executable and the bundled code of the application.
 
-By doing that Linux installation packages and docker images will be excluded and as a result, the build will be quicker.
+By doing that Linux installation packages and Docker images will be excluded and as a result, the build will be quicker.
 
 We can do it by simply running:
 
@@ -111,7 +111,7 @@ For a longer and verbose logging than `debug` there is other option that can be 
 ## Create a Kibana distributable with Linux installation packages and Docker images
 
 If you comply with every prerequisite and dependency listed above, then there is also the option to create a Kibana distributable along with 
-Linux installation packages like rpm and deb or docker images.
+Linux installation packages like rpm and deb or Docker images.
 
 To achieve it, you can run:
 
@@ -119,9 +119,9 @@ To achieve it, you can run:
 yarn build
 ```
 
-At the end you will get the Kibana distributable archives plus the docker images and both an rpm and a deb package.
+At the end you will get the Kibana distributable archives plus the Docker images and both an rpm and a deb package.
 
-To specify just a single installation package or docker images to build instead of all of them you can add rpm, deb or docker-images as an argument:
+To specify just a single installation package or Docker images to build instead of all of them you can add rpm, deb or docker-images as an argument:
 
 ```bash
 yarn build --deb
