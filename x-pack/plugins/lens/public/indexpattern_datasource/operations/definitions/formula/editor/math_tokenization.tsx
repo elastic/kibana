@@ -11,7 +11,7 @@ export const LANGUAGE_ID = 'lens_math';
 monaco.languages.register({ id: LANGUAGE_ID });
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
-  wordPattern: /[A-Za-z\.-_@]/g,
+  wordPattern: /[^()'"\s]+/g,
   brackets: [['(', ')']],
   autoClosingPairs: [
     { open: '(', close: ')' },
@@ -34,9 +34,9 @@ export const lexerRules = {
   tokenizer: {
     root: [
       [/\s+/, 'whitespace'],
-      [/[a-zA-Z0-9][a-zA-Z0-9_\-\.]*/, 'keyword'],
-      [/[,=]/, 'delimiter'],
       [/-?(\d*\.)?\d+([eE][+\-]?\d+)?/, 'number'],
+      [/[a-zA-Z0-9][a-zA-Z0-9_\-\.]*/, 'keyword'],
+      [/[,=:]/, 'delimiter'],
       // strings double quoted
       [/"([^"\\]|\\.)*$/, 'string.invalid'], // string without termination
       [/"/, 'string', '@string_dq'],

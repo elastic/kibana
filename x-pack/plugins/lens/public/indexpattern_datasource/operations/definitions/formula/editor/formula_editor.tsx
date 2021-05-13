@@ -44,6 +44,8 @@ import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { regenerateLayerFromAst } from '../parse';
 
+export const MemoizedFormulaEditor = React.memo(FormulaEditor);
+
 export function FormulaEditor({
   layer,
   updateLayer,
@@ -434,7 +436,7 @@ export function FormulaEditor({
       wordBasedSuggestions: false,
       autoIndent: 'brackets',
       wrappingIndent: 'none',
-      dimension: { width: 290, height: 200 },
+      dimension: { width: 320, height: 200 },
       fixedOverflowWidgets: true,
     },
   };
@@ -537,12 +539,16 @@ export function FormulaEditor({
                   editor1.current = editor;
                   disposables.current.push(
                     editor.onDidFocusEditorWidget(() => {
-                      setIsCloseable(false);
+                      setTimeout(() => {
+                        setIsCloseable(false);
+                      });
                     })
                   );
                   disposables.current.push(
                     editor.onDidBlurEditorWidget(() => {
-                      setIsCloseable(true);
+                      setTimeout(() => {
+                        setIsCloseable(true);
+                      });
                     })
                   );
                   // If we ever introduce a second Monaco editor, we need to toggle

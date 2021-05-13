@@ -35,9 +35,13 @@
   display: block; // Overrides EUI's styling of `display: flex` on `EuiFlexItem` components
 }
 
+.lnsFormula__editorContent {
+  height: 201px;
+}
+
 .lnsIndexPatternDimensionEditor-isFullscreen .lnsFormula__editorContent {
   flex: 1;
-  min-height: 0;
+  min-height: 201px;
 }
 
 .lnsFormula__editorHelp--inline {

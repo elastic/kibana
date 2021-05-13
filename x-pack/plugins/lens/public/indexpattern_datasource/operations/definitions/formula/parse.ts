@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
 import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from '../index';
@@ -61,9 +62,9 @@ function extractColumns(
     const nodeOperation = operations[node.name];
     if (!nodeOperation) {
       // it's a regular math node
-      const consumedArgs = node.args.map(parseNode).filter(Boolean) as Array<
-        number | TinymathVariable
-      >;
+      const consumedArgs = node.args
+        .map(parseNode)
+        .filter((n) => typeof n !== 'undefined' && n !== null) as Array<number | TinymathVariable>;
       return {
         ...node,
         args: consumedArgs,
@@ -188,6 +189,12 @@ export function regenerateLayerFromAst(
 
   columns[columnId] = {
     ...currentColumn,
+    label: !currentColumn.customLabel
+      ? text ??
+        i18n.translate('xpack.lens.indexPattern.formulaLabel', {
+          defaultMessage: 'Formula',
+        })
+      : currentColumn.label,
     params: {
       ...currentColumn.params,
       formula: text,
