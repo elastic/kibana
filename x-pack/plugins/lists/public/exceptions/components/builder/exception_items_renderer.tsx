@@ -444,3 +444,6 @@ export const ExceptionBuilderComponent = ({
 };
 
 ExceptionBuilderComponent.displayName = 'ExceptionBuilder';
+
+// eslint-disable-next-line import/no-default-export
+export default ExceptionBuilderComponent;
