@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 
