@@ -31,7 +31,7 @@ punch they need to stand out in analysis and visualizations.
 For example, you can combine two fields into one or extract portions of fields.
 The runtime fields you create are part of the index pattern from that point forward,
 and you can use them anywhere the index pattern is available.
-Refer to runtime-fields for more information.
+Refer to <<runtime-fields>> for more information.
 
 [role="screenshot"]
 image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
@@ -65,6 +65,9 @@ easily into Elasticsearch. To do this, set the new `xpack.actions.preconfiguredA
 index it, and use the index and Kibana’s visualization capabilities to power custom alert history views,
 built for your use case. For more information, watch
 https://www.elastic.co/webinars/getting-started-with-alerting-for-the-elastic-stack[this webinar].
+
+[role="screenshot"]
+image::user/images/highlights-alerting-history.png[Rules and connectors management page]
 
 You'll find new terminology for *Alerting* in the UI and the <<alerts-api,API>>:
 
