@@ -7,6 +7,7 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { CustomPaletteState } from '../..';
 import { PaletteService } from './service';
 import { PaletteDefinition, SeriesLayer } from './types';
 
@@ -54,7 +55,10 @@ export const getPaletteRegistry = () => {
     title: 'Custom Mocked Palette',
     getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'blue'),
     getCategoricalColors: jest.fn((num: number) => ['blue', 'yellow']),
-    getGradientColorHelper: () => jest.fn(),
+    getColorForValue: jest.fn(
+      (num: number | undefined, state: unknown, minMax: { min: number; max: number }) =>
+        num == null || num < 1 ? undefined : 'blue'
+    ),
     canDynamicColoring: true,
     toExpression: jest.fn(() => ({
       type: 'expression',

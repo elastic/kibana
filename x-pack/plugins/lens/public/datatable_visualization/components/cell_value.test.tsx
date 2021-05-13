@@ -15,8 +15,8 @@ import { IUiSettingsClient } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { Args, ColumnConfigArg } from '../expression';
-import { CustomPaletteState } from 'src/plugins/charts/public';
 import { DataContextType } from './types';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 describe('datatable cell renderer', () => {
   const table: Datatable = {
@@ -88,6 +88,9 @@ describe('datatable cell renderer', () => {
   });
 
   describe('dynamic coloring', () => {
+    const paletteRegistry = chartPluginMock.createPaletteRegistry();
+    const customPalette = paletteRegistry.get('custom');
+
     function getCellRenderer(columnConfig: Args) {
       return createGridCell(
         {
@@ -142,6 +145,7 @@ describe('datatable cell renderer', () => {
           value={{
             table,
             minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
+            getColorForValue: customPalette.getColorForValue,
             ...context,
           }}
         >
@@ -167,125 +171,25 @@ describe('datatable cell renderer', () => {
       expect(setCellProps).not.toHaveBeenCalled();
     });
 
-    describe('progression: "fixed"', () => {
-      // last value inclusiveness is something to be tested on the configuration side:
-      // stops are generated in a way to handle also the inclusiveness when last stop value === rangeMax
+    it('should set the coloring of the cell when enabled', async () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'cell';
 
-      it('should set the coloring of the cell when enabled - within numeric range', async () => {
-        const columnConfig = getColumnConfiguration();
-        columnConfig.columns[0].colorMode = 'cell';
-        columnConfig.columns[0].palette!.params!.range = 'number';
-        columnConfig.columns[0].palette!.params!.rangeMin = 12;
-        columnConfig.columns[0].palette!.params!.rangeMax = 140;
-        columnConfig.columns[0].palette!.params!.continuity = 'above';
+      const { setCellProps } = await renderCellComponent(columnConfig, {});
 
-        const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
-        });
-
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#aaa' }),
-        });
+      expect(setCellProps).toHaveBeenCalledWith({
+        style: expect.objectContaining({ backgroundColor: 'blue' }),
       });
+    });
 
-      it('should set the coloring of the text when enabled - within numeric range', async () => {
-        const columnConfig = getColumnConfiguration();
-        columnConfig.columns[0].colorMode = 'text';
-        columnConfig.columns[0].palette!.params!.range = 'number';
-        columnConfig.columns[0].palette!.params!.rangeMin = 12;
-        columnConfig.columns[0].palette!.params!.rangeMax = 140;
-        columnConfig.columns[0].palette!.params!.continuity = 'above';
+    it('should set the coloring of the text when enabled', async () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'text';
 
-        const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
-        });
+      const { setCellProps } = await renderCellComponent(columnConfig, {});
 
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ color: '#aaa' }),
-        });
-      });
-
-      it('should set the coloring of the cell when enabled - use custom stops', async () => {
-        const columnConfig = getColumnConfiguration();
-        columnConfig.columns[0].colorMode = 'cell';
-        (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 99, 100];
-        columnConfig.columns[0].palette!.params!.continuity = 'above';
-
-        const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 12, max: 155 /* > 123 */ } },
-        });
-
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#bbb' }),
-        });
-      });
-
-      it('should set the coloring of the cell when enabled - use custom stops percent', async () => {
-        const columnConfig = getColumnConfiguration();
-        columnConfig.columns[0].colorMode = 'cell';
-        (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [20, 60, 100];
-        columnConfig.columns[0].palette!.params!.continuity = 'above';
-        columnConfig.columns[0].palette!.params!.range = 'percent';
-        columnConfig.columns[0].palette!.params!.rangeMin = 0;
-        columnConfig.columns[0].palette!.params!.rangeMax = 100;
-
-        const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 123, max: 500 } },
-        });
-
-        expect(setCellProps).toHaveBeenCalledWith({
-          style: expect.objectContaining({ backgroundColor: '#aaa' }),
-        });
-      });
-
-      it('should adjust the text coloring based on contrast on cell coloring', async () => {
-        const columnConfig = getColumnConfiguration();
-        columnConfig.columns[0].colorMode = 'cell';
-        columnConfig.columns[0].palette!.params!.colors = ['#aaa', '#bbb', '#000']; // black for higher contrast
-        columnConfig.columns[0].palette!.params!.continuity = 'above';
-        columnConfig.columns[0].palette!.params!.range = 'number';
-
-        const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 0, max: 100 /* < 123 */ } },
-        });
-
-        expect(setCellProps).toHaveBeenCalledWith({
-          // white text on black cell
-          style: {
-            backgroundColor: '#000',
-            color: '#ffffff', // the light color is picked from the specific theme detected
-          },
-        });
-      });
-
-      it('should apply the palette stops only to the passed range, not extending extremities colors for outbound values - numeric range', async () => {
-        const columnConfig = getColumnConfiguration();
-        columnConfig.columns[0].colorMode = 'cell';
-        (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 5, 100];
-        columnConfig.columns[0].palette!.params!.range = 'number';
-        columnConfig.columns[0].palette!.params!.rangeMin = 10;
-        columnConfig.columns[0].palette!.params!.rangeMax = 50;
-
-        const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 0, max: 150 } },
-        });
-
-        expect(setCellProps).not.toHaveBeenCalled();
-      });
-
-      it('should apply the palette stops only to the passed range, not extending extremities colors for outbound values - percent range', async () => {
-        const columnConfig = getColumnConfiguration();
-        columnConfig.columns[0].colorMode = 'cell';
-        (columnConfig.columns[0].palette!.params! as CustomPaletteState).stops = [0, 5, 100];
-        columnConfig.columns[0].palette!.params!.range = 'percent';
-        columnConfig.columns[0].palette!.params!.rangeMin = 10;
-        columnConfig.columns[0].palette!.params!.rangeMax = 50;
-
-        const { setCellProps } = await renderCellComponent(columnConfig, {
-          minMaxByColumnId: { a: { min: 0, max: 150 } },
-        });
-
-        expect(setCellProps).not.toHaveBeenCalled();
+      expect(setCellProps).toHaveBeenCalledWith({
+        style: expect.objectContaining({ color: 'blue' }),
       });
     });
   });

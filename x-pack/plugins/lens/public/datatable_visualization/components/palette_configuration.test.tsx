@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiColorPalettePickerPaletteProps, EuiSwitchEvent } from '@elastic/eui';
+import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
@@ -125,25 +125,13 @@ describe('palette panel', () => {
       });
 
       function toggleReverse(instance: ReactWrapper, checked: boolean) {
-        return ((instance
+        return instance
           .find('[data-test-subj="lnsDatatable_dynamicColoring_reverse"]')
           .first()
-          .prop('onChange') as unknown) as (event: EuiSwitchEvent) => void)({
-          target: { checked },
-        } as EuiSwitchEvent);
+          .prop('onClick')!({} as React.MouseEvent);
       }
 
-      it('should start set to false', () => {
-        const instance = mountWithIntl(<CustomizablePalette {...props} />);
-        expect(
-          instance
-            .find('[data-test-subj="lnsDatatable_dynamicColoring_reverse"]')
-            .first()
-            .prop('checked')
-        ).toEqual(false);
-      });
-
-      it('should set the reverse flag on the state', () => {
+      it('should reverse the colorStops on click', () => {
         const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
         toggleReverse(instance, true);
