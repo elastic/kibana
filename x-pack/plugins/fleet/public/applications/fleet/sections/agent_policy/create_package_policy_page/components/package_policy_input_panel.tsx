@@ -120,6 +120,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               checked={packagePolicyInput.enabled}
+              disabled={packagePolicyInput.keep_enabled}
               onChange={(e) => {
                 const enabled = e.target.checked;
                 updatePackagePolicyInput({

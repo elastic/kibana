@@ -6,28 +6,25 @@
  */
 
 import * as t from 'io-ts';
-
 import {
+  DefaultUpdateCommentsArray,
+  EntriesArray,
+  NamespaceType,
   OsTypeArray,
   Tags,
-  _version,
+  UpdateCommentsArray,
   description,
   exceptionListItemType,
   id,
   meta,
   name,
-  namespace_type,
+  nonEmptyEntriesArray,
   osTypeArrayOrUndefined,
   tags,
-} from '../common/schemas';
+} from '@kbn/securitysolution-io-ts-utils';
+
+import { _version, namespace_type } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import {
-  DefaultUpdateCommentsArray,
-  EntriesArray,
-  NamespaceType,
-  UpdateCommentsArray,
-  nonEmptyEntriesArray,
-} from '../types';
 
 export const updateExceptionListItemSchema = t.intersection([
   t.exact(

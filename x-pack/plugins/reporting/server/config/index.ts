@@ -39,8 +39,6 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
             `through feature controls in Management > Security > Roles`,
         });
       }
-
-      return settings;
     },
   ],
 };

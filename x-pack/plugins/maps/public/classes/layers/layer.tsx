@@ -77,7 +77,6 @@ export interface ILayer {
   getMbLayerIds(): string[];
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
-  canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
@@ -450,10 +449,6 @@ export class AbstractLayer implements ILayer {
 
   ownsMbSourceId(mbSourceId: string): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
-  }
-
-  canShowTooltip() {
-    return false;
   }
 
   syncLayerWithMB(mbMap: MbMap) {
