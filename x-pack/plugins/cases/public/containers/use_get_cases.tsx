@@ -140,10 +140,10 @@ export interface UseGetCases extends UseGetCasesState {
 
 const empty = {};
 export const useGetCases = (
-  params: Partial<{
+  params: {
     initialQueryParams?: Partial<QueryParams>;
     initialFilterOptions?: Partial<FilterOptions>;
-  }> = {}
+  } = {}
 ): UseGetCases => {
   const { initialQueryParams = empty, initialFilterOptions = empty } = params;
   const [state, dispatch] = useReducer(dataFetchReducer, {
