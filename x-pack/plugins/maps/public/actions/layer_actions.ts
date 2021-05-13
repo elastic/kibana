@@ -408,6 +408,15 @@ export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
   };
 }
 
+export function updateFittableFlag(id: string, isFittableFlag: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'isFittable',
+    newValue: isFittableFlag,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({

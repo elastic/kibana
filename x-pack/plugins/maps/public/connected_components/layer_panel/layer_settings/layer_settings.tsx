@@ -33,6 +33,8 @@ export interface Props {
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
   updateAlpha: (layerId: string, alpha: number) => void;
   updateLabelsOnTop: (layerId: string, areLabelsOnTop: boolean) => void;
+  updateFittableFlag: (layerId: string, isFittable: boolean) => void;
+  supportsFitToBounds: boolean;
 }
 
 export function LayerSettings(props: Props) {
@@ -58,12 +60,35 @@ export function LayerSettings(props: Props) {
     props.updateLabelsOnTop(layerId, event.target.checked);
   };
 
+  const isFittableFlagChange = (event: EuiSwitchEvent) => {
+    props.updateFittableFlag(layerId, event.target.checked);
+  };
+
   const onAttributionChange = (attribution?: Attribution) => {
     if (attribution) {
       props.setLayerAttribution(layerId, attribution);
     } else {
       props.clearLayerAttribution(layerId);
     }
+  };
+
+  const renderIsFittable = () => {
+    if (!props.supportsFitToBounds) {
+      return null;
+    }
+    return (
+      <EuiFormRow display="columnCompressedSwitch">
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlag', {
+            defaultMessage: `Include bounds when fitting on all data`,
+          })}
+          checked={props.layer.isFittableFlagOn()}
+          onChange={isFittableFlagChange}
+          data-test-subj="mapLayerPanelFittableFlagCheckbox"
+          compressed
+        />
+      </EuiFormRow>
+    );
   };
 
   const renderZoomSliders = () => {
@@ -140,6 +165,7 @@ export function LayerSettings(props: Props) {
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
+        {renderIsFittable()}
       </EuiPanel>
 
       <EuiSpacer size="s" />
