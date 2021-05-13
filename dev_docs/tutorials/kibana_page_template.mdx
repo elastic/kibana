@@ -7,15 +7,15 @@ date: 2021-03-20
 tags: ['kibana', 'dev', 'ui', 'tutorials']
 ---
 
-`KibanaPageLayout` is a thin wrapper around [EuiPageTemplate](https://elastic.github.io/eui/#/layout/page) that makes setting up common types of Kibana pages quicker and easier while also adhering to any Kibana-specific requirements and patterns.
+`KibanaPageLayout` is a thin wrapper around [**EuiPageTemplate**](https://elastic.github.io/eui/#/layout/page) that makes setting up common types of Kibana pages quicker and easier while also adhering to any Kibana-specific requirements and patterns.
 
-Refer to EUI's documentation on [EuiPageTemplate](https://elastic.github.io/eui/#/layout/page) for constructing page layouts.
+Refer to EUI's documentation on [**EuiPageTemplate**](https://elastic.github.io/eui/#/layout/page) for constructing page layouts.
 
 ## `isEmptyState`
 
 Use the `isEmptyState` prop for when there is no page content to show. For example, before the user has created something, when no search results are found, before data is populated, or when permissions aren't met.
 
-The default empty state uses any `pageHeader` info provided to populate an [`EuiEmptyPrompt`](https://elastic.github.io/eui/#/display/empty-prompt) and uses the `centeredBody` template type.
+The default empty state uses any `pageHeader` info provided to populate an [**EuiEmptyPrompt**](https://elastic.github.io/eui/#/display/empty-prompt) and uses the `centeredBody` template type.
 
 ```tsx
 <KibanaPageLayout
@@ -42,7 +42,7 @@ The default empty state uses any `pageHeader` info provided to populate an [`Eui
 
 ### Custom empty state
 
-You can also provide a custom empty prompt to replace the pre-built one. You'll want to remove any `pageHeader` props and pass an [`EuiEmptyPrompt`](https://elastic.github.io/eui/#/display/empty-prompt) directly as the child of KibanaPageLayout.
+You can also provide a custom empty prompt to replace the pre-built one. You'll want to remove any `pageHeader` props and pass an [**EuiEmptyPrompt**](https://elastic.github.io/eui/#/display/empty-prompt) directly as the child of KibanaPageLayout.
 
 ```tsx
 <KibanaPageLayout isEmptyState={true}>
@@ -84,3 +84,68 @@ When passing both a `pageHeader` configuration and `isEmptyState`, the component
 ```
 
 ![Screenshot of demo custom empty state code with a page header. Shows the Kibana navigation bars, a level 1 heading "Dashboards", and a centered empty state with the a level 2 heading "No data", body text "You have no data. Would you like some of ours?", and a button that says "Get sample data".](../assets/kibana_header_and_empty_state.png)
+
+## Solution navigation
+
+To add left side navigation for your solution, simply pass in your navigation component to `pageSideBar`. We recommend using [**EuiSideNav**](https://elastic.github.io/eui/#/navigation/side-nav).
+
+When using `EuiSideNav`, root level items should not be linked but provide section labelling only.
+
+```tsx
+<KibanaPageLayout
+  pageSideBar={
+    <EuiSideNav
+      mobileTitle="Management menu"
+      toggleOpenOnMobile={toggleOpenOnMobile}
+      isOpenOnMobile={isSideNavOpenOnMobile}
+      items={[
+        {
+          name: 'Root item',
+          items: [
+            { name: 'Navigation item' },
+            { name: 'Navigation item' },
+          ]
+        }
+      ]}
+    />
+  }
+>
+  {...}
+</KibanaPageLayout>
+```
+
+
+![Screenshot of Stack Management empty state code with solution nav, root level items highlighted.](../assets/kibana_template_solution_nav.png)
+
+
+Kibana has particular patterns for displaying solution navigation through the `pageSideBar` prop. When passing in content via `pageSideBar`, we also encourage passing more information about your `solution`. This `solution` object requires the `name` of your solution and optionally allows passing an `icon` to showcase the logo. It also extends [**EuiTitle**](https://elastic.github.io/eui/#/display/title) for passing any other common props.
+
+```tsx
+<KibanaPageLayout
+  solution={{
+    name: 'Management',
+    icon: 'managementApp',
+    id: 'stack-management-nav-header',
+  }}
+  pageSideBar={
+    <EuiSideNav
+      mobileTitle="Management menu"
+      toggleOpenOnMobile={toggleOpenOnMobile}
+      isOpenOnMobile={isSideNavOpenOnMobile}
+      items={[
+        {
+          name: 'Root item',
+          items: [
+            { name: 'Navigation item' },
+            { name: 'Navigation item' },
+          ]
+        }
+      ]}
+    />
+  }
+>
+  {...}
+</KibanaPageLayout>
+```
+
+![Screenshot of Stack Management empty state code with solution nav title highlighted.](../assets/kibana_template_solution_nav_title.png)
