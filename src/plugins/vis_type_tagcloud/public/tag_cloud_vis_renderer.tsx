@@ -15,7 +15,7 @@ import { ExpressionRenderDefinition } from '../../expressions/common/expression_
 import { TagCloudVisDependencies } from './plugin';
 import { TagCloudVisRenderValue } from './tag_cloud_fn';
 
-const TagComponent = lazy(() => import('./components/tag_component'));
+const TagCloudChart = lazy(() => import('./components/tag_cloud_chart'));
 
 export const getTagCloudVisRenderer: (
   deps: TagCloudVisDependencies
@@ -32,7 +32,7 @@ export const getTagCloudVisRenderer: (
     render(
       <I18nProvider>
         <VisualizationContainer handlers={handlers}>
-          <TagComponent
+          <TagCloudChart
             {...config}
             palettesRegistry={palettesRegistry}
             renderComplete={handlers.done}
