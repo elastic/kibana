@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties, Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { RawValue } from '../../../../../plugins/maps/common/constants';
@@ -48,6 +48,13 @@ export interface RenderTooltipContentParams {
     featureId?: string | number;
     mbProperties: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
+  loadFeatureGeometry: ({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+  }) => Geometry | null;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
 }
 

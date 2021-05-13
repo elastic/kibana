@@ -52,6 +52,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
       findLayerById={[Function]}
       getLayerName={[Function]}
       isLocked={false}
+      loadFeatureGeometry={[Function]}
       loadFeatureProperties={[Function]}
     />
   </EuiText>
@@ -101,6 +102,7 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
     }
     getLayerName={[Function]}
     isLocked={false}
+    loadFeatureGeometry={[Function]}
     loadFeatureProperties={[Function]}
   >
     Custom tooltip content

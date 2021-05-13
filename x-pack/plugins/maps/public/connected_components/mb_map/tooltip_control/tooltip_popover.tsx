@@ -8,7 +8,7 @@
 import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { Map as MbMap } from 'mapbox-gl';
-import { GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties, Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { FeaturesTooltip } from './features_tooltip';
@@ -28,6 +28,13 @@ interface Props {
   getFilterActions?: () => Promise<Action[]>;
   index: number;
   isLocked: boolean;
+  loadFeatureGeometry: ({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+  }) => Geometry | null;
   location: [number, number];
   mbMap: MbMap;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
@@ -85,7 +92,7 @@ export class TooltipPopover extends Component<Props, State> {
   }: {
     layerId: string;
     featureId?: string | number;
-    mbProperties: GeoJsonProperties;
+    mbProperties?: GeoJsonProperties;
   }) => {
     const tooltipLayer = this.props.findLayerById(layerId);
     if (!tooltipLayer) {
@@ -98,7 +105,7 @@ export class TooltipPopover extends Component<Props, State> {
     }
 
     const properties = targetFeature ? targetFeature.properties : mbProperties;
-    return await tooltipLayer.getPropertiesForTooltip(properties);
+    return await tooltipLayer.getPropertiesForTooltip(properties ? properties : {});
   };
 
   _getLayerName = async (layerId: string) => {
@@ -120,6 +127,7 @@ export class TooltipPopover extends Component<Props, State> {
       features: this.props.features,
       isLocked: this.props.isLocked,
       loadFeatureProperties: this._loadFeatureProperties,
+      loadFeatureGeometry: this.props.loadFeatureGeometry,
       getLayerName: this._getLayerName,
     };
 

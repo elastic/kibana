@@ -115,7 +115,7 @@ export class TooltipControl extends Component<Props, {}> {
     featureId,
   }: {
     layerId: string;
-    featureId: string;
+    featureId?: string | number;
   }): Geometry | null => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer || featureId === undefined) {
@@ -403,6 +403,7 @@ export class TooltipControl extends Component<Props, {}> {
           closeTooltip={closeTooltip}
           isLocked={isLocked}
           index={index}
+          loadFeatureGeometry={this._getFeatureGeometry}
         />
       );
     });

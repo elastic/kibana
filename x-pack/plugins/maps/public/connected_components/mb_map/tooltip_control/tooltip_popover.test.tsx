@@ -81,6 +81,9 @@ const defaultProps = {
     return undefined;
   },
   index: 0,
+  loadFeatureGeometry: () => {
+    return null;
+  },
 };
 
 describe('TooltipPopover', () => {
