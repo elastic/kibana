@@ -232,9 +232,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig.columns
         .filter(({ columnId }) => isNumericMap[columnId])
         .map(({ columnId }) => columnId),
-      firstLocalTable
+      firstTable
     );
-  }, [firstLocalTable, isNumericMap, columnConfig]);
+  }, [firstTable, isNumericMap, columnConfig]);
 
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {

@@ -70,7 +70,12 @@ export function TableDimensionEditor(
 
   const visibleColumnsCount = state.columns.filter((c) => !c.hidden).length;
 
-  const minMaxByColumnId = findMinMaxByColumnId([accessor], currentData);
+  const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
+  const columnsToCheck = hasTransposedColumn
+    ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
+      []
+    : [accessor];
+  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
 
   const activePalette = column?.palette || {
     type: 'palette',

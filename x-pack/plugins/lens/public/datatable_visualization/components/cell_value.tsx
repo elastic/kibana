@@ -12,6 +12,7 @@ import type { FormatFactory } from '../../types';
 import type { DataContextType } from './types';
 import { ColumnConfig } from './table_basic';
 import { getContrastColor } from '../../shared_components/coloring/utils';
+import { getOriginalId } from '../transpose_helpers';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -32,10 +33,11 @@ export const createGridCell = (
       columnConfig.columns.find(({ columnId: id }) => id === columnId) || {};
 
     useEffect(() => {
-      if (minMaxByColumnId?.[columnId]) {
+      const originalId = getOriginalId(columnId);
+      if (minMaxByColumnId?.[originalId]) {
         if (colorMode !== 'none' && palette?.params && getColorForValue) {
           // workout the bucket the value belongs to
-          const color = getColorForValue(rowValue, palette.params, minMaxByColumnId[columnId]);
+          const color = getColorForValue(rowValue, palette.params, minMaxByColumnId[originalId]);
           if (color) {
             const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
             if (colorMode === 'cell' && color) {
@@ -50,7 +52,7 @@ export const createGridCell = (
       // make sure to clean it up when something change
       // this avoids cell's styling to stick forever
       return () => {
-        if (minMaxByColumnId?.[columnId]) {
+        if (minMaxByColumnId?.[originalId]) {
           setCellProps({
             style: {
               backgroundColor: undefined,
