@@ -42,13 +42,6 @@ export const FILTER_COLLAPSE_REQUESTS_LABEL = i18n.translate(
   }
 );
 
-export const METRICS_TOOLTIP_HEADER_SCREENREADER_LABEL = i18n.translate(
-  'xpack.uptime.synthetics.waterfall.metrics.tooltipHeader',
-  {
-    defaultMessage: 'URL of the listed metrics',
-  }
-);
-
 export const SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL = i18n.translate(
   'xpack.uptime.synthetics.waterfall.sidebar.filterMatchesScreenReaderLabel',
   {

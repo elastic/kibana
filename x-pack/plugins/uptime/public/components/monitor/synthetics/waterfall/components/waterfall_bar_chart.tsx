@@ -18,12 +18,11 @@ import {
   TickFormatter,
   TooltipInfo,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
-import { METRICS_TOOLTIP_HEADER_SCREENREADER_LABEL } from './translations';
 
 const getChartHeight = (data: WaterfallData): number => {
   // We get the last item x(number of bars) and adds 1 to cater for 0 index
@@ -34,18 +33,16 @@ const getChartHeight = (data: WaterfallData): number => {
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
-  const sidebarItem = sidebarItems?.find((si) => si.index === tooltipInfo.header?.value);
-  const relevantItems = data.filter((item) => {
+  const sidebarItem = sidebarItems?.find((item) => item.index === tooltipInfo.header?.value);
+  const relevantItems = data.filter((datum) => {
     return (
-      item.x === tooltipInfo.header?.value && item.config.showTooltip && item.config.tooltipProps
+      datum.x === tooltipInfo.header?.value && datum.config.showTooltip && datum.config.tooltipProps
     );
   });
   return relevantItems.length ? (
     <WaterfallChartTooltip>
       <EuiFlexGroup direction="column" gutterSize="none">
-        {sidebarItem && (
-          <div aria-label={METRICS_TOOLTIP_HEADER_SCREENREADER_LABEL}>{sidebarItem.url}</div>
-        )}
+        {sidebarItem && <EuiText>{sidebarItem.url}</EuiText>}
         {relevantItems.map((item, index) => {
           return (
             <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
