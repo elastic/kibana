@@ -243,7 +243,7 @@ export function TableDimensionEditor(
                 defaultMessage: 'Color palette',
               })}
             >
-              <EuiFlexGroup style={{ height: 32 }} alignItems="center" gutterSize="none">
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem>
                   <EuiColorPaletteDisplay
                     data-test-subj="lnsDatatable_dynamicColoring_palette"
@@ -264,7 +264,6 @@ export function TableDimensionEditor(
                     size="xs"
                     flush="both"
                   >
-                    {' '}
                     {i18n.translate('xpack.lens.paletteTableGradient.customize', {
                       defaultMessage: 'Edit',
                     })}
