@@ -175,7 +175,7 @@ image::user/images/highlights-ml-job-validation.png[Data frame analytics job val
 === Discover&mdash;preview of new document table
 
 *Discover* has a new table layout, now in technology preview.
-To enable this feature, go to the *Discover* section of <<advanced-options,*Advanced Settings*>>.
+To enable this feature, go to the *Discover* section of {kibana-ref}/advanced-options.html[*Advanced Settings*].
 Benefits of the new document table include:
 
 * Changeable column widths
