@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as i18n from './translations';
+import * as i18n from '../translations';
 import { SecurityPageName } from '../types';
 import { SiemNavTab } from '../../common/components/navigation/types';
 import {
@@ -18,6 +18,7 @@ import {
   APP_MANAGEMENT_PATH,
 } from '../../../common/constants';
 
+// TODO: Move this file into main_navigation to keep all primary navigation logic in one place
 export const navTabs: SiemNavTab = {
   [SecurityPageName.overview]: {
     id: SecurityPageName.overview,
