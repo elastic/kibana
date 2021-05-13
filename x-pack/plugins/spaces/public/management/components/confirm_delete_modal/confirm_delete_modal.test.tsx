@@ -59,7 +59,7 @@ describe('ConfirmDeleteModal', () => {
           <p>
             <FormattedMessage
               defaultMessage="You can't recover deleted spaces."
-              id="xpack.security.management.users.confirmDelete.cannotUndoWarning"
+              id="xpack.spaces.management.confirmDeleteModal.cannotUndoWarning"
               values={Object {}}
             />
           </p>

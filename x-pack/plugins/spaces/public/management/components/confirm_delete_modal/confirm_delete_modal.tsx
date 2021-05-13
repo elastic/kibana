@@ -61,7 +61,7 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
         text: (error as any).body?.message || error.message,
       });
     }
-  });
+  }, [isCurrentSpace]);
 
   return (
     <EuiConfirmModal
