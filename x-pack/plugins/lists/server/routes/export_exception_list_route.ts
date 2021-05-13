@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+
 import type { ListsPluginRouter } from '../types';
 import { EXCEPTION_LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { exportExceptionListQuerySchema } from '../../common/schemas';
 
-import { getExceptionListClient } from './utils';
+import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
 export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
   router.get(

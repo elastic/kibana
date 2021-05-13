@@ -6,6 +6,17 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import {
+  createBootstrapIndex,
+  deleteAllIndex,
+  deletePolicy,
+  deleteTemplate,
+  getIndexExists,
+  getPolicyExists,
+  getTemplateExists,
+  setPolicy,
+  setTemplate,
+} from '@kbn/securitysolution-es-utils';
 
 import {
   FoundListItemSchema,
@@ -40,17 +51,6 @@ import {
   searchListItemByValues,
   updateListItem,
 } from '../../services/items';
-import {
-  createBootstrapIndex,
-  deleteAllIndex,
-  deletePolicy,
-  deleteTemplate,
-  getIndexExists,
-  getPolicyExists,
-  getTemplateExists,
-  setPolicy,
-  setTemplate,
-} from '../../siem_server_deps';
 import listsItemsPolicy from '../items/list_item_policy.json';
 
 import listPolicy from './list_policy.json';

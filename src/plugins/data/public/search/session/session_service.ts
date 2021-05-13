@@ -262,15 +262,14 @@ export class SessionService {
    * Request a cancellation of on-going search requests within current session
    */
   public async cancel(): Promise<void> {
-    this.state.get().pendingSearches.forEach((s) => {
+    const { pendingSearches, sessionId } = this.state.get();
+    if (!sessionId) return;
+
+    pendingSearches.forEach((s) => {
       s.abort();
     });
+    await this.sessionsClient.cancel(sessionId).catch(() => {});
     this.state.transitions.cancel();
-
-    const { sessionId, isRestore, isStored } = this.state.get();
-    if (sessionId && !isRestore && !isStored) {
-      await this.sessionsClient.cancel(sessionId).catch(() => {});
-    }
   }
 
   /**

@@ -7,10 +7,10 @@
 
 import { createHash } from 'crypto';
 import { deflate } from 'zlib';
+import { Entry, EntryNested } from '@kbn/securitysolution-io-ts-utils';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
