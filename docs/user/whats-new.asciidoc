@@ -61,7 +61,7 @@ To learn more, refer to {kibana-ref}/drilldowns.html[Create custom dashboard act
 
 This release introduces a preconfigured Index connector, which allows you to index your alert history
 easily into Elasticsearch. To do this, set the new `xpack.actions.preconfiguredAlertHistoryEsIndex`
-<<alert-action-settings-kb,action setting>> to `true`. You can capture the alert and its context,
+{kibana-ref}/alert-action-settings-kb.html[action setting] to `true`. You can capture the alert and its context,
 index it, and use the index and Kibana’s visualization capabilities to power custom alert history views,
 built for your use case. For more information, watch
 https://www.elastic.co/webinars/getting-started-with-alerting-for-the-elastic-stack[this webinar].
