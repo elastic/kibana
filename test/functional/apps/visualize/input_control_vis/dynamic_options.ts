@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
   const comboBox = getService('comboBox');
 
-  describe('dynamic options', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/98974
+  describe.skip('dynamic options', () => {
     describe('without chained controls', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('visualize');

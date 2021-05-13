@@ -12,6 +12,7 @@ import { severity_mapping, SeverityMapping } from '../common/schemas';
 /**
  * Types the DefaultStringArray as:
  *   - If null or undefined, then a default severity_mapping array will be set
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const DefaultSeverityMappingArray = new t.Type<
   SeverityMapping,

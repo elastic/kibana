@@ -23,6 +23,7 @@ describe('MetaEngineCreationLogic', () => {
   const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
+    isLoading: false,
     indexedEngineNames: [],
     name: '',
     rawName: '',
@@ -74,6 +75,28 @@ describe('MetaEngineCreationLogic', () => {
           'two',
           'three',
         ]);
+      });
+    });
+
+    describe('submitEngine', () => {
+      it('sets isLoading to true', () => {
+        mount({ isLoading: false });
+        MetaEngineCreationLogic.actions.submitEngine();
+        expect(MetaEngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: true,
+        });
+      });
+    });
+
+    describe('onSubmitError', () => {
+      it('resets isLoading to false', () => {
+        mount({ isLoading: true });
+        MetaEngineCreationLogic.actions.onSubmitError();
+        expect(MetaEngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: false,
+        });
       });
     });
   });

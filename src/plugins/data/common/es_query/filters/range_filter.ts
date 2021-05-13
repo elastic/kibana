@@ -138,7 +138,10 @@ export const buildRangeFilter = (
 };
 
 export const getRangeScript = (field: IFieldType, params: RangeFilterParams) => {
-  const knownParams = pickBy(params, (val, key: any) => key in operators);
+  const knownParams = mapValues(
+    pickBy(params, (val, key: any) => key in operators),
+    (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)
+  );
   let script = map(
     knownParams,
     (val: any, key: string) => '(' + field.script + ')' + get(operators, key) + key

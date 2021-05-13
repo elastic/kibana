@@ -20,7 +20,7 @@ import {
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray } from '../../../../../../lists/common/schemas/types';
+import { EntriesArray } from '@kbn/securitysolution-io-ts-utils';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,

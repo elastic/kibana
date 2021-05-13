@@ -4441,14 +4441,20 @@
         "index_patterns": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
             }
           }
         },
         "saved_searches": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
             }
           }
         },
@@ -4457,12 +4463,30 @@
             "saved_searches": {
               "properties": {
                 "total": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
                 }
               }
             },
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
+              }
             }
           }
         }
@@ -5218,13 +5242,13 @@
         "available": {
           "type": "boolean",
           "_meta": {
-            "description": "Indicates if the spaces feature is available in this installation."
+            "description": "Indicates if the Spaces feature is available in this installation."
           }
         },
         "enabled": {
           "type": "boolean",
           "_meta": {
-            "description": "Indicates if the spaces feature is enabled in this installation."
+            "description": "Indicates if the Spaces feature is enabled in this installation."
           }
         },
         "count": {

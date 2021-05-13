@@ -6,17 +6,20 @@
  */
 
 export * from './calculate_scroll_math';
+export * from './decode_version';
 export * from './encode_decode_cursor';
+export * from './encode_hit_version';
+export * from './escape_query';
 export * from './find_source_type';
 export * from './find_source_value';
-export * from './get_query_filter';
 export * from './get_query_filter_from_type_value';
+export * from './get_query_filter';
 export * from './get_search_after_scroll';
 export * from './get_search_after_with_tie_breaker';
 export * from './get_sort_with_tie_breaker';
 export * from './get_source_with_tie_breaker';
 export * from './scroll_to_start_page';
 export * from './transform_elastic_named_search_to_list_item';
-export * from './transform_elastic_to_list';
 export * from './transform_elastic_to_list_item';
+export * from './transform_elastic_to_list';
 export * from './transform_list_item_to_elastic_query';
