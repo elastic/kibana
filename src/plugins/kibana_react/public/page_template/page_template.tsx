@@ -7,9 +7,29 @@
  */
 import './page_template.scss';
 
-import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
-import classNames from 'classnames';
 import React, { FunctionComponent } from 'react';
+import classNames from 'classnames';
+
+import {
+  EuiAvatar,
+  EuiEmptyPrompt,
+  EuiPageTemplate,
+  EuiPageTemplateProps,
+  EuiTitle,
+  IconType,
+  EuiTitleProps,
+} from '@elastic/eui';
+
+export interface KibanaPageTemplateSolution extends Omit<EuiTitleProps, 'children'> {
+  /**
+   * Name of the solution, i.e. "Observability"
+   */
+  name: string;
+  /**
+   * Solution logo, i.e. "logoObservability"
+   */
+  icon?: IconType;
+}
 
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   /**
@@ -19,6 +39,10 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
    * With `pageHeader` and `children`: Uses `centeredContent`
    */
   isEmptyState?: boolean;
+  /**
+   * When adding `pageSideBar`, we encourage providing solution information to create a solution nav title
+   */
+  solution?: KibanaPageTemplateSolution;
 };
 
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
@@ -29,6 +53,8 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   restrictWidth = true,
   bottomBar,
   bottomBarProps,
+  pageSideBar,
+  solution,
   ...rest
 }) => {
   // Needed for differentiating between union types
@@ -38,6 +64,31 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       bottomBar,
       bottomBarProps,
     };
+  }
+
+  /**
+   * Solution navigation requires a logo and solution name
+   */
+  if (pageSideBar && solution) {
+    const { name, icon, ...solutionRest } = solution;
+    pageSideBar = (
+      <>
+        <EuiTitle size="xs" {...solutionRest} className="kbnPageTemplate__solutionNavTitle">
+          <h2>
+            {icon && (
+              <EuiAvatar
+                color="plain"
+                iconType={icon}
+                name={name}
+                className="kbnPageTemplate__solutionNavTitleIcon"
+              />
+            )}
+            <strong>{name}</strong>
+          </h2>
+        </EuiTitle>
+        {pageSideBar}
+      </>
+    );
   }
 
   /**
@@ -68,6 +119,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       restrictWidth={restrictWidth}
       paddingSize={template === 'centeredBody' ? 'none' : 'l'}
       pageHeader={pageHeader}
+      pageSideBar={pageSideBar}
       pageSideBarProps={{
         className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
         ...rest.pageSideBarProps,

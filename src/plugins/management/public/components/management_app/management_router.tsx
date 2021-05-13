@@ -9,12 +9,13 @@
 import React, { useCallback, useState } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
 import { ManagementAppDependencies } from './management_app';
 import { ManagementSection } from '../../utils';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
-import { KibanaPageTemplate } from '../../../../kibana_react/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '../../../../kibana_react/public';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];
@@ -35,6 +36,14 @@ export const ManagementRouter = ({
     window.scrollTo(0, 0);
   }, []);
 
+  const solution: KibanaPageTemplateProps['solution'] = {
+    name: i18n.translate('management.nav.label', {
+      defaultMessage: 'Management',
+    }),
+    icon: 'managementApp',
+    id: 'stack-management-nav-header',
+  };
+
   return (
     <Router history={history}>
       <Switch>
@@ -51,8 +60,10 @@ export const ManagementRouter = ({
                   managementPageLayout={({ children, ...rest }) => (
                     <KibanaPageTemplate
                       {...rest}
+                      solution={solution}
                       pageSideBar={
                         <ManagementSidebarNav
+                          navId={solution.id}
                           selectedId={selectedId}
                           sections={sections}
                           history={history}
@@ -76,8 +87,10 @@ export const ManagementRouter = ({
               managementPageLayout={({ children, ...rest }) => (
                 <KibanaPageTemplate
                   {...rest}
+                  solution={solution}
                   pageSideBar={
                     <ManagementSidebarNav
+                      navId={solution.id}
                       selectedId={selectedId}
                       sections={sections}
                       history={history}

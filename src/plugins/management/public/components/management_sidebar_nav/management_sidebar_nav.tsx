@@ -13,7 +13,6 @@ import { sortBy } from 'lodash';
 import {
   EuiIcon,
   EuiSideNav,
-  EuiScreenReaderOnly,
   EuiSideNavItemType,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,11 +28,8 @@ interface ManagementSidebarNavProps {
   sections: ManagementSection[];
   history: AppMountParameters['history'];
   selectedId: string;
+  navId?: string;
 }
-
-const headerLabel = i18n.translate('management.nav.label', {
-  defaultMessage: 'Management',
-});
 
 const navMenuLabel = i18n.translate('management.nav.menu', {
   defaultMessage: 'Management menu',
@@ -41,11 +37,11 @@ const navMenuLabel = i18n.translate('management.nav.menu', {
 
 /** @internal **/
 export const ManagementSidebarNav = ({
+  navId,
   selectedId,
   sections,
   history,
 }: ManagementSidebarNavProps) => {
-  const HEADER_ID = 'stack-management-nav-header';
   const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
   const toggleOpenOnMobile = () => setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
 
@@ -81,11 +77,11 @@ export const ManagementSidebarNav = ({
 
   const TooltipWrapper = ({ text, tip }: TooltipWrapperProps) => (
     <EuiToolTip content={tip} position="right">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>{text}</EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiIcon type="questionInCircle" />
+          <EuiIcon color="subdued" size="s" type="questionInCircle" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiToolTip>
@@ -109,16 +105,13 @@ export const ManagementSidebarNav = ({
 
   return (
     <>
-      <EuiScreenReaderOnly>
-        <h2 id={HEADER_ID}>{headerLabel}</h2>
-      </EuiScreenReaderOnly>
       <EuiSideNav
-        aria-labelledby={HEADER_ID}
+        aria-labelledby={navId}
         mobileTitle={navMenuLabel}
         toggleOpenOnMobile={toggleOpenOnMobile}
         isOpenOnMobile={isSideNavOpenOnMobile}
         items={sectionsToNavItems(sections)}
-        dataTestSubj="mgtSideBarNav"
+        data-test-subj="mgtSideBarNav"
       />
     </>
   );
