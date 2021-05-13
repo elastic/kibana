@@ -41,19 +41,19 @@ describe('Test of <Doc /> helper / hook', () => {
     const actual = buildSearchBody('1', indexPattern, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "_source": true,
-        "docvalue_fields": Array [],
-        "fields": undefined,
-        "query": Object {
-          "ids": Object {
-            "values": Array [
-              "1",
-            ],
+        "body": Object {
+          "_source": true,
+          "fields": Array [],
+          "query": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
           },
+          "script_fields": Array [],
+          "stored_fields": Array [],
         },
-        "runtime_mappings": Object {},
-        "script_fields": Array [],
-        "stored_fields": Array [],
       }
     `);
   });
@@ -65,24 +65,24 @@ describe('Test of <Doc /> helper / hook', () => {
     const actual = buildSearchBody('1', indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "_source": false,
-        "docvalue_fields": Array [],
-        "fields": Array [
-          Object {
-            "field": "*",
-            "include_unmapped": "true",
+        "body": Object {
+          "fields": Array [
+            Object {
+              "field": "*",
+              "include_unmapped": "true",
+            },
+          ],
+          "query": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
           },
-        ],
-        "query": Object {
-          "ids": Object {
-            "values": Array [
-              "1",
-            ],
-          },
+          "runtime_mappings": Object {},
+          "script_fields": Array [],
+          "stored_fields": Array [],
         },
-        "runtime_mappings": Object {},
-        "script_fields": Array [],
-        "stored_fields": Array [],
       }
     `);
   });
@@ -106,31 +106,31 @@ describe('Test of <Doc /> helper / hook', () => {
     const actual = buildSearchBody('1', indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "_source": false,
-        "docvalue_fields": Array [],
-        "fields": Array [
-          Object {
-            "field": "*",
-            "include_unmapped": "true",
-          },
-        ],
-        "query": Object {
-          "ids": Object {
-            "values": Array [
-              "1",
-            ],
-          },
-        },
-        "runtime_mappings": Object {
-          "myRuntimeField": Object {
-            "script": Object {
-              "source": "emit(10.0)",
+        "body": Object {
+          "fields": Array [
+            Object {
+              "field": "*",
+              "include_unmapped": "true",
             },
-            "type": "double",
+          ],
+          "query": Object {
+            "ids": Object {
+              "values": Array [
+                "1",
+              ],
+            },
           },
+          "runtime_mappings": Object {
+            "myRuntimeField": Object {
+              "script": Object {
+                "source": "emit(10.0)",
+              },
+              "type": "double",
+            },
+          },
+          "script_fields": Array [],
+          "stored_fields": Array [],
         },
-        "script_fields": Array [],
-        "stored_fields": Array [],
       }
     `);
   });

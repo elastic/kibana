@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  describe('telemetry collectors', () => {
+  describe('telemetry collectors heartbeat', () => {
     before('generating data', async () => {
       await getService('esArchiver').load('uptime/blank');
 
@@ -82,7 +82,9 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.refresh();
     });
 
-    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
+    after('unload heartbeat index', () => {
+      getService('esArchiver').unload('uptime/blank');
+    });
 
     beforeEach(async () => {
       await es.indices.refresh();
@@ -116,6 +118,13 @@ export default function ({ getService }: FtrProviderContext) {
         dateRangeEnd: ['now/d'],
         autoRefreshEnabled: true,
         autorefreshInterval: [100],
+        fleet_monitor_frequency: [],
+        fleet_monitor_name_stats: {
+          avg_length: 0,
+          max_length: 0,
+          min_length: 0,
+        },
+        fleet_no_of_unique_monitors: 0,
       });
     });
 

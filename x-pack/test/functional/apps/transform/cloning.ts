@@ -32,7 +32,7 @@ function getTransformConfig(): TransformPivotConfig {
       aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
     },
     description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
+      'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
     frequency: '3s',
     settings: {
       max_page_search_size: 250,

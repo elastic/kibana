@@ -262,12 +262,18 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
                 `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
                 sortedExpectedColorStats,
                 undefined,
-                4
+                10
               );
 
               expect(actualColorStats.length).to.eql(
                 sortedExpectedColorStats.length,
-                `Expected and actual color stats for column '${expected.id}' should have the same amount of elements. Expected: ${sortedExpectedColorStats.length} (got ${actualColorStats.length})`
+                `Expected and actual color stats for column '${
+                  expected.id
+                }' should have the same amount of elements. Expected: ${
+                  sortedExpectedColorStats.length
+                } '${JSON.stringify(sortedExpectedColorStats)}' (got ${
+                  actualColorStats.length
+                } '${JSON.stringify(actualColorStats)}')`
               );
               expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
                 true,

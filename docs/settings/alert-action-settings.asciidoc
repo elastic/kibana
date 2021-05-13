@@ -85,7 +85,11 @@ a|`xpack.actions.`
   | Specifies the max number of bytes of the http response for requests to external resources. Defaults to 1000000 (1MB).
 
 | `xpack.actions.responseTimeout` {ess-icon}
-  | Specifies the time allowed for requests to external resources. Requests that take longer are aborted. The time is formatted as <count>[ms|s|m|h|d|w|M|Y], for example, '20m', '24h', '7d', '1w'. Defaults to 60s.
+  | Specifies the time allowed for requests to external resources. Requests that take longer are aborted. The time is formatted as: +
+  +
+  `<count>[ms,s,m,h,d,w,M,Y]` +
+  +
+  For example, `20m`, `24h`, `7d`, `1w`. Defaults to `60s`.
 
 
 |===

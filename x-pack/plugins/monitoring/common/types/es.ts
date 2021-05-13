@@ -210,6 +210,19 @@ export interface ElasticsearchLegacySource {
     };
     metrics?: {
       beat?: {
+        cgroup?: {
+          memory: {
+            id: string;
+            mem: {
+              limit: {
+                bytes: number;
+              };
+              usage: {
+                bytes: number;
+              };
+            };
+          };
+        };
         memstats?: {
           memory_alloc?: number;
         };
