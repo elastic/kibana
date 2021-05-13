@@ -141,11 +141,11 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
             name: 'something',
           })
-          .expect(500);
+          .expect(400);
 
         expect(noSpacesDupe).to.eql({
-          statusCode: 500,
-          error: 'Internal Server Error',
+          statusCode: 400,
+          error: 'Bad Request',
           message: 'An enrollment key named something already exists for agent policy policy1',
         });
 
@@ -156,10 +156,10 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
             name: 'something else',
           })
-          .expect(500);
+          .expect(400);
         expect(hasSpacesDupe).to.eql({
-          statusCode: 500,
-          error: 'Internal Server Error',
+          statusCode: 400,
+          error: 'Bad Request',
           message: 'An enrollment key named something else already exists for agent policy policy1',
         });
       });

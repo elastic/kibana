@@ -14,6 +14,7 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/s
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import type { ESSearchResponse as SearchResponse } from '../../../../../../typings/elasticsearch';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
+import { IngestManagerError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
@@ -177,7 +178,7 @@ export async function generateEnrollmentAPIKey(
         k.name?.replace(providedKeyName, '').trim().match(uuidRegex)
       )
     ) {
-      throw new Error(
+      throw new IngestManagerError(
         i18n.translate('xpack.fleet.serverError.enrollmentKeyDuplicate', {
           defaultMessage:
             'An enrollment key named {providedKeyName} already exists for agent policy {agentPolicyId}',
