@@ -47,17 +47,19 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
 
 exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 <Fragment>
-  <EuiPanel
-    paddingSize="l"
+  <_EuiSplitPanelOuter
+    hasBorder={true}
   >
-    <EuiForm>
-      <EuiText>
-        <EuiFlexGroup
-          alignItems="baseline"
+    <_EuiSplitPanelInner
+      color="subdued"
+    >
+      <EuiFlexGroup
+        alignItems="baseline"
+      >
+        <EuiFlexItem
+          grow={false}
         >
-          <EuiFlexItem
-            grow={false}
-          >
+          <EuiTitle>
             <h2>
               <FormattedMessage
                 defaultMessage="Usage Data"
@@ -65,12 +67,15 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 values={Object {}}
               />
             </h2>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiText>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </_EuiSplitPanelInner>
+    <_EuiSplitPanelInner>
       <EuiCallOut
         color="primary"
         iconType="spacesApp"
+        size="s"
         title={
           <p>
             <FormattedMessage
@@ -91,6 +96,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           </p>
         }
       />
+      <EuiSpacer />
       <EuiSpacer
         size="s"
       />
@@ -178,8 +184,8 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           }
         }
       />
-    </EuiForm>
-  </EuiPanel>
+    </_EuiSplitPanelInner>
+  </_EuiSplitPanelOuter>
 </Fragment>
 `;
 
