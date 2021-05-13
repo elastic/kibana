@@ -35,7 +35,7 @@ SRC_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/uuid"  
+  "@npm//@types/uuid"
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
