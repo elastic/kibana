@@ -31,7 +31,7 @@ Creates a configuration if one does not already exist. If one exists it is delet
 
 **Returns:** *Promise*<[*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
 
-Defined in: [configure/client.ts:102](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/configure/client.ts#L102)
+Defined in: [configure/client.ts:102](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/configure/client.ts#L102)
 
 ___
 
@@ -50,7 +50,7 @@ Retrieves the external connector configuration for a particular case owner.
 
 **Returns:** *Promise*<{} \| [*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
 
-Defined in: [configure/client.ts:84](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/configure/client.ts#L84)
+Defined in: [configure/client.ts:84](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/configure/client.ts#L84)
 
 ___
 
@@ -62,7 +62,7 @@ Retrieves the valid external connectors supported by the cases plugin.
 
 **Returns:** *Promise*<FindActionResult[]\>
 
-Defined in: [configure/client.ts:88](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/configure/client.ts#L88)
+Defined in: [configure/client.ts:88](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/configure/client.ts#L88)
 
 ___
 
@@ -81,4 +81,4 @@ Updates a particular configuration with new values.
 
 **Returns:** *Promise*<[*ICasesConfigureResponse*](typedoc_interfaces.icasesconfigureresponse.md)\>
 
-Defined in: [configure/client.ts:95](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/configure/client.ts#L95)
+Defined in: [configure/client.ts:95](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/configure/client.ts#L95)

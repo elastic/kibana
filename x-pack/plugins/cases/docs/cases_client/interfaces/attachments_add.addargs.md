@@ -21,7 +21,7 @@ The arguments needed for creating a new attachment to a case.
 
 The case ID that this attachment will be associated with
 
-Defined in: [attachments/add.ts:308](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/add.ts#L308)
+Defined in: [attachments/add.ts:308](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/add.ts#L308)
 
 ___
 
@@ -31,4 +31,4 @@ ___
 
 The attachment values.
 
-Defined in: [attachments/add.ts:312](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/add.ts#L312)
+Defined in: [attachments/add.ts:312](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/add.ts#L312)

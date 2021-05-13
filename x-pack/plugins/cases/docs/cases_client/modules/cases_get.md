@@ -31,7 +31,7 @@ Retrieves the reporters from all the cases.
 
 **Returns:** *Promise*<User[]\>
 
-Defined in: [cases/get.ts:279](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/cases/get.ts#L279)
+Defined in: [cases/get.ts:279](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/cases/get.ts#L279)
 
 ___
 
@@ -50,4 +50,4 @@ Retrieves the tags from all the cases.
 
 **Returns:** *Promise*<string[]\>
 
-Defined in: [cases/get.ts:217](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/cases/get.ts#L217)
+Defined in: [cases/get.ts:217](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/cases/get.ts#L217)

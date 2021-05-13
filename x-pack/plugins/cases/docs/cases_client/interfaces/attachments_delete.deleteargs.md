@@ -22,7 +22,7 @@ Parameters for deleting a single attachment of a case or sub case.
 
 The attachment ID to delete
 
-Defined in: [attachments/delete.ts:44](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/delete.ts#L44)
+Defined in: [attachments/delete.ts:44](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/delete.ts#L44)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 The case ID to delete an attachment from
 
-Defined in: [attachments/delete.ts:40](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/delete.ts#L40)
+Defined in: [attachments/delete.ts:40](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/delete.ts#L40)
 
 ___
 
@@ -42,4 +42,4 @@ ___
 
 If specified the caseID will be ignored and this value will be used to find a sub case for deleting the attachment
 
-Defined in: [attachments/delete.ts:48](https://github.com/jonathan-buttner/kibana/blob/1e8ae1f6ba4/x-pack/plugins/cases/server/client/attachments/delete.ts#L48)
+Defined in: [attachments/delete.ts:48](https://github.com/jonathan-buttner/kibana/blob/085f89ff3ca/x-pack/plugins/cases/server/client/attachments/delete.ts#L48)
