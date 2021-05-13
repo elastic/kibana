@@ -43,8 +43,6 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
   };
 
   const resetConnection = () => {
-    // reset fields
-    // setConnectionStatus('incomplete');
     updateCurrentStep(1);
   };
 
