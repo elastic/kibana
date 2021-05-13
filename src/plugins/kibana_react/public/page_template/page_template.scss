@@ -1,0 +1,15 @@
+.kbnPageTemplate__pageSideBar {
+  padding: $euiSizeL;
+}
+
+@include euiBreakpoint('xs','s') {
+  .kbnPageTemplate__pageSideBar {
+    width: auto;
+    padding: 0;
+
+    // TODO: Fix in EUI
+    .euiSideNav__mobileToggle {
+      height: auto;
+    }
+  }
+}
