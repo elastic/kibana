@@ -14,7 +14,6 @@ import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { useOwnerContext } from '../owner_context/use_owner_context';
 
 export interface RecentCasesProps {
   allCasesNavigation: CasesNavigation;
@@ -29,7 +28,6 @@ const RecentCases = ({
   createCaseNavigation,
   maxCasesToShow,
 }: RecentCasesProps) => {
-  const owner = useOwnerContext();
   const currentUser = useCurrentUser();
   const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
     'recentlyCreated'
@@ -76,7 +74,6 @@ const RecentCases = ({
           createCaseNavigation={createCaseNavigation}
           filterOptions={recentCasesFilterOptions}
           maxCasesToShow={maxCasesToShow}
-          owner={owner}
         />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">
