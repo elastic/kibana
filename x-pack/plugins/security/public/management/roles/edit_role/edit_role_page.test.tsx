@@ -143,7 +143,8 @@ function getProps({
   rolesAPIClient.getRole.mockResolvedValue(role);
 
   const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
-  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*']);
+  // `undefined` titles can technically happen via import/export or other manual manipulation
+  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
 
   const indicesAPIClient = indicesAPIClientMock.create();
 
