@@ -34,12 +34,12 @@ export const cell = (props: CellProps) => {
     return cellWithFiltersTemplate
       .replace('__classes__', classes)
       .replace('__extraAttrs__', extraAttrs)
-      .replace('__formatted__', props.formatted)
       .replace('__column__', escapedColumnContents)
-      .replace('__column__', escapedColumnContents);
+      .replace('__column__', escapedColumnContents)
+      .replace('<formatted />', props.formatted);
   }
   return cellWithoutFiltersTemplate
     .replace('__classes__', classes)
     .replace('__extraAttrs__', extraAttrs)
-    .replace('__formatted__', props.formatted);
+    .replace('<formatted />', props.formatted);
 };
