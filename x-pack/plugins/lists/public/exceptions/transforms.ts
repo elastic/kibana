@@ -8,7 +8,7 @@
 import { flow } from 'fp-ts/lib/function';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 
-import {
+import type {
   CreateExceptionListItemSchema,
   EntriesArray,
   Entry,

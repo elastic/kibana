@@ -58,13 +58,14 @@ describe('When the add exception modal is opened', () => {
     ReturnType<typeof helpers.defaultEndpointExceptionItems>
   >;
   let ExceptionBuilderComponent: jest.SpyInstance<
-    ReturnType<typeof ExceptionBuilder.ExceptionBuilderComponent>
+    ReturnType<typeof ExceptionBuilder.getExceptionBuilderComponentLazy>
   >;
   beforeEach(() => {
+    const emptyComp = <span data-test-subj="alert-exception-builder" />;
     defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
     ExceptionBuilderComponent = jest
-      .spyOn(ExceptionBuilder, 'ExceptionBuilderComponent')
-      .mockReturnValue(<></>);
+      .spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy')
+      .mockReturnValue(emptyComp);
 
     (useAsync as jest.Mock).mockImplementation(() => ({
       start: jest.fn(),
