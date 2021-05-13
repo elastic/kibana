@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TooltipFeature } from '../../../../common/descriptor_types';
-import { ILayer } from '../../../classes/layers/layer';
+import { TooltipFeature } from '../../../../../common/descriptor_types';
+import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
@@ -27,7 +27,7 @@ const DEFAULT_PAGE_NUMBER = 0;
 interface Props {
   features: TooltipFeature[];
   isLocked: boolean;
-  findLayerById: (layerId: string) => ILayer | undefined;
+  findLayerById: (layerId: string) => IVectorLayer | undefined;
   setCurrentFeature: (feature: TooltipFeature) => void;
 }
 
@@ -78,7 +78,7 @@ export class Footer extends Component<Props, State> {
       countByLayerId.set(this.props.features[i].layerId, count);
     }
 
-    const layers: ILayer[] = [];
+    const layers: IVectorLayer[] = [];
     countByLayerId.forEach((count, layerId) => {
       const layer = this.props.findLayerById(layerId);
       if (layer) {

@@ -9,15 +9,15 @@ import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { GeoJsonProperties, Geometry } from 'geojson';
+import { GeoJsonProperties } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { FeatureProperties } from './feature_properties';
-import { RawValue } from '../../../../common/constants';
+import { RawValue } from '../../../../../common/constants';
 import { Footer } from './footer';
 import { Header } from './header';
-import { GEOMETRY_FILTER_ACTION, TooltipFeature } from '../../../../common/descriptor_types';
-import { ITooltipProperty } from '../../../classes/tooltips/tooltip_property';
-import { ILayer } from '../../../classes/layers/layer';
+import { GEOMETRY_FILTER_ACTION, TooltipFeature } from '../../../../../common/descriptor_types';
+import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
+import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const PROPERTIES_VIEW = 'PROPERTIES_VIEW';
 const FILTER_ACTIONS_VIEW = 'FILTER_ACTIONS_VIEW';
@@ -41,15 +41,8 @@ interface Props {
     featureId?: string | number;
     mbProperties: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
-  loadFeatureGeometry: ({
-    layerId,
-    featureId,
-  }: {
-    layerId: string;
-    featureId?: string | number;
-  }) => Geometry | null;
   getLayerName: (layerId: string) => Promise<string | null>;
-  findLayerById: (layerId: string) => ILayer | undefined;
+  findLayerById: (layerId: string) => IVectorLayer | undefined;
 }
 
 interface State {
