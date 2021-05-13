@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get, sortBy, reverse } from 'lodash';
+import { sortBy, reverse } from 'lodash';
 import { ClusterMetric, Metric } from '../classes';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../../format_timezone';
+import { getAlertTypes } from '../../kibana/task_manager';
 
 export class KibanaClusterMetric extends ClusterMetric {
   constructor(opts) {
@@ -85,22 +86,24 @@ export class KibanaTaskManagerMetric extends KibanaMetric {
   constructor(opts) {
     super(opts);
 
-    this.getDateHistogramSubAggs = () => {
-      const subAggs = this.types.reduce((accum, type) => {
-        return {
-          ...accum,
-          [`metric_${type}`]: {
-            filter: { term: { 'kibana_stats.task_manager.drift.by_type.alertType': type } },
-            aggs: {
-              metric: {
-                [this.metricAgg]: { field: this.field },
+    if (!opts.by_alert_type) {
+      this.getDateHistogramSubAggs = () => {
+        const subAggs = this.types.reduce((accum, type) => {
+          return {
+            ...accum,
+            [`metric_${type}`]: {
+              filter: { term: { 'kibana_stats.task_manager.drift.by_type.alertType': type } },
+              aggs: {
+                metric: {
+                  [this.metricAgg]: { field: this.field },
+                },
               },
             },
-          },
-        };
-      }, {});
-      return subAggs;
-    };
+          };
+        }, {});
+        return subAggs;
+      };
+    }
 
     this.resultHandler = (
       result,
@@ -110,6 +113,21 @@ export class KibanaTaskManagerMetric extends KibanaMetric {
       bucketSizeInSeconds,
       timezone
     ) => {
+      if (opts.by_alert_type) {
+        return {
+          ...result,
+          metric: {
+            ...metric,
+            label: metric.label.replace('[alertType]', opts.by_alert_type),
+            description: metric.description.replace('[alertType]', opts.by_alert_type),
+          },
+          data: usableBuckets.map((bucket) => [
+            formatUTCTimestampForTimezone(bucket.key, timezone),
+            calculation(bucket, `metric.value`, metric, bucketSizeInSeconds),
+          ]), // map buckets to X/Y coords for Flot charting
+        };
+      }
+
       const list = this.types.map((type) => {
         return {
           ...result,
@@ -153,26 +171,14 @@ export class KibanaTaskManagerMetric extends KibanaMetric {
   }
 
   async before(req, indexPattern, query) {
-    const params = {
-      index: indexPattern,
-      size: 0,
-      ignoreUnavailable: true,
-      filterPath: ['aggregations.types.buckets'],
-      body: {
-        query,
-        aggs: {
-          types: {
-            terms: {
-              field: 'kibana_stats.task_manager.drift.by_type.alertType',
-              size: 1000, // TODO: how to paginate properly here
-            },
-          },
-        },
-      },
-    };
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    const alertTypeResponse = await callWithRequest(req, 'search', params);
-    const types = get(alertTypeResponse, 'aggregations.types.buckets', []).map((type) => type.key);
-    this.types = types;
+    const callCluster = async (endpoint, params) => {
+      return await callWithRequest(req, endpoint, params);
+    };
+
+    this.types = await getAlertTypes(callCluster, indexPattern, {
+      clusterUuid: req.params.clusterUuid,
+      query,
+    });
   }
 }

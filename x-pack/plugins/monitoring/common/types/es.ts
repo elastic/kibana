@@ -64,6 +64,19 @@ export interface ElasticsearchSourceKibanaStats {
     };
   };
   concurrent_connections?: number;
+  task_manager?: {
+    drift?: {
+      by_type?: Array<{
+        alertType: string;
+        stat?: {
+          p50: number;
+          p90: number;
+          p95: number;
+          p99: number;
+        };
+      }>;
+    };
+  };
 }
 
 export interface ElasticsearchSourceLogstashPipelineVertex {

@@ -78,6 +78,7 @@ export interface RouteDependencies {
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   logger: Logger;
+  esDataClient: ILegacyClusterClient;
 }
 
 export interface MonitoringCore {

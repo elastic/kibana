@@ -67,6 +67,7 @@ export interface AlertInstanceState {
     | AlertNodeState
     | AlertLicenseState
     | AlertNodesChangedState
+    | AlertTaskManagerDurationState
   >;
   [x: string]: unknown;
 }
@@ -91,6 +92,11 @@ export interface AlertCpuUsageState extends AlertNodeState {
 
 export interface AlertDiskUsageState extends AlertNodeState {
   diskUsage: number;
+}
+
+export interface AlertTaskManagerDurationState extends AlertNodeState {
+  p99: number;
+  alertType: string;
 }
 
 export interface AlertMemoryUsageState extends AlertNodeState {
@@ -169,6 +175,7 @@ export interface AlertCpuUsageNodeStats extends AlertNodeStats {
 
 export interface AlertTaskManagerDurationStats extends AlertNodeStats {
   p99: number;
+  alertType: string;
 }
 
 export interface AlertThreadPoolRejectionsStats {

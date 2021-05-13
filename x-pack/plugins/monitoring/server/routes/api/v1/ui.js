@@ -28,6 +28,7 @@ export {
   setCollectionIntervalRoute,
 } from './elasticsearch_settings';
 export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
+export { alertTypesRoute, taskManagerInstanceRoute } from './kibana/task_manager';
 export { apmInstanceRoute, apmInstancesRoute, apmOverviewRoute } from './apm';
 export {
   logstashClusterPipelinesRoute,

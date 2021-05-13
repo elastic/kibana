@@ -356,13 +356,14 @@ export async function getSeries(
   indexPattern,
   metricName,
   metricOptions,
+  _metric,
   filters,
   groupBy,
   { min, max, bucketSize, timezone }
 ) {
   checkParam(indexPattern, 'indexPattern in details/getSeries');
 
-  const metric = metrics[metricName];
+  const metric = _metric || metrics[metricName];
   if (!metric) {
     throw new Error(`Not a valid metric: ${metricName}`);
   }

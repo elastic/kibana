@@ -271,4 +271,22 @@ export const metrics = {
       max: 5,
     },
   }),
+  kibana_task_manager_drift_p50_per_alert_type_opts: {
+    field: 'kibana_stats.task_manager.drift.by_type.stat.p50',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Label', {
+      defaultMessage: 'P50 drift for [alertType]',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.taskManagerDurationP99Description',
+      {
+        defaultMessage: 'P50 drift for [alertType]',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    limit: {
+      max: 5,
+    },
+  },
 };

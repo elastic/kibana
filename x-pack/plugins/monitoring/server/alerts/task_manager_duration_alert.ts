@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, LegacyCallAPIOptions } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertCpuUsageState,
+  AlertTaskManagerDurationState,
   AlertTaskManagerDurationStats,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
@@ -38,6 +38,7 @@ import { parseDuration } from '../../../alerting/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
+import { getAlertTypes } from '../lib/kibana/task_manager';
 
 export class TaskManagerDurationAlert extends BaseAlert {
   constructor(public rawAlert?: SanitizedAlert) {
@@ -50,15 +51,15 @@ export class TaskManagerDurationAlert extends BaseAlert {
         duration: '5m',
       },
       actionVariables: [
-        // {
-        //   name: 'nodes',
-        //   description: i18n.translate(
-        //     'xpack.monitoring.alerts.taskManagerDuration.actionVariables.nodes',
-        //     {
-        //       defaultMessage: 'The list of nodes reporting high cpu usage.',
-        //     }
-        //   ),
-        // },
+        {
+          name: 'alertTypes',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.taskManagerDuration.actionVariables.nodes',
+            {
+              defaultMessage: 'The list of nodes reporting high cpu usage.',
+            }
+          ),
+        },
         // {
         //   name: 'count',
         //   description: i18n.translate(
@@ -86,13 +87,24 @@ export class TaskManagerDurationAlert extends BaseAlert {
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
+
+    const callCluster = async (
+      endpoint: string,
+      clientParams: Record<string, any>,
+      options?: LegacyCallAPIOptions
+    ) => {
+      const { body: response } = await esClient.search(clientParams);
+      return response;
+    };
+    const alertTypes = await getAlertTypes(callCluster, kibanaIndexPattern, {});
     const stats = await fetchTaskManagerDurationStats(
       esClient,
       clusters,
       kibanaIndexPattern,
       startMs,
       endMs,
-      Globals.app.config.ui.max_bucket_size
+      Globals.app.config.ui.max_bucket_size,
+      alertTypes
     );
     return stats.map((stat) => {
       return {
@@ -174,19 +186,19 @@ export class TaskManagerDurationAlert extends BaseAlert {
 
     const firingNodes = alertStates.filter(
       (alertState) => alertState.ui.isFiring
-    ) as AlertCpuUsageState[];
+    ) as AlertTaskManagerDurationState[];
     const firingCount = firingNodes.length;
     if (firingCount > 0) {
       const shortActionText = i18n.translate(
         'xpack.monitoring.alerts.taskManagerDuration.shortAction',
         {
-          defaultMessage: 'Verify CPU levels across affected nodes.',
+          defaultMessage: 'Task manager is getting slow',
         }
       );
       const fullActionText = i18n.translate(
         'xpack.monitoring.alerts.taskManagerDuration.fullAction',
         {
-          defaultMessage: 'View nodes',
+          defaultMessage: 'Fix it yo',
         }
       );
       const action = `[${fullActionText}](elasticsearch/nodes)`;
@@ -216,7 +228,11 @@ export class TaskManagerDurationAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes.map(({ nodeName, cpuUsage }) => `${nodeName}:${cpuUsage}`).toString(),
+        alertTypes: firingNodes
+          .map(
+            ({ meta }: { meta: AlertTaskManagerDurationStats }) => `${meta.alertType}:${meta.p99}`
+          )
+          .toString(),
         count: firingCount,
         clusterName: cluster.clusterName,
         action,

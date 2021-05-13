@@ -42,7 +42,7 @@ function getPageData($injector) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const $route = $injector.get('$route');
-  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/kibana/${$route.current.params.uuid}`;
+  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/kibana/${$route.current.params.uuid}/task_manager`;
   const timeBounds = Legacy.shims.timefilter.getBounds();
 
   return $http
@@ -90,6 +90,7 @@ uiRoutes.when('/kibana/instances/:uuid/task_manager', {
       });
 
       const renderReact = (data) => {
+        console.log({ data });
         this.renderReact(
           <SetupModeRenderer
             scope={$scope}
@@ -107,62 +108,16 @@ uiRoutes.when('/kibana/instances/:uuid/task_manager', {
                     <AlertsCallout alerts={this.alerts} />
                     <EuiPageContent>
                       <EuiFlexGrid columns={2} gutterSize="s">
-                        <EuiFlexItem grow={true}>
-                          <MonitoringTimeseriesContainer
-                            series={data.metrics.kibana_requests}
-                            onBrush={this.onBrush}
-                            zoomInfo={this.zoomInfo}
-                          />
-                          <EuiSpacer />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={true}>
-                          <MonitoringTimeseriesContainer
-                            series={data.metrics.kibana_response_times}
-                            onBrush={this.onBrush}
-                            zoomInfo={this.zoomInfo}
-                          />
-                          <EuiSpacer />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={true}>
-                          <MonitoringTimeseriesContainer
-                            series={data.metrics.kibana_memory}
-                            onBrush={this.onBrush}
-                            zoomInfo={this.zoomInfo}
-                          />
-                          <EuiSpacer />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={true}>
-                          <MonitoringTimeseriesContainer
-                            series={data.metrics.kibana_average_concurrent_connections}
-                            onBrush={this.onBrush}
-                            zoomInfo={this.zoomInfo}
-                          />
-                          <EuiSpacer />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={true}>
-                          <MonitoringTimeseriesContainer
-                            series={data.metrics.kibana_os_load}
-                            onBrush={this.onBrush}
-                            zoomInfo={this.zoomInfo}
-                          />
-                          <EuiSpacer />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={true}>
-                          <MonitoringTimeseriesContainer
-                            series={data.metrics.kibana_process_delay}
-                            onBrush={this.onBrush}
-                            zoomInfo={this.zoomInfo}
-                          />
-                          <EuiSpacer />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={true}>
-                          <MonitoringTimeseriesContainer
-                            series={data.metrics.kibana_task_manager}
-                            onBrush={this.onBrush}
-                            zoomInfo={this.zoomInfo}
-                          />
-                          <EuiSpacer />
-                        </EuiFlexItem>
+                        {Object.values(data.metrics).map((metric) => (
+                          <EuiFlexItem grow={true}>
+                            <MonitoringTimeseriesContainer
+                              series={metric}
+                              onBrush={this.onBrush}
+                              zoomInfo={this.zoomInfo}
+                            />
+                            <EuiSpacer />
+                          </EuiFlexItem>
+                        ))}
                       </EuiFlexGrid>
                     </EuiPageContent>
                   </EuiPageBody>

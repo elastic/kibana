@@ -29,99 +29,117 @@ export async function fetchTaskManagerDurationStats(
   index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  alertTypes?: string[]
 ): Promise<AlertTaskManagerDurationStats[]> {
   // Using pure MS didn't seem to work well with the date_histogram interval
   // but minutes does
   const intervalInMinutes = moment.duration(endMs - startMs).asMinutes();
   const filterPath = ['aggregations'];
-  const params = {
-    index,
-    filterPath,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
-              },
-            },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: startMs,
-                  lte: endMs,
+
+  const stats: AlertTaskManagerDurationStats[] = [];
+  const responses = await Promise.all(
+    (alertTypes || []).map(async (alertType) => {
+      const params = {
+        index,
+        filterPath,
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
+                  },
                 },
-              },
+                {
+                  term: {
+                    type: 'kibana_stats',
+                  },
+                },
+                {
+                  term: {
+                    'kibana_stats.task_manager.drift.by_type.alertType': alertType,
+                  },
+                },
+                {
+                  range: {
+                    timestamp: {
+                      format: 'epoch_millis',
+                      gte: startMs,
+                      lte: endMs,
+                    },
+                  },
+                },
+              ],
             },
-          ],
-        },
-      },
-      aggs: {
-        clusters: {
-          terms: {
-            field: 'cluster_uuid',
-            size,
-            include: clusters.map((cluster) => cluster.clusterUuid),
           },
           aggs: {
-            kibanas: {
+            clusters: {
               terms: {
-                field: 'kibana_stats.kibana.uuid',
+                field: 'cluster_uuid',
                 size,
+                include: clusters.map((cluster) => cluster.clusterUuid),
               },
               aggs: {
-                index: {
+                kibanas: {
                   terms: {
-                    field: '_index',
-                    size: 1,
+                    field: 'kibana_stats.kibana.uuid',
+                    size,
                   },
-                },
-                average_p99: {
-                  avg: {
-                    field: 'kibana_stats.task_manager.runtime.duration.p99',
-                  },
-                },
-                name: {
-                  terms: {
-                    field: 'kibana_stats.kibana.name',
-                    size: 1,
+                  aggs: {
+                    index: {
+                      terms: {
+                        field: '_index',
+                        size: 1,
+                      },
+                    },
+                    average_p99: {
+                      avg: {
+                        field: 'kibana_stats.task_manager.drift.by_type.stat.p50',
+                      },
+                    },
+                    name: {
+                      terms: {
+                        field: 'kibana_stats.kibana.name',
+                        size: 1,
+                      },
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    },
-  };
-
-  const { body: response } = await esClient.search(params);
-  const stats: AlertCpuUsageNodeStats[] = [];
-  const clusterBuckets = get(
-    response,
-    'aggregations.clusters.buckets',
-    []
-  ) as ClusterBucketESResponse[];
-  for (const clusterBucket of clusterBuckets) {
-    for (const node of clusterBucket.nodes.buckets) {
-      const indexName = get(node, 'index.buckets[0].key', '');
-      const stat = {
-        clusterUuid: clusterBucket.key,
-        nodeId: node.key,
-        nodeName: get(node, 'name.buckets[0].key'),
-        p99: get(node, 'average_p99.value'),
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
       };
-      stats.push(stat);
+
+      const { body: response } = await esClient.search(params);
+      return response;
+    })
+  );
+
+  let alertTypeIndex: number = 0;
+  for (const response of responses) {
+    const alertType = alertTypes ? alertTypes[alertTypeIndex++] : null;
+    const clusterBuckets = get(
+      response,
+      'aggregations.clusters.buckets',
+      []
+    ) as ClusterBucketESResponse[];
+    for (const clusterBucket of clusterBuckets) {
+      for (const node of clusterBucket.kibanas.buckets) {
+        const indexName = get(node, 'index.buckets[0].key', '');
+        const stat = {
+          clusterUuid: clusterBucket.key,
+          nodeId: node.key,
+          nodeName: get(node, 'name.buckets[0].key'),
+          p99: get(node, 'average_p99.value'),
+          alertType,
+          ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+        };
+        stats.push(stat);
+      }
     }
   }
   return stats;

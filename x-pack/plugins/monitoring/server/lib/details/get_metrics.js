@@ -39,6 +39,25 @@ export async function getMetrics(
 
   const rows = await Promise.all(
     metricSet.map(async (metric) => {
+      if (metric.metric) {
+        return [
+          await getSeries(
+            req,
+            indexPattern,
+            null,
+            metricOptions,
+            metric.metric,
+            [...filters, ...(metric.filters || [])],
+            groupBy,
+            {
+              min,
+              max,
+              bucketSize,
+              timezone,
+            }
+          ),
+        ];
+      }
       // metric names match the literal metric name, but they can be supplied in groups or individually
       let metricNames;
 
@@ -51,12 +70,21 @@ export async function getMetrics(
       return flatten(
         await Promise.all(
           metricNames.map(async (metricName) => {
-            return await getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
-              min,
-              max,
-              bucketSize,
-              timezone,
-            });
+            return await getSeries(
+              req,
+              indexPattern,
+              metricName,
+              metricOptions,
+              null,
+              filters,
+              groupBy,
+              {
+                min,
+                max,
+                bucketSize,
+                timezone,
+              }
+            );
           })
         )
       );

@@ -174,6 +174,7 @@ export class MonitoringPlugin
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
         logger: this.log,
+        esDataClient: core.elasticsearch.legacy.client,
       });
       initInfraSource(config, plugins.infra);
     }
