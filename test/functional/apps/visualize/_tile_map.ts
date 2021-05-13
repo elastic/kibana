@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('tile map visualize app', function () {
     describe('incomplete config', function describeIndexTests() {
       before(async function () {
+        await PageObjects.visualize.initTests();
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');

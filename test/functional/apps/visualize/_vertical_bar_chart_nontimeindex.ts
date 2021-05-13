@@ -39,7 +39,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     };
 
-    before(initBarChart);
+    before(async () => {
+      await PageObjects.visualize.initTests();
+      await initBarChart();
+    });
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
