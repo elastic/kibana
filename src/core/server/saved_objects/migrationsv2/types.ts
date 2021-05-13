@@ -26,6 +26,11 @@ export interface MigrationLog {
   message: string;
 }
 
+export interface Progress {
+  processed: number | undefined;
+  total: number | undefined;
+}
+
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
@@ -183,6 +188,7 @@ export interface ReindexSourceToTempRead extends PostInitState {
   readonly lastHitSortValue: number[] | undefined;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface ReindexSourceToTempClosePit extends PostInitState {
@@ -197,6 +203,7 @@ export interface ReindexSourceToTempIndex extends PostInitState {
   readonly lastHitSortValue: number[] | undefined;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface ReindexSourceToTempIndexBulk extends PostInitState {
@@ -204,6 +211,7 @@ export interface ReindexSourceToTempIndexBulk extends PostInitState {
   readonly transformedDocs: SavedObjectsRawDoc[];
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
+  readonly progress: Progress;
 }
 
 export type SetTempWriteBlock = PostInitState & {
@@ -252,6 +260,7 @@ export interface OutdatedDocumentsSearchRead extends PostInitState {
   readonly hasTransformedDocs: boolean;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface OutdatedDocumentsSearchClosePit extends PostInitState {
@@ -276,6 +285,7 @@ export interface OutdatedDocumentsTransform extends PostInitState {
   readonly hasTransformedDocs: boolean;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 export interface TransformedDocumentsBulkIndex extends PostInitState {
   /**
@@ -286,6 +296,7 @@ export interface TransformedDocumentsBulkIndex extends PostInitState {
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;
   readonly pitId: string;
+  readonly progress: Progress;
 }
 
 export interface MarkVersionIndexReady extends PostInitState {
