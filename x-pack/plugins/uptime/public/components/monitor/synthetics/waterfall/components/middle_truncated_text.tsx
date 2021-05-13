@@ -8,8 +8,17 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiScreenReaderOnly, EuiToolTip, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiLink,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+  EuiText,
+} from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT } from './constants';
+import { useWaterfallContext } from '../context/waterfall_chart';
 
 interface Props {
   ariaLabel: string;
@@ -67,6 +76,26 @@ export const getChunks = (text: string = '') => {
   return { first: chars.join(''), last: endChars.join('') };
 };
 
+const TooltipContent: React.FC<Pick<Props, 'url' | 'text'>> = ({ text, url }) => {
+  const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
+  const tooltipMetrics = data.filter(
+    (d) =>
+      d.x === sidebarItems?.find((f) => f.url === url)?.index &&
+      d.config.tooltipProps &&
+      d.config.showTooltip
+  );
+  return (
+    <>
+      <EuiText>{text}</EuiText>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {tooltipMetrics.map((item, index) => (
+          <EuiFlexItem key={index}>{renderTooltipItem(item.config.tooltipProps)}</EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </>
+  );
+};
+
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
@@ -80,7 +109,11 @@ export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, ur
       <EuiScreenReaderOnly>
         <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
       </EuiScreenReaderOnly>
-      <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
+      <EuiToolTip
+        content={<TooltipContent {...{ text, url }} />}
+        position="top"
+        data-test-subj="middleTruncatedTextToolTip"
+      >
         <>
           {onClick ? (
             <StyledButton
