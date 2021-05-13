@@ -8,7 +8,9 @@
     "declarationMap": true
   },
   "include": [
+    "common/**/*",
     "public/**/*",
+    "server/**/*",
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
