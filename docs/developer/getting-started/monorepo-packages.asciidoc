@@ -83,9 +83,9 @@ yarn kbn watch-bazel
 - @kbn/logging
 - @kbn/securitysolution-constants
 - @kbn/securitysolution-es-utils
-- kbn-securitysolution-io-ts-alerting-types
-- kbn-securitysolution-io-ts-list-types
-- kbn-securitysolution-io-ts-types
+- kbn/securitysolution-io-ts-alerting-types
+- kbn/securitysolution-io-ts-list-types
+- kbn/securitysolution-io-ts-types
 - @kbn/securitysolution-io-ts-utils
 - @kbn/securitysolution-utils
 - @kbn/std
@@ -93,4 +93,3 @@ yarn kbn watch-bazel
 - @kbn/tinymath
 - @kbn/utility-types
 - @kbn/utils
-
