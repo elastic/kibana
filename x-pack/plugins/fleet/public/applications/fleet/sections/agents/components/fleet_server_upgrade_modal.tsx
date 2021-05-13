@@ -64,24 +64,22 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
         }
 
         for (const agent of res.data?.list ?? []) {
-          if (agent.policy_id) {
-            if (!agentPoliciesAlreadyChecked[agent.policy_id]) {
-              agentPoliciesAlreadyChecked[agent.policy_id] = true;
-              const policyRes = await sendGetOneAgentPolicy(agent.policy_id);
-              const hasFleetServer =
-                (policyRes.data?.item.package_policies as PackagePolicy[]).some(
-                  (p: PackagePolicy) => {
-                    return p.package?.name === FLEET_SERVER_PACKAGE;
-                  }
-                ) ?? false;
-              if (!hasFleetServer) {
-                await sendPutSettings({
-                  has_seen_fleet_migration_notice: true,
-                });
-                onClose();
-                return;
-              }
-            }
+          if (!agent.policy_id || agentPoliciesAlreadyChecked[agent.policy_id]) {
+            continue;
+          }
+
+          agentPoliciesAlreadyChecked[agent.policy_id] = true;
+          const policyRes = await sendGetOneAgentPolicy(agent.policy_id);
+          const hasFleetServer =
+            (policyRes.data?.item.package_policies as PackagePolicy[]).some((p: PackagePolicy) => {
+              return p.package?.name === FLEET_SERVER_PACKAGE;
+            }) ?? false;
+          if (!hasFleetServer) {
+            await sendPutSettings({
+              has_seen_fleet_migration_notice: true,
+            });
+            onClose();
+            return;
           }
         }
         setAgentsAndPoliciesLoaded(true);
@@ -95,7 +93,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
     }
 
     check();
-  }, [setAgentsAndPoliciesLoaded, notifications.toasts, onClose]);
+  }, [notifications.toasts, onClose]);
 
   const onChange = useCallback(async () => {
     try {
