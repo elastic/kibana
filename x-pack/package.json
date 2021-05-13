@@ -28,7 +28,6 @@
   },
   "devDependencies": {
     "@kbn/plugin-helpers": "link:../packages/kbn-plugin-helpers",
-    "@kbn/storybook": "link:../packages/kbn-storybook",
     "@kbn/test": "link:../packages/kbn-test"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "incremental": false,
+    "incremental": true,
     "outDir": "target",
     "skipLibCheck": true,
     "declaration": true,
