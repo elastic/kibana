@@ -22,6 +22,7 @@ describe('Color Stops component', () => {
       rangeType: 'percent',
       dataBounds: { min: 0, max: 200 },
       onChange: jest.fn(),
+      'data-test-prefix': 'my-test',
     };
   });
   it('should display all the color stops passed', () => {
