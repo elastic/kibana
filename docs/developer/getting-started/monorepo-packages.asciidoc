@@ -82,9 +82,12 @@ yarn kbn watch-bazel
 - @kbn/legacy-logging
 - @kbn/logging
 - @kbn/securitysolution-constants
-- @kbn/securitysolution-utils
 - @kbn/securitysolution-es-utils
+- kbn-securitysolution-io-ts-alerting-types
+- kbn-securitysolution-io-ts-list-types
+- kbn-securitysolution-io-ts-types
 - @kbn/securitysolution-io-ts-utils
+- @kbn/securitysolution-utils
 - @kbn/std
 - @kbn/telemetry-utils
 - @kbn/tinymath
