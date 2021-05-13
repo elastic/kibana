@@ -14,11 +14,7 @@ import { EuiButton, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocLinksStart, HttpSetup } from 'src/core/public';
 import { API_BASE_PATH } from '../../../../../../common/constants';
-import {
-  EnrichedDeprecationInfo,
-  ReindexStatus,
-  UIReindexOption,
-} from '../../../../../../common/types';
+import { ReindexAction, ReindexStatus, UIReindexOption } from '../../../../../../common/types';
 import { LoadingState } from '../../../types';
 import { ReindexFlyout } from './flyout';
 import { ReindexPollingService, ReindexState } from './polling_service';
@@ -27,7 +23,7 @@ interface ReindexButtonProps {
   indexName: string;
   http: HttpSetup;
   docLinks: DocLinksStart;
-  reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
+  reindexBlocker?: ReindexAction['blockerForReindexing'];
 }
 
 interface ReindexButtonState {

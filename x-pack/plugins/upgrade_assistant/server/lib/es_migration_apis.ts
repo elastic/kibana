@@ -166,8 +166,8 @@ const getCombinedIndexInfos = async (
 
   const indexNames = indices.map(({ index }) => index!);
 
-  // If we have found deprecation information for index/indices check whether the index is
-  // open or closed.
+  // If we have found deprecation information for index/indices
+  // check whether the index is open or closed.
   if (indexNames.length) {
     const indexStates = await esIndicesStateCheck(dataClient.asCurrentUser, indexNames);
 
@@ -182,16 +182,16 @@ const getCombinedIndexInfos = async (
 };
 
 const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
-  const combined = deprecations.cluster_settings
+  const combinedDeprecations = deprecations.cluster_settings
     .concat(deprecations.ml_settings)
     .concat(deprecations.node_settings);
 
-  if (isCloudEnabled) {
-    // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter((d) => d.message !== 'Security realm settings structure changed');
-  } else {
-    return combined;
-  }
+  return combinedDeprecations.map((deprecation) => {
+    return {
+      ...deprecation,
+      correctiveAction: getCorrectiveAction(deprecation.message),
+    };
+  });
 };
 
 const getCorrectiveAction = (message: string) => {
@@ -200,6 +200,7 @@ const getCorrectiveAction = (message: string) => {
   );
   const requiresReindexAction = /Index created before/.test(message);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
+  const requiresMlAction = /model snapshot/.test(message);
 
   if (requiresReindexAction) {
     return {
@@ -212,6 +213,19 @@ const getCorrectiveAction = (message: string) => {
       type: 'indexSetting',
       deprecatedSettings: indexSettingDeprecation!.settings,
     };
+  }
+
+  if (requiresMlAction) {
+    const regex = /(?<=\[).*?(?=\])/g;
+    const matches = message.match(regex);
+
+    if (matches?.length === 2) {
+      return {
+        type: 'mlSnapshot',
+        snapshotId: matches[0],
+        jobId: matches[1],
+      };
+    }
   }
 
   return undefined;

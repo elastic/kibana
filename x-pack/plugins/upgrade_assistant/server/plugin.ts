@@ -25,11 +25,8 @@ import { CredentialStore, credentialStoreFactory } from './lib/reindexing/creden
 import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
-import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
-import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
-import { registerReindexIndicesRoutes, createReindexWorker } from './routes/reindex_indices';
-import { registerTelemetryRoutes } from './routes/telemetry';
-import { registerUpdateSettingsRoute } from './routes/update_index_settings';
+import { createReindexWorker } from './routes/reindex_indices';
+import { registerRoutes } from './routes/register_routes';
 import { telemetrySavedObjectType, reindexOperationSavedObjectType } from './saved_object_types';
 
 import { RouteDependencies } from './types';
@@ -107,12 +104,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     // Initialize version service with current kibana version
     versionService.setup(this.kibanaVersion);
 
-    registerClusterCheckupRoutes(dependencies);
-    registerDeprecationLoggingRoutes(dependencies);
-    registerReindexIndicesRoutes(dependencies, this.getWorker.bind(this));
-    // Bootstrap the needed routes and the collector for the telemetry
-    registerTelemetryRoutes(dependencies);
-    registerUpdateSettingsRoute(dependencies);
+    registerRoutes(dependencies, this.getWorker.bind(this));
 
     if (usageCollection) {
       getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
