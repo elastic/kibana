@@ -13,7 +13,7 @@ export const useOwnerContext = () => {
 
   if (ownerContext.length === 0) {
     throw new Error(
-      'useOwnerContext must be used within a OwnerProvider and not be an empty array'
+      'useOwnerContext must be used within an OwnerProvider and not be an empty array'
     );
   }
 

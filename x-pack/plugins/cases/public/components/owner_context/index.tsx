@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 
-// This context is available to all children of the stateful_event component where the provider is currently set
 export const OwnerContext = React.createContext<string[]>([]);
 
 export const OwnerProvider: React.FC<{

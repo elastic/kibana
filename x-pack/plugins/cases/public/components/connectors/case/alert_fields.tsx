@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { ActionParamsProps } from '../../../../../triggers_actions_ui/public/types';
-import { CommentType } from '../../../../common';
+import { CommentType, SECURITY_SOLUTION_OWNER } from '../../../../common';
 
 import { CaseActionParams } from './types';
 import { ExistingCase } from './existing_case';
@@ -98,7 +98,7 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
       <ExistingCase
         onCaseChanged={onCaseChanged}
         selectedCase={selectedCase}
-        owner="securitySolution"
+        owner={SECURITY_SOLUTION_OWNER}
       />
       <EuiSpacer size="m" />
       <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_TITLE} iconType="iInCircle">

@@ -62,7 +62,7 @@ describe('Case Configuration API', () => {
         method: 'GET',
         signal: abortCtrl.signal,
         query: {
-          owner: SECURITY_SOLUTION_OWNER,
+          owner: [SECURITY_SOLUTION_OWNER],
         },
       });
     });

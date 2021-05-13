@@ -155,7 +155,7 @@ export const initialState: State = {
 };
 
 /**
- * Configurations across multiple plugins in
+ * Configurations across multiple plugins is
  * not supported at the moment. For that reason owner: string;
  * instead of owner: string[]
  */
