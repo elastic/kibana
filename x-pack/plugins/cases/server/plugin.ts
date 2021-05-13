@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
+import {
+  ElasticsearchClient,
+  IContextProvider,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+} from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -144,8 +150,25 @@ export class CasePlugin {
         logger: this.log,
       });
     };
+    const getCasesClient = (
+      scopedClusterClient: ElasticsearchClient,
+      savedObjectsClient: any,
+      user: any
+    ) =>
+      createExternalCasesClient({
+        scopedClusterClient,
+        savedObjectsClient,
+        user,
+        caseService: this.caseService!,
+        caseConfigureService: this.caseConfigureService!,
+        connectorMappingsService: this.connectorMappingsService!,
+        userActionService: this.userActionService!,
+        alertsService: this.alertsService!,
+        logger: this.log,
+      });
 
     return {
+      getCasesClient,
       getCasesClientWithRequestAndContext,
     };
   }

@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import {
+  ElasticsearchClient,
+  KibanaRequest,
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from 'kibana/server';
+import { CasesClient } from './client';
+export { CasesClient } from './client';
 import { ConfigType, ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
+import { CasesRequestHandlerContext } from './types';
 
 export { CaseRequestContext } from './types';
 export const config: PluginConfigDescriptor<ConfigType> = {
@@ -18,3 +26,15 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
+
+export interface PluginStartContract {
+  getCasesClientWithRequestAndContext(
+    context: CasesRequestHandlerContext,
+    request: KibanaRequest
+  ): CasesClient;
+  getCasesClient(
+    scopedClusterClient: ElasticsearchClient,
+    savedObjectsClient: any,
+    user: any
+  ): CasesClient;
+}
