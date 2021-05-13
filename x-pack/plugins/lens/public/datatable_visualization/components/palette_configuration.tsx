@@ -74,15 +74,6 @@ export function CustomizablePalette({
   const rangeType = activePalette.params?.rangeType ?? defaultParams.rangeType;
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
-  const stopsTooltipContent = [
-    i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage', {
-      defaultMessage:
-        'Percent value types are relative to the full range of available data values.',
-    }),
-    i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpInclusive', {
-      defaultMessage: 'Stop values are inclusive.',
-    }),
-  ];
   const colorStopsToShow = getColorStops(
     palettes,
     activePalette?.params?.colorStops || [],
@@ -193,7 +184,15 @@ export function CustomizablePalette({
         </EuiFormRow>
         <EuiFormRow
           label={
-            <EuiToolTip content={stopsTooltipContent.join('\n')}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage',
+                {
+                  defaultMessage:
+                    'Percent value types are relative to the full range of available data values.',
+                }
+              )}
+            >
               <span>
                 {i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
                   defaultMessage: 'Value type',
