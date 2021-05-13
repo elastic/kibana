@@ -655,13 +655,13 @@ export const ViewStrings = {
         defaultMessage: 'Column from which to extract values to make available in the dropdown',
       }),
     getDefaultDisplayName: () =>
-        i18n.translate('xpack.canvas.uis.views.dropdownControl.args.defaultValueTitle', {
-          defaultMessage: 'Default value',
-        }),
+      i18n.translate('xpack.canvas.uis.views.dropdownControl.args.defaultValueTitle', {
+        defaultMessage: 'Default value',
+      }),
     getDefaultHelp: () =>
-        i18n.translate('xpack.canvas.uis.views.dropdownControl.args.defaultValueLabel', {
-          defaultMessage: 'The default value that is choosen in the dropdown',
-        }),
+      i18n.translate('xpack.canvas.uis.views.dropdownControl.args.defaultValueLabel', {
+        defaultMessage: 'The default value that is choosen in the dropdown',
+      }),
   },
   GetCell: {
     getDisplayName: () =>

@@ -60,9 +60,11 @@ export const DropdownFilter: FunctionComponent<Props> = ({
     );
   });
 
-  /* Commit the value after mount to get the default value */
-  React.useEffect(() => {
-    commit(value);
+  /* Commit the value after mount to get the default value. */
+  const effectHandler = React.useEffect(() => {
+    if (typeof value === "string" && choices.some(choice => choice.[0] === value)) {
+      commit(value);
+    }
   }, []);
 
   /* eslint-disable jsx-a11y/no-onchange */
