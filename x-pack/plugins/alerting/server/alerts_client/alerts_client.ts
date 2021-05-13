@@ -1016,6 +1016,11 @@ export class AlertsClient {
         ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: new Date().toISOString(),
+          error: null,
+        },
       });
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
