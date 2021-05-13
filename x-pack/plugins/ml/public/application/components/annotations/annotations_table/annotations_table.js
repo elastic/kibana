@@ -52,6 +52,7 @@ import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../common/constants/
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { timeFormatter } from '../../../../../common/util/date_utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import { DatafeedModal } from '../../../jobs/jobs_list/components/datafeed_modal';
 
 const CURRENT_SERIES = 'current_series';
 /**
@@ -79,6 +80,8 @@ class AnnotationsTableUI extends Component {
         this.props.jobs[0] !== undefined
           ? this.props.jobs[0].job_id
           : undefined,
+      datafeedModalVisible: false,
+      datafeedEnd: null,
     };
     this.sorting = {
       sort: { field: 'timestamp', direction: 'asc' },
@@ -485,6 +488,38 @@ class AnnotationsTableUI extends Component {
       },
     });
 
+    if (this.state.jobId && this.props.jobs[0].analysis_config.bucket_span) {
+      // add datafeed modal action
+      actions.push({
+        render: (annotation) => {
+          const viewDataFeedTooltipText = (
+            <FormattedMessage
+              id="xpack.ml.annotationsTable.viewDatafeedTooltip"
+              defaultMessage="View datafeed"
+            />
+          );
+          const viewDataFeedTooltipAriaLabelText = i18n.translate(
+            'xpack.ml.annotationsTable.viewDatafeedTooltipAriaLabel',
+            { defaultMessage: 'View datafeed' }
+          );
+          return (
+            <EuiToolTip position="bottom" content={viewDataFeedTooltipText}>
+              <EuiButtonIcon
+                onClick={() =>
+                  this.setState({
+                    datafeedModalVisible: true,
+                    datafeedEnd: annotation.end_timestamp,
+                  })
+                }
+                iconType="visAreaStacked"
+                aria-label={viewDataFeedTooltipAriaLabelText}
+              />
+            </EuiToolTip>
+          );
+        },
+      });
+    }
+
     if (isSingleMetricViewerLinkVisible) {
       actions.push({
         render: (annotation) => {
@@ -690,6 +725,19 @@ class AnnotationsTableUI extends Component {
           search={search}
           rowProps={getRowProps}
         />
+        {this.state.datafeedModalVisible && this.state.datafeedEnd && (
+          <DatafeedModal
+            onClose={() => {
+              this.setState({
+                datafeedModalVisible: false,
+              });
+            }}
+            end={this.state.datafeedEnd}
+            timefield={this.props.jobs[0].data_description.time_field}
+            datafeedConfig={this.props.jobs[0].datafeed_config}
+            bucketSpan={this.props.jobs[0].analysis_config.bucket_span}
+          />
+        )}
       </Fragment>
     );
   }

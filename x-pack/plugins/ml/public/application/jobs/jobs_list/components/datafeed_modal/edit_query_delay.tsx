@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { FC, useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
+import { EuiButtonEmpty, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+
+import { ml } from '../../../../services/ml_api_service';
+import { useToastNotificationService } from '../../../../services/toast_notification_service';
+import { DATAFEED_STATE } from '../../../../../../common/constants/states';
+
+export const EditQueryDelay: FC<{ datafeedConfig: any }> = ({ datafeedConfig }) => {
+  const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const { query_delay: queryDelay, datafeed_id: datafeedId, state } = datafeedConfig;
+  const { displaySuccessToast, displayErrorToast } = useToastNotificationService();
+
+  const updateQueryDelay = useCallback(async () => {
+    const datafeedConfigClone = cloneDeep(datafeedConfig);
+    delete datafeedConfigClone.state;
+    delete datafeedConfigClone.timing_stats;
+
+    try {
+      await ml.updateDatafeed({
+        datafeedId,
+        datafeedConfig: { ...datafeedConfigClone, query_delay: newQueryDelay },
+      });
+      displaySuccessToast(
+        i18n.translate(
+          'xpack.ml.jobsList.datafeedModal.editQueryDelay.changesSavedNotificationMessage',
+          {
+            defaultMessage: 'Changes to query delay for {datafeedId} saved',
+            values: {
+              datafeedId,
+            },
+          }
+        )
+      );
+    } catch (error) {
+      displayErrorToast(
+        error,
+        i18n.translate(
+          'xpack.ml.jobsList.datafeedModal.editQueryDelay.changesNotSavedNotificationMessage',
+          {
+            defaultMessage: 'Could not save changes to query delay for {datafeedId}',
+            values: {
+              datafeedId,
+            },
+          }
+        )
+      );
+    }
+    setIsEditing(false);
+  }, [datafeedConfig.datafeed_id]);
+
+  return (
+    <>
+      {isEditing === false ? (
+        <EuiButtonEmpty
+          color="primary"
+          size="xs"
+          onClick={() => {
+            setIsEditing(true);
+          }}
+          iconType="pencil"
+        >
+          <FormattedMessage
+            id="xpack.ml.jobsList.datafeedModal.queryDelayLabel"
+            defaultMessage="Query delay: {queryDelay}"
+            values={{ queryDelay: newQueryDelay || queryDelay }}
+          />
+        </EuiButtonEmpty>
+      ) : null}
+      {isEditing === true ? (
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.jobsList.datafeedModal.queryDelayLabel"
+              defaultMessage="Query delay"
+            />
+          }
+        >
+          <EuiFlexGroup gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFieldText
+                value={newQueryDelay || queryDelay}
+                placeholder={queryDelay}
+                onChange={(e) => {
+                  setNewQueryDelay(e.target.value);
+                }}
+                disabled={state !== DATAFEED_STATE.STOPPED}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="none" direction="column">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty color="primary" size="xs" onClick={updateQueryDelay}>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.datafeedModal.applyQueryDelayLabel"
+                      defaultMessage="Apply"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty color="text" size="xs" onClick={() => setIsEditing(false)}>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.datafeedModal.cancelQueryDelayUpdateLabel"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      ) : null}
+    </>
+  );
+};

@@ -44,6 +44,7 @@ export function resultsServiceProvider(
     interval?: any,
     overallScore?: number
   ): Promise<any>;
+  getBucketResultsForChart(jobId: any, start: any, end: any, desc: any): Promise<any>;
   getInfluencerValueMaxScoreByTime(
     jobIds: string[],
     influencerFieldName: string,
