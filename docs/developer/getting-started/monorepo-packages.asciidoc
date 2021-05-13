@@ -74,6 +74,7 @@ yarn kbn watch-bazel
 - @kbn/config-schema
 - @kbn/crypto
 - @kbn/dev-utils
+- @kbn/docs-utils
 - @kbn/es
 - @kbn/eslint-import-resolver-kibana
 - @kbn/eslint-plugin-eslint
