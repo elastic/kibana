@@ -81,61 +81,27 @@ function mergeWithSubFeatures(
       subFeaturePrivilege.savedObject.read
     );
 
-    let all: string[] = [];
-    let read: string[] = [];
-    if (Array.isArray(mergedConfig.alerting?.all)) {
-      all = mergedConfig.alerting?.all ?? [];
-    } else {
-      const allObject = mergedConfig.alerting?.all as {
-        rule?: readonly string[];
-        alert?: readonly string[];
-      };
-      const rule = allObject?.rule ?? [];
-      const alert = allObject?.alert ?? [];
-      all = [...rule, ...alert];
-    }
-
-    if (Array.isArray(mergedConfig.alerting?.read)) {
-      read = mergedConfig.alerting?.read ?? [];
-    } else {
-      const readObject = mergedConfig.alerting?.read as {
-        rule?: readonly string[];
-        alert?: readonly string[];
-      };
-      const rule = readObject?.rule ?? [];
-      const alert = readObject?.alert ?? [];
-      read = [...rule, ...alert];
-    }
-
-    let subfeatureAll: string[] = [];
-    let subfeatureRead: string[] = [];
-    if (Array.isArray(subFeaturePrivilege.alerting?.all)) {
-      subfeatureAll = subFeaturePrivilege.alerting?.all ?? [];
-    } else {
-      const allObject = subFeaturePrivilege.alerting?.all as {
-        rule?: readonly string[];
-        alert?: readonly string[];
-      };
-      const rule = allObject?.rule ?? [];
-      const alert = allObject?.alert ?? [];
-      subfeatureAll = [...rule, ...alert];
-    }
-
-    if (Array.isArray(subFeaturePrivilege.alerting?.read)) {
-      subfeatureRead = subFeaturePrivilege.alerting?.read ?? [];
-    } else {
-      const readObject = subFeaturePrivilege.alerting?.read as {
-        rule?: readonly string[];
-        alert?: readonly string[];
-      };
-      const rule = readObject?.rule ?? [];
-      const alert = readObject?.alert ?? [];
-      subfeatureRead = [...rule, ...alert];
-    }
-
     mergedConfig.alerting = {
-      all: mergeArrays(all ?? [], subfeatureAll ?? []),
-      read: mergeArrays(read ?? [], subfeatureRead ?? []),
+      rule: {
+        all: mergeArrays(
+          mergedConfig.alerting?.rule?.all ?? [],
+          subFeaturePrivilege.alerting?.rule?.all ?? []
+        ),
+        read: mergeArrays(
+          mergedConfig.alerting?.rule?.read ?? [],
+          subFeaturePrivilege.alerting?.rule?.read ?? []
+        ),
+      },
+      alert: {
+        all: mergeArrays(
+          mergedConfig.alerting?.alert?.all ?? [],
+          subFeaturePrivilege.alerting?.alert?.all ?? []
+        ),
+        read: mergeArrays(
+          mergedConfig.alerting?.alert?.read ?? [],
+          subFeaturePrivilege.alerting?.alert?.read ?? []
+        ),
+      },
     };
   }
   return mergedConfig;
