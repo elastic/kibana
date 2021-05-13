@@ -19,7 +19,7 @@ export interface SpacesApi {
    * Observable representing the currently active space.
    * The details of the space can change without a full page reload (such as display name, color, etc.)
    */
-  readonly activeSpace$: Observable<Space>;
+  getActiveSpace$(): Observable<Space>;
 
   /**
    * Retrieve the currently active space.

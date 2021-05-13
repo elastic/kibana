@@ -108,7 +108,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [KibanaRequestRoute](./kibana-plugin-core-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyAPICaller](./kibana-plugin-core-server.legacyapicaller.md) |  |
 |  [LegacyCallAPIOptions](./kibana-plugin-core-server.legacycallapioptions.md) | The set of options that defines how API call should be made and result be processed. |
-|  [LegacyElasticsearchError](./kibana-plugin-core-server.legacyelasticsearcherror.md) | @<!-- -->deprecated. The new elasticsearch client doesn't wrap errors anymore. |
+|  [LegacyElasticsearchError](./kibana-plugin-core-server.legacyelasticsearcherror.md) | @<!-- -->deprecated. The new elasticsearch client doesn't wrap errors anymore.  7.16 |
 |  [LegacyRequest](./kibana-plugin-core-server.legacyrequest.md) |  |
 |  [LoggerContextConfigInput](./kibana-plugin-core-server.loggercontextconfiginput.md) |  |
 |  [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) | Provides APIs to plugins for customizing the plugin's logger. |
