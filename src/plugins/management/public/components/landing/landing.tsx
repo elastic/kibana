@@ -27,7 +27,8 @@ export const ManagementLandingPage = ({
   return (
     <ManagementPageLayout
       data-test-subj="managementHome"
-      template="centeredBody"
+      isEmptyState
+      template="centeredContent"
       pageHeader={{
         iconType: 'managementApp',
         pageTitle: (
