@@ -104,7 +104,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <DetailStatus stats={data.kibanaSummary} alerts={this.alerts} />
                     </EuiPanel>
                     <EuiSpacer size="m" />
-                    <AlertsCallout alerts={this.alerts} />
+                    {/* <AlertsCallout alerts={this.alerts} /> */}
                     <EuiPageContent>
                       <EuiFlexGrid columns={2} gutterSize="s">
                         <EuiFlexItem grow={true}>

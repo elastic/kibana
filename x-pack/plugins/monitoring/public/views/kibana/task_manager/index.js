@@ -105,7 +105,7 @@ uiRoutes.when('/kibana/instances/:uuid/task_manager', {
                       <DetailStatus stats={data.kibanaSummary} alerts={this.alerts} />
                     </EuiPanel>
                     <EuiSpacer size="m" />
-                    <AlertsCallout alerts={this.alerts} />
+                    {/* <AlertsCallout alerts={this.alerts} /> */}
                     <EuiPageContent>
                       <EuiFlexGrid columns={2} gutterSize="s">
                         {Object.values(data.metrics).map((metric) => (
