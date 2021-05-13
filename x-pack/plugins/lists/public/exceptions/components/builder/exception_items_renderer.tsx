@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import { OsTypeArray } from '@kbn/securitysolution-io-ts-utils';
+import { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
