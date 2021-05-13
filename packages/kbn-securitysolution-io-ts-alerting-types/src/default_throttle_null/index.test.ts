@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { Throttle } from '../throttle';
 import { DefaultThrottleNull } from '.';
-import { foldLeftRight, getPaths } from '../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_throttle_null', () => {
   test('it should validate a throttle string', () => {

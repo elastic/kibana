@@ -8,13 +8,13 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { DefaultStringArray } from '../default_string_array';
-import { foldLeftRight, getPaths } from '../test_utils';
+import { ReferencesDefaultArray } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_string_array', () => {
   test('it should validate an empty array', () => {
     const payload: string[] = [];
-    const decoded = DefaultStringArray.decode(payload);
+    const decoded = ReferencesDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -23,7 +23,7 @@ describe('default_string_array', () => {
 
   test('it should validate an array of strings', () => {
     const payload = ['value 1', 'value 2'];
-    const decoded = DefaultStringArray.decode(payload);
+    const decoded = ReferencesDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -32,18 +32,18 @@ describe('default_string_array', () => {
 
   test('it should not validate an array with a number', () => {
     const payload = ['value 1', 5];
-    const decoded = DefaultStringArray.decode(payload);
+    const decoded = ReferencesDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "DefaultStringArray"',
+      'Invalid value "5" supplied to "referencesWithDefaultArray"',
     ]);
     expect(message.schema).toEqual({});
   });
 
   test('it should return a default array entry', () => {
     const payload = null;
-    const decoded = DefaultStringArray.decode(payload);
+    const decoded = ReferencesDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);

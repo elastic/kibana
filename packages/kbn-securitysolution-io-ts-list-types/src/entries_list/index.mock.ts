@@ -7,7 +7,7 @@
  */
 
 import { EntryList } from '.';
-import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../../constants/index.mock';
+import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../constants/index.mock';
 
 export const getEntryListMock = (): EntryList => ({
   field: FIELD,

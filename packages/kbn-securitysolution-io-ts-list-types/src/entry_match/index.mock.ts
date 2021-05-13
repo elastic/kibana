@@ -7,7 +7,7 @@
  */
 
 import { EntryMatch } from '.';
-import { ENTRY_VALUE, FIELD, MATCH, OPERATOR } from '../../constants/index.mock';
+import { ENTRY_VALUE, FIELD, MATCH, OPERATOR } from '../constants/index.mock';
 
 export const getEntryMatchMock = (): EntryMatch => ({
   field: FIELD,

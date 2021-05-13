@@ -17,8 +17,8 @@ import {
   CommentsArrayOrUndefined,
   commentsArrayOrUndefined,
 } from '.';
-import { foldLeftRight, getPaths } from '../../test_utils';
-import { DATE_NOW } from '../../constants/index.mock';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { DATE_NOW } from '../constants/index.mock';
 
 describe('Comment', () => {
   describe('comment', () => {

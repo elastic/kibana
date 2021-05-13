@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getEntryMatchMock } from '../entry_match/index.mock';
 import { entriesArray, entriesArrayOrUndefined, entry } from '.';
-import { foldLeftRight, getPaths } from '../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getEntryMatchAnyMock } from '../entry_match_any/index.mock';
 import { getEntryExistsMock } from '../entries_exist/index.mock';
 import { getEntryListMock } from '../entries_list/index.mock';

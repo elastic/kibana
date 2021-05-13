@@ -17,7 +17,7 @@ import {
   CreateCommentsArrayOrUndefined,
   createCommentsArrayOrUndefined,
 } from '.';
-import { foldLeftRight, getPaths } from '../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('CreateComment', () => {
   describe('createComment', () => {

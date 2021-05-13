@@ -7,7 +7,7 @@
  */
 
 import { EntryMatchWildcard } from '.';
-import { ENTRY_VALUE, FIELD, OPERATOR, WILDCARD } from '../../constants/index.mock';
+import { ENTRY_VALUE, FIELD, OPERATOR, WILDCARD } from '../constants/index.mock';
 
 export const getEntryMatchWildcardMock = (): EntryMatchWildcard => ({
   field: FIELD,

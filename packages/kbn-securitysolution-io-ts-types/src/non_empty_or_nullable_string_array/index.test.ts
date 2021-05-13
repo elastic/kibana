@@ -9,7 +9,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { nonEmptyOrNullableStringArray } from '.';
-import { foldLeftRight, getPaths } from '../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('nonEmptyOrNullableStringArray', () => {
   test('it should FAIL validation when given an empty array', () => {

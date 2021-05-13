@@ -16,8 +16,7 @@ import {
   ThreatMappingEntries,
   threat_mapping,
 } from '.';
-import { foldLeftRight, getPaths } from '../test_utils';
-import { exactCheck } from '../exact_check';
+import { foldLeftRight, getPaths, exactCheck } from '@kbn/securitysolution-io-ts-utils';
 
 describe('threat_mapping', () => {
   describe('threatMappingEntries', () => {

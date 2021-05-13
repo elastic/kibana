@@ -11,7 +11,7 @@ import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { NonEmptyArray } from '.';
-import { foldLeftRight, getPaths } from '../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 const testSchema = t.keyof({
   valid: true,

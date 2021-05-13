@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getEntryExistsMock } from './index.mock';
 import { entriesExists, EntryExists } from '.';
-import { foldLeftRight, getPaths } from '../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('entriesExists', () => {
   test('it should validate an entry', () => {

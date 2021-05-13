@@ -14,7 +14,7 @@ import {
   nonEmptyEndpointEntriesArray,
   NonEmptyEndpointEntriesArray,
 } from '.';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';
 import { getEndpointEntryNestedMock } from '../entry_nested/index.mock';
 import { getEndpointEntriesArrayMock } from './index.mock';
