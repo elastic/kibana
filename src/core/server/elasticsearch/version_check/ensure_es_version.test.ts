@@ -19,7 +19,8 @@ const mockLogger = mockLoggerFactory.get('mock logger');
 const KIBANA_VERSION = '5.1.0';
 
 const createEsSuccess = elasticsearchClientMock.createSuccessTransportRequestPromise;
-const createEsError = elasticsearchClientMock.createErrorTransportRequestPromise;
+const createEsErrorReturn = (err: any) =>
+  elasticsearchClientMock.createErrorTransportRequestPromise(err);
 
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
@@ -141,7 +142,7 @@ describe('pollEsNodesVersion', () => {
     internalClient.nodes.info.mockImplementationOnce(() => createEsSuccess(infos));
   };
   const nodeInfosErrorOnce = (error: any) => {
-    internalClient.nodes.info.mockImplementationOnce(() => createEsError(error));
+    internalClient.nodes.info.mockImplementationOnce(() => createEsErrorReturn(new Error(error)));
   };
 
   it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
@@ -150,7 +151,7 @@ describe('pollEsNodesVersion', () => {
     jest.clearAllMocks();
 
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
-    nodeInfosErrorOnce(new Error('mock request error'));
+    nodeInfosErrorOnce('mock request error');
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
 
     pollEsNodesVersion({
@@ -178,7 +179,7 @@ describe('pollEsNodesVersion', () => {
     ];
     jest.clearAllMocks();
 
-    nodeInfosErrorOnce(new Error('mock request error'));
+    nodeInfosErrorOnce('mock request error');
 
     pollEsNodesVersion({
       internalClient,
@@ -207,9 +208,9 @@ describe('pollEsNodesVersion', () => {
     ];
     jest.clearAllMocks();
 
-    nodeInfosErrorOnce(new Error('mock request error')); // emit
-    nodeInfosErrorOnce(new Error('mock request error')); // ignore, same error message
-    nodeInfosErrorOnce(new Error('mock request error 2')); // emit
+    nodeInfosErrorOnce('mock request error'); // emit
+    nodeInfosErrorOnce('mock request error'); // ignore, same error message
+    nodeInfosErrorOnce('mock request error 2'); // emit
 
     pollEsNodesVersion({
       internalClient,
@@ -241,10 +242,10 @@ describe('pollEsNodesVersion', () => {
     jest.clearAllMocks();
 
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
-    nodeInfosErrorOnce(new Error('mock request error')); // emit
-    nodeInfosErrorOnce(new Error('mock request error')); // ignore
+    nodeInfosErrorOnce('mock request error'); // emit
+    nodeInfosErrorOnce('mock request error'); // ignore
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit
-    nodeInfosErrorOnce(new Error('mock request error 2')); // emit
+    nodeInfosErrorOnce('mock request error 2'); // emit
 
     pollEsNodesVersion({
       internalClient,
