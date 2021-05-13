@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import {
-  checkRunningSessions as checkRunningSessions$,
-  CheckRunningSessionsDeps,
-} from './check_running_sessions';
+import { checkPersistedSessions as checkPersistedSessions$ } from './check_persisted_sessions';
 import {
   SearchSessionStatus,
   SearchSessionSavedObjectAttributes,
   ENHANCED_ES_SEARCH_STRATEGY,
-  EQL_SEARCH_STRATEGY,
 } from '../../../../../../src/plugins/data/common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { SearchSessionsConfig, SearchStatus } from './types';
+import { SearchSessionsConfig, CheckSearchSessionsDeps, SearchStatus } from './types';
 import moment from 'moment';
 import {
   SavedObjectsBulkUpdateObject,
-  SavedObjectsDeleteOptions,
   SavedObjectsClientContract,
 } from '../../../../../../src/core/server';
 import { Subject } from 'rxjs';
@@ -28,8 +23,8 @@ import { takeUntil } from 'rxjs/operators';
 
 jest.useFakeTimers();
 
-const checkRunningSessions = (deps: CheckRunningSessionsDeps, config: SearchSessionsConfig) =>
-  checkRunningSessions$(deps, config).toPromise();
+const checkPersistedSessions = (deps: CheckSearchSessionsDeps, config: SearchSessionsConfig) =>
+  checkPersistedSessions$(deps, config).toPromise();
 
 describe('getSearchStatus', () => {
   let mockClient: any;
@@ -81,7 +76,7 @@ describe('getSearchStatus', () => {
       total: 0,
     } as any);
 
-    await checkRunningSessions(
+    await checkPersistedSessions(
       {
         savedObjectsClient,
         client: mockClient,
@@ -101,7 +96,7 @@ describe('getSearchStatus', () => {
         total: 0,
       } as any);
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -119,7 +114,7 @@ describe('getSearchStatus', () => {
         total: 5,
       } as any);
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -143,7 +138,7 @@ describe('getSearchStatus', () => {
         });
       });
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -173,7 +168,7 @@ describe('getSearchStatus', () => {
         });
       });
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -201,7 +196,7 @@ describe('getSearchStatus', () => {
         });
       });
 
-      await checkRunningSessions$(
+      await checkPersistedSessions$(
         {
           savedObjectsClient,
           client: mockClient,
@@ -224,7 +219,7 @@ describe('getSearchStatus', () => {
         total: 0,
       } as any);
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -240,6 +235,17 @@ describe('getSearchStatus', () => {
 
     test('sessions fetched in the beginning are processed even if sessions in the end fail', async () => {
       let i = 0;
+      mockClient.asyncSearch.status.mockResolvedValue({
+        body: {
+          is_partial: false,
+          is_running: false,
+          rawResponse: {},
+        },
+      });
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [],
+      });
       savedObjectsClient.find.mockImplementation(() => {
         return new Promise((resolve, reject) => {
           if (++i === 2) {
@@ -261,6 +267,7 @@ describe('getSearchStatus', () => {
                               'map-key': {
                                 strategy: ENHANCED_ES_SEARCH_STRATEGY,
                                 id: 'async-id',
+                                status: SearchStatus.IN_PROGRESS,
                               },
                             },
                           },
@@ -278,7 +285,7 @@ describe('getSearchStatus', () => {
         });
       });
 
-      await checkRunningSessions$(
+      await checkPersistedSessions$(
         {
           savedObjectsClient,
           client: mockClient,
@@ -290,277 +297,7 @@ describe('getSearchStatus', () => {
       jest.runAllTimers();
 
       expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
-
-      // by checking that delete was called we validate that sessions from session that were successfully fetched were processed
-      expect(mockClient.asyncSearch.delete).toBeCalled();
-      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
-      expect(id).toBe('async-id');
-    });
-  });
-
-  describe('delete', () => {
-    test('doesnt delete a persisted session', async () => {
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '123',
-            attributes: {
-              persisted: true,
-              status: SearchSessionStatus.IN_PROGRESS,
-              created: moment().subtract(moment.duration(30, 'm')),
-              touched: moment().subtract(moment.duration(10, 'm')),
-              idMapping: {},
-            },
-          },
-        ],
-        total: 1,
-      } as any);
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
-      expect(savedObjectsClient.delete).not.toBeCalled();
-    });
-
-    test('doesnt delete a non persisted, recently touched session', async () => {
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '123',
-            attributes: {
-              persisted: false,
-              status: SearchSessionStatus.IN_PROGRESS,
-              created: moment().subtract(moment.duration(3, 'm')),
-              touched: moment().subtract(moment.duration(10, 's')),
-              idMapping: {},
-            },
-          },
-        ],
-        total: 1,
-      } as any);
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
-      expect(savedObjectsClient.delete).not.toBeCalled();
-    });
-
-    test('doesnt delete a non persisted, completed session, within on screen time frame', async () => {
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '123',
-            attributes: {
-              persisted: false,
-              status: SearchSessionStatus.COMPLETE,
-              created: moment().subtract(moment.duration(3, 'm')),
-              touched: moment().subtract(moment.duration(1, 'm')),
-              idMapping: {
-                'search-hash': {
-                  id: 'search-id',
-                  strategy: 'cool',
-                  status: SearchStatus.COMPLETE,
-                },
-              },
-            },
-          },
-        ],
-        total: 1,
-      } as any);
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
-      expect(savedObjectsClient.delete).not.toBeCalled();
-    });
-
-    test('deletes in space', async () => {
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '123',
-            namespaces: ['awesome'],
-            attributes: {
-              persisted: false,
-              status: SearchSessionStatus.IN_PROGRESS,
-              created: moment().subtract(moment.duration(3, 'm')),
-              touched: moment().subtract(moment.duration(2, 'm')),
-              idMapping: {
-                'map-key': {
-                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
-                  id: 'async-id',
-                },
-              },
-            },
-          },
-        ],
-        total: 1,
-      } as any);
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.delete).toBeCalled();
-
-      const [, id, opts] = savedObjectsClient.delete.mock.calls[0];
-      expect(id).toBe('123');
-      expect((opts as SavedObjectsDeleteOptions).namespace).toBe('awesome');
-    });
-
-    test('deletes a non persisted, abandoned session', async () => {
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '123',
-            attributes: {
-              persisted: false,
-              status: SearchSessionStatus.IN_PROGRESS,
-              created: moment().subtract(moment.duration(3, 'm')),
-              touched: moment().subtract(moment.duration(2, 'm')),
-              idMapping: {
-                'map-key': {
-                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
-                  id: 'async-id',
-                },
-              },
-            },
-          },
-        ],
-        total: 1,
-      } as any);
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
-      expect(savedObjectsClient.delete).toBeCalled();
-
-      expect(mockClient.asyncSearch.delete).toBeCalled();
-
-      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
-      expect(id).toBe('async-id');
-    });
-
-    test('deletes a completed, not persisted session', async () => {
-      mockClient.asyncSearch.delete = jest.fn().mockResolvedValue(true);
-
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '123',
-            attributes: {
-              persisted: false,
-              status: SearchSessionStatus.COMPLETE,
-              created: moment().subtract(moment.duration(30, 'm')),
-              touched: moment().subtract(moment.duration(6, 'm')),
-              idMapping: {
-                'map-key': {
-                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
-                  id: 'async-id',
-                  status: SearchStatus.COMPLETE,
-                },
-                'eql-map-key': {
-                  strategy: EQL_SEARCH_STRATEGY,
-                  id: 'eql-async-id',
-                  status: SearchStatus.COMPLETE,
-                },
-              },
-            },
-          },
-        ],
-        total: 1,
-      } as any);
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
-      expect(savedObjectsClient.delete).toBeCalled();
-
-      expect(mockClient.asyncSearch.delete).toBeCalled();
-      expect(mockClient.eql.delete).not.toBeCalled();
-
-      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
-      expect(id).toBe('async-id');
-    });
-
-    test('ignores errors thrown while deleting async searches', async () => {
-      mockClient.asyncSearch.delete = jest.fn().mockRejectedValueOnce(false);
-
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '123',
-            attributes: {
-              persisted: false,
-              status: SearchSessionStatus.COMPLETE,
-              created: moment().subtract(moment.duration(30, 'm')),
-              touched: moment().subtract(moment.duration(6, 'm')),
-              idMapping: {
-                'map-key': {
-                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
-                  id: 'async-id',
-                  status: SearchStatus.COMPLETE,
-                },
-              },
-            },
-          },
-        ],
-        total: 1,
-      } as any);
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
-      expect(savedObjectsClient.delete).toBeCalled();
-
-      expect(mockClient.asyncSearch.delete).toBeCalled();
-
-      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
-      expect(id).toBe('async-id');
+      expect(mockClient.asyncSearch.status).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -594,7 +331,7 @@ describe('getSearchStatus', () => {
         },
       });
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -633,7 +370,7 @@ describe('getSearchStatus', () => {
         total: 1,
       } as any);
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -676,7 +413,7 @@ describe('getSearchStatus', () => {
         },
       });
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -719,7 +456,7 @@ describe('getSearchStatus', () => {
         },
       });
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -766,7 +503,7 @@ describe('getSearchStatus', () => {
         },
       });
 
-      await checkRunningSessions(
+      await checkPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
