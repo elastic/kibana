@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { APMRuleRegistry } from '../../plugin';
-
-export const createAPMLifecycleRuleType = createLifecycleRuleTypeFactory<APMRuleRegistry>();
+export const TECHNICAL_COMPONENT_TEMPLATE_NAME = `technical-mappings`;
+export const ECS_COMPONENT_TEMPLATE_NAME = `ecs-mappings`;
+export const DEFAULT_ILM_POLICY_ID = 'ilm-policy';

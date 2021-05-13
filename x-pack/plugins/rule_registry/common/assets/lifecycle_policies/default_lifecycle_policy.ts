@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { ILMPolicy } from '../types';
-
-export const defaultIlmPolicy: ILMPolicy = {
+export const defaultLifecyclePolicy = {
   policy: {
     phases: {
       hot: {
