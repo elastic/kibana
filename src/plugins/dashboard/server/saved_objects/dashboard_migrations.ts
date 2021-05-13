@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SemVer } from 'semver';
+import semver from 'semver';
 import { get, flow } from 'lodash';
-import { SavedObjectAttributes, SavedObjectMigrationFn } from 'kibana/server';
+import {
+  SavedObjectAttributes,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+} from 'kibana/server';
 
 import { migrations730 } from './migrations_730';
 import { SavedDashboardPanel } from '../../common/types';
@@ -20,6 +24,8 @@ import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from '../../common/embeddable/embeddable_saved_object_converters';
+import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
+import { SerializableValue } from '../../../kibana_utils/common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -141,8 +147,10 @@ function createExtractPanelReferencesMigration(
   };
 }
 
+type ValueOrReferenceInput = SavedObjectEmbeddableInput & { attributes?: SerializableValue };
+
 // Runs the embeddable migrations on each panel
-const migrateEmbeddablePanels = (
+const migrateByValuePanels = (
   deps: DashboardSavedObjectTypeMigrationsDeps,
   version: string
 ): SavedObjectMigrationFn => (doc: any) => {
@@ -153,7 +161,7 @@ const migrateEmbeddablePanels = (
   if (typeof attributes.panelsJSON !== 'string') {
     return attributes;
   }
-  const panels = JSON.parse(attributes.panelsJSON);
+  const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
   // Same here, prevent failing saved object import if ever panels aren't an array.
   if (!Array.isArray(panels)) {
     return attributes;
@@ -161,9 +169,9 @@ const migrateEmbeddablePanels = (
   const newPanels: SavedDashboardPanel[] = [];
   panels.forEach((panel) => {
     // Convert each panel into a state that can be passed to EmbeddablesSetup.migrate
-    const originalPanelState = convertSavedDashboardPanelToPanelState(panel);
-    if (panel.explicitInput.attributes) {
-      // Migrate the state using migrations defined by embeddables
+    const originalPanelState = convertSavedDashboardPanelToPanelState<ValueOrReferenceInput>(panel);
+    if (originalPanelState.explicitInput.attributes) {
+      // If this panel is by value, migrate the state using embeddable migrations
       const migratedInput = deps.embeddable.migrate(
         {
           ...originalPanelState.explicitInput,
@@ -200,12 +208,12 @@ export interface DashboardSavedObjectTypeMigrationsDeps {
 
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
-) => {
+): SavedObjectMigrationMap => {
   const embeddableMigrations = deps.embeddable
     .getMigrationVersions()
-    .filter((version) => new SemVer(version) >= new SemVer('7.12.0'))
+    .filter((version) => semver.gt(version, '7.12.0'))
     .map((version): [string, SavedObjectMigrationFn] => {
-      return [version, migrateEmbeddablePanels(deps, version)];
+      return [version, migrateByValuePanels(deps, version)];
     });
 
   return {
