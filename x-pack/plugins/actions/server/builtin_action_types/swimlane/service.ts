@@ -105,8 +105,10 @@ export const createExternalService = (
       let isDescriptionPosted = true;
       if (
         fieldId != null &&
+        res.data.comments[fieldId] != null &&
         res.data.comments[fieldId].length &&
         data.comments != null &&
+        data.comments[fieldId] != null &&
         data.comments[fieldId].length === 1
       ) {
         // this is the description, it is sent as a comment.
