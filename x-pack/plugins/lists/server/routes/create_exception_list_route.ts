@@ -6,16 +6,17 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListsPluginRouter } from '../types';
 import { EXCEPTION_LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import {
   CreateExceptionListSchemaDecoded,
   createExceptionListSchema,
   exceptionListSchema,
 } from '../../common/schemas';
 
+import { buildRouteValidation, buildSiemResponse } from './utils';
 import { getExceptionListClient } from './utils/get_exception_list_client';
 
 export const createExceptionListRoute = (router: ListsPluginRouter): void => {
