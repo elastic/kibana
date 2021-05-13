@@ -84,6 +84,7 @@ export async function mountManagementSection(
               uiSettings={uiSettings}
               componentRegistry={componentRegistry}
               trackUiMetric={trackUiMetric}
+              managementPageLayout={params.managementPageLayout}
             />
           </Route>
         </Switch>

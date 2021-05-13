@@ -7,15 +7,12 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PageTitle = () => {
   return (
-    <EuiText>
-      <h1 data-test-subj="managementSettingsTitle">
-        <FormattedMessage id="advancedSettings.pageTitle" defaultMessage="Settings" />
-      </h1>
-    </EuiText>
+    <span data-test-subj="managementSettingsTitle">
+      <FormattedMessage id="advancedSettings.pageTitle" defaultMessage="Settings" />
+    </span>
   );
 };

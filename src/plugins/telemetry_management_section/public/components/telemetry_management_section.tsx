@@ -9,13 +9,12 @@
 import React, { Component, Fragment } from 'react';
 import {
   EuiCallOut,
-  EuiPanel,
-  EuiForm,
+  EuiSplitPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
-  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -116,18 +115,19 @@ export class TelemetryManagementSection extends Component<Props, State> {
             <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
           </TrackApplicationView>
         )}
-        <EuiPanel paddingSize="l">
-          <EuiForm>
-            <EuiText>
-              <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={false}>
+        <EuiSplitPanel.Outer hasBorder>
+          <EuiSplitPanel.Inner color="subdued">
+            <EuiFlexGroup alignItems="baseline">
+              <EuiFlexItem grow={false}>
+                <EuiTitle>
                   <h2>
                     <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
                   </h2>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiText>
-
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner>
             {this.maybeGetAppliesSettingMessage()}
             <EuiSpacer size="s" />
             <LazyField
@@ -154,8 +154,8 @@ export class TelemetryManagementSection extends Component<Props, State> {
               handleChange={this.toggleOptIn}
               enableSaving={this.props.enableSaving}
             />
-          </EuiForm>
-        </EuiPanel>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
       </Fragment>
     );
   }
@@ -165,28 +165,32 @@ export class TelemetryManagementSection extends Component<Props, State> {
       return null;
     }
     return (
-      <EuiCallOut
-        color="primary"
-        iconType="spacesApp"
-        title={
-          <p>
-            <FormattedMessage
-              id="telemetry.callout.appliesSettingTitle"
-              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
-              values={{
-                allOfKibanaText: (
-                  <strong>
-                    <FormattedMessage
-                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      defaultMessage="all of Kibana"
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </p>
-        }
-      />
+      <>
+        <EuiCallOut
+          color="primary"
+          iconType="spacesApp"
+          size="s"
+          title={
+            <p>
+              <FormattedMessage
+                id="telemetry.callout.appliesSettingTitle"
+                defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+                values={{
+                  allOfKibanaText: (
+                    <strong>
+                      <FormattedMessage
+                        id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                        defaultMessage="all of Kibana"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+          }
+        />
+        <EuiSpacer />
+      </>
     );
   };
 

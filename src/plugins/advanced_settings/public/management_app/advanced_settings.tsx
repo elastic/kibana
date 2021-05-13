@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
+import React, { Component, ComponentType } from 'react';
 import { Subscription } from 'rxjs';
 import { UnregisterCallback } from 'history';
 import { parse } from 'query-string';
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+import { EuiSpacer, Query } from '@elastic/eui';
 
 import {
   IUiSettingsClient,
@@ -32,6 +32,7 @@ import { getAriaName, toEditableConfig, fieldSorter, DEFAULT_CATEGORY } from './
 
 import { FieldSetting, SettingsChanges } from './types';
 import { parseErrorMsg } from './components/search/search';
+import { KibanaPageTemplateProps } from '../../../kibana_react/public';
 
 export const QUERY = 'query';
 
@@ -43,6 +44,7 @@ interface AdvancedSettingsProps {
   toasts: ToastsStart;
   componentRegistry: ComponentRegistry['start'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  managementPageLayout: ComponentType<KibanaPageTemplateProps>;
 }
 
 interface AdvancedSettingsState {
@@ -239,17 +241,21 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
       componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT
     );
     const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
+    const ManagementPageLayout = this.props.managementPageLayout;
 
     return (
-      <div>
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem>
-            <PageTitle />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <ManagementPageLayout
+        pageHeader={{
+          pageTitle: <PageTitle />,
+          rightSideItems: [
+            <Search
+              query={query}
+              categories={this.categories}
+              onQueryChange={this.onQueryChange}
+            />,
+          ],
+        }}
+      >
         <PageSubtitle />
         <EuiSpacer size="m" />
         <CallOuts />
@@ -269,6 +275,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           dockLinks={this.props.dockLinks}
           toasts={this.props.toasts}
           trackUiMetric={this.props.trackUiMetric}
+          queryText={query.text}
         />
         <PageFooter
           toasts={this.props.toasts}
@@ -276,7 +283,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           onQueryMatchChange={this.onFooterQueryMatchChange}
           enableSaving={this.props.enableSaving}
         />
-      </div>
+      </ManagementPageLayout>
     );
   }
 }

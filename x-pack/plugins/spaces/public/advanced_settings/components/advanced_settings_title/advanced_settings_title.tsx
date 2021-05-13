@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,22 +32,18 @@ export const AdvancedSettingsTitle = (props: Props) => {
   if (!activeSpace) return null;
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
-      <EuiFlexItem grow={false}>
-        <Suspense fallback={<EuiLoadingSpinner />}>
-          <LazySpaceAvatar space={activeSpace} />
-        </Suspense>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ marginLeft: '10px' }}>
-        <EuiTitle size="m">
-          <h1 data-test-subj="managementSettingsTitle">
-            <FormattedMessage
-              id="xpack.spaces.management.advancedSettingsTitle.settingsTitle"
-              defaultMessage="Settings"
-            />
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      {/* TODO: Figure out how to get this to be passed back up to the ManagementPageLayout */}
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazySpaceAvatar space={activeSpace} />
+      </Suspense>
+      &emsp;
+      <span data-test-subj="managementSettingsTitle">
+        <FormattedMessage
+          id="xpack.spaces.management.advancedSettingsTitle.settingsTitle"
+          defaultMessage="Settings"
+        />
+      </span>
+    </>
   );
 };
