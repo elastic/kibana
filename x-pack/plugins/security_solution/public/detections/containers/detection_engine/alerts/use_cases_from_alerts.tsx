@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getCaseIdsFromAlertId } from './api';
@@ -22,18 +23,29 @@ export const useCasesFromAlerts = ({ alertId }: { alertId: string }): CasesFromA
   const { addError } = useAppToasts();
 
   useEffect(() => {
+    // isMounted tracks if a component is mounted before changing state
+    let isMounted = true;
     setLoading(true);
     const fetchData = async () => {
       try {
         const casesResponse = await getCaseIdsFromAlertId({ alertId });
-        setCases(casesResponse);
-        setLoading(false);
+        if (isMounted) {
+          setCases(casesResponse);
+        }
       } catch (error) {
         addError(error.message, { title: CASES_FROM_ALERTS_FAILURE });
+      }
+      if (isMounted) {
         setLoading(false);
       }
     };
-    fetchData();
+    if (!isEmpty(alertId)) {
+      fetchData();
+    }
+    return () => {
+      // updates to show component is unmounted
+      isMounted = false;
+    };
   }, [alertId, addError]);
   return { loading, caseIds: cases };
 };
