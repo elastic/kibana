@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { Type } from '@kbn/securitysolution-io-ts-utils';
+
+import { SerializerOrUndefined } from '../../../common/schemas';
 import {
   EsDataTypeGeoPoint,
   EsDataTypeGeoShape,
   EsDataTypeRangeTerm,
   EsDataTypeSingle,
   EsDataTypeUnion,
-  SerializerOrUndefined,
-  Type,
   esDataTypeGeoShape,
   esDataTypeRangeTerm,
   esDataTypeSingle,
-} from '../../../common/schemas';
+} from '../../schemas/common/schemas';
 
 export const DEFAULT_DATE_REGEX = RegExp('(?<gte>.+),(?<lte>.+)|(?<value>.+)');
 export const DEFAULT_LTE_GTE_REGEX = RegExp('(?<gte>.+)-(?<lte>.+)|(?<value>.+)');

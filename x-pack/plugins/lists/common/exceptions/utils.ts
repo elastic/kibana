@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import { CreateExceptionListItemSchema, EntriesArray, ExceptionListItemSchema } from '../schemas';
-
-export const hasLargeValueItem = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-): boolean => {
-  return exceptionItems.some((exceptionItem) => hasLargeValueList(exceptionItem.entries));
-};
+import { EntriesArray } from '@kbn/securitysolution-io-ts-utils';
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
   const found = entries.filter(({ type }) => type === 'list');
-  return found.length > 0;
-};
-
-export const hasNestedEntry = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'nested');
   return found.length > 0;
 };

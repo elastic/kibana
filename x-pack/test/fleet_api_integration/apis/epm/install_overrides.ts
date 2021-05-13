@@ -62,12 +62,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.component_templates[0].component_template.template.mappings.dynamic).to.be(
           false
         );
-        // Make sure that the `@timestamp` field exists and is set to date
-        // this can be removed once https://github.com/elastic/elasticsearch/issues/58956 is resolved
-        expect(
-          body.component_templates[0].component_template.template.mappings.properties['@timestamp']
-            .type
-        ).to.be('date');
 
         ({ body } = await es.transport.request({
           method: 'GET',

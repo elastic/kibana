@@ -48,11 +48,13 @@ export class EventFiltersHttpService implements EventFiltersService {
     page,
     sortField,
     sortOrder,
+    filter,
   }: Partial<{
     page: number;
     perPage: number;
     sortField: string;
     sortOrder: string;
+    filter: string;
   }> = {}): Promise<FoundExceptionListItemSchema> {
     const http = await this.httpWrapper();
     return http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
@@ -63,6 +65,7 @@ export class EventFiltersHttpService implements EventFiltersService {
         sort_order: sortOrder,
         list_id: [ENDPOINT_EVENT_FILTERS_LIST_ID],
         namespace_type: ['agnostic'],
+        filter,
       },
     });
   }
