@@ -288,4 +288,11 @@ export interface SpaceAvatarProps {
    * Default value is true.
    */
   announceSpaceName?: boolean;
+
+  /**
+   * Whether or not to render the avatar in a disabled state.
+   *
+   * Default value is false.
+   */
+  isDisabled?: boolean;
 }

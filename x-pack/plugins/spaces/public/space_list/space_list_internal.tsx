@@ -142,11 +142,10 @@ export const SpaceListInternal = ({
     <Suspense fallback={<EuiLoadingSpinner />}>
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
         {displayedSpaces.map((space) => {
-          // color may be undefined, which is intentional; SpacesAvatar calls the getSpaceColor function before rendering
-          const color = space.isFeatureDisabled ? 'hollow' : space.color;
+          const isDisabled = space.isFeatureDisabled;
           return (
             <EuiFlexItem grow={false} key={space.id}>
-              <LazySpaceAvatar space={{ ...space, color }} size={'s'} />
+              <LazySpaceAvatar space={space} isDisabled={isDisabled} size={'s'} />
             </EuiFlexItem>
           );
         })}

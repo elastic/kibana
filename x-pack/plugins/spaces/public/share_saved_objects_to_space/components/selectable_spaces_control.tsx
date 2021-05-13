@@ -106,10 +106,14 @@ export const SelectableSpacesControl = (props: Props) => {
     .sort(createSpacesComparator(activeSpaceId))
     .map<SpaceOption>((space) => {
       const checked = selectedSpaceIds.includes(space.id);
-      const additionalProps = getAdditionalProps(space, activeSpaceId, checked);
+      const { isAvatarDisabled, ...additionalProps } = getAdditionalProps(
+        space,
+        activeSpaceId,
+        checked
+      );
       return {
         label: space.name,
-        prepend: <LazySpaceAvatar space={space} size={'s'} />, // wrapped in a Suspense below
+        prepend: <LazySpaceAvatar space={space} isDisabled={isAvatarDisabled} size={'s'} />, // wrapped in a Suspense below
         checked: checked ? 'on' : undefined,
         ['data-space-id']: space.id,
         ['data-test-subj']: `sts-space-selector-row-${space.id}`,
@@ -260,8 +264,10 @@ function getAdditionalProps(
   if (space.isFeatureDisabled) {
     return {
       append: APPEND_FEATURE_IS_DISABLED,
+      isAvatarDisabled: true,
     };
   }
+  return {};
 }
 
 /**

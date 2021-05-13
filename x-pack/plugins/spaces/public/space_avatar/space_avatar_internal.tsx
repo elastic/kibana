@@ -20,6 +20,7 @@ interface Props {
   size?: 's' | 'm' | 'l' | 'xl';
   className?: string;
   announceSpaceName?: boolean;
+  isDisabled?: boolean;
 }
 
 export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
