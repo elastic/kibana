@@ -37,7 +37,6 @@ export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConne
   return response;
 };
 
-// TODO: refactor
 export const getCaseConfigure = async ({
   signal,
   owner,

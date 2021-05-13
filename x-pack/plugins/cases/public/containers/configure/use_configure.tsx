@@ -218,7 +218,6 @@ export const useCaseConfigure = (owner: string): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  // TODO: refactor
   const setID = useCallback((id: string) => {
     dispatch({
       payload: id,
