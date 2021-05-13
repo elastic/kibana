@@ -264,8 +264,9 @@ export function TableDimensionEditor(
                     size="xs"
                     flush="both"
                   >
+                    {' '}
                     {i18n.translate('xpack.lens.paletteTableGradient.customize', {
-                      defaultMessage: 'Settings',
+                      defaultMessage: 'Edit',
                     })}
                   </EuiButtonEmpty>
                   <PalettePanelContainer

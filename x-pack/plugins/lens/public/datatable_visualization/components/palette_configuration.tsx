@@ -76,7 +76,8 @@ export function CustomizablePalette({
 
   const stopsTooltipContent = [
     i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage', {
-      defaultMessage: "Percentage values are computed against table's current data.",
+      defaultMessage:
+        'Percent value types are relative to the full range of available data values.',
     }),
     i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpInclusive', {
       defaultMessage: 'Stop values are inclusive.',
@@ -191,9 +192,16 @@ export function CustomizablePalette({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
-            defaultMessage: 'Value type',
-          })}
+          label={
+            <EuiToolTip content={stopsTooltipContent.join('\n')}>
+              <span>
+                {i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
+                  defaultMessage: 'Value type',
+                })}{' '}
+                <EuiIcon type="questionInCircle" color="subdued" />
+              </span>
+            </EuiToolTip>
+          }
           display="rowCompressed"
         >
           <EuiButtonGroup
@@ -267,20 +275,14 @@ export function CustomizablePalette({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={
-            <EuiToolTip content={stopsTooltipContent.join('\n')}>
-              <span>
-                {i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsLabel', {
-                  defaultMessage: 'Color stops',
-                })}{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
-              </span>
-            </EuiToolTip>
-          }
+          label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsLabel', {
+            defaultMessage: 'Color stops',
+          })}
         >
           <CustomStops
             key={`${activePalette.name}-${rangeType}`}
             reverse={activePalette.params?.reverse}
+            data-test-prefix="lnsDatatable"
             colorStops={colorStopsToShow}
             rangeType={rangeType}
             dataBounds={dataBounds}

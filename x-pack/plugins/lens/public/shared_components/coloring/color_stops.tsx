@@ -28,6 +28,7 @@ export interface CustomStopsProps {
   rangeType: 'number' | 'percent';
   dataBounds: { min: number; max: number };
   reverse?: boolean;
+  'data-test-prefix': string;
 }
 export const CustomStops = ({
   colorStops,
@@ -35,12 +36,15 @@ export const CustomStops = ({
   rangeType,
   dataBounds,
   reverse,
+  ['data-test-prefix']: dataTestPrefix,
 }: CustomStopsProps) => {
   const shouldEnableDelete = colorStops.length > 2;
 
   const [localColorStops, setLocalColorStops] = useState<Array<{ color: string; stop: string }>>(
     colorStops.map(({ color, stop }) => ({ color, stop: String(stop) }))
   );
+
+  const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
 
   useDebounceWithOptions(
     () => {
@@ -67,7 +71,7 @@ export const CustomStops = ({
     <EuiFlexItem>
       <EuiFormRow display="row">
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem data-test-subj={`lnsDatatable_dynamicColoring_custom_stops`}>
+          <EuiFlexItem data-test-subj={`${dataTestPrefix}_dynamicColoring_custom_stops`}>
             {localColorStops.map(({ color, stop }, index) => {
               const prevStopValue = Number(localColorStops[index - 1]?.stop ?? -Infinity);
               const nextStopValue = Number(localColorStops[index + 1]?.stop ?? Infinity);
@@ -75,7 +79,7 @@ export const CustomStops = ({
               // do not show color error messages if number field is already in error
               if (!isValidColor(color) && errorMessages.length === 0) {
                 errorMessages.push(
-                  i18n.translate('xpack.lens.table.dynamicColoring.customPalette.hexWarningLabel', {
+                  i18n.translate('xpack.lens.dynamicColoring.customPalette.hexWarningLabel', {
                     defaultMessage: 'Color must provide a valid hex value',
                   })
                 );
@@ -86,13 +90,13 @@ export const CustomStops = ({
                   display="rowCompressed"
                   isInvalid={Boolean(errorMessages.length)}
                   error={errorMessages[0]}
-                  data-test-subj={`lnsDatatable_dynamicColoring_stop_row_${index}`}
+                  data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_row_${index}`}
                   onBlur={(e: FocusEvent<HTMLDivElement>) => {
                     // sort the stops when the focus leaves the row container
                     const shouldSort = Number(stop) > nextStopValue || prevStopValue > Number(stop);
-                    const isFocusStillInContent = (e.currentTarget as Node)?.contains(
-                      e.relatedTarget as Node
-                    );
+                    const isFocusStillInContent =
+                      (e.currentTarget as Node)?.contains(e.relatedTarget as Node) ||
+                      popoverInFocus;
                     if (shouldSort && !isFocusStillInContent) {
                       setLocalColorStops(
                         [...localColorStops].sort(
@@ -106,7 +110,7 @@ export const CustomStops = ({
                     <EuiFlexItem>
                       <EuiFieldNumber
                         compressed
-                        data-test-subj={`lnsDatatable_dynamicColoring_stop_value_${index}`}
+                        data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_value_${index}`}
                         value={stop}
                         min={-Infinity}
                         onChange={({ target }) => {
@@ -120,7 +124,7 @@ export const CustomStops = ({
                         }}
                         append={rangeType === 'percent' ? '%' : undefined}
                         aria-label={i18n.translate(
-                          'xpack.lens.table.dynamicColoring.customPalette.stopAriaLabel',
+                          'xpack.lens.dynamicColoring.customPalette.stopAriaLabel',
                           {
                             defaultMessage: 'Stop {index}',
                             values: {
@@ -131,7 +135,7 @@ export const CustomStops = ({
                       />
                     </EuiFlexItem>
                     <EuiFlexItem
-                      data-test-subj={`lnsDatatable_dynamicColoring_stop_color_${index}`}
+                      data-test-subj={`${dataTestPrefix}_dynamicColoring_stop_color_${index}`}
                     >
                       <EuiColorPicker
                         key={stop}
@@ -145,12 +149,14 @@ export const CustomStops = ({
                         isInvalid={!isValidColor(color)}
                         showAlpha
                         compressed
+                        onFocus={() => setPopoverInFocus(true)}
+                        onBlur={() => setPopoverInFocus(false)}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <TooltipWrapper
                         tooltipContent={i18n.translate(
-                          'xpack.lens.table.dynamicColoring.customPalette.deleteButtonDisabled',
+                          'xpack.lens.dynamicColoring.customPalette.deleteButtonDisabled',
                           {
                             defaultMessage:
                               'This color stop cannot be deleted, as two or more stops are required',
@@ -162,13 +168,13 @@ export const CustomStops = ({
                           iconType="trash"
                           color="danger"
                           aria-label={i18n.translate(
-                            'xpack.lens.table.dynamicColoring.customPalette.deleteButtonAriaLabel',
+                            'xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel',
                             {
                               defaultMessage: 'Delete',
                             }
                           )}
                           title={i18n.translate(
-                            'xpack.lens.table.dynamicColoring.customPalette.deleteButtonLabel',
+                            'xpack.lens.dynamicColoring.customPalette.deleteButtonLabel',
                             {
                               defaultMessage: 'Delete',
                             }
@@ -177,7 +183,7 @@ export const CustomStops = ({
                             const newColorStops = localColorStops.filter((_, i) => i !== index);
                             setLocalColorStops(newColorStops);
                           }}
-                          data-test-subj={`lnsDatatable_dynamicColoring_removeStop_${index}`}
+                          data-test-subj={`${dataTestPrefix}_dynamicColoring_removeStop_${index}`}
                           isDisabled={!shouldEnableDelete}
                         />
                       </TooltipWrapper>
@@ -193,15 +199,12 @@ export const CustomStops = ({
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="lnsDatatable_dynamicColoring_addStop"
+              data-test-subj="${dataTestPrefix}_dynamicColoring_addStop"
               iconType="plusInCircle"
               color="primary"
-              aria-label={i18n.translate(
-                'xpack.lens.table.dynamicColoring.customPalette.addColorStop',
-                {
-                  defaultMessage: 'Add color stop',
-                }
-              )}
+              aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
+                defaultMessage: 'Add color stop',
+              })}
               onClick={() => {
                 const newColorStops = [...localColorStops];
                 const length = newColorStops.length;
@@ -211,15 +214,16 @@ export const CustomStops = ({
                   newColorStops.map(({ color, stop }) => ({ color, stop: Number(stop) })),
                   max
                 );
+                const prevColor = localColorStops[length - 1].color || DEFAULT_COLOR;
                 const newStop = step + Number(localColorStops[length - 1].stop);
                 newColorStops.push({
-                  color: DEFAULT_COLOR,
+                  color: prevColor,
                   stop: String(newStop),
                 });
                 setLocalColorStops(newColorStops);
               }}
             >
-              {i18n.translate('xpack.lens.table.dynamicColoring.customPalette.addColorStop', {
+              {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorStop', {
                 defaultMessage: 'Add color stop',
               })}
             </EuiButtonEmpty>

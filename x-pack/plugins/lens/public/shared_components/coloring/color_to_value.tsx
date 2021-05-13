@@ -100,7 +100,7 @@ export function workoutColorForValue(
 }
 
 export function getContrastColor(color: string, isDarkTheme: boolean) {
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorEmptyShade : euiLightVars.euiTextColor;
-  const lightColor = isDarkTheme ? euiDarkVars.euiTextColor : euiLightVars.euiColorEmptyShade;
+  const darkColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorInk;
+  const lightColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorGhost;
   return isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
 }

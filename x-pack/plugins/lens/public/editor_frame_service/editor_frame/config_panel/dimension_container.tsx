@@ -92,18 +92,6 @@ export function DimensionContainer({
                 onClick={closeFlyout}
                 responsive={false}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="text"
-                    data-test-subj="lns-indexPattern-dimensionContainerBack"
-                    className="lnsDimensionContainer__backIcon"
-                    onClick={closeFlyout}
-                    iconType="sortLeft"
-                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
-                      defaultMessage: 'Close configuration',
-                    })}
-                  />
-                </EuiFlexItem>
                 <EuiFlexItem grow={true}>
                   <EuiTitle size="xs">
                     <h2
@@ -120,6 +108,18 @@ export function DimensionContainer({
                       </strong>
                     </h2>
                   </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="text"
+                    data-test-subj="lns-indexPattern-dimensionContainerBack"
+                    className="lnsDimensionContainer__backIcon"
+                    onClick={closeFlyout}
+                    iconType="cross"
+                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                      defaultMessage: 'Close configuration',
+                    })}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutHeader>
