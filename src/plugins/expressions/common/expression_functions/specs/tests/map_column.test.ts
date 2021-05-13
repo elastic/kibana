@@ -35,6 +35,18 @@ describe('mapColumn', () => {
     expect(result.rows[arbitraryRowIndex]).toHaveProperty('pricePlusTwo');
   });
 
+  it('matches name to id when mapColumn is called without an id', async () => {
+    const result = await runFn(testTable, { name: 'name', expression: pricePlusTwo });
+    const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
+    const arbitraryRowIndex = 4;
+
+    expect(result.type).toBe('datatable');
+    expect(result.columns).toHaveLength(sqlTable.columns.length);
+    expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
+    expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
+    expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
+  });
+
   it('overwrites existing column with the new column if an existing column name is missing an id', async () => {
     const result = await runFn(sqlTable, { name: 'name', expression: pricePlusTwo });
     const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
