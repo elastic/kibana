@@ -62,7 +62,7 @@ export const DropdownFilter: FunctionComponent<Props> = ({
 
   /* Commit the value after mount to get the default value. */
   const effectHandler = React.useEffect(() => {
-    const valueExist = choices.some(choice => choice.[0] === value);
+    const valueExist = choices.some(choice => choice[0] === value);
     if (typeof value === "string" && valueExist) {
       commit(value);
     }
