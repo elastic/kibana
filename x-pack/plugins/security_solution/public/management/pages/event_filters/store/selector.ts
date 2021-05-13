@@ -183,3 +183,42 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
     );
   }
 );
+
+export const getDeletionState = createSelector(
+  getCurrentListPageState,
+  (listState) => listState.deletion
+);
+
+export const showDeleteModal: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ item }) => {
+    return Boolean(item);
+  }
+);
+
+export const getItemToDelete: EventFiltersSelector<
+  StoreState['listPage']['deletion']['item']
+> = createSelector(getDeletionState, ({ item }) => item);
+
+export const isDeletionInProgress: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadingResourceState(status);
+  }
+);
+
+export const wasDeletionSuccessful: EventFiltersSelector<boolean> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    return isLoadedResourceState(status);
+  }
+);
+
+export const getDeleteError: EventFiltersSelector<ServerApiError | undefined> = createSelector(
+  getDeletionState,
+  ({ status }) => {
+    if (isFailedResourceState(status)) {
+      return status.error;
+    }
+  }
+);
