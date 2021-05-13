@@ -191,23 +191,6 @@ which is helpful when you want to compare to the whole documentation set.
 image::images/lens_bucketed_aggregation_advanced_dropdown.png[Lens Advanced options for bucketed aggregations]
 
 [float]
-[[is-it-possible-to-use-a-custom-color-palette]]
-===== Is it possible to use a custom color palette?
-
-*Lens* provides a set of pre-defined color palette to apply for the entire visualization.
-
-In the datatable visualization, in *Lens*, there's a new palette editor pattern which enables you either tweak existing predefined palettes, or even to create a custom palette for the column:
-+
-[role="screenshot"]
-image::images/lens_datatable_palette_editor.png[Lens data table palette panel editor]
-+
-[role="screenshot"]
-image::images/lens_datatable_custom_palette.png[Lens data table custom palette panel editor]
-
-The feature is available for numeric columns in the datatable.
-
-
-[float]
 [[is-it-possible-to-select-color-for-specific-bar-or-point]]
 ===== How do I change the color for a single data point?
 
