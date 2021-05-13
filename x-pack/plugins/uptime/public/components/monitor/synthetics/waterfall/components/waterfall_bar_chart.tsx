@@ -34,9 +34,9 @@ const getChartHeight = (data: WaterfallData): number => {
 const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
   const sidebarItem = sidebarItems?.find((item) => item.index === tooltipInfo.header?.value);
-  const relevantItems = data.filter((datum) => {
+  const relevantItems = data.filter((item) => {
     return (
-      datum.x === tooltipInfo.header?.value && datum.config.showTooltip && datum.config.tooltipProps
+      item.x === tooltipInfo.header?.value && item.config.showTooltip && item.config.tooltipProps
     );
   });
   return relevantItems.length ? (
