@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { EuiPanel } from '@elastic/eui';
 
 import { TimelineId } from '../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
-import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
@@ -25,8 +25,14 @@ import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { useThrottledResizeObserver } from '../../common/components/utils';
 import { AppLeaveHandler } from '../../../../../../src/core/public';
+import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
+import { MainNavigation } from './main_navigation';
+import { HeaderGlobal } from './header_global';
+import { IS_DRAGGING_CLASS_NAME } from '../../common/components/drag_and_drop/helpers';
+import { getTimelineShowStatusByIdSelector } from '../../timelines/components/flyout/selectors';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 
-const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
+const StyledEuiPanel = styled(EuiPanel).attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
     paddingTop: `${paddingTop}px`,
   },
@@ -37,7 +43,21 @@ const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   flex: 1 1 auto;
 `;
 
-Main.displayName = 'Main';
+const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
+  $isShowingTimelineOverlay?: boolean;
+}>`
+  .timeline-bottom-bar {
+    background: #ffffff;
+    color: inherit;
+    transform: ${({ $isShowingTimelineOverlay }) =>
+      $isShowingTimelineOverlay ? 'none' : 'translateY(calc(100% - 50px))'};
+    z-index: ${({ theme }) => theme.eui.euiZLevel8};
+
+    .${IS_DRAGGING_CLASS_NAME} & {
+      transform: none;
+    }
+  }
+`;
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -51,6 +71,8 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) =>
   const banners$ = overlays.banners.get$();
   const [headerFixed, setHeaderFixed] = useState<boolean>(true);
   const mainPaddingTop = headerFixed ? height : 0;
+  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+  const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, TimelineId.active));
 
   useEffect(() => {
     const subscription = banners$.subscribe((banners) => setHeaderFixed(!banners.length));
@@ -80,24 +102,43 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, onAppLeave }) =>
   // can remove this.
   useUpgradeEndpointPackage();
 
+  const shouldShowTimelineBottomBar = indicesExist && showTimeline;
   return (
-    <SecuritySolutionAppWrapper>
-      <HeaderGlobal ref={ref} isFixed={headerFixed} />
-
-      <Main paddingTop={mainPaddingTop} data-test-subj="pageContainer">
+    <SecuritySolutionAppWrapper className="kbnAppWrapper">
+      <main className="kbnAppWrapper" data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          {indicesExist && showTimeline && (
-            <>
-              <AutoSaveWarningMsg />
-              <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
-            </>
-          )}
-
-          {children}
+          <StyledKibanaPageTemplate
+            paddingSize="none"
+            pageSideBar={<MainNavigation />}
+            restrictWidth={false}
+            template="default"
+            $isShowingTimelineOverlay={show}
+            bottomBarProps={{
+              // Using a classname to target the bottom bar for the show/hide functionality
+              className: 'timeline-bottom-bar',
+              left: 240,
+              position: 'fixed',
+              usePortal: false,
+            }}
+            bottomBar={
+              shouldShowTimelineBottomBar && (
+                <>
+                  <AutoSaveWarningMsg />
+                  <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
+                </>
+              )
+            }
+          >
+            <EuiPanel color="subdued" paddingSize="none">
+              <HeaderGlobal ref={ref} isFixed={headerFixed} />
+            </EuiPanel>
+            <StyledEuiPanel paddingTop={mainPaddingTop} paddingSize="l" color="transparent">
+              {children}
+            </StyledEuiPanel>
+          </StyledKibanaPageTemplate>
         </DragDropContextWrapper>
-      </Main>
-
+      </main>
       <HelpMenu />
     </SecuritySolutionAppWrapper>
   );
