@@ -12,6 +12,7 @@ export {
   PresentationCapabilitiesService,
   PresentationDashboardsService,
   PresentationLabsService,
+  getStubPluginServices,
 } from './services';
 
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
