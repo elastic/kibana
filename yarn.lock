@@ -2698,7 +2698,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-constants@link:bazel-bin/packages/kbn-securitysolution-constants/npm_module":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils/npm_module":
   version "0.0.0"
   uid ""
 
