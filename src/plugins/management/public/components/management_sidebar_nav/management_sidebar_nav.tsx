@@ -22,8 +22,6 @@ import {
 import { AppMountParameters } from 'kibana/public';
 import { ManagementApp, ManagementSection } from '../../utils';
 
-import './management_sidebar_nav.scss';
-
 import { ManagementItem } from '../../utils/management_item';
 import { reactRouterNavigate } from '../../../../kibana_react/public';
 
@@ -120,7 +118,7 @@ export const ManagementSidebarNav = ({
         toggleOpenOnMobile={toggleOpenOnMobile}
         isOpenOnMobile={isSideNavOpenOnMobile}
         items={sectionsToNavItems(sections)}
-        className="mgtSideBarNav"
+        dataTestSubj="mgtSideBarNav"
       />
     </>
   );

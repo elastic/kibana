@@ -14,7 +14,7 @@ export function ManagementMenuProvider({ getService }: FtrProviderContext) {
   class ManagementMenu {
     public async getSections() {
       const sectionsElements = await find.allByCssSelector(
-        '.mgtSideBarNav > .euiSideNav__content > .euiSideNavItem'
+        '[data-test-subj="mgtSideBarNav"] > .euiSideNav__content > .euiSideNavItem'
       );
 
       const sections = [];

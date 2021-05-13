@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './page_template.scss';
 
 import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { FunctionComponent } from 'react';
 
 export type KibanaPageTemplateProps = EuiPageTemplateProps & {
@@ -63,9 +65,13 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   return (
     <EuiPageTemplate
       template={template}
+      restrictWidth={restrictWidth}
       paddingSize={template === 'centeredBody' ? 'none' : 'l'}
       pageHeader={pageHeader}
-      restrictWidth={restrictWidth}
+      pageSideBarProps={{
+        className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
+        ...rest.pageSideBarProps,
+      }}
       {...localBottomBarProps}
       {...rest}
     >
