@@ -81,6 +81,7 @@ export function getRichDetectors(
       partitionField,
       excludeFrequent: d.exclude_frequent || null,
       description: d.detector_description || null,
+      useNull: d.use_null || null,
     };
   });
 }
