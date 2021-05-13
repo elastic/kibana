@@ -230,7 +230,7 @@ export function setQuery({
   query,
   timeFilters,
   timeslice,
-  filters = [],
+  filters,
   forceRefresh = false,
   searchSessionId,
   searchSessionMapBuffer,
