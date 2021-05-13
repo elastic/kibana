@@ -53,7 +53,7 @@ Also in 7.13, you are no longer required to manually create drilldowns with
 functionality that you’ve already configured. You can copy drilldowns,
 then apply them to other panels on a dashboard, making it faster to
 create an interactive experience between multiple dashboards.
-To learn more, refer to <<drilldowns>>.
+To learn more, refer to {kibana-ref}/drilldowns.html[Create custom dashboard actions].
 
 [float]
 [[alerting-7-13]]
