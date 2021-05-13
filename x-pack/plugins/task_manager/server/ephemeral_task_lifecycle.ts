@@ -12,7 +12,7 @@ import { Logger } from '../../../../src/core/server';
 import { Result, asErr, asOk } from './lib/result_type';
 import { TaskManagerConfig } from './config';
 
-import { TaskEventType } from './task_events';
+import { isTaskRunEvent } from './task_events';
 import { Middleware } from './lib/middleware';
 import { EphemeralTaskInstance } from './task';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -30,7 +30,7 @@ export interface EphemeralTaskLifecycleOpts {
   lifecycleEvent: Observable<TaskLifecycleEvent>;
 }
 
-type EphemeralTaskInstanceRequest = Omit<EphemeralTaskInstance, 'startedAt'>;
+export type EphemeralTaskInstanceRequest = Omit<EphemeralTaskInstance, 'startedAt'>;
 
 /**
  * The public interface into the task manager system.
@@ -72,7 +72,7 @@ export class EphemeralTaskLifecycle {
           // we want to know when the queue has ephemeral task run requests
           (e) =>
             this.ephemeralTaskQueue.size > 0 &&
-            e.type === TaskEventType.TASK_POLLING_CYCLE &&
+            isTaskRunEvent(e) &&
             // and when a polling cycle has just completed,
             // (e.type === TaskEventType.TASK_POLLING_CYCLE ||
             //   // or the "load" in the TaskPool has changed (meaning a task has just completed)
@@ -140,7 +140,7 @@ export class EphemeralTaskLifecycle {
   };
 
   public attemptToRun(task: EphemeralTaskInstanceRequest) {
-    pushIntoSet(this.ephemeralTaskQueue, this.config.request_capacity, task);
+    return pushIntoSet(this.ephemeralTaskQueue, this.config.request_capacity, task);
   }
 
   private createTaskRunnerForTask = (

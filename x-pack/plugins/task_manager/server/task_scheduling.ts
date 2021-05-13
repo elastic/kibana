@@ -12,9 +12,9 @@ import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option'
 
 import uuid from 'uuid';
 import { pick } from 'lodash';
-import { merge } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { Logger } from '../../../../src/core/server';
-import { asOk, either, map, mapErr, promiseResult } from './lib/result_type';
+import { asOk, either, map, mapErr, promiseResult, isErr } from './lib/result_type';
 import {
   isTaskRunEvent,
   isTaskClaimEvent,
@@ -41,6 +41,7 @@ import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fie
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -109,7 +110,7 @@ export class TaskScheduling {
   public async runNow(taskId: string): Promise<RunNowResult> {
     return new Promise(async (resolve, reject) => {
       this.awaitTaskRunResult(taskId)
-        // don't expose state on runNow
+        .promise // don't expose state on runNow
         .then(({ id }) => resolve({ id }))
         .catch(reject);
       this.taskPollingLifecycle.attemptToRun(taskId);
@@ -123,31 +124,42 @@ export class TaskScheduling {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async ephemeralRunNow(
-    tasks: EphemeralTask[],
+    task: EphemeralTask,
     options?: Record<string, unknown>
-  ): Promise<Array<PromiseSettledResult<RunNowResult>>> {
-    return await Promise.allSettled(
-      tasks.map(
-        async (task): Promise<RunNowResult> => {
-          const id = uuid.v4();
-          const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-            ...options,
-            taskInstance: task,
-          });
-          return new Promise(async (resolve, reject) => {
-            this.awaitTaskRunResult(id).then(resolve).catch(reject);
-            this.ephemeralTaskLifecycle.attemptToRun({
-              id,
-              scheduledAt: new Date(),
-              runAt: new Date(),
-              status: TaskStatus.Idle,
-              ownerId: this.taskManagerId,
-              ...modifiedTask,
-            });
-          });
-        }
-      )
-    );
+  ): Promise<RunNowResult> {
+    const id = uuid.v4();
+    const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
+      ...options,
+      taskInstance: task,
+    });
+    return new Promise(async (resolve, reject) => {
+      let ephemeralTaskLifecycleResult = null;
+      const {
+        promise: awaitTaskRunPromise,
+        subscription: awaitTaskRunSubscription,
+      } = this.awaitTaskRunResult(id);
+      awaitTaskRunPromise
+        .then((arg: RunNowResult) => {
+          ephemeralTaskLifecycleResult = 1;
+          resolve(arg);
+        })
+        .catch((err: Error) => {
+          ephemeralTaskLifecycleResult = 0;
+          reject(err);
+        });
+      const attemptToRunResult = this.ephemeralTaskLifecycle.attemptToRun({
+        id,
+        scheduledAt: new Date(),
+        runAt: new Date(),
+        status: TaskStatus.Idle,
+        ownerId: this.taskManagerId,
+        ...modifiedTask,
+      });
+      if (isErr(attemptToRunResult)) {
+        awaitTaskRunSubscription.unsubscribe();
+        reject(new EphemeralTaskRejectedDueToCapacityError('', task));
+      }
+    });
   }
 
   /**
@@ -170,13 +182,15 @@ export class TaskScheduling {
     }
   }
 
-  private async awaitTaskRunResult(taskId: string): Promise<RunNowResult> {
-    return new Promise((resolve, reject) => {
-      const subscription = merge(
-        this.taskPollingLifecycle.events,
-        this.ephemeralTaskLifecycle.events
-      )
-        // listen for all events related to the current task
+  private awaitTaskRunResult(
+    taskId: string
+  ): { promise: Promise<RunNowResult>; subscription: Subscription } {
+    // TODO: CHRIS
+    // I don't love this pattern but working for now to illustrate desired behavior for PoC
+    let subscription: Subscription;
+    const promise = new Promise((resolve, reject) => {
+      // listen for all events related to the current task
+      subscription = merge(this.taskPollingLifecycle.events, this.ephemeralTaskLifecycle.events)
         .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
         .subscribe((taskEvent: TaskLifecycleEvent) => {
           if (isTaskClaimEvent(taskEvent)) {
@@ -231,6 +245,9 @@ export class TaskScheduling {
           }
         });
     });
+
+    // @ts-ignore
+    return { promise, subscription };
   }
 
   private async identifyTaskFailureReason(taskId: string, error: Option<ConcreteTaskInstance>) {

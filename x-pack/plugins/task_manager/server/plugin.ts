@@ -181,8 +181,8 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
-      ephemeralRunNow: (tasks: EphemeralTask[], options?: Record<string, unknown>) =>
-        taskScheduling.ephemeralRunNow(tasks),
+      ephemeralRunNow: (task: EphemeralTask, options?: Record<string, unknown>) =>
+        taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled,
       getEphemeralTasksPerCycle: () => this.config.ephemeral_tasks.max_per_cycle,
     };
