@@ -30,12 +30,15 @@ const MyFlexItem = styled(EuiFlexItem)`
   }
 `;
 
-interface ExceptionItemProps {
+export interface ExceptionItemProps {
   loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
+  showName?: boolean;
+  showModified?: boolean;
+  'data-test-subj'?: string;
 }
 
 const ExceptionItemComponent = ({
@@ -44,6 +47,9 @@ const ExceptionItemComponent = ({
   commentsAccordionId,
   onDeleteException,
   onEditException,
+  showModified = false,
+  showName = false,
+  'data-test-subj': dataTestSubj,
 }: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -78,7 +84,7 @@ const ExceptionItemComponent = ({
   }, [loadingItemIds, exceptionItem.id]);
 
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">
@@ -86,6 +92,8 @@ const ExceptionItemComponent = ({
               showComments={showComments}
               exceptionItem={exceptionItem}
               onCommentsClick={onCommentsClick}
+              showModified={showModified}
+              showName={showName}
             />
             <ExceptionEntries
               disableDelete={disableDelete}

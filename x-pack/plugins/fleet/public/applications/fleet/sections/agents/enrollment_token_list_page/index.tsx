@@ -31,7 +31,7 @@ import {
   useStartServices,
   sendDeleteOneEnrollmentAPIKey,
 } from '../../../hooks';
-import type { EnrollmentAPIKey } from '../../../types';
+import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
 
 import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
@@ -171,9 +171,21 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   });
 
   const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
+  const agentPoliciesById = agentPolicies.reduce(
+    (acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
+      acc[policy.id] = policy;
+      return acc;
+    },
+    {}
+  );
 
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
-  const items = enrollmentAPIKeysRequest?.data?.list ?? [];
+  const rowItems =
+    enrollmentAPIKeysRequest?.data?.list.filter((enrollmentKey) => {
+      if (!agentPolicies.length || !enrollmentKey.policy_id) return false;
+      const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
+      return !agentPolicy?.is_managed;
+    }) || [];
 
   const columns = [
     {
@@ -203,7 +215,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string) => {
-        const agentPolicy = agentPolicies.find((c) => c.id === policyId);
+        const agentPolicy = agentPoliciesById[policyId];
         const value = agentPolicy ? agentPolicy.name : policyId;
         return (
           <span className="eui-textTruncate" title={value}>
@@ -314,7 +326,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
             />
           )
         }
-        items={total ? items : []}
+        items={total ? rowItems : []}
         itemId="id"
         columns={columns}
         pagination={{

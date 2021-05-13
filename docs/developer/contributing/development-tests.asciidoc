@@ -19,7 +19,7 @@ root)
 
 |Functional
 |`test/**/config.js` `x-pack/test/**/config.js`
-|`node scripts/functional_tests_server --config [directory]/config.js``node scripts/functional_test_runner_ --config [directory]/config.js --grep=regexp`
+|`node scripts/functional_tests_server --config [directory]/config.js` `node scripts/functional_test_runner --config [directory]/config.js --grep=regexp`
 |===
 
 Test runner arguments: - Where applicable, the optional arguments

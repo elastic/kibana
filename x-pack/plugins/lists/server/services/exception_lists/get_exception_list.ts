@@ -5,17 +5,14 @@
  * 2.0.
  */
 
+import { IdOrUndefined, NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+
 import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server/';
-import {
-  ExceptionListSchema,
-  ExceptionListSoSchema,
-  IdOrUndefined,
-  ListIdOrUndefined,
-  NamespaceType,
-} from '../../../common/schemas';
+import { ExceptionListSchema, ListIdOrUndefined } from '../../../common/schemas';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
 

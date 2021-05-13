@@ -12,7 +12,10 @@ import { ResponseError } from '../../public/application/lib/api';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadStatusResponse = (response?: UpgradeAssistantStatus, error?: ResponseError) => {
+  const setLoadEsDeprecationsResponse = (
+    response?: UpgradeAssistantStatus,
+    error?: ResponseError
+  ) => {
     const status = error ? error.statusCode || 400 : 200;
     const body = error ? error : response;
 
@@ -60,7 +63,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   return {
-    setLoadStatusResponse,
+    setLoadEsDeprecationsResponse,
     setLoadDeprecationLoggingResponse,
     setUpdateDeprecationLoggingResponse,
     setUpdateIndexSettingsResponse,

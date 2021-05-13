@@ -30,6 +30,86 @@ interface ColumnChange {
   shouldResetLabel?: boolean;
 }
 
+interface ColumnCopy {
+  layer: IndexPatternLayer;
+  columnId: string;
+  sourceColumn: IndexPatternColumn;
+  sourceColumnId: string;
+  indexPattern: IndexPattern;
+  shouldDeleteSource?: boolean;
+}
+
+export function copyColumn({
+  layer,
+  columnId,
+  sourceColumn,
+  shouldDeleteSource,
+  indexPattern,
+  sourceColumnId,
+}: ColumnCopy): IndexPatternLayer {
+  let modifiedLayer = {
+    ...layer,
+    columns: copyReferencesRecursively(layer.columns, sourceColumn, columnId),
+  };
+
+  if (shouldDeleteSource) {
+    modifiedLayer = deleteColumn({
+      layer: modifiedLayer,
+      columnId: sourceColumnId,
+      indexPattern,
+    });
+  }
+
+  return modifiedLayer;
+}
+
+function copyReferencesRecursively(
+  columns: Record<string, IndexPatternColumn>,
+  sourceColumn: IndexPatternColumn,
+  columnId: string
+) {
+  if ('references' in sourceColumn) {
+    if (columns[columnId]) {
+      return columns;
+    }
+    sourceColumn?.references.forEach((ref, index) => {
+      // TODO: Add an option to assign IDs without generating the new one
+      const newId = generateId();
+      const refColumn = { ...columns[ref] };
+
+      // TODO: For fullReference types, now all references are hidden columns,
+      // but in the future we will have references to visible columns
+      // and visible columns shouldn't be copied
+      const refColumnWithInnerRefs =
+        'references' in refColumn
+          ? copyReferencesRecursively(columns, refColumn, newId) // if a column has references, copy them too
+          : { [newId]: refColumn };
+
+      const newColumn = columns[columnId];
+      let references = [newId];
+      if (newColumn && 'references' in newColumn) {
+        references = newColumn.references;
+        references[index] = newId;
+      }
+
+      columns = {
+        ...columns,
+        ...refColumnWithInnerRefs,
+        [columnId]: {
+          ...sourceColumn,
+          references,
+        },
+      };
+    });
+  } else {
+    columns = {
+      ...columns,
+      [columnId]: sourceColumn,
+    };
+  }
+  return columns;
+}
+
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
   if (args.layer.columns[args.columnId]) {
     return replaceColumn(args);
@@ -712,7 +792,12 @@ function addBucket(
     // they already had, with an extra level of detail.
     updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
   }
-  reorderByGroups(visualizationGroups, targetGroup, updatedColumnOrder, addedColumnId);
+  updatedColumnOrder = reorderByGroups(
+    visualizationGroups,
+    targetGroup,
+    updatedColumnOrder,
+    addedColumnId
+  );
   const tempLayer = {
     ...resetIncomplete(layer, addedColumnId),
     columns: { ...layer.columns, [addedColumnId]: column },
@@ -749,16 +834,24 @@ export function reorderByGroups(
     });
     const columnGroupIndex: Record<string, number> = {};
     updatedColumnOrder.forEach((columnId) => {
-      columnGroupIndex[columnId] = orderedVisualizationGroups.findIndex(
+      const groupIndex = orderedVisualizationGroups.findIndex(
         (group) =>
           (columnId === addedColumnId && group.groupId === targetGroup) ||
           group.accessors.some((acc) => acc.columnId === columnId)
       );
+      if (groupIndex !== -1) {
+        columnGroupIndex[columnId] = groupIndex;
+      } else {
+        // referenced columns won't show up in visualization groups - put them in the back of the list. This will work as they are always metrics
+        columnGroupIndex[columnId] = updatedColumnOrder.length;
+      }
     });
 
-    updatedColumnOrder.sort((a, b) => {
+    return [...updatedColumnOrder].sort((a, b) => {
       return columnGroupIndex[a] - columnGroupIndex[b];
     });
+  } else {
+    return updatedColumnOrder;
   }
 }
 
@@ -899,12 +992,8 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
   });
 
-  const [direct, referenceBased] = _.partition(
-    entries,
-    ([, col]) => operationDefinitionMap[col.operationType].input !== 'fullReference'
-  );
   // If a reference has another reference as input, put it last in sort order
-  referenceBased.sort(([idA, a], [idB, b]) => {
+  entries.sort(([idA, a], [idB, b]) => {
     if ('references' in a && a.references.includes(idB)) {
       return 1;
     }
@@ -913,12 +1002,9 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     }
     return 0;
   });
-  const [aggregations, metrics] = _.partition(direct, ([, col]) => col.isBucketed);
+  const [aggregations, metrics] = _.partition(entries, ([, col]) => col.isBucketed);
 
-  return aggregations
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id))
-    .concat(referenceBased.map(([id]) => id));
+  return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
 
 // Splits existing columnOrder into the three categories

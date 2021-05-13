@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic
 interface Props {
   value: string;
   placeholder: string;
+  autoFocus: boolean;
   onChange(newValue: string): void;
   onDelete(): void;
   disableDelete: boolean;
@@ -23,6 +24,7 @@ import './input_row.scss';
 export const InputRow: React.FC<Props> = ({
   value,
   placeholder,
+  autoFocus,
   onChange,
   onDelete,
   disableDelete,
@@ -35,7 +37,7 @@ export const InputRow: React.FC<Props> = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        autoFocus
+        autoFocus={autoFocus}
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>

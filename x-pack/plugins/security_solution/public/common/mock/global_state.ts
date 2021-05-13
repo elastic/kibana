@@ -39,6 +39,12 @@ export const mockGlobalState: State = {
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
+    enableExperimental: {
+      eventFilteringEnabled: false,
+      trustedAppsByPolicyEnabled: false,
+      metricsEntitiesEnabled: false,
+      hostIsolationEnabled: false,
+    },
   },
   hosts: {
     page: {

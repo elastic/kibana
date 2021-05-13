@@ -11,7 +11,7 @@ import { ESFilter } from 'typings/elasticsearch';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
 interface CommonProps {
-  value?: string;
+  selectedValue?: string[];
   label: string;
   button?: JSX.Element;
   width?: number;
@@ -24,14 +24,15 @@ interface CommonProps {
 export type FieldValueSuggestionsProps = CommonProps & {
   indexPattern: IndexPattern;
   sourceField: string;
-  onChange: (val?: string) => void;
+  asCombobox?: boolean;
+  onChange: (val?: string[]) => void;
   filters: ESFilter[];
   time?: { from: string; to: string };
 };
 
 export type FieldValueSelectionProps = CommonProps & {
   loading?: boolean;
-  onChange: (val?: string) => void;
+  onChange: (val?: string[]) => void;
   values?: string[];
   setQuery: Dispatch<SetStateAction<string>>;
 };

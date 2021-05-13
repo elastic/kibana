@@ -32,6 +32,7 @@ describe('dateHistogram(req, panel, series)', () => {
       index_pattern: '*',
       time_field: '@timestamp',
       interval: '10s',
+      id: 'panelId',
     };
     series = { id: 'test' };
     config = {
@@ -89,6 +90,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -130,6 +132,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '10s',
             timeField: '@timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -174,6 +177,7 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '20s',
             timeField: 'timestamp',
             seriesId: 'test',
+            panelId: 'panelId',
           },
         },
       },
@@ -230,6 +234,7 @@ describe('dateHistogram(req, panel, series)', () => {
               seriesId: 'test',
               bucketSize: 10,
               intervalString: '10s',
+              panelId: 'panelId',
             },
           },
         },

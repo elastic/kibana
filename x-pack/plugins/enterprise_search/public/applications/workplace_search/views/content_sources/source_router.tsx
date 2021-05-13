@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch, useParams } from 'react-router-dom';
+
+import { Route, Switch, useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import moment from 'moment';
@@ -47,14 +48,18 @@ import { SourceLogic } from './source_logic';
 
 export const SourceRouter: React.FC = () => {
   const { sourceId } = useParams() as { sourceId: string };
+  const { pathname } = useLocation();
   const { initializeSource, resetSourceState } = useActions(SourceLogic);
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
     initializeSource(sourceId);
-    return resetSourceState;
-  }, []);
+    return () => {
+      // We only want to reset the state when leaving the source section. Otherwise there is an unwanted flash of UI.
+      if (!pathname.includes(sourceId)) resetSourceState();
+    };
+  }, [pathname]);
 
   if (dataLoading) return <Loading />;
 

@@ -8,6 +8,7 @@
 import { noop } from 'lodash/fp';
 import React from 'react';
 
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../constants';
 import { OnFilterChange } from '../../../events';
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { TextFilter } from '../text_filter';
@@ -24,7 +25,7 @@ export const Filter = React.memo<Props>(({ header, onFilterChange = noop }) => {
       return (
         <TextFilter
           columnId={header.id}
-          minWidth={header.width}
+          minWidth={header.initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH}
           onFilterChange={onFilterChange}
           placeholder={header.placeholder}
         />

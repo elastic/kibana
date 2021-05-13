@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { id } from '@kbn/securitysolution-io-ts-utils';
 
-import { id, list_id, value } from '../common/schemas';
+import { list_id, value } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const readListItemSchema = t.exact(t.partial({ id, list_id, value }));

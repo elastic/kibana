@@ -1,0 +1,5 @@
+{
+  "modules": ["host_metrics"],
+  "indices": ["auditbeat-*"],
+  "prefix": ["default_"]
+}

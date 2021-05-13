@@ -13,7 +13,9 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  */
 const allowedExperimentalValues = Object.freeze({
   trustedAppsByPolicyEnabled: false,
+  metricsEntitiesEnabled: false,
   eventFilteringEnabled: false,
+  hostIsolationEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

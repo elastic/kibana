@@ -43,6 +43,11 @@ jest.mock('./services', () => {
   };
   service.registerFunction(testFn);
 
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  for (const func of require('../common/test_helpers/expression_functions').functionTestSpecs) {
+    service.registerFunction(func);
+  }
+
   const moduleMock = {
     __execution: undefined,
     __getLastExecution: () => moduleMock.__execution,
@@ -144,7 +149,7 @@ describe('ExpressionLoader', () => {
   });
 
   it('cancels the previous request when the expression is updated', () => {
-    const expressionLoader = new ExpressionLoader(element, 'var foo', {});
+    const expressionLoader = new ExpressionLoader(element, 'sleep 10', {});
     const execution = __getLastExecution();
     jest.spyOn(execution, 'cancel');
 

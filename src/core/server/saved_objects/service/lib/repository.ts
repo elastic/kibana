@@ -1174,13 +1174,13 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: SavedObjectsUpdateOptions = {}
+    options: SavedObjectsUpdateOptions<T> = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, references, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: SavedObjectsRawDoc | undefined;
@@ -1189,6 +1189,30 @@ export class SavedObjectsRepository {
     }
 
     const time = this._getCurrentTime();
+
+    let rawUpsert: SavedObjectsRawDoc | undefined;
+    if (upsert) {
+      let savedObjectNamespace: string | undefined;
+      let savedObjectNamespaces: string[] | undefined;
+
+      if (this._registry.isSingleNamespace(type) && namespace) {
+        savedObjectNamespace = namespace;
+      } else if (this._registry.isMultiNamespace(type)) {
+        savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
+      }
+
+      const migrated = this._migrator.migrateDocument({
+        id,
+        type,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+        attributes: {
+          ...upsert,
+        },
+        updated_at: time,
+      });
+      rawUpsert = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
+    }
 
     const doc = {
       [type]: attributes,
@@ -1205,6 +1229,7 @@ export class SavedObjectsRepository {
 
         body: {
           doc,
+          ...(rawUpsert && { upsert: rawUpsert._source }),
         },
         _source_includes: ['namespace', 'namespaces', 'originId'],
         require_alias: true,
@@ -1917,10 +1942,7 @@ export class SavedObjectsRepository {
       ...(preference ? { preference } : {}),
     };
 
-    const {
-      body,
-      statusCode,
-    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(
+    const { body, statusCode } = await this.client.openPointInTime(
       // @ts-expect-error @elastic/elasticsearch OpenPointInTimeRequest.index expected to accept string[]
       esOptions,
       {

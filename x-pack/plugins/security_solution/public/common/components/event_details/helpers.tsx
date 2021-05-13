@@ -98,7 +98,7 @@ export const getColumnHeaderFromBrowserField = ({
   id: browserField.name || '',
   type: browserField.type,
   aggregatable: browserField.aggregatable,
-  width,
+  initialWidth: width,
 });
 
 /**

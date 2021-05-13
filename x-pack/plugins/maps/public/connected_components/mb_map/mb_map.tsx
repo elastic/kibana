@@ -26,7 +26,7 @@ import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { MapSettings } from '../../reducers/map';
-import { Goto } from '../../../common/descriptor_types';
+import { Goto, MapCenterAndZoom } from '../../../common/descriptor_types';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
@@ -35,8 +35,12 @@ import {
 } from '../../../common/constants';
 import { getGlyphUrl, isRetina } from '../../util';
 import { syncLayerOrder } from './sort_layers';
-// @ts-expect-error
-import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';
+import {
+  addSpriteSheetToMapFromImageData,
+  loadSpriteSheetImageData,
+  removeOrphanedSourcesAndLayers,
+  // @ts-expect-error
+} from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
@@ -172,8 +176,7 @@ export class MBMap extends Component<Props, State> {
     };
   }
 
-  async _createMbMapInstance(): Promise<MapboxMap> {
-    const initialView = await getInitialView(this.props.goto, this.props.settings);
+  async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
     return new Promise((resolve) => {
       const mbStyle = {
         version: 8,
@@ -237,9 +240,14 @@ export class MBMap extends Component<Props, State> {
   }
 
   async _initializeMap() {
+    const initialView = await getInitialView(this.props.goto, this.props.settings);
+    if (!this._isMounted) {
+      return;
+    }
+
     let mbMap: MapboxMap;
     try {
-      mbMap = await this._createMbMapInstance();
+      mbMap = await this._createMbMapInstance(initialView);
     } catch (error) {
       this.props.setMapInitError(error.message);
       return;
@@ -293,10 +301,13 @@ export class MBMap extends Component<Props, State> {
     });
   }
 
-  _loadMakiSprites(mbMap: MapboxMap) {
-    const sprites = isRetina() ? sprites2 : sprites1;
+  async _loadMakiSprites(mbMap: MapboxMap) {
+    const spritesUrl = isRetina() ? sprites2 : sprites1;
     const json = isRetina() ? spritesheet[2] : spritesheet[1];
-    addSpritesheetToMap(json, sprites, mbMap);
+    const spritesData = await loadSpriteSheetImageData(spritesUrl);
+    if (this._isMounted) {
+      addSpriteSheetToMapFromImageData(json, spritesData, mbMap);
+    }
   }
 
   _syncMbMapWithMapState = () => {

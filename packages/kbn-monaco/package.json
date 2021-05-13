@@ -10,9 +10,6 @@
     "kbn:bootstrap": "yarn build --dev",
     "build:antlr4ts": "../../node_modules/antlr4ts-cli/antlr4ts ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js"
   },
-  "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils"
-  },
   "dependencies": {
     "@kbn/i18n": "link:../kbn-i18n"
   }

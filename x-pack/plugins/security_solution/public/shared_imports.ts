@@ -59,4 +59,6 @@ export {
   addEndpointExceptionList,
   withOptionalSignal,
   ExceptionBuilder,
+  transformNewItemOutput,
+  transformOutput,
 } from '../../lists/public';

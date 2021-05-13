@@ -22,6 +22,8 @@ import {
   EuiFormRow,
   EuiText,
   EuiCallOut,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import {
   hasEqlSequenceQuery,
@@ -60,6 +62,7 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import { OsTypeArray, OsType } from '../../../../../../lists/common/schemas';
 
 export interface AddExceptionModalProps {
   ruleName: string;
@@ -293,6 +296,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
+  const hasAlertData = useMemo((): boolean => {
+    return alertData !== undefined;
+  }, [alertData]);
+
+  const [selectedOs, setSelectedOs] = useState<OsType | undefined>();
+
+  const osTypesSelection = useMemo((): OsTypeArray => {
+    return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [selectedOs] : [];
+  }, [hasAlertData, alertData, selectedOs]);
+
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
   > => {
@@ -302,11 +315,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = retrieveAlertOsTypes(alertData);
+      const osTypes = osTypesSelection;
       enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
-  }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, osTypesSelection]);
 
   const onAddExceptionConfirm = useCallback((): void => {
     if (addOrUpdateExceptionItems != null) {
@@ -343,10 +356,55 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return false;
   }, [maybeRule]);
 
+  const OsOptions: Array<EuiComboBoxOptionOption<OsType>> = useMemo((): Array<
+    EuiComboBoxOptionOption<OsType>
+  > => {
+    return [
+      {
+        label: sharedI18n.OPERATING_SYSTEM_WINDOWS,
+        value: 'windows',
+      },
+      {
+        label: sharedI18n.OPERATING_SYSTEM_MAC,
+        value: 'macos',
+      },
+      {
+        label: sharedI18n.OPERATING_SYSTEM_LINUX,
+        value: 'linux',
+      },
+    ];
+  }, []);
+
+  const handleOSSelectionChange = useCallback(
+    (selectedOptions): void => {
+      setSelectedOs(selectedOptions[0].value);
+    },
+    [setSelectedOs]
+  );
+
+  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsType>> => {
+    return OsOptions.filter((option) => {
+      return selectedOs === option.value;
+    });
+  }, [selectedOs, OsOptions]);
+
+  const singleSelectionOptions = useMemo(() => {
+    return { asPlainText: true };
+  }, []);
+
+  const hasOsSelection = useMemo(() => {
+    return exceptionListType === 'endpoint' && !hasAlertData;
+  }, [exceptionListType, hasAlertData]);
+
+  const isExceptionBuilderFormDisabled = useMemo(() => {
+    return hasOsSelection && selectedOs === undefined;
+  }, [hasOsSelection, selectedOs]);
+
   return (
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
       <ModalHeader>
         <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
+        <EuiSpacer size="xs" />
         <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
           {ruleName}
         </ModalHeaderSubtitle>
@@ -395,6 +453,22 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
+              {exceptionListType === 'endpoint' && !hasAlertData && (
+                <>
+                  <EuiFormRow label={sharedI18n.OPERATING_SYSTEM_LABEL}>
+                    <EuiComboBox
+                      placeholder={i18n.OPERATING_SYSTEM_PLACEHOLDER}
+                      singleSelection={singleSelectionOptions}
+                      options={OsOptions}
+                      selectedOptions={selectedOStoOptions}
+                      onChange={handleOSSelectionChange}
+                      isClearable={false}
+                      data-test-subj="os-selection-dropdown"
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="l" />
+                </>
+              )}
               <ExceptionBuilder.ExceptionBuilderComponent
                 allowLargeValueLists={
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
@@ -403,17 +477,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 autocompleteService={data.autocomplete}
                 exceptionListItems={initialExceptionItems}
                 listType={exceptionListType}
+                osTypes={osTypesSelection}
                 listId={ruleExceptionList.list_id}
                 listNamespaceType={ruleExceptionList.namespace_type}
                 listTypeSpecificIndexPatternFilter={filterIndexPatterns}
                 ruleName={ruleName}
                 indexPatterns={indexPatterns}
-                isOrDisabled={false}
-                isAndDisabled={false}
-                isNestedDisabled={false}
+                isOrDisabled={isExceptionBuilderFormDisabled}
+                isAndDisabled={isExceptionBuilderFormDisabled}
+                isNestedDisabled={isExceptionBuilderFormDisabled}
                 data-test-subj="alert-exception-builder"
                 id-aria="alert-exception-builder"
                 onChange={handleBuilderOnChange}
+                isDisabled={isExceptionBuilderFormDisabled}
               />
 
               <EuiSpacer />
@@ -450,7 +526,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               </EuiFormRow>
               {exceptionListType === 'endpoint' && (
                 <>
-                  <EuiSpacer />
+                  <EuiSpacer size="s" />
                   <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
                     {i18n.ENDPOINT_QUARANTINE_TEXT}
                   </EuiText>

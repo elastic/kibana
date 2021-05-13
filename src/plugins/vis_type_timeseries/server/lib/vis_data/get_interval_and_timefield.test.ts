@@ -7,14 +7,14 @@
  */
 
 import { getIntervalAndTimefield } from './get_interval_and_timefield';
-import { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../common/types';
+import { FetchedIndexPattern, Panel, Series } from '../../../common/types';
 
 describe('getIntervalAndTimefield(panel, series)', () => {
   const index: FetchedIndexPattern = {} as FetchedIndexPattern;
 
   test('returns the panel interval and timefield', () => {
-    const panel = { time_field: '@timestamp', interval: 'auto' } as PanelSchema;
-    const series = {} as SeriesItemsSchema;
+    const panel = { time_field: '@timestamp', interval: 'auto' } as Panel;
+    const series = {} as Series;
 
     expect(getIntervalAndTimefield(panel, series, index)).toEqual({
       timeField: '@timestamp',
@@ -23,12 +23,12 @@ describe('getIntervalAndTimefield(panel, series)', () => {
   });
 
   test('returns the series interval and timefield', () => {
-    const panel = { time_field: '@timestamp', interval: 'auto' } as PanelSchema;
+    const panel = { time_field: '@timestamp', interval: 'auto' } as Panel;
     const series = ({
       override_index_pattern: true,
       series_interval: '1m',
       series_time_field: 'time',
-    } as unknown) as SeriesItemsSchema;
+    } as unknown) as Series;
 
     expect(getIntervalAndTimefield(panel, series, index)).toEqual({
       timeField: 'time',

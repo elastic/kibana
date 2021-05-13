@@ -82,7 +82,7 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
   ) {
     return (
       <div style={{ width: pct(50) }}>
-        <EuiLoadingContent />
+        <EuiLoadingContent data-test-subj="loadingSpinner" />
       </div>
     );
   }

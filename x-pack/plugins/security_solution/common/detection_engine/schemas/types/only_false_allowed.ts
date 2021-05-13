@@ -13,6 +13,7 @@ import { Either } from 'fp-ts/lib/Either';
  *   - If null or undefined, then a default false will be set
  *   - If true is sent in then this will return an error
  *   - If false is sent in then this will allow it only false
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const OnlyFalseAllowed = new t.Type<boolean, boolean | undefined, unknown>(
   'DefaultBooleanTrue',

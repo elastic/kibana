@@ -260,11 +260,16 @@ export class AlertsClient {
     );
     const username = await this.getUserName();
 
-    const createdAPIKey = data.enabled
-      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
-      : null;
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = data.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+    }
 
-    this.validateActions(alertType, data.actions);
+    await this.validateActions(alertType, data.actions);
 
     const createTime = Date.now();
     const { references, actions } = await this.denormalizeActions(data.actions);
@@ -723,13 +728,20 @@ export class AlertsClient {
       data.params,
       alertType.validate?.params
     );
-    this.validateActions(alertType, data.actions);
+    await this.validateActions(alertType, data.actions);
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const createdAPIKey = attributes.enabled
-      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
-      : null;
+
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = attributes.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
+    }
+
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
@@ -837,12 +849,21 @@ export class AlertsClient {
     }
 
     const username = await this.getUserName();
+
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = await this.createAPIKey(
+        this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+      );
+    } catch (error) {
+      throw Boom.badRequest(
+        `Error updating API key for rule: could not create API key - ${error.message}`
+      );
+    }
+
     const updateAttributes = this.updateMeta({
       ...attributes,
-      ...this.apiKeyAsAlertAttributes(
-        await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-        username
-      ),
+      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       updatedAt: new Date().toISOString(),
       updatedBy: username,
     });
@@ -944,13 +965,20 @@ export class AlertsClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
+
+      let createdAPIKey = null;
+      try {
+        createdAPIKey = await this.createAPIKey(
+          this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+        );
+      } catch (error) {
+        throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
+      }
+
       const updateAttributes = this.updateMeta({
         ...attributes,
         enabled: true,
-        ...this.apiKeyAsAlertAttributes(
-          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-          username
-        ),
+        ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
       });
@@ -1406,10 +1434,36 @@ export class AlertsClient {
     };
   }
 
-  private validateActions(
+  private async validateActions(
     alertType: UntypedNormalizedAlertType,
     actions: NormalizedAlertAction[]
-  ): void {
+  ): Promise<void> {
+    if (actions.length === 0) {
+      return;
+    }
+
+    // check for actions using connectors with missing secrets
+    const actionsClient = await this.getActionsClient();
+    const actionIds = [...new Set(actions.map((action) => action.id))];
+    const actionResults = (await actionsClient.getBulk(actionIds)) || [];
+    const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
+      (result) => result.isMissingSecrets
+    );
+
+    if (actionsUsingConnectorsWithMissingSecrets.length) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.alerting.alertsClient.validateActions.misconfiguredConnector', {
+          defaultMessage: 'Invalid connectors: {groups}',
+          values: {
+            groups: actionsUsingConnectorsWithMissingSecrets
+              .map((connector) => connector.name)
+              .join(', '),
+          },
+        })
+      );
+    }
+
+    // check for actions with invalid action groups
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));

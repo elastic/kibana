@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Promise<any>;
+resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
 ```
 
 ## Parameters
@@ -20,5 +20,5 @@ resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Promise<an
 
 <b>Returns:</b>
 
-`Promise<any>`
+`Observable<any>`
 

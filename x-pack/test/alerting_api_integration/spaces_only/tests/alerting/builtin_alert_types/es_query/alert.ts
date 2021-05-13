@@ -53,9 +53,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
       // write documents in the future, figure out the end date
       const endDateMillis = Date.now() + (ALERT_INTERVALS_TO_WRITE - 1) * ALERT_INTERVAL_MILLIS;
       endDate = new Date(endDateMillis).toISOString();
-
-      // write documents from now to the future end date in groups
-      createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
     });
 
     afterEach(async () => {
@@ -65,6 +62,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: threshold on hit count < >', async () => {
+      // write documents from now to the future end date in groups
+      createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+
       await createAlert({
         name: 'never fire',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -104,6 +104,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly with query: threshold on hit count < >', async () => {
+      // write documents from now to the future end date in groups
+      createEsDocumentsInGroups(ES_GROUPS_TO_WRITE);
+
       const rangeQuery = (rangeThreshold: number) => {
         return {
           query: {
@@ -126,8 +129,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         name: 'never fire',
         esQuery: JSON.stringify(rangeQuery(ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE + 1)),
         size: 100,
-        thresholdComparator: '>=',
-        threshold: [0],
+        thresholdComparator: '<',
+        threshold: [-1],
       });
 
       await createAlert({
@@ -151,6 +154,37 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
         expect(previousTimestamp).to.be.empty();
+      }
+    });
+
+    it('runs correctly: no matches', async () => {
+      await createAlert({
+        name: 'always fire',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        thresholdComparator: '<',
+        threshold: [1],
+      });
+
+      const docs = await waitForDocs(1);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { previousTimestamp, hits } = doc._source;
+        const { name, title, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+        expect(title).to.be(`alert 'always fire' matched query`);
+        const messagePattern = /alert 'always fire' is active:\n\n- Value: 0+\n- Conditions Met: Number of matching documents is less than 1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
+        expect(hits).to.be.empty();
+
+        // during the first execution, the latestTimestamp value should be empty
+        // since this alert always fires, the latestTimestamp value should be updated each execution
+        if (!i) {
+          expect(previousTimestamp).to.be.empty();
+        } else {
+          expect(previousTimestamp).not.to.be.empty();
+        }
       }
     });
 

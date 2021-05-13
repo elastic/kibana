@@ -10,12 +10,12 @@ import { setMockSearchContextState } from './__mocks__/hooks.mock';
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 // @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaType } from '../../../../shared/schema/types';
 
 import { Pagination } from './pagination';
 import { SearchExperienceContent } from './search_experience_content';
@@ -33,7 +33,7 @@ describe('SearchExperienceContent', () => {
     myRole: { canManageEngineDocuments: true },
     engine: {
       schema: {
-        title: 'string' as SchemaTypes,
+        title: SchemaType.Text,
       },
     },
   };
@@ -113,81 +113,15 @@ describe('SearchExperienceContent', () => {
     expect(wrapper.find('[data-test-subj="documentsSearchNoResults"]').length).toBe(1);
   });
 
-  describe('when an empty search was performed and there are no results, meaning there are no documents indexed', () => {
-    beforeEach(() => {
-      setMockSearchContextState({
-        ...searchState,
-        resultSearchTerm: '',
-        wasSearched: true,
-        totalResults: 0,
-      });
+  it('renders empty if an empty search was performed and there are no results', () => {
+    // In a real world scenario this does not happen - wasSearched returns false before this final branch
+    setMockSearchContextState({
+      ...searchState,
+      resultSearchTerm: '',
+      totalResults: 0,
+      wasSearched: true,
     });
-
-    it('renders a no documents message', () => {
-      const wrapper = shallow(<SearchExperienceContent />);
-      expect(wrapper.find('[data-test-subj="documentsSearchResults"]').length).toBe(0);
-      expect(wrapper.find('[data-test-subj="documentsSearchNoDocuments"]').length).toBe(1);
-    });
-
-    it('will include a button to index new documents', () => {
-      const wrapper = mount(<SearchExperienceContent />);
-      expect(
-        wrapper
-          .find(
-            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="IndexDocumentsButton"]'
-          )
-          .exists()
-      ).toBe(true);
-    });
-
-    it('will include a button to documentation if this is a meta engine', () => {
-      setMockValues({
-        ...values,
-        isMetaEngine: true,
-      });
-
-      const wrapper = mount(<SearchExperienceContent />);
-
-      expect(
-        wrapper
-          .find(
-            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="IndexDocumentsButton"]'
-          )
-          .exists()
-      ).toBe(false);
-
-      expect(
-        wrapper
-          .find(
-            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="documentsSearchDocsLink"]'
-          )
-          .exists()
-      ).toBe(true);
-    });
-
-    it('will include a button to documentation if the user cannot manage documents', () => {
-      setMockValues({
-        ...values,
-        myRole: { canManageEngineDocuments: false },
-      });
-
-      const wrapper = mount(<SearchExperienceContent />);
-
-      expect(
-        wrapper
-          .find(
-            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="IndexDocumentsButton"]'
-          )
-          .exists()
-      ).toBe(false);
-
-      expect(
-        wrapper
-          .find(
-            '[data-test-subj="documentsSearchNoDocuments"] [data-test-subj="documentsSearchDocsLink"]'
-          )
-          .exists()
-      ).toBe(true);
-    });
+    const wrapper = shallow(<SearchExperienceContent />);
+    expect(wrapper.isEmptyRender()).toBe(true);
   });
 });

@@ -8,7 +8,7 @@
 import { Dispatch, useMemo, useReducer, useEffect, useRef } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 
-import { errorToToaster, useStateToaster } from '../../../../../common/components/toasters';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 
 import { fetchRules } from '../api';
@@ -65,9 +65,9 @@ export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn 
   const reducer = useMemo(() => createRulesTableReducer(tableRef), [tableRef]);
   const [state, dispatch] = useReducer(reducer, initialState);
   const facade = useRef(createRulesTableFacade(dispatch));
+  const { addError } = useAppToasts();
 
   const reFetchRules = useRef<() => Promise<void>>(() => Promise.resolve());
-  const [, dispatchToaster] = useStateToaster();
 
   const { pagination, filterOptions } = state;
   const filterTags = filterOptions.tags.sort().join();
@@ -95,7 +95,7 @@ export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn 
         }
       } catch (error) {
         if (isSubscribed) {
-          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
           facade.current.setRules([], {});
         }
       }

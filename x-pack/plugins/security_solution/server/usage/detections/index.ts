@@ -8,16 +8,37 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import {
   getMlJobsUsage,
-  getMlJobMetrics,
   getRulesUsage,
   initialRulesUsage,
   initialMlJobsUsage,
-} from './detections_helpers';
+} from './detections_usage_helpers';
+import {
+  getMlJobMetrics,
+  getDetectionRuleMetrics,
+  initialDetectionRulesUsage,
+} from './detections_metrics_helpers';
 import { MlPluginSetup } from '../../../../ml/server';
 
 interface FeatureUsage {
   enabled: number;
   disabled: number;
+}
+
+interface FeatureTypeUsage {
+  enabled: number;
+  disabled: number;
+  alerts: number;
+  cases: number;
+}
+
+export interface DetectionRulesTypeUsage {
+  query: FeatureTypeUsage;
+  threshold: FeatureTypeUsage;
+  eql: FeatureTypeUsage;
+  machine_learning: FeatureTypeUsage;
+  threat_match: FeatureTypeUsage;
+  elastic_total: FeatureTypeUsage;
+  custom_total: FeatureTypeUsage;
 }
 
 export interface DetectionRulesUsage {
@@ -37,6 +58,7 @@ export interface DetectionsUsage {
 
 export interface DetectionMetrics {
   ml_jobs: MlJobMetric[];
+  detection_rules: DetectionRuleAdoption;
 }
 
 export interface MlJobDataCount {
@@ -58,7 +80,6 @@ export interface MlJobModelSize {
 }
 
 export interface MlTimingStats {
-  average_bucket_processing_time_ms: number;
   bucket_count: number;
   exponential_average_bucket_processing_time_ms: number;
   exponential_average_bucket_processing_time_per_hour_ms: number;
@@ -74,6 +95,45 @@ export interface MlJobMetric {
   data_counts: MlJobDataCount;
   model_size_stats: MlJobModelSize;
   timing_stats: MlTimingStats;
+}
+
+export interface DetectionRuleMetric {
+  rule_name: string;
+  rule_id: string;
+  rule_type: string;
+  enabled: boolean;
+  elastic_rule: boolean;
+  created_on: string;
+  updated_on: string;
+  alert_count_daily: number;
+  cases_count_daily: number;
+}
+
+export interface DetectionRuleAdoption {
+  detection_rule_detail: DetectionRuleMetric[];
+  detection_rule_usage: DetectionRulesTypeUsage;
+}
+
+export interface AlertsAggregationResponse {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    [aggName: string]: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+  };
+}
+
+export interface CasesSavedObject {
+  associationType: string;
+  type: string;
+  alertId: string;
+  index: string;
+  rule: {
+    id: string;
+    name: string;
+  };
 }
 
 export const defaultDetectionsUsage = {
@@ -99,12 +159,22 @@ export const fetchDetectionsUsage = async (
 };
 
 export const fetchDetectionsMetrics = async (
+  kibanaIndex: string,
+  signalsIndex: string,
+  esClient: ElasticsearchClient,
   ml: MlPluginSetup | undefined,
   savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionMetrics> => {
-  const [mlJobMetrics] = await Promise.allSettled([getMlJobMetrics(ml, savedObjectClient)]);
+  const [mlJobMetrics, detectionRuleMetrics] = await Promise.allSettled([
+    getMlJobMetrics(ml, savedObjectClient),
+    getDetectionRuleMetrics(kibanaIndex, signalsIndex, esClient, savedObjectClient),
+  ]);
 
   return {
     ml_jobs: mlJobMetrics.status === 'fulfilled' ? mlJobMetrics.value : [],
+    detection_rules:
+      detectionRuleMetrics.status === 'fulfilled'
+        ? detectionRuleMetrics.value
+        : { detection_rule_detail: [], detection_rule_usage: initialDetectionRulesUsage },
   };
 };
