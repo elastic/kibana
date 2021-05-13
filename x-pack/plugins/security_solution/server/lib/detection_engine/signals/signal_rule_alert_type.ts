@@ -72,6 +72,7 @@ import {
 } from '../schemas/rule_schemas';
 import { RefreshTypes } from '../types';
 import { BaseHit } from '../../../../common/detection_engine/types';
+import { GenericBulkCreateResponse } from './single_bulk_create';
 
 export const signalRulesAlertType = ({
   logger,
@@ -436,7 +437,17 @@ const bulkCreateFactory = (
   esClient: ElasticsearchClient,
   buildRuleMessage: BuildRuleMessage,
   refreshForBulkCreate: RefreshTypes
-) => async <T>(wrappedDocs: Array<BaseHit<T>>) => {
+) => async <T>(wrappedDocs: Array<BaseHit<T>>): Promise<GenericBulkCreateResponse<T>> => {
+  if (wrappedDocs.length === 0) {
+    return {
+      errors: [],
+      success: true,
+      bulkCreateDuration: '0',
+      createdItemsCount: 0,
+      createdItems: [],
+    };
+  }
+
   const bulkBody = wrappedDocs.flatMap((wrappedDoc) => [
     {
       create: {
