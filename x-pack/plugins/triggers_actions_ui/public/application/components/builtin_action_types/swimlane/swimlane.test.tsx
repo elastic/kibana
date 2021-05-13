@@ -46,26 +46,17 @@ describe('swimlane connector validation', () => {
         },
       },
     } as SwimlaneActionConnector;
-
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiToken: [],
-        apiUrl: [],
-        appId: [],
-        mappings: [],
-      },
+      config: { errors: { apiUrl: [], appId: [], mappings: [] } },
+      secrets: { errors: { apiToken: [] } },
     });
 
     // @ts-ignore
     delete actionConnector.config.apiUrl;
     actionConnector.secrets.apiToken = 'test1';
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiToken: [],
-        apiUrl: [],
-        appId: [],
-        mappings: [],
-      },
+      config: { errors: { apiUrl: ['URL is required.'], appId: [], mappings: [] } },
+      secrets: { errors: { apiToken: [] } },
     });
   });
 
@@ -83,9 +74,8 @@ describe('swimlane connector validation', () => {
       },
     } as SwimlaneActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(actionTypeModel.validateConnector(actionConnector).config).toEqual({
       errors: {
-        apiToken: [],
         apiUrl: [],
         appId: [],
         mappings: ['Field mappings are required.'],

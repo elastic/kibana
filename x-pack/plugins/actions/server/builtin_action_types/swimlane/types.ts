@@ -53,7 +53,6 @@ export type PushToServiceApiParams = ExecutorSubActionPushParams;
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
   logger: Logger;
-  mappings: MappingConfigType;
 }
 
 export interface ExternalServiceIncidentResponse {

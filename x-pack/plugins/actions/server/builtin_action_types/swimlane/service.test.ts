@@ -11,6 +11,7 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { Logger } from '../../../../../../src/core/server';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { createExternalService } from './service';
+import { mappings } from './mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -25,45 +26,6 @@ jest.mock('../lib/axios_utils', () => {
 
 axios.create = jest.fn(() => axios);
 const configurationUtilities = actionsConfigMock.create();
-
-const mappings = {
-  alertSourceConfig: {
-    id: 'adnjls',
-    name: 'Alert Source',
-    key: 'alert-source',
-    fieldType: 'text',
-  },
-  severityConfig: {
-    id: 'adnlas',
-    name: 'Severity',
-    key: 'severity',
-    fieldType: 'text',
-  },
-  alertNameConfig: {
-    id: 'adnfls',
-    name: 'Alert Name',
-    key: 'alert-name',
-    fieldType: 'text',
-  },
-  caseIdConfig: {
-    id: 'a6sst',
-    name: 'Case Id',
-    key: 'case-id-name',
-    fieldType: 'text',
-  },
-  caseNameConfig: {
-    id: 'a6fst',
-    name: 'Case Name',
-    key: 'case-name',
-    fieldType: 'text',
-  },
-  commentsConfig: {
-    id: 'a6fdf',
-    name: 'Comments',
-    key: 'comments',
-    fieldType: 'text',
-  },
-};
 
 describe('Swimlane Service', () => {
   beforeEach(() => {

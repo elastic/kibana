@@ -7,10 +7,17 @@
 
 import { api } from './api';
 import { ExternalService } from './types';
-import { externalServiceMock } from './mocks';
+import { externalServiceMock, recordResponseCreate, recordResponseUpdate } from './mocks';
 import { Logger } from '@kbn/logging';
 let mockedLogger: jest.Mocked<Logger>;
-
+const params = {
+  alertName: 'alert name',
+  caseName: 'case name',
+  severity: 'critical',
+  alertSource: 'elastic',
+  caseId: '123456',
+  comments: 'some comments',
+};
 describe('api', () => {
   let externalService: jest.Mocked<ExternalService>;
 
@@ -19,7 +26,7 @@ describe('api', () => {
   });
 
   describe('createRecord', () => {
-    test('it creates a record correctly', async () => {
+    test('it creates a record correctly with a comment', async () => {
       const res = await api.createRecord({
         externalService,
         logger: mockedLogger,
@@ -32,9 +39,58 @@ describe('api', () => {
           comments: 'some comments',
         },
       });
-      expect(res).toEqual({
-        id: '123456',
+      expect(res).toEqual(recordResponseCreate);
+    });
+  });
+
+  describe('pushToService', () => {
+    test('it pushes a new record', async () => {
+      const res = await api.pushToService({
+        externalService,
+        logger: mockedLogger,
+        params: {
+          incident: {
+            ...params,
+            externalId: null,
+          },
+          comments: [],
+        },
       });
+      expect(externalService.createComment).not.toHaveBeenCalled();
+      expect(externalService.createRecord).toHaveBeenCalled();
+      expect(externalService.updateRecord).not.toHaveBeenCalled();
+      expect(res).toEqual(recordResponseCreate);
+    });
+    test('it pushes a new record with a comment', async () => {
+      await api.pushToService({
+        externalService,
+        logger: mockedLogger,
+        params: {
+          incident: {
+            ...params,
+            externalId: null,
+          },
+          comments: [{ comment: 'some comments', commentId: '123' }],
+        },
+      });
+      expect(externalService.createComment).toHaveBeenCalled();
+    });
+    test('updates existing record', async () => {
+      const res = await api.pushToService({
+        externalService,
+        logger: mockedLogger,
+        params: {
+          incident: {
+            ...params,
+            externalId: '1234',
+          },
+          comments: [{ comment: 'some comments', commentId: '123' }],
+        },
+      });
+      expect(externalService.createComment).toHaveBeenCalled();
+      expect(externalService.createRecord).not.toHaveBeenCalled();
+      expect(externalService.updateRecord).toHaveBeenCalled();
+      expect(res).toEqual(recordResponseUpdate);
     });
   });
 });
