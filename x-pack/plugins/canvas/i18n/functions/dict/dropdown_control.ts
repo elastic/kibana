@@ -25,8 +25,7 @@ export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
       defaultMessage: 'The column or field to use as the label in the dropdown control',
     }),
     valueColumn: i18n.translate('xpack.canvas.functions.dropdownControl.args.valueColumnHelpText', {
-      defaultMessage:
-        'The column or field from which to extract the unique values for the dropdown control.',
+      defaultMessage: 'The column or field from which to extract the unique values for the dropdown control.',
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
       defaultMessage: 'The group name for the filter.',
