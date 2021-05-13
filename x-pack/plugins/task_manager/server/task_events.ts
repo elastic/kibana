@@ -13,7 +13,6 @@ import { Result, Err } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
-import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
 
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
@@ -64,7 +63,6 @@ export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<RanTask, ErroredTask>;
 export type TaskClaim = TaskEvent<ConcreteTaskInstance, ClaimTaskErr>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
-export type EphemeralTaskDelayedDueToCapacity = TaskEvent<EphemeralTaskInstanceRequest, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
 
 export type TaskManagerStats = 'load' | 'pollingDelay' | 'claimDuration';
@@ -152,19 +150,6 @@ export function asTaskManagerStatEvent(
   };
 }
 
-export function asEphemeralTaskDelayedDueToCapacityEvent(
-  id: string,
-  event: Result<EphemeralTaskInstanceRequest, Error>,
-  timing?: TaskTiming
-): EphemeralTaskDelayedDueToCapacity {
-  return {
-    id,
-    type: TaskEventType.EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY,
-    event,
-    timing,
-  };
-}
-
 export function isTaskMarkRunningEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskMarkRunning {
@@ -190,9 +175,4 @@ export function isTaskManagerStatEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_STAT;
-}
-export function isEphemeralTaskDelayedDueToCapacityEvent(
-  taskEvent: TaskEvent<unknown, unknown>
-): taskEvent is EphemeralTaskDelayedDueToCapacity {
-  return taskEvent.type === TaskEventType.EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY;
 }

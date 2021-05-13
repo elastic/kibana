@@ -25,7 +25,6 @@ import {
   ErrResultOf,
   ClaimTaskErr,
   TaskClaimErrorType,
-  isEphemeralTaskDelayedDueToCapacityEvent,
 } from './task_events';
 import { Middleware } from './lib/middleware';
 import {
@@ -42,7 +41,6 @@ import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fie
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { EphemeralTaskDelayedDueToCapacityError } from './task_running/errors';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -212,8 +210,6 @@ export class TaskScheduling {
                 if (isTaskRunEvent(taskEvent)) {
                   subscription.unsubscribe();
                   resolve(pick((taskInstance as RanTask).task, ['id', 'state']));
-                } else if (isEphemeralTaskDelayedDueToCapacityEvent(taskEvent)) {
-                  return reject(new EphemeralTaskDelayedDueToCapacityError('', taskEvent));
                 }
               },
               async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {

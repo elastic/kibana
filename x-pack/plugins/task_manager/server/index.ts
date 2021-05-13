@@ -22,12 +22,7 @@ export {
 } from './task';
 
 export { asInterval } from './lib/intervals';
-export {
-  isUnrecoverableError,
-  throwUnrecoverableError,
-  EphemeralTaskDelayedDueToCapacityError,
-  isEphemeralTaskDelayedDueToCapacityError,
-} from './task_running';
+export { isUnrecoverableError, throwUnrecoverableError } from './task_running';
 
 export {
   TaskManagerPlugin as TaskManager,
