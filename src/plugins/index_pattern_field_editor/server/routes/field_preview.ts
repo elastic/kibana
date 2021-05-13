@@ -11,6 +11,7 @@ import { HttpResponsePayload } from 'kibana/server';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { RouteDependencies } from '../types';
+import { handleEsError } from '../shared_imports';
 
 const bodySchema = schema.object({
   index: schema.string(),
@@ -60,8 +61,16 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         const fieldValue = (response.body.result as any[]) as HttpResponsePayload;
 
         return res.ok({ body: fieldValue });
-      } catch (e) {
-        return res.badRequest({ body: 'Todo: handle ES error' });
+      } catch (error) {
+        // Assume invalid painless script was submitted
+        // Return 200 with error object
+        const handleCustomError = () => {
+          return res.ok({
+            body: error.body,
+          });
+        };
+
+        return handleEsError({ error, response: res, handleCustomError });
       }
     }
   );

@@ -237,7 +237,11 @@ const FieldEditorComponent = ({
 
   useEffect(() => {
     // TODO: remove console.log
-    console.log('Field preview:', data?.[0]); // eslint-disable-line
+    if (data?.error) {
+      console.log('Preview error', data.error); // eslint-disable-line no-console
+    } else {
+      console.log('Field preview:', data?.[0]); // eslint-disable-line no-console
+    }
   }, [data]);
 
   const [{ name: updatedName, type: updatedType }] = useFormData({ form });
