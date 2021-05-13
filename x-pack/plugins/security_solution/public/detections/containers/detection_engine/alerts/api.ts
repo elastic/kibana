@@ -7,14 +7,17 @@
 
 import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
-import { HostIsolationResponse } from '../../../../../common/endpoint/types';
+import { HostIsolationResponse, HostMetadataInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../../common/constants';
-import { ISOLATE_HOST_ROUTE } from '../../../../../common/endpoint/constants';
+import {
+  HOST_METADATA_GET_API,
+  ISOLATE_HOST_ROUTE,
+} from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
   BasicSignals,
@@ -25,6 +28,7 @@ import {
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
 } from './types';
+import { resolvePathVariables } from '../../../../management/pages/trusted_apps/service/utils';
 
 /**
  * Fetch Alerts by providing a query
@@ -146,3 +150,18 @@ export const getCaseIdsFromAlertId = async ({
   KibanaServices.get().http.fetch<CasesFromAlertsResponse>(getCasesFromAlertsUrl(alertId), {
     method: 'get',
   });
+
+/**
+ * Get Host metadata
+ *
+ * @param host id
+ */
+export const getHostMetadata = async ({
+  agentId,
+}: {
+  agentId: string;
+}): Promise<HostMetadataInfo> =>
+  KibanaServices.get().http.fetch<HostMetadataInfo>(
+    resolvePathVariables(HOST_METADATA_GET_API, { id: agentId }),
+    { method: 'get' }
+  );

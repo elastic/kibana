@@ -28,8 +28,13 @@ import {
   sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
-import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
+import {
+  HOST_METADATA_GET_API,
+  HOST_METADATA_LIST_API,
+  metadataCurrentIndexPattern,
+} from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
+import { resolvePathVariables } from '../../trusted_apps/service/utils';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
@@ -76,7 +81,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       try {
         const decodedQuery: Query = searchBarQuery(getState());
 
-        endpointResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
+        endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_API);
+        endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_API, {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
             filters: { kql: decodedQuery.query },
@@ -225,7 +231,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       if (listData(getState()).length === 0) {
         const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
         try {
-          const response = await coreStart.http.post('/api/endpoint/metadata', {
+          const response = await coreStart.http.post(HOST_METADATA_LIST_API, {
             body: JSON.stringify({
               paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
             }),
@@ -275,7 +281,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
       try {
         const response = await coreStart.http.get<HostInfo>(
-          `/api/endpoint/metadata/${selectedEndpoint}`
+          resolvePathVariables(HOST_METADATA_GET_API, { id: selectedEndpoint })
         );
         dispatch({
           type: 'serverReturnedEndpointDetails',
@@ -402,7 +408,7 @@ const getAgentAndPoliciesForEndpointsList = async (
 const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      await http.post<HostResultList>('/api/endpoint/metadata', {
+      await http.post<HostResultList>(HOST_METADATA_LIST_API, {
         body: JSON.stringify({
           paging_properties: [{ page_index: 0 }, { page_size: 1 }],
         }),

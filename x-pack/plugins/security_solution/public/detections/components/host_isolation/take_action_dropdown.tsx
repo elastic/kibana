@@ -9,28 +9,22 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import { ISOLATE_HOST } from './translations';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
+import { useHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 
 export const TakeActionDropdown = React.memo(
-  ({ onChange }: { onChange: (action: 'isolateHost') => void }) => {
+  ({ onChange, agentId }: { onChange: (action: 'isolateHost') => void; agentId: string }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const closePopoverHandler = useCallback(() => {
       setIsPopoverOpen(false);
     }, []);
 
-    const takeActionItems = useMemo(() => {
-      return [
-        <EuiContextMenuItem
-          key="isolateHost"
-          onClick={() => {
-            setIsPopoverOpen(false);
-            onChange('isolateHost');
-          }}
-        >
-          {ISOLATE_HOST}
-        </EuiContextMenuItem>,
-      ];
+    const isolateHostHandler = useCallback(() => {
+      setIsPopoverOpen(false);
+      onChange('isolateHost');
     }, [onChange]);
+
+    const isolationStatus = useHostIsolationStatus({ agentId });
 
     const takeActionButton = useMemo(() => {
       return (
@@ -56,7 +50,13 @@ export const TakeActionDropdown = React.memo(
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel size="s" items={takeActionItems} />
+        <EuiContextMenuPanel size="s">
+          {isolationStatus === false && (
+            <EuiContextMenuItem key="isolateHost" onClick={isolateHostHandler}>
+              {ISOLATE_HOST}
+            </EuiContextMenuItem>
+          )}
+        </EuiContextMenuPanel>
       </EuiPopover>
     );
   }
