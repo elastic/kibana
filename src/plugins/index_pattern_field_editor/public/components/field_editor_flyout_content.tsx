@@ -250,6 +250,7 @@ const FieldEditorFlyoutContentComponent = ({
       </EuiFormRow>
     </EuiConfirmModal>
   ) : null;
+
   return (
     <>
       <EuiFlyoutHeader>

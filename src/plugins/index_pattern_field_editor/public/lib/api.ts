@@ -9,14 +9,25 @@ import { HttpSetup } from 'src/core/public';
 import { API_BASE_PATH } from '../../common/constants';
 import { useRequest, UseRequestResponse } from '../shared_imports';
 
+type FieldPreviewContext =
+  | 'boolean_field'
+  | 'date_field'
+  | 'double_field'
+  | 'geo_point_field'
+  | 'ip_field'
+  | 'keyword_field'
+  | 'long_field';
+
 export const initApi = (httpClient: HttpSetup) => {
-  const usePreviewField = ({
+  const useFieldPreview = ({
     index,
+    context,
     script,
     document,
   }: {
     index: string;
-    script: string | null;
+    context: FieldPreviewContext;
+    script: { source: string } | null;
     document: Record<string, any>;
   }): UseRequestResponse => {
     return useRequest(httpClient, {
@@ -24,6 +35,7 @@ export const initApi = (httpClient: HttpSetup) => {
       path: `${API_BASE_PATH}/field_preview`,
       body: {
         index,
+        context,
         script,
         document,
       },
@@ -31,7 +43,7 @@ export const initApi = (httpClient: HttpSetup) => {
   };
 
   return {
-    usePreviewField,
+    useFieldPreview,
   };
 };
 

@@ -177,55 +177,9 @@ const formSerializer = (field: FieldFormInternal): Field => {
 
 const mockDataPreview = {
   index: 'kibana_sample_data_logs',
-  script: "emit('test')",
+  script: { source: "emit(doc['referer'].value)" },
   document: {
-    referer: ['http://twitter.com/success/fyodor-yurchikhin'],
-    request: ['/beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz'],
-    agent: ['Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1'],
-    extension: ['gz'],
-    'tags.keyword': ['error', 'info'],
-    'geo.coordinates': [
-      {
-        coordinates: [-92.33716583, 32.72495583],
-        type: 'Point',
-      },
-    ],
-    'geo.dest': ['IN'],
-    'response.keyword': ['200'],
-    'machine.os': ['ios'],
-    utc_time: ['2021-05-13T10:49:17.763Z'],
-    'agent.keyword': ['Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1'],
-    clientip: ['199.233.207.139'],
-    host: ['artifacts.elastic.co'],
-    'machine.ram': [12884901888],
-    'extension.keyword': ['gz'],
-    'host.keyword': ['artifacts.elastic.co'],
-    'machine.os.keyword': ['ios'],
-    hour_of_day: [10],
-    'geo.srcdest': ['US:IN'],
-    timestamp: ['2021-05-13T10:49:17.763Z'],
-    ip: ['199.233.207.139'],
-    'request.keyword': ['/beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz'],
-    index: ['kibana_sample_data_logs'],
-    'geo.src': ['US'],
-    'index.keyword': ['kibana_sample_data_logs'],
-    message: [
-      '199.233.207.139 - - [2018-08-02T10:49:17.763Z] "GET /beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz HTTP/1.1" 200 7652 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-    ],
-    url: [
-      'https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz',
-    ],
-    'url.keyword': [
-      'https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz',
-    ],
-    tags: ['error', 'info'],
-    '@timestamp': ['2021-05-13T10:49:17.763Z'],
-    bytes: [7652],
-    response: ['200'],
-    'message.keyword': [
-      '199.233.207.139 - - [2018-08-02T10:49:17.763Z] "GET /beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz HTTP/1.1" 200 7652 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-    ],
-    'event.dataset': ['sample_web_logs'],
+    referer: ['Value to be returned by the script'],
   },
 };
 
@@ -241,7 +195,7 @@ const FieldEditorComponent = ({
   ctx: { fieldTypeToProcess, namesNotAllowed, existingConcreteFields },
 }: Props) => {
   const {
-    apiService: { usePreviewField },
+    apiService: { useFieldPreview },
   } = useFieldEditorContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -254,11 +208,12 @@ const FieldEditorComponent = ({
 
   const [{ type }] = useFormData<FieldFormInternal>({ form });
 
-  const [script, setScript] = useState<string | null>(null);
-  const { data } = usePreviewField({
-    script,
+  const [script, setScript] = useState<{ source: string } | null>(null);
+  const { data } = useFieldPreview({
     index: mockDataPreview.index,
     document: mockDataPreview.document,
+    context: 'keyword_field',
+    script,
   });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
@@ -282,7 +237,7 @@ const FieldEditorComponent = ({
 
   useEffect(() => {
     // TODO: remove console.log
-    console.log('Preview update', data); // eslint-disable-line
+    console.log('Field preview:', data?.[0]); // eslint-disable-line
   }, [data]);
 
   const [{ name: updatedName, type: updatedType }] = useFormData({ form });

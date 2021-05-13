@@ -7,13 +7,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { HttpResponsePayload } from 'kibana/server';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { RouteDependencies } from '../types';
 
 const bodySchema = schema.object({
   index: schema.string(),
-  script: schema.nullable(schema.string()),
+  script: schema.nullable(schema.object({ source: schema.string() })),
+  context: schema.oneOf([
+    schema.literal('boolean_field'),
+    schema.literal('date_field'),
+    schema.literal('double_field'),
+    schema.literal('geo_point_field'),
+    schema.literal('ip_field'),
+    schema.literal('keyword_field'),
+    schema.literal('long_field'),
+  ]),
   document: schema.object({}, { unknowns: 'allow' }),
 });
 
@@ -26,7 +36,33 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
       },
     },
     async (ctx, req, res) => {
-      return res.ok({ body: 'OK' });
+      const { client } = ctx.core.elasticsearch;
+
+      if (req.body.script === null) {
+        return res.ok();
+      }
+
+      const body = JSON.stringify({
+        script: req.body.script,
+        context: req.body.context,
+        context_setup: {
+          document: req.body.document,
+          index: req.body.index,
+        } as any,
+      });
+
+      try {
+        const response = await client.asCurrentUser.scriptsPainlessExecute({
+          // @ts-expect-error `ExecutePainlessScriptRequest.body` does not allow `string`
+          body,
+        });
+
+        const fieldValue = (response.body.result as any[]) as HttpResponsePayload;
+
+        return res.ok({ body: fieldValue });
+      } catch (e) {
+        return res.badRequest({ body: 'Todo: handle ES error' });
+      }
     }
   );
 };
