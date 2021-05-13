@@ -882,7 +882,7 @@ describe('When on the Trusted Apps Page', () => {
 
     it('search action is dispatched', async () => {
       await act(async () => {
-        fireEvent.click(renderResult.getByTestId('trustedAppSearchButton'));
+        fireEvent.click(renderResult.getByTestId('searchButton'));
         expect(await waitForAction('userChangedUrl')).not.toBeNull();
       });
     });
