@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EntriesArray } from './entries';
+import { EntriesArray } from '@kbn/securitysolution-io-ts-utils';
+
 import { getEntryMatchMock } from './entry_match.mock';
 import { getEntryMatchAnyMock } from './entry_match_any.mock';
 import { getEntryListMock } from './entry_list.mock';

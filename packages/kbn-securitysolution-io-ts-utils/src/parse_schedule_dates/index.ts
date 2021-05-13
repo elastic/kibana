@@ -22,5 +22,5 @@ export const parseScheduleDates = (time: string): moment.Moment | null => {
     ? dateMath.parse(time)
     : null;
 
-  return formattedDate ?? null;
+  return formattedDate != null ? formattedDate : null;
 };
