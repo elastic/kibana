@@ -119,6 +119,9 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
               params,
             };
           }),
+          producer: 'alertsFixture',
+          ruleTypeId: 'test.always-firing',
+          ruleTypeName: 'Test: Always Firing',
         },
       };
       if (expected.alertInfo.namespace === undefined) {

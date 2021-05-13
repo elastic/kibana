@@ -157,6 +157,7 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
       (actionTypeId, actionId, params) => params
     );
+    alertTypeRegistry.get.mockReturnValue(alertType);
   });
 
   test('successfully executes the task', async () => {
@@ -223,6 +224,9 @@ describe('Task Runner', () => {
     expect(call.rule.updatedAt).toBe(mockDate);
     expect(call.rule.notifyWhen).toBe('onActiveAlert');
     expect(call.rule.throttle).toBe(null);
+    expect(call.rule.producer).toBe('alerts');
+    expect(call.rule.ruleTypeId).toBe('test');
+    expect(call.rule.ruleTypeName).toBe('My test alert');
     expect(call.rule.actions).toMatchInlineSnapshot(`
     Array [
       Object {

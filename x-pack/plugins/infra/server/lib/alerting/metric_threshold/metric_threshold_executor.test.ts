@@ -52,6 +52,9 @@ const mockOptions = {
     updatedAt: new Date(),
     throttle: null,
     notifyWhen: null,
+    producer: '',
+    ruleTypeId: '',
+    ruleTypeName: '',
   },
 };
 

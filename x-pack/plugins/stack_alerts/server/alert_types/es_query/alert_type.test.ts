@@ -161,6 +161,9 @@ describe('alertType', () => {
         name: uuid.v4(),
         tags: [],
         consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
         enabled: true,
         schedule: {
           interval: '1h',
@@ -237,6 +240,9 @@ describe('alertType', () => {
         name: uuid.v4(),
         tags: [],
         consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
         enabled: true,
         schedule: {
           interval: '1h',
@@ -388,6 +394,9 @@ describe('alertType', () => {
         name: uuid.v4(),
         tags: [],
         consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
         enabled: true,
         schedule: {
           interval: '1h',
@@ -462,6 +471,9 @@ describe('alertType', () => {
         name: uuid.v4(),
         tags: [],
         consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
         enabled: true,
         schedule: {
           interval: '1h',
@@ -574,6 +586,9 @@ describe('alertType', () => {
         name: uuid.v4(),
         tags: [],
         consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
         enabled: true,
         schedule: {
           interval: '1h',
@@ -655,6 +670,9 @@ describe('alertType', () => {
         name: uuid.v4(),
         tags: [],
         consumer: '',
+        producer: '',
+        ruleTypeId: '',
+        ruleTypeName: '',
         enabled: true,
         schedule: {
           interval: '1h',

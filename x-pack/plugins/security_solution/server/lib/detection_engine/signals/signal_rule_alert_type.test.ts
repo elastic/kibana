@@ -70,6 +70,9 @@ const getPayload = (
     name: ruleAlert.name,
     tags: ruleAlert.tags,
     consumer: 'foo',
+    producer: 'foo',
+    ruleTypeId: 'ruleType',
+    ruleTypeName: 'Name of rule',
     enabled: true,
     schedule: {
       interval: '1h',

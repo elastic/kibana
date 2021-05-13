@@ -91,7 +91,11 @@ export type SanitizedRuleConfig = Pick<
   | 'updatedAt'
   | 'throttle'
   | 'notifyWhen'
->;
+> & {
+  producer: string;
+  ruleTypeId: string;
+  ruleTypeName: string;
+};
 
 export enum HealthStatus {
   OK = 'ok',

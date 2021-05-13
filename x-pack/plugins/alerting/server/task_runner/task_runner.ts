@@ -215,6 +215,7 @@ export class TaskRunner<
     event: Event
   ): Promise<AlertTaskState> {
     const {
+      alertTypeId,
       consumer,
       schedule,
       throttle,
@@ -235,6 +236,7 @@ export class TaskRunner<
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
+    const alertType = this.alertTypeRegistry.get(alertTypeId);
 
     const alertInstances = mapValues<
       Record<string, RawAlertInstance>,
@@ -275,6 +277,9 @@ export class TaskRunner<
           name,
           tags,
           consumer,
+          producer: alertType.producer,
+          ruleTypeId: alert.alertTypeId,
+          ruleTypeName: alertType.name,
           enabled,
           schedule,
           actions,

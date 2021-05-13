@@ -166,6 +166,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
                       params,
                     };
                   }),
+                  producer: 'alertsFixture',
+                  ruleTypeId: 'test.always-firing',
+                  ruleTypeName: 'Test: Always Firing',
                 },
               });
               expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
@@ -308,6 +311,9 @@ instanceStateValue: true
                       params,
                     };
                   }),
+                  producer: 'alertsFixture',
+                  ruleTypeId: 'test.always-firing',
+                  ruleTypeName: 'Test: Always Firing',
                 },
               });
 
@@ -432,6 +438,9 @@ instanceStateValue: true
                 params,
               };
             }),
+            producer: 'alertsFixture',
+            ruleTypeId: 'test.always-firing',
+            ruleTypeName: 'Test: Always Firing',
           });
 
           expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
