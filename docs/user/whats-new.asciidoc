@@ -31,7 +31,7 @@ punch they need to stand out in analysis and visualizations.
 For example, you can combine two fields into one or extract portions of fields.
 The runtime fields you create are part of the index pattern from that point forward,
 and you can use them anywhere the index pattern is available.
-Refer to <<runtime-fields>> for more information.
+Refer to {kibana-ref}/managing-index-patterns.html#runtime-fields[Explore your data with runtime fields] for more information.
 
 [role="screenshot"]
 image::user/images/highlights-runtime-fields.png[Create field form showing Painless script]
