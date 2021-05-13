@@ -10,6 +10,7 @@
   "kibanaVersion": "kibana",
   "optionalPlugins": [
     "home",
+    "usageCollection",
     "lens"
   ],
   "requiredBundles": [

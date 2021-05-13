@@ -18,6 +18,8 @@ import {
   CreateActionRequestBodySchema,
 } from '../../../common/schemas/routes/action/create_action_request_body_schema';
 
+import {getUsageRecorder} from '../usage'
+
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
@@ -39,34 +41,45 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         osqueryContext,
         agentSelection
       );
-
+      const usageRecorder = getUsageRecorder()
+      usageRecorder.incrementCallCount('live_query')
       if (!selectedAgents.length) {
+        usageRecorder.incrementErrorCount('live_query')
         return response.badRequest({ body: new Error('No agents found for selection') });
       }
 
-      const action = {
-        action_id: uuid.v4(),
-        '@timestamp': moment().toISOString(),
-        expiration: moment().add(1, 'days').toISOString(),
-        type: 'INPUT_ACTION',
-        input_type: 'osquery',
-        agents: selectedAgents,
-        data: {
-          id: uuid.v4(),
-          query: request.body.query,
-        },
-      };
-      const actionResponse = await esClient.index<{}, {}>({
-        index: '.fleet-actions',
-        body: action,
-      });
+      try {
+        const action = {
+          action_id: uuid.v4(),
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(1, 'days').toISOString(),
+          type: 'INPUT_ACTION',
+          input_type: 'osquery',
+          agents: selectedAgents,
+          data: {
+            id: uuid.v4(),
+            query: request.body.query,
+          },
+        };
+        const actionResponse = await esClient.index<{}, {}>({
+          index: '.fleet-actions',
+          body: action,
+        });
 
-      return response.ok({
-        body: {
-          response: actionResponse,
-          actions: [action],
-        },
-      });
+        return response.ok({
+          body: {
+            response: actionResponse,
+            actions: [action],
+          },
+        });
+      } catch (error) {
+        usageRecorder.incrementErrorCount('live_query')
+        return response.customError({
+          statusCode: 500,
+          body: new Error(`Error occurred whlie processing ${error}`) ,
+        });
+
+      }
     }
   );
 };

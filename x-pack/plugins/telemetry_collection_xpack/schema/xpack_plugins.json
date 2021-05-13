@@ -3598,6 +3598,53 @@
         }
       }
     },
+    "osquery": {
+      "_meta": {
+        "description": "TODO: UPDATE THIS TO MATCH EXPORTED METRICS SCHEMA BEFORE PR"
+      },
+      "properties": {
+        "query_metrics": {
+          "properties": {
+            "live_query_usage": {
+              "properties": {
+                "call_count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of ad hoc queries dispatched"
+                  }
+                },
+                "error_count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of ad hoc queries which resulted in an error"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "beat_metrics": {
+          "properties": {
+            "usage": {
+              "properties": {
+                "cpu": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "CPU usage reported by osquery beat"
+                  }
+                },
+                "rss": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Memory usage reported by osquery beat"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "ml": {
       "properties": {
         "alertRules": {
