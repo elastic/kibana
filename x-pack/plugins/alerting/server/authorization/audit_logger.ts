@@ -17,7 +17,7 @@ export enum AuthorizationResult {
   Authorized = 'Authorized',
 }
 
-export class AlertsAuthorizationAuditLogger {
+export class AlertingAuthorizationAuditLogger {
   private readonly auditLogger: LegacyAuditLogger;
 
   constructor(auditLogger: LegacyAuditLogger = { log() {} }) {
@@ -30,20 +30,20 @@ export class AlertsAuthorizationAuditLogger {
     scopeType: ScopeType,
     scope: string,
     operation: string,
-    authorizationType: string
+    entity: string
   ): string {
-    return `${authorizationResult} to ${operation} a "${alertTypeId}" ${authorizationType} ${
+    return `${authorizationResult} to ${operation} a "${alertTypeId}" ${entity} ${
       scopeType === ScopeType.Consumer ? `for "${scope}"` : `by "${scope}"`
     }`;
   }
 
-  public alertsAuthorizationFailure(
+  public logAuthorizationFailure(
     username: string,
     alertTypeId: string,
     scopeType: ScopeType,
     scope: string,
     operation: string,
-    authorizationType: string
+    entity: string
   ): string {
     const message = this.getAuthorizationMessage(
       AuthorizationResult.Unauthorized,
@@ -51,39 +51,39 @@ export class AlertsAuthorizationAuditLogger {
       scopeType,
       scope,
       operation,
-      authorizationType
+      entity
     );
-    this.auditLogger.log('alerts_authorization_failure', `${username} ${message}`, {
+    this.auditLogger.log('alerting_authorization_failure', `${username} ${message}`, {
       username,
       alertTypeId,
       scopeType,
       scope,
       operation,
-      authorizationType,
+      entity,
     });
     return message;
   }
 
-  public alertsUnscopedAuthorizationFailure(
+  public logUnscopedAuthorizationFailure(
     username: string,
     operation: string,
-    authorizationType: string
+    entity: string
   ): string {
-    const message = `Unauthorized to ${operation} ${authorizationType}s for any rule types`;
-    this.auditLogger.log('alerts_unscoped_authorization_failure', `${username} ${message}`, {
+    const message = `Unauthorized to ${operation} ${entity}s for any rule types`;
+    this.auditLogger.log('alerting_unscoped_authorization_failure', `${username} ${message}`, {
       username,
       operation,
     });
     return message;
   }
 
-  public alertsAuthorizationSuccess(
+  public logAuthorizationSuccess(
     username: string,
     alertTypeId: string,
     scopeType: ScopeType,
     scope: string,
     operation: string,
-    authorizationType: string
+    entity: string
   ): string {
     const message = this.getAuthorizationMessage(
       AuthorizationResult.Authorized,
@@ -91,40 +91,40 @@ export class AlertsAuthorizationAuditLogger {
       scopeType,
       scope,
       operation,
-      authorizationType
+      entity
     );
-    this.auditLogger.log('alerts_authorization_success', `${username} ${message}`, {
+    this.auditLogger.log('alerting_authorization_success', `${username} ${message}`, {
       username,
       alertTypeId,
       scopeType,
       scope,
       operation,
-      authorizationType,
+      entity,
     });
     return message;
   }
 
-  public alertsBulkAuthorizationSuccess(
+  public logBulkAuthorizationSuccess(
     username: string,
     authorizedEntries: Array<[string, string]>,
     scopeType: ScopeType,
     operation: string,
-    authorizationType: string
+    entity: string
   ): string {
     const message = `${AuthorizationResult.Authorized} to ${operation}: ${authorizedEntries
       .map(
         ([alertTypeId, scope]) =>
-          `"${alertTypeId}" ${authorizationType}s ${
+          `"${alertTypeId}" ${entity}s ${
             scopeType === ScopeType.Consumer ? `for "${scope}"` : `by "${scope}"`
           }`
       )
       .join(', ')}`;
-    this.auditLogger.log('alerts_authorization_success', `${username} ${message}`, {
+    this.auditLogger.log('alerting_authorization_success', `${username} ${message}`, {
       username,
       scopeType,
       authorizedEntries,
       operation,
-      authorizationType,
+      entity,
     });
     return message;
   }

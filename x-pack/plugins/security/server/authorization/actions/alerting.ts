@@ -17,7 +17,7 @@ export class AlertingActions {
   public get(
     ruleTypeId: string,
     consumer: string,
-    alertingType: string,
+    alertingEntity: string,
     operation: string
   ): string {
     if (!ruleTypeId || !isString(ruleTypeId)) {
@@ -32,10 +32,10 @@ export class AlertingActions {
       throw new Error('consumer is required and must be a string');
     }
 
-    if (!alertingType || !isString(alertingType)) {
-      throw new Error('alertingType is required and must be a string');
+    if (!alertingEntity || !isString(alertingEntity)) {
+      throw new Error('alertingEntity is required and must be a string');
     }
 
-    return `${this.prefix}${ruleTypeId}/${consumer}/${alertingType}/${operation}`;
+    return `${this.prefix}${ruleTypeId}/${consumer}/${alertingEntity}/${operation}`;
   }
 }

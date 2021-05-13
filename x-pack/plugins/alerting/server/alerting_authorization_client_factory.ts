@@ -10,8 +10,8 @@ import { ALERTS_FEATURE_ID } from '../common';
 import { AlertTypeRegistry } from './types';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
-import { AlertsAuthorization } from './authorization/alerts_authorization';
-import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
+import { AlertingAuthorization } from './authorization/alerting_authorization';
+import { AlertingAuthorizationAuditLogger } from './authorization/audit_logger';
 import { Space } from '../../spaces/server';
 
 export interface AlertingAuthorizationClientFactoryOpts {
@@ -42,15 +42,15 @@ export class AlertingAuthorizationClientFactory {
     this.features = options.features;
   }
 
-  public create(request: KibanaRequest, exemptConsumerIds: string[] = []): AlertsAuthorization {
+  public create(request: KibanaRequest, exemptConsumerIds: string[] = []): AlertingAuthorization {
     const { securityPluginSetup, securityPluginStart, features } = this;
-    return new AlertsAuthorization({
+    return new AlertingAuthorization({
       authorization: securityPluginStart?.authz,
       request,
       getSpace: this.getSpace,
       alertTypeRegistry: this.alertTypeRegistry,
       features: features!,
-      auditLogger: new AlertsAuthorizationAuditLogger(
+      auditLogger: new AlertingAuthorizationAuditLogger(
         securityPluginSetup?.audit.getLogger(ALERTS_FEATURE_ID)
       ),
       exemptConsumerIds,

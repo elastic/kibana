@@ -73,6 +73,10 @@ export class AlertsClientFactory {
     const { securityPluginSetup, securityPluginStart, actions, eventLog } = this;
     const spaceId = this.getSpaceId(request);
 
+    if (!this.authorization) {
+      throw new Error('AlertingAuthorizationClientFactory is not defined');
+    }
+
     return new AlertsClient({
       spaceId,
       kibanaVersion: this.kibanaVersion,
@@ -83,7 +87,7 @@ export class AlertsClientFactory {
         excludedWrappers: ['security'],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
-      authorization: this.authorization!.create(request, [ALERTS_FEATURE_ID]),
+      authorization: this.authorization.create(request, [ALERTS_FEATURE_ID]),
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
