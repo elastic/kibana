@@ -42,7 +42,8 @@ const setup = (props: Props = defaultProps) => {
   };
 };
 
-describe('<FieldEditorFlyoutContent />', () => {
+// Skipping for now, I will unskip after migrating to the __jest__/client_integration folder
+describe.skip('<FieldEditorFlyoutContent />', () => {
   beforeAll(() => {
     jest.useFakeTimers();
   });
