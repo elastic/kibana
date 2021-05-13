@@ -524,37 +524,32 @@ describe('palettes', () => {
       expect(color).toEqual('#00ff00');
     });
 
-    it('should return a gradient helper function', () => {
-      const helperFn = palette.getGradientColorHelper!(
-        { min: 0, max: 100 },
-        {
-          colors: ['#00ff00', '#000000'],
-          stops: [],
-        }
-      );
-      expect(helperFn).not.toBeUndefined();
-      // check initial and final stops match
-      expect(helperFn(0)).toEqual('#00ff00');
-      expect(helperFn(1000)).toEqual('#000000');
-      // check that moving a tiny bit off the color changes as gradient
-      expect(helperFn(1)).not.toEqual('#00ff00');
-      expect(helperFn(99)).not.toEqual('#000000');
+    // just an integration test here. More in depth tests on the subject can be found on the helper file
+    it('should return a color for the given value with its domain', () => {
+      expect(
+        palette.getColorForValue!(
+          0,
+          { colors: ['red', 'green', 'blue'], stops: [], gradient: false },
+          { min: 0, max: 100 }
+        )
+      ).toBe('red');
     });
 
-    it('should return a gradient helper function that supports custom stops', () => {
-      const helperFn = palette.getGradientColorHelper!(
-        { min: 0, max: 100 },
-        {
-          colors: ['#00ff00', '#aa0000', '#000000'],
-          stops: [0, 25, 100],
-        }
-      );
-      expect(helperFn).not.toBeUndefined();
-
-      expect(helperFn(25)).toEqual('#aa0000');
-      // make sure there are small changes on the gradient
-      expect(helperFn(26)).not.toEqual('#aa0000');
-      expect(helperFn(24)).not.toEqual('#aa0000');
+    it('should return a color for the given value with its domain based on custom stops', () => {
+      expect(
+        palette.getColorForValue!(
+          60,
+          {
+            colors: ['red', 'green', 'blue'],
+            stops: [10, 50, 100],
+            range: 'percent',
+            gradient: false,
+            rangeMin: 0,
+            rangeMax: 100,
+          },
+          { min: 0, max: 100 }
+        )
+      ).toBe('blue');
     });
 
     // just make sure to not have broken anything

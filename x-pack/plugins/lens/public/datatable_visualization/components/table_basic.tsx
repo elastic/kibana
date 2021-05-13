@@ -42,6 +42,7 @@ import {
   createTransposeColumnFilterHandler,
 } from './table_actions';
 import { findMinMaxByColumnId } from './shared_utils';
+import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -307,6 +308,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
           alignments,
           minMaxByColumnId,
+          getColorForValue: props.paletteService.get(CUSTOM_PALETTE).getColorForValue!,
         }}
       >
         <EuiDataGrid

@@ -1,31 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
-import { isColorDark } from '@elastic/eui';
-import chroma from 'chroma-js';
-import { CustomPaletteState } from 'src/plugins/charts/public';
 
-// This module is dedicated to the palette to value mapping
+import { CustomPaletteState } from '../..';
 
 function findColorSegment(
   value: number,
-  { min, max }: { min: number; max: number },
   comparison: (value: number, bucket: number) => number,
   colors: string[],
-  rangeMin?: number,
-  rangeMax?: number
+  rangeMin: number,
+  rangeMax: number
 ) {
-  const maxValue = rangeMax ?? max;
-  const minValue = rangeMin ?? min;
   // assume uniform distribution within the provided range, can ignore stops
-  const step = (maxValue - minValue) / colors.length;
+  const step = (rangeMax - rangeMin) / colors.length;
 
   // what about values in range
-  const index = colors.findIndex((c, i) => comparison(value, minValue + (1 + i) * step) <= 0);
+  const index = colors.findIndex((c, i) => comparison(value, rangeMin + (1 + i) * step) <= 0);
   return colors[index] || colors[0];
 }
 
@@ -68,15 +62,16 @@ export function workoutColorForValue(
   if (value == null) {
     return;
   }
-  const { colors, stops, range, continuity, rangeMax, rangeMin } = params;
+  const { colors, stops, range = 'percent', continuity = 'above', rangeMax, rangeMin } = params;
   // ranges can be absolute numbers or percentages
   // normalized the incoming value to the same format as range to make easier comparisons
   const normalizedValue = getNormalizedValueByRange(value, params, minMax);
-  const extraRangeArguments = range === 'percent' ? [0, 100] : [minMax.min, minMax.max];
+  const dataRangeArguments = range === 'percent' ? [0, 100] : [minMax.min, minMax.max];
   const comparisonFn = (v: number, threshold: number) => v - threshold;
 
-  const maxRange = stops.length ? rangeMax : extraRangeArguments[1];
-  const minRange = stops.length ? rangeMin : extraRangeArguments[0];
+  // if steps are defined consider the specific rangeMax/Min as data boundaries
+  const maxRange = stops.length ? rangeMax : dataRangeArguments[1];
+  const minRange = stops.length ? rangeMin : dataRangeArguments[0];
 
   // in case of shorter rangers, extends the steps on the sides to cover the whole set
   if (comparisonFn(normalizedValue, maxRange) > 0) {
@@ -96,11 +91,11 @@ export function workoutColorForValue(
     return findColorsByStops(normalizedValue, comparisonFn, colors, stops);
   }
 
-  return findColorSegment(normalizedValue, minMax, comparisonFn, colors, ...extraRangeArguments);
-}
-
-export function getContrastColor(color: string, isDarkTheme: boolean) {
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorInk;
-  const lightColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorGhost;
-  return isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
+  return findColorSegment(
+    normalizedValue,
+    comparisonFn,
+    colors,
+    dataRangeArguments[0],
+    dataRangeArguments[1]
+  );
 }

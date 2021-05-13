@@ -8,6 +8,7 @@
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import {
   applyPaletteParams,
+  getContrastColor,
   getDataMinMax,
   getPaletteStops,
   getStepValue,
@@ -382,5 +383,17 @@ describe('getStepValue', () => {
         100
       )
     ).toBe(1);
+  });
+});
+
+describe('getContrastColor', () => {
+  it('should pick the light color when the passed one is dark', () => {
+    expect(getContrastColor('#000', true)).toBe('#dfe5ef');
+    expect(getContrastColor('#000', false)).toBe('#ffffff');
+  });
+
+  it('should pick the dark color when the passed one is light', () => {
+    expect(getContrastColor('#fff', true)).toBe('#1d1e24');
+    expect(getContrastColor('#fff', false)).toBe('#343741');
   });
 });

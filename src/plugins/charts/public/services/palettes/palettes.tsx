@@ -30,6 +30,7 @@ import { lightenColor } from './lighten_color';
 import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types';
 import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
+import { workoutColorForValue } from './helpers';
 
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
   const colors = euiPaletteColorBlind({ rotations: 2 });
@@ -162,15 +163,22 @@ function buildSyncedKibanaPalette(
 function buildCustomPalette(): PaletteDefinition {
   return {
     id: 'custom',
-    getGradientColorHelper: (
-      { min, max }: { min: number; max: number },
-      { colors, stops }: { colors: string[]; stops: number[] }
+    getColorForValue: (
+      value,
+      params: {
+        colors: string[];
+        range: 'number' | 'percent';
+        continuity: 'above' | 'below' | 'none' | 'all';
+        gradient: boolean;
+        /** Stops values mark where colors end (non-inclusive value) */
+        stops: number[];
+        /** Important: specify rangeMin/rangeMax if custom stops are defined! */
+        rangeMax: number;
+        rangeMin: number;
+      },
+      dataBounds
     ) => {
-      const gradientColorFn = chroma
-        .scale(colors)
-        // if explicit stops are passed use them, or use min/max values in the series
-        .domain(stops.length ? stops : [min, max]);
-      return (value: number) => gradientColorFn(value).hex();
+      return workoutColorForValue(value, params, dataBounds);
     },
     getCategoricalColor: (
       series: SeriesLayer[],

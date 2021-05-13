@@ -11,10 +11,7 @@ import { IUiSettingsClient } from 'kibana/public';
 import type { FormatFactory } from '../../types';
 import type { DataContextType } from './types';
 import { ColumnConfig } from './table_basic';
-import {
-  getContrastColor,
-  workoutColorForValue,
-} from '../../shared_components/coloring/color_to_value';
+import { getContrastColor } from '../../shared_components/coloring/utils';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -25,7 +22,7 @@ export const createGridCell = (
   // Changing theme requires a full reload of the page, so we can cache here
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
-    const { table, alignments, minMaxByColumnId } = useContext(DataContext);
+    const { table, alignments, minMaxByColumnId, getColorForValue } = useContext(DataContext);
     const rowValue = table?.rows[rowIndex][columnId];
     const content = formatters[columnId]?.convert(rowValue, 'html');
     const currentAlignment = alignments && alignments[columnId];
@@ -36,9 +33,9 @@ export const createGridCell = (
 
     useEffect(() => {
       if (minMaxByColumnId?.[columnId]) {
-        if (colorMode !== 'none' && palette?.params) {
+        if (colorMode !== 'none' && palette?.params && getColorForValue) {
           // workout the bucket the value belongs to
-          const color = workoutColorForValue(rowValue, palette.params, minMaxByColumnId[columnId]);
+          const color = getColorForValue(rowValue, palette.params, minMaxByColumnId[columnId]);
           if (color) {
             const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };
             if (colorMode === 'cell' && color) {
@@ -62,7 +59,7 @@ export const createGridCell = (
           });
         }
       };
-    }, [rowValue, columnId, setCellProps, colorMode, palette, minMaxByColumnId]);
+    }, [rowValue, columnId, setCellProps, colorMode, palette, minMaxByColumnId, getColorForValue]);
 
     return (
       <div

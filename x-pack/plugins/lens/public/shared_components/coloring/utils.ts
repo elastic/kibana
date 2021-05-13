@@ -7,6 +7,8 @@
 
 import chroma from 'chroma-js';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
+import { isColorDark } from '@elastic/eui';
 import {
   CUSTOM_PALETTE,
   defaultParams,
@@ -276,4 +278,10 @@ export function getColorStops(
     freshColorStops = reversePalette(freshColorStops);
   }
   return freshColorStops;
+}
+
+export function getContrastColor(color: string, isDarkTheme: boolean) {
+  const darkColor = isDarkTheme ? euiDarkVars.euiColorGhost : euiLightVars.euiColorInk;
+  const lightColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars.euiColorGhost;
+  return isColorDark(...chroma(color).rgb()) ? lightColor : darkColor;
 }

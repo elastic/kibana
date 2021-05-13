@@ -109,13 +109,14 @@ export interface PaletteDefinition<T = unknown> {
    */
   canDynamicColoring?: boolean;
   /**
-   * Get a helper function to compute interpolated gradient colors based on value and its domain.
-   * This can be used for dynamic coloring based on value.
+   * Get the assigned color for the given value based on its data domain and state settings.
+   * This can be used for dynamic coloring based on uniform color distribution or custom stops.
    */
-  getGradientColorHelper?: (
-    { min, max }: { min: number; max: number },
-    state?: T
-  ) => (value: number) => string;
+  getColorForValue?: (
+    value: number | undefined,
+    state: T,
+    { min, max }: { min: number; max: number }
+  ) => string | undefined;
 }
 
 export interface PaletteRegistry {
