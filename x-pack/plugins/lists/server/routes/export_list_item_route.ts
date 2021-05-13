@@ -7,10 +7,13 @@
 
 import { Stream } from 'stream';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+
 import type { ListsPluginRouter } from '../types';
 import { LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { exportListItemQuerySchema } from '../../common/schemas';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getListClient } from '.';
 
