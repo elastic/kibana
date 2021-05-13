@@ -17,6 +17,8 @@ interface InitialFieldValues {
   validFields: string[];
   validSortFields: string[];
   validFacetFields: string[];
+  urlField?: string;
+  titleField?: string;
 }
 interface SearchUIActions {
   loadFieldData(): void;
@@ -61,8 +63,20 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
     validFields: [[], { onFieldDataLoaded: (_, { validFields }) => validFields }],
     validSortFields: [[], { onFieldDataLoaded: (_, { validSortFields }) => validSortFields }],
     validFacetFields: [[], { onFieldDataLoaded: (_, { validFacetFields }) => validFacetFields }],
-    titleField: ['', { onTitleFieldChange: (_, { titleField }) => titleField }],
-    urlField: ['', { onUrlFieldChange: (_, { urlField }) => urlField }],
+    titleField: [
+      '',
+      {
+        onTitleFieldChange: (_, { titleField }) => titleField,
+        onFieldDataLoaded: (_, { titleField }) => titleField || '',
+      },
+    ],
+    urlField: [
+      '',
+      {
+        onUrlFieldChange: (_, { urlField }) => urlField,
+        onFieldDataLoaded: (_, { urlField }) => urlField || '',
+      },
+    ],
     facetFields: [[], { onFacetFieldsChange: (_, { facetFields }) => facetFields }],
     sortFields: [[], { onSortFieldsChange: (_, { sortFields }) => sortFields }],
     activeField: [ActiveField.None, { onActiveFieldChange: (_, { activeField }) => activeField }],
@@ -76,8 +90,20 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
 
       try {
         const initialFieldValues = await http.get(url);
+        const {
+          defaultValues: { urlField, titleField },
+          validFields,
+          validSortFields,
+          validFacetFields,
+        } = initialFieldValues;
 
-        actions.onFieldDataLoaded(initialFieldValues);
+        actions.onFieldDataLoaded({
+          validFields,
+          validSortFields,
+          validFacetFields,
+          urlField,
+          titleField,
+        });
       } catch (e) {
         flashAPIErrors(e);
       }
