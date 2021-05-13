@@ -60,7 +60,7 @@ describe('APMSection', () => {
     }));
   });
 
-  it('renders transaction stat less then 1k', () => {
+  it('renders transaction stat less than 1k', () => {
     const resp = {
       appLink: '/app/apm',
       stats: {
