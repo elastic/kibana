@@ -32,13 +32,7 @@ const managementSchema = Joi.object().pattern(
   Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
-const alertingSchema = Joi.alternatives().try([
-  Joi.object({
-    rule: Joi.array().items(Joi.string()),
-    alert: Joi.array().items(Joi.string()),
-  }),
-  Joi.array().items(Joi.string()),
-]);
+const alertingSchema = Joi.array().items(Joi.string());
 
 const appCategorySchema = Joi.object({
   id: Joi.string().required(),
@@ -55,8 +49,14 @@ const kibanaPrivilegeSchema = Joi.object({
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
   alerting: Joi.object({
-    all: alertingSchema,
-    read: alertingSchema,
+    rule: {
+      all: alertingSchema,
+      read: alertingSchema,
+    },
+    alert: {
+      all: alertingSchema,
+      read: alertingSchema,
+    },
   }),
   savedObject: Joi.object({
     all: Joi.array().items(Joi.string()).required(),
@@ -73,8 +73,14 @@ const kibanaIndependentSubFeaturePrivilegeSchema = Joi.object({
   management: managementSchema,
   catalogue: catalogueSchema,
   alerting: Joi.object({
-    all: alertingSchema,
-    read: alertingSchema,
+    rule: {
+      all: alertingSchema,
+      read: alertingSchema,
+    },
+    alert: {
+      all: alertingSchema,
+      read: alertingSchema,
+    },
   }),
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
@@ -118,7 +124,7 @@ const kibanaFeatureSchema = Joi.object({
   app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,
-  alerting: Joi.array().items(Joi.string()),
+  alerting: alertingSchema,
   privileges: Joi.object({
     all: kibanaPrivilegeSchema,
     read: kibanaPrivilegeSchema,
@@ -209,25 +215,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   }
 
   function validateAlertingEntry(privilegeId: string, entry: FeatureKibanaPrivileges['alerting']) {
-    let all: string[] = [];
-    let read: string[] = [];
-    if (Array.isArray(entry?.all)) {
-      all = entry?.all ?? [];
-    } else {
-      const allObject = entry?.all as { rule?: readonly string[]; alert?: readonly string[] };
-      const rule = allObject?.rule ?? [];
-      const alert = allObject?.alert ?? [];
-      all = [...rule, ...alert];
-    }
-
-    if (Array.isArray(entry?.read)) {
-      read = entry?.read ?? [];
-    } else {
-      const readObject = entry?.read as { rule?: readonly string[]; alert?: readonly string[] };
-      const rule = readObject?.rule ?? [];
-      const alert = readObject?.alert ?? [];
-      read = [...rule, ...alert];
-    }
+    const all: string[] = [...(entry?.rule?.all ?? []), ...(entry?.alert?.all ?? [])];
+    const read: string[] = [...(entry?.rule?.read ?? []), ...(entry?.alert?.read ?? [])];
 
     all.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
     read.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
