@@ -6,13 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 
 export const indexAnnotationSchema = schema.object({
   timestamp: schema.number(),
   end_timestamp: schema.number(),
   annotation: schema.string(),
   job_id: schema.string(),
-  type: schema.string(),
+  type: schema.oneOf([
+    schema.literal(ANNOTATION_TYPE.ANNOTATION),
+    schema.literal(ANNOTATION_TYPE.COMMENT),
+  ]),
   create_time: schema.maybe(schema.number()),
   create_username: schema.maybe(schema.string()),
   modified_time: schema.maybe(schema.number()),
@@ -32,8 +36,8 @@ export const indexAnnotationSchema = schema.object({
 
 export const getAnnotationsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
-  earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
-  latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
+  earliestMs: schema.nullable(schema.number()),
+  latestMs: schema.nullable(schema.number()),
   maxAnnotations: schema.number(),
   /** Fields to find unique values for (e.g. events or created_by) */
   fields: schema.maybe(

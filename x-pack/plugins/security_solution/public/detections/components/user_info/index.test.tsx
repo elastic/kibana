@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useUserInfo, ManageUserInfo } from './index';
 
 import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
-import React from 'react';
+import { UserPrivilegesProvider } from '../user_privileges';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
@@ -63,7 +64,9 @@ describe('useUserInfo', () => {
     });
     const wrapper = ({ children }: { children: JSX.Element }) => (
       <TestProviders>
-        <ManageUserInfo>{children}</ManageUserInfo>
+        <UserPrivilegesProvider>
+          <ManageUserInfo>{children}</ManageUserInfo>
+        </UserPrivilegesProvider>
       </TestProviders>
     );
     await act(async () => {

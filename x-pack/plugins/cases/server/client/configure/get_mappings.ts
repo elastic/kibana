@@ -7,8 +7,7 @@
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ConnectorMappings, ConnectorTypes } from '../../../common/api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { createCaseError } from '../../common/error';
 import { CasesClientArgs } from '..';
 import { MappingsArgs } from './types';

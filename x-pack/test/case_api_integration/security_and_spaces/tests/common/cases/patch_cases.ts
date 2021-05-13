@@ -32,10 +32,11 @@ import {
   createCase,
   createComment,
   updateCase,
-  getAllUserAction,
+  getCaseUserActions,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
   findCases,
+  superUserSpace1Auth,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
@@ -58,7 +59,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getAllUserAction(supertest, postedCase.id);
+        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getAllUserAction(supertest, postedCase.id);
+        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 

@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_connectors', () => {
     it('should return an empty find body correctly if no connectors are loaded', async () => {
-      const connectors = await getCaseConnectors(supertest);
+      const connectors = await getCaseConnectors({ supertest });
       expect(connectors).to.eql([]);
     });
 

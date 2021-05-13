@@ -50,6 +50,7 @@ const getServerTitle = (isFleetTypeMetric, total) => {
         values: { apmsTotal },
       }
     );
+    return linkLabel;
   }
   linkLabel.link = (
     <FormattedMessage

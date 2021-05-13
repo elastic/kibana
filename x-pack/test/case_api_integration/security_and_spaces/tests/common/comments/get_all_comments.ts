@@ -18,6 +18,7 @@ import {
   createCase,
   createComment,
   getAllComments,
+  superUserSpace1Auth,
 } from '../../../../common/lib/utils';
 import { CommentType } from '../../../../../../plugins/cases/common/api';
 import {
@@ -31,7 +32,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { superUserSpace1Auth } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

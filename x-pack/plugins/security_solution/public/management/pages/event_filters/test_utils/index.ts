@@ -83,7 +83,7 @@ export const createdEventFilterEntryMock = (): ExceptionListItemSchema => ({
   name: 'Test',
   namespace_type: 'agnostic',
   os_types: ['windows'],
-  tags: [],
+  tags: ['policy:all'],
   tie_breaker_id: 'c42f3dbd-292f-49e8-83ab-158d024a4d8b',
   type: 'simple',
   updated_at: '2021-04-19T10:30:36.428Z',

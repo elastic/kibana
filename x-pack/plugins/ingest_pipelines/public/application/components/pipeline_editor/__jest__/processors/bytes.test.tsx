@@ -8,12 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-// Default parameter values automatically added to the Bytes processor when saved
-const defaultBytesParameters = {
-  ignore_failure: undefined,
-  description: undefined,
-};
-
 const BYTES_TYPE = 'bytes';
 
 describe('Processor: Bytes', () => {
@@ -85,7 +79,6 @@ describe('Processor: Bytes', () => {
     const processors = getProcessorValue(onUpdate, BYTES_TYPE);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
-      ...defaultBytesParameters,
     });
   });
 
@@ -112,13 +105,9 @@ describe('Processor: Bytes', () => {
 
     const processors = getProcessorValue(onUpdate, BYTES_TYPE);
     expect(processors[0].bytes).toEqual({
-      description: undefined,
       field: 'field_1',
-      ignore_failure: undefined,
       target_field: 'target_field',
       ignore_missing: true,
-      tag: undefined,
-      if: undefined,
     });
   });
 });

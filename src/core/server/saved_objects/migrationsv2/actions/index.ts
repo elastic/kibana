@@ -22,6 +22,10 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+import {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+} from '../../migrations/core/migrate_raw_docs';
 export type { RetryableEsClientError };
 
 /**
@@ -46,6 +50,7 @@ export interface ActionErrorTypeMap {
   incompatible_mapping_exception: IncompatibleMappingException;
   alias_not_found_exception: AliasNotFound;
   remove_index_not_a_concrete_index: RemoveIndexNotAConcreteIndex;
+  documents_transform_failed: DocumentsTransformFailed;
 }
 
 /**
@@ -107,34 +112,37 @@ export const setWriteBlock = (
   IndexNotFound | RetryableEsClientError,
   'set_write_block_succeeded'
 > => () => {
-  return client.indices
-    .addBlock<{
-      acknowledged: boolean;
-      shards_acknowledged: boolean;
-    }>(
-      {
-        index,
-        block: 'write',
-      },
-      { maxRetries: 0 /** handle retry ourselves for now */ }
-    )
-    .then((res: any) => {
-      return res.body.acknowledged === true
-        ? Either.right('set_write_block_succeeded' as const)
-        : Either.left({
-            type: 'retryable_es_client_error' as const,
-            message: 'set_write_block_failed',
-          });
-    })
-    .catch((e: ElasticsearchClientError) => {
-      if (e instanceof EsErrors.ResponseError) {
-        if (e.message === 'index_not_found_exception') {
-          return Either.left({ type: 'index_not_found_exception' as const, index });
+  return (
+    client.indices
+      .addBlock<{
+        acknowledged: boolean;
+        shards_acknowledged: boolean;
+      }>(
+        {
+          index,
+          block: 'write',
+        },
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      )
+      // not typed yet
+      .then((res: any) => {
+        return res.body.acknowledged === true
+          ? Either.right('set_write_block_succeeded' as const)
+          : Either.left({
+              type: 'retryable_es_client_error' as const,
+              message: 'set_write_block_failed',
+            });
+      })
+      .catch((e: ElasticsearchClientError) => {
+        if (e instanceof EsErrors.ResponseError) {
+          if (e.body?.error?.type === 'index_not_found_exception') {
+            return Either.left({ type: 'index_not_found_exception' as const, index });
+          }
         }
-      }
-      throw e;
-    })
-    .catch(catchRetryableEsClientErrors);
+        throw e;
+      })
+      .catch(catchRetryableEsClientErrors)
+  );
 };
 
 /**
@@ -263,12 +271,12 @@ export const cloneIndex = (
         });
       })
       .catch((error: EsErrors.ResponseError) => {
-        if (error.body.error.type === 'index_not_found_exception') {
+        if (error?.body?.error?.type === 'index_not_found_exception') {
           return Either.left({
             type: 'index_not_found_exception' as const,
             index: error.body.error.index,
           });
-        } else if (error.body.error.type === 'resource_already_exists_exception') {
+        } else if (error?.body?.error?.type === 'resource_already_exists_exception') {
           /**
            * If the target index already exists it means a previous clone
            * operation had already been started. However, we can't be sure
@@ -520,28 +528,13 @@ export const closePit = (
 };
 
 /*
- * Transform outdated docs and write them to the index.
+ * Transform outdated docs
  * */
 export const transformDocs = (
-  client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
-  outdatedDocuments: SavedObjectsRawDoc[],
-  index: string,
-  // used for testing purposes only
-  refresh: estypes.Refresh
-): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound | TargetIndexHadWriteBlock,
-  'bulk_index_succeeded'
-> =>
-  pipe(
-    TaskEither.tryCatch(
-      () => transformRawDocs(outdatedDocuments),
-      (e) => {
-        throw e;
-      }
-    ),
-    TaskEither.chain((docs) => bulkOverwriteTransformedDocuments(client, index, docs, refresh))
-  );
+  outdatedDocuments: SavedObjectsRawDoc[]
+): TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess> =>
+  transformRawDocs(outdatedDocuments);
 
 /** @internal */
 export interface ReindexResponse {
@@ -744,8 +737,6 @@ export const waitForPickupUpdatedMappingsTask = flow(
     }
   )
 );
-
-/** @internal */
 export interface AliasNotFound {
   type: 'alias_not_found_exception';
 }
@@ -795,22 +786,22 @@ export const updateAliases = (
     })
     .catch((err: EsErrors.ElasticsearchClientError) => {
       if (err instanceof EsErrors.ResponseError) {
-        if (err.body.error.type === 'index_not_found_exception') {
+        if (err?.body?.error?.type === 'index_not_found_exception') {
           return Either.left({
             type: 'index_not_found_exception' as const,
             index: err.body.error.index,
           });
         } else if (
-          err.body.error.type === 'illegal_argument_exception' &&
-          err.body.error.reason.match(
+          err?.body?.error?.type === 'illegal_argument_exception' &&
+          err?.body?.error?.reason?.match(
             /The provided expression \[.+\] matches an alias, specify the corresponding concrete indices instead./
           )
         ) {
           return Either.left({ type: 'remove_index_not_a_concrete_index' as const });
         } else if (
-          err.body.error.type === 'aliases_not_found_exception' ||
-          (err.body.error.type === 'resource_not_found_exception' &&
-            err.body.error.reason.match(/required alias \[.+\] does not exist/))
+          err?.body?.error?.type === 'aliases_not_found_exception' ||
+          (err?.body?.error?.type === 'resource_not_found_exception' &&
+            err?.body?.error?.reason?.match(/required alias \[.+\] does not exist/))
         ) {
           return Either.left({
             type: 'alias_not_found_exception' as const,
@@ -903,7 +894,7 @@ export const createIndex = (
         });
       })
       .catch((error) => {
-        if (error.body.error.type === 'resource_already_exists_exception') {
+        if (error?.body?.error?.type === 'resource_already_exists_exception') {
           /**
            * If the target index already exists it means a previous create
            * operation had already been started. However, we can't be sure

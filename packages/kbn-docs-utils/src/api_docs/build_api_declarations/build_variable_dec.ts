@@ -15,14 +15,11 @@ import {
   PropertySignature,
   ShorthandPropertyAssignment,
 } from 'ts-morph';
-import { getApiSectionId, isInternal } from '../utils';
-import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
+import { isInternal } from '../utils';
 import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
 import { getArrowFunctionDec } from './build_arrow_fn_dec';
 import { buildApiDeclaration } from './build_api_declaration';
-import { getSourceForNode } from './utils';
-import { getSignature } from './get_signature';
-import { getTypeKind } from './get_type_kind';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 
 /**
  * Special handling for objects and arrow functions which are variable or property node types.
@@ -43,45 +40,61 @@ export function buildVariableDec(
     | ShorthandPropertyAssignment,
   plugins: KibanaPlatformPlugin[],
   anchorLink: AnchorLink,
-  log: ToolingLog
+  currentPluginId: string,
+  log: ToolingLog,
+  captureReferences: boolean
 ): ApiDeclaration {
   const initializer = node.getInitializer();
-  // Recusively list object properties as children.
+  // Recursively list object properties as children.
   if (initializer && Node.isObjectLiteralExpression(initializer)) {
     return {
-      id: getApiSectionId(anchorLink),
+      ...buildBasicApiDeclaration({
+        node,
+        plugins,
+        anchorLink,
+        apiName: node.getName(),
+        currentPluginId,
+        captureReferences,
+        log,
+      }),
       type: TypeKind.ObjectKind,
-      tags: getJSDocTagNames(node),
       children: initializer.getProperties().reduce((acc, prop) => {
-        const child = buildApiDeclaration(
-          prop,
+        const child = buildApiDeclaration({
+          node: prop,
           plugins,
           log,
-          anchorLink.pluginName,
-          anchorLink.scope,
-          anchorLink.apiName
-        );
+          currentPluginId: anchorLink.pluginName,
+          scope: anchorLink.scope,
+          captureReferences,
+          parentApiId: anchorLink.apiName,
+        });
         if (!isInternal(child)) {
           acc.push(child);
         }
         return acc;
       }, [] as ApiDeclaration[]),
-      description: getCommentsFromNode(node),
-      label: node.getName(),
-      source: getSourceForNode(node),
+      // Clear out the signature, we don't want it for objects, relying on the children properties will be enough.
+      signature: undefined,
     };
   } else if (initializer && Node.isArrowFunction(initializer)) {
-    return getArrowFunctionDec(node, initializer, plugins, anchorLink, log);
+    return getArrowFunctionDec(
+      node,
+      initializer,
+      plugins,
+      anchorLink,
+      currentPluginId,
+      log,
+      captureReferences
+    );
   }
 
-  // Otherwise return it just as a single entry.
-  return {
-    tags: getJSDocTagNames(node),
-    id: getApiSectionId(anchorLink),
-    type: getTypeKind(node),
-    label: node.getName(),
-    description: getCommentsFromNode(node),
-    source: getSourceForNode(node),
-    signature: getSignature(node, plugins, log),
-  };
+  return buildBasicApiDeclaration({
+    currentPluginId,
+    anchorLink,
+    node,
+    plugins,
+    log,
+    captureReferences,
+    apiName: node.getName(),
+  });
 }

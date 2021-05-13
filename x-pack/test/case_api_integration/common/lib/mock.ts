@@ -31,6 +31,11 @@ import {
 } from '../../../../plugins/cases/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
+/**
+ * A null filled user will occur when the security plugin is disabled
+ */
+export const nullUser = { email: null, full_name: null, username: null };
+
 export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',

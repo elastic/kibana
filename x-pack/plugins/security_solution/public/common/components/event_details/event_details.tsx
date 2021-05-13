@@ -146,6 +146,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   const tableTab = useMemo(
     () => ({
       id: EventsViewType.tableView,
+      'data-test-subj': 'tableTab',
       name: i18n.TABLE,
       content: (
         <>

@@ -22,7 +22,7 @@ import {
   createCase,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
-  getAllUserAction,
+  getCaseUserActions,
 } from '../../../../common/lib/utils';
 import {
   secOnly,
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
-        const userActions = await getAllUserAction(supertest, postedCase.id);
+        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[0]);
 
         const { new_value, ...rest } = creationUserAction as CaseUserActionResponse;

@@ -33,13 +33,14 @@ class TimeseriesVisualization extends Component {
   scaledDataFormat = this.props.getConfig('dateFormat:scaled');
   dateFormat = this.props.getConfig('dateFormat');
 
-  xAxisFormatter = (interval) => (val) => {
+  xAxisFormatter = (interval) => {
     const formatter = createIntervalBasedFormatter(
       interval,
       this.scaledDataFormat,
-      this.dateFormat
+      this.dateFormat,
+      this.props.model.ignore_daylight_time
     );
-    return formatter(val);
+    return (val) => formatter(val);
   };
 
   yAxisStackedByPercentFormatter = (val) => {

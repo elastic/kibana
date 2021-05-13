@@ -255,6 +255,9 @@ export const ConnectorEditFlyout = ({
       if (closeAfterSave) {
         closeFlyout();
       }
+      if (connector.isMissingSecrets) {
+        connector.isMissingSecrets = false;
+      }
       if (reloadConnectors) {
         reloadConnectors();
       }

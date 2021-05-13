@@ -614,12 +614,14 @@ function enforceFrozenInputs(oldInputs: PackagePolicyInput[], newInputs: Package
 
   for (const input of resultInputs) {
     const oldInput = oldInputs.find((i) => i.type === input.type);
+    if (oldInput?.keep_enabled) input.enabled = oldInput.enabled;
     if (input.vars && oldInput?.vars) {
       input.vars = _enforceFrozenVars(oldInput.vars, input.vars);
     }
     if (input.streams && oldInput?.streams) {
       for (const stream of input.streams) {
         const oldStream = oldInput.streams.find((s) => s.id === stream.id);
+        if (oldStream?.keep_enabled) stream.enabled = oldStream.enabled;
         if (stream.vars && oldStream?.vars) {
           stream.vars = _enforceFrozenVars(oldStream.vars, stream.vars);
         }

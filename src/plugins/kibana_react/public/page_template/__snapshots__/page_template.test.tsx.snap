@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaPageTemplate render basic template 1`] = `
+<EuiPageTemplate
+  pageHeader={
+    Object {
+      "description": "test",
+      "iconType": "test",
+      "rightSideItems": Array [
+        "test",
+      ],
+      "title": "test",
+    }
+  }
+  restrictWidth={true}
+/>
+`;
+
+exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
+<EuiPageTemplate
+  restrictWidth={true}
+  template="centeredBody"
+>
+  <EuiEmptyPrompt
+    title={
+      <h1>
+        custom test
+      </h1>
+    }
+  />
+</EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
+<EuiPageTemplate
+  pageHeader={
+    Object {
+      "description": "test",
+      "iconType": "test",
+      "rightSideItems": Array [
+        "test",
+      ],
+      "title": "test",
+    }
+  }
+  restrictWidth={true}
+  template="centeredContent"
+>
+  <EuiEmptyPrompt
+    title={
+      <h1>
+        custom test
+      </h1>
+    }
+  />
+</EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplate render default empty prompt 1`] = `
+<EuiPageTemplate
+  restrictWidth={true}
+  template="centeredBody"
+>
+  <EuiEmptyPrompt
+    actions={
+      Array [
+        "test",
+      ]
+    }
+    body={
+      <p>
+        test
+      </p>
+    }
+    iconType="test"
+  />
+</EuiPageTemplate>
+`;

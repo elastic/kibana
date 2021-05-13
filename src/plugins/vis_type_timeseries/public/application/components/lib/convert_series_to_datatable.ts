@@ -13,7 +13,7 @@ import {
   DatatableColumnType,
 } from 'src/plugins/expressions/public';
 import { TimeseriesVisParams } from '../../../types';
-import { PanelData } from '../../../../common/types';
+import type { PanelData } from '../../../../common/types';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import { getDataStart } from '../../../services';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';

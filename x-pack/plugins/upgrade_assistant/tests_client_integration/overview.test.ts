@@ -49,7 +49,7 @@ describe('Overview page', () => {
         domainId: 'xpack.spaces',
         level: 'critical',
         message:
-          'Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)',
+          'Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)',
       },
     ];
 

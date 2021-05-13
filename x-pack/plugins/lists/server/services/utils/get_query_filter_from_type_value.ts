@@ -6,8 +6,7 @@
  */
 
 import { isEmpty, isObject } from 'lodash/fp';
-
-import { Type } from '../../../common/schemas';
+import { Type } from '@kbn/securitysolution-io-ts-utils';
 
 export type QueryFilterType = [
   { term: Record<string, unknown> },
