@@ -104,29 +104,3 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   }, [fetchUser]);
   return user;
 };
-
-export interface UseGetUserSavedObjectPermissions {
-  crud: boolean;
-  read: boolean;
-}
-
-export const useGetUserSavedObjectPermissions = () => {
-  const [
-    savedObjectsPermissions,
-    setSavedObjectsPermissions,
-  ] = useState<UseGetUserSavedObjectPermissions | null>(null);
-  const uiCapabilities = useKibana().services.application.capabilities;
-
-  useEffect(() => {
-    const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
-    const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.siem.show === 'boolean' ? uiCapabilities.siem.show : false;
-    setSavedObjectsPermissions({
-      crud: capabilitiesCanUserCRUD,
-      read: capabilitiesCanUserRead,
-    });
-  }, [uiCapabilities]);
-
-  return savedObjectsPermissions;
-};
