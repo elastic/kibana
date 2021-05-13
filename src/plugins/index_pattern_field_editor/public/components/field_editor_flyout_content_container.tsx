@@ -20,9 +20,10 @@ import {
 } from '../shared_imports';
 import { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
-import { deserializeField, getRuntimeFieldValidator } from '../lib';
+import { deserializeField, getRuntimeFieldValidator, ApiService } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
+import { FieldEditorProvider } from './field_editor_context';
 
 export interface FieldEditorContext {
   indexPattern: IndexPattern;
@@ -65,6 +66,7 @@ export interface Props {
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
+  apiService: ApiService;
 }
 
 /**
@@ -86,6 +88,7 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
   usageCollection,
+  apiService,
 }: Props) => {
   const fieldToEdit = deserializeField(indexPattern, field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
@@ -180,19 +183,21 @@ export const FieldEditorFlyoutContentContainer = ({
   }, [loadEditor]);
 
   return (
-    <FieldEditorFlyoutContent
-      onSave={saveField}
-      onCancel={onCancel}
-      docLinks={docLinks}
-      field={fieldToEdit}
-      FieldEditor={Editor}
-      fieldFormatEditors={fieldFormatEditors}
-      fieldFormats={fieldFormats}
-      uiSettings={uiSettings}
-      indexPattern={indexPattern}
-      fieldTypeToProcess={fieldTypeToProcess}
-      runtimeFieldValidator={validateRuntimeField}
-      isSavingField={isSaving}
-    />
+    <FieldEditorProvider apiService={apiService}>
+      <FieldEditorFlyoutContent
+        onSave={saveField}
+        onCancel={onCancel}
+        docLinks={docLinks}
+        field={fieldToEdit}
+        FieldEditor={Editor}
+        fieldFormatEditors={fieldFormatEditors}
+        fieldFormats={fieldFormats}
+        uiSettings={uiSettings}
+        indexPattern={indexPattern}
+        fieldTypeToProcess={fieldTypeToProcess}
+        runtimeFieldValidator={validateRuntimeField}
+        isSavingField={isSaving}
+      />
+    </FieldEditorProvider>
   );
 };

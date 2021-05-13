@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { deserializeField } from './serialization';
-
-export { getLinks } from './documentation';
-
-export { getRuntimeFieldValidator, RuntimeFieldPainlessError } from './runtime_field_validation';
-
-export { initApi, ApiService } from './api';
+export const API_BASE_PATH = '/api/index_pattern_field_editor';

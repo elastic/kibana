@@ -316,4 +316,4 @@ const FieldEditorComponent = ({
   );
 };
 
-export const FieldEditor = React.memo(FieldEditorComponent);
+export const FieldEditor = React.memo(FieldEditorComponent) as typeof FieldEditorComponent;
