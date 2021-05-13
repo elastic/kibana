@@ -6,6 +6,7 @@
  */
 
 import { flow } from 'fp-ts/lib/function';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 
 import {
   CreateExceptionListItemSchema,
@@ -14,7 +15,6 @@ import {
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '../../common';
-import { addIdToItem, removeIdFromItem } from '../../common/shared_imports';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these
