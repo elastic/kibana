@@ -32,11 +32,10 @@ const MessageDeprecation: FunctionComponent<{
 
   return (
     <DeprecationCell
-      reindexBlocker={deprecation.blockerForReindexing}
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      reindexIndexName={deprecation.reindex ? deprecation.index! : undefined}
-      deprecatedIndexSettings={deprecation.deprecatedIndexSettings}
+      correctiveAction={deprecation.correctiveAction}
+      indexName={deprecation.index}
       docUrl={deprecation.url}
       items={items}
     />
@@ -57,10 +56,10 @@ const SimpleMessageDeprecation: FunctionComponent<{ deprecation: EnrichedDepreca
 
   return (
     <DeprecationCell
-      reindexBlocker={deprecation.blockerForReindexing}
+      correctiveAction={deprecation.correctiveAction}
+      indexName={deprecation.index}
       items={items}
       docUrl={deprecation.url}
-      deprecatedIndexSettings={deprecation.deprecatedIndexSettings}
     />
   );
 };
@@ -94,12 +93,11 @@ export const EsDeprecationList: FunctionComponent<{
   if (currentGroupBy === GroupByOption.message && deprecations[0].index !== undefined) {
     // We assume that every deprecation message is the same issue (since they have the same
     // message) and that each deprecation will have an index associated with it.
+
     const indices = deprecations.map((dep) => ({
       index: dep.index!,
       details: dep.details,
-      reindex: dep.reindex === true,
-      deprecatedIndexSettings: dep.deprecatedIndexSettings,
-      blockerForReindexing: dep.blockerForReindexing,
+      correctiveAction: dep.correctiveAction,
     }));
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {

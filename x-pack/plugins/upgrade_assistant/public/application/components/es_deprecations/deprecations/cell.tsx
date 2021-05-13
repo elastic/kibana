@@ -24,13 +24,12 @@ import { FixIndexSettingsButton } from './index_settings';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
-  reindexIndexName?: string;
-  deprecatedIndexSettings?: string[];
   docUrl?: string;
   headline?: string;
   healthColor?: string;
   children?: ReactNode;
-  reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
+  correctiveAction?: EnrichedDeprecationInfo['correctiveAction'];
+  indexName?: string;
 }
 
 /**
@@ -39,12 +38,11 @@ interface DeprecationCellProps {
 export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
-  reindexIndexName,
-  deprecatedIndexSettings,
+  correctiveAction,
+  indexName,
   docUrl,
   items = [],
   children,
-  reindexBlocker,
 }) => (
   <div className="upgDeprecationCell">
     <EuiFlexGroup responsive={false} wrap alignItems="baseline">
@@ -82,14 +80,14 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
         )}
       </EuiFlexItem>
 
-      {reindexIndexName && (
+      {correctiveAction?.type === 'reindex' && (
         <EuiFlexItem grow={false}>
           <AppContext.Consumer>
             {({ http, docLinks }) => (
               <ReindexButton
                 docLinks={docLinks}
-                reindexBlocker={reindexBlocker}
-                indexName={reindexIndexName}
+                reindexBlocker={correctiveAction.blockerForReindexing}
+                indexName={indexName!}
                 http={http}
               />
             )}
@@ -97,9 +95,12 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
         </EuiFlexItem>
       )}
 
-      {deprecatedIndexSettings?.length && (
+      {correctiveAction?.type === 'indexSetting' && (
         <EuiFlexItem grow={false}>
-          <FixIndexSettingsButton settings={deprecatedIndexSettings} index={reindexIndexName!} />
+          <FixIndexSettingsButton
+            settings={correctiveAction.deprecatedSettings}
+            index={indexName!}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

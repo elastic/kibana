@@ -190,11 +190,9 @@ export interface DeprecationAPIResponse {
   node_settings: DeprecationInfo[];
   index_settings: IndexSettingsDeprecationInfo;
 }
-export interface EnrichedDeprecationInfo extends DeprecationInfo {
-  index?: string;
-  node?: string;
-  reindex?: boolean;
-  deprecatedIndexSettings?: string[];
+
+export interface ReindexAction {
+  type: 'reindex';
   /**
    * Indicate what blockers have been detected for calling reindex
    * against this index.
@@ -203,6 +201,21 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
    * In future this could be an array of blockers.
    */
   blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+}
+
+export interface MlAction {
+  type: 'mlSnapshot';
+  snapshotId: string;
+  jobId: string;
+}
+
+export interface IndexSettingAction {
+  type: 'indexSetting';
+  deprecatedSettings: string[];
+}
+export interface EnrichedDeprecationInfo extends DeprecationInfo {
+  index?: string;
+  correctiveAction?: ReindexAction | MlAction | IndexSettingAction;
 }
 
 export interface UpgradeAssistantStatus {
