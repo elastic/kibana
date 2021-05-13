@@ -82,6 +82,7 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
       bytes_sent_rate: bytesSentRate,
       errors,
       memory: stats.metrics?.beat?.memstats?.memory_alloc,
+      cgroup_memory: hit._source.beats_stats?.metrics?.beat?.cgroup?.memory.mem.usage.bytes,
       version: stats.beat?.version,
       time_of_last_event: hit._source.timestamp,
     });
@@ -115,6 +116,16 @@ export async function getApms(req: LegacyRequest, apmIndexPattern: string, clust
       'hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
       'hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
       'hits.hits._source.beats_stats.metrics.beat.memstats.memory_alloc',
+      'hits.hits._source.beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes',
+      'hits.hits._source.beat.stats.beat.uuid',
+      'hits.hits._source.beat.stats.beat.name',
+      'hits.hits._source.beat.stats.beat.host',
+      'hits.hits._source.beat.stats.beat.type',
+      'hits.hits._source.beat.stats.beat.version',
+      'hits.hits._source.beat.stats.libbeat.output.type',
+      'hits.hits._source.beat.stats.libbeat.output.read.errors',
+      'hits.hits._source.beat.stats.libbeat.output.write.errors',
+      'hits.hits._source.beat.stats.memstats.memory.alloc',
 
       // latest hits for calculating metrics
       'hits.hits._source.beats_stats.timestamp',
