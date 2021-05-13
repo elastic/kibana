@@ -6,17 +6,17 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListsPluginRouter } from '../types';
 import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import {
   FindEndpointListItemSchemaDecoded,
   findEndpointListItemSchema,
   foundExceptionListItemSchema,
 } from '../../common/schemas';
 
-import { getExceptionListClient } from './utils';
+import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
 export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
   router.get(

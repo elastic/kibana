@@ -38,6 +38,7 @@ export interface ExceptionItemProps {
   onEditException: (item: ExceptionListItemSchema) => void;
   showName?: boolean;
   showModified?: boolean;
+  'data-test-subj'?: string;
 }
 
 const ExceptionItemComponent = ({
@@ -48,6 +49,7 @@ const ExceptionItemComponent = ({
   onEditException,
   showModified = false,
   showName = false,
+  'data-test-subj': dataTestSubj,
 }: ExceptionItemProps): JSX.Element => {
   const [entryItems, setEntryItems] = useState<FormattedEntry[]>([]);
   const [showComments, setShowComments] = useState(false);
@@ -82,7 +84,7 @@ const ExceptionItemComponent = ({
   }, [loadingItemIds, exceptionItem.id]);
 
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">

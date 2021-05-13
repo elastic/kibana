@@ -19,6 +19,7 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
 import React from 'react';
+import { RULE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
@@ -115,7 +116,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
           />
           {getAlertAnnotations({
             alerts: alerts?.filter(
-              (alert) => alert['rule.id'] === AlertType.ErrorCount
+              (alert) => alert[RULE_ID]?.[0] === AlertType.ErrorCount
             ),
             theme,
           })}
