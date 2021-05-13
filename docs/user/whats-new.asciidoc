@@ -69,7 +69,7 @@ https://www.elastic.co/webinars/getting-started-with-alerting-for-the-elastic-st
 [role="screenshot"]
 image::user/images/highlights-alerting-history.png[Rules and connectors management page]
 
-You'll find new terminology for *Alerting* in the UI and the <<alerts-api,API>>:
+You'll find new terminology for *Alerting* in the UI and the {kibana-ref}/alerts-api.html[API]:
 
 * The main Alerting management page
 was renamed *Rules and Connectors*.
