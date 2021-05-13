@@ -6,7 +6,7 @@
 **_Gain insight to your data._**
 
 *Discover* enables you to quickly search and filter your data, get information
-about structure of the fields, and visualize your data with *Lens* and *Maps*.
+about the structure of the fields, and visualize your data with *Lens* and *Maps*.
 You can customize and save your searches and place them on a dashboard.
 
 ++++
@@ -110,6 +110,43 @@ image:images/document-table.png[Document table with fields for manufacturer, geo
 . To rearrange the table columns, hover the mouse over a
 column header, and then use the move and sort controls.
 
+[float]
+[[add-field-in-discover]]
+=== Add a field
+
+What happens if you forgot to define an important value as a separate field? Or, what if you
+want to combine two fields and treat them as one?
+You can add a field to your index pattern from inside of **Discover**,
+and then use that field for analysis and visualizations,
+the same way you do with other fields.
+
+. Click the ellipsis icon (...), and then click *Add field to index pattern*.
++
+[role="screenshot"]
+image:images/add-field-to-pattern.png[Dropdown menu located next to index pattern field with item for adding a field to an index pattern, width=50%]
+
+. In the *Create field* form, enter `hello` for the name.
+
+. Turn on *Set value*.
+
+. Use the Painless scripting language to define the field:
++
+```ts
+emit("Hello World!");
+```
+
+. Click *Save*.
+
+. In the fields list, search for the *hello* field, and then click it.
++
+You'll see the top values for the field.  The pop-up also includes actions for filtering,
+editing, and deleting the field.
++
+[role="screenshot"]
+image:images/hello-field.png[Top values for the hello field, width=50%]
+
+For more information on adding fields and Painless scripting language examples, refer to <<runtime-fields, Explore your data with runtime fields>>.
+
 
 [float]
 [[search-in-discover]]
@@ -186,7 +223,8 @@ You can bookmark this document and share the link.
 === Save your search for later use
 
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
-Saving a search saves the query and the filters.
+Saving a search saves the query text, filters,
+and current view of *Discover*&mdash;the columns selected in the document table, the sort order, and the index pattern.
 
 . In the toolbar, click **Save**.
 
