@@ -20,7 +20,7 @@ export interface GetSessionsDeps {
 }
 
 export function getSearchSessionsPage$(
-  { savedObjectsClient, logger }: GetSessionsDeps,
+  { savedObjectsClient }: GetSessionsDeps,
   filter: any,
   pageSize: number,
   page: number

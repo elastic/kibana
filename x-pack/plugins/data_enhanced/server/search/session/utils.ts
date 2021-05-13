@@ -24,5 +24,5 @@ export function createRequestHash(keys: Record<any, any>) {
 export function isSearchSessionExpired(
   session: SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
 ) {
-  return moment(session.attributes.expires).isAfter(moment());
+  return moment(session.attributes.expires).isBefore(moment());
 }
