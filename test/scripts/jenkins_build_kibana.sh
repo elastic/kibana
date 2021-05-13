@@ -39,4 +39,4 @@ node scripts/ship_ci_stats \
   --metrics packages/kbn-ui-shared-deps/target/metrics.json
 
 mkdir -p "$WORKSPACE/kibana-build"
-cp -pR build/oss/kibana-*-SNAPSHOT-linux-x86_64/. $WORKSPACE/kibana-build/
+cp -pR build/default/kibana-*-SNAPSHOT-linux-x86_64/. $WORKSPACE/kibana-build/
