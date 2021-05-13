@@ -94,26 +94,27 @@ export function App({
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
-      isSaveModalVisible: false,
-      indicateNoData: false,
       isSaveable: false,
       searchSessionId: startSession(),
     };
   });
 
+  const [indicateNoData, setIndicateNoData] = useState(false);
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+
   const { lastKnownDoc } = state;
 
   const showNoDataPopover = useCallback(() => {
-    setState((prevState) => ({ ...prevState, indicateNoData: true }));
-  }, [setState]);
+    setIndicateNoData(true);
+  }, [setIndicateNoData]);
 
   useEffect(() => {
-    if (state.indicateNoData) {
-      setState((prevState) => ({ ...prevState, indicateNoData: false }));
+    if (indicateNoData) {
+      setIndicateNoData(false);
     }
   }, [
-    setState,
-    state.indicateNoData,
+    setIndicateNoData,
+    indicateNoData,
     state.query,
     state.filters,
     state.indexPatternsForTopNav,
@@ -520,9 +521,10 @@ export function App({
         );
         setState((s) => ({
           ...s,
-          isSaveModalVisible: false,
           isLinkedToOriginatingApp: false,
         }));
+
+        setIsSaveModalVisible(false);
         // remove editor state so the connection is still broken after reload
         stateTransfer.clearEditorState(APP_ID);
 
@@ -538,14 +540,15 @@ export function App({
         ...s,
         persistedDoc: newDoc,
         lastKnownDoc: newDoc,
-        isSaveModalVisible: false,
         isLinkedToOriginatingApp: false,
       }));
+
+      setIsSaveModalVisible(false);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.dir(e);
       trackUiEvent('save_failed');
-      setState((s) => ({ ...s, isSaveModalVisible: false }));
+      setIsSaveModalVisible(false);
     }
   };
 
@@ -632,7 +635,7 @@ export function App({
       },
       showSaveModal: () => {
         if (savingToDashboardPermitted || savingToLibraryPermitted) {
-          setState((s) => ({ ...s, isSaveModalVisible: true }));
+          setIsSaveModalVisible(true);
         }
       },
       cancel: () => {
@@ -704,7 +707,7 @@ export function App({
           query={state.query}
           dateRangeFrom={fromDate}
           dateRangeTo={toDate}
-          indicateNoData={state.indicateNoData}
+          indicateNoData={indicateNoData}
         />
         {(!state.isLoading || state.persistedDoc) && (
           <MemoizedEditorFrameWrapper
@@ -728,7 +731,7 @@ export function App({
         )}
       </div>
       <SaveModal
-        isVisible={state.isSaveModalVisible}
+        isVisible={isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
         savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
@@ -736,7 +739,7 @@ export function App({
         tagsIds={tagsIds}
         onSave={runSave}
         onClose={() => {
-          setState((s) => ({ ...s, isSaveModalVisible: false }));
+          setIsSaveModalVisible(false);
         }}
         getAppNameFromId={() => getOriginatingAppName()}
         lastKnownDoc={lastKnownDoc}
