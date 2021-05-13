@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
-  const docTable = getService('docTable');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -76,8 +75,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open the context view with the same columns', async () => {
-      const columnNames = await docTable.getHeaderFields();
-      expect(columnNames).to.eql(['Time', ...TEST_COLUMN_NAMES]);
+      const columnNames = await dataGrid.getHeaderFields();
+      expect(columnNames).to.eql(['Time (@timestamp)', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {
@@ -112,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await browser.getCurrentUrl()).to.contain('#/context');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('document table has a length of 6', async () => {
-        const nrOfDocs = (await docTable.getBodyRows()).length;
+        const nrOfDocs = (await dataGrid.getBodyRows()).length;
         return nrOfDocs === 6;
       });
     });
