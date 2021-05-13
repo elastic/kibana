@@ -67,9 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickRowToggle({ rowIndex: 0 });
         const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         await rowActions[1].click();
-        // entering the context view (contains the legacy type)
-        const contextFields = await docTable.getFields();
+
+        const contextFields = await dataGrid.getFields();
         const anchorTimestamp = contextFields[0][0];
+
         return anchorTimestamp === firstTimestamp;
       });
     });
