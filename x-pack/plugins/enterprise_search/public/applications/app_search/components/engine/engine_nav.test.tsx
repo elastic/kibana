@@ -78,6 +78,12 @@ describe('EngineNav', () => {
   describe('schema nav icons', () => {
     const myRole = { canViewEngineSchema: true };
 
+    it('renders schema errors alert icon', () => {
+      setMockValues({ ...values, myRole, hasSchemaErrors: true });
+      const wrapper = shallow(<EngineNav />);
+      expect(wrapper.find('[data-test-subj="EngineNavSchemaErrors"]')).toHaveLength(1);
+    });
+
     it('renders unconfirmed schema fields info icon', () => {
       setMockValues({ ...values, myRole, hasUnconfirmedSchemaFields: true });
       const wrapper = shallow(<EngineNav />);
