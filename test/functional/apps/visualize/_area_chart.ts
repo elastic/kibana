@@ -505,7 +505,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show error when calendar interval invalid', async () => {
-          await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
+          await PageObjects.visEditor.setInterval('2w', { type: 'custom' });
           const intervalErrorMessage = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );

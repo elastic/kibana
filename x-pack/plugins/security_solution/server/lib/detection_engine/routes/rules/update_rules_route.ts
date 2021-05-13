@@ -68,8 +68,8 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
             alertsClient,
             savedObjectsClient,
             enabled: request.body.enabled ?? true,
-            actions: request.body.actions,
-            throttle: request.body.throttle,
+            actions: request.body.actions ?? [],
+            throttle: request.body.throttle ?? 'no_actions',
             name: request.body.name,
           });
           const ruleStatuses = await ruleStatusClient.find({

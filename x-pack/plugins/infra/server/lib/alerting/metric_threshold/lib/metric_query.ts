@@ -13,6 +13,7 @@ import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
 
 const MINIMUM_BUCKETS = 5;
+const COMPOSITE_RESULTS_PER_PAGE = 100;
 
 const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
   filterQuery
@@ -83,7 +84,7 @@ export const getElasticsearchMetricQuery = (
     ? {
         groupings: {
           composite: {
-            size: 10,
+            size: COMPOSITE_RESULTS_PER_PAGE,
             sources: Array.isArray(groupBy)
               ? groupBy.map((field, index) => ({
                   [`groupBy${index}`]: {

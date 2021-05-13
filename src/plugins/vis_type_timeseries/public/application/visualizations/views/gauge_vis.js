@@ -161,6 +161,6 @@ GaugeVis.propTypes = {
   max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   metric: PropTypes.object,
   reversed: PropTypes.bool,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   type: PropTypes.oneOf(['half', 'circle']),
 };
