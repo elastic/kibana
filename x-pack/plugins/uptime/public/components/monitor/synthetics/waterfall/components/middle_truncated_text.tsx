@@ -79,10 +79,10 @@ export const getChunks = (text: string = '') => {
 const TooltipContent: React.FC<Pick<Props, 'url' | 'text'>> = ({ text, url }) => {
   const { data, renderTooltipItem, sidebarItems } = useWaterfallContext();
   const tooltipMetrics = data.filter(
-    (d) =>
-      d.x === sidebarItems?.find((f) => f.url === url)?.index &&
-      d.config.tooltipProps &&
-      d.config.showTooltip
+    (datum) =>
+      datum.x === sidebarItems?.find((sidebarItem) => sidebarItem.url === url)?.index &&
+      datum.config.tooltipProps &&
+      datum.config.showTooltip
   );
   return (
     <>
