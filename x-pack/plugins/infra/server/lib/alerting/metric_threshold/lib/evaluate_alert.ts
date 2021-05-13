@@ -26,6 +26,7 @@ interface Aggregation {
       aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
       doc_count: number;
       to_as_string: string;
+      key_as_string: string;
     }>;
   };
 }
@@ -60,6 +61,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
         filterQuery,
         timeframe
       );
+
       const { threshold, warningThreshold, comparator, warningComparator } = criterion;
       const pointsEvaluator = (points: any[] | typeof NaN | null, t?: number[], c?: Comparator) => {
         if (!t || !c) return [false];
@@ -179,7 +181,10 @@ const getValuesFromAggregations = (
     const { buckets } = aggregations.aggregatedIntervals;
     if (!buckets.length) return null; // No Data state
     if (aggType === Aggregators.COUNT) {
-      return buckets.map((bucket) => ({ key: bucket.to_as_string, value: bucket.doc_count }));
+      return buckets.map((bucket) => ({
+        key: bucket.to_as_string,
+        value: bucket.doc_count,
+      }));
     }
     if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
       return buckets.map((bucket) => {
@@ -190,7 +195,7 @@ const getValuesFromAggregations = (
       });
     }
     return buckets.map((bucket) => ({
-      key: bucket.to_as_string,
+      key: bucket.key_as_string ?? bucket.to_as_string,
       value: bucket.aggregatedValue?.value ?? null,
     }));
   } catch (e) {

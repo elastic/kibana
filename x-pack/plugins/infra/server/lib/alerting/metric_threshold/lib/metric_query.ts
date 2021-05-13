@@ -10,6 +10,7 @@ import { MetricExpressionParams, Aggregators } from '../types';
 import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { roundTimestamp } from '../../../../utils/round_timestamp';
 import { createPercentileAggregation } from './create_percentile_aggregation';
+import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
 
 const MINIMUM_BUCKETS = 5;
 const COMPOSITE_RESULTS_PER_PAGE = 100;
@@ -48,6 +49,9 @@ export const getElasticsearchMetricQuery = (
     timeUnit
   );
 
+  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
+  const offsetInMS = parseInt(offset, 10) * 1000;
+
   const aggregations =
     aggType === Aggregators.COUNT
       ? {}
@@ -63,18 +67,34 @@ export const getElasticsearchMetricQuery = (
           },
         };
 
-  const baseAggs = {
-    aggregatedIntervals: {
-      date_range: {
-        field: timefield,
-        ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
-          from: from + intervalAsMS * i,
-          to: from + intervalAsMS * (i + 1),
-        })),
-      },
-      aggregations,
-    },
-  };
+  const baseAggs =
+    aggType === Aggregators.RATE
+      ? {
+          aggregatedIntervals: {
+            date_histogram: {
+              field: timefield,
+              fixed_interval: interval,
+              offset,
+              extended_bounds: {
+                min: from,
+                max: to,
+              },
+            },
+            aggregations,
+          },
+        }
+      : {
+          aggregatedIntervals: {
+            date_range: {
+              field: timefield,
+              ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
+                from: from + intervalAsMS * i + offsetInMS,
+                to: from + intervalAsMS * (i + 1) + offsetInMS,
+              })),
+            },
+            aggregations,
+          },
+        };
 
   const aggs = groupBy
     ? {
