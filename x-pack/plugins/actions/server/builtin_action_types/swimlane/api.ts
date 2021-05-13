@@ -27,7 +27,6 @@ const pushToServiceHandler = async ({
   const { comments } = params;
   let res: ExternalServiceIncidentResponse;
   const incident: Incident = params.incident;
-
   if (incident.externalId != null) {
     res = await externalService.updateRecord({
       incidentId: incident.externalId,
@@ -37,23 +36,17 @@ const pushToServiceHandler = async ({
     res = await externalService.createRecord({ incident });
   }
 
-  console.log('TO DO comments', comments);
-  // if (comments && Array.isArray(comments) && comments.length > 0) {
-  //   res.comments = [];
-  //   for (const currentComment of comments) {
-  //     const comment = await externalService.createComment({
-  //       incidentId: res.id,
-  //       comment: currentComment,
-  //     });
-  //     res.comments = [
-  //       ...(res.comments ?? []),
-  //       {
-  //         commentId: comment.commentId,
-  //         pushedDate: comment.pushedDate,
-  //       },
-  //     ];
-  //   }
-  // }
+  const createdDate = new Date().toISOString();
+
+  if (comments && Array.isArray(comments) && comments.length > 0) {
+    for (const currentComment of comments) {
+      await externalService.createComment({
+        incidentId: res.id,
+        comment: currentComment,
+        createdDate,
+      });
+    }
+  }
 
   return res;
 };

@@ -7,19 +7,22 @@
 
 import {
   CreateRecordParams,
+  ExecutorSubActionCreateRecordParams,
   MappingConfigType,
-  SwimlaneRecordPayload,
   SwimlaneDataComments,
   SwimlaneDataValues,
+  SwimlaneRecordPayload,
 } from './types';
 
 export const getBodyForEventAction = (
   applicationId: string,
   mappingConfig: MappingConfigType,
-  params: CreateRecordParams['incident']
+  params: CreateRecordParams['incident'],
+  incidentId?: string
 ): SwimlaneRecordPayload => {
   const data: SwimlaneRecordPayload = {
     applicationId,
+    ...(incidentId ? { id: incidentId } : {}),
   };
 
   const values: SwimlaneDataValues = {};
@@ -38,7 +41,10 @@ export const getBodyForEventAction = (
 
     const createdDate = new Date().toISOString();
     const { id, fieldType } = fieldMap;
-    const paramName = mappingsKey.replace('Config', '');
+    const paramName = mappingsKey.replace(
+      'Config',
+      ''
+    ) as keyof ExecutorSubActionCreateRecordParams;
     if (params[paramName]) {
       const value = params[paramName];
       if (value) {
@@ -73,4 +79,17 @@ export const getBodyForEventAction = (
   }
 
   return data;
+};
+
+export const removeCommentFieldUpdatedInformation = (content: string): string => {
+  // these values are added on in `transformFields` in `x-pack/plugins/cases/server/client/cases/utils.ts`
+  // have to remove to compare string values
+  // probably a bug
+  if (content.indexOf(` (updated at `) > 0) {
+    return content.slice(0, content.indexOf(` (updated at`));
+  }
+  if (content.indexOf(` (created at `) > 0) {
+    return content.slice(0, content.indexOf(` (created at`));
+  }
+  return content;
 };

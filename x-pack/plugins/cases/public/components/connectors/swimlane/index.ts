@@ -11,8 +11,6 @@ import { CaseConnector } from '../types';
 import { ConnectorTypes, SwimlaneUnmappedFieldsType } from '../../../../common';
 import * as i18n from './translations';
 
-export * from './types';
-
 export const getCaseConnector = (): CaseConnector<SwimlaneUnmappedFieldsType> => {
   return {
     id: ConnectorTypes.swimlane,

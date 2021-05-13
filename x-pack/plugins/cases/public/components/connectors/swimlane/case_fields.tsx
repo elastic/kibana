@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { ConnectorFieldsProps } from '../types';
@@ -15,95 +15,82 @@ import { fieldLabels } from './index';
 const SwimlaneFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<SwimlaneUnmappedFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
-  const [state, setState] = useState<SwimlaneUnmappedFieldsType>(
-    fields ?? { alertSource: '', caseId: '', caseName: '', severity: '' }
-  );
+  const { alertSource, caseId, caseName, severity } = fields || {
+    alertSource: null,
+    caseId: null,
+    caseName: null,
+    severity: null,
+  };
 
-  const onFieldChange = useCallback((key, { target: { value } }) => {
-    setState((prevState) => ({
-      ...prevState,
-      [key]: value,
-    }));
-  }, []);
+  const onFieldChange = useCallback(
+    (key, value) => {
+      onChange({
+        ...fields,
+        alertSource,
+        caseId,
+        caseName,
+        severity,
+        [key]: value,
+      });
+    },
+    [alertSource, caseId, caseName, fields, onChange, severity]
+  );
   const listItems = useMemo(
     () =>
-      Object.keys(state).reduce((acc: Array<{ title: string; description: string }>, f) => {
-        const fieldName = f as keyof SwimlaneUnmappedFieldsType;
-        return [
-          ...acc,
-          ...(state[fieldName] !== null && state[fieldName] !== ''
-            ? [
-                {
-                  title: fieldLabels[fieldName],
-                  description: state[fieldName] ?? '',
-                },
-              ]
-            : []),
-        ];
-      }, []),
-    [state]
+      Object.entries({ alertSource, caseId, caseName, severity }).reduce(
+        (acc: Array<{ title: string; description: string }>, [key, value]) => {
+          const fieldName = key as keyof SwimlaneUnmappedFieldsType;
+          return [
+            ...acc,
+            ...(value !== null && value !== ''
+              ? [
+                  {
+                    title: fieldLabels[fieldName],
+                    description: value ?? '',
+                  },
+                ]
+              : []),
+          ];
+        },
+        []
+      ),
+    [alertSource, caseId, caseName, severity]
   );
-  // const listItems = useMemo(
-  //   () => [
-  //     ...(alertSource != null && alertSource.length > 0
-  //       ? [
-  //           {
-  //             title: fieldLabels.alertSource,
-  //             description: alertSource ?? '',
-  //           },
-  //         ]
-  //       : []),
-  //     ...(caseName != null && caseName.length > 0
-  //       ? [
-  //           {
-  //             title: fieldLabels.caseName,
-  //             description: caseName ?? '',
-  //           },
-  //         ]
-  //       : []),
-  //     ...(caseId != null && caseId.length > 0
-  //       ? [
-  //           {
-  //             title: fieldLabels.caseId,
-  //             description: caseId ?? '',
-  //           },
-  //         ]
-  //       : []),
-  //     ...(severity != null && severity.length > 0
-  //       ? [
-  //           {
-  //             title: fieldLabels.severity,
-  //             description: severity ?? '',
-  //           },
-  //         ]
-  //       : []),
-  //   ],
-  //   [alertSource, caseId, caseName, severity]
-  // );
-  const Fields = useCallback(
-    () => (
-      <span data-test-subj={'connector-fields-swimlane'}>
-        {Object.keys(state).map((f) => {
-          const fieldName = f as keyof SwimlaneUnmappedFieldsType;
-          return (
-            <>
-              <EuiFormRow fullWidth label={fieldLabels[fieldName]}>
-                <EuiFieldText
-                  value={state[fieldName] ?? ''}
-                  onChange={(e) => onFieldChange(f, e)}
-                />
-              </EuiFormRow>
-              <EuiSpacer size="m" />
-            </>
-          );
-        })}
-      </span>
-    ),
-    [onFieldChange, state]
-  );
-
   return isEdit ? (
-    <Fields />
+    <span data-test-subj={'connector-fields-swimlane'}>
+      <EuiFormRow fullWidth label={fieldLabels.alertSource}>
+        <EuiFieldText
+          data-test-subj="alertSource"
+          value={alertSource ?? ''}
+          onChange={(e) => onFieldChange('alertSource', e.target.value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow fullWidth label={fieldLabels.caseId}>
+        <EuiFieldText
+          data-test-subj="caseId"
+          value={caseId ?? ''}
+          onChange={(e) => onFieldChange('caseId', e.target.value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow fullWidth label={fieldLabels.caseName}>
+        <EuiFieldText
+          data-test-subj="caseName"
+          value={caseName ?? ''}
+          onChange={(e) => onFieldChange('caseName', e.target.value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow fullWidth label={fieldLabels.severity}>
+        <EuiFieldText
+          data-test-subj="severity"
+          value={severity ?? ''}
+          onChange={(e) => onFieldChange('severity', e.target.value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </span>
   ) : (
     <ConnectorCard
       isLoading={false}

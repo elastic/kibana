@@ -61,6 +61,7 @@ describe('Create Record Mapping', () => {
       caseName: 'Case Name',
       caseId: 'es3456789',
       comments: 'This is a comment',
+      externalId: null,
     };
     const data = getBodyForEventAction(appId, mappingConfig, params);
     expect(data?.values?.[mappingConfig.alertSourceConfig.id]).toEqual(params.alertSource);

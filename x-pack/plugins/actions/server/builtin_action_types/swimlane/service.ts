@@ -10,15 +10,19 @@ import axios from 'axios';
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { getErrorMessage, request } from '../lib/axios_utils';
-import { getBodyForEventAction } from './helpers';
+import { getBodyForEventAction, removeCommentFieldUpdatedInformation } from './helpers';
 import {
-  SwimlanePublicConfigurationType,
+  CreateCommentParams,
+  CreateRecordParams,
   ExternalService,
   ExternalServiceCredentials,
-  CreateRecordParams,
   ExternalServiceIncidentResponse,
-  SwimlaneSecretConfigurationType,
   MappingConfigType,
+  SwimlaneComment,
+  SwimlanePublicConfigurationType,
+  SwimlaneRecordPayload,
+  SwimlaneSecretConfigurationType,
+  UpdateRecordParams,
 } from './types';
 import * as i18n from './translations';
 
@@ -45,9 +49,16 @@ export const createExternalService = (
   const apiUrl = urlWithoutTrailingSlash.endsWith('api')
     ? urlWithoutTrailingSlash
     : urlWithoutTrailingSlash + '/api';
-  const recordUrl = `${apiUrl}/app/{appId}/record`;
-  const getPostRecordUrl = (id: string) => recordUrl.replace('{appId}', id);
+  const getPostRecordUrl = (id: string) => `${apiUrl}/app/${id}/record`;
+  const getPostRecordIdUrl = (id: string, recordId: string) =>
+    `${getPostRecordUrl(id)}/${recordId}`;
+  const getRecordIdUrl = (id: string, recordId: string) =>
+    `${urlWithoutTrailingSlash}/record/${id}/${recordId}`;
+  const getPostCommentUrl = (id: string, recordId: string, commentFieldId: string) =>
+    `${getPostRecordIdUrl(id, recordId)}/${commentFieldId}/comment`;
 
+  const getCommentFieldId = (fieldMappings: MappingConfigType): string | null =>
+    fieldMappings.commentsConfig?.id || null;
   const createRecord = async (
     params: CreateRecordParams
   ): Promise<ExternalServiceIncidentResponse> => {
@@ -56,14 +67,14 @@ export const createExternalService = (
       const data = getBodyForEventAction(appId, mappingConfig, params.incident);
       const res = await request({
         axios: axiosInstance,
-        url: getPostRecordUrl(appId),
-        logger,
         configurationUtilities,
-        headers,
-        method: 'post',
         data,
+        headers,
+        logger,
+        method: 'post',
+        url: getPostRecordUrl(appId),
       });
-      return { id: res.data.id, title: res.data.name };
+      return { id: res.data.id, title: res.data.name, url: getRecordIdUrl(appId, res.data.id) };
     } catch (error) {
       throw new Error(
         getErrorMessage(
@@ -75,32 +86,105 @@ export const createExternalService = (
   };
 
   const updateRecord = async (
-    params: CreateRecordParams
+    params: UpdateRecordParams
   ): Promise<ExternalServiceIncidentResponse> => {
     try {
       const mappingConfig = mappings as MappingConfigType;
-      const data = getBodyForEventAction(appId, mappingConfig, params.incident);
-      const res = await request({
+      const data = getBodyForEventAction(appId, mappingConfig, params.incident, params.incidentId);
+      const res = await request<SwimlaneRecordPayload>({
         axios: axiosInstance,
-        url: getPostRecordUrl(appId),
-        logger,
         configurationUtilities,
-        headers,
-        method: 'post',
         data,
+        headers,
+        logger,
+        method: 'patch',
+        url: getPostRecordIdUrl(appId, params.incidentId),
       });
-      return { id: res.data.id, title: res.data.name };
+      const fieldId = mappingConfig.commentsConfig?.id;
+      let potentialNewDescription: SwimlaneComment[] = [];
+      let isDescriptionPosted = true;
+      if (
+        fieldId != null &&
+        res.data.comments[fieldId].length &&
+        data.comments != null &&
+        data.comments[fieldId].length === 1
+      ) {
+        // this is the description, it is sent as a comment.
+        // on update, it needs a separate comment post
+        // will only ever be length of 1
+        potentialNewDescription = data.comments[fieldId];
+        // remove update time to compare string only
+        const messageString = removeCommentFieldUpdatedInformation(
+          `${potentialNewDescription[0].message}`
+        );
+
+        // already saved description/comments
+        const existingComments: SwimlaneComment[] = res.data.comments[fieldId];
+
+        // check if description is updated
+        isDescriptionPosted = existingComments.some(
+          ({ message }) => removeCommentFieldUpdatedInformation(`${message}`) === messageString
+        );
+        if (!isDescriptionPosted) {
+          // if description has updated
+          // post as comments
+          await createComment({
+            incidentId: params.incidentId,
+            comment: { comment: potentialNewDescription[0].message },
+            createdDate: potentialNewDescription[0].createdDate,
+          });
+        }
+      }
+      return {
+        id: res.data.id,
+        title: res.data.name,
+        url: getRecordIdUrl(appId, params.incidentId),
+      };
     } catch (error) {
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to create record in application with id ${appId}. Error: ${error.message}`
+          `Unable to update record in application with id ${appId}. Error: ${error.message}`
+        )
+      );
+    }
+  };
+
+  const createComment = async ({ incidentId, comment, createdDate }: CreateCommentParams) => {
+    try {
+      const mappingConfig = mappings as MappingConfigType;
+      const fieldId = getCommentFieldId(mappingConfig);
+      if (fieldId == null) {
+        throw new Error(`No comment field mapped in ${i18n.NAME} connector`);
+      }
+      const data = {
+        createdDate,
+        fieldId,
+        isRichText: true,
+        message: comment.comment,
+      };
+      await request({
+        axios: axiosInstance,
+        configurationUtilities,
+        data,
+        headers,
+        logger,
+        method: 'post',
+        url: getPostCommentUrl(appId, incidentId, fieldId),
+      });
+      return { pushedDate: createdDate };
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to create comment in application with id ${appId}. Error: ${error.message}`
         )
       );
     }
   };
 
   return {
+    createComment,
     createRecord,
     updateRecord,
   };

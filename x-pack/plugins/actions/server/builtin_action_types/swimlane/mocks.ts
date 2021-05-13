@@ -13,9 +13,23 @@ import {
 
 const createMock = (): jest.Mocked<ExternalService> => {
   return {
+    createComment: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        pushedDate: '123456',
+      })
+    ),
     createRecord: jest.fn().mockImplementation(() =>
       Promise.resolve({
         id: '123456',
+        title: 'neato',
+        url: 'swimlane.com',
+      })
+    ),
+    updateRecord: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        id: '123456',
+        title: 'neato',
+        url: 'swimlane.com',
       })
     ),
   };

@@ -6,7 +6,6 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import {
@@ -54,11 +53,16 @@ export type PushToServiceApiParams = ExecutorSubActionPushParams;
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
   logger: Logger;
+  mappings: MappingConfigType;
 }
 
 export interface ExternalServiceIncidentResponse {
   id: string;
   title: string;
+  url: string;
+}
+export interface ExternalServiceCommentResponse {
+  pushedDate: string;
 }
 
 export interface FieldConfig {
@@ -70,16 +74,13 @@ export interface FieldConfig {
 
 export interface SwimlaneRecordPayload {
   applicationId: string;
+  id?: string;
   values?: SwimlaneDataValues;
   comments?: SwimlaneDataComments;
 }
 
-export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
-  url: string;
-}
-
-// export type ExternalServiceParams = Record<string, unknown>;
 export interface ExternalService {
+  createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
   createRecord: (params: CreateRecordParams) => Promise<ExternalServiceIncidentResponse>;
   updateRecord: (params: UpdateRecordParams) => Promise<ExternalServiceIncidentResponse>;
 }
@@ -101,11 +102,6 @@ export interface CreateRecordApiHandlerArgs extends ExternalServiceApiHandlerArg
   logger: Logger;
 }
 
-export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
-  params: PushToServiceApiParams;
-  logger: Logger;
-}
-
 export interface GetApplicationHandlerArgs {
   externalService: ExternalService;
 }
@@ -115,9 +111,23 @@ export interface ExternalServiceApi {
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
 }
 
-export type SwimlaneExecutorResultData = ExternalServiceIncidentResponse | PushToServiceResponse;
+export type SwimlaneExecutorResultData = ExternalServiceIncidentResponse;
 export type SwimlaneDataValues = Record<string, string | number>;
-export type SwimlaneDataComments = Record<
-  string,
-  Array<{ fieldId: string; message: string | number; createdDate: string; isRichText: boolean }>
->;
+export interface SwimlaneComment {
+  fieldId: string;
+  message: string | number;
+  createdDate: string;
+  isRichText: boolean;
+}
+export type SwimlaneDataComments = Record<string, SwimlaneComment[]>;
+
+export interface SimpleComment {
+  comment: SwimlaneComment['message'];
+  commentId?: string;
+}
+
+export interface CreateCommentParams {
+  incidentId: string;
+  comment: SimpleComment;
+  createdDate: string;
+}

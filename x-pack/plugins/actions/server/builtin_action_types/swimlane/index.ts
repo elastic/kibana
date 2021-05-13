@@ -119,11 +119,8 @@ async function executor(
       externalService,
       params: pushToServiceParams,
       logger,
+      mappings: config.mappings,
     });
-    data = {
-      ...data,
-      url: `${config.apiUrl}/record/${config.appId}/${data.id}`,
-    };
 
     logger.debug(`response push to service for incident id: ${data.id}`);
   }
