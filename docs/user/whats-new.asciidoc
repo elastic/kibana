@@ -44,7 +44,7 @@ Because *Lens* is the quickest and easiest way to create visualization panels,
 *Lens* now opens by default when you click *Create visualization* on the dashboard.
 To make it easy to open the other visualization editors and tools,
 or add your saved visualizations with a single-click, use the new dashboard toolbar.
-To learn more, refer to <<dashboard>>.
+To learn more, refer to {kibana-ref}/dashboard.html[Dashboard].
 
 [role="screenshot"]
 image::user/images/highlights-dashboard.png[New toolbar in Dashboard]
