@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -42,7 +35,7 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, observabilityRuleRegistry } = usePluginContext();
+  const { core, observabilityRuleRegistry, ObservabilityPageTemplate } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const {
@@ -106,7 +99,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   );
 
   return (
-    <EuiPageTemplate
+    <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: (
           <>
@@ -114,7 +107,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             <ExperimentalBadge />
           </>
         ),
-
         rightSideItems: [
           <EuiButton fill href={manageDetectionRulesHref} iconType="gear">
             {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
@@ -171,6 +163,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           <AlertsTable items={topAlerts ?? []} />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageTemplate>
+    </ObservabilityPageTemplate>
   );
 }
