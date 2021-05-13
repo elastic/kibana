@@ -110,7 +110,7 @@ The 7.13 release also includes a few smaller tweaks:
 * Making cosmetic changes to your visualization? *Lens* quickly renders the changes without refreshing the data.
 * Dragging and dropping a field on top of another field? In addition to the default replace option, you can also choose to swap and duplicate.
 
-To learn more, refer to <<lens>>.
+To learn more, refer to {kibana-ref}/lens.html[Lens].
 
 [float]
 [[ems-7-13]]
