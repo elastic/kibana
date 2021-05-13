@@ -12,9 +12,10 @@ export const getLinks = (docLinks: DocLinksStart) => {
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
   const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
   const painlessDocsBase = `${docsBase}/elasticsearch/painless/${DOC_LINK_VERSION}`;
+  const kibanaDocsBase = `${docsBase}/kibana/${DOC_LINK_VERSION}`;
 
   return {
-    runtimePainless: `${docsBase}/kibana/master/managing-index-patterns.html#runtime-fields`,
+    runtimePainless: `${kibanaDocsBase}/managing-index-patterns.html#runtime-fields`,
     painlessSyntax: `${painlessDocsBase}/painless-lang-spec.html`,
   };
 };
