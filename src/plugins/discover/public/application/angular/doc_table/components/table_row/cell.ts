@@ -6,8 +6,21 @@
  * Side Public License, v 1.
  */
 import { escape } from 'lodash';
-import cellWithFiltersTemplate from './cell_with_buttons.html';
-import cellWithoutFiltersTemplate from './cell_without_buttons.html';
+import cellWithFilters from './cell_with_buttons.html';
+import cellWithoutFilters from './cell_without_buttons.html';
+
+const TAGS_WITH_WS = />\s+</g;
+
+/**
+ * Remove all of the whitespace between html tags
+ * so that inline elements don't have extra spaces.
+ */
+function noWhiteSpace(html: string): string {
+  return html.replace(TAGS_WITH_WS, '><');
+}
+
+const cellWithFiltersTemplate = noWhiteSpace(cellWithFilters);
+const cellWithoutFiltersTemplate = noWhiteSpace(cellWithoutFilters);
 
 interface CellProps {
   timefield: boolean;
