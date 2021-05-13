@@ -7,7 +7,6 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { CustomPaletteState } from '../..';
 import { PaletteService } from './service';
 import { PaletteDefinition, SeriesLayer } from './types';
 
