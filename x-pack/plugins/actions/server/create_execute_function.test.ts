@@ -177,6 +177,35 @@ describe('execute()', () => {
     );
   });
 
+  test('throws when isMissingSecrets is true for connector', async () => {
+    const executeFn = createExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      isESOCanEncrypt: true,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      preconfiguredActions: [],
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        name: 'mock-action',
+        isMissingSecrets: true,
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    await expect(
+      executeFn(savedObjectsClient, {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        apiKey: null,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to execute action because no secrets are defined for the \\"mock-action\\" connector."`
+    );
+  });
+
   test('should ensure action type is enabled', async () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({

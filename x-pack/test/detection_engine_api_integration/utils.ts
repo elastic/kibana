@@ -683,7 +683,7 @@ export const getWebHookAction = () => ({
 export const getRuleWithWebHookAction = (
   id: string,
   enabled = false,
-  rule?: QueryCreateSchema
+  rule?: CreateRulesSchema
 ): CreateRulesSchema | UpdateRulesSchema => {
   const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
   return {
@@ -888,7 +888,7 @@ export const createNewAction = async (supertest: SuperTest<supertestAsPromised.T
 
 /**
  * Helper to cut down on the noise in some of the tests. This
- * creates a new action and expects a 200 and does not do any retries.
+ * uses the find API to get an immutable rule by id.
  * @param supertest The supertest deps
  */
 export const findImmutableRuleById = async (

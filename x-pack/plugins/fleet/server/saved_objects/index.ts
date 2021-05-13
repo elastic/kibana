@@ -15,7 +15,6 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -24,7 +23,6 @@ import {
 
 import {
   migrateAgentActionToV7100,
-  migrateAgentEventToV7100,
   migrateAgentPolicyToV7100,
   migrateAgentToV7100,
   migrateEnrollmentApiKeysToV7100,
@@ -131,33 +129,6 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
-    },
-  },
-  // TODO: Remove this saved object type. Core will drop any saved objects of
-  // this type during migrations. See https://github.com/elastic/kibana/issues/91869
-  [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
-    name: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        type: { type: 'keyword' },
-        subtype: { type: 'keyword' },
-        agent_id: { type: 'keyword' },
-        action_id: { type: 'keyword' },
-        policy_id: { type: 'keyword' },
-        stream_id: { type: 'keyword' },
-        timestamp: { type: 'date' },
-        message: { type: 'text' },
-        payload: { type: 'text' },
-        data: { type: 'text' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateAgentEventToV7100,
     },
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {

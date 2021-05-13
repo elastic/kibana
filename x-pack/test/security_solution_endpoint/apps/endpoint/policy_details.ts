@@ -22,8 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
 
   describe('When on the Endpoint Policy Details Page', function () {
-    this.tags(['ciGroup7']);
-
     describe('with an invalid policy id', () => {
       it('should display an error', async () => {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
@@ -178,6 +176,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
             artifact_manifest: {
               artifacts: {
+                'endpoint-exceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
                 'endpoint-exceptionlist-macos-v1': {
                   compression_algorithm: 'zlib',
                   decoded_sha256:
@@ -327,6 +337,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
             artifact_manifest: {
               artifacts: {
+                'endpoint-exceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
                 'endpoint-exceptionlist-macos-v1': {
                   compression_algorithm: 'zlib',
                   decoded_sha256:
@@ -474,6 +496,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
             artifact_manifest: {
               artifacts: {
+                'endpoint-exceptionlist-linux-v1': {
+                  compression_algorithm: 'zlib',
+                  decoded_sha256:
+                    'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  decoded_size: 14,
+                  encoded_sha256:
+                    'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                  encoded_size: 22,
+                  encryption_algorithm: 'none',
+                  relative_url:
+                    '/api/fleet/artifacts/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                },
                 'endpoint-exceptionlist-macos-v1': {
                   compression_algorithm: 'zlib',
                   decoded_sha256:

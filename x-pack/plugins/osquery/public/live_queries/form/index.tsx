@@ -35,7 +35,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   // onSubmit,
   onSuccess,
 }) => {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
   const {
     data,
@@ -51,6 +54,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }),
     {
       onSuccess,
+      onError: (error) => {
+        // @ts-expect-error update types
+        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+      },
     }
   );
 
