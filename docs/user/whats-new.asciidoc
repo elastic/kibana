@@ -142,7 +142,7 @@ In addition:
 * The scaling option for “Top hits” is in its own layer card, making it easier for anyone to
 create a layer showing the most relevant or recent documents.
 
-To learn more, refer to <<maps>>.
+To learn more, refer to {kibana-ref}/maps.html[Maps].
 
 [float]
 [[ml-7-13]]
