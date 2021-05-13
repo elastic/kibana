@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
 } from '../../../expressions/public';
-import { TimeMarker } from '../types';
+import type { TimeMarker } from '../types';
 
 export type ExpressionValueTimeMarker = ExpressionValueBoxed<
   'time_marker',

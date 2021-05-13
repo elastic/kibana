@@ -69,7 +69,7 @@ const prepareCategoryAxis = (data: CategoryAxis) => {
     show: data.show,
     position: data.position,
     type: data.type,
-    titleText: data.title.text,
+    title: data.title.text,
     scale: prepareScale(data.scale),
     labels: prepareLabel(data.labels),
   });

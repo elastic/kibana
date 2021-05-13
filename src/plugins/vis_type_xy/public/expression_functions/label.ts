@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Labels } from '../../../charts/public';
-import {
+import type { Labels } from '../../../charts/public';
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
@@ -47,7 +47,7 @@ export const label = (): ExpressionFunctionDefinition<
     filter: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.label.filter.help', {
-        defaultMessage: 'filter',
+        defaultMessage: 'If true that we hide overlapping labels and duplicates on axis',
       }),
     },
     overwriteColor: {

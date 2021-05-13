@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
 } from '../../../expressions/public';
-import { ThresholdLine } from '../types';
+import type { ThresholdLine } from '../types';
 
 export type ExpressionValueThresholdLine = ExpressionValueBoxed<
   'threshold_line',
@@ -61,7 +61,7 @@ export const thresholdLine = (): ExpressionFunctionDefinition<
     style: {
       types: ['string'],
       help: i18n.translate('visTypeXy.function.thresholdLine.style.help', {
-        defaultMessage: 'Style of threshold line',
+        defaultMessage: 'Style of threshold line. Can be full, dashed or dot-dashed',
       }),
       required: true,
     },

@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionValueCategoryAxis } from './category_axis';
-import { CategoryAxis } from '../types';
-import {
+import type { ExpressionValueCategoryAxis } from './category_axis';
+import type { CategoryAxis } from '../types';
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,

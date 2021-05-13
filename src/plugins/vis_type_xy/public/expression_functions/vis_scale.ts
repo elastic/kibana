@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
 } from '../../../expressions/public';
-import { Scale } from '../types';
+import type { Scale } from '../types';
 
 export type ExpressionValueScale = ExpressionValueBoxed<
   'vis_scale',
@@ -48,13 +48,13 @@ export const visScale = (): ExpressionFunctionDefinition<
     defaultYExtents: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.scale.defaultYExtents.help', {
-        defaultMessage: 'Flag which allow to scale to data bounds',
+        defaultMessage: 'Flag which allows to scale to data bounds',
       }),
     },
     setYExtents: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.scale.setYExtents.help', {
-        defaultMessage: 'Flag which allow to set your own extents',
+        defaultMessage: 'Flag which allows to set your own extents',
       }),
     },
     max: {
@@ -72,13 +72,13 @@ export const visScale = (): ExpressionFunctionDefinition<
     mode: {
       types: ['string'],
       help: i18n.translate('visTypeXy.function.scale.mode.help', {
-        defaultMessage: 'Scale mode',
+        defaultMessage: 'Scale mode. Can be normal, percentage, wiggle or silhouette',
       }),
     },
     type: {
       types: ['string'],
       help: i18n.translate('visTypeXy.function.scale.type.help', {
-        defaultMessage: 'Scale type',
+        defaultMessage: 'Scale type. Can be linear, log or square root',
       }),
       required: true,
     },

@@ -46,7 +46,7 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
     chartType: {
       types: ['string'],
       help: i18n.translate('visTypeXy.function.args.args.chartType.help', {
-        defaultMessage: 'Type of a chart',
+        defaultMessage: 'Type of a chart. Can be line, area or histogram',
       }),
     },
     addTimeMarker: {
@@ -58,7 +58,7 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
     addLegend: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.args.addLegend.help', {
-        defaultMessage: 'Show legend chart legend',
+        defaultMessage: 'Show chart legend',
       }),
     },
     addTooltip: {
@@ -152,7 +152,7 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
     times: {
       types: ['time_marker'],
       help: i18n.translate('visTypeXy.function.args.times.help', {
-        defaultMessage: 'times',
+        defaultMessage: 'Time marker config',
       }),
       multi: true,
     },

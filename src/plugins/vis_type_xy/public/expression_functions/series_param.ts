@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
 } from '../../../expressions/public';
-import { SeriesParam } from '../types';
+import type { SeriesParam } from '../types';
 
 export interface Arguments extends Omit<SeriesParam, 'data'> {
   label: string;
@@ -70,7 +70,7 @@ export const seriesParam = (): ExpressionFunctionDefinition<
     interpolate: {
       types: ['string'],
       help: i18n.translate('visTypeXy.function.seriesParam.interpolate.help', {
-        defaultMessage: 'Interpolate mode',
+        defaultMessage: 'Interpolate mode. Can be linear, cardinal or step-after',
       }),
     },
     show: {
@@ -101,7 +101,7 @@ export const seriesParam = (): ExpressionFunctionDefinition<
     type: {
       types: ['string'],
       help: i18n.translate('visTypeXy.function.seriesParam.type.help', {
-        defaultMessage: 'Chart type',
+        defaultMessage: 'Chart type. Can be line, area or histogram',
       }),
     },
     valueAxis: {

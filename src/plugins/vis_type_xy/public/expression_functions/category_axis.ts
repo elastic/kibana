@@ -7,17 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
 } from '../../../expressions/public';
-import { CategoryAxis } from '../types';
-import { ExpressionValueScale } from './vis_scale';
-import { ExpressionValueLabel } from './label';
+import type { CategoryAxis } from '../types';
+import type { ExpressionValueScale } from './vis_scale';
+import type { ExpressionValueLabel } from './label';
 
 export interface Arguments extends Omit<CategoryAxis, 'title' | 'scale' | 'labels'> {
-  titleText?: string;
+  title?: string;
   scale: ExpressionValueScale;
   labels: ExpressionValueLabel;
 }
@@ -73,14 +73,14 @@ export const categoryAxis = (): ExpressionFunctionDefinition<
     type: {
       types: ['string'],
       help: i18n.translate('visTypeXy.function.categoryAxis.type.help', {
-        defaultMessage: 'Type of the category axis',
+        defaultMessage: 'Type of the category axis. Can be category or value',
       }),
       required: true,
     },
-    titleText: {
+    title: {
       types: ['string'],
-      help: i18n.translate('visTypeXy.function.categoryAxis.titleText.help', {
-        defaultMessage: 'Title text of the category axis',
+      help: i18n.translate('visTypeXy.function.categoryAxis.title.help', {
+        defaultMessage: 'Title of the category axis',
       }),
     },
     scale: {
@@ -104,7 +104,7 @@ export const categoryAxis = (): ExpressionFunctionDefinition<
       position: args.position,
       axisType: args.type,
       title: {
-        text: args.titleText,
+        text: args.title,
       },
       scale: {
         ...args.scale,

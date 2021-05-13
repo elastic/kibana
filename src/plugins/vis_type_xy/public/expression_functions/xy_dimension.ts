@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionValueVisDimension } from '../../../visualizations/public';
-import {
+import type { ExpressionValueVisDimension } from '../../../visualizations/public';
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
 } from '../../../expressions/public';
-import { Dimension } from '../types';
+import type { Dimension } from '../types';
 
 interface Arguments {
   visDimension: ExpressionValueVisDimension;
