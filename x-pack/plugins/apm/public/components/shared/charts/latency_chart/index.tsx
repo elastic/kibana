@@ -26,6 +26,7 @@ import {
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
 import * as urlHelpers from '../../../shared/Links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
+import { InspectESQueries } from '../../inspect_es_queries';
 
 interface Props {
   height?: number;
@@ -52,6 +53,7 @@ export function LatencyChart({ height }: Props) {
   const {
     latencyChartsData,
     latencyChartsStatus,
+    _inspect,
   } = useTransactionLatencyChartsFetcher();
 
   const {
@@ -106,6 +108,9 @@ export function LatencyChart({ height }: Props) {
                     });
                   }}
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InspectESQueries inspect={_inspect} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
