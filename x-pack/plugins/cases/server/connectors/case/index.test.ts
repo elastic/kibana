@@ -27,6 +27,7 @@ import {
   createCasesClientFactory,
   createCasesClientMock,
 } from '../../client/mocks';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 const services = actionsMock.createServices();
 let caseActionType: CaseActionType;
@@ -753,7 +754,7 @@ describe('case connector', () => {
             comment: {
               comment: 'a comment',
               type: CommentType.user,
-              owner: 'securitySolution',
+              owner: SECURITY_SOLUTION_OWNER,
             },
           },
         };
@@ -774,7 +775,7 @@ describe('case connector', () => {
                 id: null,
                 name: null,
               },
-              owner: 'securitySolution',
+              owner: SECURITY_SOLUTION_OWNER,
             },
           },
         };
@@ -958,7 +959,7 @@ describe('case connector', () => {
           settings: {
             syncAlerts: true,
           },
-          owner: 'securitySolution',
+          owner: SECURITY_SOLUTION_OWNER,
         };
 
         mockCasesClient.cases.create.mockReturnValue(Promise.resolve(createReturn));
@@ -1055,7 +1056,7 @@ describe('case connector', () => {
             settings: {
               syncAlerts: true,
             },
-            owner: 'securitySolution',
+            owner: SECURITY_SOLUTION_OWNER,
           },
         ];
 
@@ -1136,7 +1137,7 @@ describe('case connector', () => {
                 username: 'awesome',
               },
               id: 'mock-comment',
-              owner: 'securitySolution',
+              owner: SECURITY_SOLUTION_OWNER,
               pushed_at: null,
               pushed_by: null,
               updated_at: null,
@@ -1147,7 +1148,7 @@ describe('case connector', () => {
           settings: {
             syncAlerts: true,
           },
-          owner: 'securitySolution',
+          owner: SECURITY_SOLUTION_OWNER,
         };
 
         mockCasesClient.attachments.add.mockReturnValue(Promise.resolve(commentReturn));
@@ -1160,7 +1161,7 @@ describe('case connector', () => {
             comment: {
               comment: 'a comment',
               type: CommentType.user,
-              owner: 'securitySolution',
+              owner: SECURITY_SOLUTION_OWNER,
             },
           },
         };

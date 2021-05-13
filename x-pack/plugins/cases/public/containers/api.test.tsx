@@ -7,7 +7,7 @@
 
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../common';
+import { ConnectorTypes, CommentType, CaseStatuses, SECURITY_SOLUTION_OWNER } from '../../common';
 import { CASES_URL } from '../../common';
 
 import {
@@ -250,18 +250,18 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await getReporters(abortCtrl.signal, ['securitySolution']);
+      await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
         method: 'GET',
         signal: abortCtrl.signal,
         query: {
-          owner: 'securitySolution',
+          owner: SECURITY_SOLUTION_OWNER,
         },
       });
     });
 
     test('happy path', async () => {
-      const resp = await getReporters(abortCtrl.signal, ['securitySolution']);
+      const resp = await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(respReporters);
     });
   });
@@ -273,18 +273,18 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await getTags(abortCtrl.signal, ['securitySolution']);
+      await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
         method: 'GET',
         signal: abortCtrl.signal,
         query: {
-          owner: 'securitySolution',
+          owner: SECURITY_SOLUTION_OWNER,
         },
       });
     });
 
     test('happy path', async () => {
-      const resp = await getTags(abortCtrl.signal, ['securitySolution']);
+      const resp = await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(tags);
     });
   });
@@ -401,7 +401,7 @@ describe('Case Configuration API', () => {
       settings: {
         syncAlerts: true,
       },
-      owner: 'securitySolution',
+      owner: SECURITY_SOLUTION_OWNER,
     };
 
     test('check url, method, signal', async () => {
@@ -426,7 +426,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       comment: 'comment',
-      owner: 'securitySolution',
+      owner: SECURITY_SOLUTION_OWNER,
       type: CommentType.user as const,
     };
 

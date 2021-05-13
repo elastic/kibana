@@ -12,6 +12,8 @@ import RecentCases from '.';
 import { TestProviders } from '../../common/mock';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesMockState } from '../../containers/mock';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+
 jest.mock('../../containers/use_get_cases');
 configure({ testIdAttribute: 'data-test-subj' });
 const defaultProps = {
@@ -28,7 +30,7 @@ const defaultProps = {
     onClick: jest.fn(),
   },
   maxCasesToShow: 10,
-  owner: ['securitySolution'],
+  owner: [SECURITY_SOLUTION_OWNER],
 };
 const setFilters = jest.fn();
 const mockData = {

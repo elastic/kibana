@@ -19,7 +19,7 @@ import {
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { KibanaServices } from '../../common/lib/kibana';
 
 const abortCtrl = new AbortController();
@@ -57,12 +57,12 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await getCaseConfigure({ signal: abortCtrl.signal, owner: ['securitySolution'] });
+      await getCaseConfigure({ signal: abortCtrl.signal, owner: [SECURITY_SOLUTION_OWNER] });
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
         method: 'GET',
         signal: abortCtrl.signal,
         query: {
-          owner: 'securitySolution',
+          owner: SECURITY_SOLUTION_OWNER,
         },
       });
     });
@@ -70,7 +70,7 @@ describe('Case Configuration API', () => {
     test('happy path', async () => {
       const resp = await getCaseConfigure({
         signal: abortCtrl.signal,
-        owner: ['securitySolution'],
+        owner: [SECURITY_SOLUTION_OWNER],
       });
       expect(resp).toEqual(caseConfigurationCamelCaseResponseMock);
     });
@@ -79,7 +79,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue({});
       const resp = await getCaseConfigure({
         signal: abortCtrl.signal,
-        owner: ['securitySolution'],
+        owner: [SECURITY_SOLUTION_OWNER],
       });
       expect(resp).toBe(null);
     });

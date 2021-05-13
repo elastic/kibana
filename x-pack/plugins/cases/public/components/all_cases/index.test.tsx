@@ -13,7 +13,7 @@ import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
 
-import { CaseStatuses, CaseType, StatusAll } from '../../../common';
+import { CaseStatuses, CaseType, SECURITY_SOLUTION_OWNER, StatusAll } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -815,7 +815,7 @@ describe('AllCasesGeneric', () => {
           },
         },
         id: '1',
-        owner: 'securitySolution',
+        owner: SECURITY_SOLUTION_OWNER,
         status: 'open',
         subCaseIds: [],
         tags: ['coke', 'pepsi'],

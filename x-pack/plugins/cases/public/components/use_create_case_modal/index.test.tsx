@@ -12,6 +12,7 @@ import { render } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
 import { TestProviders } from '../../common/mock';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 jest.mock('../../common/lib/kibana');
 
@@ -28,7 +29,7 @@ describe('useCreateCaseModal', () => {
 
   it('init', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated, owner: 'securitySolution' }),
+      () => useCreateCaseModal({ onCaseCreated, owner: SECURITY_SOLUTION_OWNER }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -39,7 +40,7 @@ describe('useCreateCaseModal', () => {
 
   it('opens the modal', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated, owner: 'securitySolution' }),
+      () => useCreateCaseModal({ onCaseCreated, owner: SECURITY_SOLUTION_OWNER }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -54,7 +55,7 @@ describe('useCreateCaseModal', () => {
 
   it('closes the modal', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated, owner: 'securitySolution' }),
+      () => useCreateCaseModal({ onCaseCreated, owner: SECURITY_SOLUTION_OWNER }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -72,7 +73,7 @@ describe('useCreateCaseModal', () => {
     const { result, rerender } = renderHook<
       UseCreateCaseModalProps,
       UseCreateCaseModalReturnedValues
-    >(() => useCreateCaseModal({ onCaseCreated, owner: 'securitySolution' }), {
+    >(() => useCreateCaseModal({ onCaseCreated, owner: SECURITY_SOLUTION_OWNER }), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -85,7 +86,7 @@ describe('useCreateCaseModal', () => {
 
   it('closes the modal when creating a case', async () => {
     const { result } = renderHook<UseCreateCaseModalProps, UseCreateCaseModalReturnedValues>(
-      () => useCreateCaseModal({ onCaseCreated, owner: 'securitySolution' }),
+      () => useCreateCaseModal({ onCaseCreated, owner: SECURITY_SOLUTION_OWNER }),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }

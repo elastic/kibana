@@ -79,6 +79,8 @@ export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
 /**
  * This must be the same value that the security solution plugin uses to define the case kind when it registers the
  * feature for the 7.13 migration only.
+ *
+ * This variable is being also used by test files and mocks.
  */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution';
 

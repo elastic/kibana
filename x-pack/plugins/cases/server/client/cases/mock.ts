@@ -12,6 +12,7 @@ import {
   CaseUserActionsResponse,
   AssociationType,
   CommentResponseAlertsType,
+  SECURITY_SOLUTION_OWNER,
 } from '../../../common';
 
 import { BasicParams } from './types';
@@ -39,7 +40,7 @@ export const comment: CommentResponse = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
-  owner: 'securitySolution',
+  owner: SECURITY_SOLUTION_OWNER,
   pushed_at: null,
   pushed_by: null,
   updated_at: '2019-11-25T21:55:00.177Z',
@@ -67,7 +68,7 @@ export const commentAlert: CommentResponse = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
-  owner: 'securitySolution',
+  owner: SECURITY_SOLUTION_OWNER,
   pushed_at: null,
   pushed_by: null,
   updated_at: '2019-11-25T21:55:00.177Z',
@@ -85,7 +86,7 @@ export const commentAlertMultipleIds: CommentResponseAlertsType = {
   alertId: ['alert-id-1', 'alert-id-2'],
   index: 'alert-index-1',
   type: CommentType.alert as const,
-  owner: 'securitySolution',
+  owner: SECURITY_SOLUTION_OWNER,
 };
 
 export const commentGeneratedAlert: CommentResponseAlertsType = {
@@ -135,7 +136,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: 'fd830c60-6646-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: null,
-    owner: 'securitySolution',
+    owner: SECURITY_SOLUTION_OWNER,
   },
   {
     action_field: ['pushed'],
@@ -152,7 +153,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '0a801750-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: null,
-    owner: 'securitySolution',
+    owner: SECURITY_SOLUTION_OWNER,
   },
   {
     action_field: ['comment'],
@@ -168,7 +169,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '7373eb60-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: 'comment-alert-1',
-    owner: 'securitySolution',
+    owner: SECURITY_SOLUTION_OWNER,
   },
   {
     action_field: ['comment'],
@@ -184,7 +185,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '7abc6410-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: 'comment-alert-2',
-    owner: 'securitySolution',
+    owner: SECURITY_SOLUTION_OWNER,
   },
   {
     action_field: ['pushed'],
@@ -201,7 +202,7 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: null,
-    owner: 'securitySolution',
+    owner: SECURITY_SOLUTION_OWNER,
   },
   {
     action_field: ['comment'],
@@ -217,6 +218,6 @@ export const userActions: CaseUserActionsResponse = [
     action_id: '0818e5e0-6648-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
     comment_id: 'comment-user-1',
-    owner: 'securitySolution',
+    owner: SECURITY_SOLUTION_OWNER,
   },
 ];

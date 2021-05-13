@@ -237,7 +237,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
               id: rule?.id != null ? rule.id[0] : null,
               name: rule?.name != null ? rule.name[0] : null,
             },
-            owner: 'securitySolution',
+            owner: APP_ID,
           },
           createCaseNavigation: {
             href: formatUrl(getCreateCaseUrl()),
