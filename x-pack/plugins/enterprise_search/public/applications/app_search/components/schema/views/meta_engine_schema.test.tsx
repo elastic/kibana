@@ -14,6 +14,8 @@ import { shallow } from 'enzyme';
 
 import { Loading } from '../../../../shared/loading';
 
+import { MetaEnginesSchemaTable } from '../components';
+
 import { MetaEngineSchema } from './';
 
 describe('MetaEngineSchema', () => {
@@ -33,8 +35,7 @@ describe('MetaEngineSchema', () => {
   it('renders', () => {
     const wrapper = shallow(<MetaEngineSchema />);
 
-    expect(wrapper.isEmptyRender()).toBe(false);
-    // TODO: Check for schema components
+    expect(wrapper.find(MetaEnginesSchemaTable)).toHaveLength(1);
   });
 
   it('calls loadSchema on mount', () => {

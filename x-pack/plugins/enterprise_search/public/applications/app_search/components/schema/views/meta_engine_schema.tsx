@@ -14,7 +14,9 @@ import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { Loading } from '../../../../shared/loading';
+import { DataPanel } from '../../data_panel';
 
+import { MetaEnginesSchemaTable } from '../components';
 import { MetaEngineSchemaLogic } from '../schema_meta_engine_logic';
 
 export const MetaEngineSchema: React.FC = () => {
@@ -40,7 +42,27 @@ export const MetaEngineSchema: React.FC = () => {
         )}
       />
       <FlashMessages />
-      <EuiPageContentBody>TODO</EuiPageContentBody>
+      <EuiPageContentBody>
+        TODO: Conflicts callout
+        <DataPanel
+          hasBorder
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.schema.metaEngine.activeFieldsTitle',
+                { defaultMessage: 'Active fields' }
+              )}
+            </h2>
+          }
+          subtitle={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engine.schema.metaEngine.activeFieldsDescription',
+            { defaultMessage: 'Fields which belong to one or more engine.' }
+          )}
+        >
+          <MetaEnginesSchemaTable />
+        </DataPanel>
+        TODO: Conflicts table
+      </EuiPageContentBody>
     </>
   );
 };
