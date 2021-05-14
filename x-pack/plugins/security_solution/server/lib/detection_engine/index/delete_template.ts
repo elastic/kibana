@@ -6,6 +6,9 @@
  */
 import { ElasticsearchClient } from 'kibana/server';
 
+/**
+ * @deprecated Use the one from kbn-securitysolution-es-utils
+ */
 export const deleteTemplate = async (
   esClient: ElasticsearchClient,
   name: string

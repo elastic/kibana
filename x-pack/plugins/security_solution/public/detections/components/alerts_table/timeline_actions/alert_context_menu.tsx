@@ -493,10 +493,10 @@ const AddExceptionModalWrapper: React.FC<AddExceptionModalWrapperProps> = ({
 }) => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
-  const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>(
-    buildGetAlertByIdQuery(ecsData?._id),
-    signalIndexName
-  );
+  const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
+    query: buildGetAlertByIdQuery(ecsData?._id),
+    indexName: signalIndexName,
+  });
 
   const enrichedAlert: AlertData | undefined = useMemo(() => {
     if (isLoadingAlertData === false) {
