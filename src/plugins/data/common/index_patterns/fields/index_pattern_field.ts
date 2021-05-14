@@ -99,7 +99,7 @@ export class IndexPatternField implements IFieldType {
   }
 
   /**
-   * kibana/javascript type - string, number, etc
+   * Kibana/javascript type - string, number, etc
    */
   public get type() {
     return this.runtimeField?.type
@@ -108,7 +108,7 @@ export class IndexPatternField implements IFieldType {
   }
 
   /**
-   * elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents
+   * Elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents
    */
   public get esTypes() {
     return this.runtimeField?.type ? [this.runtimeField?.type] : this.spec.esTypes;
@@ -131,7 +131,7 @@ export class IndexPatternField implements IFieldType {
   }
 
   /**
-   * expresses the structure of multi and nested fields
+   * Expresses the structure of multi and nested fields
    */
   public get subType() {
     return this.spec.subType;

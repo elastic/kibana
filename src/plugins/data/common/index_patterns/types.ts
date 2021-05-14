@@ -204,11 +204,11 @@ export interface FieldSpec {
   format?: SerializedFieldFormat;
   name: string;
   /**
-   * kibana/javascript type - string, number, etc
+   * Kibana/javascript type - string, number, etc
    */
   type: string;
   /**
-   * elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents
+   * Elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents
    */
   esTypes?: string[];
   scripted?: boolean;
@@ -216,7 +216,7 @@ export interface FieldSpec {
   aggregatable: boolean;
   readFromDocValues?: boolean;
   /**
-   * expresses the structure of multi and nested fields
+   * Expresses the structure of multi and nested fields
    */
   subType?: IFieldSubType;
   indexed?: boolean;
