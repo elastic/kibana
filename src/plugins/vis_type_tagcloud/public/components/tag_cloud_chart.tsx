@@ -81,7 +81,7 @@ export const TagCloudChart = ({
 
   const tagCloudData = useMemo(() => {
     const tagColumn = bucket ? visData.columns[bucket.accessor].id : -1;
-    const metricColumn = visData.columns[metric.accessor].id;
+    const metricColumn = visData.columns[metric.accessor]?.id;
     const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
 
     const metrics = visData.rows.map((row) => row[metricColumn]);

@@ -99,7 +99,9 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
       maxFontSize: args.maxFontSize,
       showLabel: args.showLabel,
       metric: args.metric,
-      bucket: args.bucket,
+      ...(args.bucket && {
+        bucket: args.bucket,
+      }),
       palette: {
         type: 'palette',
         name: args.palette,
