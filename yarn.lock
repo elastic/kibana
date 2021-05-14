@@ -2658,7 +2658,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/i18n@link:packages/kbn-i18n":
+"@kbn/i18n@link:bazel-bin/packages/kbn-i18n/npm_module":
   version "0.0.0"
   uid ""
 
