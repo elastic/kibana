@@ -7,6 +7,8 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+
 import type { PreconfiguredAgentPolicy } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
@@ -32,12 +34,13 @@ function getPutPreconfiguredPackagesMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.find.mockImplementation(async ({ type, search }) => {
     if (type === AGENT_POLICY_SAVED_OBJECT_TYPE) {
-      const attributes = mockConfiguredPolicies.get(search!.replace(/"/g, ''));
+      const id = search!.replace(/"/g, '');
+      const attributes = mockConfiguredPolicies.get(id);
       if (attributes) {
         return {
           saved_objects: [
             {
-              id: `mocked-${attributes.preconfiguration_id}`,
+              id: `mocked-${id}`,
               attributes,
               type: type as string,
               score: 1,
@@ -57,11 +60,22 @@ function getPutPreconfiguredPackagesMock() {
       per_page: 0,
     };
   });
-  soClient.create.mockImplementation(async (type, policy) => {
-    const attributes = policy as AgentPolicy;
-    mockConfiguredPolicies.set(attributes.preconfiguration_id, attributes);
+  soClient.get.mockImplementation(async (type, id) => {
+    const attributes = mockConfiguredPolicies.get(id);
+    if (!attributes) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     return {
-      id: `mocked-${attributes.preconfiguration_id}`,
+      id: `mocked-${id}`,
+      attributes,
+      type: type as string,
+      references: [],
+    };
+  });
+  soClient.create.mockImplementation(async (type, policy, options) => {
+    const attributes = policy as AgentPolicy;
+    const { id } = options!;
+    mockConfiguredPolicies.set(id, attributes);
+    return {
+      id: `mocked-${id}`,
       attributes,
       type,
       references: [],

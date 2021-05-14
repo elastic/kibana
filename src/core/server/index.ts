@@ -397,7 +397,7 @@ export type {
 } from './deprecations';
 
 export type { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 
 export type {
   SavedObject,

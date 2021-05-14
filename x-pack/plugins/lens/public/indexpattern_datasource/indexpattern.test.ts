@@ -17,6 +17,7 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedReferenceOperation } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -172,6 +173,7 @@ describe('IndexPattern Data Source', () => {
       data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+      uiActions: uiActionsPluginMock.createStartContract(),
     });
 
     baseState = {
@@ -859,6 +861,44 @@ describe('IndexPattern Data Source', () => {
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[2]).toEqual('mock');
+      });
+
+      it('should keep correct column mapping keys with reference columns present', async () => {
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col2', 'col1'],
+              columns: {
+                col1: {
+                  label: 'Count of records',
+                  dataType: 'date',
+                  isBucketed: false,
+                  sourceField: 'timefield',
+                  operationType: 'unique_count',
+                },
+                col2: {
+                  label: 'Reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  // @ts-expect-error not a valid type
+                  operationType: 'testReference',
+                  references: ['col1'],
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
+          'col-0-col1': expect.objectContaining({
+            id: 'col1',
+          }),
+        });
       });
     });
   });

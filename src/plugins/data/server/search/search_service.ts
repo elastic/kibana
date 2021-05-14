@@ -251,7 +251,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private registerSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse<any> = IEsSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>

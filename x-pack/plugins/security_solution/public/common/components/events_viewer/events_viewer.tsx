@@ -44,6 +44,10 @@ import { RowRenderer } from '../../../timelines/components/timeline/body/rendere
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
+import {
+  defaultControlColumn,
+  ControlColumnProps,
+} from '../../../timelines/components/timeline/body/control_columns';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -273,6 +277,9 @@ const EventsViewerComponent: React.FC<Props> = ({
     setIsQueryLoading(loading);
   }, [loading]);
 
+  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
+  const trailingControlColumns: ControlColumnProps[] = [];
+
   return (
     <StyledEuiPanel
       data-test-subj="events-viewer-panel"
@@ -323,6 +330,8 @@ const EventsViewerComponent: React.FC<Props> = ({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,
                     })}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={trailingControlColumns}
                   />
                   <Footer
                     activePage={pageInfo.activePage}

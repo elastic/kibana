@@ -62,6 +62,7 @@ import {
   SavedObjectsType,
 } from '../../types';
 import { MigrationLogger } from './migration_logger';
+import { TransformSavedObjectDocumentError } from '.';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
 import { DEFAULT_NAMESPACE_STRING } from '../../service/lib/utils';
@@ -169,7 +170,7 @@ export class DocumentMigrator implements VersionedTransformer {
   }
 
   /**
-   * Gets the latest version of each migratable property.
+   * Gets the latest version of each migrate-able property.
    *
    * @readonly
    * @type {SavedObjectsMigrationVersion}
@@ -679,9 +680,15 @@ function wrapWithTry(
       const failedTransform = `${type.name}:${version}`;
       const failedDoc = JSON.stringify(doc);
       log.error(error);
-
-      throw new Error(
-        `Failed to transform document ${doc?.id}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
+      // To make debugging failed migrations easier, we add items needed to convert the
+      // saved object id to the full raw id (the id only contains the uuid part) and the full error itself
+      throw new TransformSavedObjectDocumentError(
+        doc.id,
+        doc.type,
+        doc.namespace,
+        failedTransform,
+        failedDoc,
+        error
       );
     }
   };
@@ -850,7 +857,8 @@ function assertNoDowngrades(
  * that we can later regenerate any inbound object references to match.
  *
  * @note This is only intended to be used when single-namespace object types are converted into multi-namespace object types.
+ * @internal
  */
-function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
+export function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
   return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
 }

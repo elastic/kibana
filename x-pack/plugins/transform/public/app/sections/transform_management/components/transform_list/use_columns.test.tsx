@@ -13,8 +13,11 @@ jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Job List Columns', () => {
-  test('useColumns()', () => {
-    const { result } = renderHook(() => useColumns([], () => {}, 1, []));
+  test('useColumns()', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useColumns([], () => {}, 1, []));
+
+    await waitForNextUpdate();
+
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
     expect(columns).toHaveLength(7);

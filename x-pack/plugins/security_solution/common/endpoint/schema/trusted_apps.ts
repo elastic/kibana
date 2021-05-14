@@ -29,7 +29,12 @@ export const GetTrustedAppsRequestSchema = {
   }),
 };
 
-const ConditionEntryTypeSchema = schema.literal('match');
+const ConditionEntryTypeSchema = schema.conditional(
+  schema.siblingRef('field'),
+  ConditionEntryField.PATH,
+  schema.oneOf([schema.literal('match'), schema.literal('wildcard')]),
+  schema.literal('match')
+);
 const ConditionEntryOperatorSchema = schema.literal('included');
 
 /*

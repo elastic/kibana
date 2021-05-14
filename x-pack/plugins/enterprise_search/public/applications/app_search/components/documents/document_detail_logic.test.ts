@@ -15,7 +15,7 @@ import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { InternalSchemaTypes } from '../../../shared/types';
+import { InternalSchemaType } from '../../../shared/schema/types';
 
 import { DocumentDetailLogic } from './document_detail_logic';
 
@@ -38,7 +38,7 @@ describe('DocumentDetailLogic', () => {
   describe('actions', () => {
     describe('setFields', () => {
       it('should set fields to the provided value and dataLoading to false', () => {
-        const fields = [{ name: 'foo', value: ['foo'], type: 'string' as InternalSchemaTypes }];
+        const fields = [{ name: 'foo', value: ['foo'], type: InternalSchemaType.String }];
 
         mount({
           dataLoading: true,

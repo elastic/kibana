@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorField, ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
+import { ConnectorField, ConnectorMappingsAttributes, ConnectorTypes } from '../../../common';
 import {
   JiraGetFieldsResponse,
   ResilientGetFieldsResponse,

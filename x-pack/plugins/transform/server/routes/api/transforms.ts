@@ -61,6 +61,7 @@ import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messag
 import { registerTransformNodesRoutes } from './transforms_nodes';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import { isLatestTransform } from '../../../common/types/transform';
+import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
@@ -562,9 +563,7 @@ const previewTransformHandler: RequestHandler<
       ).reduce((acc, [fieldName, fieldCaps]) => {
         const fieldDefinition = Object.values(fieldCaps)[0];
         const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
-        const isKeywordDuplicate =
-          fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
-        if (isMetaField || isKeywordDuplicate) {
+        if (isMetaField || isKeywordDuplicate(fieldName, fieldNamesSet)) {
           return acc;
         }
         acc[fieldName] = { ...fieldDefinition };

@@ -190,6 +190,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   const pingHistogramExploratoryViewLink = createExploratoryViewUrl(
     {
       'pings-over-time': {
+        dataType: 'synthetics',
         reportType: 'upp',
         time: { from: dateRangeStart, to: dateRangeEnd },
         ...(monitorId ? { filters: [{ field: 'monitor.id', values: [monitorId] }] } : {}),
@@ -197,6 +198,8 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     },
     basePath
   );
+
+  const showAnalyzeButton = false;
 
   return (
     <>
@@ -211,11 +214,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton size="s" href={pingHistogramExploratoryViewLink}>
-            <FormattedMessage id="xpack.uptime.pingHistogram.analyze" defaultMessage="Analyze" />
-          </EuiButton>
-        </EuiFlexItem>
+        {showAnalyzeButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" href={pingHistogramExploratoryViewLink}>
+              <FormattedMessage id="xpack.uptime.pingHistogram.analyze" defaultMessage="Analyze" />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {content}
     </>

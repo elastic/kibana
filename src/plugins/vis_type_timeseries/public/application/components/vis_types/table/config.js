@@ -26,7 +26,6 @@ import {
   EuiFormRow,
   EuiCode,
   EuiHorizontalRule,
-  EuiFormLabel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -171,14 +170,17 @@ export class TableSeriesConfig extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="visTypeTimeseries.table.showTrendArrowsLabel"
-                defaultMessage="Show trend arrows?"
+            <EuiFormRow
+              label={i18n.translate('visTypeTimeseries.table.showTrendArrowsLabel', {
+                defaultMessage: 'Show trend arrows?',
+              })}
+            >
+              <YesNo
+                value={model.trend_arrows}
+                name="trend_arrows"
+                onChange={this.props.onChange}
               />
-            </EuiFormLabel>
-            <EuiSpacer size="s" />
-            <YesNo value={model.trend_arrows} name="trend_arrows" onChange={this.props.onChange} />
+            </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
 

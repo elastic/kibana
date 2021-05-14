@@ -108,7 +108,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [KibanaRequestRoute](./kibana-plugin-core-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyAPICaller](./kibana-plugin-core-server.legacyapicaller.md) |  |
 |  [LegacyCallAPIOptions](./kibana-plugin-core-server.legacycallapioptions.md) | The set of options that defines how API call should be made and result be processed. |
-|  [LegacyElasticsearchError](./kibana-plugin-core-server.legacyelasticsearcherror.md) | @<!-- -->deprecated. The new elasticsearch client doesn't wrap errors anymore. |
+|  [LegacyElasticsearchError](./kibana-plugin-core-server.legacyelasticsearcherror.md) | @<!-- -->deprecated. The new elasticsearch client doesn't wrap errors anymore.  7.16 |
 |  [LegacyRequest](./kibana-plugin-core-server.legacyrequest.md) |  |
 |  [LoggerContextConfigInput](./kibana-plugin-core-server.loggercontextconfiginput.md) |  |
 |  [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) | Provides APIs to plugins for customizing the plugin's logger. |
@@ -230,6 +230,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Variable | Description |
 |  --- | --- |
+|  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-server.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [kibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution. |
 |  [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md) | The current "level" of availability of a service. |
 |  [validBodyOutput](./kibana-plugin-core-server.validbodyoutput.md) | The set of valid body.output |

@@ -21,6 +21,7 @@ describe('OperationTypeSelect', function () {
     mockUrlStorage({
       data: {
         'performance-distribution': {
+          dataType: 'ux',
           reportType: 'kpi',
           operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
@@ -37,6 +38,7 @@ describe('OperationTypeSelect', function () {
     const { setSeries } = mockUrlStorage({
       data: {
         'series-id': {
+          dataType: 'ux',
           reportType: 'kpi',
           operationType: 'median',
           time: { from: 'now-15m', to: 'now' },
@@ -50,6 +52,7 @@ describe('OperationTypeSelect', function () {
 
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       operationType: 'median',
+      dataType: 'ux',
       reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });
@@ -57,6 +60,7 @@ describe('OperationTypeSelect', function () {
     fireEvent.click(screen.getByText('95th Percentile'));
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       operationType: '95th',
+      dataType: 'ux',
       reportType: 'kpi',
       time: { from: 'now-15m', to: 'now' },
     });

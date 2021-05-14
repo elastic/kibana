@@ -1,16 +1,20 @@
 @import '../mixins';
 
 /**
- * stretch the root element of the Kibana application to set the base-size that
+ * Stretch the root element of the Kibana application to set the base-size that
  * flexed children should keep. Only works when paired with root styles applied
  * by core service from new platform
  */
-// SASSTODO: Naming here is too embedded and high up that changing them could cause major breaks
+
 #kibana-body {
-  overflow-x: hidden;
+  // DO NOT ADD ANY OVERFLOW BEHAVIORS HERE
+  // It will break the sticky navigation
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
+// Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header
 #app-fixed-viewport {
   pointer-events: none;
   visibility: hidden;
@@ -21,26 +25,17 @@
   left: 0;
 }
 
-.app-wrapper {
+.kbnAppWrapper {
+  // DO NOT ADD ANY OTHER STYLES TO THIS SELECTOR
+  // This a very nested dependency happnening in "all" apps
   display: flex;
   flex-flow: column nowrap;
-  margin: 0 auto;
-
-  @include kibanaFullBodyMinHeight();
-}
-
-.app-wrapper-panel {
-  display: flex;
   flex-grow: 1;
-  flex-shrink: 0;
-  flex-basis: auto;
-  flex-direction: column;
-
-  > * {
-    flex-shrink: 0;
-  }
+  z-index: 0; // This effectively puts every high z-index inside the scope of this wrapper to it doesn't interfere with the header and/or overlay mask
+  position: relative; // This is temporary for apps that relied on this being present on `.application`
 }
 
+// TODO: This is problematic because it doesn't stay in line with EUI:
 // adapted from euiHeaderAffordForFixed as we need to handle the top banner
 @mixin kbnAffordForHeader($headerHeight) {
   padding-top: $headerHeight;

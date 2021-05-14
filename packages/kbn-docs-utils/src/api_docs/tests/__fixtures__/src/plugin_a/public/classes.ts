@@ -31,6 +31,11 @@ export interface WithGen<T = number> {
   t: T;
 }
 
+/**
+ *
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface AnotherInterface<T> {
   t: T;
 }

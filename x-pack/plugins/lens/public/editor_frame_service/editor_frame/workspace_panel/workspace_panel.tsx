@@ -43,7 +43,6 @@ import {
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
-import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import {
   UiActionsStart,
@@ -339,17 +338,22 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
-  return (
-    <WorkspacePanelWrapper
-      title={title}
-      framePublicAPI={framePublicAPI}
-      dispatch={dispatch}
-      visualizationState={visualizationState}
-      visualizationId={activeVisualizationId}
-      datasourceStates={datasourceStates}
-      datasourceMap={datasourceMap}
-      visualizationMap={visualizationMap}
-    >
+  const dragDropContext = useContext(DragContext);
+
+  const renderDragDrop = () => {
+    const customWorkspaceRenderer =
+      activeDatasourceId &&
+      datasourceMap[activeDatasourceId]?.getCustomWorkspaceRenderer &&
+      dragDropContext.dragging
+        ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
+            datasourceStates[activeDatasourceId].state,
+            dragDropContext.dragging
+          )
+        : undefined;
+
+    return customWorkspaceRenderer ? (
+      customWorkspaceRenderer()
+    ) : (
       <DragDrop
         className="lnsWorkspacePanel__dragDrop"
         dataTestSubj="lnsWorkspace"
@@ -364,11 +368,26 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
         </EuiPageContentBody>
       </DragDrop>
+    );
+  };
+
+  return (
+    <WorkspacePanelWrapper
+      title={title}
+      framePublicAPI={framePublicAPI}
+      dispatch={dispatch}
+      visualizationState={visualizationState}
+      visualizationId={activeVisualizationId}
+      datasourceStates={datasourceStates}
+      datasourceMap={datasourceMap}
+      visualizationMap={visualizationMap}
+    >
+      {renderDragDrop()}
     </WorkspacePanelWrapper>
   );
 });
 
-export const InnerVisualizationWrapper = ({
+export const VisualizationWrapper = ({
   expression,
   framePublicAPI,
   timefilter,
@@ -619,5 +638,3 @@ export const InnerVisualizationWrapper = ({
     </div>
   );
 };
-
-export const VisualizationWrapper = debouncedComponent(InnerVisualizationWrapper);

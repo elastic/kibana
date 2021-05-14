@@ -6,19 +6,17 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-
-import { decodeVersion } from '../utils/decode_version';
-import { encodeHitVersion } from '../utils/encode_hit_version';
 import {
   DescriptionOrUndefined,
   Id,
-  ListSchema,
   MetaOrUndefined,
   NameOrUndefined,
-  UpdateEsListSchema,
-  VersionOrUndefined,
-  _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { decodeVersion } from '../utils/decode_version';
+import { encodeHitVersion } from '../utils/encode_hit_version';
+import { ListSchema, VersionOrUndefined, _VersionOrUndefined } from '../../../common/schemas';
+import { UpdateEsListSchema } from '../../schemas/elastic_query';
 
 import { getList } from '.';
 

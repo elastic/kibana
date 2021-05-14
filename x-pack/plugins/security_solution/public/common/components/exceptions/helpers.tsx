@@ -49,18 +49,28 @@ import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { addIdToItem, removeIdFromItem } from '../../../../common';
+import exceptionableLinuxFields from './exceptionable_linux_fields.json';
+import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
 import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
 
 export const filterIndexPatterns = (
   patterns: IIndexPattern,
-  type: ExceptionListType
+  type: ExceptionListType,
+  osTypes?: OsTypeArray
 ): IIndexPattern => {
   switch (type) {
     case 'endpoint':
+      const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
+        ? (name: string) =>
+            exceptionableLinuxFields.includes(name) || exceptionableEndpointFields.includes(name)
+        : (name: string) =>
+            exceptionableWindowsMacFields.includes(name) ||
+            exceptionableEndpointFields.includes(name);
+
       return {
         ...patterns,
-        fields: patterns.fields.filter(({ name }) => exceptionableEndpointFields.includes(name)),
+        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
       };
     case 'endpoint_events':
       return {
@@ -511,9 +521,11 @@ export const getPrepopulatedEndpointException = ({
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
-  const { file } = alertEcsData;
+  const { file, host } = alertEcsData;
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
+  const filePathDefault = host?.os?.family === 'linux' ? 'file.path' : 'file.path.caseless';
+
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: addIdToEntries([
@@ -536,7 +548,7 @@ export const getPrepopulatedEndpointException = ({
         ],
       },
       {
-        field: 'file.path.caseless',
+        field: filePathDefault,
         operator: 'included',
         type: 'match',
         value: filePath ?? '',

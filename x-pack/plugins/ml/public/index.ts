@@ -49,6 +49,7 @@ export {
   getSeverityColor,
   getSeverityType,
   getFormattedSeverityScore,
+  getSeverity,
 } from '../common/util/anomaly_utils';
 export { ES_CLIENT_TOTAL_HITS_RELATION } from '../common/types/es_client';
 

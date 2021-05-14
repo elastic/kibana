@@ -10,6 +10,10 @@ import { PluginServices } from './create';
 import { PresentationCapabilitiesService } from './capabilities';
 import { PresentationDashboardsService } from './dashboards';
 import { PresentationLabsService } from './labs';
+
+export { PresentationCapabilitiesService } from './capabilities';
+export { PresentationDashboardsService } from './dashboards';
+export { PresentationLabsService } from './labs';
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
   capabilities: PresentationCapabilitiesService;

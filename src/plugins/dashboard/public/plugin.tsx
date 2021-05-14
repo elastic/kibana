@@ -12,6 +12,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { APP_WRAPPER_CLASS } from '../../../core/public';
 import {
   App,
   Plugin,
@@ -292,7 +293,7 @@ export class DashboardPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
-        params.element.classList.add('dshAppContainer');
+        params.element.classList.add(APP_WRAPPER_CLASS);
         const { mountApp } = await import('./application/dashboard_router');
         appMounted();
         return mountApp({

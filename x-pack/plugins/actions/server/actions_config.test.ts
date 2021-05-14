@@ -13,7 +13,13 @@ import {
   AllowedHosts,
   EnabledActionTypes,
 } from './actions_config';
+import { resolveCustomHosts } from './lib/custom_host_settings';
+import { Logger } from '../../../../src/core/server';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
+
 import moment from 'moment';
+
+const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const defaultActionsConfig: ActionsConfig = {
   enabled: false,
@@ -354,5 +360,80 @@ describe('getProxySettings', () => {
 
     const proxySettings = getActionsConfigurationUtilities(config).getProxySettings();
     expect(proxySettings?.proxyOnlyHosts).toEqual(new Set(proxyOnlyHosts));
+  });
+
+  test('getCustomHostSettings() returns undefined when no matching config', () => {
+    const httpsUrl = 'https://elastic.co/foo/bar';
+    const smtpUrl = 'smtp://elastic.co';
+    let config: ActionsConfig = resolveCustomHosts(mockLogger, {
+      ...defaultActionsConfig,
+    });
+
+    let chs = getActionsConfigurationUtilities(config).getCustomHostSettings(httpsUrl);
+    expect(chs).toEqual(undefined);
+    chs = getActionsConfigurationUtilities(config).getCustomHostSettings(smtpUrl);
+    expect(chs).toEqual(undefined);
+
+    config = resolveCustomHosts(mockLogger, {
+      ...defaultActionsConfig,
+      customHostSettings: [],
+    });
+    chs = getActionsConfigurationUtilities(config).getCustomHostSettings(httpsUrl);
+    expect(chs).toEqual(undefined);
+    chs = getActionsConfigurationUtilities(config).getCustomHostSettings(smtpUrl);
+    expect(chs).toEqual(undefined);
+
+    config = resolveCustomHosts(mockLogger, {
+      ...defaultActionsConfig,
+      customHostSettings: [
+        {
+          url: 'https://www.elastic.co:443',
+        },
+      ],
+    });
+    chs = getActionsConfigurationUtilities(config).getCustomHostSettings(httpsUrl);
+    expect(chs).toEqual(undefined);
+    chs = getActionsConfigurationUtilities(config).getCustomHostSettings(smtpUrl);
+    expect(chs).toEqual(undefined);
+  });
+
+  test('getCustomHostSettings() returns matching config', () => {
+    const httpsUrl = 'https://elastic.co/ignoring/paths/here';
+    const smtpUrl = 'smtp://elastic.co:123';
+    const config: ActionsConfig = resolveCustomHosts(mockLogger, {
+      ...defaultActionsConfig,
+      customHostSettings: [
+        {
+          url: 'https://elastic.co',
+          tls: {
+            rejectUnauthorized: true,
+          },
+        },
+        {
+          url: 'smtp://elastic.co:123',
+          tls: {
+            rejectUnauthorized: false,
+          },
+          smtp: {
+            ignoreTLS: true,
+          },
+        },
+      ],
+    });
+
+    let chs = getActionsConfigurationUtilities(config).getCustomHostSettings(httpsUrl);
+    expect(chs).toEqual(config.customHostSettings![0]);
+    chs = getActionsConfigurationUtilities(config).getCustomHostSettings(smtpUrl);
+    expect(chs).toEqual(config.customHostSettings![1]);
+  });
+
+  test('getCustomHostSettings() returns undefined when bad url is passed in', () => {
+    const badUrl = 'https://elastic.co/foo/bar';
+    const config: ActionsConfig = resolveCustomHosts(mockLogger, {
+      ...defaultActionsConfig,
+    });
+
+    const chs = getActionsConfigurationUtilities(config).getCustomHostSettings(badUrl);
+    expect(chs).toEqual(undefined);
   });
 });

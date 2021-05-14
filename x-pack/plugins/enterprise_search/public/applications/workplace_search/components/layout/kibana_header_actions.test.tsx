@@ -10,7 +10,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { externalUrl } from '../../../shared/enterprise_search_url';
-import { WORKPLACE_SEARCH_URL_PREFIX } from '../../constants';
 
 import { WorkplaceSearchHeaderActions } from './';
 
@@ -30,7 +29,6 @@ describe('WorkplaceSearchHeaderActions', () => {
     expect(wrapper.find('[data-test-subj="PersonalDashboardButton"]').prop('to')).toEqual(
       '/p/sources'
     );
-    expect(wrapper.find('[data-test-subj="PersonalDashboardMVPButton"]')).toHaveLength(0);
   });
 
   it('renders a link to the search application', () => {
@@ -40,16 +38,5 @@ describe('WorkplaceSearchHeaderActions', () => {
     expect(wrapper.find('[data-test-subj="HeaderSearchButton"]').prop('href')).toEqual(
       'http://localhost:3002/ws/search'
     );
-  });
-
-  it('renders an MVP link back to the legacy dashboard on the MVP page', () => {
-    window.history.pushState({}, 'Overview', WORKPLACE_SEARCH_URL_PREFIX);
-    externalUrl.enterpriseSearchUrl = ENT_SEARCH_URL;
-    const wrapper = shallow(<WorkplaceSearchHeaderActions />);
-
-    expect(wrapper.find('[data-test-subj="PersonalDashboardMVPButton"]').prop('href')).toEqual(
-      `${ENT_SEARCH_URL}/ws/sources`
-    );
-    expect(wrapper.find('[data-test-subj="PersonalDashboardButton"]')).toHaveLength(0);
   });
 });

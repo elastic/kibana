@@ -13,6 +13,7 @@ import {
   EnvironmentName,
   getProjectIDs,
   Project,
+  SolutionName,
 } from '../../../common';
 import { PluginServiceFactory } from '../create';
 import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from '../labs';
@@ -36,9 +37,15 @@ export const labsServiceFactory: LabsServiceFactory = () => {
 
   let statuses = reset();
 
-  const getProjects = () =>
+  const getProjects = (solutions: SolutionName[] = []) =>
     projectIDs.reduce((acc, id) => {
-      acc[id] = getProject(id);
+      const project = getProject(id);
+      if (
+        solutions.length === 0 ||
+        solutions.some((solution) => project.solutions.includes(solution))
+      ) {
+        acc[id] = project;
+      }
       return acc;
     }, {} as { [id in ProjectID]: Project });
 
@@ -57,11 +64,13 @@ export const labsServiceFactory: LabsServiceFactory = () => {
   const setProjectStatus = (id: ProjectID, env: EnvironmentName, value: boolean) => {
     statuses[id] = { ...statuses[id], [env]: value };
   };
+  const isProjectEnabled = (id: ProjectID) => getProject(id).status.isEnabled;
 
   return {
     getProjectIDs,
     getProject,
     getProjects,
+    isProjectEnabled,
     setProjectStatus,
     reset: () => {
       statuses = reset();

@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFormLabel,
   EuiSpacer,
   EuiFieldText,
   EuiTitle,
@@ -28,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '../aggs/field_select';
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
@@ -38,7 +38,7 @@ import { YesNo } from '../yes_no';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
-import { BUCKET_TYPES } from '../../../../common/metric_types';
+import { BUCKET_TYPES } from '../../../../common/enums';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
@@ -246,18 +246,20 @@ export class TablePanelConfig extends Component<
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel htmlFor={htmlId('globalFilterOption')}>
-                  <FormattedMessage
-                    id="visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel"
-                    defaultMessage="Ignore global filter?"
+                <EuiFormRow
+                  label={i18n.translate(
+                    'visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel',
+                    {
+                      defaultMessage: 'Ignore global filter?',
+                    }
+                  )}
+                >
+                  <YesNo
+                    value={model.ignore_global_filter}
+                    name="ignore_global_filter"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="m" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
+                </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

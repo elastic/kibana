@@ -17,6 +17,7 @@ import { decorateSnapshotUi } from '../snapshots/decorate_snapshot_ui';
  *
  *  @param  {Mocha} mocha
  *  @param  {ToolingLog} log
+ *  @param  {Config} config
  *  @param  {ProviderCollection} providers
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
@@ -24,12 +25,16 @@ import { decorateSnapshotUi } from '../snapshots/decorate_snapshot_ui';
 export const loadTestFiles = ({
   mocha,
   log,
+  config,
   lifecycle,
   providers,
   paths,
   updateBaselines,
   updateSnapshots,
 }) => {
+  const dockerServers = config.get('dockerServers');
+  const isDockerGroup = dockerServers && Object.keys(dockerServers).length;
+
   decorateSnapshotUi({ lifecycle, updateSnapshots, isCi: !!process.env.CI });
 
   const innerLoadTestFile = (path) => {
@@ -55,7 +60,9 @@ export const loadTestFiles = ({
     loadTracer(provider, `testProvider[${path}]`, () => {
       // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
 
-      const context = decorateMochaUi(lifecycle, global);
+      const context = decorateMochaUi(log, lifecycle, global, {
+        isDockerGroup,
+      });
       mocha.suite.emit('pre-require', context, path, mocha);
 
       const returnVal = provider({

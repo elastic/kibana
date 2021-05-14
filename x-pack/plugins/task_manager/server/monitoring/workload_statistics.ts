@@ -115,7 +115,7 @@ export function createWorkloadAggregator(
       taskStore.aggregate({
         aggs: {
           taskType: {
-            terms: { field: 'task.taskType' },
+            terms: { size: 100, field: 'task.taskType' },
             aggs: {
               status: {
                 terms: { field: 'task.status' },

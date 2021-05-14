@@ -21,6 +21,7 @@ function createSetupMock() {
 }
 function createStartMock() {
   return {
+    authc: authenticationMock.createStart(),
     navControlService: navControlServiceMock.createStart(),
   };
 }

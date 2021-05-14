@@ -7,12 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Meta } from '../../../../../../../common/types';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
-
 import { HttpLogic } from '../../../../../shared/http';
-
 import { EngineDetails } from '../../../engine/types';
+import { EnginesAPIResponse } from '../../types';
 
 interface MetaEnginesTableValues {
   expandedRows: { [id: string]: boolean };
@@ -28,11 +26,6 @@ interface MetaEnginesTableActions {
   fetchOrDisplayRow(itemId: string): { itemId: string };
   fetchSourceEngines(engineName: string): { engineName: string };
   hideRow(itemId: string): { itemId: string };
-}
-
-interface EnginesAPIResponse {
-  results: EngineDetails[];
-  meta: Meta;
 }
 
 export const MetaEnginesTableLogic = kea<

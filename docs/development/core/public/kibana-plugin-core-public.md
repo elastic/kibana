@@ -138,6 +138,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Variable | Description |
 |  --- | --- |
+|  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-public.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [URL\_MAX\_LENGTH](./kibana-plugin-core-public.url_max_length.md) | The max URL length allowed by the current browser. Should be used to display warnings to users when query parameters cause URL to exceed this limit. |
 
 ## Type Aliases

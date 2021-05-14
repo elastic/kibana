@@ -16,25 +16,38 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { CommentType, CaseStatuses } from '../../../../../cases/common/api';
-import { Ecs } from '../../../../common/ecs';
-import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
-import { usePostComment } from '../../containers/use_post_comment';
-import { Case } from '../../containers/types';
-import { useStateToaster } from '../../../common/components/toasters';
+import { Case, CaseStatuses } from '../../../../../cases/common';
 import { APP_ID } from '../../../../common/constants';
-import { useGetUserSavedObjectPermissions, useKibana } from '../../../common/lib/kibana';
-import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import { Ecs } from '../../../../common/ecs';
 import { SecurityPageName } from '../../../app/types';
-import { useAllCasesModal } from '../use_all_cases_modal';
+import {
+  getCaseDetailsUrl,
+  getCreateCaseUrl,
+  useFormatUrl,
+} from '../../../common/components/link_to';
+import { useStateToaster } from '../../../common/components/toasters';
+import { useControl } from '../../../common/hooks/use_control';
+import { useGetUserSavedObjectPermissions, useKibana } from '../../../common/lib/kibana';
+import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
+import { CreateCaseFlyout } from '../create/flyout';
 import { createUpdateSuccessToaster } from './helpers';
 import * as i18n from './translations';
-import { useControl } from '../../../common/hooks/use_control';
-import { CreateCaseFlyout } from '../create/flyout';
 
 interface AddToCaseActionProps {
   ariaLabel?: string;
   ecsRowData: Ecs;
+}
+
+interface PostCommentArg {
+  caseId: string;
+  data: {
+    type: 'alert';
+    alertId: string | string[];
+    index: string | string[];
+    rule: { id: string | null; name: string | null };
+  };
+  updateCase?: (newCase: Case) => void;
+  subCaseId?: string;
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
@@ -45,7 +58,10 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const eventIndex = ecsRowData._index;
   const rule = ecsRowData.signal?.rule;
 
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    cases,
+  } = useKibana().services;
   const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
@@ -60,8 +76,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       ? i18n.ACTION_ADD_TO_CASE_TOOLTIP
       : i18n.UNSUPPORTED_EVENTS_MSG
     : i18n.PERMISSIONS_MSG;
-
-  const { postComment } = usePostComment();
 
   const onViewCaseClick = useCallback(
     (id) => {
@@ -79,33 +93,52 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   } = useControl();
 
   const attachAlertToCase = useCallback(
-    async (theCase: Case, updateCase?: (newCase: Case) => void) => {
+    async (
+      theCase: Case,
+      postComment?: (arg: PostCommentArg) => Promise<void>,
+      updateCase?: (newCase: Case) => void
+    ) => {
       closeCaseFlyoutOpen();
-      await postComment({
-        caseId: theCase.id,
-        data: {
-          type: CommentType.alert,
-          alertId: eventId,
-          index: eventIndex ?? '',
-          rule: {
-            id: rule?.id != null ? rule.id[0] : null,
-            name: rule?.name != null ? rule.name[0] : null,
+      if (postComment) {
+        await postComment({
+          caseId: theCase.id,
+          data: {
+            type: 'alert',
+            alertId: eventId,
+            index: eventIndex ?? '',
+            rule: {
+              id: rule?.id != null ? rule.id[0] : null,
+              name: rule?.name != null ? rule.name[0] : null,
+            },
           },
-        },
-        updateCase,
-      });
+          updateCase,
+        });
+      }
     },
-    [closeCaseFlyoutOpen, postComment, eventId, eventIndex, rule]
+    [closeCaseFlyoutOpen, eventId, eventIndex, rule]
   );
-
   const onCaseSuccess = useCallback(
-    async (theCase: Case) =>
-      dispatchToaster({
+    async (theCase: Case) => {
+      closeCaseFlyoutOpen();
+      return dispatchToaster({
         type: 'addToaster',
         toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
-      }),
-    [dispatchToaster, onViewCaseClick]
+      });
+    },
+    [closeCaseFlyoutOpen, dispatchToaster, onViewCaseClick]
   );
+
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
+  const goToCreateCase = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCreateCaseUrl(urlSearch),
+      });
+    },
+    [navigateToApp, urlSearch]
+  );
+  const [isAllCaseModalOpen, openAllCaseModal] = useState(false);
 
   const onCaseClicked = useCallback(
     (theCase) => {
@@ -116,19 +149,11 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
        */
       if (theCase == null) {
         openCaseFlyoutOpen();
-        return;
       }
-
-      attachAlertToCase(theCase, onCaseSuccess);
+      openAllCaseModal(false);
     },
-    [attachAlertToCase, onCaseSuccess, openCaseFlyoutOpen]
+    [openCaseFlyoutOpen]
   );
-
-  const { modal: allCasesModal, openModal: openAllCaseModal } = useAllCasesModal({
-    disabledStatuses: [CaseStatuses.closed],
-    onRowClick: onCaseClicked,
-  });
-
   const addNewCaseClick = useCallback(() => {
     closePopover();
     openCaseFlyoutOpen();
@@ -136,7 +161,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
 
   const addExistingCaseClick = useCallback(() => {
     closePopover();
-    openAllCaseModal();
+    openAllCaseModal(true);
   }, [openAllCaseModal, closePopover]);
 
   const items = useMemo(
@@ -196,12 +221,30 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       </ActionIconItem>
       {isCreateCaseFlyoutOpen && (
         <CreateCaseFlyout
-          onCloseFlyout={closeCaseFlyoutOpen}
           afterCaseCreated={attachAlertToCase}
+          onCloseFlyout={closeCaseFlyoutOpen}
           onSuccess={onCaseSuccess}
         />
       )}
-      {allCasesModal}
+      {isAllCaseModalOpen &&
+        cases.getAllCasesSelectorModal({
+          alertData: {
+            alertId: eventId,
+            index: eventIndex ?? '',
+            rule: {
+              id: rule?.id != null ? rule.id[0] : null,
+              name: rule?.name != null ? rule.name[0] : null,
+            },
+          },
+          createCaseNavigation: {
+            href: formatUrl(getCreateCaseUrl()),
+            onClick: goToCreateCase,
+          },
+          disabledStatuses: [CaseStatuses.closed],
+          onRowClick: onCaseClicked,
+          updateCase: onCaseSuccess,
+          userCanCrud: userPermissions?.crud ?? false,
+        })}
     </>
   );
 };

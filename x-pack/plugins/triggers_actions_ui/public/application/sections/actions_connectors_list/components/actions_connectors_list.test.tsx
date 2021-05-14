@@ -118,6 +118,7 @@ describe('actions_connectors_list component with items', () => {
           id: '3',
           actionTypeId: 'test2',
           description: 'My preconfigured test 2',
+          isMissingSecrets: true,
           referencedByCount: 1,
           isPreconfigured: true,
           config: {},
@@ -213,6 +214,16 @@ describe('actions_connectors_list component with items', () => {
     expect(
       wrapper.find('button[data-test-subj="runConnector"]').last().getDOMNode()
     ).toBeDisabled();
+  });
+
+  it('renders fix button when connector secrets is missing', async () => {
+    await setup();
+    expect(
+      wrapper.find('button[data-test-subj="deleteConnector"]').last().getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="fixConnectorButton"]').last().getDOMNode()
+    ).not.toBeDisabled();
   });
 
   it('supports pagination', async () => {

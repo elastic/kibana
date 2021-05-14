@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setMockActions } from '../../../../__mocks__';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -18,7 +20,11 @@ describe('SynonymCard', () => {
     id: 'syn-1234567890',
     synonyms: ['lorem', 'ipsum', 'dolor', 'sit', 'amet'],
   };
+  const actions = {
+    openModal: jest.fn(),
+  };
 
+  setMockActions(actions);
   const wrapper = shallow(<SynonymCard {...MOCK_SYNONYM_SET} />)
     .find(EuiCard)
     .dive();
@@ -33,6 +39,6 @@ describe('SynonymCard', () => {
 
   it('renders a manage synonym button', () => {
     wrapper.find(EuiButton).simulate('click');
-    // TODO: expect open modal action
+    expect(actions.openModal).toHaveBeenCalledWith(MOCK_SYNONYM_SET);
   });
 });

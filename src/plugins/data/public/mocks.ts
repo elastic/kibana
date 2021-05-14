@@ -33,7 +33,6 @@ const createSetupContract = (): Setup => {
     search: searchServiceMock.createSetupContract(),
     fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
-    __enhance: jest.fn(),
   };
 };
 

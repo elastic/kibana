@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -37,9 +37,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
 }
 
-const MissingFleetServerHostCallout: React.FunctionComponent<{ onClose: () => void }> = ({
-  onClose,
-}) => {
+const MissingFleetServerHostCallout: React.FunctionComponent = () => {
   const { setModal } = useUrlModal();
   return (
     <EuiCallOut
@@ -70,7 +68,6 @@ const MissingFleetServerHostCallout: React.FunctionComponent<{ onClose: () => vo
         fill
         iconType="gear"
         onClick={() => {
-          onClose();
           setModal('settings');
         }}
       >
@@ -89,11 +86,21 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const [mode, setMode] = useState<'managed' | 'standalone'>('managed');
 
+  const { modal } = useUrlModal();
+  const [lastModal, setLastModal] = useState(modal);
   const settings = useGetSettings();
   const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
 
+  // Refresh settings when there is a modal/flyout change
+  useEffect(() => {
+    if (modal !== lastModal) {
+      settings.resendRequest();
+      setLastModal(modal);
+    }
+  }, [modal, lastModal, settings]);
+
   return (
-    <EuiFlyout onClose={onClose} size="l" maxWidth={880}>
+    <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
@@ -130,7 +137,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutBody
         banner={
           fleetServerHosts.length === 0 && mode === 'managed' ? (
-            <MissingFleetServerHostCallout onClose={onClose} />
+            <MissingFleetServerHostCallout />
           ) : undefined
         }
       >

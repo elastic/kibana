@@ -9,8 +9,8 @@
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 import { SearchListItemArraySchema } from '../../../common/schemas';
-import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
 import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE, VALUE_2 } from '../../../common/constants.mock';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import { searchListItemByValues } from './search_list_item_by_values';
 

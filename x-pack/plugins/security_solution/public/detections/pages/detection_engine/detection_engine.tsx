@@ -28,7 +28,6 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
-import { ReadOnlyAlertsCallOut } from '../../components/callouts/read_only_alerts_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
 import { useUserData } from '../../components/user_info';
@@ -57,6 +56,7 @@ import {
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
+import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -211,8 +211,8 @@ const DetectionEnginePageComponent = () => {
   return (
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
-      <ReadOnlyAlertsCallOut />
       <NeedAdminForUpdateRulesCallOut />
+      <MissingPrivilegesCallOut />
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
