@@ -166,28 +166,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    // core.application.register({
-    //   exactRoute: true,
-    //   id: APP_ID,
-    //   title: APP_NAME,
-    //   appRoute: APP_PATH,
-    //   navLinkStatus: AppNavLinkStatus.hidden,
-    //   category: DEFAULT_APP_CATEGORIES.security,
-    //   deepLinks: [
-    //     {
-    //       id: SecurityPageName.overview,
-    //       title: OVERVIEW,
-    //       path: APP_OVERVIEW_PATH,
-    //       navLinkStatus: AppNavLinkStatus.visible,
-    //     }
-    //   ],
-    //   mount: async () => {
-    //     const [{ application }] = await core.getStartServices();
-    //     application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
-    //     return () => true;
-    //   },
-    // });
-
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.overview}`,
       title: OVERVIEW,

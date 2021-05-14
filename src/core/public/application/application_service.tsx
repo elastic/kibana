@@ -231,6 +231,7 @@ export class ApplicationService {
       const shouldNavigate = navigatingToSameApp
         ? true
         : await this.shouldNavigate(overlays, appId);
+
       if (shouldNavigate) {
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
