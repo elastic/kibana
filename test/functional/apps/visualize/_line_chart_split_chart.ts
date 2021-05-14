@@ -43,7 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     };
 
-    before(initLineChart);
+    before(async () => {
+      await PageObjects.visualize.initTests();
+      await initLineChart();
+    });
 
     afterEach(async () => {
       await inspector.close();

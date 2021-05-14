@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { NamespaceType } from '@kbn/securitysolution-io-ts-utils';
+import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   FilterOrUndefined,

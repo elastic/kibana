@@ -13,7 +13,7 @@ import {
   OsTypeArray,
   entriesNested,
   entry,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../common/constants';
 import { ExceptionListSoSchema } from '../schemas/saved_objects';
