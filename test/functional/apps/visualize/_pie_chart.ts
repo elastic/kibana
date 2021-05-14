@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('pie chart', function () {
     const vizName1 = 'Visualization PieChart';
     before(async function () {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickPieChart');
