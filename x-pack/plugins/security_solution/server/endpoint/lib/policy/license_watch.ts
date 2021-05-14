@@ -26,7 +26,7 @@ import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAccordingToLicenseLevel,
 } from '../../../../common/license/policy_config';
-import { isAtLeast, LicenseService } from '../../../../common/license/license';
+import { LicenseService } from '../../../../common/license/license';
 
 export class PolicyWatcher {
   private logger: Logger;
