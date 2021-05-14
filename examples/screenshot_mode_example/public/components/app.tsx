@@ -23,9 +23,12 @@ import {
 
 import { CoreStart } from '../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-import { ScreenshotModePluginSetup } from '../../../../src/plugins/screenshot_mode/public';
+import {
+  ScreenshotModePluginSetup,
+  KBN_SCREENSHOT_MODE_HEADER,
+} from '../../../../src/plugins/screenshot_mode/public';
 
-import { PLUGIN_NAME } from '../../common';
+import { PLUGIN_NAME, BASE_API_ROUTE } from '../../common';
 
 interface ScreenshotModeExampleAppDeps {
   basename: string;
@@ -45,14 +48,18 @@ export const ScreenshotModeExampleApp = ({
   const isScreenshotMode = screenshotMode.isScreenshotMode();
 
   useEffect(() => {
+    // fire and forget
+    http.get(`${BASE_API_ROUTE}/check_is_screenshot`, {
+      headers: isScreenshotMode ? { [KBN_SCREENSHOT_MODE_HEADER]: 'true' } : undefined,
+    });
     notifications.toasts.addInfo({
       title: 'Welcome to the screenshot example app!',
       text: isScreenshotMode
         ? 'In screenshot mode we want this to remain visible'
         : 'In normal mode this toast will disappear eventually',
-      toastLifeTimeMs: isScreenshotMode ? 360000 : undefined,
+      toastLifeTimeMs: isScreenshotMode ? 360000 : 3000,
     });
-  }, [isScreenshotMode, notifications]);
+  }, [isScreenshotMode, notifications, http]);
   return (
     <Router basename={basename}>
       <I18nProvider>

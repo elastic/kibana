@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
+import { PluginInitializerContext } from 'kibana/server';
+import { ScreenshotModeExamplePlugin } from './plugin';
 
-export { setScreenshotModeEnabled, KBN_SCREENSHOT_MODE_HEADER } from '../common';
-
-export { ScreenshotModeRequestHandlerContext } from './types';
-
-export function plugin() {
-  return new ScreenshotModePlugin();
-}
+export const plugin = (ctx: PluginInitializerContext) => new ScreenshotModeExamplePlugin(ctx);

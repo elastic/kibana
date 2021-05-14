@@ -10,4 +10,6 @@ export {
   getScreenshotMode,
   setScreenshotModeEnabled,
   setScreenshotModeDisabled,
-} from './get_set_screenshot_mode';
+} from './get_set_browser_screenshot_mode';
+
+export { KBN_SCREENSHOT_MODE_HEADER } from './constants';

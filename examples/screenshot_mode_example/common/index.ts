@@ -7,3 +7,5 @@
  */
 
 export const PLUGIN_NAME = 'Screenshot mode example app';
+
+export const BASE_API_ROUTE = '/api/screenshot_mode_example';

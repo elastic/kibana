@@ -7,7 +7,7 @@
  */
 
 import { Plugin, CoreSetup } from '../../../core/server';
-import { KBN_SCREENSHOT_MODE_HEADER } from './constants';
+import { KBN_SCREENSHOT_MODE_HEADER } from '../common';
 import { ScreenshotModeRequestHandlerContext } from './types';
 
 export class ScreenshotModePlugin implements Plugin {

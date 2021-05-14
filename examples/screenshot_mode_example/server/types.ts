@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
+import { IRouter, Logger } from 'kibana/server';
+import { ScreenshotModeRequestHandlerContext } from '../../../src/plugins/screenshot_mode/server';
 
-export { setScreenshotModeEnabled, KBN_SCREENSHOT_MODE_HEADER } from '../common';
+export type ScreenshotModeExampleRouter = IRouter<ScreenshotModeRequestHandlerContext>;
 
-export { ScreenshotModeRequestHandlerContext } from './types';
-
-export function plugin() {
-  return new ScreenshotModePlugin();
+export interface RouteDependencies {
+  router: ScreenshotModeExampleRouter;
+  log: Logger;
 }

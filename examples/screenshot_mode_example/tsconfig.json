@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "common/**/*.ts",
+    "server/**/*.ts",
     "../../typings/**/*"
   ],
   "exclude": [],
