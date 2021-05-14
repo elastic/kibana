@@ -7,15 +7,7 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import { find } from 'lodash/fp';
-import {
-  EuiCallOut,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
@@ -26,6 +18,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import {
   EndpointIsolatedFormProps,
   EndpointIsolateForm,
+  EndpointIsolateSuccess,
 } from '../../../common/components/endpoint/host_isolation';
 
 export const HostIsolationPanel = React.memo(
@@ -99,43 +92,29 @@ export const HostIsolationPanel = React.memo(
       return (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            iconType="check"
-            color="success"
-            title={i18n.translate(
-              'xpack.securitySolution.endpoint.hostIsolation.successfulIsolation.title',
-              {
-                defaultMessage: 'Host Isolation on {hostname} successfully submitted',
-                values: { hostname: hostName },
-              }
-            )}
-          >
-            {caseCount > 0 && (
-              <>
-                <EuiText size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.hostIsolation.successfulIsolation.cases"
-                      defaultMessage="This action has been attached to the following {caseCount, plural, one {case} other {cases}}:"
-                      values={{ caseCount }}
-                    />
-                  </p>
-                </EuiText>
-                <EuiText size="s">
-                  <ul>{casesList}</ul>
-                </EuiText>
-              </>
-            )}
-          </EuiCallOut>
-          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty flush="right" onClick={backToAlertDetails}>
-                <EuiText size="s">
-                  <p>{RETURN_TO_ALERT_DETAILS}</p>
-                </EuiText>
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EndpointIsolateSuccess
+            hostName={hostName}
+            completeButtonLabel={RETURN_TO_ALERT_DETAILS}
+            onComplete={backToAlertDetails}
+            additionalInfo={
+              caseCount > 0 && (
+                <>
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.hostIsolation.successfulIsolation.cases"
+                        defaultMessage="This action has been attached to the following {caseCount, plural, one {case} other {cases}}:"
+                        values={{ caseCount }}
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiText size="s">
+                    <ul>{casesList}</ul>
+                  </EuiText>
+                </>
+              )
+            }
+          />
         </>
       );
     }, [backToAlertDetails, hostName, caseCount, casesList]);

@@ -11,7 +11,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -48,8 +47,8 @@ export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
             <FormattedMessage
               id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
               defaultMessage="Isolate host {hostName} from network."
-              values={{ hostName }}
-            />
+              values={{ hostName: <b>{hostName}</b> }}
+            />{' '}
             {messageAppend}
           </p>
         </EuiText>
