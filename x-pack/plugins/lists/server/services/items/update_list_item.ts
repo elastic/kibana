@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { Id, MetaOrUndefined } from '@kbn/securitysolution-io-ts-utils';
+import { Id, MetaOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ListItemSchema, _VersionOrUndefined } from '../../../common/schemas';
 import { transformListItemToElasticQuery } from '../utils';

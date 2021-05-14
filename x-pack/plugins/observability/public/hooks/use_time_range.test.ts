@@ -10,7 +10,7 @@ import * as pluginContext from './use_plugin_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import * as kibanaUISettings from './use_kibana_ui_settings';
-import { createObservabilityRuleRegistryMock } from '../rules/observability_rule_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -39,7 +39,7 @@ describe('useTimeRange', () => {
           },
         },
       } as unknown) as ObservabilityPublicPluginsStart,
-      observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: () => null,
     }));
     jest.spyOn(kibanaUISettings, 'useKibanaUISettings').mockImplementation(() => ({
@@ -82,7 +82,7 @@ describe('useTimeRange', () => {
               },
             },
           } as unknown) as ObservabilityPublicPluginsStart,
-          observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+          observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
           ObservabilityPageTemplate: () => null,
         }));
       });

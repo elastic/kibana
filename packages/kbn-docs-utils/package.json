@@ -7,9 +7,5 @@
   "types": "target/index.d.ts",
   "kibana": {
     "devOnly": true
-  },
-  "scripts": {
-    "kbn:bootstrap": "../../node_modules/.bin/tsc",
-    "kbn:watch": "../../node_modules/.bin/tsc --watch"
   }
 }

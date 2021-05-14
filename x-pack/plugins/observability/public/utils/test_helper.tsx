@@ -15,7 +15,7 @@ import translations from '../../../translations/translations/ja-JP.json';
 import { PluginContext } from '../context/plugin_context';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { createObservabilityRuleRegistryMock } from '../rules/observability_rule_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 
 const appMountParameters = ({ setHeaderActionMenu: () => {} } as unknown) as AppMountParameters;
 
@@ -37,7 +37,7 @@ const plugins = ({
   data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
 } as unknown) as ObservabilityPublicPluginsStart;
 
-const observabilityRuleRegistry = createObservabilityRuleRegistryMock();
+const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
 function ObservabilityPageTemplate({ children }: PropsWithChildren<{}>) {
   return <>{children}</>;
@@ -53,7 +53,7 @@ export const render = (component: React.ReactNode) => {
             config,
             core,
             plugins,
-            observabilityRuleRegistry,
+            observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
           }}
         >

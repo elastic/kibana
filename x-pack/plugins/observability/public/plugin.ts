@@ -8,6 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, of } from 'rxjs';
 import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public';
+import {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
@@ -25,28 +29,25 @@ import type {
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import type { LensPublicStart } from '../../lens/public';
-import type { RuleRegistryPublicPluginSetupContract } from '../../rule_registry/public';
-import type { ObservabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
-import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
-import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
-import { FormatterRuleRegistry } from './rules/formatter_rule_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { createNavigationRegistry } from './services/navigation_registry';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { ConfigSchema } from '.';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createLazyObservabilityPageTemplate } from './components/shared';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-export type ObservabilityRuleRegistry = ObservabilityPublicSetup['ruleRegistry'];
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
-  ruleRegistry: RuleRegistryPublicPluginSetupContract;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
 }
@@ -78,11 +79,9 @@ export class Plugin
 
     createCallObservabilityApi(coreSetup.http);
 
-    const observabilityRuleRegistry = pluginsSetup.ruleRegistry.registry.create({
-      ...observabilityRuleRegistrySettings,
-      fieldMap: {} as ObservabilityRuleFieldMap,
-      ctor: FormatterRuleRegistry,
-    });
+    const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
+      pluginsSetup.triggersActionsUi.alertTypeRegistry
+    );
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -95,7 +94,7 @@ export class Plugin
         core: coreStart,
         plugins: pluginsStart,
         appMountParameters: params,
-        observabilityRuleRegistry,
+        observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
       });
     };
@@ -179,11 +178,11 @@ export class Plugin
 
     return {
       dashboard: { register: registerDataHandler },
+      observabilityRuleTypeRegistry,
+      isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
-      ruleRegistry: observabilityRuleRegistry,
-      isAlertingExperienceEnabled: () => config.unsafe.alertingExperience.enabled,
     };
   }
   public start({ application }: CoreStart) {

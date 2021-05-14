@@ -6,10 +6,10 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListsPluginRouter } from '../types';
 import { LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import {
   FindListItemSchemaDecoded,
   findListItemSchema,
@@ -17,7 +17,7 @@ import {
 } from '../../common/schemas';
 import { decodeCursor } from '../services/utils';
 
-import { getListClient } from './utils';
+import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
 
 export const findListItemRoute = (router: ListsPluginRouter): void => {
   router.get(
