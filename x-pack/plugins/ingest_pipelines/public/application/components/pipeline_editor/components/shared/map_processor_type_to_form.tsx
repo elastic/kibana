@@ -529,13 +529,13 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       'xpack.ingestPipelines.processors.description.registeredDomain',
       {
         defaultMessage:
-          'Extracts the registered domain (also known as the effective top-level domain or eTLD), sub-domain, and top-level domain from a fully qualified domain name.',
+          'Extracts the registered domain (effective top-level domain), sub-domain, and top-level domain from a fully qualified domain name.',
       }
     ),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.registeredDomain', {
         defaultMessage:
-          'Extracts the registered domain, sub-domain and top-level domain from "{field}"',
+          'Extracts the registered domain, sub-domain, and top-level domain from "{field}"',
         values: {
           field,
         },
