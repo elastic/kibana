@@ -20,21 +20,38 @@ import { Operations } from '../../authorization';
  * Parameters for deleting all comments of a case or sub case.
  */
 export interface DeleteAllArgs {
+  /**
+   * The case ID to delete all attachments for
+   */
   caseID: string;
+  /**
+   * If specified the caseID will be ignored and this value will be used to find a sub case for deleting all the attachments
+   */
   subCaseID?: string;
 }
 
 /**
- * Parameters for deleting a single comment of a case or sub case.
+ * Parameters for deleting a single attachment of a case or sub case.
  */
 export interface DeleteArgs {
+  /**
+   * The case ID to delete an attachment from
+   */
   caseID: string;
+  /**
+   * The attachment ID to delete
+   */
   attachmentID: string;
+  /**
+   * If specified the caseID will be ignored and this value will be used to find a sub case for deleting the attachment
+   */
   subCaseID?: string;
 }
 
 /**
  * Delete all comments for a case or sub case.
+ *
+ * @ignore
  */
 export async function deleteAll(
   { caseID, subCaseID }: DeleteAllArgs,
@@ -108,6 +125,11 @@ export async function deleteAll(
   }
 }
 
+/**
+ * Deletes an attachment
+ *
+ * @ignore
+ */
 export async function deleteComment(
   { caseID, attachmentID, subCaseID }: DeleteArgs,
   clientArgs: CasesClientArgs

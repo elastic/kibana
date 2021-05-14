@@ -50,6 +50,11 @@ async function deleteSubCases({
   );
 }
 
+/**
+ * Deletes the specified cases and their attachments.
+ *
+ * @ignore
+ */
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
     savedObjectsClient: soClient,
