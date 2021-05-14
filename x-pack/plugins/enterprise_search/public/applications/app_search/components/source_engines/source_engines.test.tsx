@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__';
+import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { mount, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
+
+import { EuiPageHeader } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 
@@ -21,45 +23,63 @@ import { SourceEnginesTable } from './components/source_engines_table';
 
 import { SourceEngines } from '.';
 
-const MOCK_ACTIONS = {
-  // SourceEnginesLogic
-  fetchIndexedEngines: jest.fn(),
-  fetchSourceEngines: jest.fn(),
-  // FlashMessagesLogic
-  dismissToastMessage: jest.fn(),
-};
-
-const MOCK_VALUES = {
-  // AppLogic
-  myRole: {
-    canManageMetaEngineSourceEngines: true,
-  },
-  // SourceEnginesLogic
-  dataLoading: false,
-  isModalOpen: false,
-  selectedEngineNamesToAdd: [],
-  sourceEngines: [],
-};
-
 describe('SourceEngines', () => {
+  const MOCK_ACTIONS = {
+    fetchIndexedEngines: jest.fn(),
+    fetchSourceEngines: jest.fn(),
+  };
+
+  const MOCK_VALUES = {
+    // AppLogic
+    myRole: {
+      canManageMetaEngineSourceEngines: true,
+    },
+    // SourceEnginesLogic
+    dataLoading: false,
+    isModalOpen: false,
+  };
+
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues(MOCK_VALUES);
     setMockActions(MOCK_ACTIONS);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  it('renders and calls a function to initialize data', () => {
+    const wrapper = shallow(<SourceEngines />);
+
+    expect(wrapper.find(SourceEnginesTable)).toHaveLength(1);
+    expect(MOCK_ACTIONS.fetchIndexedEngines).toHaveBeenCalled();
+    expect(MOCK_ACTIONS.fetchSourceEngines).toHaveBeenCalled();
   });
 
-  describe('non-happy-path states', () => {
-    it('renders a loading component before data has loaded', () => {
-      setMockValues({ ...MOCK_VALUES, dataLoading: true });
-      const wrapper = shallow(<SourceEngines />);
+  it('renders the add source engines modal', () => {
+    setMockValues({
+      ...MOCK_VALUES,
+      isModalOpen: true,
+    });
+    const wrapper = shallow(<SourceEngines />);
 
-      expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.find(AddSourceEnginesModal)).toHaveLength(1);
+  });
+
+  it('renders a loading component before data has loaded', () => {
+    setMockValues({ ...MOCK_VALUES, dataLoading: true });
+    const wrapper = shallow(<SourceEngines />);
+
+    expect(wrapper.find(Loading)).toHaveLength(1);
+  });
+
+  describe('page actions', () => {
+    const getPageHeader = (wrapper: ShallowWrapper) =>
+      wrapper.find(EuiPageHeader).dive().children().dive();
+
+    it('contains a button to add source engines', () => {
+      const wrapper = shallow(<SourceEngines />);
+      expect(getPageHeader(wrapper).find(AddSourceEnginesButton)).toHaveLength(1);
     });
 
-    it('hides the add source engines button is the user does not have permissions', () => {
+    it('hides the add source engines button if the user does not have permissions', () => {
       setMockValues({
         ...MOCK_VALUES,
         myRole: {
@@ -68,40 +88,7 @@ describe('SourceEngines', () => {
       });
       const wrapper = shallow(<SourceEngines />);
 
-      expect(wrapper.find(AddSourceEnginesButton)).toHaveLength(0);
-    });
-
-    it('shows the add source engines modal', () => {
-      setMockValues({
-        ...MOCK_VALUES,
-        isModalOpen: true,
-      });
-      const wrapper = shallow(<SourceEngines />);
-
-      expect(wrapper.find(AddSourceEnginesModal)).toHaveLength(1);
-    });
-  });
-
-  describe('happy-path states', () => {
-    it('renders and calls a function to initialize data', () => {
-      const wrapper = shallow(<SourceEngines />);
-
-      expect(wrapper.find(SourceEnginesTable)).toHaveLength(1);
-      expect(MOCK_ACTIONS.fetchIndexedEngines).toHaveBeenCalled();
-      expect(MOCK_ACTIONS.fetchSourceEngines).toHaveBeenCalled();
-    });
-
-    // TODO When this test runs it causes an infinite re-render loop
-    it.skip('contains a button to add source engines', () => {
-      const wrapper = mount(<SourceEngines />);
-
-      expect(wrapper.find(AddSourceEnginesButton)).toHaveLength(1);
-    });
-
-    it('hides the add source engines modal by default', () => {
-      const wrapper = shallow(<SourceEngines />);
-
-      expect(wrapper.find(AddSourceEnginesModal)).toHaveLength(0);
+      expect(getPageHeader(wrapper).find(AddSourceEnginesButton)).toHaveLength(0);
     });
   });
 });
