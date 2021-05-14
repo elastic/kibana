@@ -976,6 +976,8 @@ export interface ElasticsearchStatusMeta {
     // (undocumented)
     incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
     // (undocumented)
+    nodesInfoRequestError?: NodesVersionCompatibility['nodesInfoRequestError'];
+    // (undocumented)
     warningNodes: NodesVersionCompatibility['warningNodes'];
 }
 
@@ -1726,6 +1728,8 @@ export interface NodesVersionCompatibility {
     kibanaVersion: string;
     // (undocumented)
     message?: string;
+    // (undocumented)
+    nodesInfoRequestError?: Error;
     // (undocumented)
     warningNodes: NodeInfo[];
 }
