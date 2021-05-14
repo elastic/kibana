@@ -74,7 +74,7 @@ describe('getImportWarnings', () => {
     const warnings = getImportWarnings(
       (savedObjectRules as unknown) as Array<SavedObject<RawAlert>>
     );
-    expect(warnings[0].message).toBe('2 rules must to enabled after the import.');
+    expect(warnings[0].message).toBe('2 rules must be enabled after the import.');
   });
 
   it('return no warning messages if no rules were imported', () => {
