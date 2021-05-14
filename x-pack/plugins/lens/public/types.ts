@@ -34,6 +34,7 @@ import type {
   LensResizeActionData,
   LensToggleActionData,
 } from './datatable_visualization/components/types';
+import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -214,6 +215,10 @@ export interface Datasource<T = unknown, P = unknown> {
     }
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
+  getCustomWorkspaceRenderer?: (
+    state: T,
+    dragging: DraggingIdentifier
+  ) => undefined | (() => JSX.Element);
   updateStateOnCloseDimension?: (props: {
     layerId: string;
     columnId: string;
@@ -268,6 +273,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
+  uiActions: UiActionsStart;
 }
 
 interface SharedDimensionProps {
@@ -344,7 +350,7 @@ export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProp
   dropType: DropType;
 };
 
-export type FieldOnlyDataType = 'document' | 'ip' | 'histogram';
+export type FieldOnlyDataType = 'document' | 'ip' | 'histogram' | 'geo_point' | 'geo_shape';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 // An operation represents a column in a table, not any information
