@@ -14,7 +14,6 @@ import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
@@ -37,10 +36,9 @@ import {
   Query,
   SavedQuery,
   syncQueryStateWithUrl,
-  waitUntilNextSessionCompletes$,
 } from '../../../../../src/plugins/data/public';
 import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
-import { LensAppProps, LensAppServices, LensAppState } from './types';
+import { LensAppProps, LensAppServices } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
 import { Document } from '../persistence';
 import { SaveModal } from './save_modal';
@@ -50,6 +48,13 @@ import {
 } from '../editor_frame_service/embeddable/embeddable';
 import { useTimeRange } from './time_range';
 import { EditorFrameInstance } from '../types';
+import {
+  setState as setAppState,
+  useLensSelector,
+  useLensDispatch,
+  LensAppState,
+  DispatchSetState,
+} from '../state_management/index';
 
 export function App({
   history,
@@ -83,19 +88,20 @@ export function App({
 
   const startSession = useCallback(() => data.search.session.start(), [data.search.session]);
 
+  const dispatch = useLensDispatch();
+  const dispatchSetState: DispatchSetState = useCallback(
+    (state: Partial<LensAppState>) => dispatch(setAppState(state)),
+    [dispatch]
+  );
+
+  const appState = useLensSelector((state) => state.app);
+
   const [state, setState] = useState<LensAppState>(() => {
     return {
-      query: data.query.queryString.getQuery(),
-      // Do not use app-specific filters from previous app,
-      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-      filters: !initialContext
-        ? data.query.filterManager.getGlobalFilters()
-        : data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
       isSaveable: false,
-      searchSessionId: startSession(),
     };
   });
 
@@ -116,17 +122,17 @@ export function App({
   }, [
     setIndicateNoData,
     indicateNoData,
-    state.query,
-    state.filters,
+    appState.query,
+    appState.filters,
     state.indexPatternsForTopNav,
-    state.searchSessionId,
+    appState.searchSessionId,
   ]);
 
   const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
     data,
     state.lastKnownDoc,
-    setState,
-    state.searchSessionId
+    dispatchSetState,
+    appState.searchSessionId
   );
 
   const onError = useCallback(
@@ -149,49 +155,6 @@ export function App({
   );
 
   useEffect(() => {
-    // Clear app-specific filters when navigating to Lens. Necessary because Lens
-    // can be loaded without a full page refresh. If the user navigates to Lens from Discover
-    // we keep the filters
-    if (!initialContext) {
-      data.query.filterManager.setAppFilters([]);
-    }
-
-    const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
-      next: () => {
-        setState((s) => ({
-          ...s,
-          filters: data.query.filterManager.getFilters(),
-          searchSessionId: startSession(),
-        }));
-        trackUiEvent('app_filters_updated');
-      },
-    });
-
-    const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
-      next: () => {
-        setState((s) => ({
-          ...s,
-          searchSessionId: startSession(),
-        }));
-      },
-    });
-
-    const autoRefreshSubscription = data.query.timefilter.timefilter
-      .getAutoRefreshFetch$()
-      .pipe(
-        tap(() => {
-          setState((s) => ({
-            ...s,
-            searchSessionId: startSession(),
-          }));
-        }),
-        switchMap((done) =>
-          // best way in lens to estimate that all panels are updated is to rely on search session service state
-          waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
-        )
-      )
-      .subscribe();
-
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
       useHash: uiSettings.get('state:storeInSessionStorage'),
@@ -202,41 +165,10 @@ export function App({
       kbnUrlStateStorage
     );
 
-    const sessionSubscription = data.search.session
-      .getSession$()
-      // wait for a tick to filter/timerange subscribers the chance to update the session id in the state
-      .pipe(delay(0))
-      // then update if it didn't get updated yet
-      .subscribe((newSessionId) => {
-        if (newSessionId) {
-          setState((prevState) => {
-            if (prevState.searchSessionId !== newSessionId) {
-              return { ...prevState, searchSessionId: newSessionId };
-            } else {
-              return prevState;
-            }
-          });
-        }
-      });
-
     return () => {
       stopSyncingQueryServiceStateWithUrl();
-      filterSubscription.unsubscribe();
-      timeSubscription.unsubscribe();
-      autoRefreshSubscription.unsubscribe();
-      sessionSubscription.unsubscribe();
     };
-  }, [
-    data.query.filterManager,
-    data.query.timefilter.timefilter,
-    data.search.session,
-    notifications.toasts,
-    uiSettings,
-    data.query,
-    history,
-    initialContext,
-    startSession,
-  ]);
+  }, [data.search.session, notifications.toasts, uiSettings, data.query, history]);
 
   useEffect(() => {
     onAppLeave((actions) => {
@@ -359,9 +291,9 @@ export function App({
               isLoading: false,
               ...(!_.isEqual(state.persistedDoc, doc) ? { persistedDoc: doc } : null),
               lastKnownDoc: doc,
-              query: doc.state.query,
               indexPatternsForTopNav: indexPatterns,
             }));
+            dispatchSetState({ query: doc.state.query });
           })
           .catch((e) => {
             setState((s) => ({ ...s, isLoading: false }));
@@ -387,6 +319,7 @@ export function App({
     redirectTo,
     chrome.recentlyAccessed,
     state.persistedDoc,
+    dispatchSetState,
   ]);
 
   const tagsIds =
@@ -654,16 +587,12 @@ export function App({
             } else {
               // Query has changed, renew the session id.
               // Time change will be picked up by the time subscription
-              setState((s) => ({
-                ...s,
-                searchSessionId: startSession(),
-              }));
+              dispatchSetState({ searchSessionId: startSession() });
               trackUiEvent('app_query_change');
             }
-            setState((s) => ({
-              ...s,
-              query: query || s.query,
-            }));
+            if (query) {
+              dispatchSetState({ query });
+            }
           }}
           onSaved={(savedQuery) => {
             setState((s) => ({ ...s, savedQuery }));
@@ -675,19 +604,21 @@ export function App({
             setState((s) => ({
               ...s,
               savedQuery: { ...savedQuery }, // Shallow query for reference issues
-              query: savedQuery.attributes.query,
             }));
+            dispatchSetState({ query: savedQuery.attributes.query });
           }}
           onClearSavedQuery={() => {
             data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
             setState((s) => ({
               ...s,
               savedQuery: undefined,
+            }));
+            dispatchSetState({
               filters: data.query.filterManager.getGlobalFilters(),
               query: data.query.queryString.getDefaultQuery(),
-            }));
+            });
           }}
-          query={state.query}
+          query={appState.query}
           dateRangeFrom={fromDate}
           dateRangeTo={toDate}
           indicateNoData={indicateNoData}
@@ -701,9 +632,9 @@ export function App({
             initialContext={initialContext}
             setState={setState}
             data={data}
-            query={state.query}
-            filters={state.filters}
-            searchSessionId={state.searchSessionId}
+            query={appState.query}
+            filters={appState.filters}
+            searchSessionId={appState.searchSessionId}
             isSaveable={state.isSaveable}
             savedQuery={state.savedQuery}
             persistedDoc={state.persistedDoc}

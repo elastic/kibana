@@ -15,6 +15,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
 import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
+import { Provider } from 'react-redux';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
@@ -33,6 +34,7 @@ import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actio
 import { LensAttributeService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { makeConfigureStore, navigateAway } from '../state_management/index';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -149,6 +151,36 @@ export async function mountApp(
       coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
     }
   };
+  const initialContext =
+    historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
+      ? historyLocationState.payload
+      : undefined;
+
+  // Clear app-specific filters when navigating to Lens. Necessary because Lens
+  // can be loaded without a full page refresh. If the user navigates to Lens from Discover
+  // we keep the filters
+  if (!initialContext) {
+    data.query.filterManager.setAppFilters([]);
+  }
+
+  const preloadedState = {
+    app: {
+      query: data.query.queryString.getQuery(),
+      // Do not use app-specific filters from previous app,
+      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+      filters: !initialContext
+        ? data.query.filterManager.getGlobalFilters()
+        : data.query.filterManager.getFilters(),
+      searchSessionId: '',
+
+      indexPatternsForTopNav: [],
+      isSaveable: false,
+      isAppLoading: false,
+      isLinkedToOriginatingApp: false,
+    },
+  };
+
+  const lensStore = makeConfigureStore(preloadedState, { data });
 
   // const featureFlagConfig = await getByValueFeatureFlag();
   const EditorRenderer = React.memo(
@@ -160,23 +192,22 @@ export async function mountApp(
         [props.history]
       );
       trackUiEvent('loaded');
+
       return (
-        <App
-          incomingState={embeddableEditorIncomingState}
-          editorFrame={instance}
-          initialInput={getInitialInput(props.id, props.editByValue)}
-          redirectTo={redirectCallback}
-          redirectToOrigin={redirectToOrigin}
-          redirectToDashboard={redirectToDashboard}
-          onAppLeave={params.onAppLeave}
-          setHeaderActionMenu={params.setHeaderActionMenu}
-          history={props.history}
-          initialContext={
-            historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD
-              ? historyLocationState.payload
-              : undefined
-          }
-        />
+        <Provider store={lensStore}>
+          <App
+            incomingState={embeddableEditorIncomingState}
+            editorFrame={instance}
+            initialInput={getInitialInput(props.id, props.editByValue)}
+            redirectTo={redirectCallback}
+            redirectToOrigin={redirectToOrigin}
+            redirectToDashboard={redirectToDashboard}
+            onAppLeave={params.onAppLeave}
+            setHeaderActionMenu={params.setHeaderActionMenu}
+            history={props.history}
+            initialContext={initialContext}
+          />
+        </Provider>
       );
     }
   );
@@ -232,5 +263,6 @@ export async function mountApp(
     data.search.session.clear();
     unmountComponentAtNode(params.element);
     unlistenParentHistory();
+    lensStore.dispatch(navigateAway());
   };
 }
