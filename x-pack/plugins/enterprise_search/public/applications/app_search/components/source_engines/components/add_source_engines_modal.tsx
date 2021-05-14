@@ -18,11 +18,9 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 
 import { SourceEnginesLogic } from '../source_engines_logic';
@@ -53,33 +51,29 @@ export const AddSourceEnginesModal: React.FC = () => {
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={closeAddSourceEnginesModal}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiText>{MODAL_DESCRIPTION}</EuiText>
-          <EuiSpacer />
-          <EuiComboBox
-            options={selectableEngineNames.map((engineName) => ({ label: engineName }))}
-            selectedOptions={selectedEngineNamesToAdd.map((engineName) => ({ label: engineName }))}
-            onChange={(options) =>
-              setSelectedEngineNamesToAdd(options.map((option) => option.label))
-            }
-          />
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeAddSourceEnginesModal}>Cancel</EuiButtonEmpty>
-          <EuiButton
-            disabled={selectedEngineNamesToAdd.length === 0}
-            onClick={() => addSourceEngines(selectedEngineNamesToAdd)}
-            fill
-          >
-            Save
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal onClose={closeAddSourceEnginesModal}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{MODAL_TITLE}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiText color="subdued">{MODAL_DESCRIPTION}</EuiText>
+        <EuiSpacer />
+        <EuiComboBox
+          options={selectableEngineNames.map((engineName) => ({ label: engineName }))}
+          selectedOptions={selectedEngineNamesToAdd.map((engineName) => ({ label: engineName }))}
+          onChange={(options) => setSelectedEngineNamesToAdd(options.map((option) => option.label))}
+        />
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={closeAddSourceEnginesModal}>Cancel</EuiButtonEmpty>
+        <EuiButton
+          disabled={selectedEngineNamesToAdd.length === 0}
+          onClick={() => addSourceEngines(selectedEngineNamesToAdd)}
+          fill
+        >
+          Save
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

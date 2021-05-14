@@ -75,7 +75,7 @@ export const SourceEnginesTable: React.FC = () => {
           to={generateEncodedPath(ENGINE_PATH, { engineName })}
           data-test-subj="EngineName"
         >
-          <strong>{engineName}</strong>
+          {engineName}
         </EuiLinkTo>
       ),
     },
@@ -111,7 +111,6 @@ export const SourceEnginesTable: React.FC = () => {
       sorting
       allowNeutralSort
       search={{ box: { incremental: true } }}
-      responsive={false}
     />
   );
 };

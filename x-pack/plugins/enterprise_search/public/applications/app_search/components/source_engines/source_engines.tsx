@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { EuiPageHeader, EuiPageContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -53,8 +53,10 @@ export const SourceEngines: React.FC = () => {
         rightSideItems={canManageMetaEngineSourceEngines ? [<AddSourceEnginesButton />] : []}
       />
       <FlashMessages />
-      <SourceEnginesTable />
-      {addSourceEnginesModalOpen && <AddSourceEnginesModal />}
+      <EuiPageContent hasBorder>
+        <SourceEnginesTable />
+        {addSourceEnginesModalOpen && <AddSourceEnginesModal />}
+      </EuiPageContent>
     </>
   );
 };
