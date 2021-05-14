@@ -15,7 +15,7 @@ import {
   NamespaceType,
   OsTypeArray,
   TagsOrUndefined,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   ExceptionListSchema,

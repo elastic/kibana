@@ -18,7 +18,7 @@ import {
   tags,
   updated_at,
   updated_by,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   _versionOrUndefined,

@@ -48,11 +48,13 @@ export class EventFiltersHttpService implements EventFiltersService {
     page,
     sortField,
     sortOrder,
+    filter,
   }: Partial<{
     page: number;
     perPage: number;
     sortField: string;
     sortOrder: string;
+    filter: string;
   }> = {}): Promise<FoundExceptionListItemSchema> {
     const http = await this.httpWrapper();
     return http.get(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
@@ -63,6 +65,7 @@ export class EventFiltersHttpService implements EventFiltersService {
         sort_order: sortOrder,
         list_id: [ENDPOINT_EVENT_FILTERS_LIST_ID],
         namespace_type: ['agnostic'],
+        filter,
       },
     });
   }
@@ -87,6 +90,15 @@ export class EventFiltersHttpService implements EventFiltersService {
   ): Promise<ExceptionListItemSchema> {
     return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       body: JSON.stringify(exception),
+    });
+  }
+
+  async deleteOne(id: string): Promise<ExceptionListItemSchema> {
+    return (await this.httpWrapper()).delete<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+      query: {
+        id,
+        namespace_type: 'agnostic',
+      },
     });
   }
 }

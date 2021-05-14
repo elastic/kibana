@@ -12,7 +12,7 @@ import {
   nameOrUndefined,
   updated_at,
   updated_by,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
 
 export const updateEsListSchema = t.exact(
   t.type({

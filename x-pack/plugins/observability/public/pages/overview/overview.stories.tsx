@@ -23,7 +23,7 @@ import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.m
 import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/metrics.mock';
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
-import { createObservabilityRuleRegistryMock } from '../../rules/observability_rule_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -54,7 +54,7 @@ const withCore = makeDecorator({
                 },
               },
             } as unknown) as ObservabilityPublicPluginsStart,
-            observabilityRuleRegistry: createObservabilityRuleRegistryMock(),
+            observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
           }}
         >
           <EuiThemeProvider>
