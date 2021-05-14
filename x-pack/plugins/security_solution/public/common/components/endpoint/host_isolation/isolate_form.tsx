@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CANCEL, COMMENT, COMMENT_PLACEHOLDER, CONFIRM } from './translations';
@@ -55,27 +56,27 @@ export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
 
         <EuiSpacer size="m" />
 
-        <EuiFormRow label={COMMENT} fullWidth>
-          <EuiTextArea
-            data-test-subj="host_isolation_comment"
-            fullWidth
-            placeholder={COMMENT_PLACEHOLDER}
-            value={comment}
-            onChange={handleCommentChange}
-          />
-        </EuiFormRow>
+        <EuiTitle size="xs">
+          <h4>{COMMENT}</h4>
+        </EuiTitle>
+        <EuiTextArea
+          data-test-subj="host_isolation_comment"
+          fullWidth
+          placeholder={COMMENT_PLACEHOLDER}
+          value={comment}
+          onChange={handleCommentChange}
+        />
 
-        {/* <EuiTitle size="xs">*/}
-        {/*  <h4>{COMMENT}</h4>*/}
-        {/* </EuiTitle>*/}
-        {/* <EuiSpacer size="m" />*/}
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel}>{CANCEL}</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={onCancel} disabled={isLoading}>
+              {CANCEL}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onConfirm} isLoading={isLoading}>
+            <EuiButton fill onClick={onConfirm} disabled={isLoading} isLoading={isLoading}>
               {CONFIRM}
             </EuiButton>
           </EuiFlexItem>

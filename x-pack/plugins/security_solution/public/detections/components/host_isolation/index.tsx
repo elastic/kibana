@@ -9,30 +9,24 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { find } from 'lodash/fp';
 import {
   EuiCallOut,
-  EuiTitle,
   EuiText,
-  EuiTextArea,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
-import {
-  CANCEL,
-  CASES_ASSOCIATED_WITH_ALERT,
-  COMMENT,
-  COMMENT_PLACEHOLDER,
-  CONFIRM,
-  RETURN_TO_ALERT_DETAILS,
-} from './translations';
+import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import { Maybe } from '../../../../../observability/common/typings';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
 import { CaseDetailsLink } from '../../../common/components/links';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import {
+  EndpointIsolatedFormProps,
+  EndpointIsolateForm,
+} from '../../../common/components/endpoint/host_isolation';
 
 export const HostIsolationPanel = React.memo(
   ({
@@ -75,6 +69,11 @@ export const HostIsolationPanel = React.memo(
     }, [isolateHost]);
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
+
+    const handleIsolateFormChange: EndpointIsolatedFormProps['onChange'] = useCallback(
+      ({ comment: newComment }) => setComment(newComment),
+      []
+    );
 
     const casesList = useMemo(
       () =>
@@ -145,13 +144,18 @@ export const HostIsolationPanel = React.memo(
       return (
         <>
           <EuiSpacer size="m" />
-          <EuiText size="s">
-            <p>
+          <EndpointIsolateForm
+            hostName={hostName}
+            onCancel={backToAlertDetails}
+            onConfirm={confirmHostIsolation}
+            onChange={handleIsolateFormChange}
+            comment={comment}
+            isLoading={loading}
+            messageAppend={
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
-                defaultMessage="Isolate host {hostname} from network. This action will be added to the {cases}."
+                id="xpack.securitySolution.detections.hostIsolation.impactedCases"
+                defaultMessage="This action will be added to the {cases}."
                 values={{
-                  hostname: <b>{hostName}</b>,
                   cases: (
                     <b>
                       {caseCount}
@@ -161,42 +165,19 @@ export const HostIsolationPanel = React.memo(
                   ),
                 }}
               />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiTitle size="xs">
-            <h4>{COMMENT}</h4>
-          </EuiTitle>
-          <EuiTextArea
-            data-test-subj="host_isolation_comment"
-            fullWidth={true}
-            placeholder={COMMENT_PLACEHOLDER}
-            value={comment}
-            onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setComment(event.target.value)
             }
           />
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={backToAlertDetails}>{CANCEL}</EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={confirmHostIsolation} isLoading={loading}>
-                {CONFIRM}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </>
       );
     }, [
-      alertRule,
-      backToAlertDetails,
-      comment,
-      confirmHostIsolation,
       hostName,
+      backToAlertDetails,
+      confirmHostIsolation,
+      handleIsolateFormChange,
+      comment,
       loading,
       caseCount,
+      alertRule,
     ]);
 
     return isIsolated ? hostIsolated : hostNotIsolated;
