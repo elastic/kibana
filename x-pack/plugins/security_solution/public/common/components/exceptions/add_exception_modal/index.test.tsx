@@ -21,7 +21,7 @@ import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_e
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray } from '@kbn/securitysolution-io-ts-utils';
+import { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ExceptionListItemSchema } from '../../../../../../lists/common';
 import {
@@ -58,13 +58,14 @@ describe('When the add exception modal is opened', () => {
     ReturnType<typeof helpers.defaultEndpointExceptionItems>
   >;
   let ExceptionBuilderComponent: jest.SpyInstance<
-    ReturnType<typeof ExceptionBuilder.ExceptionBuilderComponent>
+    ReturnType<typeof ExceptionBuilder.getExceptionBuilderComponentLazy>
   >;
   beforeEach(() => {
+    const emptyComp = <span data-test-subj="alert-exception-builder" />;
     defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
     ExceptionBuilderComponent = jest
-      .spyOn(ExceptionBuilder, 'ExceptionBuilderComponent')
-      .mockReturnValue(<></>);
+      .spyOn(ExceptionBuilder, 'getExceptionBuilderComponentLazy')
+      .mockReturnValue(emptyComp);
 
     (useAsync as jest.Mock).mockImplementation(() => ({
       start: jest.fn(),

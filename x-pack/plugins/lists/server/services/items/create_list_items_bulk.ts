@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { ElasticsearchClient } from 'kibana/server';
-import { MetaOrUndefined, Type } from '@kbn/securitysolution-io-ts-utils';
+import { MetaOrUndefined, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { transformListItemToElasticQuery } from '../utils';
 import { DeserializerOrUndefined, SerializerOrUndefined } from '../../../common/schemas';
