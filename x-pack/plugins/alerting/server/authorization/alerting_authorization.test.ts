@@ -71,7 +71,9 @@ function mockFeature(appName: string, typeName?: string) {
         ...(typeName
           ? {
               alerting: {
-                all: [typeName],
+                rule: {
+                  all: [typeName],
+                },
               },
             }
           : {}),
@@ -85,7 +87,9 @@ function mockFeature(appName: string, typeName?: string) {
         ...(typeName
           ? {
               alerting: {
-                read: [typeName],
+                rule: {
+                  read: [typeName],
+                },
               },
             }
           : {}),
@@ -138,7 +142,9 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
                 name: 'sub feature alert',
                 includeIn: 'all',
                 alerting: {
-                  all: [typeName],
+                  rule: {
+                    all: [typeName],
+                  },
                 },
                 savedObject: {
                   all: [],
@@ -151,7 +157,9 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
                 name: 'sub feature alert',
                 includeIn: 'read',
                 alerting: {
-                  read: [typeName],
+                  rule: {
+                    read: [typeName],
+                  },
                 },
                 savedObject: {
                   all: [],

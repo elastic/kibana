@@ -100,7 +100,6 @@ export function privilegesFactory(
         }
       }
 
-      console.log(`stackAlerts: ${JSON.stringify(featurePrivileges.stackAlerts)}`);
       return {
         features: featurePrivileges,
         global: {
