@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// TODO: mob programming
-
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XYLayerConfig, AxesSettingsConfig } from './types';
-import { ToolbarPopover } from '../shared_components';
+import { ToolbarPopover, useDebouncedValue } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../assets/axis_left';
@@ -151,15 +149,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   setEndzoneVisibility,
   endzonesVisible,
 }) => {
-  const [title, setTitle] = useState<string | undefined>(axisTitle);
-
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
 
-  const onTitleChange = (value: string): void => {
-    setTitle(value);
-    updateTitleState(value);
-  };
+  const { inputValue: title, handleInputChange: onTitleChange } = useDebouncedValue<string>({
+    value: axisTitle || '',
+    onChange: updateTitleState,
+  });
   return (
     <ToolbarPopover
       title={config.popoverTitle}
