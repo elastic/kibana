@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Type, type } from '@kbn/securitysolution-io-ts-utils';
+import { Type, type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 

@@ -15,15 +15,26 @@ import { shallow } from 'enzyme';
 import { EuiPageHeader, EuiButton } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
+import { SchemaAddFieldModal } from '../../../../shared/schema';
+
+import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
 
 import { Schema } from './';
 
 describe('Schema', () => {
   const values = {
     dataLoading: false,
+    hasSchema: true,
+    hasSchemaChanged: false,
+    isUpdating: false,
+    isModalOpen: false,
   };
   const actions = {
     loadSchema: jest.fn(),
+    updateSchema: jest.fn(),
+    addSchemaField: jest.fn(),
+    openModal: jest.fn(),
+    closeModal: jest.fn(),
   };
 
   beforeEach(() => {
@@ -35,8 +46,8 @@ describe('Schema', () => {
   it('renders', () => {
     const wrapper = shallow(<Schema />);
 
-    expect(wrapper.isEmptyRender()).toBe(false);
-    // TODO: Check for schema components
+    expect(wrapper.find(SchemaCallouts)).toHaveLength(1);
+    expect(wrapper.find(SchemaTable)).toHaveLength(1);
   });
 
   it('calls loadSchema on mount', () => {
@@ -52,14 +63,79 @@ describe('Schema', () => {
     expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
-  it('renders page action buttons', () => {
-    const wrapper = shallow(<Schema />)
-      .find(EuiPageHeader)
-      .dive()
-      .children()
-      .dive();
+  it('renders an empty state', () => {
+    setMockValues({ ...values, hasSchema: false });
+    const wrapper = shallow(<Schema />);
 
-    expect(wrapper.find(EuiButton)).toHaveLength(2);
-    // TODO: Expect click actions
+    expect(wrapper.find(EmptyState)).toHaveLength(1);
+  });
+
+  describe('page action buttons', () => {
+    const subject = () =>
+      shallow(<Schema />)
+        .find(EuiPageHeader)
+        .dive()
+        .children()
+        .dive();
+
+    it('renders', () => {
+      const wrapper = subject();
+      expect(wrapper.find(EuiButton)).toHaveLength(2);
+    });
+
+    it('renders loading/disabled state when schema is updating', () => {
+      setMockValues({ isUpdating: true });
+      const wrapper = subject();
+
+      expect(wrapper.find('[data-test-subj="updateSchemaButton"]').prop('isLoading')).toBe(true);
+      expect(wrapper.find('[data-test-subj="addSchemaFieldModalButton"]').prop('disabled')).toBe(
+        true
+      );
+    });
+
+    describe('add button', () => {
+      it('opens the add schema field modal', () => {
+        const wrapper = subject();
+
+        wrapper.find('[data-test-subj="addSchemaFieldModalButton"]').simulate('click');
+        expect(actions.openModal).toHaveBeenCalled();
+      });
+    });
+
+    describe('update button', () => {
+      describe('when nothing on the page has changed', () => {
+        it('is disabled', () => {
+          const wrapper = subject();
+
+          expect(wrapper.find('[data-test-subj="updateSchemaButton"]').prop('disabled')).toBe(true);
+        });
+      });
+
+      describe('when schema has been changed locally', () => {
+        it('is enabled', () => {
+          setMockValues({ ...values, hasSchemaChanged: true });
+          const wrapper = subject();
+
+          expect(wrapper.find('[data-test-subj="updateSchemaButton"]').prop('disabled')).toBe(
+            false
+          );
+        });
+
+        it('calls updateSchema on click', () => {
+          setMockValues({ ...values, hasSchemaChanged: true });
+          const wrapper = subject();
+
+          wrapper.find('[data-test-subj="updateSchemaButton"]').simulate('click');
+          expect(actions.updateSchema).toHaveBeenCalled();
+        });
+      });
+    });
+  });
+
+  it('renders a modal that lets a user add a new schema field', () => {
+    setMockValues({ isModalOpen: true });
+    const wrapper = shallow(<Schema />);
+
+    expect(wrapper.find(SchemaAddFieldModal)).toHaveLength(1);
   });
 });
