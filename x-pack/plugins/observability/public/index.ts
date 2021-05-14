@@ -62,4 +62,5 @@ export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 export type { SeriesUrl } from './components/shared/exploratory_view/types';
 
-export { FormatterRuleRegistry } from './rules/formatter_rule_registry';
+export type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
