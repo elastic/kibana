@@ -92,8 +92,8 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       pageHeader={pageHeader}
       pageSideBar={pageSideBar}
       pageSideBarProps={{
-        className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
         ...rest.pageSideBarProps,
+        className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
       }}
       {...localBottomBarProps}
       {...rest}
