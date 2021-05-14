@@ -7,13 +7,15 @@
 
 import * as t from 'io-ts';
 import {
-  DefaultNamespaceArray,
-  DefaultNamespaceArrayTypeDecoded,
   EmptyStringArray,
   EmptyStringArrayDecoded,
   NonEmptyStringArray,
   StringToPositiveNumber,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-types';
+import {
+  DefaultNamespaceArray,
+  DefaultNamespaceArrayTypeDecoded,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import { sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
