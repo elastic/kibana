@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { description, id, meta, name, version } from '@kbn/securitysolution-io-ts-utils';
+import { description, id, meta, name, version } from '@kbn/securitysolution-io-ts-list-types';
 
 import { _version } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';

@@ -56,7 +56,7 @@ import {
   ENTRIES_WITH_IDS,
   OLD_DATE_RELATIVE_TO_DATE_NOW,
 } from '../../../../../lists/common/constants.mock';
-import { EntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-utils';
+import { EntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
