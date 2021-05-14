@@ -682,14 +682,7 @@ function wrapWithTry(
       log.error(error);
       // To make debugging failed migrations easier, we add items needed to convert the
       // saved object id to the full raw id (the id only contains the uuid part) and the full error itself
-      throw new TransformSavedObjectDocumentError(
-        doc.id,
-        doc.type,
-        doc.namespace,
-        failedTransform,
-        failedDoc,
-        error
-      );
+      throw new TransformSavedObjectDocumentError(failedTransform, failedDoc, error);
     }
   };
 }

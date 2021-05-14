@@ -20,13 +20,10 @@
 
 export class TransformSavedObjectDocumentError extends Error {
   constructor(
-    public readonly id: string,
-    public readonly type: string,
-    public readonly namespace: string | undefined,
     public readonly failedTransform: string, // created by document_migrator wrapWithTry as `${type.name}:${version}`;
     public readonly failedDoc: string,
     public readonly originalError: Error
   ) {
-    super(`Failed to transform document ${id}. Transform: ${failedTransform}\nDoc: ${failedDoc}`);
+    super(`${originalError.message}`);
   }
 }

@@ -1134,10 +1134,7 @@ describe('migrations v2 model', () => {
         const corruptDocumentIdsCarriedOver = ['a:somethingelse'];
         const originalTransformError = new Error('something went wrong');
         const transFormErr = new TransformSavedObjectDocumentError(
-          '123',
-          'vis',
-          undefined,
-          'randomvis: 7.12.0',
+          'a: 7.12.0',
           'failedDoc',
           originalTransformError
         );
@@ -1159,7 +1156,7 @@ describe('migrations v2 model', () => {
         expect(newState.reason.includes('Migrations failed. Reason:')).toBe(true);
         expect(newState.reason.includes('Corrupt saved object documents: ')).toBe(true);
         expect(newState.reason.includes('Transformation errors: ')).toBe(true);
-        expect(newState.reason.includes('randomvis: 7.12.0')).toBe(true);
+        expect(newState.reason.includes('bob:tail')).toBe(true);
         expect(newState.logs).toStrictEqual([]); // No logs because no hits
       });
     });
