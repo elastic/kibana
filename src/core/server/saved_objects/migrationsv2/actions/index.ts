@@ -162,7 +162,7 @@ export const removeWriteBlock = (
         // Don't change any existing settings
         preserve_existing: true,
         body: {
-          index: {
+          settings: {
             blocks: {
               write: false,
             },
@@ -464,7 +464,7 @@ export interface ReadWithPit {
 export const readWithPit = (
   client: ElasticsearchClient,
   pitId: string,
-  query: estypes.QueryContainer,
+  query: estypes.QueryDslQueryContainer,
   batchSize: number,
   searchAfter?: number[],
   seqNoPrimaryTerm?: boolean
@@ -584,7 +584,7 @@ export const reindex = (
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesQuery: estypes.QueryContainer
+  unusedTypesQuery: estypes.QueryDslQueryContainer
 ): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> => () => {
   return client
     .reindex({
@@ -1002,7 +1002,7 @@ export interface SearchResponse {
 interface SearchForOutdatedDocumentsOptions {
   batchSize: number;
   targetIndex: string;
-  outdatedDocumentsQuery?: estypes.QueryContainer;
+  outdatedDocumentsQuery?: estypes.QueryDslQueryContainer;
 }
 
 /**
