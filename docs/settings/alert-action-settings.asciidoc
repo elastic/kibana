@@ -70,6 +70,7 @@ You can configure the following settings in the `kibana.yml` file.
 xpack.actions.customHostSettings:
   - url: smtp://mail.example.com:465
     tls: 
+      verificationMode: 'certificate'
       certificateAuthoritiesFiles: [ 'one.crt' ]
       certificateAuthoritiesData: |
           -----BEGIN CERTIFICATE-----
@@ -79,7 +80,9 @@ xpack.actions.customHostSettings:
       requireTLS: true
   - url: https://webhook.example.com
     tls: 
+      // legacy
       rejectUnauthorized: false
+      verificationMode: 'none'
 --
 
 [cols="2*<"]
@@ -154,10 +157,12 @@ xpack.actions.customHostSettings:
 | `xpack.actions.proxyHeaders` {ess-icon}
   | Specifies HTTP headers for the proxy, if using a proxy for actions. Defaults to {}.
 
-a|`xpack.actions.`
+[Legacy. Use `ssl.verificationMode` configuration instead.]
+| `xpack.actions.`
 `proxyRejectUnauthorizedCertificates` {ess-icon}
   | Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Defaults to `true`.
 
+[Legacy. Use `ssl.verificationMode` configuration instead.]
 | `xpack.actions.rejectUnauthorized` {ess-icon}
   | Set to `false` to bypass certificate validation for actions. Defaults to `true`. +
   +

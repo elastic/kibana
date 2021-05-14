@@ -58,7 +58,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transportConfig: Record<string, any> = {};
   const proxySettings = configurationUtilities.getProxySettings();
-  const rejectUnauthorized = configurationUtilities.isRejectUnauthorizedCertificatesEnabled();
+  const generalTLSSettings = configurationUtilities.getTLSSettings();
 
   if (hasAuth && user != null && password != null) {
     transportConfig.auth = {
@@ -93,7 +93,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     if (proxySettings && useProxy) {
       transportConfig.tls = {
         // do not fail on invalid certs if value is false
-        rejectUnauthorized: proxySettings?.proxyRejectUnauthorizedCertificates,
+        rejectUnauthorized: proxySettings?.proxyTLSSettings.rejectUnauthorized,
       };
       transportConfig.proxy = proxySettings.proxyUrl;
       transportConfig.headers = proxySettings.proxyHeaders;
@@ -103,7 +103,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       // authenticate rarely have valid certs; eg cloud proxy, and npm maildev
       transportConfig.tls = { rejectUnauthorized: false };
     } else {
-      transportConfig.tls = { rejectUnauthorized };
+      transportConfig.tls = { rejectUnauthorized: generalTLSSettings.rejectUnauthorized };
     }
 
     // finally, allow customHostSettings to override some of the settings

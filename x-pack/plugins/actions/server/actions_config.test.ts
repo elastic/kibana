@@ -27,8 +27,8 @@ const defaultActionsConfig: ActionsConfig = {
   enabledActionTypes: [],
   preconfiguredAlertHistoryEsIndex: false,
   preconfigured: {},
-  proxyRejectUnauthorizedCertificates: true,
-  rejectUnauthorized: true,
+  proxyRejectUnauthorizedCertificates: true, // legacy
+  rejectUnauthorized: true, // legacy
   maxResponseContentLength: new ByteSizeValue(1000000),
   responseTimeout: moment.duration(60000),
   cleanupFailedExecutionsTask: {

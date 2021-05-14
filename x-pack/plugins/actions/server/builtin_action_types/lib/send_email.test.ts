@@ -119,7 +119,7 @@ describe('send_email module', () => {
     `);
   });
 
-  test('rejectUnauthorized default setting email using not secure host/port', async () => {
+  test('verificationMode default setting email using not secure host/port', async () => {
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         host: 'example.com',

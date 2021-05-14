@@ -30,6 +30,7 @@ describe('getCustomAgents', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
       proxyRejectUnauthorizedCertificates: false,
+      proxyTLSSettings: {},
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
     });

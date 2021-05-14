@@ -177,6 +177,56 @@ describe('config validation', () => {
       `"[customHostSettings.0.url]: expected value of type [string] but got [undefined]"`
     );
   });
+
+  test('action with configured ssl', () => {
+    const config: Record<string, unknown> = {
+      preconfigured: {
+        mySlack1: {
+          actionTypeId: '.slack',
+          name: 'Slack #xyz',
+          config: {
+            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+          },
+        },
+      },
+      proxyRejectUnauthorizedCertificates: false,
+      rejectUnauthorized: false,
+    };
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "allowedHosts": Array [
+          "*",
+        ],
+        "cleanupFailedExecutionsTask": Object {
+          "cleanupInterval": "PT5M",
+          "enabled": true,
+          "idleInterval": "PT1H",
+          "pageSize": 100,
+        },
+        "enabled": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
+        "preconfigured": Object {
+          "mySlack1": Object {
+            "actionTypeId": ".slack",
+            "config": Object {
+              "webhookUrl": "https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz",
+            },
+            "name": "Slack #xyz",
+            "secrets": Object {},
+          },
+        },
+        "preconfiguredAlertHistoryEsIndex": false,
+        "proxyRejectUnauthorizedCertificates": false,
+        "rejectUnauthorized": false,
+        "responseTimeout": "PT1M",
+      }
+    `);
+  });
 });
 
 // object creator that ensures we can create a property named __proto__ on an
