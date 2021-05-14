@@ -7,6 +7,9 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 
+/**
+ * @deprecated Use the one from kbn-securitysolution-es-utils
+ */
 export const setTemplate = async (
   esClient: ElasticsearchClient,
   name: string,
