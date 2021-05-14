@@ -53,6 +53,7 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   currentIndexPattern: IndexPattern;
 }
 
+// TODO: this is another logic instance we want to generalize
 /**
  * This component shows a debounced input for the label of a dimension. It will update on root state changes
  * if no debounced changes are in flight because the user is currently typing into the input.

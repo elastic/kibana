@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// TODO: mob programming
+
 import React, { useState } from 'react';
 import {
   EuiFlexGroup,
