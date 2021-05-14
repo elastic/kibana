@@ -6,7 +6,7 @@
  */
 
 import Mustache from 'mustache';
-import { type } from '@kbn/securitysolution-io-ts-utils';
+import { type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { DeserializerOrUndefined } from '../../../common/schemas';
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';

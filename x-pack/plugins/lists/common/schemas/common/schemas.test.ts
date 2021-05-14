@@ -11,15 +11,13 @@ import {
   ExceptionListTypeEnum,
   ListOperatorEnum as OperatorEnum,
   Type,
-  exactCheck,
   exceptionListType,
-  foldLeftRight,
-  getPaths,
   listOperator as operator,
   osType,
   osTypeArrayOrUndefined,
   type,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('Common schemas', () => {
   describe('operator', () => {

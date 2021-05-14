@@ -10,7 +10,6 @@ import {
   CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
-  EmptyStringArrayDecoded,
   EntriesArray,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
@@ -23,12 +22,15 @@ import {
   NameOrUndefined,
   NamespaceType,
   NamespaceTypeArray,
-  NonEmptyStringArrayDecoded,
   OsTypeArray,
   Tags,
   TagsOrUndefined,
   UpdateCommentsArray,
-} from '@kbn/securitysolution-io-ts-utils';
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  EmptyStringArrayDecoded,
+  NonEmptyStringArrayDecoded,
+} from '@kbn/securitysolution-io-ts-types';
 
 import {
   FilterOrUndefined,

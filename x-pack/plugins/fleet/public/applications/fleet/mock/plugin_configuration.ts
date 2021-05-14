@@ -14,19 +14,10 @@ export const createConfigurationMock = (): FleetConfigType => {
     registryProxyUrl: '',
     agents: {
       enabled: true,
-      tlsCheckDisabled: true,
-      pollingRequestTimeout: 1000,
-      maxConcurrentConnections: 100,
-      kibana: {
-        host: '',
-        ca_sha256: '',
-      },
       elasticsearch: {
         host: '',
         ca_sha256: '',
       },
-      agentPolicyRolloutRateLimitIntervalMs: 100,
-      agentPolicyRolloutRateLimitRequestPerInterval: 1000,
     },
   };
 };
