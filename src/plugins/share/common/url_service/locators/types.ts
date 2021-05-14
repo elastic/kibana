@@ -17,7 +17,7 @@ export interface LocatorClient {
    *
    * @param urlGenerator Definition of the new locator.
    */
-  create<P extends SerializableState>(urlGenerator: LocatorDefinition<P>): LocatorPublic<P>;
+  create<P extends SerializableState>(locatorDefinition: LocatorDefinition<P>): LocatorPublic<P>;
 
   /**
    * Retrieve a previously registered locator.
@@ -30,7 +30,8 @@ export interface LocatorClient {
 /**
  * A convenience interface used to define and register a locator.
  */
-export interface LocatorDefinition<P extends SerializableState> extends PersistableState<P> {
+export interface LocatorDefinition<P extends SerializableState>
+  extends Partial<PersistableState<P>> {
   /**
    * Unique ID of the locator. Should be constant and unique across Kibana.
    */
@@ -53,7 +54,7 @@ export interface LocatorPublic<P> {
    * Returns a relative URL to the client-side redirect endpoint using this
    * locator. (This method is necessary for compatibility with URL generators.)
    */
-  getRedirectPath(params: P): string;
+  getLocation(params: P): KibanaLocation;
 
   /**
    * Navigate using the `core.application.navigateToApp()` method to a Kibana
