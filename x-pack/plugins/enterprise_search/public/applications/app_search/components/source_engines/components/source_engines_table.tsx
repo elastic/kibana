@@ -11,8 +11,6 @@ import { useActions, useValues } from 'kea';
 
 import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import { ENGINE_PATH } from '../../../routes';
@@ -25,24 +23,8 @@ import {
   ACTIONS_COLUMN,
 } from '../../engines/components/tables/shared_columns';
 
+import { REMOVE_SOURCE_ENGINE_BUTTON_LABEL, REMOVE_SOURCE_ENGINE_CONFIRM_DIALOGUE } from '../i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
-
-const REMOVE_SOURCE_ENGINE_CONFIRM_DIALOGUE = (engineName: string) =>
-  i18n.translate(
-    'xpack.enterpriseSearch.appSearch.sourceEngines.removeEngineConfirmDialogue.description',
-    {
-      defaultMessage:
-        'This will remove the engine, {engineName}, from this meta engine. All existing settings will be lost. Are you sure?',
-      values: { engineName },
-    }
-  );
-
-const REMOVE_SOURCE_ENGINE_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.sourceEngines.removeEngineButton.label',
-  {
-    defaultMessage: 'Remove from meta engine',
-  }
-);
 
 export const SourceEnginesTable: React.FC = () => {
   const {

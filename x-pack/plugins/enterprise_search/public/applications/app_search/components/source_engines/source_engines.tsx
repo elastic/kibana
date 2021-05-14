@@ -11,8 +11,6 @@ import { useActions, useValues } from 'kea';
 
 import { EuiPageHeader, EuiPageContent } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
@@ -20,14 +18,8 @@ import { AppLogic } from '../../app_logic';
 import { getEngineBreadcrumbs } from '../engine';
 
 import { AddSourceEnginesButton, AddSourceEnginesModal, SourceEnginesTable } from './components';
+import { SOURCE_ENGINES_TITLE } from './i18n';
 import { SourceEnginesLogic } from './source_engines_logic';
-
-const SOURCE_ENGINES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.souceEngines.title',
-  {
-    defaultMessage: 'Manage engines',
-  }
-);
 
 export const SourceEngines: React.FC = () => {
   const {

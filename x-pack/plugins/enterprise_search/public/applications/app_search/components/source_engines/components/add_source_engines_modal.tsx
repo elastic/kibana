@@ -21,10 +21,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../shared/constants';
 
+import {
+  ADD_SOURCE_ENGINES_MODAL_TITLE,
+  ADD_SOURCE_ENGINES_MODAL_DESCRIPTION,
+  ADD_SOURCE_ENGINES_PLACEHOLDER,
+} from '../i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesModal: React.FC = () => {
@@ -36,29 +40,16 @@ export const AddSourceEnginesModal: React.FC = () => {
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.title',
-            { defaultMessage: 'Add engines' }
-          )}
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{ADD_SOURCE_ENGINES_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiText color="subdued">
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.description',
-            { defaultMessage: 'Add additional engines to this meta engine.' }
-          )}
-        </EuiText>
+        <EuiText color="subdued">{ADD_SOURCE_ENGINES_MODAL_DESCRIPTION}</EuiText>
         <EuiSpacer />
         <EuiComboBox
           options={selectableEngineNames.map((engineName) => ({ label: engineName }))}
           selectedOptions={selectedEngineNamesToAdd.map((engineName) => ({ label: engineName }))}
           onChange={(options) => onAddEnginesSelection(options.map((option) => option.label))}
-          placeholder={i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesModal.placeholder',
-            { defaultMessage: 'Select engine(s)' }
-          )}
+          placeholder={ADD_SOURCE_ENGINES_PLACEHOLDER}
         />
       </EuiModalBody>
       <EuiModalFooter>

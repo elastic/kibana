@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
+import { kea, MakeLogicType } from 'kea';
 
 import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
 import { EnginesAPIResponse } from '../engines/types';
+
+import { ADD_SOURCE_ENGINES_SUCCESS_MESSAGE, REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE } from './i18n';
 
 export interface SourceEnginesLogicValues {
   dataLoading: boolean;
@@ -62,25 +63,6 @@ export const fetchEngines = (
 
   recursiveFetchEngines();
 };
-
-const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
-  i18n.translate(
-    'xpack.enterpriseSearch.appSearch.engine.souceEngines.removeSourceEngineSuccessMessage',
-    {
-      defaultMessage: 'Engine {engineName} has been removed from this meta engine.',
-      values: { engineName },
-    }
-  );
-
-const ADD_SOURCE_ENGINES_SUCCESS_MESSAGE = (sourceEngineNames: string[]) =>
-  i18n.translate(
-    'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesSuccessMessage',
-    {
-      defaultMessage:
-        '{sourceEnginesCount, plural, one {# engine has} other {# engines have}} been added to this meta engine.',
-      values: { sourceEnginesCount: sourceEngineNames.length },
-    }
-  );
 
 interface SourceEnginesLogicActions {
   addSourceEngines: (sourceEngineNames: string[]) => { sourceEngineNames: string[] };

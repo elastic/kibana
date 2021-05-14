@@ -11,23 +11,15 @@ import { useActions } from 'kea';
 
 import { EuiButton } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
+import { ADD_SOURCE_ENGINES_BUTTON_LABEL } from '../i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
 
 export const AddSourceEnginesButton: React.FC = () => {
   const { openModal } = useActions(SourceEnginesLogic);
 
-  const BUTTON_LABEL = i18n.translate(
-    'xpack.enterpriseSearch.appSearch.engine.souceEngines.addSourceEnginesButtonLabel',
-    {
-      defaultMessage: 'Add engines',
-    }
-  );
-
   return (
     <EuiButton color="secondary" fill onClick={openModal}>
-      {BUTTON_LABEL}
+      {ADD_SOURCE_ENGINES_BUTTON_LABEL}
     </EuiButton>
   );
 };
