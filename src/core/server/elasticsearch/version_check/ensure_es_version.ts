@@ -74,7 +74,7 @@ export function mapNodesVersionCompatibility(
       incompatibleNodes: [],
       warningNodes: [],
       kibanaVersion,
-      nodesInfoRequestError: nodesInfoResponse.nodesInfoRequestError, // optionally stringify the whole Error or parts of it that we're interested in
+      nodesInfoRequestError: nodesInfoResponse.nodesInfoRequestError,
     };
   }
   const nodes = Object.keys(nodesInfoResponse.nodes)
@@ -129,7 +129,6 @@ function compareNodesInfoErrorMessages(
 // Returns true if two NodesVersionCompatibility entries match
 function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
   const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
-  // if we pass the full error back in here, we can check to see if it's the same error rather than checking
   return (
     curr.isCompatible === prev.isCompatible &&
     curr.incompatibleNodes.length === prev.incompatibleNodes.length &&
@@ -156,8 +155,8 @@ export const pollEsNodesVersion = ({
         })
       ).pipe(
         map(({ body }) => body),
-        catchError((_err) => {
-          return of({ nodes: {}, nodesInfoRequestError: _err });
+        catchError((nodesInfoRequestError) => {
+          return of({ nodes: {}, nodesInfoRequestError });
         })
       );
     }),
