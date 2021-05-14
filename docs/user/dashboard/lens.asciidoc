@@ -209,9 +209,9 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 [[is-it-possible-to-sort-dimensions-in-a-chart]]
 ===== How do I sort the dimensions in a chart?
 
-Sorting dimensions in visualizations is unsupported in *Lens* for charts.
+Sorting dimensions in visualizations is unsupported in *Lens*.
 
-Sorting is possible in *Lens* datatables, but it is limited to a single column. Click on the column header to sort by the column and select the sorting criteria.
+You can sort the dimensions for a single column in data tables: click the column header, then select the sorting criteria you want to use.
 If you use the dimension as `Columns`, then all the columns that belong to the same dimension are sorted in the table.
 
 [float]
