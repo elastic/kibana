@@ -11,7 +11,7 @@ import { NotificationsStart } from 'src/core/public';
 import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 import { ApiService } from '../lib';
 
-interface Context {
+export interface Context {
   indexPattern: IndexPattern;
   services: {
     search: DataPublicPluginStart['search'];

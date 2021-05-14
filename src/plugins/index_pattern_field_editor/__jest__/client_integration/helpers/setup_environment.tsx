@@ -13,18 +13,28 @@ import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { merge } from 'lodash';
 
-import {
-  FieldEditorProvider,
-  Props as FieldEditorProviderProps,
-} from '../../../public/components/field_editor_context';
+import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
+import { FieldPreviewProvider } from '../../../public/components/field_preview_context';
 import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+const dataStart = dataPluginMock.createStartContract();
+const { search } = dataStart;
+
+export const spySearchResult = jest.fn();
+
+search.search = () =>
+  ({
+    toPromise: spySearchResult,
+  } as any);
 
 let apiService: ApiService;
 
 export const setupEnvironment = () => {
+  // @ts-expect-error Axios does not fullfill HttpSetupn from core but enough for our tests
   apiService = initApi(mockHttpClient);
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 
@@ -36,17 +46,24 @@ export const setupEnvironment = () => {
 
 export const WithFieldEditorDependencies = <T extends object = { [key: string]: unknown }>(
   Comp: FunctionComponent<T>,
-  overridingDependencies?: Partial<FieldEditorProviderProps>
+  overridingDependencies?: Partial<Context>
 ) => (props: T) => {
-  const dependencies: FieldEditorProviderProps = {
-    apiService,
+  const dependencies: Context = {
+    indexPattern: { title: 'testIndexPattern' } as any,
+    services: {
+      notifications: notificationServiceMock.createStartContract(),
+      search,
+      api: apiService,
+    },
   };
 
   const mergedDependencies = merge({}, dependencies, overridingDependencies);
 
   return (
     <FieldEditorProvider {...mergedDependencies}>
-      <Comp {...props} />
+      <FieldPreviewProvider>
+        <Comp {...props} />
+      </FieldPreviewProvider>
     </FieldEditorProvider>
   );
 };

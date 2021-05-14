@@ -94,7 +94,9 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         })
         .toPromise();
 
-      setDocuments(response.rawResponse.hits.hits);
+      if (response) {
+        setDocuments(response.rawResponse.hits.hits);
+      }
     },
     [indexPattern, search]
   );
