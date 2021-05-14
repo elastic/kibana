@@ -115,7 +115,7 @@ export const formulaOperation: OperationDefinition<
     }
     // carry over the format settings from previous operation for seamless transfer
     // NOTE: this works only for non-default formatters set in Lens
-    let prevFormat: FormulaIndexPatternColumn['params'] = {};
+    let prevFormat = {};
     if (previousColumn?.params && 'format' in previousColumn.params) {
       prevFormat = { format: previousColumn.params.format };
     }
