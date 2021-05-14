@@ -32,7 +32,7 @@ describe('Axes Settings', () => {
       toggleAxisTitleVisibility: jest.fn(),
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
-      hasBarOnAxis: false,
+      hasBarOrAreaOnAxis: false,
     };
   });
 
@@ -97,17 +97,6 @@ describe('Axes Settings', () => {
     it('hides the extent section if no extent is passed in', () => {
       const component = shallow(<AxisSettingsPopover {...props} />);
       expect(component.find('[data-test-subj="lnsXY_axisBounds_groups"]').length).toBe(0);
-    });
-
-    it('shows the section and allows to change mode if extent is present', () => {
-      const setSpy = jest.fn();
-      const component = shallow(
-        <AxisSettingsPopover {...props} extent={{ mode: 'dataBounds' }} setExtent={setSpy} />
-      );
-      const modeGroup = component.find('[data-test-subj="lnsXY_axisBounds_groups"]');
-      expect(modeGroup.prop('idSelected')).toContain('dataBounds');
-      ((modeGroup.prop('onChange') as unknown) as (mode: string) => void)('custom');
-      expect(setSpy).toHaveBeenCalledWith({ mode: 'custom' });
     });
 
     it('renders bound inputs if mode is custom', () => {

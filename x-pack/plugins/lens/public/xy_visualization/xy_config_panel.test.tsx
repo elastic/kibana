@@ -16,6 +16,7 @@ import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
+import { Datatable } from 'src/plugins/expressions/public';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -160,6 +161,34 @@ describe('XY Config panels', () => {
       expect(component.find(AxisSettingsPopover).at(1).prop('setEndzoneVisibility')).toBeTruthy();
       expect(component.find(AxisSettingsPopover).at(1).prop('endzonesVisible')).toBe(false);
       expect(component.find(AxisSettingsPopover).at(2).prop('setEndzoneVisibility')).toBeFalsy();
+    });
+
+    it('should pass in information about current data bounds', () => {
+      const state = testState();
+      frame.activeData = {
+        first: ({
+          rows: [{ bar: -5 }, { bar: 50 }],
+        } as unknown) as Datatable,
+      };
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            yLeftExtent: {
+              mode: 'custom',
+              lowerBound: 123,
+              upperBound: 456,
+            },
+          }}
+        />
+      );
+
+      expect(component.find(AxisSettingsPopover).at(0).prop('dataBounds')).toEqual({
+        min: -5,
+        max: 50,
+      });
     });
 
     it('should pass in extent information', () => {

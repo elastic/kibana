@@ -55,7 +55,7 @@ import {
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
-import { getAxesConfiguration } from './axes_configuration';
+import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
 
@@ -459,6 +459,33 @@ export function XYChart({
     return style;
   };
 
+  const getYAxisDomain = (axis: GroupsConfiguration[number]) => {
+    const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
+    const hasBarOrArea = Boolean(
+      axis.series.some((series) => {
+        const seriesType = filteredLayers.find((l) => l.layerId === series.layer)?.seriesType;
+        return seriesType?.includes('bar') || seriesType?.includes('area');
+      })
+    );
+    const fit = !hasBarOrArea && extent.mode === 'dataBounds';
+    let min: undefined | number;
+    let max: undefined | number;
+
+    if (extent.mode === 'custom') {
+      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
+      if (!inclusiveZeroError && !boundaryError) {
+        min = extent.lowerBound;
+        max = extent.upperBound;
+      }
+    }
+
+    return {
+      fit,
+      min,
+      max,
+    };
+  };
+
   const shouldShowValueLabels =
     // No stacked bar charts
     filteredLayers.every((layer) => !layer.seriesType.includes('stacked')) &&
@@ -612,12 +639,6 @@ export function XYChart({
       />
 
       {yAxesConfiguration.map((axis) => {
-        const hasBars = Boolean(
-          axis.series.some((series) =>
-            filteredLayers.find((l) => l.layerId === series.layer)?.seriesType.includes('bar')
-          )
-        );
-        const extent = axis.groupId === 'left' ? yLeftExtent : yRightExtent;
         return (
           <Axis
             key={axis.groupId}
@@ -634,16 +655,7 @@ export function XYChart({
             hide={filteredLayers[0].hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
             style={getYAxesStyle(axis.groupId)}
-            domain={{
-              fit: !hasBars && extent.mode === 'dataBounds',
-              min:
-                extent.mode === 'custom' &&
-                extent.lowerBound &&
-                (!hasBars || extent.lowerBound <= 0)
-                  ? extent.lowerBound
-                  : undefined,
-              max: extent.mode === 'custom' && extent.upperBound ? extent.upperBound : undefined,
-            }}
+            domain={getYAxisDomain(axis)}
           />
         );
       })}

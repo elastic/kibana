@@ -738,7 +738,7 @@ describe('xy_expression', () => {
         });
       });
 
-      test('it does not allow fit for bar chart', () => {
+      test('it does not allow fit for area chart', () => {
         const { data, args } = sampleArgs();
 
         const component = shallow(
@@ -754,7 +754,7 @@ describe('xy_expression', () => {
               layers: [
                 {
                   ...args.layers[0],
-                  seriesType: 'bar',
+                  seriesType: 'area',
                 },
               ],
             }}
@@ -792,7 +792,7 @@ describe('xy_expression', () => {
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: false,
           min: undefined,
-          max: 456,
+          max: undefined,
         });
       });
     });

@@ -27,6 +27,7 @@ import {
   VisualizationToolbarProps,
   VisualizationDimensionEditorProps,
   FormatFactory,
+  FramePublicAPI,
 } from '../types';
 import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
@@ -34,7 +35,7 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { TooltipWrapper } from './tooltip_wrapper';
-import { getAxesConfiguration } from './axes_configuration';
+import { getAxesConfiguration, GroupsConfiguration } from './axes_configuration';
 import { PalettePicker } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getScaleType, getSortedAccessors } from './to_expression';
@@ -123,11 +124,42 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
+const getDataBounds = function (
+  activeData: FramePublicAPI['activeData'],
+  axes: GroupsConfiguration
+) {
+  const groups: Partial<Record<string, { min: number; max: number }>> = {};
+  axes.forEach((axis) => {
+    let min = Number.MAX_VALUE;
+    let max = Number.MIN_VALUE;
+    axis.series.forEach((series) => {
+      activeData?.[series.layer].rows.forEach((row) => {
+        const value = row[series.accessor];
+        if (!Number.isNaN(value)) {
+          if (value < min) {
+            min = value;
+          }
+          if (value > max) {
+            max = value;
+          }
+        }
+      });
+    });
+    groups[axis.groupId] = {
+      min: Math.round((min + Number.EPSILON) * 100) / 100,
+      max: Math.round((max + Number.EPSILON) * 100) / 100,
+    };
+  });
+
+  return groups;
+};
+
 export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
-  const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
+  const axisGroups = getAxesConfiguration(state?.layers, shouldRotate, frame.activeData);
+  const dataBounds = getDataBounds(frame.activeData, axisGroups);
 
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
@@ -210,19 +242,21 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       : !state?.legend.isVisible
       ? 'hide'
       : 'show';
-  const hasBarOnLeftAxis = Boolean(
+  const hasBarOrAreaOnLeftAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'left')
-      ?.series?.some((series) =>
-        state.layers.find((l) => l.layerId === series.layer)?.seriesType.includes('bar')
-      )
+      ?.series?.some((series) => {
+        const seriesType = state.layers.find((l) => l.layerId === series.layer)?.seriesType;
+        return seriesType?.includes('bar') || seriesType?.includes('area');
+      })
   );
-  const hasBarOnRightAxis = Boolean(
+  const hasBarOrAreaOnRightAxis = Boolean(
     axisGroups
       .find((group) => group.groupId === 'left')
-      ?.series?.some((series) =>
-        state.layers.find((l) => l.layerId === series.layer)?.seriesType.includes('bar')
-      )
+      ?.series?.some((series) => {
+        const seriesType = state.layers.find((l) => l.layerId === series.layer)?.seriesType;
+        return seriesType?.includes('bar') || seriesType?.includes('area');
+      })
   );
 
   return (
@@ -303,7 +337,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                   yLeftExtent: extent,
                 });
               }}
-              hasBarOnAxis={hasBarOnLeftAxis}
+              hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
+              dataBounds={dataBounds.left}
             />
           </TooltipWrapper>
           <AxisSettingsPopover
@@ -319,7 +354,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
-            hasBarOnAxis={false}
+            hasBarOrAreaOnAxis={false}
           />
           <TooltipWrapper
             tooltipContent={
@@ -357,7 +392,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                   yRightExtent: extent,
                 });
               }}
-              hasBarOnAxis={hasBarOnRightAxis}
+              hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
+              dataBounds={dataBounds.right}
             />
           </TooltipWrapper>
         </EuiFlexGroup>
