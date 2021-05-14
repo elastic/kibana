@@ -9,8 +9,9 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
+import { addIdToItem } from '@kbn/securitysolution-utils';
+import { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
-import { addIdToItem } from '../../../../common/shared_imports';
 import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   CreateExceptionListItemSchema,
@@ -23,7 +24,6 @@ import {
   exceptionListItemSchema,
 } from '../../../../common';
 import { AndOrBadge } from '../and_or_badge';
-import { OsTypeArray } from '../../../../common/schemas';
 
 import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
@@ -444,3 +444,6 @@ export const ExceptionBuilderComponent = ({
 };
 
 ExceptionBuilderComponent.displayName = 'ExceptionBuilder';
+
+// eslint-disable-next-line import/no-default-export
+export default ExceptionBuilderComponent;

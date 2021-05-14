@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 /**
  * Types the ReferencesDefaultArray as:
  *   - If null or undefined, then a default array will be set
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils
  */
 export const ReferencesDefaultArray = new t.Type<string[], string[] | undefined, unknown>(
   'referencesWithDefaultArray',

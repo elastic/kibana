@@ -6,11 +6,11 @@
  */
 
 import * as t from 'io-ts';
+import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
+import { DefaultNamespaceArray, NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { filter, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { StringToPositiveNumber } from '../types/string_to_positive_number';
-import { DefaultNamespaceArray, NamespaceTypeArray } from '../types/default_namespace_array';
 
 export const findExceptionListSchema = t.exact(
   t.partial({

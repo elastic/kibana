@@ -12,11 +12,10 @@ import {
   jobsAndSpaces,
   jobsAndCurrentSpace,
   syncJobObjects,
-  jobTypeSchema,
   canDeleteJobSchema,
+  jobTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { JobType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -213,7 +212,7 @@ export function savedObjectsRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
       try {
-        const { jobType, jobIds }: { jobType: JobType; jobIds: string[] } = request.body;
+        const { jobType, jobIds } = request.body;
         const { getCurrentSpaceId } = spacesUtilsProvider(getSpaces, request);
 
         const currentSpaceId = await getCurrentSpaceId();
@@ -318,7 +317,7 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService, client }) => {
       try {
         const { jobType } = request.params;
-        const { jobIds }: { jobIds: string[] } = request.body;
+        const { jobIds } = request.body;
 
         const { canDeleteJobs } = checksFactory(client, jobSavedObjectService);
         const body = await canDeleteJobs(

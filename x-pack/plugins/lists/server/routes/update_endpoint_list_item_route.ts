@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+
 import type { ListsPluginRouter } from '../types';
 import { ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
 import {
   UpdateEndpointListItemSchemaDecoded,
   exceptionListItemSchema,
   updateEndpointListItemSchema,
 } from '../../common/schemas';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getExceptionListClient } from '.';
 

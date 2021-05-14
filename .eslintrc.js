@@ -1257,6 +1257,22 @@ module.exports = {
     },
 
     /**
+     * Discover overrides
+     */
+    {
+      files: ['src/plugins/discover/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            'ts-expect-error': false,
+          },
+        ],
+      },
+    },
+
+    /**
      * Enterprise Search overrides
      * NOTE: We also have a single rule at the bottom of the file that
      * overrides Prettier's default of not linting unnecessary backticks

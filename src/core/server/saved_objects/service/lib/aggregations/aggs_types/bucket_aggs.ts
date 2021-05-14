@@ -14,6 +14,7 @@ import { schema as s, ObjectType } from '@kbn/config-schema';
  * Currently supported:
  * - filter
  * - histogram
+ * - nested
  * - terms
  *
  * Not implemented:
@@ -32,7 +33,6 @@ import { schema as s, ObjectType } from '@kbn/config-schema';
  * - ip_range
  * - missing
  * - multi_terms
- * - nested
  * - parent
  * - range
  * - rare_terms
@@ -42,6 +42,7 @@ import { schema as s, ObjectType } from '@kbn/config-schema';
  * - significant_text
  * - variable_width_histogram
  */
+
 export const bucketAggsSchemas: Record<string, ObjectType> = {
   filter: s.object({
     term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
@@ -70,6 +71,9 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
         _key: s.string(),
       })
     ),
+  }),
+  nested: s.object({
+    path: s.string(),
   }),
   terms: s.object({
     field: s.maybe(s.string()),

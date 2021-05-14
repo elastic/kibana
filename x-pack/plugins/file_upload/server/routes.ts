@@ -185,7 +185,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /internal/file_upload/index_exists ES Field caps wrapper checks if index exists
+   * @api {post} /internal/file_upload/index_exists ES indices exists wrapper checks if index exists
    * @apiName IndexExists
    */
   router.post(
@@ -200,20 +200,10 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const { index } = request.body;
-
-        const options = {
-          index: [index],
-          fields: ['*'],
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        };
-
-        const { body } = await context.core.elasticsearch.client.asCurrentUser.fieldCaps(options);
-        const exists = Array.isArray(body.indices) && body.indices.length !== 0;
-        return response.ok({
-          body: { exists },
-        });
+        const {
+          body: indexExists,
+        } = await context.core.elasticsearch.client.asCurrentUser.indices.exists(request.body);
+        return response.ok({ body: { exists: indexExists } });
       } catch (e) {
         return response.customError(wrapError(e));
       }

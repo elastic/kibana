@@ -27,7 +27,7 @@ import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
 } from '../../alerting/server';
-import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
+import { SecurityPluginSetup as SecuritySetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
@@ -73,7 +73,7 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../src/plugins/telemetry/server';
-import { licenseService } from './lib/license/license';
+import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -100,6 +100,7 @@ export interface StartPlugins {
   licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
+  security: SecurityPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -132,7 +133,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly config: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
-  private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
@@ -157,7 +157,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
-    this.setupPlugins = plugins;
 
     const config = this.config;
     const globalConfig = this.context.config.legacy.get();
@@ -306,7 +305,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     compose(core, plugins, endpointContext);
 
     core.getStartServices().then(([_, depsStart]) => {
-      const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
+      const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
+        depsStart.data,
+        endpointContext
+      );
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
@@ -397,7 +399,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       packagePolicyService: plugins.fleet?.packagePolicyService,
       agentPolicyService: plugins.fleet?.agentPolicyService,
       appClientFactory: this.appClientFactory,
-      security: this.setupPlugins!.security!,
+      security: plugins.security,
       alerting: plugins.alerting,
       config: this.config!,
       logger,

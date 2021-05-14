@@ -327,7 +327,6 @@ export const CustomFields = memo<Props>(
                     defaultMessage="Timeout must be 0 or greater and less than schedule interval"
                   />
                 }
-                labelAppend={<OptionalLabel />}
                 helpText={
                   <FormattedMessage
                     id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText"

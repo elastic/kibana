@@ -26,6 +26,7 @@ class TimeseriesVisualization extends Component {
   static propTypes = {
     model: PropTypes.object,
     onBrush: PropTypes.func,
+    onFilterClick: PropTypes.func,
     visData: PropTypes.object,
     getConfig: PropTypes.func,
   };
@@ -33,13 +34,14 @@ class TimeseriesVisualization extends Component {
   scaledDataFormat = this.props.getConfig('dateFormat:scaled');
   dateFormat = this.props.getConfig('dateFormat');
 
-  xAxisFormatter = (interval) => (val) => {
+  xAxisFormatter = (interval) => {
     const formatter = createIntervalBasedFormatter(
       interval,
       this.scaledDataFormat,
-      this.dateFormat
+      this.dateFormat,
+      this.props.model.ignore_daylight_time
     );
-    return formatter(val);
+    return (val) => formatter(val);
   };
 
   yAxisStackedByPercentFormatter = (val) => {
@@ -135,7 +137,7 @@ class TimeseriesVisualization extends Component {
   };
 
   render() {
-    const { model, visData, onBrush, syncColors, palettesService } = this.props;
+    const { model, visData, onBrush, onFilterClick, syncColors, palettesService } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -229,6 +231,7 @@ class TimeseriesVisualization extends Component {
             series={series}
             yAxis={yAxis}
             onBrush={onBrush}
+            onFilterClick={onFilterClick}
             backgroundColor={model.background_color}
             showGrid={Boolean(model.show_grid)}
             legend={Boolean(model.show_legend)}

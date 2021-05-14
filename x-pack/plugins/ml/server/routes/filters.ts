@@ -8,7 +8,7 @@
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
-import { FilterManager, FormFilter } from '../models/filter';
+import { FilterManager, FormFilter, UpdateFilter } from '../models/filter';
 import type { MlClient } from '../lib/ml_client';
 
 // TODO - add function for returning a list of just the filter IDs.
@@ -33,7 +33,7 @@ function newFilter(mlClient: MlClient, filter: FormFilter) {
   return mgr.newFilter(filter);
 }
 
-function updateFilter(mlClient: MlClient, filterId: string, filter: FormFilter) {
+function updateFilter(mlClient: MlClient, filterId: string, filter: UpdateFilter) {
   const mgr = new FilterManager(mlClient);
   return mgr.updateFilter(filterId, filter);
 }

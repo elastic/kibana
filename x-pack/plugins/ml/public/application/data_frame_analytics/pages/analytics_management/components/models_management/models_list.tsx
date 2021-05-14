@@ -292,7 +292,7 @@ export const ModelsList: FC = () => {
       }),
       icon: 'visTable',
       type: 'icon',
-      available: (item) => item.metadata?.analytics_config?.id,
+      available: (item) => !!item.metadata?.analytics_config?.id,
       onClick: async (item) => {
         if (item.metadata?.analytics_config === undefined) return;
 
@@ -327,7 +327,7 @@ export const ModelsList: FC = () => {
       icon: 'graphApp',
       type: 'icon',
       isPrimary: true,
-      available: (item) => item.metadata?.analytics_config?.id,
+      available: (item) => !!item.metadata?.analytics_config?.id,
       onClick: async (item) => {
         const path = await mlUrlGenerator.createUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
