@@ -2727,7 +2727,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/server-http-tools@link:packages/kbn-server-http-tools":
+"@kbn/server-http-tools@link:bazel-bin/packages/kbn-server-http-tools/npm_module":
   version "0.0.0"
   uid ""
 
